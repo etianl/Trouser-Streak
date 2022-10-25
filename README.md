@@ -16,4 +16,5 @@
  </p>
 
 ## Features:
-**AutoBuild** aaaaaaaaaaa
+**AutoBuild:** Places blocks according to placement in a 5x5 grid. You can draw pictures with it! (Credits to Banana for the Autobuild) I modified it so it places lengthways infront of you.
+This way you can draw stairs and place them infront of you, hop up em and keep going.
