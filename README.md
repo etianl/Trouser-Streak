@@ -5,14 +5,14 @@
 </div>  
 
 ## Credits to the people I skidded from:
-<div align="left">
-    <p>This modpack would not be possible without
 - [Meteor Client](https://github.com/meteordevelopment/meteor-client)
 - [Allah-Hack](https://github.com/TaxEvasiqn/allah-hack)
 - [Meteor-Rejects](https://github.com/AntiCope/meteor-rejects)
 - [GriefWaffen](https://github.com/CuteNoobCodes/GriefWaffen-public)
 - [Frostburn Client](https://github.com/evaan/FrostBurn)
 - [Banana](https://github.com/Bennooo/banana-for-everyone)
+ <div align="left">
+    <p>This modpack would not have been possible without you
  </p>
 
 ## Features:
