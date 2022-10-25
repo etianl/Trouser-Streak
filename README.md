@@ -7,6 +7,7 @@
 ## Credits to the people I skidded from:
 <div align="left">
     <p>This modpack would not be possible without </p>
+##
 - [Meteor Client](https://github.com/meteordevelopment/meteor-client)
 - [Allah-Hack](https://github.com/TaxEvasiqn/allah-hack)
 - [Meteor-Rejects](https://github.com/AntiCope/meteor-rejects)
