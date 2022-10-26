@@ -1,6 +1,6 @@
 <div align="center">
   <h1>Trouser-Streak</h1>
-    <p>Trouser-Streak is a compilation of modules, updated to the latest version. Most of the modules were not written by me, but have had things added/changed. </p>
+    <p>Trouser-Streak is a compilation of modules, updated to the latest version from other addons.</p>
   <img src="src/main/resources/assets/icon/icon.png" alt="Trouser-Streak Logo" width="28%"/>
 </div>  
 
