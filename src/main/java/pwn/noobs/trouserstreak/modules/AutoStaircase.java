@@ -3,11 +3,16 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.AutoWalk;
+import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
+import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.option.KeyBinding;
 import pwn.noobs.trouserstreak.Trouser;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
@@ -59,6 +64,32 @@ public class AutoStaircase extends Module {
         .min(1)
         .sliderMax(30)
         .build());
+    private final Setting<Double> jump = sgGeneral.add(new DoubleSetting.Builder()
+            .name("JumpVelocity")
+            .description("Your velocity when jumping, for fine tuning.")
+            .defaultValue(0.420)
+            .min(0.39)
+            .sliderMax(0.57)
+            .build()
+    );
+
+    public final Setting<TimerMode> timer = sgGeneral.add(new EnumSetting.Builder<TimerMode>()
+            .name("Timer")
+            .description("Couldn't figger out how to do it without just leaving this here. Go Fast!")
+            .defaultValue(TimerMode.GOFAST)
+            .build()
+    );
+
+    public final Setting<Integer> StairTimer = sgGeneral.add(new IntSetting.Builder()
+            .name("TimerMultiplier")
+            .description("The multiplier value for Timer.")
+            .defaultValue(10)
+            .min(1)
+            .sliderMax(30)
+            .build()
+    );
+
+    private boolean resetTimer;
 
     public AutoStaircase() {
         super(Trouser.Main, "auto-staircase", "Make stairs!");
@@ -74,6 +105,7 @@ public class AutoStaircase extends Module {
 
     @Override
     public void onActivate() {
+        resetTimer = false;
         ticksPassed = 0;
         blocksPlaced = 0;
 
@@ -92,6 +124,21 @@ public class AutoStaircase extends Module {
     public void onDeactivate() {
         mc.options.forwardKey.setPressed(false);
         mc.options.jumpKey.setPressed(false);
+        Modules.get().get(Timer.class).setOverride(Timer.OFF);
+        resetTimer = true;
+    }
+
+    @EventHandler
+    private void onPreTick(TickEvent.Pre event) {
+        if (timer.get() == TimerMode.GOFAST) {
+            if (mc.world.getBlockState(mc.player.getBlockPos()).getBlock() == Blocks.AIR && !mc.player.isOnGround()) {
+                resetTimer = false;
+                Modules.get().get(Timer.class).setOverride(StairTimer.get());
+            } else if (!resetTimer) {
+                Modules.get().get(Timer.class).setOverride(Timer.OFF);
+                resetTimer = true;
+            }
+        }
     }
 
     @EventHandler
@@ -126,6 +173,7 @@ public class AutoStaircase extends Module {
         if (!mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
             mc.options.forwardKey.setPressed(true);
             mc.options.jumpKey.setPressed(true);
+            mc.player.setVelocity(0, jump.get(), 0);
 
                 ticksPassed = 0;
                 blocksPlaced = 0;
@@ -155,5 +203,8 @@ public class AutoStaircase extends Module {
     private void setPressed(KeyBinding key, boolean pressed) {
         key.setPressed(pressed);
         Input.setKeyState(key, pressed);
+    }
+    public enum TimerMode {
+        GOFAST
     }
 }
