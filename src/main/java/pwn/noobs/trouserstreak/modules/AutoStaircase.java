@@ -73,10 +73,10 @@ public class AutoStaircase extends Module {
             .build()
     );
 
-    public final Setting<TimerMode> timer = sgGeneral.add(new EnumSetting.Builder<TimerMode>()
+    public final Setting<Boolean> timer = sgGeneral.add(new BoolSetting.Builder()
             .name("Timer")
-            .description("Couldn't figger out how to do it without just leaving this here. Go Fast!")
-            .defaultValue(TimerMode.GOFAST)
+            .description("Timer on/off")
+            .defaultValue(true)
             .build()
     );
 
@@ -86,6 +86,7 @@ public class AutoStaircase extends Module {
             .defaultValue(10)
             .min(1)
             .sliderMax(30)
+            .visible(() -> timer.get())
             .build()
     );
 
@@ -130,7 +131,7 @@ public class AutoStaircase extends Module {
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (timer.get() == TimerMode.GOFAST) {
+        if (timer.get()) {
             if (mc.world.getBlockState(mc.player.getBlockPos()).getBlock() == Blocks.AIR && !mc.player.isOnGround()) {
                 resetTimer = false;
                 Modules.get().get(Timer.class).setOverride(StairTimer.get());
@@ -203,8 +204,5 @@ public class AutoStaircase extends Module {
     private void setPressed(KeyBinding key, boolean pressed) {
         key.setPressed(pressed);
         Input.setKeyState(key, pressed);
-    }
-    public enum TimerMode {
-        GOFAST
     }
 }

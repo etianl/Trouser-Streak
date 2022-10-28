@@ -176,6 +176,26 @@ public class FireballRain extends Module {
                         mc.interactionManager.clickCreativeStack(bfr, 36 + mc.player.getInventory().selectedSlot);
                         i = 0;
                     }
+                    case Wither -> {
+                        Vec3d cpos = pickRandomPos();
+
+                        NbtCompound tag = new NbtCompound();
+                        NbtList speedlist = new NbtList();
+                        NbtList pos = new NbtList();
+                        speedlist.add(NbtDouble.of(0));
+                        speedlist.add(NbtDouble.of(-speed.get()));
+                        speedlist.add(NbtDouble.of(0));
+                        pos.add(NbtDouble.of(cpos.x));
+                        pos.add(NbtDouble.of(height.get()));
+                        pos.add(NbtDouble.of(cpos.z));
+                        tag.put("Pos", pos);
+                        tag.putString("id", "minecraft:wither");
+                        bomb.setSubNbt("EntityTag", tag);
+                        mc.interactionManager.clickCreativeStack(bomb, 36 + mc.player.getInventory().selectedSlot);
+                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
+                        mc.interactionManager.clickCreativeStack(bfr, 36 + mc.player.getInventory().selectedSlot);
+                        i = 0;
+                    }
                     case TNT -> {
                         Vec3d cpos = pickRandomPos();
 
@@ -266,6 +286,6 @@ public class FireballRain extends Module {
         }
     }
     public enum Modes {
-        Fireball, Creeper, Lightning, Kitty, Arrow, TNT, Spit, ShulkerBullet
+        Fireball, Creeper, Lightning, Kitty, Arrow, TNT, Spit, ShulkerBullet, Wither
     }
 }

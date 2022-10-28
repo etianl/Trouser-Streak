@@ -21,6 +21,7 @@
 - **AutoStaircase:** Builds stairs upward in the direction you are facing. (Credits to Frostburn, and Banana for the player centering utils to make it work correctly) I just had to fix up some stuff for this one but Frostburn had the base code there. I believe this is the first publicly available automatic staircase builder in a Meteor addon, correct me if I'm wrong maybe I didn't have to learn some Java to do this.
 - **BetterScaffold:** Give you more options for scaffolding, bigger range and others. (Credits to Meteor-Tweaks)
 - **Boom:** Throws entities when you click (Credits to Allah-Hack) I just added some more fun things you might want to throw.
+- **ExplosionAura:** Spawns creepers at your position that explode as you move. Like a bigger, more laggy Nuker module for creative mode. The use of the module Velocity is recommended to avoid being thrown around.
 - **FireballClicker:** Shoots fireballs wherever you click (Credits to GriefWaffen)
 - **FireballRain+:** Rains whatever entities you desire from a list similar to Boom (Credits to Griefwaffen (Or Allah-Hack? I have reason to believe it came from there)) It used to only rain fireballs, but I didn't think that was fun enough so I added the things put in Boom.
 - **HandOfGod:** Deletes the world around you as you fly. It deletes when you press forward, jump, or crouch. Operator status required.

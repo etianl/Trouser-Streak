@@ -118,6 +118,20 @@ public class Boom extends Module {
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                     mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
                 }
+                case Wither -> {
+                    ItemStack Kitty = new ItemStack(Items.CAT_SPAWN_EGG);
+                    NbtCompound tag = new NbtCompound();
+                    NbtList motion = new NbtList();
+                    motion.add(NbtDouble.of(sex.x));
+                    motion.add(NbtDouble.of(sex.y));
+                    motion.add(NbtDouble.of(sex.z));
+                    tag.put("Motion", motion);
+                    tag.putString("id", "minecraft:wither");
+                    Kitty.setSubNbt("EntityTag", tag);
+                    mc.interactionManager.clickCreativeStack(Kitty, 36 + mc.player.getInventory().selectedSlot);
+                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
+                    mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
+                }
                 case TNT -> {
                     ItemStack TNT = new ItemStack(Items.CAT_SPAWN_EGG);
                     NbtCompound tag = new NbtCompound();
@@ -209,6 +223,6 @@ public class Boom extends Module {
         }
     }
     public enum Modes {
-        Instant, Motion, Lightning, Kitty, Creeper, Arrow, TNT, WitherSkull, Spit, ShulkerBullet
+        Instant, Motion, Lightning, Kitty, Creeper, Arrow, TNT, WitherSkull, Spit, ShulkerBullet, Wither
     }
 }

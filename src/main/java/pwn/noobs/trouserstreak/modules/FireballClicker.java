@@ -1,5 +1,6 @@
 package pwn.noobs.trouserstreak.modules;
 
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import pwn.noobs.trouserstreak.Trouser;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -43,13 +44,23 @@ public class FireballClicker extends Module {
         .visible(() -> mode.get() == Modes.Motion)
         .build());
 
+    public final Setting<Boolean> larp = sgGeneral.add(new BoolSetting.Builder()
+            .name("LARP")
+            .description("LARP on/off")
+            .defaultValue(true)
+            .build()
+    );
+
     public FireballClicker() {
-        super(Trouser.Main, "Fireball", "Spawns a fireball at where you're clicking.");
+        super(Trouser.Main, "Fireball", "Shoots a fireball at where you're clicking.");
     }
 
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if (mc.options.attackKey.isPressed() && mc.currentScreen == null) {
+            if (larp.get()) {
+                ChatUtils.sendPlayerMsg("Fireball!");
+            }
             if (mc.player.getAbilities().creativeMode) {
                 HitResult hr = mc.cameraEntity.raycast(300, 0, true);
                 Vec3d owo = hr.getPos();
