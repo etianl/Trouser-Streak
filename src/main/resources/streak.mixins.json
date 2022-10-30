@@ -1,6 +1,6 @@
 {
   "required": true,
-  "package": "pwn.noobs.trouserstreak.mixins",
+  "package": "pwn.noobs.trouserstreak.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
   ],
@@ -8,5 +8,6 @@
     "defaultRequire": 1
   },
   "mixins": [
+    "InventoryScreenMixin"
   ]
 }
