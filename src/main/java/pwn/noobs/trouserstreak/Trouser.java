@@ -32,6 +32,7 @@ public class Trouser extends MeteorAddon {
         Modules.get().add(new HandOfGod());
         Modules.get().add(new ExplosionAura());
         Modules.get().add(new DupeModule());
+        Modules.get().add(new RedstoneNuker());
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package pwn.noobs.trouserstreak.modules;
 
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import pwn.noobs.trouserstreak.Trouser;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
@@ -47,12 +48,21 @@ public class FireballClicker extends Module {
     public final Setting<Boolean> larp = sgGeneral.add(new BoolSetting.Builder()
             .name("LARP")
             .description("LARP on/off")
-            .defaultValue(true)
+            .defaultValue(false)
             .build()
     );
 
     public FireballClicker() {
         super(Trouser.Main, "Fireball", "Shoots a fireball at where you're clicking.");
+    }
+
+    @EventHandler
+    public void onTick(TickEvent.Post event) {
+        if (mc.player.getAbilities().creativeMode) {}
+        else {
+            error("You need to be in creative mode.");
+            toggle();
+        }
     }
 
     @EventHandler
@@ -84,15 +94,33 @@ public class FireballClicker extends Module {
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                         mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
                     }
+                    case Instant -> {
+                        Vec3d aaa = mc.player.getRotationVector().multiply(100);
+                        ItemStack Instant = new ItemStack(Items.SALMON_SPAWN_EGG);
+                        NbtCompound tag = new NbtCompound();
+                        NbtList Pos = new NbtList();
+                        NbtList motion = new NbtList();
+                        Pos.add(NbtDouble.of(pos.getX()));
+                        Pos.add(NbtDouble.of(pos.getY()));
+                        Pos.add(NbtDouble.of(pos.getZ()));
+                        motion.add(NbtDouble.of(aaa.x));
+                        motion.add(NbtDouble.of(aaa.y));
+                        motion.add(NbtDouble.of(aaa.z));
+                        tag.put("Pos", Pos);
+                        tag.put("Motion", motion);
+                        tag.putInt("ExplosionPower", power.get());
+                        tag.putString("id", "minecraft:fireball");
+                        Instant.setSubNbt("EntityTag", tag);
+                        mc.interactionManager.clickCreativeStack(Instant, 36 + mc.player.getInventory().selectedSlot);
+                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
+                        mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
+                    }
 
                 }
-            } else {
-                error("You need to be in creative mode.");
-                toggle();
             }
         }
     }
     public enum Modes {
-        Motion
+        Motion, Instant
     }
 }

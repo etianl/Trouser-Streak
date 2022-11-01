@@ -44,7 +44,7 @@ public class Voider extends Module {
     public void onTick(TickEvent.Post event) {
         if (!(mc.player.hasPermissionLevel(4))) {
             toggle();
-            error("must have op");
+            error("Must have OP");
         }
         i--;
         switch (mode.get()) {

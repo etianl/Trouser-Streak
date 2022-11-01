@@ -131,7 +131,7 @@ public class HandOfGod extends Module {
     public void onTick(TickEvent.Post event) {
         if (!(mc.player.hasPermissionLevel(4))) {
             toggle();
-            error("must have op");
+            error("Must have OP");
         }
             if (mc.options.forwardKey.isPressed()) {
                 ChatUtils.sendPlayerMsg("/execute at @p run fill ~"+pRadius.get()+" ~"+pRadius.get()+" ~"+pRadius.get()+" ~-"+pRadius.get()+" ~-"+pRadius.get()+" ~-"+pRadius.get()+" air");

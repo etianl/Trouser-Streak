@@ -36,95 +36,100 @@ public class ExplosionAura extends Module {
 
     @EventHandler
     public void onTick(TickEvent.Post event) {
-        if (mc.options.forwardKey.isPressed()) {
-            ItemStack rst = mc.player.getMainHandStack();
-            BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
-            ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
-            NbtCompound tag = new NbtCompound();
-            tag.putInt("ignited", (1));
-            tag.putInt("Fuse", (1));
-            tag.putInt("Invulnerable", (1));
-            tag.putInt("NoGravity", (1));
-            tag.putInt("ExplosionRadius", power.get());
-            Creeper.setSubNbt("EntityTag", tag);
-            mc.interactionManager.clickCreativeStack(Creeper, 36 + mc.player.getInventory().selectedSlot);
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-            mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-        }
-        if (mc.options.jumpKey.isPressed()) {
-            ItemStack rst = mc.player.getMainHandStack();
-            BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
-            ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
-            NbtCompound tag = new NbtCompound();
-            tag.putInt("ignited", (1));
-            tag.putInt("Fuse", (1));
-            tag.putInt("Invulnerable", (1));
-            tag.putInt("NoGravity", (1));
-            tag.putInt("ExplosionRadius", power.get());
-            Creeper.setSubNbt("EntityTag", tag);
-            mc.interactionManager.clickCreativeStack(Creeper, 36 + mc.player.getInventory().selectedSlot);
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-            mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-        }
-        if (mc.options.sneakKey.isPressed()) {
-            ItemStack rst = mc.player.getMainHandStack();
-            BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
-            ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
-            NbtCompound tag = new NbtCompound();
-            tag.putInt("ignited", (1));
-            tag.putInt("Fuse", (1));
-            tag.putInt("Invulnerable", (1));
-            tag.putInt("NoGravity", (1));
-            tag.putInt("ExplosionRadius", power.get());
-            Creeper.setSubNbt("EntityTag", tag);
-            mc.interactionManager.clickCreativeStack(Creeper, 36 + mc.player.getInventory().selectedSlot);
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-            mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-        }
-        if (mc.options.leftKey.isPressed()) {
-            ItemStack rst = mc.player.getMainHandStack();
-            BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
-            ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
-            NbtCompound tag = new NbtCompound();
-            tag.putInt("ignited", (1));
-            tag.putInt("Fuse", (1));
-            tag.putInt("Invulnerable", (1));
-            tag.putInt("NoGravity", (1));
-            tag.putInt("ExplosionRadius", power.get());
-            Creeper.setSubNbt("EntityTag", tag);
-            mc.interactionManager.clickCreativeStack(Creeper, 36 + mc.player.getInventory().selectedSlot);
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-            mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-        }
-        if (mc.options.rightKey.isPressed()) {
-            ItemStack rst = mc.player.getMainHandStack();
-            BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
-            ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
-            NbtCompound tag = new NbtCompound();
-            tag.putInt("ignited", (1));
-            tag.putInt("Fuse", (1));
-            tag.putInt("Invulnerable", (1));
-            tag.putInt("NoGravity", (1));
-            tag.putInt("ExplosionRadius", power.get());
-            Creeper.setSubNbt("EntityTag", tag);
-            mc.interactionManager.clickCreativeStack(Creeper, 36 + mc.player.getInventory().selectedSlot);
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-            mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-        }
-        if (mc.options.backKey.isPressed()) {
-            ItemStack rst = mc.player.getMainHandStack();
-            BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
-            ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
-            NbtCompound tag = new NbtCompound();
-            tag.putInt("ignited", (1));
-            tag.putInt("Fuse", (1));
-            tag.putInt("Invulnerable", (1));
-            tag.putInt("NoGravity", (1));
-            tag.putInt("ExplosionRadius", power.get());
-            Creeper.setSubNbt("EntityTag", tag);
-            mc.interactionManager.clickCreativeStack(Creeper, 36 + mc.player.getInventory().selectedSlot);
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-            mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
+        if (mc.player.getAbilities().creativeMode) {
+            if (mc.options.forwardKey.isPressed()) {
+                ItemStack rst = mc.player.getMainHandStack();
+                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
+                ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
+                NbtCompound tag = new NbtCompound();
+                tag.putInt("ignited", (1));
+                tag.putInt("Fuse", (1));
+                tag.putInt("Invulnerable", (1));
+                tag.putInt("NoGravity", (1));
+                tag.putInt("ExplosionRadius", power.get());
+                Creeper.setSubNbt("EntityTag", tag);
+                mc.interactionManager.clickCreativeStack(Creeper, 36 + mc.player.getInventory().selectedSlot);
+                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
+                mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
+            }
+            if (mc.options.jumpKey.isPressed()) {
+                ItemStack rst = mc.player.getMainHandStack();
+                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
+                ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
+                NbtCompound tag = new NbtCompound();
+                tag.putInt("ignited", (1));
+                tag.putInt("Fuse", (1));
+                tag.putInt("Invulnerable", (1));
+                tag.putInt("NoGravity", (1));
+                tag.putInt("ExplosionRadius", power.get());
+                Creeper.setSubNbt("EntityTag", tag);
+                mc.interactionManager.clickCreativeStack(Creeper, 36 + mc.player.getInventory().selectedSlot);
+                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
+                mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
+            }
+            if (mc.options.sneakKey.isPressed()) {
+                ItemStack rst = mc.player.getMainHandStack();
+                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
+                ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
+                NbtCompound tag = new NbtCompound();
+                tag.putInt("ignited", (1));
+                tag.putInt("Fuse", (1));
+                tag.putInt("Invulnerable", (1));
+                tag.putInt("NoGravity", (1));
+                tag.putInt("ExplosionRadius", power.get());
+                Creeper.setSubNbt("EntityTag", tag);
+                mc.interactionManager.clickCreativeStack(Creeper, 36 + mc.player.getInventory().selectedSlot);
+                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
+                mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
+            }
+            if (mc.options.leftKey.isPressed()) {
+                ItemStack rst = mc.player.getMainHandStack();
+                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
+                ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
+                NbtCompound tag = new NbtCompound();
+                tag.putInt("ignited", (1));
+                tag.putInt("Fuse", (1));
+                tag.putInt("Invulnerable", (1));
+                tag.putInt("NoGravity", (1));
+                tag.putInt("ExplosionRadius", power.get());
+                Creeper.setSubNbt("EntityTag", tag);
+                mc.interactionManager.clickCreativeStack(Creeper, 36 + mc.player.getInventory().selectedSlot);
+                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
+                mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
+            }
+            if (mc.options.rightKey.isPressed()) {
+                ItemStack rst = mc.player.getMainHandStack();
+                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
+                ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
+                NbtCompound tag = new NbtCompound();
+                tag.putInt("ignited", (1));
+                tag.putInt("Fuse", (1));
+                tag.putInt("Invulnerable", (1));
+                tag.putInt("NoGravity", (1));
+                tag.putInt("ExplosionRadius", power.get());
+                Creeper.setSubNbt("EntityTag", tag);
+                mc.interactionManager.clickCreativeStack(Creeper, 36 + mc.player.getInventory().selectedSlot);
+                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
+                mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
+            }
+            if (mc.options.backKey.isPressed()) {
+                ItemStack rst = mc.player.getMainHandStack();
+                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
+                ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
+                NbtCompound tag = new NbtCompound();
+                tag.putInt("ignited", (1));
+                tag.putInt("Fuse", (1));
+                tag.putInt("Invulnerable", (1));
+                tag.putInt("NoGravity", (1));
+                tag.putInt("ExplosionRadius", power.get());
+                Creeper.setSubNbt("EntityTag", tag);
+                mc.interactionManager.clickCreativeStack(Creeper, 36 + mc.player.getInventory().selectedSlot);
+                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
+                mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
+            }
+        } else {
+            error("You need to be in creative mode.");
+            toggle();
         }
     }
 }
