@@ -164,7 +164,7 @@ public class RedstoneNuker extends Module {
     // Whitelist
     private final Setting<List<Block>> whitelist = sgGeneral.add(new BlockListSetting.Builder()
             .name("blocks")
-            .description("Block to use for spawn proofing")
+            .description("Blocks to remove.")
             .defaultValue(Blocks.REDSTONE_BLOCK, Blocks.REDSTONE_TORCH, Blocks.REDSTONE_WALL_TORCH, Blocks.ACACIA_PRESSURE_PLATE, Blocks.BIRCH_PRESSURE_PLATE, Blocks.CRIMSON_PRESSURE_PLATE, Blocks.DARK_OAK_PRESSURE_PLATE,
                           Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.JUNGLE_PRESSURE_PLATE, Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE, Blocks.MANGROVE_PRESSURE_PLATE, Blocks.OAK_PRESSURE_PLATE,
                           Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE, Blocks.SPRUCE_PRESSURE_PLATE, Blocks.STONE_PRESSURE_PLATE, Blocks.WARPED_PRESSURE_PLATE, Blocks.DAYLIGHT_DETECTOR, Blocks.REDSTONE_WIRE, Blocks.COMPARATOR,

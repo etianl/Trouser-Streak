@@ -1,23 +1,21 @@
 package pwn.noobs.trouserstreak.modules;
 
-import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
+import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.option.KeyBinding;
-import pwn.noobs.trouserstreak.Trouser;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.util.Hand;
@@ -25,12 +23,11 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.settings.*;
+import net.minecraft.util.math.Vec3i;
+import pwn.noobs.trouserstreak.Trouser;
 import pwn.noobs.trouserstreak.utils.BEntityUtils;
 import pwn.noobs.trouserstreak.utils.BPlayerUtils;
 import pwn.noobs.trouserstreak.utils.BWorldUtils;
-import pwn.noobs.trouserstreak.utils.PositionUtils;
 
 
 /**
@@ -41,7 +38,7 @@ import pwn.noobs.trouserstreak.utils.PositionUtils;
  * @Author etianll
  * https://github.com/etianl
  */
-public class AutoStaircase extends Module {
+public class AutoStaircaseDown extends Module {
     public enum CenterMode {
         Center,
         Snap,
@@ -69,12 +66,20 @@ public class AutoStaircase extends Module {
         .min(1)
         .sliderMax(30)
         .build());
-    private final Setting<Double> jump = sgGeneral.add(new DoubleSetting.Builder()
-            .name("JumpVelocity")
-            .description("Your velocity when jumping, for fine tuning.")
-            .defaultValue(0.4)
-            .min(0.39)
-            .sliderMax(0.57)
+    private final Setting<Integer> down = sgGeneral.add(new IntSetting.Builder()
+            .name("DownVelocity")
+            .description("Your downward velocity, for fine tuning.")
+            .defaultValue(10)
+            .min(1)
+            .sliderMax(100)
+            .build()
+    );
+    private final Setting<Double> fwd = sgGeneral.add(new DoubleSetting.Builder()
+            .name("ForwardVelocity")
+            .description("Your forward velocity, for fine tuning.")
+            .defaultValue(0.392)
+            .min(0.1)
+            .sliderMax(0.4)
             .build()
     );
 
@@ -97,8 +102,8 @@ public class AutoStaircase extends Module {
 
     private boolean resetTimer;
 
-    public AutoStaircase() {
-        super(Trouser.Main, "auto-staircase", "Make stairs!");
+    public AutoStaircaseDown() {
+        super(Trouser.Main, "auto-staircase-down", "Make stairs, downward!");
     }
 
     // Fields
@@ -214,6 +219,7 @@ public class AutoStaircase extends Module {
         mc.options.jumpKey.setPressed(false);
         Modules.get().get(Timer.class).setOverride(Timer.OFF);
         resetTimer = true;
+        mc.player.setVelocity(0,0,0);
     }
 
     @EventHandler
@@ -238,17 +244,25 @@ public class AutoStaircase extends Module {
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent playerMoveEvent) {
         if (mc.player == null || mc.world == null) {toggle(); return;}
-        if (!mc.player.isOnGround() || !(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
-        BlockPos pos = mc.player.getBlockPos().offset(mc.player.getMovementDirection());
+        if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
+        BlockPos pos = playerPos.add(new Vec3i(0,-1.05,0));
         switch (mc.player.getMovementDirection()) {
-            case NORTH ->
+            case NORTH -> {
                 mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(mc.player.getX(), mc.player.getY(), mc.player.getZ() - view.get()));
-            case EAST ->
+                mc.player.setVelocity(0,-down.get(),-fwd.get());
+            }
+            case EAST -> {
                 mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(mc.player.getX() + view.get(), mc.player.getY(), mc.player.getZ()));
-            case SOUTH ->
+                mc.player.setVelocity(fwd.get(),-down.get(),0);
+            }
+            case SOUTH -> {
                 mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(mc.player.getX(), mc.player.getY(), mc.player.getZ() + view.get()));
-            case WEST ->
+                mc.player.setVelocity(0,-down.get(),fwd.get());
+            }
+            case WEST -> {
                 mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(mc.player.getX() - view.get(), mc.player.getY(), mc.player.getZ()));
+                mc.player.setVelocity(-fwd.get(),-down.get(),0);
+            }
             default -> {
             }
         }
@@ -260,19 +274,12 @@ public class AutoStaircase extends Module {
         }
         if (!mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
             mc.options.forwardKey.setPressed(true);
-            mc.options.jumpKey.setPressed(true);
-            mc.player.setVelocity(0, jump.get(), 0);
 
                 ticksPassed = 0;
                 blocksPlaced = 0;
 
                 centered = false;
                 playerPos = BEntityUtils.playerPos(mc.player);
-
-                if (centerMode.get() != CenterMode.None) {
-                    if (centerMode.get() == CenterMode.Snap) BWorldUtils.snapPlayer(playerPos);
-                    else PlayerUtils.centerPlayer();
-                }
 
                 dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());
 

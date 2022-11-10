@@ -39,11 +39,11 @@ public class ExplosionAura extends Module {
         if (mc.player.getAbilities().creativeMode) {
             if (mc.options.forwardKey.isPressed()) {
                 ItemStack rst = mc.player.getMainHandStack();
-                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
+                BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, new BlockPos(mc.player.getPos()), false);
                 ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
                 NbtCompound tag = new NbtCompound();
                 tag.putInt("ignited", (1));
-                tag.putInt("Fuse", (1));
+                tag.putInt("Fuse", (0));
                 tag.putInt("Invulnerable", (1));
                 tag.putInt("NoGravity", (1));
                 tag.putInt("ExplosionRadius", power.get());
@@ -54,11 +54,11 @@ public class ExplosionAura extends Module {
             }
             if (mc.options.jumpKey.isPressed()) {
                 ItemStack rst = mc.player.getMainHandStack();
-                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
+                BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, new BlockPos(mc.player.getPos()), false);
                 ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
                 NbtCompound tag = new NbtCompound();
                 tag.putInt("ignited", (1));
-                tag.putInt("Fuse", (1));
+                tag.putInt("Fuse", (0));
                 tag.putInt("Invulnerable", (1));
                 tag.putInt("NoGravity", (1));
                 tag.putInt("ExplosionRadius", power.get());
@@ -69,11 +69,11 @@ public class ExplosionAura extends Module {
             }
             if (mc.options.sneakKey.isPressed()) {
                 ItemStack rst = mc.player.getMainHandStack();
-                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
+                BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, new BlockPos(mc.player.getPos()), false);
                 ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
                 NbtCompound tag = new NbtCompound();
                 tag.putInt("ignited", (1));
-                tag.putInt("Fuse", (1));
+                tag.putInt("Fuse", (0));
                 tag.putInt("Invulnerable", (1));
                 tag.putInt("NoGravity", (1));
                 tag.putInt("ExplosionRadius", power.get());
@@ -84,11 +84,11 @@ public class ExplosionAura extends Module {
             }
             if (mc.options.leftKey.isPressed()) {
                 ItemStack rst = mc.player.getMainHandStack();
-                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
+                BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, new BlockPos(mc.player.getPos()), false);
                 ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
                 NbtCompound tag = new NbtCompound();
                 tag.putInt("ignited", (1));
-                tag.putInt("Fuse", (1));
+                tag.putInt("Fuse", (0));
                 tag.putInt("Invulnerable", (1));
                 tag.putInt("NoGravity", (1));
                 tag.putInt("ExplosionRadius", power.get());
@@ -99,11 +99,11 @@ public class ExplosionAura extends Module {
             }
             if (mc.options.rightKey.isPressed()) {
                 ItemStack rst = mc.player.getMainHandStack();
-                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
+                BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, new BlockPos(mc.player.getPos()), false);
                 ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
                 NbtCompound tag = new NbtCompound();
                 tag.putInt("ignited", (1));
-                tag.putInt("Fuse", (1));
+                tag.putInt("Fuse", (0));
                 tag.putInt("Invulnerable", (1));
                 tag.putInt("NoGravity", (1));
                 tag.putInt("ExplosionRadius", power.get());
@@ -114,11 +114,11 @@ public class ExplosionAura extends Module {
             }
             if (mc.options.backKey.isPressed()) {
                 ItemStack rst = mc.player.getMainHandStack();
-                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
+                BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, new BlockPos(mc.player.getPos()), false);
                 ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
                 NbtCompound tag = new NbtCompound();
                 tag.putInt("ignited", (1));
-                tag.putInt("Fuse", (1));
+                tag.putInt("Fuse", (0));
                 tag.putInt("Invulnerable", (1));
                 tag.putInt("NoGravity", (1));
                 tag.putInt("ExplosionRadius", power.get());

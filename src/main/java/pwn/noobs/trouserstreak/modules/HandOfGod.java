@@ -78,7 +78,12 @@ public class HandOfGod extends Module {
             .defaultValue(true)
             .build()
     );
-
+    public final Setting<Boolean> auto = sgGeneral.add(new BoolSetting.Builder()
+            .name("FULLAUTO")
+            .description("FULL AUTO BABY!")
+            .defaultValue(false)
+            .build()
+    );
     public HandOfGod() {
         super(Trouser.Main, "HandOfGod", "Deletes the world as you fly around, and replaces blocks with whatever you please when you click. Must be OP");
     }
@@ -133,6 +138,34 @@ public class HandOfGod extends Module {
             toggle();
             error("Must have OP");
         }
+            if (auto.get() && mc.options.attackKey.isPressed() && mc.currentScreen == null) {
+                HitResult hr = mc.cameraEntity.raycast(300, 0, true);
+                Vec3d god = hr.getPos();
+                BlockPos pos = new BlockPos(god);
+                if (lightning.get()) {
+                    ItemStack rst = mc.player.getMainHandStack();
+                    BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
+                    ItemStack Lightning = new ItemStack(Items.SALMON_SPAWN_EGG);
+                    NbtCompound tag = new NbtCompound();
+                    NbtList Pos = new NbtList();
+                    Pos.add(NbtDouble.of(pos.getX()));
+                    Pos.add(NbtDouble.of(pos.getY()));
+                    Pos.add(NbtDouble.of(pos.getZ()));
+                    tag.put("Pos", Pos);
+                    tag.putString("id", "minecraft:lightning_bolt");
+                    Lightning.setSubNbt("EntityTag", tag);
+                    mc.interactionManager.clickCreativeStack(Lightning, 36 + mc.player.getInventory().selectedSlot);
+                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
+                    mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
+                }
+                int x1 = Math.round(pos.getX()) + cRadius.get();
+                int y1 = Math.round(pos.getY()) + cRadius.get();
+                int z1 = Math.round(pos.getZ()) + cRadius.get();
+                int x2 = Math.round(pos.getX()) - cRadius.get();
+                int y2 = Math.round(pos.getY()) - cRadius.get();
+                int z2 = Math.round(pos.getZ()) - cRadius.get();
+                ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + block);
+            }
             if (mc.options.forwardKey.isPressed()) {
                 ChatUtils.sendPlayerMsg("/execute at @p run fill ~"+pRadius.get()+" ~"+pRadius.get()+" ~"+pRadius.get()+" ~-"+pRadius.get()+" ~-"+pRadius.get()+" ~-"+pRadius.get()+" air");
             }
