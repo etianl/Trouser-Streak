@@ -233,6 +233,10 @@ public class AutoStaircaseDown extends Module {
                 resetTimer = true;
             }
         }
+        if (mc.player.getMainHandStack().isEmpty()) {
+            mc.player.setVelocity(0,0,0);
+            mc.options.forwardKey.setPressed(false);
+        }
     }
 
     @EventHandler
@@ -285,8 +289,8 @@ public class AutoStaircaseDown extends Module {
 
         }
         if (mc.player.getMainHandStack().isEmpty()) {
+            mc.player.setVelocity(0,0,0);
             mc.options.forwardKey.setPressed(false);
-            mc.options.jumpKey.setPressed(false);
         }
     }
     private void unpress() {

@@ -227,6 +227,10 @@ public class AutoStaircase extends Module {
                 resetTimer = true;
             }
         }
+        if (mc.player.getMainHandStack().isEmpty()) {
+            mc.options.forwardKey.setPressed(false);
+            mc.options.jumpKey.setPressed(false);
+        }
     }
 
     @EventHandler
