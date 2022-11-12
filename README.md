@@ -22,6 +22,7 @@
 - **AutoDrop:** Drops the stack in your selected slot automatically. You can shift click your inventory items to slot one to dump your trash easily.
 - **AutoStaircase:** Builds stairs upward in the direction you are facing. (Credits to Frostburn, and Banana for the player centering utils to make it work correctly) I just had to fix up some stuff for this one but Frostburn had the base code there. I believe this is the first publicly available automatic staircase builder in a Meteor addon, correct me if I'm wrong maybe I didn't have to learn some Java to do this.
 - **AutoStaircaseDown:** Similar to above. Builds stairs downward, and can even start midair (turn off flight).
+- **AutoStaircaseFly:** Flight-based autostaircaser. With this one, your view is not locked at all and you can change direction by looking around. Switching direction works excellent with this one. Antikick included to prevent da boot. 
 - **BetterScaffold:** Give you more options for scaffolding, bigger range and others. (Credits to Meteor-Tweaks)
 - **Boom:** Throws entities when you click (Credits to Allah-Hack) I just added some more fun things you might want to throw.
 - **ExplosionAura:** Spawns creepers at your position that explode as you move. Like a bigger, more laggy Nuker module for creative mode. The use of the module Velocity is recommended to avoid being thrown around.
@@ -33,3 +34,7 @@
 - **RedstoneNuker:** It's just the regular Nuker module from Meteor client, customized for only breaking things that generate redstone signals. Also with included AutoTool. To keep you safer when placing lots of TNT.
 - **ShulkerDupe:** Duplicates the contents of a shulker when opening. Only works on Vanilla, Forge, and Fabric servers 1.19 and below. Use multiconnect or viafabric (Credits to Allah-Hack)
 - **Voider:** Replaces the world from the top down (Credits to Allah-Hack) I only added options to set max and minimum height for voiding, and instead of just air it can do water and lava now too.
+
+## Known Bugs:
+- Turning direction using the back key and mouse with the AutoStaircaseDown module causes double block placement. It's fine though for lava flow, just wastes blocks. Block wastage can be avoided by just disabling the module, turning, then re-enabling.
+- The antikick with AutoStaircaseFly does not always work when enabling the module while falling.

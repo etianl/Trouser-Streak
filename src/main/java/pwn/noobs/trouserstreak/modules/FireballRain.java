@@ -38,7 +38,17 @@ public class FireballRain extends Module {
         .description("power of explosions")
         .defaultValue(10)
         .sliderRange(1, 127)
+            .visible(() -> mode.get() == Modes.Fireball || mode.get() == Modes.Creeper)
         .build());
+
+    private final Setting<Integer> fuse = sgGeneral.add(new IntSetting.Builder()
+            .name("Creeper/TNT fuse")
+            .description("In ticks")
+            .defaultValue(40)
+            .sliderRange(1, 120)
+            .visible(() -> mode.get() == Modes.TNT || mode.get() == Modes.Creeper)
+            .build());
+
 
     private final Setting<Integer> height = sgGeneral.add(new IntSetting.Builder()
         .name("height")
@@ -60,6 +70,7 @@ public class FireballRain extends Module {
         .defaultValue(2)
         .sliderRange(1, 20)
         .build());
+
 
     public FireballRain() {
         super(Trouser.Main, "Fireball Rain+", "Rains fireballs from the sky, and other things");
@@ -129,6 +140,7 @@ public class FireballRain extends Module {
                         tag.put("ExplosionRadius", NbtDouble.of(power.get()));
                         tag.put("power", speedlist);
                         tag.put("Pos", pos);
+                        tag.putInt("Fuse", (fuse.get()));
                         tag.putString("id", "minecraft:creeper");
                         bomb.setSubNbt("EntityTag", tag);
                         mc.interactionManager.clickCreativeStack(bomb, 36 + mc.player.getInventory().selectedSlot);
@@ -210,7 +222,7 @@ public class FireballRain extends Module {
                         pos.add(NbtDouble.of(cpos.z));
                         tag.put("Pos", pos);
                         tag.putString("id", "minecraft:tnt");
-                        tag.putInt("Fuse", (60));
+                        tag.putInt("Fuse", (fuse.get()));
                         bomb.setSubNbt("EntityTag", tag);
                         mc.interactionManager.clickCreativeStack(bomb, 36 + mc.player.getInventory().selectedSlot);
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);

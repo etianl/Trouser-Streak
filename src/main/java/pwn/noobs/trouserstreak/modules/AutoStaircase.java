@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.util.math.Vec3i;
 import pwn.noobs.trouserstreak.Trouser;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.item.BlockItem;
@@ -62,11 +63,11 @@ public class AutoStaircase extends Module {
         .build()
     );
 
-    private final Setting<Integer> view = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Double> view = sgGeneral.add(new DoubleSetting.Builder()
         .name("ViewAngle")
         .description("Angle of your view")
         .defaultValue(1)
-        .min(1)
+        .min(0.1)
         .sliderMax(30)
         .build());
     private final Setting<Double> jump = sgGeneral.add(new DoubleSetting.Builder()
@@ -98,7 +99,7 @@ public class AutoStaircase extends Module {
     private boolean resetTimer;
 
     public AutoStaircase() {
-        super(Trouser.Main, "auto-staircase", "Make stairs!");
+        super(Trouser.Main, "AutoStaircase", "Make stairs!");
     }
 
     // Fields
@@ -193,6 +194,7 @@ public class AutoStaircase extends Module {
 
     @Override
     public void onActivate() {
+        mc.player.setVelocity(0,0,0);
         resetTimer = false;
         ticksPassed = 0;
         blocksPlaced = 0;
@@ -206,6 +208,13 @@ public class AutoStaircase extends Module {
         }
 
         dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());
+        if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
+        BlockPos pos = playerPos.add(new Vec3i(0,-1.5,0));
+        if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
+            mc.options.forwardKey.setPressed(false);
+            if (!airPlace.getDefaultValue()) mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos.down()), Direction.DOWN, pos, false));
+            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+            mc.player.swingHand(Hand.MAIN_HAND);}
     }
 
     @Override
@@ -230,6 +239,16 @@ public class AutoStaircase extends Module {
         if (mc.player.getMainHandStack().isEmpty()) {
             mc.options.forwardKey.setPressed(false);
             mc.options.jumpKey.setPressed(false);
+        }
+        if (mc.options.backKey.isPressed()){
+            mc.options.jumpKey.setPressed(false);
+            mc.player.setVelocity(0,-5,0);
+            ticksPassed = 0;
+            blocksPlaced = 0;
+
+            centered = false;
+            playerPos = BEntityUtils.playerPos(mc.player);
+            PlayerUtils.centerPlayer();
         }
     }
 
