@@ -28,7 +28,7 @@
 - **Boom:** Throws entities when you click (Credits to Allah-Hack) I just added some more fun things you might want to throw.
 - **ExplosionAura:** Spawns creepers at your position that explode as you move. Like a bigger, more laggy Nuker module for creative mode. The use of the module Velocity is recommended to avoid being thrown around.
 - **FireballClicker:** Shoots fireballs wherever you click (Credits to GriefWaffen)
-- **FireballRain+:** Rains whatever entities you desire from a list similar to Boom (Credits to Griefwaffen (Or Allah-Hack? I have reason to believe it came from there)) It used to only rain fireballs, but I didn't think that was fun enough so I added the things put in Boom.
+- **FireballRain+:** Rains whatever entities you desire from a list similar to Boom (Credits to Allah-Hack.) I did pull the code from GriefWaffen, the name was from there. It used to only rain fireballs, but I didn't think that was fun enough so I added the things put in Boom.
 - **HandOfGod:** Deletes the world around you as you fly, and as you click. It deletes when you press the directional keys, or when you click it fills with the specified block. Operator status required.
 - **Inventory Dupe (1.17):** Duplicates things in your crafting slots when the module is enabled and the Dupe button is pressed in your inventory. (Credit to ItsVen and Da0neDatGotAway for original creation of the dupe, and to B2H990 for making the fabric mod.)
 - **InstaKillBow** Shoots arrows with incredible power and velocity. Credits to Saturn5Vfive
