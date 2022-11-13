@@ -35,7 +35,10 @@ import meteordevelopment.meteorclient.settings.*;
 import pwn.noobs.trouserstreak.utils.BEntityUtils;
 import pwn.noobs.trouserstreak.utils.BPlayerUtils;
 import pwn.noobs.trouserstreak.utils.BWorldUtils;
-import pwn.noobs.trouserstreak.utils.PositionUtils;
+import net.minecraft.block.AbstractBlock;
+import net.minecraft.entity.Entity;
+import java.lang.Math;
+
 
 
 /**
@@ -89,11 +92,11 @@ public class AutoStaircaseFly extends Module {
             .build()
     );
 
-    public final Setting<Integer> StairTimer = sgGeneral.add(new IntSetting.Builder()
+    public final Setting<Double> StairTimer = sgGeneral.add(new DoubleSetting.Builder()
             .name("TimerMultiplier")
             .description("The multiplier value for Timer.")
             .defaultValue(2)
-            .min(1)
+            .min(0.5)
             .sliderMax(10)
             .visible(() -> timer.get())
             .build()
@@ -234,6 +237,7 @@ public class AutoStaircaseFly extends Module {
     @Override
     public void onActivate() {
         resetTimer = false;
+        mc.player.setNoGravity(true);
         ticksPassed = 0;
         blocksPlaced = 0;
 
@@ -244,10 +248,19 @@ public class AutoStaircaseFly extends Module {
             if (centerMode.get() == CenterMode.Snap) BWorldUtils.snapPlayer(playerPos);
             else PlayerUtils.centerPlayer();
         }
-        mc.player.setVelocity(0,0,0);
         mc.options.jumpKey.setPressed(true);
+        if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
+        BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
+        if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
+            if (!airPlace.getDefaultValue()) mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos.down()), Direction.DOWN, pos, false));
+            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+            mc.player.swingHand(Hand.MAIN_HAND);}
 
         dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());
+        if (Modules.get().get(Flight.class).isActive()) {
+            Modules.get().get(Flight.class).toggle();
+        }
+        mc.player.setNoGravity(false);
     }
 
     @Override
@@ -261,7 +274,6 @@ public class AutoStaircaseFly extends Module {
         if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
         BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
         if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
-            mc.options.forwardKey.setPressed(false);
             if (!airPlace.getDefaultValue()) mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos.down()), Direction.DOWN, pos, false));
             mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
             mc.player.swingHand(Hand.MAIN_HAND);}
@@ -295,35 +307,56 @@ public class AutoStaircaseFly extends Module {
 
         else if (akick.get() && delayLeft <= 0 && offLeft > 0) {
             offLeft--;
-        mc.options.backKey.setPressed(true);
-
+            if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
+            BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
+            if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
+                if (!airPlace.getDefaultValue()) mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos.down()), Direction.DOWN, pos, false));
+                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                mc.player.swingHand(Hand.MAIN_HAND);}
+            mc.player.setVelocity(0,0,0);
+            mc.player.setPos(mc.player.getX(),Math.round(mc.player.getY())+0.01,mc.player.getZ());
         } else if (akick.get() && delayLeft <= 0 && offLeft <= 0) {
-            mc.options.backKey.setPressed(false);
             delayLeft = delay.get();
             offLeft = offTime.get();
         }
+        ticksPassed = 0;
+        blocksPlaced = 0;
+
+        centered = false;
+        playerPos = BEntityUtils.playerPos(mc.player);
+
+        if (centerMode.get() != CenterMode.None) {
+            if (centerMode.get() == CenterMode.Snap) BWorldUtils.snapPlayer(playerPos);
+            else PlayerUtils.centerPlayer();
+        }
+
+        dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());
     }
-    private long lastModifiedTime = 0;
-    private double lastY = Double.MAX_VALUE;
+    private double lastPacketY = Double.MAX_VALUE;
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
         if (!(event.packet instanceof PlayerMoveC2SPacket packet) || akick.get()) return;
 
-        long currentTime = System.currentTimeMillis();
         double currentY = packet.getY(Double.MAX_VALUE);
         if (currentY != Double.MAX_VALUE) {
             // maximum time we can be "floating" is 80 ticks, so 4 seconds max
-            if (currentTime - lastModifiedTime > 1000
-                    && lastY != Double.MAX_VALUE
-                    && mc.world.getBlockState(mc.player.getBlockPos().down()).isAir()) {
+            if (this.delayLeft <= 0 && this.lastPacketY != Double.MAX_VALUE &&
+                    shouldFlyDown(currentY, this.lastPacketY) && isEntityOnAir(mc.player)) {
                 // actual check is for >= -0.03125D but we have to do a bit more than that
                 // probably due to compression or some shit idk
-                ((PlayerMoveC2SPacketAccessor) packet).setY(lastY - 0.03130D);
-                lastModifiedTime = currentTime;
+                ((PlayerMoveC2SPacketAccessor) packet).setY(lastPacketY - 0.03130D);
             } else {
-                lastY = currentY;
+                lastPacketY = currentY;
             }
         }
+    }
+    private boolean shouldFlyDown(double currentY, double lastY) {
+        if (currentY >= lastY) {
+            return true;
+        } else return lastY - currentY < 0.03130D;
+    }
+    private boolean isEntityOnAir(Entity entity) {
+        return entity.world.getStatesInBox(entity.getBoundingBox().expand(0.0625).stretch(0.0, -0.55, 0.0)).allMatch(AbstractBlock.AbstractBlockState::isAir);
     }
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent playerMoveEvent) {
@@ -346,19 +379,6 @@ public class AutoStaircaseFly extends Module {
         }
         if (!mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
             mc.options.jumpKey.setPressed(true);
-                ticksPassed = 0;
-                blocksPlaced = 0;
-
-                centered = false;
-                playerPos = BEntityUtils.playerPos(mc.player);
-
-                if (centerMode.get() != CenterMode.None) {
-                    if (centerMode.get() == CenterMode.Snap) BWorldUtils.snapPlayer(playerPos);
-                    else PlayerUtils.centerPlayer();
-                }
-
-                dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());
-
         }
     }
     private void unpress() {

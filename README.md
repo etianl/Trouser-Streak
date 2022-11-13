@@ -12,6 +12,7 @@
 - [Frostburn Client](https://github.com/evaan/FrostBurn)
 - [Banana](https://github.com/Bennooo/banana-for-everyone)
 - [1.17 Crafting Dupe](https://github.com/B2H990/NUMA-117-Crafting-Dupe/)
+- [InstantKillBow](https://github.com/Saturn5Vfive/InstantKillBow)
  <div align="left">
     <p>This modpack would not have been possible without you
  </p>
@@ -30,6 +31,7 @@
 - **FireballRain+:** Rains whatever entities you desire from a list similar to Boom (Credits to Griefwaffen (Or Allah-Hack? I have reason to believe it came from there)) It used to only rain fireballs, but I didn't think that was fun enough so I added the things put in Boom.
 - **HandOfGod:** Deletes the world around you as you fly, and as you click. It deletes when you press the directional keys, or when you click it fills with the specified block. Operator status required.
 - **Inventory Dupe (1.17):** Duplicates things in your crafting slots when the module is enabled and the Dupe button is pressed in your inventory. (Credit to ItsVen and Da0neDatGotAway for original creation of the dupe, and to B2H990 for making the fabric mod.)
+- **InstaKillBow** Shoots arrows with incredible power and velocity. Credits to Saturn5Vfive
 - **Phase:** Allows you to phase through blocks vertically, and through thin blocks horizontally such as doors and world border (Credits to Meteor-Rejects) Please add this back it's not too terrible.
 - **RedstoneNuker:** It's just the regular Nuker module from Meteor client, customized for only breaking things that generate redstone signals. Also with included AutoTool. To keep you safer when placing lots of TNT.
 - **ShulkerDupe:** Duplicates the contents of a shulker when opening. Only works on Vanilla, Forge, and Fabric servers 1.19 and below. Use multiconnect or viafabric (Credits to Allah-Hack)

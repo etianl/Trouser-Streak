@@ -90,7 +90,7 @@ public class AutoStaircaseDown extends Module {
             .build()
     );
 
-    public final Setting<Integer> StairTimer = sgGeneral.add(new IntSetting.Builder()
+    public final Setting<Double> StairTimer = sgGeneral.add(new DoubleSetting.Builder()
             .name("TimerMultiplier")
             .description("The multiplier value for Timer.")
             .defaultValue(5)
