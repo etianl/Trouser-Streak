@@ -212,6 +212,9 @@ public class AutoStaircaseDown extends Module {
         }
 
         dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());
+        if (Modules.get().get(TrouserFlight.class).isActive()) {
+            Modules.get().get(TrouserFlight.class).toggle();
+        }
     }
 
     @Override

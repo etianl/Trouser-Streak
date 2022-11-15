@@ -215,6 +215,9 @@ public class AutoStaircase extends Module {
             if (!airPlace.getDefaultValue()) mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos.down()), Direction.DOWN, pos, false));
             mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
             mc.player.swingHand(Hand.MAIN_HAND);}
+        if (Modules.get().get(TrouserFlight.class).isActive()) {
+            Modules.get().get(TrouserFlight.class).toggle();
+        }
     }
 
     @Override

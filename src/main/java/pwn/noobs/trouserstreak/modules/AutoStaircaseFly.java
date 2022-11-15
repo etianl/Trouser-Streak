@@ -237,7 +237,7 @@ public class AutoStaircaseFly extends Module {
     @Override
     public void onActivate() {
         resetTimer = false;
-        mc.player.setNoGravity(true);
+        if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
         ticksPassed = 0;
         blocksPlaced = 0;
 
@@ -248,8 +248,8 @@ public class AutoStaircaseFly extends Module {
             if (centerMode.get() == CenterMode.Snap) BWorldUtils.snapPlayer(playerPos);
             else PlayerUtils.centerPlayer();
         }
+        mc.player.setNoGravity(true);
         mc.options.jumpKey.setPressed(true);
-        if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
         BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
         if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
             if (!airPlace.getDefaultValue()) mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos.down()), Direction.DOWN, pos, false));
@@ -257,8 +257,8 @@ public class AutoStaircaseFly extends Module {
             mc.player.swingHand(Hand.MAIN_HAND);}
 
         dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());
-        if (Modules.get().get(Flight.class).isActive()) {
-            Modules.get().get(Flight.class).toggle();
+        if (Modules.get().get(TrouserFlight.class).isActive()) {
+            Modules.get().get(TrouserFlight.class).toggle();
         }
         mc.player.setNoGravity(false);
     }

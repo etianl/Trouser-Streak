@@ -1,6 +1,8 @@
 package pwn.noobs.trouserstreak.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.movement.Flight;
+import meteordevelopment.meteorclient.systems.modules.player.AntiHunger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.At;
@@ -15,9 +17,13 @@ import net.minecraft.item.Items;
 @Mixin(ClientPlayerInteractionManager.class)
 public class ClientPlayerInteractionManagerMixin {
     @Inject(at = @At("HEAD"), method = "stopUsingItem")
-    private void onStopUsingItem(PlayerEntity player, CallbackInfo ci){
+    public void onStopUsingItem(PlayerEntity player, CallbackInfo ci){
+        if ((Modules.get().get(InstantKill.class).isActive())){}
         if(Modules.get().isActive(InstantKill.class)){
         if(player.getInventory().getMainHandStack().getItem().equals(Items.BOW)){
+            if (Modules.get().get(AntiHunger.class).isActive()) {
+                Modules.get().get(AntiHunger.class).toggle();
+            }
             InstantKill.addVelocityToPlayer();
         }}
     }

@@ -25,17 +25,39 @@ public class InventoryScreenMixinBow extends Screen{
     @Inject(method = "init", at = @At("HEAD"))
     public void onInit(CallbackInfo ci){
         if(Modules.get().isActive(InstantKill.class)) {
-        ButtonWidget toggle = new ButtonWidget(1, 1, 100, 20, Text.of("InstantKill: " + (InstantKill.shouldAddVelocity ? "On" : "Off")), b -> {
+            ButtonWidget toggle = new ButtonWidget(1, 1, 90, 12, Text.of("MovePackets: " + (InstantKill.shouldAddVelocity0 ? "50" : "OFF")), b -> {
+                InstantKill.shouldAddVelocity0 = !InstantKill.shouldAddVelocity0;
+                InstantKill.mc.setScreen(new InventoryScreen(InstantKill.mc.player));
+            });
+            this.addDrawableChild(toggle);
+        }
+        if(Modules.get().isActive(InstantKill.class)) {
+        ButtonWidget toggle = new ButtonWidget(1, 13, 90, 12, Text.of("MovePackets: " + (InstantKill.shouldAddVelocity ? "100" : "OFF")), b -> {
             InstantKill.shouldAddVelocity = !InstantKill.shouldAddVelocity;
             InstantKill.mc.setScreen(new InventoryScreen(InstantKill.mc.player));
         });
         this.addDrawableChild(toggle);
-    }}
-
-    @Inject(method = "render", at = @At("HEAD"))
-    public void onRender(MatrixStack matrices, int a, int b, float d, CallbackInfo ci){
+        }
         if(Modules.get().isActive(InstantKill.class)) {
-            int pp = this.textRenderer.getWidth("Made by Saturn5Vfive <3") / 2;
-            drawCenteredText(matrices, textRenderer, Text.of("Made by Saturn5Vfive <3"), pp + 5, InstantKill.mc.getWindow().getScaledHeight() - 10, new Color(255, 255, 255, 255).getRGB());
-        }}
+            ButtonWidget toggle = new ButtonWidget(1, 25, 90, 12, Text.of("MovePackets: " + (InstantKill.shouldAddVelocity1 ? "150" : "OFF")), b -> {
+                InstantKill.shouldAddVelocity1 = !InstantKill.shouldAddVelocity1;
+                InstantKill.mc.setScreen(new InventoryScreen(InstantKill.mc.player));
+            });
+            this.addDrawableChild(toggle);
+        }
+        if(Modules.get().isActive(InstantKill.class)) {
+            ButtonWidget toggle = new ButtonWidget(1, 37, 90, 12, Text.of("MovePackets: " + (InstantKill.shouldAddVelocity2 ? "200" : "OFF")), b -> {
+                InstantKill.shouldAddVelocity2 = !InstantKill.shouldAddVelocity2;
+                InstantKill.mc.setScreen(new InventoryScreen(InstantKill.mc.player));
+            });
+            this.addDrawableChild(toggle);
+        }
+        if(Modules.get().isActive(InstantKill.class)) {
+            ButtonWidget toggle = new ButtonWidget(1, 49, 90, 12, Text.of("MovePackets: " + (InstantKill.shouldAddVelocity3 ? "300" : "OFF")), b -> {
+                InstantKill.shouldAddVelocity3 = !InstantKill.shouldAddVelocity3;
+                InstantKill.mc.setScreen(new InventoryScreen(InstantKill.mc.player));
+            });
+            this.addDrawableChild(toggle);
+        }
+    }
 }
