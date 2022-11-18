@@ -1,6 +1,7 @@
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
+import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
@@ -264,6 +265,24 @@ public class AutoMountain extends Module {
         if (Modules.get().get(TPFly.class).isActive()) {
             Modules.get().get(TPFly.class).toggle();
         }
+        if (mc.player.getPitch() >= 40){
+            mc.player.setPitch(75);
+        }
+        if (mc.player.getPitch() <= 40){
+            mc.player.setPitch(35);
+        }
+        if (mc.player.getMovementDirection() == Direction.NORTH){
+            mc.player.setYaw(180);
+        }
+        if (mc.player.getMovementDirection() == Direction.EAST){
+            mc.player.setYaw(270);
+        }
+        if (mc.player.getMovementDirection() == Direction.SOUTH){
+            mc.player.setYaw(360);
+        }
+        if (mc.player.getMovementDirection() == Direction.WEST){
+            mc.player.setYaw(90);
+        }
     }
 
     @Override
@@ -276,6 +295,21 @@ public class AutoMountain extends Module {
         if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
             mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
             mc.player.swingHand(Hand.MAIN_HAND);}
+    }
+    @EventHandler
+    private void onKeyEvent(KeyEvent event) {
+        if (mc.options.forwardKey.isPressed()){
+            mc.player.setPitch(35);
+        }
+        if (mc.options.backKey.isPressed()){
+            mc.player.setPitch(75);
+        }
+        if (mc.options.leftKey.isPressed()){
+            mc.player.setYaw(mc.player.getYaw()-90);
+        }
+        if (mc.options.rightKey.isPressed()){
+            mc.player.setYaw(mc.player.getYaw()+90);
+        }
     }
 
     @EventHandler
