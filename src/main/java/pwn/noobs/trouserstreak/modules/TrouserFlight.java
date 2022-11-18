@@ -17,8 +17,11 @@ import net.minecraft.block.AbstractBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.utils.BEntityUtils;
 
 public class TrouserFlight extends Module {
     public enum Mode {
@@ -108,6 +111,11 @@ public class TrouserFlight extends Module {
         if (mode.get() == Mode.Abilities && !mc.player.isSpectator()) {
             abilitiesOff();
         }
+        if (mode.get() == Mode.Velocity && antiKickMode.get() == AntiKickMode.Normal && !mc.options.sneakKey.isPressed()){
+            mc.player.setPos(mc.player.getX(),mc.player.getY()+1,mc.player.getZ());} //this line here prevents you dying for realz
+        else if (mode.get() == Mode.Velocity && antiKickMode.get() == AntiKickMode.Normal && mc.options.sneakKey.isPressed()) {
+            mc.options.sneakKey.setPressed(false);
+            mc.player.setPos(mc.player.getX(),mc.player.getY()+5,mc.player.getZ());} //this line here prevents you dying for realz
     }
 
     private boolean flip;
@@ -144,7 +152,9 @@ public class TrouserFlight extends Module {
                     shouldReturn = true;
                 }
                 else if (antiKickMode.get() == AntiKickMode.Normal) {
-                 if (mode.get() == Mode.Velocity)
+                    BlockPos playerPos = BEntityUtils.playerPos(mc.player);
+                    BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
+                 if (mc.world.getBlockState(pos).isAir() && mode.get() == Mode.Velocity)
                      mc.player.setPos(mc.player.getX(),mc.player.getY()-0.1,mc.player.getZ());
                 }
             } else if (antiKickMode.get() == AntiKickMode.Packet && offLeft == offTime.get()) {

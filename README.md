@@ -22,8 +22,7 @@
 - **AutoBuildDown:** Same as above, but it places beneath your feet infront of you for downward stair building. Top right space is not reachable by the player so don't use that space in this case. (Credits to Banana)
 - **AutoDrop:** Drops the stack in your selected slot automatically. You can shift click your inventory items to slot one to dump your trash easily.
 - **AutoStaircase:** Builds stairs upward in the direction you are facing. (Credits to Frostburn, and Banana for the player centering utils to make it work correctly) I just had to fix up some stuff for this one but Frostburn had the base code there. I believe this is the first publicly available automatic staircase builder in a Meteor addon, correct me if I'm wrong maybe I didn't have to learn some Java to do this.
-- **AutoStaircaseDown:** Similar to above. Builds stairs downward, and can even start midair (turn off flight).
-- **AutoStaircaseFly:** Flight-based autostaircaser. With this one, your view is not locked at all and you can change direction by looking around. Switching direction works excellent with this one. Antikick included to prevent da boot. 
+- **AutoMountain:** AutoMountain builds stairs in the direction you aim. It builds upward if you are looking toward the horizon or higher, and builds downward if you are looking down. The use key (Right Click) disables AutoMountain. (Credits to Frostburn for the base for the code.)
 - **BetterScaffold:** Give you more options for scaffolding, bigger range and others. (Credits to Meteor-Tweaks)
 - **Boom:** Throws entities when you click (Credits to Allah-Hack) I just added some more fun things you might want to throw.
 - **ExplosionAura:** Spawns creepers at your position that explode as you move. Like a bigger, more laggy Nuker module for creative mode. The use of the module Velocity is recommended to avoid being thrown around.
@@ -35,8 +34,12 @@
 - **Phase:** Allows you to phase through blocks vertically, and through thin blocks horizontally such as doors and world border (Credits to Meteor-Rejects) Please add this back it's not too terrible.
 - **RedstoneNuker:** It's just the regular Nuker module from Meteor client, customized for only breaking things that generate redstone signals. Also with included AutoTool. To keep you safer when placing lots of TNT.
 - **ShulkerDupe:** Duplicates the contents of a shulker when opening. Only works on Vanilla, Forge, and Fabric servers 1.19 and below. Use multiconnect or viafabric (Credits to Allah-Hack)
+- **TPFly:** It is a purely setPos based flight. Based off the ClickTP code, credits to Meteor for that. ***EXPERIMENTAL, movement is a little weird lol***
 - **Voider:** Replaces the world from the top down (Credits to Allah-Hack) I only added options to set max and minimum height for voiding, and instead of just air it can do water and lava now too.
 
 ## Known Bugs:
 - Turning direction using the back key and mouse with the AutoStaircaseDown module causes double block placement. It's fine though for lava flow, just wastes blocks. Block wastage can be avoided by just disabling the module, turning, then re-enabling.
 - The antikick with AutoStaircaseFly does not always work when enabling the module while falling.
+- With InstaKillBow if all MovePacket buttons are enabled as is default it attempts to send 800 packets. Disable some of them to reduce it.
+- TPFly can hurt you once in a while on disable. I tried to prevent this. You also rubberband if going toward a block because it attempts to teleport you through it.
+- Top right space in AutoBuildDown cannot be reached. Do not check it.

@@ -34,10 +34,10 @@ public class Trouser extends MeteorAddon {
         Modules.get().add(new DupeModule());
         Modules.get().add(new RedstoneNuker());
         Modules.get().add(new AutoDrop());
-        Modules.get().add(new AutoStaircaseDown());
-        Modules.get().add(new AutoStaircaseFly());
+        Modules.get().add(new AutoMountain());
         Modules.get().add(new InstantKill());
         Modules.get().add(new TrouserFlight());
+        Modules.get().add(new TPFly());
 	}
 
 	@Override

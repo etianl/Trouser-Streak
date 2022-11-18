@@ -49,12 +49,28 @@ public class HandOfGod extends Module {
         .build()
     );
 
-    public final Setting<Integer> pRadius = sgGeneral.add(new IntSetting.Builder()
-            .name("PlayerRadius")
-            .description("Radius around the player which is removed.")
+    public final Setting<Integer> pwidth = sgGeneral.add(new IntSetting.Builder()
+            .name("PlayerWidth")
+            .description("Width removed around player")
             .defaultValue(10)
             .min(1)
-            .sliderMax(15)
+            .sliderMax(30)
+            .build()
+    );
+    public final Setting<Integer> pheight = sgGeneral.add(new IntSetting.Builder()
+            .name("PlayerHeight")
+            .description("Height removed around player")
+            .defaultValue(10)
+            .min(1)
+            .sliderMax(30)
+            .build()
+    );
+    public final Setting<Integer> pdepth = sgGeneral.add(new IntSetting.Builder()
+            .name("PlayerDepth")
+            .description("Depth removed around player")
+            .defaultValue(10)
+            .min(1)
+            .sliderMax(30)
             .build()
     );
 
@@ -64,13 +80,29 @@ public class HandOfGod extends Module {
             .defaultValue("air")
             .build());
 
-    private final Setting<Integer> cRadius = sgGeneral.add(new IntSetting.Builder()
-            .name("ClickRadius")
-            .description("The radius of the click fill")
+    private final Setting<Integer> cwidth = sgGeneral.add(new IntSetting.Builder()
+            .name("ClickWidth")
+            .description("The width of the click fill")
             .defaultValue(10)
             .min(1)
-            .sliderMax(15)
+            .sliderMax(30)
             .build());
+
+    private final Setting<Integer> cheight = sgGeneral.add(new IntSetting.Builder()
+            .name("ClickHeight")
+            .description("The height of the click fill")
+            .defaultValue(10)
+            .min(1)
+            .sliderMax(30)
+            .build());
+    private final Setting<Integer> cdepth = sgGeneral.add(new IntSetting.Builder()
+            .name("ClickDepth")
+            .description("The depth of the click fill")
+            .defaultValue(10)
+            .min(1)
+            .sliderMax(30)
+            .build());
+
 
     public final Setting<Boolean> lightning = sgGeneral.add(new BoolSetting.Builder()
             .name("Lightning")
@@ -122,12 +154,12 @@ public class HandOfGod extends Module {
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                 mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
             }
-            int x1 = Math.round(pos.getX()) + cRadius.get();
-            int y1 = Math.round(pos.getY()) + cRadius.get();
-            int z1 = Math.round(pos.getZ()) + cRadius.get();
-            int x2 = Math.round(pos.getX()) - cRadius.get();
-            int y2 = Math.round(pos.getY()) - cRadius.get();
-            int z2 = Math.round(pos.getZ()) - cRadius.get();
+            int x1 = Math.round(pos.getX()) + cwidth.get();
+            int y1 = Math.round(pos.getY()) + cheight.get();
+            int z1 = Math.round(pos.getZ()) + cdepth.get();
+            int x2 = Math.round(pos.getX()) - cwidth.get();
+            int y2 = Math.round(pos.getY()) - cheight.get();
+            int z2 = Math.round(pos.getZ()) - cdepth.get();
             ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + block);
         }
     }
@@ -158,31 +190,31 @@ public class HandOfGod extends Module {
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                     mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
                 }
-                int x1 = Math.round(pos.getX()) + cRadius.get();
-                int y1 = Math.round(pos.getY()) + cRadius.get();
-                int z1 = Math.round(pos.getZ()) + cRadius.get();
-                int x2 = Math.round(pos.getX()) - cRadius.get();
-                int y2 = Math.round(pos.getY()) - cRadius.get();
-                int z2 = Math.round(pos.getZ()) - cRadius.get();
+                int x1 = Math.round(pos.getX()) + cwidth.get();
+                int y1 = Math.round(pos.getY()) + cheight.get();
+                int z1 = Math.round(pos.getZ()) + cdepth.get();
+                int x2 = Math.round(pos.getX()) - cwidth.get();
+                int y2 = Math.round(pos.getY()) - cheight.get();
+                int z2 = Math.round(pos.getZ()) - cdepth.get();
                 ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + block);
             }
             if (mc.options.forwardKey.isPressed()) {
-                ChatUtils.sendPlayerMsg("/execute at @p run fill ~"+pRadius.get()+" ~"+pRadius.get()+" ~"+pRadius.get()+" ~-"+pRadius.get()+" ~-"+pRadius.get()+" ~-"+pRadius.get()+" air");
+                ChatUtils.sendPlayerMsg("/execute at @p run fill ~"+pwidth.get()+" ~"+pheight.get()+" ~"+pdepth.get()+" ~-"+pwidth.get()+" ~-"+pheight.get()+" ~-"+pdepth.get()+" air");
             }
             if (mc.options.jumpKey.isPressed()) {
-                ChatUtils.sendPlayerMsg("/execute at @p run fill ~"+pRadius.get()+" ~"+pRadius.get()+" ~"+pRadius.get()+" ~-"+pRadius.get()+" ~-"+pRadius.get()+" ~-"+pRadius.get()+" air");
+                ChatUtils.sendPlayerMsg("/execute at @p run fill ~"+pwidth.get()+" ~"+pheight.get()+" ~"+pdepth.get()+" ~-"+pwidth.get()+" ~-"+pheight.get()+" ~-"+pdepth.get()+" air");
             }
             if (mc.options.sneakKey.isPressed()) {
-                ChatUtils.sendPlayerMsg("/execute at @p run fill ~"+pRadius.get()+" ~"+pRadius.get()+" ~"+pRadius.get()+" ~-"+pRadius.get()+" ~-"+pRadius.get()+" ~-"+pRadius.get()+" air");
+                ChatUtils.sendPlayerMsg("/execute at @p run fill ~"+pwidth.get()+" ~"+pheight.get()+" ~"+pdepth.get()+" ~-"+pwidth.get()+" ~-"+pheight.get()+" ~-"+pdepth.get()+" air");
             }
             if (mc.options.leftKey.isPressed()) {
-                ChatUtils.sendPlayerMsg("/execute at @p run fill ~"+pRadius.get()+" ~"+pRadius.get()+" ~"+pRadius.get()+" ~-"+pRadius.get()+" ~-"+pRadius.get()+" ~-"+pRadius.get()+" air");
+                ChatUtils.sendPlayerMsg("/execute at @p run fill ~"+pwidth.get()+" ~"+pheight.get()+" ~"+pdepth.get()+" ~-"+pwidth.get()+" ~-"+pheight.get()+" ~-"+pdepth.get()+" air");
             }
             if (mc.options.rightKey.isPressed()) {
-                ChatUtils.sendPlayerMsg("/execute at @p run fill ~"+pRadius.get()+" ~"+pRadius.get()+" ~"+pRadius.get()+" ~-"+pRadius.get()+" ~-"+pRadius.get()+" ~-"+pRadius.get()+" air");
+                ChatUtils.sendPlayerMsg("/execute at @p run fill ~"+pwidth.get()+" ~"+pheight.get()+" ~"+pdepth.get()+" ~-"+pwidth.get()+" ~-"+pheight.get()+" ~-"+pdepth.get()+" air");
             }
             if (mc.options.backKey.isPressed()) {
-                ChatUtils.sendPlayerMsg("/execute at @p run fill ~"+pRadius.get()+" ~"+pRadius.get()+" ~"+pRadius.get()+" ~-"+pRadius.get()+" ~-"+pRadius.get()+" ~-"+pRadius.get()+" air");
+                ChatUtils.sendPlayerMsg("/execute at @p run fill ~"+pwidth.get()+" ~"+pheight.get()+" ~"+pdepth.get()+" ~-"+pwidth.get()+" ~-"+pheight.get()+" ~-"+pdepth.get()+" air");
             }
         }
     }

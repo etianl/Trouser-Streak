@@ -49,12 +49,6 @@ public class AutoStaircase extends Module {
         None
     }
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final Setting<Boolean> airPlace = sgGeneral.add(new BoolSetting.Builder()
-        .name("AirPlace")
-        .description("AirPlace")
-        .defaultValue(true)
-        .build()
-    );
 
     private final Setting<CenterMode> centerMode = sgGeneral.add(new EnumSetting.Builder<CenterMode>()
         .name("center")
@@ -78,7 +72,13 @@ public class AutoStaircase extends Module {
             .sliderMax(0.57)
             .build()
     );
-
+    private final Setting<Integer> limit = sgGeneral.add(new IntSetting.Builder()
+            .name("Build Limit")
+            .description("sets the height at which the stairs stop")
+            .sliderRange(-64, 319)
+            .defaultValue(319)
+            .build()
+    );
     public final Setting<Boolean> timer = sgGeneral.add(new BoolSetting.Builder()
             .name("Timer")
             .description("Timer on/off")
@@ -212,11 +212,13 @@ public class AutoStaircase extends Module {
         BlockPos pos = playerPos.add(new Vec3i(0,-1.5,0));
         if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
             mc.options.forwardKey.setPressed(false);
-            if (!airPlace.getDefaultValue()) mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos.down()), Direction.DOWN, pos, false));
             mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
             mc.player.swingHand(Hand.MAIN_HAND);}
         if (Modules.get().get(TrouserFlight.class).isActive()) {
             Modules.get().get(TrouserFlight.class).toggle();
+        }
+        if (Modules.get().get(TPFly.class).isActive()) {
+            Modules.get().get(TPFly.class).toggle();
         }
     }
 
@@ -253,6 +255,14 @@ public class AutoStaircase extends Module {
             playerPos = BEntityUtils.playerPos(mc.player);
             PlayerUtils.centerPlayer();
         }
+        if (mc.options.rightKey.isPressed())
+            mc.options.rightKey.setPressed(false);
+        if (mc.options.leftKey.isPressed())
+            mc.options.leftKey.setPressed(false);
+        if(mc.player.getY() >= limit.get()){
+            mc.options.forwardKey.setPressed(false);
+            mc.options.jumpKey.setPressed(false);
+        }
     }
 
     @EventHandler
@@ -280,7 +290,6 @@ public class AutoStaircase extends Module {
         }
         if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
             mc.options.forwardKey.setPressed(false);
-            if (!airPlace.getDefaultValue()) mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos.down()), Direction.DOWN, pos, false));
             mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
             mc.player.swingHand(Hand.MAIN_HAND);
         }
