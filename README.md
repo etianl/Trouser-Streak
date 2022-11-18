@@ -22,7 +22,11 @@
 - **AutoBuildDown:** Same as above, but it places beneath your feet infront of you for downward stair building. Top right space is not reachable by the player so don't use that space in this case. (Credits to Banana)
 - **AutoDrop:** Drops the stack in your selected slot automatically. You can shift click your inventory items to slot one to dump your trash easily.
 - **AutoStaircase:** Builds stairs upward in the direction you are facing. (Credits to Frostburn, and Banana for the player centering utils to make it work correctly) I just had to fix up some stuff for this one but Frostburn had the base code there. I believe this is the first publicly available automatic staircase builder in a Meteor addon, correct me if I'm wrong maybe I didn't have to learn some Java to do this.
-- **AutoMountain:** AutoMountain builds stairs in the direction you aim. It builds upward if you are looking toward the horizon or higher, and builds downward if you are looking down. The use key (Right Click) disables AutoMountain. (Credits to Frostburn for the base for the code.)
+- **AutoMountain:** AutoMountain builds stairs in the direction you aim. It builds upward if you are looking toward the horizon or higher, and builds downward if you are looking down. (Credits to Frostburn for the base for the code.)
+- *AutoMountain Controls:* 
+Left and Right Keys turn Mountain building.
+Forward Key Turns mountain up, Back Key turns mountain down.
+The use key (Right Click) disables AutoMountain. 
 - **BetterScaffold:** Give you more options for scaffolding, bigger range and others. (Credits to Meteor-Tweaks)
 - **Boom:** Throws entities when you click (Credits to Allah-Hack) I just added some more fun things you might want to throw.
 - **ExplosionAura:** Spawns creepers at your position that explode as you move. Like a bigger, more laggy Nuker module for creative mode. The use of the module Velocity is recommended to avoid being thrown around.
