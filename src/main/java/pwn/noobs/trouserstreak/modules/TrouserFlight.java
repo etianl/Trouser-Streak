@@ -111,11 +111,10 @@ public class TrouserFlight extends Module {
         if (mode.get() == Mode.Abilities && !mc.player.isSpectator()) {
             abilitiesOff();
         }
-        if (mode.get() == Mode.Velocity && antiKickMode.get() == AntiKickMode.Normal && !mc.options.sneakKey.isPressed()){
-            mc.player.setPos(mc.player.getX(),mc.player.getY()+1,mc.player.getZ());} //this line here prevents you dying for realz
-        else if (mode.get() == Mode.Velocity && antiKickMode.get() == AntiKickMode.Normal && mc.options.sneakKey.isPressed()) {
-            mc.options.sneakKey.setPressed(false);
-            mc.player.setPos(mc.player.getX(),mc.player.getY()+5,mc.player.getZ());} //this line here prevents you dying for realz
+        if (mode.get() == Mode.Velocity && antiKickMode.get() == AntiKickMode.Normal){
+            mc.player.setPos(mc.player.getX(),mc.player.getY()+0.25,mc.player.getZ()); //this line here prevents you dying for realz
+            mc.player.setVelocity(0,-0.1,0);
+        }
     }
 
     private boolean flip;

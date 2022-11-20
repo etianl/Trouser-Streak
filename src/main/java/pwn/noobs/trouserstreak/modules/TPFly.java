@@ -24,12 +24,12 @@ import pwn.noobs.trouserstreak.utils.BEntityUtils;
 
 public class TPFly extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final Setting<Boolean> mfly = sgGeneral.add(new BoolSetting.Builder()
-            .name("POINTANDFLY")
-            .description("Forward key moves you in the direction you aim")
-            .defaultValue(false)
-            .build()
-    );
+    private final Setting<Modes> mode = sgGeneral.add(new EnumSetting.Builder<Modes>()
+            .name("mode")
+            .description("the mode")
+            .defaultValue(Modes.PointandFly)
+            .build());
+
     private final Setting<Boolean> customRange = sgGeneral.add(new BoolSetting.Builder()
             .name("POINTANDFLY UseRange")
             .description("Use custom range for POINTANDFLY.")
@@ -91,12 +91,14 @@ public class TPFly extends Module {
     private int offLeft = offTime.get();
     @Override
     public void onDeactivate() {
-        mc.player.setVelocity(0,0.00001,0);
+        mc.player.setVelocity(0,0.1,0);
         if (!mc.options.sneakKey.isPressed()){
-        mc.player.setPos(mc.player.getX(),mc.player.getY()+1,mc.player.getZ());} //this line here prevents you dying for realz
+        mc.player.setPos(mc.player.getX(),mc.player.getY()+0.25,mc.player.getZ());
+        } //this line here prevents you dying for realz
         else if (mc.options.sneakKey.isPressed()) {
             mc.options.sneakKey.setPressed(false);
-            mc.player.setPos(mc.player.getX(),mc.player.getY()+5,mc.player.getZ());} //this line here prevents you dying for realz
+            mc.player.setPos(mc.player.getX(),mc.player.getY()+(downspeed.get()+1),mc.player.getZ());
+        } //this line here prevents you dying for realz
     }
     //making absolutely sure there is no velocity and that this is setPos movement only
     @EventHandler
@@ -115,31 +117,31 @@ public class TPFly extends Module {
             case WEST -> {}
             default -> {}
         }
-        if (mc.options.forwardKey.isPressed()){
+        if (mode.get() == Modes.WASDFly && mc.options.forwardKey.isPressed()){
             if (mc.player.getMovementDirection() == Direction.NORTH) {
                 BlockPos playerPos = BEntityUtils.playerPos(mc.player);
-                BlockPos pos12 = playerPos.add(new Vec3i(0,0,-1));
+                BlockPos pos12 = playerPos.add(new Vec3i(0,0,-range.get()));
                 if (mc.world.getBlockState(pos12).isAir()){
                 mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()-range.get());
                 } else if (!mc.world.getBlockState(pos12).isAir()){}
             }
             if (mc.player.getMovementDirection() == Direction.SOUTH) {
                 BlockPos playerPos = BEntityUtils.playerPos(mc.player);
-                BlockPos pos13 = playerPos.add(new Vec3i(0,0,1));
+                BlockPos pos13 = playerPos.add(new Vec3i(0,0,range.get()));
                 if (mc.world.getBlockState(pos13).isAir()){
                 mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()+range.get());
                 } else if (!mc.world.getBlockState(pos13).isAir()){}
             }
             if (mc.player.getMovementDirection() == Direction.EAST) {
                 BlockPos playerPos = BEntityUtils.playerPos(mc.player);
-                BlockPos pos14 = playerPos.add(new Vec3i(1,0,0));
+                BlockPos pos14 = playerPos.add(new Vec3i(range.get(),0,0));
                 if (mc.world.getBlockState(pos14).isAir()){
                 mc.player.setPos(mc.player.getX()+range.get(),mc.player.getY(),mc.player.getZ());
                 } else if (!mc.world.getBlockState(pos14).isAir()){}
             }
             if (mc.player.getMovementDirection() == Direction.WEST) {
                 BlockPos playerPos = BEntityUtils.playerPos(mc.player);
-                BlockPos pos15 = playerPos.add(new Vec3i(-1,0,0));
+                BlockPos pos15 = playerPos.add(new Vec3i(-range.get(),0,0));
                 if (mc.world.getBlockState(pos15).isAir()){
                 mc.player.setPos(mc.player.getX()-range.get(),mc.player.getY(),mc.player.getZ());
                 } else if (!mc.world.getBlockState(pos15).isAir()){}
@@ -148,28 +150,28 @@ public class TPFly extends Module {
         if (mc.options.backKey.isPressed()){
             if (mc.player.getMovementDirection() == Direction.NORTH) {
                 BlockPos playerPos = BEntityUtils.playerPos(mc.player);
-                BlockPos pos16 = playerPos.add(new Vec3i(0,0,-1));
+                BlockPos pos16 = playerPos.add(new Vec3i(0,0,range.get()));
                 if (mc.world.getBlockState(pos16).isAir()){
                 mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()+range.get());
                 } else if (!mc.world.getBlockState(pos16).isAir()){}
             }
             if (mc.player.getMovementDirection() == Direction.SOUTH) {
                 BlockPos playerPos = BEntityUtils.playerPos(mc.player);
-                BlockPos pos17 = playerPos.add(new Vec3i(0,0,1));
+                BlockPos pos17 = playerPos.add(new Vec3i(0,0,-range.get()));
                 if (mc.world.getBlockState(pos17).isAir()){
                 mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()-range.get());
                 } else if (!mc.world.getBlockState(pos17).isAir()){}
             }
             if (mc.player.getMovementDirection() == Direction.EAST) {
                 BlockPos playerPos = BEntityUtils.playerPos(mc.player);
-                BlockPos pos18 = playerPos.add(new Vec3i(1,0,0));
+                BlockPos pos18 = playerPos.add(new Vec3i(-range.get(),0,0));
                 if (mc.world.getBlockState(pos18).isAir()){
                 mc.player.setPos(mc.player.getX()-range.get(),mc.player.getY(),mc.player.getZ());
                 } else if (!mc.world.getBlockState(pos18).isAir()){}
             }
             if (mc.player.getMovementDirection() == Direction.WEST) {
                 BlockPos playerPos = BEntityUtils.playerPos(mc.player);
-                BlockPos pos19 = playerPos.add(new Vec3i(-1,0,0));
+                BlockPos pos19 = playerPos.add(new Vec3i(range.get(),0,0));
                 if (mc.world.getBlockState(pos19).isAir()){
                 mc.player.setPos(mc.player.getX()+range.get(),mc.player.getY(),mc.player.getZ());
                 } else if (!mc.world.getBlockState(pos19).isAir()){}
@@ -178,28 +180,28 @@ public class TPFly extends Module {
         if (mc.options.leftKey.isPressed()){
             if (mc.player.getMovementDirection() == Direction.NORTH) {
                 BlockPos playerPos = BEntityUtils.playerPos(mc.player);
-                BlockPos pos20 = playerPos.add(new Vec3i(0,0,-1));
+                BlockPos pos20 = playerPos.add(new Vec3i(0,0,-range.get()));
                 if (mc.world.getBlockState(pos20).isAir()){
                 mc.player.setPos(mc.player.getX()-range.get(),mc.player.getY(),mc.player.getZ());
                 } else if (!mc.world.getBlockState(pos20).isAir()){}
             }
             if (mc.player.getMovementDirection() == Direction.SOUTH) {
                 BlockPos playerPos = BEntityUtils.playerPos(mc.player);
-                BlockPos pos21 = playerPos.add(new Vec3i(0,0,1));
+                BlockPos pos21 = playerPos.add(new Vec3i(0,0,range.get()));
                 if (mc.world.getBlockState(pos21).isAir()){
                 mc.player.setPos(mc.player.getX()+range.get(),mc.player.getY(),mc.player.getZ());
                 } else if (!mc.world.getBlockState(pos21).isAir()){}
             }
             if (mc.player.getMovementDirection() == Direction.EAST) {
                 BlockPos playerPos = BEntityUtils.playerPos(mc.player);
-                BlockPos pos22 = playerPos.add(new Vec3i(1,0,0));
+                BlockPos pos22 = playerPos.add(new Vec3i(range.get(),0,0));
                 if (mc.world.getBlockState(pos22).isAir()){
                 mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()-range.get());
                 } else if (!mc.world.getBlockState(pos22).isAir()){}
             }
             if (mc.player.getMovementDirection() == Direction.WEST) {
                 BlockPos playerPos = BEntityUtils.playerPos(mc.player);
-                BlockPos pos23 = playerPos.add(new Vec3i(-1,0,0));
+                BlockPos pos23 = playerPos.add(new Vec3i(-range.get(),0,0));
                 if (mc.world.getBlockState(pos23).isAir()){
                 mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()+range.get());
                 } else if (!mc.world.getBlockState(pos23).isAir()){}
@@ -210,28 +212,28 @@ public class TPFly extends Module {
         if (mc.options.rightKey.isPressed()){
             if (mc.player.getMovementDirection() == Direction.NORTH) {
                 BlockPos playerPos = BEntityUtils.playerPos(mc.player);
-                BlockPos pos24 = playerPos.add(new Vec3i(0,0,-1));
+                BlockPos pos24 = playerPos.add(new Vec3i(0,0,-range.get()));
                 if (mc.world.getBlockState(pos24).isAir()){
                 mc.player.setPos(mc.player.getX()+range.get(),mc.player.getY(),mc.player.getZ());
                 } else if (!mc.world.getBlockState(pos24).isAir()){}
             }
             if (mc.player.getMovementDirection() == Direction.SOUTH) {
                 BlockPos playerPos = BEntityUtils.playerPos(mc.player);
-                BlockPos pos25 = playerPos.add(new Vec3i(0,0,1));
+                BlockPos pos25 = playerPos.add(new Vec3i(0,0,range.get()));
                 if (mc.world.getBlockState(pos25).isAir()){
                 mc.player.setPos(mc.player.getX()-range.get(),mc.player.getY(),mc.player.getZ());
                 } else if (!mc.world.getBlockState(pos25).isAir()){}
             }
             if (mc.player.getMovementDirection() == Direction.EAST) {
                 BlockPos playerPos = BEntityUtils.playerPos(mc.player);
-                BlockPos pos26 = playerPos.add(new Vec3i(1,0,0));
+                BlockPos pos26 = playerPos.add(new Vec3i(range.get(),0,0));
                 if (mc.world.getBlockState(pos26).isAir()){
                 mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()+range.get());
                 } else if (!mc.world.getBlockState(pos26).isAir()){}
             }
             if (mc.player.getMovementDirection() == Direction.WEST) {
                 BlockPos playerPos = BEntityUtils.playerPos(mc.player);
-                BlockPos pos27 = playerPos.add(new Vec3i(-1,0,0));
+                BlockPos pos27 = playerPos.add(new Vec3i(-range.get(),0,0));
                 if (mc.world.getBlockState(pos27).isAir()){
                 mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()-range.get());
                 } else if (!mc.world.getBlockState(pos27).isAir()){}
@@ -269,7 +271,7 @@ public class TPFly extends Module {
                 mc.player.setPos(mc.player.getX()+range.get(),mc.player.getY(),mc.player.getZ());
             }
         }
-        else if (mc.options.jumpKey.isPressed() && mc.options.forwardKey.isPressed()){
+        else if (mode.get() == Modes.WASDFly && mc.options.jumpKey.isPressed() && mc.options.forwardKey.isPressed()){
             mc.player.setPos(mc.player.getX(),mc.player.getY()+upspeed.get(),mc.player.getZ());
             if (mc.player.getMovementDirection() == Direction.NORTH) {
                 mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()-range.get());
@@ -315,7 +317,7 @@ public class TPFly extends Module {
                 mc.player.setPos(mc.player.getX()+range.get(),mc.player.getY(),mc.player.getZ());
             }
         }
-        else if (mc.options.sneakKey.isPressed() && mc.options.forwardKey.isPressed()){
+        else if (mode.get() == Modes.WASDFly && mc.options.sneakKey.isPressed() && mc.options.forwardKey.isPressed()){
             mc.player.setPos(mc.player.getX(),mc.player.getY()-downspeed.get(),mc.player.getZ());
             if (mc.player.getMovementDirection() == Direction.NORTH) {
                 mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()-range.get());
@@ -332,7 +334,7 @@ public class TPFly extends Module {
         }
 
 
-        if (mfly.get() && mc.options.forwardKey.isPressed()) {
+        if (mode.get() == Modes.PointandFly && mc.options.forwardKey.isPressed()) {
             double r = customRange.get() ? range.get() : mc.interactionManager.getReachDistance();
             HitResult hitResult = mc.getCameraEntity().raycast(r, 0, false);
 
@@ -369,6 +371,80 @@ public class TPFly extends Module {
                 mc.player.setPosition(pos.getX() + 0.5 + side.getOffsetX(), pos.getY() + height, pos.getZ() + 0.5 + side.getOffsetZ());
             }
         }
+        if (mode.get() == Modes.PointandFly && mc.options.forwardKey.isPressed() && mc.options.jumpKey.isPressed()) {
+            double r = customRange.get() ? range.get() : mc.interactionManager.getReachDistance();
+            HitResult hitResult = mc.getCameraEntity().raycast(r, 0, false);
+
+            if (hitResult.getType() == HitResult.Type.ENTITY && mc.player.interact(((EntityHitResult) hitResult).getEntity(), Hand.MAIN_HAND) != ActionResult.PASS) return;
+
+            if (hitResult.getType() == HitResult.Type.MISS || hitResult.getType() == HitResult.Type.BLOCK) {
+                BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
+                Direction side = ((BlockHitResult) hitResult).getSide();
+
+                if (mc.world.getBlockState(pos).onUse(mc.world, mc.player, Hand.MAIN_HAND, (BlockHitResult) hitResult) != ActionResult.PASS) return;
+
+                BlockState state = mc.world.getBlockState(pos);
+
+                VoxelShape shape = state.getCollisionShape(mc.world, pos);
+                if (shape.isEmpty()) shape = state.getOutlineShape(mc.world, pos);
+
+                double height = shape.isEmpty() ? 1 : shape.getMax(Direction.Axis.Y);
+
+                mc.player.setPosition(pos.getX() + 0.5 + side.getOffsetX(), pos.getY() + upspeed.get(), pos.getZ() + 0.5 + side.getOffsetZ());
+            }
+            if (hitResult.getType() == HitResult.Type.ENTITY) {
+                BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
+                Direction side = ((BlockHitResult) hitResult).getSide();
+
+                if (mc.world.getBlockState(pos).onUse(mc.world, mc.player, Hand.MAIN_HAND, (BlockHitResult) hitResult) != ActionResult.PASS) return;
+
+                BlockState state = mc.world.getBlockState(pos);
+
+                VoxelShape shape = state.getCollisionShape(mc.world, pos);
+                if (shape.isEmpty()) shape = state.getOutlineShape(mc.world, pos);
+
+                double height = shape.isEmpty() ? 1 : shape.getMax(Direction.Axis.Y);
+
+                mc.player.setPosition(pos.getX() + 0.5 + side.getOffsetX(), pos.getY() + upspeed.get(), pos.getZ() + 0.5 + side.getOffsetZ());
+            }
+        }
+        if (mode.get() == Modes.PointandFly && mc.options.forwardKey.isPressed() && mc.options.sneakKey.isPressed()) {
+            double r = customRange.get() ? range.get() : mc.interactionManager.getReachDistance();
+            HitResult hitResult = mc.getCameraEntity().raycast(r, 0, false);
+
+            if (hitResult.getType() == HitResult.Type.ENTITY && mc.player.interact(((EntityHitResult) hitResult).getEntity(), Hand.MAIN_HAND) != ActionResult.PASS) return;
+
+            if (hitResult.getType() == HitResult.Type.MISS || hitResult.getType() == HitResult.Type.BLOCK) {
+                BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
+                Direction side = ((BlockHitResult) hitResult).getSide();
+
+                if (mc.world.getBlockState(pos).onUse(mc.world, mc.player, Hand.MAIN_HAND, (BlockHitResult) hitResult) != ActionResult.PASS) return;
+
+                BlockState state = mc.world.getBlockState(pos);
+
+                VoxelShape shape = state.getCollisionShape(mc.world, pos);
+                if (shape.isEmpty()) shape = state.getOutlineShape(mc.world, pos);
+
+                double height = shape.isEmpty() ? 1 : shape.getMax(Direction.Axis.Y);
+
+                mc.player.setPosition(pos.getX() + 0.5 + side.getOffsetX(), pos.getY() - downspeed.get(), pos.getZ() + 0.5 + side.getOffsetZ());
+            }
+            if (hitResult.getType() == HitResult.Type.ENTITY) {
+                BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
+                Direction side = ((BlockHitResult) hitResult).getSide();
+
+                if (mc.world.getBlockState(pos).onUse(mc.world, mc.player, Hand.MAIN_HAND, (BlockHitResult) hitResult) != ActionResult.PASS) return;
+
+                BlockState state = mc.world.getBlockState(pos);
+
+                VoxelShape shape = state.getCollisionShape(mc.world, pos);
+                if (shape.isEmpty()) shape = state.getOutlineShape(mc.world, pos);
+
+                double height = shape.isEmpty() ? 1 : shape.getMax(Direction.Axis.Y);
+
+                mc.player.setPosition(pos.getX() + 0.5 + side.getOffsetX(), pos.getY() - downspeed.get(), pos.getZ() + 0.5 + side.getOffsetZ());
+            }
+        }
         if (akick.get() && delayLeft > 0) delayLeft--;
 
         else if (akick.get() && delayLeft <= 0 && offLeft > 0) {
@@ -381,5 +457,8 @@ public class TPFly extends Module {
             delayLeft = delay.get();
             offLeft = offTime.get();
         }
+    }
+    public enum Modes {
+        PointandFly, WASDFly
     }
 }
