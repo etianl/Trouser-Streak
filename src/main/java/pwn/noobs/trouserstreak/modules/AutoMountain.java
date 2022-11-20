@@ -287,7 +287,7 @@ public class AutoMountain extends Module {
 
     @Override
     public void onDeactivate() {
-        mc.player.setVelocity(0,0,0);
+        mc.player.setVelocity(0,0.01,0);
         Modules.get().get(Timer.class).setOverride(Timer.OFF);
         resetTimer = true;
         if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
@@ -295,7 +295,7 @@ public class AutoMountain extends Module {
         if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
             mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
             mc.player.swingHand(Hand.MAIN_HAND);}
-            mc.player.setPos(mc.player.getX(),mc.player.getY()+0.05,mc.player.getZ());//this line here prevents you dying for realz
+        mc.player.setPos(mc.player.getX(),mc.player.getY()+0.05,mc.player.getZ());//this line here prevents you dying for realz
     }
     @EventHandler
     private void onKeyEvent(KeyEvent event) {
@@ -328,10 +328,7 @@ public class AutoMountain extends Module {
                 resetTimer = true;
             }
         }
-        if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) {
-            mc.player.setVelocity(0,0,0);
             mc.player.setPos(mc.player.getX(),Math.round(mc.player.getY())+0.05,mc.player.getZ());//this line here prevents you dying for realz
-        }
     }
 
     @EventHandler

@@ -113,7 +113,7 @@ public class TrouserFlight extends Module {
         }
         if (mode.get() == Mode.Velocity && antiKickMode.get() == AntiKickMode.Normal){
             mc.player.setPos(mc.player.getX(),mc.player.getY()+0.25,mc.player.getZ()); //this line here prevents you dying for realz
-            mc.player.setVelocity(0,-0.1,0);
+            mc.player.setVelocity(0,0.01,0);
         }
     }
 

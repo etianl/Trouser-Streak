@@ -91,7 +91,7 @@ public class TPFly extends Module {
     private int offLeft = offTime.get();
     @Override
     public void onDeactivate() {
-        mc.player.setVelocity(0,0.1,0);
+        mc.player.setVelocity(0,0.01,0);
         if (!mc.options.sneakKey.isPressed()){
         mc.player.setPos(mc.player.getX(),mc.player.getY()+0.25,mc.player.getZ());
         } //this line here prevents you dying for realz
