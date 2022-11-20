@@ -423,10 +423,38 @@ public class AutoMountain extends Module {
                 if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
                 BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
                 switch (mc.player.getMovementDirection()) {
-                    case NORTH -> mc.player.setPosition(mc.player.getX(),mc.player.getY()-spc.get(),mc.player.getZ()-1);
-                    case EAST -> mc.player.setPosition(mc.player.getX()+1,mc.player.getY()-spc.get(),mc.player.getZ());
-                    case SOUTH -> mc.player.setPosition(mc.player.getX(),mc.player.getY()-spc.get(),mc.player.getZ()+1);
-                    case WEST -> mc.player.setPosition(mc.player.getX()-1,mc.player.getY()-spc.get(),mc.player.getZ());
+                    case NORTH -> {
+                        BlockPos playerPos = BEntityUtils.playerPos(mc.player);
+                        BlockPos pos1 = playerPos.add(new Vec3i(0,-(spc.get()-1),-1));
+                        BlockPos pos5 = playerPos.add(new Vec3i(0,-spc.get(),-1));
+                        if (mc.world.getBlockState(pos1).isAir() && mc.world.getBlockState(pos5).isAir()) {
+                        mc.player.setPosition(mc.player.getX(),mc.player.getY()-spc.get(),mc.player.getZ()-1);}
+                        else {}
+                    }
+                    case EAST -> {
+                        BlockPos playerPos = BEntityUtils.playerPos(mc.player);
+                        BlockPos pos2 = playerPos.add(new Vec3i(1,-(spc.get()-1),0));
+                        BlockPos pos6 = playerPos.add(new Vec3i(1,-spc.get(),0));
+                        if (mc.world.getBlockState(pos2).isAir() && mc.world.getBlockState(pos6).isAir()) {
+                        mc.player.setPosition(mc.player.getX()+1,mc.player.getY()-spc.get(),mc.player.getZ());}
+                        else {}
+                    }
+                    case SOUTH -> {
+                        BlockPos playerPos = BEntityUtils.playerPos(mc.player);
+                        BlockPos pos3 = playerPos.add(new Vec3i(0,-(spc.get()-1),1));
+                        BlockPos pos7 = playerPos.add(new Vec3i(0,-spc.get(),1));
+                        if (mc.world.getBlockState(pos3).isAir() && mc.world.getBlockState(pos7).isAir()) {
+                        mc.player.setPosition(mc.player.getX(),mc.player.getY()-spc.get(),mc.player.getZ()+1);}
+                        else {}
+                    }
+                    case WEST -> {
+                        BlockPos playerPos = BEntityUtils.playerPos(mc.player);
+                        BlockPos pos4 = playerPos.add(new Vec3i(-1,-(spc.get()-1),0));
+                        BlockPos pos8 = playerPos.add(new Vec3i(-1,-spc.get(),0));
+                        if (mc.world.getBlockState(pos4).isAir() && mc.world.getBlockState(pos8).isAir()) {
+                        mc.player.setPosition(mc.player.getX()-1,mc.player.getY()-spc.get(),mc.player.getZ());}
+                        else {}
+                    }
                     default -> {
                     }
                 }
