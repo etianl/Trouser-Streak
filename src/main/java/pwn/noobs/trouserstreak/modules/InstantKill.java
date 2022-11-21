@@ -22,11 +22,11 @@ public class InstantKill extends Module {
 	public static boolean shouldAddVelocity3 = true;
 	public static boolean shouldAddVelocity0 = true;
 	public InstantKill() {
-		super(Trouser.Main, "InstaKillBow", "Enable/Disable instakill");
+		super(Trouser.Main, "InstaKill", "Enable/Disable instakill");
 	}
 	@EventHandler
 	public void onInitialize() {
-		LOGGER.info("the bow instant kill is real working");
+		LOGGER.info("the instant kill is real working");
 	}
 
 	//the exploit used here is not mine!

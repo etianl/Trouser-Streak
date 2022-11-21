@@ -1,14 +1,11 @@
 package pwn.noobs.trouserstreak.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.movement.Flight;
 import meteordevelopment.meteorclient.systems.modules.player.AntiHunger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import pwn.noobs.trouserstreak.modules.DupeModule;
 import pwn.noobs.trouserstreak.modules.InstantKill;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.entity.player.PlayerEntity;
@@ -25,6 +22,14 @@ public class ClientPlayerInteractionManagerMixin {
                 Modules.get().get(AntiHunger.class).toggle();
             }
             InstantKill.addVelocityToPlayer();
-        }}
+        }
+        if(player.getInventory().getMainHandStack().getItem().equals(Items.TRIDENT)){
+            if (Modules.get().get(AntiHunger.class).isActive()) {
+                Modules.get().get(AntiHunger.class).toggle();
+            }
+            InstantKill.addVelocityToPlayer();
+        }
+        }
     }
 }
+

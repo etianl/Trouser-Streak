@@ -38,6 +38,7 @@ public class Trouser extends MeteorAddon {
         Modules.get().add(new InstantKill());
         Modules.get().add(new TrouserFlight());
         Modules.get().add(new TPFly());
+        Modules.get().add(new LecternCrash());
 	}
 
 	@Override

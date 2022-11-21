@@ -10,6 +10,8 @@
   "mixins": [
     "InventoryScreenMixin",
     "InventoryScreenMixinBow",
-    "ClientPlayerInteractionManagerMixin"
+    "ClientPlayerInteractionManagerMixin",
+    "LecternScreenMixin",
+    "accessor.ClientConnectionAccessor"
   ]
 }
