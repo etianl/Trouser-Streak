@@ -47,6 +47,6 @@ The use key (Right Click) disables AutoMountain.
 ## Known Bugs:
 - Turning direction using the back key and mouse with the AutoStaircaseDown module causes double block placement. It's fine though for lava flow, just wastes blocks. Block wastage can be avoided by just disabling the module, turning, then re-enabling.
 - The antikick with AutoStaircaseFly does not always work when enabling the module while falling.
-- With InstaKillBow if all MovePacket buttons are enabled as is default it attempts to send 800 packets. Disable some of them to reduce it.
+- With InstaKill if all MovePacket buttons are enabled as is default it attempts to send 800 packets. Disable some of them to reduce it.
 - TPFly can hurt you once in a while on disable. I tried to prevent this. You also rubberband if going toward a block because it attempts to teleport you through it.
 - Top right space in AutoBuildDown cannot be reached. Do not check it.
