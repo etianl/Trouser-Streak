@@ -181,11 +181,11 @@ public class AutoBuild extends Module {
 
     //TODO: Clean this upp maybe and make the grid nicer with a header and stuff.
 
-    boolean ett = false, tva = true, tree = true, fyra = false, fem = false;
-    boolean ett1 = false,tva1 = true, tree1 = false, fyra1 = true, fem1 = false;
-    boolean ett2 = false, tva2 = true, tree2 = true, fyra2 = false, fem2 = false;
-    boolean ett3 = false, tva3 = true, tree3 = false, fyra3 = true, fem3 = false;
-    boolean ett4 = false, tva4 = true, tree4 = true, fyra4 = false, fem4 = false;
+    boolean ett = false, tva = true, tree = true, fyra = true, fem = false;
+    boolean ett1 = false,tva1 = true, tree1 = true, fyra1 = true, fem1 = false;
+    boolean ett2 = false, tva2 = true, tree2 = true, fyra2 = true, fem2 = false;
+    boolean ett3 = true, tva3 = true, tree3 = true, fyra3 = true, fem3 = true;
+    boolean ett4 = true, tva4 = true, tree4 = false, fyra4 = true, fem4 = true;
 
 
     @Override

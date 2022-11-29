@@ -22,6 +22,12 @@ public class ShulkerDupe extends Module {
         .defaultValue(true)
         .build());
 
+    private final Setting<Modes> mode = sgGeneral.add(new EnumSetting.Builder<Modes>()
+            .name("mode")
+            .description("the mode")
+            .defaultValue(Modes.All)
+            .build());
+
     public ShulkerDupe() {
         super(Trouser.Main, "shulker-dupe", "allah helps you duplicate when you open a shuker");
     }
@@ -38,13 +44,25 @@ public class ShulkerDupe extends Module {
     @EventHandler
     public void onSendPacket(PacketEvent.Sent event) {
         if (event.packet instanceof PlayerActionC2SPacket) {
+            switch (mode.get()) {
+                case All -> {
             if (((PlayerActionC2SPacket) event.packet).getAction() == PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK) {
                 for (int i = 0; i < 27; i++) {
                     mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, i, 0, SlotActionType.QUICK_MOVE, mc.player);
                 } if (toggle.get()) {
                     toggle();
                 }
-            }
+            }}
+                case Slot0 -> {
+            if (((PlayerActionC2SPacket) event.packet).getAction() == PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK) {
+                    mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 0, 0, SlotActionType.QUICK_MOVE, mc.player);
+                 if (toggle.get()) {
+                    toggle();
+                }
+            }}
         }
+    }}
+    public enum Modes {
+        All, Slot0
     }
 }

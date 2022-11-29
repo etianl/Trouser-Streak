@@ -64,7 +64,7 @@ public class Boom extends Module {
     );
 
     public Boom() {
-        super(Trouser.Main, "boom", "shoots something where you click");
+        super(Trouser.Main, "boom+", "shoots something where you click");
     }
 
     @EventHandler
@@ -257,7 +257,8 @@ public class Boom extends Module {
                 BlockPos pos = new BlockPos(owo);
                 ItemStack rst = mc.player.getMainHandStack();
                 Vec3d sex = mc.player.getRotationVector().multiply(speed.get());
-                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
+                BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, new BlockPos(mc.player.getPos()), false);
+                BlockHitResult bhr1 = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
                 switch (mode.get()) {
                     case Instant -> {
                         Vec3d aaa = mc.player.getRotationVector().multiply(100);
@@ -362,7 +363,7 @@ public class Boom extends Module {
                         tag.putString("id", "minecraft:wither_skull");
                         WitherSkull.setSubNbt("EntityTag", tag);
                         mc.interactionManager.clickCreativeStack(WitherSkull, 36 + mc.player.getInventory().selectedSlot);
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
+                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr1);
                         mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
                     }
                     case Spit -> {
@@ -390,7 +391,7 @@ public class Boom extends Module {
                         tag.putString("id", "minecraft:shulker_bullet");
                         ShulkerBullet.setSubNbt("EntityTag", tag);
                         mc.interactionManager.clickCreativeStack(ShulkerBullet, 36 + mc.player.getInventory().selectedSlot);
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
+                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr1);
                         mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
                     }
                     case Creeper -> {
@@ -421,7 +422,7 @@ public class Boom extends Module {
                         tag.putString("id", "minecraft:arrow");
                         Arrow.setSubNbt("EntityTag", tag);
                         mc.interactionManager.clickCreativeStack(Arrow, 36 + mc.player.getInventory().selectedSlot);
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
+                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr1);
                         mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
                     }
                 }
@@ -614,7 +615,8 @@ public class Boom extends Module {
             BlockPos pos = new BlockPos(owo);
             ItemStack rst = mc.player.getMainHandStack();
             Vec3d sex = mc.player.getRotationVector().multiply(speed.get());
-            BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
+            BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, new BlockPos(mc.player.getPos()), false);
+                BlockHitResult bhr1 = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
             switch (mode.get()) {
                 case Instant -> {
                     Vec3d aaa = mc.player.getRotationVector().multiply(100);
@@ -719,7 +721,7 @@ public class Boom extends Module {
                     tag.putString("id", "minecraft:wither_skull");
                     WitherSkull.setSubNbt("EntityTag", tag);
                     mc.interactionManager.clickCreativeStack(WitherSkull, 36 + mc.player.getInventory().selectedSlot);
-                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
+                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr1);
                     mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
                 }
                 case Spit -> {
@@ -747,7 +749,7 @@ public class Boom extends Module {
                     tag.putString("id", "minecraft:shulker_bullet");
                     ShulkerBullet.setSubNbt("EntityTag", tag);
                     mc.interactionManager.clickCreativeStack(ShulkerBullet, 36 + mc.player.getInventory().selectedSlot);
-                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
+                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr1);
                     mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
                 }
                 case Creeper -> {
@@ -778,7 +780,7 @@ public class Boom extends Module {
                     tag.putString("id", "minecraft:arrow");
                     Arrow.setSubNbt("EntityTag", tag);
                     mc.interactionManager.clickCreativeStack(Arrow, 36 + mc.player.getInventory().selectedSlot);
-                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
+                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr1);
                     mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
                 }
             }

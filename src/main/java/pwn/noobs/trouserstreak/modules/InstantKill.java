@@ -1,9 +1,17 @@
 package pwn.noobs.trouserstreak.modules;
 
+import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.item.BowItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
@@ -12,17 +20,36 @@ import org.apache.logging.log4j.Logger;
 import pwn.noobs.trouserstreak.Trouser;
 
 public class InstantKill extends Module {
+	private final SettingGroup sgGeneral = settings.getDefaultGroup();
+	public final Setting<Boolean> auto = sgGeneral.add(new BoolSetting.Builder()
+			.name("AutoDraw")
+			.description("Automatically draws your bow.")
+			.defaultValue(false)
+			.build()
+	);
 	public static final Logger LOGGER = LogManager.getLogger("instantkill");
 
 	public static final MinecraftClient mc = MinecraftClient.getInstance();
 
 	public static boolean shouldAddVelocity = true;
-	public static boolean shouldAddVelocity1 = true;
-	public static boolean shouldAddVelocity2 = true;
-	public static boolean shouldAddVelocity3 = true;
-	public static boolean shouldAddVelocity0 = true;
+	public static boolean shouldAddVelocity1 = false;
+	public static boolean shouldAddVelocity2 = false;
+	public static boolean shouldAddVelocity3 = false;
+	public static boolean shouldAddVelocity0 = false;
 	public InstantKill() {
 		super(Trouser.Main, "InstaKill", "Enable/Disable instakill");
+	}
+	@EventHandler
+	public void onTick(TickEvent.Post event) {
+		if (auto.get() && mc.player.getMainHandStack().getItem() == Items.BOW){
+		if (!mc.player.isUsingItem()) {
+		mc.options.useKey.setPressed(true);
+		}
+		}
+	}
+	@Override
+	public void onDeactivate() {
+		mc.options.useKey.setPressed(false);
 	}
 	@EventHandler
 	public void onInitialize() {

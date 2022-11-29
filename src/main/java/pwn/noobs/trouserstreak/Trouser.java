@@ -22,16 +22,14 @@ public class Trouser extends MeteorAddon {
         Modules.get().add(new ShulkerDupe());
         Modules.get().add(new BetterScaffold());
         Modules.get().add(new AutoBuild());
-        Modules.get().add(new AutoBuildDown());
         Modules.get().add(new AutoStaircase());
 		Modules.get().add(new Phase());
-        Modules.get().add(new FireballClicker());
-        Modules.get().add(new FireballRain());
+        Modules.get().add(new Airstrike());
         Modules.get().add(new Boom());
         Modules.get().add(new Voider());
         Modules.get().add(new HandOfGod());
         Modules.get().add(new ExplosionAura());
-        Modules.get().add(new DupeModule());
+        Modules.get().add(new InvDupeModule());
         Modules.get().add(new RedstoneNuker());
         Modules.get().add(new AutoDrop());
         Modules.get().add(new AutoMountain());

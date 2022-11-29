@@ -65,6 +65,13 @@ public class AutoMountain extends Module {
             .min(1)
             .sliderMax(5)
             .build());
+    private final Setting<Integer> spcoffset = sgGeneral.add(new IntSetting.Builder()
+            .name("OnDemandSpacing")
+            .description("Press spacebar to adjust spacing as you build")
+            .defaultValue(1)
+            .min(1)
+            .sliderMax(5)
+            .build());
 
     public final Setting<Boolean> timer = sgGeneral.add(new BoolSetting.Builder()
             .name("Timer")
@@ -117,7 +124,6 @@ public class AutoMountain extends Module {
     public AutoMountain() {
         super(Trouser.Main, "AutoMountain", "Make Mountains!");
     }
-
     private int delayLeft = delay.get();
     private int offLeft = offTime.get();
 
@@ -426,6 +432,9 @@ public class AutoMountain extends Module {
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);
             }
+            if (mc.options.jumpKey.isPressed()){
+                mc.player.setPosition(mc.player.getX(),mc.player.getY()+spcoffset.get(),mc.player.getZ());
+            }
         } else if (mc.player.getY() >= limit.get() || delayLeft <= 0 && offLeft <= 0) {
             delayLeft = delay.get();
             offLeft = offTime.get();
@@ -501,6 +510,9 @@ public class AutoMountain extends Module {
                 if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);
+                }
+                if (mc.options.jumpKey.isPressed()){
+                    mc.player.setPosition(mc.player.getX(),mc.player.getY()-spcoffset.get(),mc.player.getZ());
                 }
             } else if (mc.player.getY() >= limit.get() || delayLeft <= 0 && offLeft <= 0) {
                 delayLeft = delay.get();
