@@ -19,23 +19,23 @@ public class Trouser extends MeteorAddon {
 	public void onInitialize() {
 		LOG.info("Removing dingleberries");
 
+        Modules.get().add(new AutoMountain());
+        Modules.get().add(new AutoStaircase());
         Modules.get().add(new ShulkerDupe());
+        Modules.get().add(new InvDupeModule());
+        Modules.get().add(new InstantKill());
         Modules.get().add(new BetterScaffold());
         Modules.get().add(new AutoBuild());
-        Modules.get().add(new AutoStaircase());
-		Modules.get().add(new Phase());
-        Modules.get().add(new Airstrike());
-        Modules.get().add(new Boom());
+        Modules.get().add(new AirstrikePlus());
+        Modules.get().add(new BoomPlus());
         Modules.get().add(new Voider());
         Modules.get().add(new HandOfGod());
         Modules.get().add(new ExplosionAura());
-        Modules.get().add(new InvDupeModule());
         Modules.get().add(new RedstoneNuker());
-        Modules.get().add(new AutoDrop());
-        Modules.get().add(new AutoMountain());
-        Modules.get().add(new InstantKill());
-        Modules.get().add(new TrouserFlight());
         Modules.get().add(new TPFly());
+        Modules.get().add(new AutoDrop());
+        Modules.get().add(new Phase());
+        Modules.get().add(new TrouserFlight());
         Modules.get().add(new LecternCrash());
 	}
 
