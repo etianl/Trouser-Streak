@@ -55,8 +55,5 @@ It can also retrieve arrows and items from a distance if you shoot in that direc
 - Anything that requires support from a block beneath
 - There may be more
 - **Other:**
-- Turning direction using the back key and mouse with the AutoStaircaseDown module causes double block placement. It's fine though for lava flow, just wastes blocks. Block wastage can be avoided by just disabling the module, turning, then re-enabling.
-- The antikick with AutoStaircaseFly does not always work when enabling the module while falling.
 - TPFly can hurt you once in a while on disable. I tried to prevent this. You also rubberband if going toward a block because it attempts to teleport you through it.
 - Adjusting  TPFly antikick values while flying can be deadly
-- Top right space in AutoBuildDown cannot be reached. Do not check it.
