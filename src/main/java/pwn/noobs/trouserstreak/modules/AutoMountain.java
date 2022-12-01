@@ -112,12 +112,23 @@ public class AutoMountain extends Module {
     );
 
     private final Setting<Integer> limit = sgGeneral.add(new IntSetting.Builder()
-            .name("Build Limit")
-            .description("sets the Y level at which the stairs stop")
+            .name("UpwardBuildLimit")
+            .description("sets the Y level at which the stairs stop going up")
             .sliderRange(-64, 318)
             .defaultValue(318)
             .build());
-
+    public final Setting<Boolean> InvertDir = sgGeneral.add(new BoolSetting.Builder()
+            .name("InvertDir@Limit")
+            .description("Inverts Direction from up to down, 1 block before you reach your set limit.")
+            .defaultValue(false)
+            .build()
+    );
+    public final Setting<Boolean> swap = sgGeneral.add(new BoolSetting.Builder()
+            .name("SwapStackonRunOut")
+            .description("Swaps to another stack of blocks in your hotbar when you run out")
+            .defaultValue(false)
+            .build()
+    );
 
     private boolean resetTimer;
 
@@ -321,6 +332,34 @@ public class AutoMountain extends Module {
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
+        if (swap.get()){
+        if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)){
+            mc.player.getInventory().selectedSlot = 0;
+            if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)){
+                mc.player.getInventory().selectedSlot = 1;
+                if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)){
+                    mc.player.getInventory().selectedSlot = 2;
+                    if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)){
+                        mc.player.getInventory().selectedSlot = 3;
+                        if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)){
+                            mc.player.getInventory().selectedSlot = 4;
+                            if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)){
+                                mc.player.getInventory().selectedSlot = 5;
+                                if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)){
+                                    mc.player.getInventory().selectedSlot = 6;
+                                    if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)){
+                                        mc.player.getInventory().selectedSlot = 7;
+                                        if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)){
+                                            mc.player.getInventory().selectedSlot = 8;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }}
         mc.player.setVelocity(0,0,0);
         if (mc.options.useKey.isPressed()){
             Modules.get().get(AutoMountain.class).toggle();
@@ -435,7 +474,10 @@ public class AutoMountain extends Module {
             if (mc.options.jumpKey.isPressed()){
                 mc.player.setPosition(mc.player.getX(),mc.player.getY()+spcoffset.get(),mc.player.getZ());
             }
-        } else if (mc.player.getY() >= limit.get() || delayLeft <= 0 && offLeft <= 0) {
+            if (mc.player.getY() >= limit.get()-1 && InvertDir.get()){
+                mc.player.setPitch(75);
+            }
+        } else if (mc.player.getY() >= limit.get() && !InvertDir.get()|| delayLeft <= 0 && offLeft <= 0) {
             delayLeft = delay.get();
             offLeft = offTime.get();
             if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
