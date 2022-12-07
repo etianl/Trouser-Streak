@@ -471,7 +471,9 @@ public class AutoMountain extends Module {
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);
             }
-            if (mc.options.jumpKey.isPressed()){
+            BlockPos playerPos = BEntityUtils.playerPos(mc.player);
+            BlockPos nokillplz = playerPos.add(0,+spcoffset.get(),0);
+            if (mc.world.getBlockState(nokillplz).isAir() && mc.options.jumpKey.isPressed()){
                 mc.player.setPosition(mc.player.getX(),mc.player.getY()+spcoffset.get(),mc.player.getZ());
             }
             if (mc.player.getY() >= limit.get()-1 && InvertDir.get()){
@@ -553,7 +555,9 @@ public class AutoMountain extends Module {
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);
                 }
-                if (mc.options.jumpKey.isPressed()){
+                BlockPos playerPos = BEntityUtils.playerPos(mc.player);
+                BlockPos nokillplz1 = playerPos.add(new Vec3i(0,-spcoffset.get(),0));
+                if (mc.world.getBlockState(nokillplz1).isAir() && mc.options.jumpKey.isPressed()){
                     mc.player.setPosition(mc.player.getX(),mc.player.getY()-spcoffset.get(),mc.player.getZ());
                 }
             } else if (mc.player.getY() >= limit.get() || delayLeft <= 0 && offLeft <= 0) {

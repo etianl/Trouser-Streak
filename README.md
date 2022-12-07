@@ -29,9 +29,9 @@ In no particular order
 - ForwardKey Turns mountain up, Back Key turns mountain down.
 - UseKey (Right Click) disables AutoMountain.
 - JumpKey adjusts spacing of stairs according to the OnDemandSpacing value 
-- **AutoStaircase:** Builds stairs upward in the direction you are facing. (Credits to Frostburn, and Banana for the player centering utils to make it work correctly) I just had to fix up some stuff for this one but Frostburn had the base code there. I believe this is the first publicly available automatic staircase builder in a Meteor addon, correct me if I'm wrong maybe I didn't have to learn some Java to do this.
+- **AutoStaircase:** Builds stairs upward in the direction you are facing by running forward and jumping. (Credits to Frostburn, and Banana for the player centering utils to make it work correctly) I just had to fix up some stuff for this one but Frostburn had the base code there. I believe this is the first publicly available automatic staircase builder in a Meteor addon, correct me if I'm wrong maybe I didn't have to learn some Java to do this.
 - **BetterScaffold:** Give you more options for scaffolding, bigger range and others. (Credits to Meteor-Tweaks)
-- **Boom:** Throws entities when you click (Credits to Allah-Hack) I just added some more fun things you might want to throw.
+- **Boom+:** Throws entities when you click (Credits to Allah-Hack) I just added some more fun things you might want to throw.
 - **ExplosionAura:** Spawns creepers at your position that explode as you move. Like a bigger, more laggy Nuker module for creative mode. The use of the module Velocity is recommended to avoid being thrown around.
 - **HandOfGod:** Deletes the world around you as you fly, and as you click. It deletes when you press the directional keys, or when you click it fills with the specified block. Operator status required.
 - **Inventory Dupe (1.17):** Duplicates things in your crafting slots when the module is enabled and the Dupe button is pressed in your inventory. (Credit to ItsVen and Da0neDatGotAway for original creation of the dupe, and to B2H990 for making the fabric mod.)
@@ -55,5 +55,10 @@ It can also retrieve arrows and items from a distance if you shoot in that direc
 - Anything that requires support from a block beneath
 - There may be more
 - **Other:**
+- AutoMountain can cause damage once in a while and I'm not sure why. Be prepared to die in the name of mountain building. (it is really rare though)
 - TPFly can hurt you once in a while on disable. I tried to prevent this. You also rubberband if going toward a block because it attempts to teleport you through it.
 - Adjusting  TPFly antikick values while flying can be deadly
+
+## Requirements:
+- Latest dev build of Meteor-Client
+- Don't forget to update any other mods you are using if it's still crashing
