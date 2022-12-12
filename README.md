@@ -60,5 +60,5 @@ It can also retrieve arrows and items from a distance if you shoot in that direc
 - Adjusting  TPFly antikick values while flying can be deadly
 
 ## Requirements:
-- Latest dev build of Meteor-Client
+- Latest full build of Meteor-Client
 - Don't forget to update any other mods you are using if it's still crashing
