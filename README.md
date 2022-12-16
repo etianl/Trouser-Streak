@@ -58,7 +58,8 @@ It can also retrieve arrows and items from a distance if you shoot in that direc
 - AutoMountain can cause damage once in a while and I'm not sure why. Be prepared to die in the name of mountain building. (it is really rare though)
 - TPFly can hurt you once in a while on disable. I tried to prevent this. You also rubberband if going toward a block because it attempts to teleport you through it.
 - Adjusting  TPFly antikick values while flying can be deadly
+- Normal Mode antikick for the velocity flight mode that I added can cause damage once in a while for an unknown reason.
 
 ## Requirements:
-- Latest full build of Meteor-Client
+- Latest dev build of Meteor-Client
 - Don't forget to update any other mods you are using if it's still crashing

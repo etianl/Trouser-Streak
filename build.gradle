@@ -9,14 +9,9 @@ version = project.mod_version
 group = project.maven_group
 
 repositories {
-    maven {
-        name = "meteor-maven"
-        url = "https://maven.meteordev.org/releases"
-    }
-    maven {
-        name = "meteor-maven-snapshots"
-        url = "https://maven.meteordev.org/snapshots"
-    }
+    mavenCentral()
+    maven { url "https://maven.meteordev.org/releases"}
+    maven { url "https://maven.meteordev.org/snapshots" }
 }
 
 dependencies {
