@@ -592,7 +592,7 @@ public class RedstoneNuker extends Module {
                 block instanceof RedstoneWireBlock ||
                 block instanceof ComparatorBlock ||
                 block instanceof RepeaterBlock ||
-                block instanceof ButtonBlock ||
+                block instanceof AbstractButtonBlock ||
                 block instanceof DetectorRailBlock ||
                 block instanceof LeverBlock ||
                 block instanceof SculkSensorBlock ||

@@ -9,31 +9,31 @@ import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
+import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
+import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.util.math.Vec3i;
-import pwn.noobs.trouserstreak.Trouser;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.MovementType;
 import net.minecraft.item.BlockItem;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.settings.*;
+import net.minecraft.util.math.Vec3i;
+import pwn.noobs.trouserstreak.Trouser;
 import pwn.noobs.trouserstreak.utils.BEntityUtils;
 import pwn.noobs.trouserstreak.utils.BPlayerUtils;
 import pwn.noobs.trouserstreak.utils.BWorldUtils;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.entity.Entity;
-import java.lang.Math;
-
 
 
 /**
@@ -89,13 +89,6 @@ public class AutoMountain extends Module {
             .visible(() -> timer.get())
             .build()
     );
-
-    public final Setting<Boolean> akick = sgGeneral.add(new BoolSetting.Builder()
-            .name("PacketAntiKick")
-            .description("AntiKick on/off")
-            .defaultValue(true)
-            .build()
-    );
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("Pause")
             .description("The amount of delay in ticks, when pausing")
@@ -129,6 +122,19 @@ public class AutoMountain extends Module {
             .defaultValue(false)
             .build()
     );
+    public final Setting<Boolean> lagpause = sgGeneral.add(new BoolSetting.Builder()
+            .name("Pause if Server Lagging")
+            .description("Pause Builder if server is lagging (prevents rare death when building downward)")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Double> lag = sgGeneral.add(new DoubleSetting.Builder()
+            .name("How many seconds until pause")
+            .description("Pause Builder if server is lagging for this many seconds (prevents rare death when building downward)")
+            .sliderRange(0, 10)
+            .defaultValue(1)
+            .visible(() -> lagpause.get())
+            .build());
 
     private boolean resetTimer;
 
@@ -304,7 +310,7 @@ public class AutoMountain extends Module {
 
     @Override
     public void onDeactivate() {
-        mc.player.setVelocity(0,0.01,0);
+        mc.player.move(MovementType.SELF, new Vec3d(0,+0.25,0));//this line here prevents you dying for realz
         Modules.get().get(Timer.class).setOverride(Timer.OFF);
         resetTimer = true;
         if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
@@ -312,7 +318,6 @@ public class AutoMountain extends Module {
         if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
             mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
             mc.player.swingHand(Hand.MAIN_HAND);}
-        mc.player.setPos(mc.player.getX(),mc.player.getY()+0.25,mc.player.getZ());//this line here prevents you dying for realz
     }
     @EventHandler
     private void onKeyEvent(KeyEvent event) {
@@ -361,9 +366,6 @@ public class AutoMountain extends Module {
             }
         }}
         mc.player.setVelocity(0,0,0);
-        if (mc.options.useKey.isPressed()){
-            Modules.get().get(AutoMountain.class).toggle();
-        }
         if (timer.get()) {
             if (mc.world.getBlockState(mc.player.getBlockPos()).getBlock() == Blocks.AIR) {
                 resetTimer = false;
@@ -373,7 +375,7 @@ public class AutoMountain extends Module {
                 resetTimer = true;
             }
         }
-            mc.player.setPos(mc.player.getX(),Math.round(mc.player.getY())+0.05,mc.player.getZ());//this line here prevents you dying for realz
+            mc.player.setPos(mc.player.getX(),Math.round(mc.player.getY())+0.10,mc.player.getZ());//this line here prevents you dying for realz
     }
 
     @EventHandler
@@ -394,7 +396,9 @@ public class AutoMountain extends Module {
     private double lastPacketY = Double.MAX_VALUE;
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (!(event.packet instanceof PlayerMoveC2SPacket packet) || akick.get()) return;
+        //this here packet antickick from Flight prevents kick if left floating and also helps to ensure stairs building is correct
+        boolean akick = true;
+        if (!(event.packet instanceof PlayerMoveC2SPacket packet) || akick) return;
 
         double currentY = packet.getY(Double.MAX_VALUE);
         if (currentY != Double.MAX_VALUE) {
@@ -419,13 +423,23 @@ public class AutoMountain extends Module {
     }
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent playerMoveEvent) {
+        float timeSinceLastTick = TickRate.INSTANCE.getTimeSinceLastTick();
+
+        if (lagpause.get() && timeSinceLastTick >= lag.get()) {
+            if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
+            BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
+            if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
+                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                mc.player.swingHand(Hand.MAIN_HAND);}
+        }
+
         if (mc.player.getPitch() <= 40){
         if (delayLeft > 0) delayLeft--;
 
-        else if (mc.player.getY() <= limit.get() && delayLeft <= 0 && offLeft > 0) {
+        else if ((!lagpause.get() || timeSinceLastTick <= lag.get()) && mc.player.getY() <= limit.get() && delayLeft <= 0 && offLeft > 0) {
             offLeft--;
             if (mc.player == null || mc.world == null) {toggle(); return;}
-            if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
+            if ((lagpause.get() && timeSinceLastTick >= lag.get()) || !(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
             BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
             switch (mc.player.getMovementDirection()) {
                 case NORTH -> {
@@ -482,7 +496,7 @@ public class AutoMountain extends Module {
         } else if (mc.player.getY() >= limit.get() && !InvertDir.get()|| delayLeft <= 0 && offLeft <= 0) {
             delayLeft = delay.get();
             offLeft = offTime.get();
-            if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
+            if ((lagpause.get() && timeSinceLastTick >= lag.get()) || !(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
             BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
             if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
@@ -502,10 +516,10 @@ public class AutoMountain extends Module {
     } else if (mc.player.getPitch() >= 40){
             if (delayLeft > 0) delayLeft--;
 
-            else if (mc.player.getY() <= limit.get() && delayLeft <= 0 && offLeft > 0) {
+            else if ((!lagpause.get() || timeSinceLastTick <= lag.get()) && mc.player.getY() <= limit.get() && delayLeft <= 0 && offLeft > 0) {
                 offLeft--;
                 if (mc.player == null || mc.world == null) {toggle(); return;}
-                if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
+                if ((lagpause.get() && timeSinceLastTick >= lag.get()) || !(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
                 BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
                 switch (mc.player.getMovementDirection()) {
                     case NORTH -> {
@@ -563,7 +577,7 @@ public class AutoMountain extends Module {
             } else if (mc.player.getY() >= limit.get() || delayLeft <= 0 && offLeft <= 0) {
                 delayLeft = delay.get();
                 offLeft = offTime.get();
-                if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
+                if ((lagpause.get() && timeSinceLastTick >= lag.get()) || !(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
                 BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
                 if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));

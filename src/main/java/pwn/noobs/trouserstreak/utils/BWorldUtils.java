@@ -133,7 +133,7 @@ public class BWorldUtils {
     public static boolean isClickable(Block block) {
         return block instanceof CraftingTableBlock
                 || block instanceof AnvilBlock
-                || block instanceof ButtonBlock
+                || block instanceof AbstractButtonBlock
                 || block instanceof AbstractPressurePlateBlock
                 || block instanceof BlockWithEntity
                 || block instanceof BedBlock

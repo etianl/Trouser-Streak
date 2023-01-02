@@ -25,11 +25,7 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 	@Inject(method = {"init"}, at = { @At("TAIL") })
 	protected void init(final CallbackInfo ci) {
 		if(Modules.get().isActive(InvDupeModule.class)) {
-			addDrawableChild(new ButtonWidget.Builder(Text.literal("1.17Dupe"), button -> dupe())
-					.position(x + 124, height / 2 - 24)
-					.size( 48, 20)
-					.build()
-			);
+			addDrawableChild(new ButtonWidget(x + 124, height / 2 - 24, 48, 20, Text.literal("1.17Dupe"), b -> dupe()));
 		}
 	}
 

@@ -27,7 +27,6 @@ In no particular order
 - *AutoMountain Controls:* 
 - Left and RightKeys turn Mountain building.
 - ForwardKey Turns mountain up, Back Key turns mountain down.
-- UseKey (Right Click) disables AutoMountain.
 - JumpKey adjusts spacing of stairs according to the OnDemandSpacing value 
 - **AutoStaircase:** Builds stairs upward in the direction you are facing by running forward and jumping. (Credits to Frostburn, and Banana for the player centering utils to make it work correctly) I just had to fix up some stuff for this one but Frostburn had the base code there. I believe this is the first publicly available automatic staircase builder in a Meteor addon, correct me if I'm wrong maybe I didn't have to learn some Java to do this.
 - **BetterScaffold:** Give you more options for scaffolding, bigger range and others. (Credits to Meteor-Tweaks)
@@ -50,16 +49,21 @@ It can also retrieve arrows and items from a distance if you shoot in that direc
 - Walls and Fences
 - Falling Blocks (Sand, Gravel, Anvils, etc.)
 - Doors
-- Flowers
+- Beds
+- Flowers, Grass Seeds
 - Torches
 - Anything that requires support from a block beneath
 - There may be more
 - **Other:**
 - AutoMountain can cause damage once in a while and I'm not sure why. Be prepared to die in the name of mountain building. (it is really rare though)
+- AutoMountain can cause damage when disabling the module and when building down if the server is lagging or your ping is too high. There is an included option to pause the builder if no ticks to help keep you safe
 - TPFly can hurt you once in a while on disable. I tried to prevent this. You also rubberband if going toward a block because it attempts to teleport you through it.
 - Adjusting  TPFly antikick values while flying can be deadly
-- Normal Mode antikick for the velocity flight mode that I added can cause damage once in a while for an unknown reason.
 
 ## Requirements:
 - Latest dev build of Meteor-Client
 - Don't forget to update any other mods you are using if it's still crashing
+
+## Total Download Count:
+**Trouser-Streak :D**
+[![Github All Releases](https://img.shields.io/github/downloads/etianl/Trouser-Streak/total.svg)]()

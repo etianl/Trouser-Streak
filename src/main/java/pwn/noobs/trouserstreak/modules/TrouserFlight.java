@@ -15,6 +15,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.MovementType;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.util.math.BlockPos;
@@ -112,8 +113,7 @@ public class TrouserFlight extends Module {
             abilitiesOff();
         }
         if (mode.get() == Mode.Velocity && antiKickMode.get() == AntiKickMode.Normal){
-            mc.player.setPos(mc.player.getX(),mc.player.getY()+0.25,mc.player.getZ()); //this line here prevents you dying for realz
-            mc.player.setVelocity(0,0.01,0);
+            mc.player.move(MovementType.SELF, new Vec3d(0,+0.21,0));
         }
     }
 
@@ -153,8 +153,8 @@ public class TrouserFlight extends Module {
                 else if (antiKickMode.get() == AntiKickMode.Normal) {
                     BlockPos playerPos = BEntityUtils.playerPos(mc.player);
                     BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
-                 if (mc.world.getBlockState(pos).isAir() && mode.get() == Mode.Velocity)
-                     mc.player.setPos(mc.player.getX(),mc.player.getY()-0.1,mc.player.getZ());
+                    if (mc.world.getBlockState(pos).isAir() && mode.get() == Mode.Velocity)
+                     mc.player.move(MovementType.SELF, new Vec3d(0,-0.2,0));
                 }
             } else if (antiKickMode.get() == AntiKickMode.Packet && offLeft == offTime.get()) {
                 // Resend movement packets
