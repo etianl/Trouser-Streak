@@ -12,7 +12,6 @@ In no particular order
 - [Frostburn Client](https://github.com/evaan/FrostBurn)
 - [Banana](https://github.com/Bennooo/banana-for-everyone)
 - [1.17 Crafting Dupe](https://github.com/B2H990/NUMA-117-Crafting-Dupe/)
-- [InstantKillBow](https://github.com/Saturn5Vfive/InstantKillBow)
 - [LecternCrash](https://github.com/Coderx-Gamer/lectern-crash)
 
  <div align="left">
@@ -27,7 +26,6 @@ In no particular order
 - *AutoMountain Controls:* 
 - Left and RightKeys turn Mountain building.
 - ForwardKey Turns mountain up, Back Key turns mountain down.
-- UseKey (Right Click) disables AutoMountain.
 - JumpKey adjusts spacing of stairs according to the OnDemandSpacing value 
 - **AutoStaircase:** Builds stairs upward in the direction you are facing by running forward and jumping. (Credits to Frostburn, and Banana for the player centering utils to make it work correctly) I just had to fix up some stuff for this one but Frostburn had the base code there. I believe this is the first publicly available automatic staircase builder in a Meteor addon, correct me if I'm wrong maybe I didn't have to learn some Java to do this.
 - **BetterScaffold:** Give you more options for scaffolding, bigger range and others. (Credits to Meteor-Tweaks)
@@ -35,8 +33,6 @@ In no particular order
 - **ExplosionAura:** Spawns creepers at your position that explode as you move. Like a bigger, more laggy Nuker module for creative mode. The use of the module Velocity is recommended to avoid being thrown around.
 - **HandOfGod:** Deletes the world around you as you fly, and as you click. It deletes when you press the directional keys, or when you click it fills with the specified block. Operator status required.
 - **Inventory Dupe (1.17):** Duplicates things in your crafting slots when the module is enabled and the Dupe button is pressed in your inventory. (Credit to ItsVen and Da0neDatGotAway for original creation of the dupe, and to B2H990 for making the fabric mod.)
-- **InstaKill:** Shoots arrows and tridents with incredible power and velocity. Enabling multiple buttons causes the amount to add up. (Credits to Saturn5Vfive)
-It can also retrieve arrows and items from a distance if you shoot in that direction, I have noticed.
 - **LecternCrash:** Crash 1.18.X vanilla servers and possibly below. (Credits to Coderx-Gamer)
 - **Phase:** Allows you to phase through blocks vertically, and through thin blocks horizontally such as doors and world border (Credits to Meteor-Rejects) Please add this back it's not too terrible.
 - **RedstoneNuker:** It's just the regular Nuker module from Meteor client, customized for only breaking things that generate redstone signals. Also with included AutoTool. To keep you safer when placing lots of TNT.
@@ -50,12 +46,14 @@ It can also retrieve arrows and items from a distance if you shoot in that direc
 - Walls and Fences
 - Falling Blocks (Sand, Gravel, Anvils, etc.)
 - Doors
-- Flowers
+- Beds
+- Flowers, Grass Seeds
 - Torches
 - Anything that requires support from a block beneath
 - There may be more
 - **Other:**
 - AutoMountain can cause damage once in a while and I'm not sure why. Be prepared to die in the name of mountain building. (it is really rare though)
+- AutoMountain can cause damage when disabling the module and when building down if the server is lagging or your ping is too high. There is an included option to pause the builder if no ticks to help keep you safe
 - TPFly can hurt you once in a while on disable. I tried to prevent this. You also rubberband if going toward a block because it attempts to teleport you through it.
 - Adjusting  TPFly antikick values while flying can be deadly
 - Normal Mode antikick for the velocity flight mode that I added can cause damage once in a while for an unknown reason.
@@ -63,3 +61,7 @@ It can also retrieve arrows and items from a distance if you shoot in that direc
 ## Requirements:
 - Latest dev build of Meteor-Client
 - Don't forget to update any other mods you are using if it's still crashing
+
+## Total Download Count:
+**Trouser-Streak :D**
+[![Github All Releases](https://img.shields.io/github/downloads/etianl/Trouser-Streak/total.svg)]()

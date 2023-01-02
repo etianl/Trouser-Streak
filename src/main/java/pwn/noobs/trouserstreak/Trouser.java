@@ -23,7 +23,6 @@ public class Trouser extends MeteorAddon {
         Modules.get().add(new AutoStaircase());
         Modules.get().add(new ShulkerDupe());
         Modules.get().add(new InvDupeModule());
-        Modules.get().add(new InstantKill());
         Modules.get().add(new BetterScaffold());
         Modules.get().add(new AutoBuild());
         Modules.get().add(new AirstrikePlus());
@@ -37,6 +36,7 @@ public class Trouser extends MeteorAddon {
         Modules.get().add(new Phase());
         Modules.get().add(new TrouserFlight());
         Modules.get().add(new LecternCrash());
+
 	}
 
 	@Override
