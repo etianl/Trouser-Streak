@@ -10,6 +10,7 @@
   "mixins": [
     "InventoryScreenMixin",
     "LecternScreenMixin",
-    "accessor.ClientConnectionAccessor"
+    "accessor.ClientConnectionAccessor",
+    "SplashTextResourceSupplierMixin"
   ]
 }
