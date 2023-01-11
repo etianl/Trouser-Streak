@@ -28,6 +28,7 @@ In no particular order
 - Left and RightKeys turn Mountain building.
 - ForwardKey Turns mountain up, Back Key turns mountain down.
 - JumpKey adjusts spacing of stairs according to the OnDemandSpacing value 
+- UseKey (Right Click) pauses and resumes mountain building.
 - **AutoStaircase:** Builds stairs upward in the direction you are facing by running forward and jumping. (Credits to Frostburn, and Banana for the player centering utils to make it work correctly) I just had to fix up some stuff for this one but Frostburn had the base code there. I believe this is the first publicly available automatic staircase builder in a Meteor addon, correct me if I'm wrong maybe I didn't have to learn some Java to do this.
 - **BetterScaffold:** Give you more options for scaffolding, bigger range and others. (Credits to Meteor-Tweaks)
 - **Boom+:** Throws entities when you click (Credits to Allah-Hack) I just added some more fun things you might want to throw.
@@ -45,16 +46,12 @@ It can also retrieve arrows and items from a distance if you shoot in that direc
 - **Voider:** Replaces the world from the top down (Credits to Allah-Hack) I only added options to set max and minimum height for voiding, and instead of just air it can do water and lava now too.
 
 ## Known Bugs:
-- **Do Not Use These Blocks With AutoMountain**(especially with the SwapStackonRunOut option)**:**
-- Walls and Fences
-- Falling Blocks (Sand, Gravel, Anvils, etc.)
-- Doors
-- Beds
-- Flowers, Grass Seeds
-- Torches
-- Anything that requires support from a block beneath
-- There may be more
-- **Other:**
+- Some blocks may cause Automountain to attempt to build while not actually placing anything (Torches, walls, and doors did this until I fixed). If a block does not work please make an issue so I can correct it.
+-------------------------------------
+- **Blocks That do not work at all with AutoMountain**
+- SnowBlocks
+- maybe more?
+-------------------------------------
 - AutoMountain can cause damage once in a while and I'm not sure why. Be prepared to die in the name of mountain building. (it is really rare though)
 - AutoMountain can cause damage when disabling the module and when building down if the server is lagging or your ping is too high. There is an included option to pause the builder if no ticks to help keep you safe
 - TPFly can hurt you once in a while on disable. I tried to prevent this. You also rubberband if going toward a block because it attempts to teleport you through it.
