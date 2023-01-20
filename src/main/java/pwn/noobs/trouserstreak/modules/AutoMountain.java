@@ -4,24 +4,24 @@ import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
+import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
-import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
+import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.*;
-import net.minecraft.client.option.KeyBinding;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.MovementType;
 import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
@@ -33,7 +33,6 @@ import net.minecraft.util.math.Vec3i;
 import pwn.noobs.trouserstreak.Trouser;
 import pwn.noobs.trouserstreak.utils.BEntityUtils;
 import pwn.noobs.trouserstreak.utils.BPlayerUtils;
-import pwn.noobs.trouserstreak.utils.BWorldUtils;
 
 
 /**
@@ -45,18 +44,15 @@ import pwn.noobs.trouserstreak.utils.BWorldUtils;
  * https://github.com/etianl
  */
 public class AutoMountain extends Module {
-    public enum CenterMode {
-        Center,
-        Snap,
-        None
-    }
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<CenterMode> centerMode = sgGeneral.add(new EnumSetting.Builder<CenterMode>()
-        .name("center")
-        .description("How AutoStaircase should center you.")
-        .defaultValue(CenterMode.Center)
-        .build()
+    private final SettingGroup sgRender = settings.createGroup("Render");
+
+    public final Setting<Boolean> startPaused = sgGeneral.add(new BoolSetting.Builder()
+            .name("Start Paused")
+            .description("AutoMountain is Paused when module activated, for more control.")
+            .defaultValue(true)
+            .build()
     );
     private final Setting<Integer> spc = sgGeneral.add(new IntSetting.Builder()
             .name("VerticalSpacing")
@@ -90,8 +86,8 @@ public class AutoMountain extends Module {
             .build()
     );
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
-            .name("Pause")
-            .description("The amount of delay in ticks, when pausing")
+            .name("PauseForThisAmountOfTicks")
+            .description("The amount of delay in ticks, when pausing. Useful if a server kicks you for too many packets.")
             .defaultValue(0)
             .sliderRange(0, 40)
             .build()
@@ -119,7 +115,7 @@ public class AutoMountain extends Module {
     public final Setting<Boolean> swap = sgGeneral.add(new BoolSetting.Builder()
             .name("SwapStackonRunOut")
             .description("Swaps to another stack of blocks in your hotbar when you run out")
-            .defaultValue(false)
+            .defaultValue(true)
             .build()
     );
     public final Setting<Boolean> lagpause = sgGeneral.add(new BoolSetting.Builder()
@@ -135,6 +131,37 @@ public class AutoMountain extends Module {
             .defaultValue(1)
             .visible(() -> lagpause.get())
             .build());
+
+    private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
+            .name("render")
+            .description("Renders a block overlay where the next stair will be placed.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
+            .name("shape-mode")
+            .description("How the shapes are rendered.")
+            .defaultValue(ShapeMode.Both)
+            .visible(() -> render.get())
+            .build()
+    );
+
+    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
+            .name("side-color")
+            .description("The color of the sides of the blocks being rendered.")
+            .defaultValue(new SettingColor(255, 0, 255, 15))
+            .visible(() -> render.get())
+            .build()
+    );
+
+    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
+            .name("line-color")
+            .description("The color of the lines of the blocks being rendered.")
+            .defaultValue(new SettingColor(255, 0, 255, 255))
+            .visible(() -> render.get())
+            .build()
+    );
 
     private boolean resetTimer;
 
@@ -162,11 +189,7 @@ public class AutoMountain extends Module {
         mc.player.setMovementSpeed(0);
         centered = false;
         playerPos = BEntityUtils.playerPos(mc.player);
-
-        if (centerMode.get() != CenterMode.None) {
-            if (centerMode.get() == CenterMode.Snap) BWorldUtils.snapPlayer(playerPos);
-            else PlayerUtils.centerPlayer();
-        }
+        PlayerUtils.centerPlayer();
 
         dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());
 
@@ -179,11 +202,7 @@ public class AutoMountain extends Module {
         mc.player.setMovementSpeed(0);
         centered = false;
         playerPos = BEntityUtils.playerPos(mc.player);
-
-        if (centerMode.get() != CenterMode.None) {
-            if (centerMode.get() == CenterMode.Snap) BWorldUtils.snapPlayer(playerPos);
-            else PlayerUtils.centerPlayer();
-        }
+        PlayerUtils.centerPlayer();
 
         dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());
 
@@ -196,11 +215,7 @@ public class AutoMountain extends Module {
         mc.player.setMovementSpeed(0);
         centered = false;
         playerPos = BEntityUtils.playerPos(mc.player);
-
-        if (centerMode.get() != CenterMode.None) {
-            if (centerMode.get() == CenterMode.Snap) BWorldUtils.snapPlayer(playerPos);
-            else PlayerUtils.centerPlayer();
-        }
+        PlayerUtils.centerPlayer();
 
         dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());
 
@@ -213,11 +228,7 @@ public class AutoMountain extends Module {
         mc.player.setMovementSpeed(0);
         centered = false;
         playerPos = BEntityUtils.playerPos(mc.player);
-
-        if (centerMode.get() != CenterMode.None) {
-            if (centerMode.get() == CenterMode.Snap) BWorldUtils.snapPlayer(playerPos);
-            else PlayerUtils.centerPlayer();
-        }
+        PlayerUtils.centerPlayer();
 
         dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());
 
@@ -230,11 +241,7 @@ public class AutoMountain extends Module {
         mc.player.setMovementSpeed(0);
         centered = false;
         playerPos = BEntityUtils.playerPos(mc.player);
-
-        if (centerMode.get() != CenterMode.None) {
-            if (centerMode.get() == CenterMode.Snap) BWorldUtils.snapPlayer(playerPos);
-            else PlayerUtils.centerPlayer();
-        }
+        PlayerUtils.centerPlayer();
 
         dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());
 
@@ -247,11 +254,7 @@ public class AutoMountain extends Module {
         mc.player.setMovementSpeed(0);
         centered = false;
         playerPos = BEntityUtils.playerPos(mc.player);
-
-        if (centerMode.get() != CenterMode.None) {
-            if (centerMode.get() == CenterMode.Snap) BWorldUtils.snapPlayer(playerPos);
-            else PlayerUtils.centerPlayer();
-        }
+        PlayerUtils.centerPlayer();
 
         dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());
 
@@ -264,7 +267,13 @@ public class AutoMountain extends Module {
 
     @Override
     public void onActivate() {
-        pause = true;
+        mc.player.setPos(mc.player.getX(),Math.round(mc.player.getY()),mc.player.getZ());
+        if (startPaused.get() == true){
+        pause = false;
+        error("Press UseKey (RightClick) to Build Stairs!");
+        } else if (startPaused.get() == false){
+            pause = true;
+        }
         resetTimer = false;
         if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof WallStandingBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FallingBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BambooBlock) return;
         mc.player.setVelocity(0,0,0);
@@ -273,16 +282,12 @@ public class AutoMountain extends Module {
 
         centered = false;
         playerPos = BEntityUtils.playerPos(mc.player);
+        PlayerUtils.centerPlayer();
 
-        if (centerMode.get() != CenterMode.None) {
-            if (centerMode.get() == CenterMode.Snap) BWorldUtils.snapPlayer(playerPos);
-            else PlayerUtils.centerPlayer();
-        }
         BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
         if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
             mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
             mc.player.swingHand(Hand.MAIN_HAND);}
-            mc.player.setPos(mc.player.getX(),Math.round(mc.player.getY()),mc.player.getZ());
         dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());
         if (Modules.get().get(TrouserFlight.class).isActive()) {
             Modules.get().get(TrouserFlight.class).toggle();
@@ -313,7 +318,8 @@ public class AutoMountain extends Module {
     @Override
     public void onDeactivate() {
         pause = false;
-        mc.player.setVelocity(0,0.15,0);//this line here prevents you dying for realz
+        mc.player.setPos(mc.player.getX(),mc.player.getY()+0.2,mc.player.getZ());//this line here prevents you dying for realz
+        mc.player.setVelocity(0,0.1,0);//this line here prevents you dying for realz
         Modules.get().get(Timer.class).setOverride(Timer.OFF);
         resetTimer = true;
         if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof WallStandingBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FallingBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BambooBlock) return;
@@ -325,6 +331,11 @@ public class AutoMountain extends Module {
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if (mc.options.useKey.isPressed()){
+            mc.player.setPos(mc.player.getX(),mc.player.getY()+0.2,mc.player.getZ());//this line here prevents you dying for realz
+            mc.player.setVelocity(0,0.1,0);//this line here prevents you dying for realz
+            Modules.get().get(Timer.class).setOverride(Timer.OFF);
+            resetTimer = true;
+            if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof WallStandingBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FallingBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BambooBlock) return;
             BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
             if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
@@ -334,6 +345,7 @@ public class AutoMountain extends Module {
     }
     @EventHandler
     private void onKeyEvent(KeyEvent event) {
+        if (!pause == true) return;
         if (mc.options.forwardKey.isPressed()){
             mc.player.setPitch(35);
         }
@@ -350,6 +362,15 @@ public class AutoMountain extends Module {
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
+        if (!pause == true) return;
+        if (pause = true){
+            if (Modules.get().get(TrouserFlight.class).isActive()) {
+                Modules.get().get(TrouserFlight.class).toggle();
+            }
+            if (Modules.get().get(TPFly.class).isActive()) {
+                Modules.get().get(TPFly.class).toggle();
+            }
+        }
         if (swap.get()){
         if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof WallStandingBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FallingBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BambooBlock){
             mc.player.getInventory().selectedSlot = 0;
@@ -388,28 +409,26 @@ public class AutoMountain extends Module {
                 resetTimer = true;
             }
         }
-            mc.player.setPos(mc.player.getX(),Math.round(mc.player.getY())+0.10,mc.player.getZ());//this line here prevents you dying for realz
+            mc.player.setPos(mc.player.getX(),Math.round(mc.player.getY())+0.25,mc.player.getZ());//this line here prevents you dying for realz
     }
 
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
+        playerPos = BEntityUtils.playerPos(mc.player);
+        if (!pause == true) return;
         ticksPassed = 0;
         blocksPlaced = 0;
 
         centered = false;
         playerPos = BEntityUtils.playerPos(mc.player);
-
-        if (centerMode.get() != CenterMode.None) {
-            if (centerMode.get() == CenterMode.Snap) BWorldUtils.snapPlayer(playerPos);
-            else PlayerUtils.centerPlayer();
-        }
+        PlayerUtils.centerPlayer();
 
         dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());
     }
     private double lastPacketY = Double.MAX_VALUE;
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        //this here packet antickick from Flight prevents kick if left floating and also helps to ensure stairs building is correct
+        //this here packet antikick from Flight prevents kick if left floating and also helps to ensure stairs building is correct
         boolean akick = true;
         if (!(event.packet instanceof PlayerMoveC2SPacket packet) || akick) return;
 
@@ -434,6 +453,104 @@ public class AutoMountain extends Module {
     private boolean isEntityOnAir(Entity entity) {
         return entity.world.getStatesInBox(entity.getBoundingBox().expand(0.0625).stretch(0.0, -0.55, 0.0)).allMatch(AbstractBlock.AbstractBlockState::isAir);
     }
+
+    @EventHandler
+    private void onRender(Render3DEvent event) {
+        if (render.get()) {
+        if (mc.options.jumpKey.isPressed()){
+            if (mc.player.getPitch() <= 40){            //UP
+                switch (mc.player.getMovementDirection()) {
+                    case NORTH -> {
+                        BlockPos pos1 = playerPos.add(new Vec3i(0, +spcoffset.get()+spc.get()-1, -1));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    }
+                    case SOUTH -> {
+                        BlockPos pos1 = playerPos.add(new Vec3i(0, +spcoffset.get()+spc.get()-1, 1));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    }
+                    case EAST -> {
+                        BlockPos pos1 = playerPos.add(new Vec3i(1, +spcoffset.get()+spc.get()-1, 0));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    }
+                    case WEST -> {
+                        BlockPos pos1 = playerPos.add(new Vec3i(-1, +spcoffset.get()+spc.get()-1, 0));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    }
+                    default -> {
+                    }
+                }
+            }
+            else if (mc.player.getPitch() >= 40){            //UP
+                switch (mc.player.getMovementDirection()) {
+                    case NORTH -> {
+                        BlockPos pos1 = playerPos.add(new Vec3i(0, -spcoffset.get()-spc.get()-1, -1));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    }
+                    case SOUTH -> {
+                        BlockPos pos1 = playerPos.add(new Vec3i(0, -spcoffset.get()-spc.get()-1, 1));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    }
+                    case EAST -> {
+                        BlockPos pos1 = playerPos.add(new Vec3i(1, -spcoffset.get()-spc.get()-1, 0));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    }
+                    case WEST -> {
+                        BlockPos pos1 = playerPos.add(new Vec3i(-1, -spcoffset.get()-spc.get()-1, 0));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    }
+                    default -> {
+                    }
+                }
+            }
+        }
+        else {
+            if (mc.player.getPitch() <= 40) {            //UP
+                switch (mc.player.getMovementDirection()) {
+                    case NORTH -> {
+                        BlockPos pos1 = playerPos.add(new Vec3i(0, +spc.get() - 1, -1));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    }
+                    case SOUTH -> {
+                        BlockPos pos1 = playerPos.add(new Vec3i(0, +spc.get() - 1, 1));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    }
+                    case EAST -> {
+                        BlockPos pos1 = playerPos.add(new Vec3i(1, +spc.get() - 1, 0));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    }
+                    case WEST -> {
+                        BlockPos pos1 = playerPos.add(new Vec3i(-1, +spc.get() - 1, 0));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    }
+                    default -> {
+                    }
+                }
+            } else if (mc.player.getPitch() >= 40) {            //UP
+                switch (mc.player.getMovementDirection()) {
+                    case NORTH -> {
+                        BlockPos pos1 = playerPos.add(new Vec3i(0, -1 - spc.get(), -1));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    }
+                    case SOUTH -> {
+                        BlockPos pos1 = playerPos.add(new Vec3i(0, -1 - spc.get(), 1));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    }
+                    case EAST -> {
+                        BlockPos pos1 = playerPos.add(new Vec3i(1, -1 - spc.get(), 0));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    }
+                    case WEST -> {
+                        BlockPos pos1 = playerPos.add(new Vec3i(-1, -1 - spc.get(), 0));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    }
+                    default -> {
+                    }
+                }
+            }
+        }
+        }
+    }
+
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent playerMoveEvent) {
         float timeSinceLastTick = TickRate.INSTANCE.getTimeSinceLastTick();
@@ -520,11 +637,7 @@ public class AutoMountain extends Module {
 
             centered = false;
             playerPos = BEntityUtils.playerPos(mc.player);
-
-            if (centerMode.get() != CenterMode.None) {
-                if (centerMode.get() == CenterMode.Snap) BWorldUtils.snapPlayer(playerPos);
-                else PlayerUtils.centerPlayer();
-            }
+            PlayerUtils.centerPlayer();
         }
     } else if (mc.player.getPitch() >= 40){
             if (delayLeft > 0) delayLeft--;
@@ -601,22 +714,8 @@ public class AutoMountain extends Module {
 
                 centered = false;
                 playerPos = BEntityUtils.playerPos(mc.player);
-
-                if (centerMode.get() != CenterMode.None) {
-                    if (centerMode.get() == CenterMode.Snap) BWorldUtils.snapPlayer(playerPos);
-                    else PlayerUtils.centerPlayer();
-                }
+                PlayerUtils.centerPlayer();
             }
         }
-    }
-    private void unpress() {
-        setPressed(mc.options.forwardKey, false);
-        setPressed(mc.options.backKey, false);
-        setPressed(mc.options.leftKey, false);
-        setPressed(mc.options.rightKey, false);
-    }
-    private void setPressed(KeyBinding key, boolean pressed) {
-        key.setPressed(pressed);
-        Input.setKeyState(key, pressed);
     }
 }

@@ -21,7 +21,6 @@ import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
-import pwn.noobs.trouserstreak.Trouser;
 import pwn.noobs.trouserstreak.utils.BEntityUtils;
 
 public class TrouserFlight extends Module {
