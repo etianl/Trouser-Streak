@@ -1,6 +1,5 @@
 package pwn.noobs.trouserstreak.modules;
 
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShapes;
 

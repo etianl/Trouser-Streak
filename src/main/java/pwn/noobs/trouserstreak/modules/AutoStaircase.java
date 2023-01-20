@@ -1,8 +1,6 @@
 package pwn.noobs.trouserstreak.modules;
 
-import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
@@ -12,7 +10,6 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Blocks;
@@ -31,7 +28,6 @@ import meteordevelopment.meteorclient.settings.*;
 import pwn.noobs.trouserstreak.utils.BEntityUtils;
 import pwn.noobs.trouserstreak.utils.BPlayerUtils;
 import pwn.noobs.trouserstreak.utils.BWorldUtils;
-import pwn.noobs.trouserstreak.utils.PositionUtils;
 
 
 /**
