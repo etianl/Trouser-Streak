@@ -333,6 +333,7 @@ public class AutoMountain extends Module {
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if (mc.options.useKey.isPressed()){
+            pause = pause ? false : true;
             mc.player.setPos(mc.player.getX(),mc.player.getY()+0.2,mc.player.getZ());//this line here prevents you dying for realz
             mc.player.setVelocity(0,0.1,0);//this line here prevents you dying for realz
             Modules.get().get(Timer.class).setOverride(Timer.OFF);
@@ -342,7 +343,6 @@ public class AutoMountain extends Module {
             if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
-            pause = pause ? false : true;
         }
     }
     @EventHandler
