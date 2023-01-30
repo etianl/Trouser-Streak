@@ -1,11 +1,15 @@
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
+import meteordevelopment.meteorclient.events.game.GameLeftEvent;
+import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
+import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
@@ -13,9 +17,8 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.util.math.Vec3i;
-import pwn.noobs.trouserstreak.Trouser;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.util.Hand;
@@ -23,8 +26,8 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.settings.*;
+import net.minecraft.util.math.Vec3i;
+import pwn.noobs.trouserstreak.Trouser;
 import pwn.noobs.trouserstreak.utils.BEntityUtils;
 import pwn.noobs.trouserstreak.utils.BPlayerUtils;
 import pwn.noobs.trouserstreak.utils.BWorldUtils;
@@ -313,6 +316,12 @@ public class AutoStaircase extends Module {
             mc.options.jumpKey.setPressed(false);
         }
     }
+    @EventHandler
+    private void onScreenOpen(OpenScreenEvent event) {
+        if (event.screen instanceof DisconnectedScreen) {toggle();}
+    }
+    @EventHandler
+    private void onGameLeft(GameLeftEvent event) {toggle();}
     private void unpress() {
         setPressed(mc.options.forwardKey, false);
         setPressed(mc.options.backKey, false);
