@@ -112,6 +112,12 @@ public class HandOfGod extends Module {
             .defaultValue(false)
             .build()
     );
+    public final Setting<Boolean> fluids = sgGeneral.add(new BoolSetting.Builder()
+            .name("IncludeFluids")
+            .description("Includes fluids when targeting, or not.")
+            .defaultValue(true)
+            .build()
+    );
     public HandOfGod() {
         super(Trouser.Main, "HandOfGod", "Deletes the world as you fly around, and replaces blocks with whatever you please when you click. Must be OP");
     }
@@ -131,7 +137,7 @@ public class HandOfGod extends Module {
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if (mc.options.attackKey.isPressed() && mc.currentScreen == null) {
-            HitResult hr = mc.cameraEntity.raycast(300, 0, true);
+            HitResult hr = mc.cameraEntity.raycast(300, 0, fluids.get());
             Vec3d god = hr.getPos();
             BlockPos pos = new BlockPos(god);
             if (lightning.get()) {
@@ -167,7 +173,7 @@ public class HandOfGod extends Module {
             error("Must have OP");
         }
             if (auto.get() && mc.options.attackKey.isPressed() && mc.currentScreen == null) {
-                HitResult hr = mc.cameraEntity.raycast(300, 0, true);
+                HitResult hr = mc.cameraEntity.raycast(300, 0, fluids.get());
                 Vec3d god = hr.getPos();
                 BlockPos pos = new BlockPos(god);
                 if (lightning.get()) {

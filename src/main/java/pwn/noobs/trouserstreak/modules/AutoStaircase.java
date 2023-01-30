@@ -1,6 +1,8 @@
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
+import meteordevelopment.meteorclient.events.game.GameLeftEvent;
+import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
@@ -13,6 +15,7 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.util.math.Vec3i;
 import pwn.noobs.trouserstreak.Trouser;
@@ -313,6 +316,12 @@ public class AutoStaircase extends Module {
             mc.options.jumpKey.setPressed(false);
         }
     }
+    @EventHandler
+    private void onScreenOpen(OpenScreenEvent event) {
+        if (event.screen instanceof DisconnectedScreen) {toggle();}
+    }
+    @EventHandler
+    private void onGameLeft(GameLeftEvent event) {toggle();}
     private void unpress() {
         setPressed(mc.options.forwardKey, false);
         setPressed(mc.options.backKey, false);

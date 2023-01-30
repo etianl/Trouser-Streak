@@ -1,6 +1,7 @@
 //Written by etianll using some code from MeteorClient ClickTP as well as Airplace
 package pwn.noobs.trouserstreak.modules;
 
+import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -98,22 +99,24 @@ public class TPFly extends Module {
     }
     //making absolutely sure there is no velocity and that this is setPos movement only
     @EventHandler
+    public void onPlayerMove(PlayerMoveEvent playerMoveEvent) {
+        mc.player.setVelocity(0,0,0);
+        mc.player.setMovementSpeed(0);
+    }
+    @EventHandler
     private void onTick(TickEvent event) {
-        if (!akick.get())
-        {mc.player.setVelocity(0,0,0);
-        }
+        mc.player.setVelocity(0,0,0);
+        mc.player.setMovementSpeed(0);
     }
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (!akick.get())
-        {mc.player.setVelocity(0,0,0);
-        }
+        mc.player.setVelocity(0,0,0);
+        mc.player.setMovementSpeed(0);
     }
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (!akick.get())
-        {mc.player.setVelocity(0,0,0);
-        }
+        mc.player.setVelocity(0,0,0);
+        mc.player.setMovementSpeed(0);
         switch (mc.player.getMovementDirection()) {
             case NORTH -> {}
             case EAST -> {}
@@ -452,15 +455,18 @@ public class TPFly extends Module {
         if (akick.get() && delayLeft > 0) delayLeft--;
         BlockPos playerPos1 = BEntityUtils.playerPos(mc.player);
         BlockPos pos1 = playerPos1.add(new Vec3i(0,-0.65,0));
-        if (!mc.world.getBlockState(pos1).isAir())
+        if (!mc.world.getBlockState(pos1).isAir()){
+            mc.player.setMovementSpeed(0);
             mc.player.setVelocity(0,0,0);
-
+        }
         else if (akick.get() && delayLeft <= 0 && offLeft > 0) {
             offLeft--;
             BlockPos playerPos = BEntityUtils.playerPos(mc.player);
             BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
             if (mc.world.getBlockState(pos).isAir())
+                mc.player.setMovementSpeed(0);
                 mc.player.setVelocity(0,0,0);
+                mc.player.setPos(mc.player.getX(),mc.player.getY()-0.1,mc.player.getZ());
         } else if (akick.get() && delayLeft <= 0 && offLeft <= 0) {
             delayLeft = delay.get();
             offLeft = offTime.get();

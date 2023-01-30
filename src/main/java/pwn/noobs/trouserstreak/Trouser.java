@@ -1,7 +1,9 @@
 package pwn.noobs.trouserstreak;
 
+import meteordevelopment.meteorclient.systems.commands.Commands;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
+import pwn.noobs.trouserstreak.commands.LavaTimeCalculator;
 import pwn.noobs.trouserstreak.modules.*;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.systems.modules.Category;
@@ -36,6 +38,8 @@ public class Trouser extends MeteorAddon {
         Modules.get().add(new Phase());
         Modules.get().add(new TrouserFlight());
         Modules.get().add(new LecternCrash());
+        Modules.get().add(new AutoLavaCaster());
+        Commands.get().add(new LavaTimeCalculator());
 
 	}
 
