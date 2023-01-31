@@ -117,8 +117,8 @@ public class AutoLavaCaster extends Module {
     private final Setting<Double> reach = sgGeneral.add(new DoubleSetting.Builder()
             .name("YourReach")
             .description("Your Reach, in blocks. Turn it down if not using the Reach module.")
-            .defaultValue(4.7)
-            .sliderRange(3, 4.7)
+            .defaultValue(4.6)
+            .sliderRange(3, 4.6)
             .build()
     );
 
@@ -189,7 +189,14 @@ public class AutoLavaCaster extends Module {
         if (sneaky.get()){
             mc.options.sneakKey.setPressed(true);
         }
+        BlockPos hover = new BlockPos(mc.player.getX(),mc.player.getY()-1,mc.player.getZ());
+        if (mc.world.getBlockState(lava).getBlock() == Blocks.AIR){
+            toggle();
+            return;
+        }
+        if (!(mc.world.getBlockState(lava).getBlock() == Blocks.AIR) && !(mc.world.getBlockState(hover).getBlock() == Blocks.AIR)){
         placeLava();
+        }
         firstplace=true;
         ChatUtils.sendMsg(Text.of("Starting layer 1"));
     }
@@ -248,7 +255,7 @@ public class AutoLavaCaster extends Module {
                 }
             }
         PlayerUtils.centerPlayer();
-        mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(lava.getX()+0.5,lava.getY()+1.3,lava.getZ()+0.5));
+        mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(lava.getX()+0.5,lava.getY()+1.25,lava.getZ()+0.5));
         if (sneaky.get()){
             mc.options.sneakKey.setPressed(true);
         }
@@ -286,6 +293,7 @@ public class AutoLavaCaster extends Module {
                 if (mc.options.sneakKey.isPressed()){
                     mc.options.sneakKey.setPressed(false);
                 }
+                ChatUtils.sendMsg(Text.of("Done Building!"));
                 toggle();
                 return;
             }
@@ -307,6 +315,7 @@ public class AutoLavaCaster extends Module {
                 if (mc.options.sneakKey.isPressed()){
                     mc.options.sneakKey.setPressed(false);
                 }
+                ChatUtils.sendMsg(Text.of("Done Building!"));
                 toggle();
                 return;
             }
@@ -408,6 +417,7 @@ public class AutoLavaCaster extends Module {
                 if (mc.options.sneakKey.isPressed()){
                     mc.options.sneakKey.setPressed(false);
                 }
+                ChatUtils.sendMsg(Text.of("Done Building!"));
                 toggle();
                 return;
             }
@@ -429,6 +439,7 @@ public class AutoLavaCaster extends Module {
                     if (mc.options.sneakKey.isPressed()){
                         mc.options.sneakKey.setPressed(false);
                     }
+                    ChatUtils.sendMsg(Text.of("Done Building!"));
                     toggle();
                     return;
                 }
