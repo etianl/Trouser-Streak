@@ -27,6 +27,7 @@ In no particular order
 - *AutoLavaCaster Notes:*
 - Do not use Timer with this module.
 - Rotating your character will break AutoLavaCaster. Disable rotate options in Freecam, Killaura, and any others that will rotate you when casting.
+- Fish buckets, and other water buckets with entities do not work. Put the fishy somewhere safe before mountaining.
 - If Build up is enabled, and not holding a block, appropriate blocks are selected from your hotbar automatically from left to right.
 - Autoreplenish is recommended if building up, but disable search hotbar option.
 - Do not use Flammable blocks if building up, and firespread is on.
