@@ -25,10 +25,12 @@ In no particular order
 - **AutoLavaCaster** Simple timer based bot for lavacasting. Aim at the top of the block you want to cast on and activate the module. It places lava, then after an amount of time removes the lava, places the water after a specified delay, removes it after a specified delay, it will build the mountain upward, tower you up and repeat. Position yourself on a block above and diagonally, mostly perpendicular from the targeted block for best results. Use the ".lavacalc" command to determine roughly how long lava will take to finish.
 - *AutoLavaCaster Notes:*
 - Do not use Timer with this module.
+- Rotating your character will break AutoLavaCaster. Disable rotate options in Freecam, Killaura, and any others that will rotate you when casting.
+- If Build up is enabled, and not holding a block, appropriate blocks are selected from your hotbar automatically from left to right.
 - Autoreplenish is recommended if building up, but disable search hotbar option.
 - Do not use Flammable blocks if building up, and firespread is on.
 - Rotating your character will break AutoLavaCaster. Disable rotate options in Freecam, Killaura, and any others that will rotate you when casting.
-- Changing timing options while it's on can break it.
+- Reducing timing options while it's on can break it.
 - **AutoMountain:** AutoMountain builds stairs in the direction you aim. It builds upward if you are looking toward the horizon or higher, and builds downward if you are looking down. (Credits to Frostburn for the base for the code, and Banana for the player centering utils.)
 - *AutoMountain Controls:* 
 - UseKey (Right Click) starts and pauses mountain building.
