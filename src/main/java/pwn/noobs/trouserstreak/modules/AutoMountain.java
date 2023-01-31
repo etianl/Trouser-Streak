@@ -419,26 +419,6 @@ public class AutoMountain extends Module {
 
         dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());
     }
-    private double lastPacketY = Double.MAX_VALUE;
-    @EventHandler
-    private void onSendPacket(PacketEvent.Send event) {
-        //this here packet antikick from Flight prevents kick if left floating and also helps to ensure stairs building is correct
-        boolean akick = true;
-        if (!(event.packet instanceof PlayerMoveC2SPacket packet) || akick) return;
-
-        double currentY = packet.getY(Double.MAX_VALUE);
-        if (currentY != Double.MAX_VALUE) {
-            // maximum time we can be "floating" is 80 ticks, so 4 seconds max
-            if (this.delayLeft <= 0 && this.lastPacketY != Double.MAX_VALUE &&
-                    shouldFlyDown(currentY, this.lastPacketY) && isEntityOnAir(mc.player)) {
-                // actual check is for >= -0.03125D but we have to do a bit more than that
-                // probably due to compression or some shit idk
-                ((PlayerMoveC2SPacketAccessor) packet).setY(lastPacketY - 0.03130D);
-            } else {
-                lastPacketY = currentY;
-            }
-        }
-    }
     private boolean shouldFlyDown(double currentY, double lastY) {
         if (currentY >= lastY) {
             return true;
@@ -571,7 +551,7 @@ public class AutoMountain extends Module {
                     BlockPos un1 = playerPos.add(new Vec3i(0,spc.get(),0));
                     BlockPos un2 = playerPos.add(new Vec3i(0,spc.get(),-1));
                     BlockPos un3 = playerPos.add(new Vec3i(0,spc.get()+1,-1));
-                    if (mc.world.getBlockState(un1).isAir() && mc.world.getBlockState(un2).isAir() && mc.world.getBlockState(un3).isAir()){
+                    if (!mc.world.getBlockState(un1).getMaterial().isSolid() && !mc.world.getBlockState(un2).getMaterial().isSolid() && !mc.world.getBlockState(un3).getMaterial().isSolid() && !mc.world.getBlockState(un1).getMaterial().isLiquid() && !mc.world.getBlockState(un2).getMaterial().isLiquid() && !mc.world.getBlockState(un3).getMaterial().isLiquid()){
                     mc.player.setPosition(mc.player.getX(),mc.player.getY()+spc.get(),mc.player.getZ()-1);}
                     else {}
                 }
@@ -580,7 +560,7 @@ public class AutoMountain extends Module {
                     BlockPos ue1 = playerPos.add(new Vec3i(0,spc.get(),0));
                     BlockPos ue2 = playerPos.add(new Vec3i(+1,spc.get(),0));
                     BlockPos ue3 = playerPos.add(new Vec3i(+1,spc.get()+1,0));
-                    if (mc.world.getBlockState(ue1).isAir() && mc.world.getBlockState(ue2).isAir() && mc.world.getBlockState(ue3).isAir()){
+                    if (!mc.world.getBlockState(ue1).getMaterial().isSolid() && !mc.world.getBlockState(ue2).getMaterial().isSolid() && !mc.world.getBlockState(ue3).getMaterial().isSolid() && !mc.world.getBlockState(ue1).getMaterial().isLiquid() && !mc.world.getBlockState(ue2).getMaterial().isLiquid() && !mc.world.getBlockState(ue3).getMaterial().isLiquid()){
                     mc.player.setPosition(mc.player.getX()+1,mc.player.getY()+spc.get(),mc.player.getZ());}
                     else {}
                 }
@@ -589,7 +569,7 @@ public class AutoMountain extends Module {
                     BlockPos us1 = playerPos.add(new Vec3i(0,spc.get(),0));
                     BlockPos us2 = playerPos.add(new Vec3i(0,spc.get(),+1));
                     BlockPos us3 = playerPos.add(new Vec3i(0,spc.get()+1,+1));
-                    if (mc.world.getBlockState(us1).isAir() && mc.world.getBlockState(us2).isAir() && mc.world.getBlockState(us3).isAir()){
+                    if (!mc.world.getBlockState(us1).getMaterial().isSolid() && !mc.world.getBlockState(us2).getMaterial().isSolid() && !mc.world.getBlockState(us3).getMaterial().isSolid() && !mc.world.getBlockState(us1).getMaterial().isLiquid() && !mc.world.getBlockState(us2).getMaterial().isLiquid() && !mc.world.getBlockState(us3).getMaterial().isLiquid()){
                     mc.player.setPosition(mc.player.getX(),mc.player.getY()+spc.get(),mc.player.getZ()+1);}
                     else {}
                 }
@@ -598,7 +578,7 @@ public class AutoMountain extends Module {
                     BlockPos uw1 = playerPos.add(new Vec3i(0,spc.get(),0));
                     BlockPos uw2 = playerPos.add(new Vec3i(-1,spc.get(),0));
                     BlockPos uw3 = playerPos.add(new Vec3i(-1,spc.get()+1,0));
-                    if (mc.world.getBlockState(uw1).isAir() && mc.world.getBlockState(uw2).isAir() && mc.world.getBlockState(uw3).isAir()){
+                    if (!mc.world.getBlockState(uw1).getMaterial().isSolid() && !mc.world.getBlockState(uw2).getMaterial().isSolid() && !mc.world.getBlockState(uw3).getMaterial().isSolid() && !mc.world.getBlockState(uw1).getMaterial().isLiquid() && !mc.world.getBlockState(uw2).getMaterial().isLiquid() && !mc.world.getBlockState(uw3).getMaterial().isLiquid()){
                     mc.player.setPosition(mc.player.getX()-1,mc.player.getY()+spc.get(),mc.player.getZ());}
                     else {}
                 }
@@ -648,7 +628,7 @@ public class AutoMountain extends Module {
                         BlockPos dn2 = playerPos.add(new Vec3i(0,-spc.get(),-1));
                         BlockPos dn3 = playerPos.add(new Vec3i(0,0,-1));
                         BlockPos dn4 = playerPos.add(new Vec3i(0,spc.get(),-1));
-                        if (mc.world.getBlockState(dn1).isAir() && mc.world.getBlockState(dn2).isAir() && mc.world.getBlockState(dn3).isAir() && mc.world.getBlockState(dn4).isAir()) {
+                        if (!mc.world.getBlockState(dn1).getMaterial().isSolid() && !mc.world.getBlockState(dn2).getMaterial().isSolid() && !mc.world.getBlockState(dn3).getMaterial().isSolid() && !mc.world.getBlockState(dn4).getMaterial().isSolid() && !mc.world.getBlockState(dn1).getMaterial().isLiquid() && !mc.world.getBlockState(dn2).getMaterial().isLiquid() && !mc.world.getBlockState(dn3).getMaterial().isLiquid() && !mc.world.getBlockState(dn4).getMaterial().isLiquid()) {
                         mc.player.setPosition(mc.player.getX(),mc.player.getY()-spc.get(),mc.player.getZ()-1);}
                         else {}
                     }
@@ -658,7 +638,7 @@ public class AutoMountain extends Module {
                         BlockPos de2 = playerPos.add(new Vec3i(1,-spc.get(),0));
                         BlockPos de3 = playerPos.add(new Vec3i(1,0,0));
                         BlockPos de4 = playerPos.add(new Vec3i(1,spc.get(),0));
-                        if (mc.world.getBlockState(de1).isAir() && mc.world.getBlockState(de2).isAir() && mc.world.getBlockState(de3).isAir() && mc.world.getBlockState(de4).isAir()) {
+                        if (!mc.world.getBlockState(de1).getMaterial().isSolid() && !mc.world.getBlockState(de2).getMaterial().isSolid() && !mc.world.getBlockState(de3).getMaterial().isSolid() && !mc.world.getBlockState(de4).getMaterial().isSolid() && !mc.world.getBlockState(de1).getMaterial().isLiquid() && !mc.world.getBlockState(de2).getMaterial().isLiquid() && !mc.world.getBlockState(de3).getMaterial().isLiquid() && !mc.world.getBlockState(de4).getMaterial().isLiquid()) {
                         mc.player.setPosition(mc.player.getX()+1,mc.player.getY()-spc.get(),mc.player.getZ());}
                         else {}
                     }
@@ -668,7 +648,7 @@ public class AutoMountain extends Module {
                         BlockPos ds2 = playerPos.add(new Vec3i(0,-spc.get(),1));
                         BlockPos ds3 = playerPos.add(new Vec3i(0,0,1));
                         BlockPos ds4 = playerPos.add(new Vec3i(0,spc.get(),1));
-                        if (mc.world.getBlockState(ds1).isAir() && mc.world.getBlockState(ds2).isAir() && mc.world.getBlockState(ds3).isAir() && mc.world.getBlockState(ds4).isAir()) {
+                        if (!mc.world.getBlockState(ds1).getMaterial().isSolid() && !mc.world.getBlockState(ds2).getMaterial().isSolid() && !mc.world.getBlockState(ds3).getMaterial().isSolid() && !mc.world.getBlockState(ds4).getMaterial().isSolid() && !mc.world.getBlockState(ds1).getMaterial().isLiquid() && !mc.world.getBlockState(ds2).getMaterial().isLiquid() && !mc.world.getBlockState(ds3).getMaterial().isLiquid() && !mc.world.getBlockState(ds4).getMaterial().isLiquid()) {
                         mc.player.setPosition(mc.player.getX(),mc.player.getY()-spc.get(),mc.player.getZ()+1);}
                         else {}
                     }
@@ -678,7 +658,7 @@ public class AutoMountain extends Module {
                         BlockPos dw2 = playerPos.add(new Vec3i(-1,-spc.get(),0));
                         BlockPos dw3 = playerPos.add(new Vec3i(-1,0,0));
                         BlockPos dw4 = playerPos.add(new Vec3i(-1,spc.get(),0));
-                        if (mc.world.getBlockState(dw1).isAir() && mc.world.getBlockState(dw2).isAir() && mc.world.getBlockState(dw3).isAir() && mc.world.getBlockState(dw4).isAir()) {
+                        if (!mc.world.getBlockState(dw1).getMaterial().isSolid() && !mc.world.getBlockState(dw2).getMaterial().isSolid() && !mc.world.getBlockState(dw3).getMaterial().isSolid() && !mc.world.getBlockState(dw4).getMaterial().isSolid() && !mc.world.getBlockState(dw1).getMaterial().isLiquid() && !mc.world.getBlockState(dw2).getMaterial().isLiquid() && !mc.world.getBlockState(dw3).getMaterial().isLiquid() && !mc.world.getBlockState(dw4).getMaterial().isLiquid()) {
                         mc.player.setPosition(mc.player.getX()-1,mc.player.getY()-spc.get(),mc.player.getZ());}
                         else {}
                     }
