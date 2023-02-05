@@ -56,7 +56,7 @@ In no particular order
 - **Voider:** Replaces the world from the top down (Credits to Allah-Hack) I only added options to set max and minimum height for voiding, and instead of just air it can do water and lava now too.
 
 ## Known Bugs:
--**AutoLavaCaster Bugs** 
+- **AutoLavaCaster Bugs** 
 - If you are too far out of reach it breaks.
 - If view of the targeted block is obstructed it breaks.
 - **AutoMountain Bugs** 
