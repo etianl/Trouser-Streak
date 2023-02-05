@@ -3,6 +3,7 @@ package pwn.noobs.trouserstreak;
 import meteordevelopment.meteorclient.systems.commands.Commands;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
+import pwn.noobs.trouserstreak.commands.CasterTimer;
 import pwn.noobs.trouserstreak.commands.LavaTimeCalculator;
 import pwn.noobs.trouserstreak.modules.*;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
@@ -19,7 +20,7 @@ public class Trouser extends MeteorAddon {
 
 	@Override
 	public void onInitialize() {
-		LOG.info("Removing dingleberries");
+		LOG.info("Getting TP for my Bunghole...");
 
         Modules.get().add(new AutoMountain());
         Modules.get().add(new AutoStaircase());
@@ -39,7 +40,9 @@ public class Trouser extends MeteorAddon {
         Modules.get().add(new TrouserFlight());
         Modules.get().add(new LecternCrash());
         Modules.get().add(new AutoLavaCaster());
+        Modules.get().add(new Teleport());
         Commands.get().add(new LavaTimeCalculator());
+        Commands.get().add(new CasterTimer());
 
 	}
 

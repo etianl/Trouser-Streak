@@ -24,6 +24,8 @@ In no particular order
 - **AutoDrop:** Drops the stack in your selected slot automatically. You can shift click your inventory items to slot one to dump your trash easily.
 - **AutoLavaCaster** Simple timer based bot for lavacasting. Aim at the top of the block you want to cast on and activate the module. It places lava, then after an amount of time removes the lava, places the water after a specified delay, removes it after a specified delay, it will build the mountain upward, tower you up and repeat. Position yourself on a block above and diagonally, mostly perpendicular from the targeted block for best results. Use the ".lavacalc" command to determine roughly how long lava will take to finish.
 - *AutoLavaCaster Notes:*
+- The .castertimer Command tells you how long each cycle has been running for. 
+- The .lavacalc command gives you an approximation of how long lava will take to flow across a 45 degree staircase at 20TPS.
 - Do not use Timer with this module.
 - Rotating your character will break AutoLavaCaster. Disable rotate options in Freecam, Killaura, and any others that will rotate you when casting.
 - Fish buckets, and other water buckets with entities do not work. Put the fishy somewhere safe before mountaining.
@@ -48,6 +50,7 @@ In no particular order
 - **Phase:** Allows you to phase through blocks vertically, and through thin blocks horizontally such as doors and world border (Credits to Meteor-Rejects) Please add this back it's not too terrible.
 - **RedstoneNuker:** It's just the regular Nuker module from Meteor client, customized for only breaking things that generate redstone signals. Also with included AutoTool. To keep you safer when placing lots of TNT.
 - **ShulkerDupe:** Duplicates the contents of a shulker when opening. Only works on Vanilla, Forge, and Fabric servers 1.19 and below. Use multiconnect or viafabric (Credits to Allah-Hack)
+- **Teleport:** Sets your position to the targeted block, within a possible reach of 56 blocks. Rarely can cause damage, be careful.
 - **TPFly:** It is a purely setPos based flight. Based off the ClickTP code, credits to Meteor for that. ***EXPERIMENTAL, movement is a little weird lol.***
 - **TrouserFlight:** I just added a Normal mode antikick for Velocity flight cuz missing at the time
 - **Voider:** Replaces the world from the top down (Credits to Allah-Hack) I only added options to set max and minimum height for voiding, and instead of just air it can do water and lava now too.
@@ -57,10 +60,10 @@ In no particular order
 - If you are too far out of reach it breaks.
 - If view of the targeted block is obstructed it breaks.
 -**AutoMountain Bugs** 
+- AutoMountain can cause damage if you pause or disable the module while rubberbanding and building downward. There is a workaround included to fix this when pausing with the useKey.
+- Be prepared to Die in the name of building Mountains.
 - Launching a SinglePlayer world with AutoMountain enabled causes crash. Disable the AutoMountain module before loading a single player world to avoid this.
 - Some blocks may cause Automountain to attempt to build while not actually placing anything (Torches, walls, and doors did this until I fixed). If a block does not work please make an issue so I can correct it.
-- AutoMountain can cause damage once in a while and I'm not sure why. Be prepared to die in the name of mountain building. (it is really rare though)
-- Damage from AutoMountain can rarely happen when disabling the module and when building downward if the server is lagging or your ping is too high. There is an included option to pause the builder if the server is not ticking to help keep you safe.
 -------------------------------------
 - **Blocks That do not work at all with AutoMountain**
 - SnowBlocks
