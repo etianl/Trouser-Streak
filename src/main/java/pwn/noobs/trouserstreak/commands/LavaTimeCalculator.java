@@ -16,6 +16,15 @@ public class LavaTimeCalculator extends Command {
 
     @Override
         public void build(LiteralArgumentBuilder<CommandSource> builder) {
+        builder.then(argument("TopY", FloatArgumentType.floatArg()).executes(ctx -> {
+            float TopY = FloatArgumentType.getFloat(ctx, "TopY");
+            float time = (((TopY-64)*60)/20);
+
+
+
+            ChatUtils.sendMsg(Text.of("Lava will take "+time+" seconds to go from Y"+TopY+" to Y64(sea level) on a 45degree staircase at 20TPS)."));
+            return SINGLE_SUCCESS;
+        }));
         builder.then(argument("TopY", FloatArgumentType.floatArg()).then(argument("BottomY",FloatArgumentType.floatArg()).executes(ctx -> {
             float TopY = FloatArgumentType.getFloat(ctx, "TopY");
             float BottomY = FloatArgumentType.getFloat(ctx, "BottomY");
@@ -23,7 +32,7 @@ public class LavaTimeCalculator extends Command {
 
 
 
-                ChatUtils.sendMsg(Text.of("Lava will take "+time+" seconds to reach bottom (On a 45degree staircase at 20TPS)."));
+                ChatUtils.sendMsg(Text.of("Lava will take "+time+" seconds to go from  Y"+TopY+" to Y"+BottomY+" on a 45degree staircase at 20TPS)."));
                 return SINGLE_SUCCESS;
             })));
         }
