@@ -59,7 +59,7 @@ In no particular order
 -**AutoLavaCaster Bugs** 
 - If you are too far out of reach it breaks.
 - If view of the targeted block is obstructed it breaks.
--**AutoMountain Bugs** 
+- **AutoMountain Bugs** 
 - AutoMountain can cause damage if you pause or disable the module while rubberbanding and building downward. There is a workaround included to fix this when pausing with the useKey.
 - Be prepared to Die in the name of building Mountains.
 - Launching a SinglePlayer world with AutoMountain enabled causes crash. Disable the AutoMountain module before loading a single player world to avoid this.
