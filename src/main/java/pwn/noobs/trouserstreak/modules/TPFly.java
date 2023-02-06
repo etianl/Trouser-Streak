@@ -37,15 +37,15 @@ public class TPFly extends Module {
             .name("range")
             .description("The maximum distance you can teleport.")
             .defaultValue(5)
-            .min(0)
-            .sliderMax(6)
+            .min(1)
+            .sliderMax(7)
             .build()
     );
     private final Setting<Integer> upspeed = sgGeneral.add(new IntSetting.Builder()
             .name("UpRange")
             .description("UpwardRange")
             .defaultValue(4)
-            .min(0)
+            .min(1)
             .sliderMax(6)
             .build()
     );
@@ -53,7 +53,7 @@ public class TPFly extends Module {
             .name("DownRange")
             .description("DownwardRange")
             .defaultValue(4)
-            .min(0)
+            .min(1)
             .sliderMax(6)
             .build()
     );

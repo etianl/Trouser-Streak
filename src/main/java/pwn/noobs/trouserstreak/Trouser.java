@@ -22,6 +22,7 @@ public class Trouser extends MeteorAddon {
 	public void onInitialize() {
 		LOG.info("Getting TP for my Bunghole...");
 
+        Modules.get().add(new AutoLavaCaster());
         Modules.get().add(new AutoMountain());
         Modules.get().add(new AutoStaircase());
         Modules.get().add(new ShulkerDupe());
@@ -40,7 +41,6 @@ public class Trouser extends MeteorAddon {
         Modules.get().add(new Phase());
         Modules.get().add(new TrouserFlight());
         Modules.get().add(new LecternCrash());
-        Modules.get().add(new AutoLavaCaster());
         Modules.get().add(new Teleport());
         Commands.get().add(new LavaTimeCalculator());
         Commands.get().add(new CasterTimer());

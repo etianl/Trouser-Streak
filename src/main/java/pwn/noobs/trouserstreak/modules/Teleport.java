@@ -25,15 +25,21 @@ public class Teleport extends Module {
     private final Setting<Integer> reach = sgGeneral.add(new IntSetting.Builder()
             .name("Reach")
             .description("Reach")
-            .defaultValue(64)
+            .defaultValue(56)
             .sliderRange(8, 64)
             .build());
     public final Setting<Double> tpTimer = sgGeneral.add(new DoubleSetting.Builder()
             .name("Timer")
             .description("The multiplier value for speed of movement.")
-            .defaultValue(2)
+            .defaultValue(3)
             .min(1)
             .sliderMax(10)
+            .build()
+    );
+    private final Setting<Boolean> liquids = sgGeneral.add(new BoolSetting.Builder()
+            .name("TPOntopOfLiquid")
+            .description("TP you ontop of, or through the liquids.")
+            .defaultValue(true)
             .build()
     );
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
@@ -51,7 +57,7 @@ public class Teleport extends Module {
     );
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
-            .name("side-color")
+            .name("side-colorSolidBlock")
             .description("The color of the sides of the blocks being rendered.")
             .defaultValue(new SettingColor(255, 0, 255, 15))
             .visible(() -> render.get())
@@ -59,9 +65,24 @@ public class Teleport extends Module {
     );
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
-            .name("line-color")
+            .name("line-colorSolidBlock")
             .description("The color of the lines of the blocks being rendered.")
             .defaultValue(new SettingColor(255, 0, 255, 255))
+            .visible(() -> render.get())
+            .build()
+    );
+    private final Setting<SettingColor> sideColor2 = sgRender.add(new ColorSetting.Builder()
+            .name("side-colorNonSolid")
+            .description("The color of the sides of the blocks being rendered.")
+            .defaultValue(new SettingColor(0, 255, 255, 15))
+            .visible(() -> render.get())
+            .build()
+    );
+
+    private final Setting<SettingColor> lineColor2 = sgRender.add(new ColorSetting.Builder()
+            .name("line-colorNonSolid")
+            .description("The color of the lines of the blocks being rendered.")
+            .defaultValue(new SettingColor(0, 255, 255, 255))
             .visible(() -> render.get())
             .build()
     );
@@ -76,7 +97,7 @@ public class Teleport extends Module {
 
     @Override
     public void onActivate() {
-        error("Press UseKey (RightClick) to Teleport to the target!");
+        error("Press attackKey (LeftClick) to Teleport ontop of the target!");
         notponactivateplz=true;
         Modules.get().get(Timer.class).setOverride(Timer.OFF);
     }
@@ -88,7 +109,7 @@ public class Teleport extends Module {
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         Modules.get().get(Timer.class).setOverride(Timer.OFF);
-        if (mc.options.useKey.isPressed()){
+        if (mc.options.attackKey.isPressed()){
             notponactivateplz=false;
             mc.options.jumpKey.setPressed(false);
             mc.options.sneakKey.setPressed(false);
@@ -96,8 +117,8 @@ public class Teleport extends Module {
             mc.options.backKey.setPressed(false);
             mc.options.leftKey.setPressed(false);
             mc.options.rightKey.setPressed(false);
-            mc.options.useKey.setPressed(true);
-            Modules.get().get(Timer.class).setOverride(tpTimer.get());
+            mc.options.attackKey.setPressed(true);
+            mc.player.setVelocity(0,0,0);
             ticks++;
             if (ticks==2 && notponactivateplz==false){
                 location=target();
@@ -123,22 +144,32 @@ public class Teleport extends Module {
             else if (ticks==9 && notponactivateplz==false){
                 mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.875), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.875)+1.0875), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.875));
                 mc.player.setVelocity(0,0.05,0);}
+            BlockPos tptarget= new BlockPos(location.getX(), location.getY()+1, location.getZ());
+            if (mc.world.getBlockState(location).getMaterial().isSolid() && mc.world.getBlockState(tptarget).getMaterial().isSolid() && ticks==10 && notponactivateplz==false){
+                mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.875), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.875)+1.0875), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.875));
+                mc.player.setVelocity(0,0.2,0);
+                mc.options.attackKey.setPressed(false);
+                error("Blocks in the target zone. Teleporting you near the target.");
+            }
             else if (ticks==10 && notponactivateplz==false){
                 mc.player.setPos(location.getX()+0.5, location.getY()+1.1, location.getZ()+0.5);
                 mc.player.setVelocity(0,0.2,0);
-                mc.options.useKey.setPressed(false);
+                mc.options.attackKey.setPressed(false);
             }
-        }else if (!mc.options.useKey.isPressed() && ticks<10 && notponactivateplz==false){
-            mc.options.useKey.setPressed(true);
-        }else if (!mc.options.useKey.isPressed() && ticks>10 && notponactivateplz==false){
-            mc.options.useKey.setPressed(false);
+        }else if (!mc.options.attackKey.isPressed() && ticks<10 && notponactivateplz==false){
+            mc.options.attackKey.setPressed(true);
+        }else if (!mc.options.attackKey.isPressed() && ticks>10 && notponactivateplz==false){
+            mc.options.attackKey.setPressed(false);
             ticks=1;
             Modules.get().get(Timer.class).setOverride(Timer.OFF);
+        }
+        if (ticks>=2 && ticks<10){
+            Modules.get().get(Timer.class).setOverride(tpTimer.get());
         }
     }
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (!mc.options.useKey.isPressed()){
+        if (!mc.options.attackKey.isPressed()){
         location=target();}
         if (location == null) return;
         double x1 = location.getX();
@@ -148,8 +179,13 @@ public class Teleport extends Module {
         double y2 = y1+1;
         double z2 = z1+1;
 
-
+        if (render.get()){
+            if (mc.world.getBlockState(location).getMaterial().isSolid()){
         event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            }else if (!mc.world.getBlockState(location).getMaterial().isSolid()){
+                event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor2.get(), lineColor2.get(), shapeMode.get(), 0);
+            }
+        }
     }
     @EventHandler
     private void onScreenOpen(OpenScreenEvent event) {
@@ -158,7 +194,7 @@ public class Teleport extends Module {
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {toggle();}
     private BlockPos target() {
-        HitResult blockHit = mc.cameraEntity.raycast(reach.get(), 0, false);
+        HitResult blockHit = mc.cameraEntity.raycast(reach.get(), 0, liquids.get());
         return ((BlockHitResult) blockHit).getBlockPos();
     }
 
