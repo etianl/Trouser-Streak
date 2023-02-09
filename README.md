@@ -21,6 +21,7 @@ In no particular order
 
 ## Features:
 - **Airstrike+:** Rains whatever entities you desire from a list similar to Boom. It used to only rain fireballs. (Credits to Allah-Hack) 
+- **AnHero:** Become An Hero! (A quick way back to spawn.)
 - **AutoBuild:** Places blocks according to placement in a 5x5 grid. You can draw pictures with it! (Credits to Banana) I modified it so it places lengthways infront of you. This way you can draw stairs and place them infront of you, hop up em and keep going.
 - **AutoDrop:** Drops the stack in your selected slot automatically. You can shift click your inventory items to slot one to dump your trash easily.
 - **AutoLavaCaster** Simple timer based bot for lavacasting. Aim at the top of the block you want to cast on and activate the module. It places lava, then after an amount of time removes the lava, places the water after a specified delay, removes it after a specified delay, it will build the mountain upward, tower you up and repeat. Position yourself on a block above and diagonally, mostly perpendicular from the targeted block for best results. Use the ".lavacalc" command to determine roughly how long lava will take to finish.
@@ -49,6 +50,7 @@ In no particular order
 - **InstaKill:** Shoots arrows and tridents with incredible power and velocity. Enabling multiple buttons causes the amount to add up. (Credits to Saturn5Vfive)
 It can also retrieve arrows and items from a distance if you shoot in that direction, I have noticed.
 - **LecternCrash:** Crash 1.18.X vanilla servers and possibly below. (Credits to Coderx-Gamer)
+- **NewerNewChunks:** Normal NewChunks module, with a special option for tracing servers that have been updated from a version before the build limit updates. Credits to Meteor Rejects, and BleachHack from where it was ported.
 - **Phase:** Allows you to phase through blocks vertically, and through thin blocks horizontally such as doors and world border (Credits to Meteor-Rejects) Please add this back it's not too terrible.
 - **RedstoneNuker:** It's just the regular Nuker module from Meteor client, customized for only breaking things that generate redstone signals. Also with included AutoTool. To keep you safer when placing lots of TNT.
 - **ShulkerDupe:** Duplicates the contents of a shulker when opening. Only works on Vanilla, Forge, and Fabric servers 1.19 and below. Use multiconnect or viafabric (Credits to Allah-Hack)

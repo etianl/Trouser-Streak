@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.*;
+import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.item.*;
@@ -715,6 +716,10 @@ public class AutoLavaCaster extends Module {
     @EventHandler
     private void onScreenOpen(OpenScreenEvent event) {
         if (event.screen instanceof DisconnectedScreen) {
+            ticks = 0;
+            toggle();
+        }
+        if (event.screen instanceof DeathScreen) {
             ticks = 0;
             toggle();
         }
