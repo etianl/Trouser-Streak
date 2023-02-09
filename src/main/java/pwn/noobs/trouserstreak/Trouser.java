@@ -27,6 +27,8 @@ public class Trouser extends MeteorAddon {
         Modules.get().add(new AutoStaircase());
         Modules.get().add(new ShulkerDupe());
         Modules.get().add(new InvDupeModule());
+        Modules.get().add(new NewerNewChunks());
+        Modules.get().add(new Teleport());
         Modules.get().add(new BetterScaffold());
         Modules.get().add(new AutoBuild());
         Modules.get().add(new AirstrikePlus());
@@ -40,7 +42,7 @@ public class Trouser extends MeteorAddon {
         Modules.get().add(new Phase());
         Modules.get().add(new TrouserFlight());
         Modules.get().add(new LecternCrash());
-        Modules.get().add(new Teleport());
+        Modules.get().add(new AnHero());
         Commands.get().add(new LavaTimeCalculator());
         Commands.get().add(new CasterTimer());
 

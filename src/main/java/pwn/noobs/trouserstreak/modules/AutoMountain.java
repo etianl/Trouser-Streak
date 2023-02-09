@@ -88,13 +88,13 @@ public class AutoMountain extends Module {
     );
     public final Setting<Boolean> delayakick = sgTimings.add(new BoolSetting.Builder()
             .name("PauseBasedAntiKick")
-            .description("Helps if you're sending too many packets.")
+            .description("Helps if you're flying, or sending too many packets.")
             .defaultValue(false)
             .build()
     );
     private final Setting<Integer> delay = sgTimings.add(new IntSetting.Builder()
             .name("PauseForThisAmountOfTicks")
-            .description("The amount of delay in ticks, when pausing. Useful if a server kicks you for too many packets.")
+            .description("The amount of delay in ticks, when pausing. Useful if you're flying, or sending too many packets.")
             .defaultValue(5)
             .sliderRange(0, 40)
             .visible(() -> delayakick.get())
@@ -135,7 +135,7 @@ public class AutoMountain extends Module {
     );
     private final Setting<Double> lag = sgTimings.add(new DoubleSetting.Builder()
             .name("How many seconds until pause")
-            .description("Pause Builder if server is lagging for this many seconds (prevents rare death when building downward)")
+            .description("Pause Builder if server is lagging for this many seconds.")
             .sliderRange(0, 10)
             .defaultValue(1)
             .visible(() -> lagpause.get())
@@ -408,13 +408,17 @@ public class AutoMountain extends Module {
                 if (!Modules.get().get(TrouserFlight.class).isActive() && !Modules.get().get(TrouserFlight.class).isActive()){
                 mc.player.setVelocity(0,0,0);}}
             else if (ticks==antideath.get()){
+                mc.player.setPos(mc.player.getX(),mc.player.getY()+0.2,mc.player.getZ());
                 mc.player.setVelocity(0,0.1,0);//this line here prevents you dying for realz
             }}
             return;
         }
         if (!delayakick.get()){
-            offLeft=66666666;
+            offLeft=666666666;
             delayLeft=0;
+        }
+        else if (delayakick.get() && offLeft>offTime.get()){
+            offLeft=offTime.get();
         }
         ticksPassed = 0;
         blocksPlaced = 0;
