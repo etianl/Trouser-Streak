@@ -28,6 +28,7 @@ public class Trouser extends MeteorAddon {
         Modules.get().add(new ShulkerDupe());
         Modules.get().add(new InvDupeModule());
         Modules.get().add(new NewerNewChunks());
+        Modules.get().add(new InstantKill());
         Modules.get().add(new Teleport());
         Modules.get().add(new BetterScaffold());
         Modules.get().add(new AutoBuild());

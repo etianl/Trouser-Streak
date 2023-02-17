@@ -114,8 +114,10 @@ public class AutoStaircase extends Module {
 
         // North
         WButton north = table.add(theme.button("North")).expandX().minWidth(100).widget();
-        north.action = () ->
-                mc.player.setYaw(180);
+        north.action = () -> {
+        if (mc.world.isChunkLoaded(mc.player.getChunkPos().getCenterX(),mc.player.getChunkPos().getCenterZ())){
+
+            mc.player.setYaw(180);
         mc.options.jumpKey.setPressed(false);
         mc.options.forwardKey.setPressed(false);
         mc.player.setMovementSpeed(0);
@@ -127,14 +129,16 @@ public class AutoStaircase extends Module {
             else PlayerUtils.centerPlayer();
         }
 
-        dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());
+        dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());}};
 
         table.row();
 
         // East
         WButton east = table.add(theme.button("East")).expandX().minWidth(100).widget();
-        east.action = () ->
-                mc.player.setYaw(270);
+        east.action = () -> {
+        if (mc.world.isChunkLoaded(mc.player.getChunkPos().getCenterX(),mc.player.getChunkPos().getCenterZ())){
+
+            mc.player.setYaw(270);
         mc.options.jumpKey.setPressed(false);
         mc.options.forwardKey.setPressed(false);
         mc.player.setMovementSpeed(0);
@@ -146,14 +150,16 @@ public class AutoStaircase extends Module {
             else PlayerUtils.centerPlayer();
         }
 
-        dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());
+        dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());}};
 
         table.row();
 
         // South
         WButton south = table.add(theme.button("South")).expandX().minWidth(100).widget();
-        south.action = () ->
-                mc.player.setYaw(360);
+        south.action = () -> {
+        if (mc.world.isChunkLoaded(mc.player.getChunkPos().getCenterX(),mc.player.getChunkPos().getCenterZ())){
+
+            mc.player.setYaw(360);
         mc.options.jumpKey.setPressed(false);
         mc.options.forwardKey.setPressed(false);
         mc.player.setMovementSpeed(0);
@@ -165,14 +171,16 @@ public class AutoStaircase extends Module {
             else PlayerUtils.centerPlayer();
         }
 
-        dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());
+        dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());}};
 
         table.row();
 
         // West
         WButton west = table.add(theme.button("West")).expandX().minWidth(100).widget();
-        west.action = () ->
-                mc.player.setYaw(90);
+        west.action = () -> {
+        if (mc.world.isChunkLoaded(mc.player.getChunkPos().getCenterX(),mc.player.getChunkPos().getCenterZ())){
+
+            mc.player.setYaw(90);
         mc.options.jumpKey.setPressed(false);
         mc.options.forwardKey.setPressed(false);
         mc.player.setMovementSpeed(0);
@@ -184,7 +192,7 @@ public class AutoStaircase extends Module {
             else PlayerUtils.centerPlayer();
         }
 
-        dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());
+        dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());}};
 
         table.row();
 

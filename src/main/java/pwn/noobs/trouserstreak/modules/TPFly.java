@@ -117,13 +117,6 @@ public class TPFly extends Module {
     private void onTick(TickEvent.Post event) {
         mc.player.setVelocity(0,0,0);
         mc.player.setMovementSpeed(0);
-        switch (mc.player.getMovementDirection()) {
-            case NORTH -> {}
-            case EAST -> {}
-            case SOUTH -> {}
-            case WEST -> {}
-            default -> {}
-        }
         if (mode.get() == Modes.WASDFly && mc.options.forwardKey.isPressed()){
             if (mc.player.getMovementDirection() == Direction.NORTH) {
                 BlockPos playerPos = BEntityUtils.playerPos(mc.player);
