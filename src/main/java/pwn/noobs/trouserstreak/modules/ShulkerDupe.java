@@ -1,8 +1,8 @@
 package pwn.noobs.trouserstreak.modules;
 
+import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
@@ -14,55 +14,51 @@ import net.minecraft.util.math.Direction;
 import pwn.noobs.trouserstreak.Trouser;
 
 public class ShulkerDupe extends Module {
-    private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
-    private final Setting<Boolean> toggle = sgGeneral.add(new BoolSetting.Builder()
-        .name("toggle")
-        .description("toggles after duping")
-        .defaultValue(true)
-        .build());
-
-    private final Setting<Modes> mode = sgGeneral.add(new EnumSetting.Builder<Modes>()
-            .name("mode")
-            .description("the mode")
-            .defaultValue(Modes.All)
-            .build());
 
     public ShulkerDupe() {
-        super(Trouser.Main, "shulker-dupe", "allah helps you duplicate when you open a shuker");
+        super(Trouser.Main, "shulker-dupe", "ShulkerDupe only works in vanilla, forge, and fabric servers version 1.19 and below.");
     }
+    public static boolean shouldDupe;
+    public static boolean shouldDupeAll;
 
+    @Override
+    public void onActivate() {
+        shouldDupeAll=false;
+        shouldDupe=false;
+    }
+    @EventHandler
+    private void onScreenOpen(OpenScreenEvent event) {
+        if (event.screen instanceof ShulkerBoxScreen) {
+            shouldDupeAll=false;
+            shouldDupe=false;
+        }
+    }
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (mc.currentScreen instanceof ShulkerBoxScreen && mc.player != null) {
             HitResult wow = mc.crosshairTarget;
             BlockHitResult a = (BlockHitResult) wow;
+            if (shouldDupe|shouldDupeAll==true){
             mc.interactionManager.updateBlockBreakingProgress(a.getBlockPos(), Direction.DOWN);
+        }
         }
     }
 
     @EventHandler
     public void onSendPacket(PacketEvent.Sent event) {
         if (event.packet instanceof PlayerActionC2SPacket) {
-            switch (mode.get()) {
-                case All -> {
+            if (shouldDupeAll==true){
             if (((PlayerActionC2SPacket) event.packet).getAction() == PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK) {
                 for (int i = 0; i < 27; i++) {
                     mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, i, 0, SlotActionType.QUICK_MOVE, mc.player);
-                } if (toggle.get()) {
-                    toggle();
                 }
-            }}
-                case Slot0 -> {
+                shouldDupeAll=false;
+            }
+            } else if (shouldDupe==true){
             if (((PlayerActionC2SPacket) event.packet).getAction() == PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK) {
                     mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 0, 0, SlotActionType.QUICK_MOVE, mc.player);
-                 if (toggle.get()) {
-                    toggle();
-                }
-            }}
+                    shouldDupe=false;
+            }
+            }
         }
     }}
-    public enum Modes {
-        All, Slot0
-    }
-}

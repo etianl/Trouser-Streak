@@ -27,7 +27,7 @@ public class BoomPlus extends Module {
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
         .name("speed")
         .description("fastness of thing")
-        .defaultValue(10)
+        .defaultValue(5)
         .min(1)
         .sliderMax(10)
         .visible(() -> mode.get() != Modes.Lightning || mode.get() != Modes.Instant || mode.get() != Modes.Arrow || mode.get() == Modes.Creeper || mode.get() == Modes.TNT || mode.get() == Modes.WitherSkull || mode.get() == Modes.Spit || mode.get() == Modes.ShulkerBullet)
@@ -55,6 +55,15 @@ public class BoomPlus extends Module {
             .defaultValue(false)
             .build()
     );
+    public final Setting<Integer> atickdelay = sgGeneral.add(new IntSetting.Builder()
+            .name("FULLAUTOTickDelay")
+            .description("Tick Delay for FULLAUTO option.")
+            .defaultValue(2)
+            .min(0)
+            .sliderMax(20)
+            .visible(() -> auto.get())
+            .build()
+    );
 
     public final Setting<Boolean> target = sgGeneral.add(new BoolSetting.Builder()
             .name("OnTarget")
@@ -66,7 +75,11 @@ public class BoomPlus extends Module {
     public BoomPlus() {
         super(Trouser.Main, "boom+", "shoots something where you click");
     }
-
+    private int aticks=0;
+    @Override
+    public void onActivate() {
+        aticks=0;
+    }
     @EventHandler
     public void onTick(TickEvent.Post event) {
         if (mc.player.getAbilities().creativeMode) {}
@@ -75,7 +88,10 @@ public class BoomPlus extends Module {
             toggle();
         }
         if (auto.get() && mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player.getAbilities().creativeMode) {
-            if (target.get()) {
+            if (aticks<=atickdelay.get()){
+                aticks++;
+            } else if (aticks>atickdelay.get()) {
+                if (target.get()) {
                 HitResult hr = mc.cameraEntity.raycast(600, 0, true);
                 Vec3d owo = hr.getPos();
                 BlockPos pos = new BlockPos(owo);
@@ -427,6 +443,8 @@ public class BoomPlus extends Module {
                     }
                 }
             }
+            aticks=0;
+        }
         }
     }
 

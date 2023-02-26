@@ -2,6 +2,7 @@ package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -19,10 +20,13 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.chunk.WorldChunk;
 import pwn.noobs.trouserstreak.Trouser;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /*
     Ported from: https://github.com/BleachDrinker420/BleachHack/blob/master/BleachHack-Fabric-1.16/src/main/java/bleach/hack/module/mods/NewChunks.java
+    updated by etianll :D
 */
 public class NewerNewChunks extends Module {
 
@@ -30,10 +34,16 @@ public class NewerNewChunks extends Module {
 	private final SettingGroup sgRender = settings.createGroup("Render");
 
 	// general
-	private final Setting<Boolean> newservers = sgGeneral.add(new BoolSetting.Builder()
-			.name("OnlyDetectFlowAbove0")
-			.description("For Tracing servers updated to the new Build Limits from an old version. Only Detects chunks as new if liquid flow starts above 0.")
+	private final Setting<Boolean> ignore = sgGeneral.add(new BoolSetting.Builder()
+			.name("IgnoreFlowBelow0")
+			.description("For Tracing servers updated to the new Build Limits from an old version. Ignores flow if no flow above zero and there is flow below zero.")
 			.defaultValue(true)
+			.build()
+	);
+	private final Setting<Boolean> advanced = sgGeneral.add(new BoolSetting.Builder()
+			.name("AdvancedMode")
+			.description("Shows another colour if liquids are flowing below Y=0 but not above. READ THE README BEFORE TRYING.")
+			.defaultValue(false)
 			.build()
 	);
 	private final Setting<Boolean> remove = sgGeneral.add(new BoolSetting.Builder()
@@ -64,7 +74,14 @@ public class NewerNewChunks extends Module {
 			.name("new-chunks-side-color")
 			.description("Color of the chunks that are (most likely) completely new.")
 			.defaultValue(new SettingColor(255, 0, 0, 75))
-			.visible(() -> shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both)
+			.visible(() -> (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both))
+			.build()
+	);
+	private final Setting<SettingColor> olderoldChunksSideColor = sgRender.add(new ColorSetting.Builder()
+			.name("FlowIsBelowY0-side-color")
+			.description("MAY STILL BE NEW. Color of the chunks that have liquids flowing below Y=0")
+			.defaultValue(new SettingColor(255, 255, 0, 75))
+			.visible(() -> (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both) && advanced.get())
 			.build()
 	);
 
@@ -80,7 +97,14 @@ public class NewerNewChunks extends Module {
 			.name("new-chunks-line-color")
 			.description("Color of the chunks that are (most likely) completely new.")
 			.defaultValue(new SettingColor(255, 0, 0, 255))
-			.visible(() -> shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both)
+			.visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both))
+			.build()
+	);
+	private final Setting<SettingColor> olderoldChunksLineColor = sgRender.add(new ColorSetting.Builder()
+			.name("FlowIsBelowY0-line-color")
+			.description("MAY STILL BE NEW. Color of the chunks that have liquids flowing below Y=0")
+			.defaultValue(new SettingColor(255, 255, 0, 255))
+			.visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both) && advanced.get())
 			.build()
 	);
 
@@ -94,21 +118,41 @@ public class NewerNewChunks extends Module {
 
     private final Set<ChunkPos> newChunks = Collections.synchronizedSet(new HashSet<>());
     private final Set<ChunkPos> oldChunks = Collections.synchronizedSet(new HashSet<>());
+	private final Set<ChunkPos> olderoldChunks = Collections.synchronizedSet(new HashSet<>());
     private static final Direction[] searchDirs = new Direction[] { Direction.EAST, Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.UP };
-
+	private int ticks=0;
     public NewerNewChunks() {
-        super(Trouser.Main,"NewerNewChunks", "Detects completely new chunks using certain traits of them");
+        super(Trouser.Main,"NewerNewChunks", "Estimates new chunks by checking liquid flow.");
     }
+	@Override
+	public void onActivate() {
+		ticks=0;
+	}
 
 	@Override
 	public void onDeactivate() {
+		ticks=0;
 		if (remove.get()) {
 			newChunks.clear();
 			oldChunks.clear();
+			olderoldChunks.clear();
 		}
 		super.onDeactivate();
 	}
-
+	@EventHandler
+	private void onPreTick(TickEvent.Pre event) {
+		if (advanced.get() && ignore.get()){
+			ticks++;
+			if (ticks==2){
+		error("Use IgnoreFlow or Advanced mode, not both.");
+			} else if (ticks==100){
+				error("Use IgnoreFlow or Advanced mode, not both.");
+				ticks=3;
+			}
+	} else if (!advanced.get() || !ignore.get()){
+			ticks=0;
+		}
+	}
 	@EventHandler
 	private void onRender(Render3DEvent event) {
 		if (newChunksLineColor.get().a > 5 || newChunksSideColor.get().a > 5) {
@@ -116,6 +160,15 @@ public class NewerNewChunks extends Module {
 				for (ChunkPos c : newChunks) {
 					if (mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), 1024)) {
 						render(new Box(c.getStartPos(), c.getStartPos().add(16, renderHeight.get(), 16)), newChunksSideColor.get(), newChunksLineColor.get(), shapeMode.get(), event);
+					}
+				}
+			}
+		}
+		if (olderoldChunksLineColor.get().a > 5 || olderoldChunksSideColor.get().a > 5) {
+			synchronized (olderoldChunks) {
+				for (ChunkPos c : olderoldChunks) {
+					if (mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), 1024)) {
+						render(new Box(c.getStartPos(), c.getStartPos().add(16, renderHeight.get(), 16)), olderoldChunksSideColor.get(), olderoldChunksLineColor.get(), shapeMode.get(), event);
 					}
 				}
 			}
@@ -147,12 +200,29 @@ public class NewerNewChunks extends Module {
 					ChunkPos chunkPos = new ChunkPos(pos);
 
 					for (Direction dir: searchDirs) {
-						if (newservers.get()){
-						if (pos.offset(dir).getY()>0 && mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && !oldChunks.contains(chunkPos)) {
-							newChunks.add(chunkPos);
-							return;
+						if (advanced.get() && !ignore.get()){
+							if (pos.offset(dir).getY()>0 && !mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && !oldChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos)) {
+								newChunks.add(chunkPos);
+								return;
+							}else if ((pos.offset(dir).getY()<0 && !mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill()) && (pos.offset(dir).getY()>0 && !mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill()) && !oldChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos)) {
+								newChunks.add(chunkPos);
+								return;
+							}else if (pos.offset(dir).getY()<0 && !mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && !oldChunks.contains(chunkPos) &&  !newChunks.contains(chunkPos)) {
+								olderoldChunks.add(chunkPos);
+								return;
+							}
 						}
-						} else if (!newservers.get()){
+						if (ignore.get() && !advanced.get()){
+							if (pos.offset(dir).getY()>0 && mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && !oldChunks.contains(chunkPos)) {
+								newChunks.add(chunkPos);
+								return;
+							}
+							if ((pos.offset(dir).getY()<0 && !mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill()) && (pos.offset(dir).getY()>0 && !mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill()) && !oldChunks.contains(chunkPos)) {
+								newChunks.add(chunkPos);
+								return;
+							}
+							}
+						if (!advanced.get() && !ignore.get()){
 							if (mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && !oldChunks.contains(chunkPos)) {
 								newChunks.add(chunkPos);
 								return;
@@ -170,12 +240,29 @@ public class NewerNewChunks extends Module {
 				ChunkPos chunkPos = new ChunkPos(packet.getPos());
 
 				for (Direction dir: searchDirs) {
-					if (newservers.get()){
-					if (packet.getPos().offset(dir).getY()>0 && mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && !oldChunks.contains(chunkPos)) {
-						newChunks.add(chunkPos);
-						return;
+					if (advanced.get() && !ignore.get()){
+						if (packet.getPos().offset(dir).getY()>0 && !mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && !oldChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos)) {
+							newChunks.add(chunkPos);
+							return;
+						}else if ((packet.getPos().offset(dir).getY()<0 && !mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill()) && (packet.getPos().offset(dir).getY()>0 && !mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill()) && !oldChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos)) {
+							newChunks.add(chunkPos);
+							return;
+						}else if (packet.getPos().offset(dir).getY()<0 && !mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() &&  !oldChunks.contains(chunkPos) &&  !newChunks.contains(chunkPos)) {
+							olderoldChunks.add(chunkPos);
+							return;
+						}
 					}
-					} else if (!newservers.get()){
+					if (ignore.get() && !advanced.get()){
+						if (packet.getPos().offset(dir).getY()>0 && mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && !oldChunks.contains(chunkPos)) {
+							newChunks.add(chunkPos);
+							return;
+						}
+						if ((packet.getPos().offset(dir).getY()<0 && !mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill()) && (packet.getPos().offset(dir).getY()>0 && !mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill()) && !oldChunks.contains(chunkPos)) {
+							newChunks.add(chunkPos);
+							return;
+						}
+					}
+					if (!advanced.get() && !ignore.get()){
 						if (mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && !oldChunks.contains(chunkPos)) {
 							newChunks.add(chunkPos);
 							return;
@@ -190,7 +277,7 @@ public class NewerNewChunks extends Module {
 
 			ChunkPos pos = new ChunkPos(packet.getX(), packet.getZ());
 
-			if (!newChunks.contains(pos) && mc.world.getChunkManager().getChunk(packet.getX(), packet.getZ()) == null) {
+			if (!olderoldChunks.contains(pos) && !newChunks.contains(pos) && mc.world.getChunkManager().getChunk(packet.getX(), packet.getZ()) == null) {
 				WorldChunk chunk = new WorldChunk(mc.world, pos);
 				try {
 					chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), new NbtCompound(), packet.getChunkData().getBlockEntities(packet.getX(), packet.getZ()));

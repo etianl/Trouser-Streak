@@ -1,9 +1,16 @@
 package pwn.noobs.trouserstreak.modules;
 
+import meteordevelopment.meteorclient.events.game.GameLeftEvent;
+import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.EnumSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.gui.screen.DeathScreen;
+import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -58,9 +65,9 @@ public class AirstrikePlus extends Module {
 
     private final Setting<Integer> speed = sgGeneral.add(new IntSetting.Builder()
         .name("speed")
-        .description("speed of fireballs")
-        .defaultValue(10)
-        .sliderRange(1, 100)
+        .description("speed of entities")
+        .defaultValue(5)
+        .sliderRange(1, 10)
         .build());
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
@@ -78,12 +85,23 @@ public class AirstrikePlus extends Module {
     final Random r = new Random();
     Vec3d origin = null;
     int i = 0;
+    int catdog=0;
 
     private Vec3d pickRandomPos() {
         double x = r.nextDouble(radius.get() * 2) - radius.get() + origin.x;
         double y = height.get();
         double z = r.nextDouble(radius.get() * 2) - radius.get() + origin.z;
         return new Vec3d(x, y, z);
+    }
+    @EventHandler
+    private void onScreenOpen(OpenScreenEvent event) {
+        if (event.screen instanceof DisconnectedScreen) {
+            toggle();
+        }
+    }
+    @EventHandler
+    private void onGameLeft(GameLeftEvent event) {
+        toggle();
     }
 
     @EventHandler
@@ -179,6 +197,7 @@ public class AirstrikePlus extends Module {
                         pos.add(NbtDouble.of(cpos.x));
                         pos.add(NbtDouble.of(height.get()));
                         pos.add(NbtDouble.of(cpos.z));
+                        tag.putInt("Invulnerable", (1));
                         tag.put("Pos", pos);
                         tag.putString("id", "minecraft:cat");
                         bomb.setSubNbt("EntityTag", tag);
@@ -289,6 +308,51 @@ public class AirstrikePlus extends Module {
                         mc.interactionManager.clickCreativeStack(bfr, 36 + mc.player.getInventory().selectedSlot);
                         i = 0;
                     }
+                    case CatsAndDogs -> {
+                        catdog++;
+                        if (catdog<=1) {
+                            Vec3d cpos = pickRandomPos();
+
+                            NbtCompound tag = new NbtCompound();
+                            NbtList speedlist = new NbtList();
+                            NbtList pos = new NbtList();
+                            speedlist.add(NbtDouble.of(0));
+                            speedlist.add(NbtDouble.of(-speed.get()));
+                            speedlist.add(NbtDouble.of(0));
+                            pos.add(NbtDouble.of(cpos.x));
+                            pos.add(NbtDouble.of(height.get()));
+                            pos.add(NbtDouble.of(cpos.z));
+                            tag.putInt("Invulnerable", (1));
+                            tag.put("Pos", pos);
+                            tag.putString("id", "minecraft:cat");
+                            bomb.setSubNbt("EntityTag", tag);
+                            mc.interactionManager.clickCreativeStack(bomb, 36 + mc.player.getInventory().selectedSlot);
+                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
+                            mc.interactionManager.clickCreativeStack(bfr, 36 + mc.player.getInventory().selectedSlot);
+                            i = 0;
+                        } else if (catdog>=2){
+                        Vec3d cpos = pickRandomPos();
+
+                        NbtCompound tag = new NbtCompound();
+                        NbtList speedlist = new NbtList();
+                        NbtList pos = new NbtList();
+                        speedlist.add(NbtDouble.of(0));
+                        speedlist.add(NbtDouble.of(-speed.get()));
+                        speedlist.add(NbtDouble.of(0));
+                        pos.add(NbtDouble.of(cpos.x));
+                        pos.add(NbtDouble.of(height.get()));
+                        pos.add(NbtDouble.of(cpos.z));
+                            tag.putInt("Invulnerable", (1));
+                        tag.put("Pos", pos);
+                        tag.putString("id", "minecraft:wolf");
+                        bomb.setSubNbt("EntityTag", tag);
+                        mc.interactionManager.clickCreativeStack(bomb, 36 + mc.player.getInventory().selectedSlot);
+                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
+                        mc.interactionManager.clickCreativeStack(bfr, 36 + mc.player.getInventory().selectedSlot);
+                        i = 0;
+                        catdog=0;
+                        }
+                    }
                 }
             }
         } else {
@@ -297,6 +361,6 @@ public class AirstrikePlus extends Module {
         }
     }
     public enum Modes {
-        Fireball, Creeper, Lightning, Kitty, Arrow, TNT, Spit, ShulkerBullet, Wither
+        Fireball, Creeper, Lightning, Kitty, Arrow, TNT, Spit, ShulkerBullet, Wither, CatsAndDogs
     }
 }
