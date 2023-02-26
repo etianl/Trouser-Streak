@@ -13,6 +13,7 @@
     "ClientPlayerInteractionManagerMixin",
     "LecternScreenMixin",
     "SplashTextResourceSupplierMixin",
+    "ShulkerBoxScreenMixin",
     "accessor.ClientConnectionAccessor"
   ]
 }

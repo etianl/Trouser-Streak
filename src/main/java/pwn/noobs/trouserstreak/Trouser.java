@@ -20,7 +20,7 @@ public class Trouser extends MeteorAddon {
 
 	@Override
 	public void onInitialize() {
-		LOG.info("Getting TP for my Bunghole...");
+		LOG.info("Initializing PantsMod!");
 
         Modules.get().add(new AutoLavaCaster());
         Modules.get().add(new AutoMountain());
@@ -34,7 +34,7 @@ public class Trouser extends MeteorAddon {
         Modules.get().add(new AutoBuild());
         Modules.get().add(new AirstrikePlus());
         Modules.get().add(new BoomPlus());
-        Modules.get().add(new Voider());
+        Modules.get().add(new VoiderPlus());
         Modules.get().add(new HandOfGod());
         Modules.get().add(new ExplosionAura());
         Modules.get().add(new RedstoneNuker());

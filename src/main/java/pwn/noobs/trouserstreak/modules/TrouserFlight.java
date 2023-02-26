@@ -93,7 +93,7 @@ public class TrouserFlight extends Module {
     public TrouserFlight() {
         super(Categories.Movement, "flight", "FLYYYY! No Fall is recommended with this module.");
     }
-
+    public static double trouserspeed;
     private int delayLeft = delay.get();
     private int offLeft = offTime.get();
 
@@ -121,6 +121,7 @@ public class TrouserFlight extends Module {
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
+        trouserspeed=speed.get();
         float currentYaw = mc.player.getYaw();
         if (mc.player.fallDistance >= 3f && currentYaw == lastYaw && mc.player.getVelocity().length() < 0.003d) {
             mc.player.setYaw(currentYaw + (flip ? 1 : -1));
@@ -154,6 +155,7 @@ public class TrouserFlight extends Module {
                     BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
                     if (mc.world.getBlockState(pos).isAir() && mode.get() == Mode.Velocity)
                      mc.player.move(MovementType.SELF, new Vec3d(0,-0.2,0));
+                     mc.player.setVelocity(0,0,0);
                 }
             } else if (antiKickMode.get() == AntiKickMode.Packet && offLeft == offTime.get()) {
                 // Resend movement packets
