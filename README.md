@@ -14,7 +14,7 @@ In no particular order
 - [1.17 Crafting Dupe](https://github.com/B2H990/NUMA-117-Crafting-Dupe/)
 - [InstantKillBow](https://github.com/Saturn5Vfive/InstantKillBow)
 - [LecternCrash](https://github.com/Coderx-Gamer/lectern-crash)
-- [etianl] (https://github.com/etianl/)
+- [etianl](https://github.com/etianl/)
 
  <div align="left">
     <p>This modpack would not have been possible without you
@@ -45,8 +45,8 @@ In no particular order
 - Holding ForwardKey or BackKey then holding Left or RightKey as well builds stairs diagonally. Release left or right key first to continue building in the direction you were prior. 
 - **AutoStaircase:** Builds stairs upward in the direction you are facing by running forward and jumping. (Credits to etianl for bringing it to life! As well as Credits to Frostburn, and Banana for the player centering utils to make it work correctly) I just had to fix up some stuff for this one but Frostburn had the base code there. I believe this is the first publicly available automatic staircase builder in a Meteor addon, correct me if I'm wrong maybe I didn't have to learn some Java to do this.
 - **BetterScaffold:** Give you more options for scaffolding, bigger range and others. (Credits to Meteor-Tweaks)
-- **Boom+:** Throws entities when you click (Credits to Allah-Hack) I just added some more fun things you might want to throw.
-- **ExplosionAura:** Spawns creepers at your position that explode as you move. Like a bigger, more laggy Nuker module for creative mode. The use of the module Velocity is recommended to avoid being thrown around. (Credits to etianl :D)
+- **Boom+:** Throws entities or spawns them on the targeted block when you click (Credits to Allah-Hack) I just added some more fun things you might want to throw.
+- **ExplosionAura:** Spawns creepers at your position as you move that explode instantly. Like a bigger, more laggy Nuker module for creative mode. The use of the module Velocity is recommended to avoid being thrown around. (Credits to etianl :D)
 - **HandOfGod:** Runs the "/fill" command on the world around you in different ways as you fly, and as you click. Operator status required. (Credits to etianl :D)
 - **Inventory Dupe (1.17):** Duplicates things in your crafting slots when the module is enabled and the Dupe button is pressed in your inventory. (Credit to ItsVen and Da0neDatGotAway for original creation of the dupe, and to B2H990 for making the fabric mod.)
 - **InstaKill:** Shoots arrows and tridents with incredible power and velocity. Enabling multiple buttons causes the amount of packets to add up. (Credits to Saturn5Vfive)
