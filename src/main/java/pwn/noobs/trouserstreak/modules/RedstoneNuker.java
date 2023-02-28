@@ -33,10 +33,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import pwn.noobs.trouserstreak.Trouser;
-import net.minecraft.block.BambooBlock;
-import net.minecraft.block.BambooSaplingBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -58,7 +54,7 @@ public class RedstoneNuker extends Module {
         .build()
     );
 
-    private final Setting<RedstoneNuker.Mode> mode = sgGeneral.add(new EnumSetting.Builder<RedstoneNuker.Mode>()
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
         .description("The way the blocks are broken.")
         .defaultValue(Mode.All)
@@ -145,10 +141,10 @@ public class RedstoneNuker extends Module {
         .build()
     );
 
-    private final Setting<RedstoneNuker.SortMode> sortMode = sgGeneral.add(new EnumSetting.Builder<RedstoneNuker.SortMode>()
+    private final Setting<SortMode> sortMode = sgGeneral.add(new EnumSetting.Builder<SortMode>()
         .name("sort-mode")
         .description("The blocks you want to mine first.")
-        .defaultValue(RedstoneNuker.SortMode.Closest)
+        .defaultValue(SortMode.Closest)
         .build()
     );
 
@@ -240,13 +236,6 @@ public class RedstoneNuker extends Module {
             .build()
     );
 
-    private final Setting<Boolean> silkTouchForEnderChest = sgAutoTool.add(new BoolSetting.Builder()
-            .name("silk-touch-for-ender-chest")
-            .description("Mines Ender Chests only with the Silk Touch enchantment.")
-            .defaultValue(true)
-            .build()
-    );
-
     private final Setting<Boolean> antiBreak = sgAutoTool.add(new BoolSetting.Builder()
             .name("anti-break")
             .description("Stops you from breaking your tool.")
@@ -260,7 +249,7 @@ public class RedstoneNuker extends Module {
             .defaultValue(10)
             .range(1, 100)
             .sliderRange(1, 100)
-            .visible(antiBreak::get)
+            .visible(() -> antiBreak.get())
             .build()
     );
 
@@ -277,7 +266,7 @@ public class RedstoneNuker extends Module {
             .defaultValue(0)
             .build()
     ));
-
+    private boolean silkTouchForEnderChest=false;
     private boolean wasPressed;
     private boolean shouldSwitch;
     private int ticks;
@@ -520,7 +509,7 @@ public class RedstoneNuker extends Module {
         bestSlot = -1;
 
         for (int i = 0; i < 9; i++) {
-            double score = getScore(mc.player.getInventory().getStack(i), blockState, silkTouchForEnderChest.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack));
+            double score = getScore(mc.player.getInventory().getStack(i), blockState, silkTouchForEnderChest, prefer.get(), itemStack -> !shouldStopUsing(itemStack));
             if (score < 0) continue;
 
             if (score > bestScore) {
@@ -529,7 +518,7 @@ public class RedstoneNuker extends Module {
             }
         }
 
-        if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack))) || shouldStopUsing(currentStack) || !isTool(currentStack))) {
+        if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest, prefer.get(), itemStack -> !shouldStopUsing(itemStack))) || shouldStopUsing(currentStack) || !isTool(currentStack))) {
             ticks = switchDelay.get();
 
             if (ticks == 0) InvUtils.swap(bestSlot, true);
@@ -549,7 +538,7 @@ public class RedstoneNuker extends Module {
         return antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamage()) < (itemStack.getMaxDamage() * breakDurability.get() / 100);
     }
 
-    public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, RedstoneNuker.EnchantPreference enchantPreference, Predicate<ItemStack> good) {
+    public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, EnchantPreference enchantPreference, Predicate<ItemStack> good) {
         if (!good.test(itemStack) || !isTool(itemStack)) return -1;
 
         if (silkTouchEnderChest

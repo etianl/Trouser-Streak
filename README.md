@@ -51,8 +51,15 @@ In no particular order
 - **Inventory Dupe (1.17):** Duplicates things in your crafting slots when the module is enabled and the Dupe button is pressed in your inventory. (Credit to ItsVen and Da0neDatGotAway for original creation of the dupe, and to B2H990 for making the fabric mod.)
 - **InstaKill:** Shoots arrows and tridents with incredible power and velocity. Enabling multiple buttons causes the amount of packets to add up. (Credits to Saturn5Vfive)
 - **LecternCrash:** Crash 1.18.X vanilla servers and possibly below. (Credits to Coderx-Gamer)
-- **NewerNewChunks:** Normal NewChunks module, with special options for tracing servers that have been updated from a version before the build limit updates. (Credits to Meteor Rejects, and BleachHack from where it was ported, and etianl for updating :D.)
+- **NewerNewChunks:** NewChunks module with the ability to save chunk data for later! Also with special options for tracing servers that have been updated from a version before the build limit updates. (Credits to Meteor Rejects, and BleachHack from where it was ported, and etianl for updating :D.)
 - *NewerNewChunks Notes:*
+- NewerNewChunks stores your NewChunks data as text files seperately per server and per dimension in the NewChunks folder in your Minecraft folder.
+- Save and Load ChunkData options are for the stored files.
+- This enables you to chunk trace multiple different servers and dimensions without mixing NewChunks data.
+- If the game crashes, chunk data is saved! No loss in tracing progress.
+- Send chunk data to your friends! Just copy the appropriate folder and send it.
+- There is also an option for deleting chunk data in that particular dimension on the server.
+- *NewerNewChunks Special Options:*
 - The "IgnoreFlowBelow0" does not show a new chunk if liquid flow is only below Y zero, but does show a newchunk if flow is above Y zero, or both above AND below Y zero.
 - The "AdvancedMode" highlights chunks that have flow only below Y0. If there is nothing but these you are updating old chunks to the new build limits and the FlowIsBelowY0 coloured chunks are OLD. If they are mixed with newchunks the FlowIsBelowY0 coloured chunks are NEW.
 - AdvancedMode can be confusing, do not use if you can't interpret the chunk data.
