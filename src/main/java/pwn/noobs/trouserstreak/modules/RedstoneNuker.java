@@ -240,13 +240,6 @@ public class RedstoneNuker extends Module {
             .build()
     );
 
-    private final Setting<Boolean> silkTouchForEnderChest = sgAutoTool.add(new BoolSetting.Builder()
-            .name("silk-touch-for-ender-chest")
-            .description("Mines Ender Chests only with the Silk Touch enchantment.")
-            .defaultValue(true)
-            .build()
-    );
-
     private final Setting<Boolean> antiBreak = sgAutoTool.add(new BoolSetting.Builder()
             .name("anti-break")
             .description("Stops you from breaking your tool.")
@@ -260,7 +253,7 @@ public class RedstoneNuker extends Module {
             .defaultValue(10)
             .range(1, 100)
             .sliderRange(1, 100)
-            .visible(antiBreak::get)
+            .visible(() -> antiBreak.get())
             .build()
     );
 
@@ -277,7 +270,7 @@ public class RedstoneNuker extends Module {
             .defaultValue(0)
             .build()
     ));
-
+    private boolean silkTouchForEnderChest=false;
     private boolean wasPressed;
     private boolean shouldSwitch;
     private int ticks;
@@ -520,7 +513,7 @@ public class RedstoneNuker extends Module {
         bestSlot = -1;
 
         for (int i = 0; i < 9; i++) {
-            double score = getScore(mc.player.getInventory().getStack(i), blockState, silkTouchForEnderChest.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack));
+            double score = getScore(mc.player.getInventory().getStack(i), blockState, silkTouchForEnderChest, prefer.get(), itemStack -> !shouldStopUsing(itemStack));
             if (score < 0) continue;
 
             if (score > bestScore) {
@@ -529,7 +522,7 @@ public class RedstoneNuker extends Module {
             }
         }
 
-        if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack))) || shouldStopUsing(currentStack) || !isTool(currentStack))) {
+        if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest, prefer.get(), itemStack -> !shouldStopUsing(itemStack))) || shouldStopUsing(currentStack) || !isTool(currentStack))) {
             ticks = switchDelay.get();
 
             if (ticks == 0) InvUtils.swap(bestSlot, true);
