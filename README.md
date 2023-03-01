@@ -1,6 +1,7 @@
 <div align="center">
   <h1>Trouser-Streak</h1>
     <p>Trouser-Streak is a compilation of modules, updated to the latest version and optimized for maximum grief. I did not make all of these.</p>
+	    <p>I frequently release updates, please check back here often! :)</p>
   <img src="src/main/resources/assets/icon/icon.png" alt="Trouser-Streak Logo" width="28%"/>
 </div>  
 
