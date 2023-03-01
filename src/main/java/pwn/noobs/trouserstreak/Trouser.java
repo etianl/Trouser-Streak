@@ -1,22 +1,19 @@
 package pwn.noobs.trouserstreak;
 
-import meteordevelopment.meteorclient.systems.commands.Commands;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.item.ItemStack;
-import pwn.noobs.trouserstreak.commands.LavaTimeCalculator;
-import pwn.noobs.trouserstreak.commands.CasterTimer;
-import pwn.noobs.trouserstreak.modules.*;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
+import meteordevelopment.meteorclient.systems.commands.Commands;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import net.minecraft.item.Items;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pwn.noobs.trouserstreak.commands.CasterTimer;
+import pwn.noobs.trouserstreak.commands.LavaTimeCalculator;
+import pwn.noobs.trouserstreak.modules.*;
 
 
 public class Trouser extends MeteorAddon {
 	public static final Logger LOG = LoggerFactory.getLogger(Trouser.class);
-	public static final Category Main = new Category("TrouserStreak", stack());
+	public static final Category Main = new Category("TrouserStreak");
 
 	@Override
 	public void onInitialize() {
@@ -28,8 +25,8 @@ public class Trouser extends MeteorAddon {
         Modules.get().add(new ShulkerDupe());
         Modules.get().add(new InvDupeModule());
         Modules.get().add(new NewerNewChunks());
-        Modules.get().add(new Teleport());
         Modules.get().add(new InstantKill());
+        Modules.get().add(new Teleport());
         Modules.get().add(new BetterScaffold());
         Modules.get().add(new AutoBuild());
         Modules.get().add(new AirstrikePlus());
@@ -46,6 +43,7 @@ public class Trouser extends MeteorAddon {
         Modules.get().add(new AnHero());
         Commands.get().add(new LavaTimeCalculator());
         Commands.get().add(new CasterTimer());
+
 	}
 
 	@Override
@@ -57,9 +55,4 @@ public class Trouser extends MeteorAddon {
         return "pwn.noobs.trouserstreak";
     }
 
-    private static ItemStack stack() {
-        ItemStack a = new ItemStack(Items.GLOW_LICHEN);
-        a.addEnchantment(Enchantment.byRawId(1), 1);
-        return a;
-    }
 }

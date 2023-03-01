@@ -12,7 +12,7 @@
     "InventoryScreenMixinBow",
     "ClientPlayerInteractionManagerMixin",
     "LecternScreenMixin",
-    "SplashTextResourceSupplierMixin",
+    "TrouserSplashTextMixin",
     "ShulkerBoxScreenMixin",
     "accessor.ClientConnectionAccessor"
   ]

@@ -149,6 +149,7 @@ public class HandOfGod extends Module {
             .sliderRange(1, 30)
             .visible(() -> mgcersr.get())
             .build());
+
     public final Setting<Boolean> voider = sgPcentered.add(new BoolSetting.Builder()
             .name("VoiderAura")
             .description("Runs /fill on a single layer to your specified radius in a range from above your head to beneath your feet.")
@@ -266,6 +267,8 @@ public class HandOfGod extends Module {
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                 mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
             }
+            switch (mc.player.getHorizontalFacing()){
+                case NORTH, SOUTH -> {
             int x1 = Math.round(pos.getX()) + cwidth.get();
             int y1 = Math.round(pos.getY()) + cheight.get();
             int z1 = Math.round(pos.getZ()) + cdepth.get();
@@ -273,6 +276,17 @@ public class HandOfGod extends Module {
             int y2 = Math.round(pos.getY()) - cheight.get();
             int z2 = Math.round(pos.getZ()) - cdepth.get();
             ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + block);
+                }
+                case EAST, WEST -> {
+                    int x1 = Math.round(pos.getX()) + cdepth.get();
+                    int y1 = Math.round(pos.getY()) + cheight.get();
+                    int z1 = Math.round(pos.getZ()) + cwidth.get();
+                    int x2 = Math.round(pos.getX()) - cdepth.get();
+                    int y2 = Math.round(pos.getY()) - cheight.get();
+                    int z2 = Math.round(pos.getZ()) - cwidth.get();
+                    ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + block);
+                }
+            }
         }
     }
 
@@ -305,13 +319,26 @@ public class HandOfGod extends Module {
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                     mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
                 }
-                int x1 = Math.round(pos.getX()) + cwidth.get();
-                int y1 = Math.round(pos.getY()) + cheight.get();
-                int z1 = Math.round(pos.getZ()) + cdepth.get();
-                int x2 = Math.round(pos.getX()) - cwidth.get();
-                int y2 = Math.round(pos.getY()) - cheight.get();
-                int z2 = Math.round(pos.getZ()) - cdepth.get();
-                ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + block);
+                    switch (mc.player.getHorizontalFacing()){
+                        case NORTH, SOUTH -> {
+                            int x1 = Math.round(pos.getX()) + cwidth.get();
+                            int y1 = Math.round(pos.getY()) + cheight.get();
+                            int z1 = Math.round(pos.getZ()) + cdepth.get();
+                            int x2 = Math.round(pos.getX()) - cwidth.get();
+                            int y2 = Math.round(pos.getY()) - cheight.get();
+                            int z2 = Math.round(pos.getZ()) - cdepth.get();
+                            ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + block);
+                        }
+                        case EAST, WEST -> {
+                            int x1 = Math.round(pos.getX()) + cdepth.get();
+                            int y1 = Math.round(pos.getY()) + cheight.get();
+                            int z1 = Math.round(pos.getZ()) + cwidth.get();
+                            int x2 = Math.round(pos.getX()) - cdepth.get();
+                            int y2 = Math.round(pos.getY()) - cheight.get();
+                            int z2 = Math.round(pos.getZ()) - cwidth.get();
+                            ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + block);
+                        }
+                    }
                     aticks=0;
                 }
             }
@@ -319,7 +346,16 @@ public class HandOfGod extends Module {
                 if (ticks<=tickdelay.get()){
                     ticks++;
                 } else if (ticks>tickdelay.get()){
-                    ChatUtils.sendPlayerMsg("/execute at @p run fill ~"+pwidth.get()+" ~"+pheight.get()+" ~"+pdepth.get()+" ~-"+pwidth.get()+" ~-"+pheight.get()+" ~-"+pdepth.get()+" air");
+                    switch (mc.player.getHorizontalFacing()){
+                        case NORTH, SOUTH -> {
+                            ChatUtils.sendPlayerMsg("/execute at @p run fill ~"+pwidth.get()+" ~"+pheight.get()+" ~"+pdepth.get()+" ~-"+pwidth.get()+" ~-"+pheight.get()+" ~-"+pdepth.get()+" air");
+
+                        }
+                        case EAST, WEST -> {
+                            ChatUtils.sendPlayerMsg("/execute at @p run fill ~"+pdepth.get()+" ~"+pheight.get()+" ~"+pwidth.get()+" ~-"+pdepth.get()+" ~-"+pheight.get()+" ~-"+pwidth.get()+" air");
+
+                        }
+                    }
                     ticks=0;
                 }
             }

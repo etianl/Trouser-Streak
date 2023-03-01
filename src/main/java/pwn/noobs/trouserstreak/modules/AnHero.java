@@ -17,7 +17,8 @@ import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.text.Text;
+import net.minecraft.entity.MovementType;
+import net.minecraft.util.math.Vec3d;
 import pwn.noobs.trouserstreak.Trouser;
 
 public class AnHero extends Module {
@@ -106,15 +107,15 @@ public class AnHero extends Module {
         ticks++;
         Modules.get().get(Timer.class).setOverride(toasterbath.get());
         if (ticks==1){
-            mc.player.setPos(mc.player.getX(), mc.player.getY()+7,mc.player.getZ());
+            mc.player.move(MovementType.SELF, new Vec3d(0, +7,0));
         }else if (ticks==2){
-            mc.player.setPos(mc.player.getX(), mc.player.getY()+7,mc.player.getZ());
+            mc.player.move(MovementType.SELF, new Vec3d(0, +7,0));
         }else if (ticks==3){
-            mc.player.setPos(mc.player.getX(), mc.player.getY()+7,mc.player.getZ());
+            mc.player.move(MovementType.SELF, new Vec3d(0, +7,0));
         }else if (ticks==4){
-            mc.player.setPos(mc.player.getX(), mc.player.getY()+7,mc.player.getZ());
+            mc.player.move(MovementType.SELF, new Vec3d(0, +7,0));
         }else if (ticks==5){
-            mc.player.setPos(mc.player.getX(), mc.player.getY()+7,mc.player.getZ());
+            mc.player.move(MovementType.SELF, new Vec3d(0, +7,0));
         }else if (ticks>=6 && ticks<20){
             mc.player.setVelocity(0.01,-10,0);
         }else if (ticks>=20){
