@@ -421,8 +421,9 @@ public class NewerNewChunks extends Module {
 			}
 		}
 		//autoreload when entering different dimensions
-		if (mc.world.getRegistryKey().getValue().toString().contains("end")){
+			if (reloadworld<10){
 			reloadworld++;
+			}
 			if (reloadworld==3){
 				if (worldleaveremove.get()){
 				newChunks.clear();
@@ -476,119 +477,6 @@ public class NewerNewChunks extends Module {
 					}
 				}
 			}
-		}
-		if (mc.world.getRegistryKey().getValue().toString().contains("overworld")){
-			reloadworld++;
-			if (reloadworld==3){
-				if (worldleaveremove.get()){
-					newChunks.clear();
-					oldChunks.clear();
-					olderoldChunks.clear();
-				}
-				if (load.get()){
-					try {
-						List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt"));
-
-						for (String line : allLines) {
-							String s = line;
-							String[] array = s.split(", ");
-							int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
-							int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
-							chunkPos = new ChunkPos(X,Z);
-							if (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)){
-								newChunks.add(chunkPos);}
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					try {
-						List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/FlowIsBelowY0ChunkData.txt"));
-
-						for (String line : allLines) {
-							String s = line;
-							String[] array = s.split(", ");
-							int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
-							int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
-							chunkPos = new ChunkPos(X,Z);
-							if (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)){
-								olderoldChunks.add(chunkPos);}
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					try {
-						List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/OldChunkData.txt"));
-
-						for (String line : allLines) {
-							String s = line;
-							String[] array = s.split(", ");
-							int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
-							int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
-							oldpos = new ChunkPos(X,Z);
-							oldChunks.add(oldpos);
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-		if (mc.world.getRegistryKey().getValue().toString().contains("nether")){
-			reloadworld++;
-			if (reloadworld==3){
-				if (worldleaveremove.get()){
-					newChunks.clear();
-					oldChunks.clear();
-					olderoldChunks.clear();
-				}
-				if (load.get()){
-					try {
-						List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt"));
-
-						for (String line : allLines) {
-							String s = line;
-							String[] array = s.split(", ");
-							int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
-							int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
-							chunkPos = new ChunkPos(X,Z);
-							if (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)){
-								newChunks.add(chunkPos);}
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					try {
-						List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/FlowIsBelowY0ChunkData.txt"));
-
-						for (String line : allLines) {
-							String s = line;
-							String[] array = s.split(", ");
-							int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
-							int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
-							chunkPos = new ChunkPos(X,Z);
-							if (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)){
-								olderoldChunks.add(chunkPos);}
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					try {
-						List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/OldChunkData.txt"));
-
-						for (String line : allLines) {
-							String s = line;
-							String[] array = s.split(", ");
-							int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
-							int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
-							oldpos = new ChunkPos(X,Z);
-							oldChunks.add(oldpos);
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		}
 
 		if (advanced.get() && ignore.get()){
 			ticks++;
@@ -617,7 +505,11 @@ public class NewerNewChunks extends Module {
 			synchronized (olderoldChunks) {
 				for (ChunkPos c : olderoldChunks) {
 					if (mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), 1024)) {
-						render(new Box(c.getStartPos(), c.getStartPos().add(16, renderHeight.get(), 16)), olderoldChunksSideColor.get(), olderoldChunksLineColor.get(), shapeMode.get(), event);
+						if (advanced.get()) {
+							render(new Box(c.getStartPos(), c.getStartPos().add(16, renderHeight.get(), 16)), olderoldChunksSideColor.get(), olderoldChunksLineColor.get(), shapeMode.get(), event);
+						} else if (!advanced.get()) {
+							render(new Box(c.getStartPos(), c.getStartPos().add(16, renderHeight.get(), 16)), newChunksSideColor.get(), newChunksLineColor.get(), shapeMode.get(), event);
+						}
 					}
 				}
 			}

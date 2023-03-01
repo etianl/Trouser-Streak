@@ -14,6 +14,6 @@
     "LecternScreenMixin",
     "accessor.ClientConnectionAccessor",
     "ShulkerBoxScreenMixin",
-    "SplashTextResourceSupplierMixin"
+    "TrouserSplashTextMixin"
   ]
 }

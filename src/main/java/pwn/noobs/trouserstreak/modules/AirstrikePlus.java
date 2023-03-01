@@ -57,10 +57,10 @@ public class AirstrikePlus extends Module {
 
 
     private final Setting<Integer> height = sgGeneral.add(new IntSetting.Builder()
-        .name("height")
-        .description("y level they spawn")
-        .defaultValue(100)
-        .sliderRange(-63, 320)
+        .name("HeightAboveHead")
+        .description("How far from your Characters Y level to spawn at.")
+        .defaultValue(20)
+        .sliderRange(-63, 319)
         .build());
 
     private final Setting<Integer> speed = sgGeneral.add(new IntSetting.Builder()
@@ -89,7 +89,7 @@ public class AirstrikePlus extends Module {
 
     private Vec3d pickRandomPos() {
         double x = r.nextDouble(radius.get() * 2) - radius.get() + origin.x;
-        double y = height.get();
+        double y = mc.player.getY()+height.get();
         double z = r.nextDouble(radius.get() * 2) - radius.get() + origin.z;
         return new Vec3d(x, y, z);
     }
@@ -128,7 +128,7 @@ public class AirstrikePlus extends Module {
                 speedlist.add(NbtDouble.of(-speed.get()));
                 speedlist.add(NbtDouble.of(0));
                 pos.add(NbtDouble.of(cpos.x));
-                pos.add(NbtDouble.of(height.get()));
+                pos.add(NbtDouble.of(mc.player.getY()+height.get()));
                 pos.add(NbtDouble.of(cpos.z));
                 tag.put("ExplosionPower", NbtDouble.of(power.get()));
                 tag.put("power", speedlist);
@@ -150,7 +150,7 @@ public class AirstrikePlus extends Module {
                         speedlist.add(NbtDouble.of(-speed.get()));
                         speedlist.add(NbtDouble.of(0));
                         pos.add(NbtDouble.of(cpos.x));
-                        pos.add(NbtDouble.of(height.get()));
+                        pos.add(NbtDouble.of(mc.player.getY()+height.get()));
                         pos.add(NbtDouble.of(cpos.z));
                         tag.putInt("ignited", (1));
                         tag.putInt("Invulnerable", (1));
@@ -175,7 +175,7 @@ public class AirstrikePlus extends Module {
                         speedlist.add(NbtDouble.of(-speed.get()));
                         speedlist.add(NbtDouble.of(0));
                         pos.add(NbtDouble.of(cpos.x));
-                        pos.add(NbtDouble.of(height.get()));
+                        pos.add(NbtDouble.of(mc.player.getY()+height.get()));
                         pos.add(NbtDouble.of(cpos.z));
                         tag.put("Pos", pos);
                         tag.putString("id", "minecraft:lightning_bolt");
@@ -195,7 +195,7 @@ public class AirstrikePlus extends Module {
                         speedlist.add(NbtDouble.of(-speed.get()));
                         speedlist.add(NbtDouble.of(0));
                         pos.add(NbtDouble.of(cpos.x));
-                        pos.add(NbtDouble.of(height.get()));
+                        pos.add(NbtDouble.of(mc.player.getY()+height.get()));
                         pos.add(NbtDouble.of(cpos.z));
                         tag.putInt("Invulnerable", (1));
                         tag.put("Pos", pos);
@@ -216,7 +216,7 @@ public class AirstrikePlus extends Module {
                         speedlist.add(NbtDouble.of(-speed.get()));
                         speedlist.add(NbtDouble.of(0));
                         pos.add(NbtDouble.of(cpos.x));
-                        pos.add(NbtDouble.of(height.get()));
+                        pos.add(NbtDouble.of(mc.player.getY()+height.get()));
                         pos.add(NbtDouble.of(cpos.z));
                         tag.put("Pos", pos);
                         tag.putString("id", "minecraft:wither");
@@ -236,7 +236,7 @@ public class AirstrikePlus extends Module {
                         speedlist.add(NbtDouble.of(-speed.get()));
                         speedlist.add(NbtDouble.of(0));
                         pos.add(NbtDouble.of(cpos.x));
-                        pos.add(NbtDouble.of(height.get()));
+                        pos.add(NbtDouble.of(mc.player.getY()+height.get()));
                         pos.add(NbtDouble.of(cpos.z));
                         tag.put("Pos", pos);
                         tag.putString("id", "minecraft:tnt");
@@ -257,7 +257,7 @@ public class AirstrikePlus extends Module {
                         speedlist.add(NbtDouble.of(-speed.get()));
                         speedlist.add(NbtDouble.of(0));
                         pos.add(NbtDouble.of(cpos.x));
-                        pos.add(NbtDouble.of(height.get()));
+                        pos.add(NbtDouble.of(mc.player.getY()+height.get()));
                         pos.add(NbtDouble.of(cpos.z));
                         tag.put("Pos", pos);
                         tag.putString("id", "minecraft:llama_spit");
@@ -278,7 +278,7 @@ public class AirstrikePlus extends Module {
                         speedlist.add(NbtDouble.of(-speed.get()));
                         speedlist.add(NbtDouble.of(0));
                         pos.add(NbtDouble.of(cpos.x));
-                        pos.add(NbtDouble.of(height.get()));
+                        pos.add(NbtDouble.of(mc.player.getY()+height.get()));
                         pos.add(NbtDouble.of(cpos.z));
                         tag.put("Pos", pos);
                         tag.putString("id", "minecraft:shulker_bullet");
@@ -298,7 +298,7 @@ public class AirstrikePlus extends Module {
                         speedlist.add(NbtDouble.of(-speed.get()));
                         speedlist.add(NbtDouble.of(0));
                         pos.add(NbtDouble.of(cpos.x));
-                        pos.add(NbtDouble.of(height.get()));
+                        pos.add(NbtDouble.of(mc.player.getY()+height.get()));
                         pos.add(NbtDouble.of(cpos.z));
                         tag.put("Pos", pos);
                         tag.putString("id", "minecraft:arrow");
@@ -320,7 +320,7 @@ public class AirstrikePlus extends Module {
                             speedlist.add(NbtDouble.of(-speed.get()));
                             speedlist.add(NbtDouble.of(0));
                             pos.add(NbtDouble.of(cpos.x));
-                            pos.add(NbtDouble.of(height.get()));
+                            pos.add(NbtDouble.of(mc.player.getY()+height.get()));
                             pos.add(NbtDouble.of(cpos.z));
                             tag.putInt("Invulnerable", (1));
                             tag.put("Pos", pos);
@@ -340,7 +340,7 @@ public class AirstrikePlus extends Module {
                         speedlist.add(NbtDouble.of(-speed.get()));
                         speedlist.add(NbtDouble.of(0));
                         pos.add(NbtDouble.of(cpos.x));
-                        pos.add(NbtDouble.of(height.get()));
+                        pos.add(NbtDouble.of(mc.player.getY()+height.get()));
                         pos.add(NbtDouble.of(cpos.z));
                             tag.putInt("Invulnerable", (1));
                         tag.put("Pos", pos);

@@ -1,22 +1,19 @@
 package pwn.noobs.trouserstreak;
 
 import meteordevelopment.meteorclient.systems.commands.Commands;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.item.ItemStack;
 import pwn.noobs.trouserstreak.commands.CasterTimer;
 import pwn.noobs.trouserstreak.commands.LavaTimeCalculator;
 import pwn.noobs.trouserstreak.modules.*;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import net.minecraft.item.Items;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 public class Trouser extends MeteorAddon {
 	public static final Logger LOG = LoggerFactory.getLogger(Trouser.class);
-	public static final Category Main = new Category("TrouserStreak", stack());
+	public static final Category Main = new Category("TrouserStreak");
 
 	@Override
 	public void onInitialize() {
@@ -58,9 +55,4 @@ public class Trouser extends MeteorAddon {
         return "pwn.noobs.trouserstreak";
     }
 
-    private static ItemStack stack() {
-        ItemStack a = new ItemStack(Items.GLOW_LICHEN);
-        a.addEnchantment(Enchantment.byRawId(1), 1);
-        return a;
-    }
 }

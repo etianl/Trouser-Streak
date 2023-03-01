@@ -41,7 +41,7 @@ public class Phase extends Module {
     private double prevZ = Double.NaN;
 
     public Phase() {
-        super(Trouser.Main, "phase", "Lets you clip through ground sometimes.");
+        super(Trouser.Main, "phase", "Lets you clip through blocks sometimes.");
     }
 
     @Override
