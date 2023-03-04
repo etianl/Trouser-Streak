@@ -190,7 +190,7 @@ public class Teleport extends Module {
                 if (ticks >= 1 && ticks <=3 && notponactivateplz==false){
                     Modules.get().get(Timer.class).setOverride(tpTimer.get());
                 }
-            } else if (location.getX()+0.5-startpos.getX() <= 3 2 && location.getX()+0.5-startpos.getX() >=-32 && location.getY()+0.5-startpos.getY()<=32 && location.getY()+0.5-startpos.getY()>=-32 && location.getZ()+0.5-startpos.getZ()<=32 && location.getZ()+0.5-startpos.getZ()>=-32 ){
+            } else if (location.getX()+0.5-startpos.getX() <= 32 && location.getX()+0.5-startpos.getX() >=-32 && location.getY()+0.5-startpos.getY()<=32 && location.getY()+0.5-startpos.getY()>=-32 && location.getZ()+0.5-startpos.getZ()<=32 && location.getZ()+0.5-startpos.getZ()>=-32 ){
                 if (ticks ==2 && notponactivateplz==false){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.25), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.25)+1.025), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.25));
                     mc.player.setVelocity(0,0.05,0);}
