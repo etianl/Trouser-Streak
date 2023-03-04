@@ -60,6 +60,7 @@ In no particular order
 - If the game crashes, chunk data is saved! No loss in tracing progress.
 - Send chunk data to your friends! Just copy the appropriate folder and send it.
 - There is also an option for deleting chunk data in that particular dimension on the server.
+- The .newchunkcount command can tell you how many total chunks have been saved in chunk data.
 - *NewerNewChunks Special Options:*
 - The "IgnoreFlowBelow0" does not show a new chunk if liquid flow is only below Y zero, but does show a newchunk if flow is above Y zero, or both above AND below Y zero.
 - The "AdvancedMode" highlights chunks that have flow only below Y0. If there is nothing but these you are updating old chunks to the new build limits and the FlowIsBelowY0 coloured chunks are OLD. If they are mixed with newchunks the FlowIsBelowY0 coloured chunks are NEW.
