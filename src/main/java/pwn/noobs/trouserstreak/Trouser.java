@@ -3,6 +3,7 @@ package pwn.noobs.trouserstreak;
 import meteordevelopment.meteorclient.systems.commands.Commands;
 import pwn.noobs.trouserstreak.commands.CasterTimer;
 import pwn.noobs.trouserstreak.commands.LavaTimeCalculator;
+import pwn.noobs.trouserstreak.commands.NewChunkCounter;
 import pwn.noobs.trouserstreak.modules.*;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.systems.modules.Category;
@@ -43,6 +44,7 @@ public class Trouser extends MeteorAddon {
         Modules.get().add(new AnHero());
         Commands.get().add(new LavaTimeCalculator());
         Commands.get().add(new CasterTimer());
+        Commands.get().add(new NewChunkCounter());
 
 	}
 

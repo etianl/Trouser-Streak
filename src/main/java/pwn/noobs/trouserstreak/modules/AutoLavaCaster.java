@@ -1,4 +1,4 @@
-//Written By etianll with a little bit of skidded codes and some new ideas. Credits to Meteor Rejects for the skids, and thanks to Banana for the utils
+//Written By etianll with a little bit of skidded codes and some new ideas. Credits to Meteor Rejects for  a bit of skids
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
@@ -30,7 +30,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import pwn.noobs.trouserstreak.Trouser;
-import pwn.noobs.trouserstreak.utils.BEntityUtils;
 
 public class AutoLavaCaster extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -160,7 +159,6 @@ public class AutoLavaCaster extends Module {
         super(Trouser.Main, "AutoLavaCaster", "Make Layers of Cobble on your Stairs! Aim at the top of the block you want to lava on.");
     }
     private BlockPos lava;
-    private BlockPos playerPos;
     public boolean firstplace;
     public static int ticks;
     int layers;
@@ -406,8 +404,7 @@ public class AutoLavaCaster extends Module {
             mc.player.setPos(mc.player.getX(),mc.player.getY()+1,mc.player.getZ());
         }
         else if (ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+15){
-            playerPos = BEntityUtils.playerPos(mc.player);
-            BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
+            BlockPos pos = mc.player.getBlockPos().add(new Vec3i(0,-1,0));
             if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
@@ -555,8 +552,7 @@ public class AutoLavaCaster extends Module {
                     lava = cast();
                 }
                 else if (ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+30){
-                    playerPos = BEntityUtils.playerPos(mc.player);
-                    BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
+                    BlockPos pos = mc.player.getBlockPos().add(new Vec3i(0,-1,0));
                     if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
@@ -702,8 +698,7 @@ public class AutoLavaCaster extends Module {
                     lava = cast();
                 }
                 else if (ticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+30){
-                    playerPos = BEntityUtils.playerPos(mc.player);
-                    BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
+                    BlockPos pos = mc.player.getBlockPos().add(new Vec3i(0,-1,0));
                     if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}

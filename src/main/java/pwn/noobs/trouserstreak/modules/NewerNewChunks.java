@@ -74,14 +74,14 @@ public class NewerNewChunks extends Module {
 	private final Setting<Boolean> autoremove = sgcacheCdata.add(new BoolSetting.Builder()
 			.name("RemoveAutomatically")
 			.description("Removes the cached chunks on a delay to help prevent RAM from getting overloaded over time.")
-			.defaultValue(false)
+			.defaultValue(true)
 			.build()
 	);
 	private final Setting<Integer> removedelay = sgcacheCdata.add(new IntSetting.Builder()
 			.name("AutoRemoveDelayInSeconds")
 			.description("Removes the cached chunks on a delay to help prevent RAM from getting overloaded over time.")
 			.sliderRange(1,300)
-			.defaultValue(10)
+			.defaultValue(15)
 			.visible(() -> autoremove.get())
 			.build());
 	private final Setting<Boolean> save = sgCdata.add(new BoolSetting.Builder()
@@ -184,6 +184,11 @@ public class NewerNewChunks extends Module {
 	private int ticks=0;
 	private int loadingticks=0;
 	private int reloadworld=0;
+	public int chunkcounterticks=0;
+	public static boolean chunkcounter;
+	public static int newchunksfound=0;
+	public static int oldchunksfound=0;
+	public static int olderoldchunksfound=0;
     public NewerNewChunks() {
         super(Trouser.Main,"NewerNewChunks", "Estimates new chunks by checking liquid flow.");
     }
@@ -205,50 +210,7 @@ public class NewerNewChunks extends Module {
 		new File("NewChunks/"+serverip+"/"+world).mkdirs();
 		}
 		if (load.get()){
-		try {
-			List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt"));
-
-			for (String line : allLines) {
-				String s = line;
-				String[] array = s.split(", ");
-				int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
-				int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
-				chunkPos = new ChunkPos(X,Z);
-				if (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)){
-				newChunks.add(chunkPos);}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-			try {
-				List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/FlowIsBelowY0ChunkData.txt"));
-
-				for (String line : allLines) {
-					String s = line;
-					String[] array = s.split(", ");
-					int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
-					int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
-					chunkPos = new ChunkPos(X,Z);
-					if (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)){
-					olderoldChunks.add(chunkPos);}
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			try {
-				List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/OldChunkData.txt"));
-
-				for (String line : allLines) {
-					String s = line;
-					String[] array = s.split(", ");
-					int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
-					int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
-					oldpos = new ChunkPos(X,Z);
-					oldChunks.add(oldpos);
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			loadData();
 		}
 		ticks=0;
 		autoremoveticks=0;
@@ -258,6 +220,10 @@ public class NewerNewChunks extends Module {
 
 	@Override
 	public void onDeactivate() {
+		chunkcounterticks=0;
+		newchunksfound=0;
+		oldchunksfound=0;
+		olderoldchunksfound=0;
 		ticks=0;
 		autoremoveticks=0;
 		loadingticks=0;
@@ -272,6 +238,10 @@ public class NewerNewChunks extends Module {
 	@EventHandler
 	private void onScreenOpen(OpenScreenEvent event) {
 		if (event.screen instanceof DisconnectedScreen) {
+			chunkcounterticks=0;
+			newchunksfound=0;
+			oldchunksfound=0;
+			olderoldchunksfound=0;
 			if (worldleaveremove.get()) {
 				newChunks.clear();
 				oldChunks.clear();
@@ -279,11 +249,19 @@ public class NewerNewChunks extends Module {
 			}
 		}
 		if (event.screen instanceof DownloadingTerrainScreen) {
+			chunkcounterticks=0;
+			newchunksfound=0;
+			oldchunksfound=0;
+			olderoldchunksfound=0;
 			reloadworld=0;
 		}
 	}
 	@EventHandler
 	private void onGameLeft(GameLeftEvent event) {
+		chunkcounterticks=0;
+		newchunksfound=0;
+		oldchunksfound=0;
+		olderoldchunksfound=0;
 		if (worldleaveremove.get()) {
 			newChunks.clear();
 			oldChunks.clear();
@@ -296,53 +274,48 @@ public class NewerNewChunks extends Module {
 		if (load.get()){
 			loadingticks++;
 			if (loadingticks<2){
-			try {
-				List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt"));
-
-				for (String line : allLines) {
-					String s = line;
-					String[] array = s.split(", ");
-					int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
-					int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
-					chunkPos = new ChunkPos(X,Z);
-					if (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)){
-					newChunks.add(chunkPos);}
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			try {
-				List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/FlowIsBelowY0ChunkData.txt"));
-
-				for (String line : allLines) {
-					String s = line;
-					String[] array = s.split(", ");
-					int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
-					int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
-					chunkPos = new ChunkPos(X,Z);
-					if (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)){
-					olderoldChunks.add(chunkPos);}
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			try {
-				List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/OldChunkData.txt"));
-
-				for (String line : allLines) {
-					String s = line;
-					String[] array = s.split(", ");
-					int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
-					int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
-					oldpos = new ChunkPos(X,Z);
-					oldChunks.add(oldpos);
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+				loadData();
 			}
 		} else if (!load.get()){
 			loadingticks=0;
+		}
+		if (chunkcounter=true){
+			chunkcounterticks++;
+			if (chunkcounterticks>=1){
+				chunkcounterticks=0;
+				newchunksfound=0;
+				oldchunksfound=0;
+				olderoldchunksfound=0;
+				chunkcounter=false;}
+			if (chunkcounter=true && chunkcounterticks<1){
+				try {
+					List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/OldChunkData.txt"));
+
+					for (String line : allLines) {
+						oldchunksfound++;
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				try {
+					List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt"));
+
+					for (String line : allLines) {
+						newchunksfound++;
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				try {
+					List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/FlowIsBelowY0ChunkData.txt"));
+
+					for (String line : allLines) {
+						olderoldchunksfound++;
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 
 		if (mc.isInSingleplayer()==true){
@@ -369,50 +342,7 @@ public class NewerNewChunks extends Module {
 			oldChunks.clear();
 			olderoldChunks.clear();
 				if (load.get() && reload.get()){
-					try {
-						List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt"));
-
-						for (String line : allLines) {
-							String s = line;
-							String[] array = s.split(", ");
-							int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
-							int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
-							chunkPos = new ChunkPos(X,Z);
-							if (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)){
-								newChunks.add(chunkPos);}
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					try {
-						List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/FlowIsBelowY0ChunkData.txt"));
-
-						for (String line : allLines) {
-							String s = line;
-							String[] array = s.split(", ");
-							int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
-							int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
-							chunkPos = new ChunkPos(X,Z);
-							if (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)){
-								olderoldChunks.add(chunkPos);}
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					try {
-						List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/OldChunkData.txt"));
-
-						for (String line : allLines) {
-							String s = line;
-							String[] array = s.split(", ");
-							int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
-							int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
-							oldpos = new ChunkPos(X,Z);
-							oldChunks.add(oldpos);
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+					loadData();
 				}
 			} else if (autoremoveticks>=removedelay.get()*20){
 				autoremoveticks=0;
@@ -429,50 +359,7 @@ public class NewerNewChunks extends Module {
 				olderoldChunks.clear();
 				}
 				if (load.get()){
-					try {
-						List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt"));
-
-						for (String line : allLines) {
-							String s = line;
-							String[] array = s.split(", ");
-							int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
-							int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
-							chunkPos = new ChunkPos(X,Z);
-							if (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)){
-								newChunks.add(chunkPos);}
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					try {
-						List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/FlowIsBelowY0ChunkData.txt"));
-
-						for (String line : allLines) {
-							String s = line;
-							String[] array = s.split(", ");
-							int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
-							int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
-							chunkPos = new ChunkPos(X,Z);
-							if (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)){
-								olderoldChunks.add(chunkPos);}
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					try {
-						List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/OldChunkData.txt"));
-
-						for (String line : allLines) {
-							String s = line;
-							String[] array = s.split(", ");
-							int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
-							int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
-							oldpos = new ChunkPos(X,Z);
-							oldChunks.add(oldpos);
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+					loadData();
 				}
 			}
 
@@ -545,43 +432,19 @@ public class NewerNewChunks extends Module {
 							if (pos.offset(dir).getY()>0 && !mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 								newChunks.add(chunkPos);
 								if (save.get()){
-									try {
-										new File("NewChunks/"+serverip+"/"+world).mkdirs();
-										FileWriter writer = new FileWriter("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt", true);
-										writer.write(String.valueOf(chunkPos));
-										writer.write("\r\n");   // write new line
-										writer.close();
-									} catch (IOException e) {
-										e.printStackTrace();
-									}
+									saveNewChunkData();
 								}
 								return;
 							}else if ((pos.offset(dir).getY()<0 && !mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill()) && (pos.offset(dir).getY()>0 && !mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill()) && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 								newChunks.add(chunkPos);
 								if (save.get()){
-									try {
-										new File("NewChunks/"+serverip+"/"+world).mkdirs();
-										FileWriter writer = new FileWriter("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt", true);
-										writer.write(String.valueOf(chunkPos));
-										writer.write("\r\n");   // write new line
-										writer.close();
-									} catch (IOException e) {
-										e.printStackTrace();
-									}
+									saveNewChunkData();
 								}
 								return;
 							}else if (pos.offset(dir).getY()<0 && !mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 								olderoldChunks.add(chunkPos);
 								if (save.get()){
-									try {
-										new File("NewChunks/"+serverip+"/"+world).mkdirs();
-										FileWriter writer = new FileWriter("NewChunks/"+serverip+"/"+world+"/FlowIsBelowY0ChunkData.txt", true);
-										writer.write(String.valueOf(chunkPos));
-										writer.write("\r\n");   // write new line
-										writer.close();
-									} catch (IOException e) {
-										e.printStackTrace();
-									}
+									saveOlderOldChunkData();
 								}
 								return;
 							}
@@ -590,29 +453,13 @@ public class NewerNewChunks extends Module {
 							if (pos.offset(dir).getY()>0 && mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 								newChunks.add(chunkPos);
 								if (save.get()){
-									try {
-										new File("NewChunks/"+serverip+"/"+world).mkdirs();
-										FileWriter writer = new FileWriter("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt", true);
-										writer.write(String.valueOf(chunkPos));
-										writer.write("\r\n");   // write new line
-										writer.close();
-									} catch (IOException e) {
-										e.printStackTrace();
-									}
+									saveNewChunkData();
 								}
 								return;
 							} else if ((pos.offset(dir).getY()<0 && !mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill()) && (pos.offset(dir).getY()>0 && !mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill()) && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 								newChunks.add(chunkPos);
 								if (save.get()){
-									try {
-										new File("NewChunks/"+serverip+"/"+world).mkdirs();
-										FileWriter writer = new FileWriter("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt", true);
-										writer.write(String.valueOf(chunkPos));
-										writer.write("\r\n");   // write new line
-										writer.close();
-									} catch (IOException e) {
-										e.printStackTrace();
-									}
+									saveNewChunkData();
 								}
 								return;
 							}
@@ -621,15 +468,7 @@ public class NewerNewChunks extends Module {
 							if (mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 								newChunks.add(chunkPos);
 								if (save.get()){
-									try {
-										new File("NewChunks/"+serverip+"/"+world).mkdirs();
-										FileWriter writer = new FileWriter("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt", true);
-										writer.write(String.valueOf(chunkPos));
-										writer.write("\r\n");   // write new line
-										writer.close();
-									} catch (IOException e) {
-										e.printStackTrace();
-									}
+									saveNewChunkData();
 								}
 									return;
 							}
@@ -650,43 +489,19 @@ public class NewerNewChunks extends Module {
 						if (packet.getPos().offset(dir).getY()>0 && !mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 							newChunks.add(chunkPos);
 							if (save.get()){
-								try {
-									new File("NewChunks/"+serverip+"/"+world).mkdirs();
-									FileWriter writer = new FileWriter("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt", true);
-									writer.write(String.valueOf(chunkPos));
-									writer.write("\r\n");   // write new line
-									writer.close();
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
+								saveNewChunkData();
 							}
 							return;
 						}else if ((packet.getPos().offset(dir).getY()<0 && !mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill()) && (packet.getPos().offset(dir).getY()>0 && !mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill()) && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 							newChunks.add(chunkPos);
 							if (save.get()){
-								try {
-									new File("NewChunks/"+serverip+"/"+world).mkdirs();
-									FileWriter writer = new FileWriter("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt", true);
-									writer.write(String.valueOf(chunkPos));
-									writer.write("\r\n");   // write new line
-									writer.close();
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
+								saveNewChunkData();
 							}
 							return;
 						}else if (packet.getPos().offset(dir).getY()<0 && !mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() &&  (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 							olderoldChunks.add(chunkPos);
 							if (save.get()){
-								try {
-									new File("NewChunks/"+serverip+"/"+world).mkdirs();
-									FileWriter writer = new FileWriter("NewChunks/"+serverip+"/"+world+"/FlowIsBelowY0ChunkData.txt", true);
-									writer.write(String.valueOf(chunkPos));
-									writer.write("\r\n");   // write new line
-									writer.close();
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
+								saveOlderOldChunkData();
 							}
 							return;
 						}
@@ -695,29 +510,13 @@ public class NewerNewChunks extends Module {
 						if (packet.getPos().offset(dir).getY()>0 && mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 							newChunks.add(chunkPos);
 							if (save.get()){
-								try {
-									new File("NewChunks/"+serverip+"/"+world).mkdirs();
-									FileWriter writer = new FileWriter("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt", true);
-									writer.write(String.valueOf(chunkPos));
-									writer.write("\r\n");   // write new line
-									writer.close();
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
+								saveNewChunkData();
 							}
 							return;
 						}else if ((packet.getPos().offset(dir).getY()<0 && !mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill()) && (packet.getPos().offset(dir).getY()>0 && !mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill()) && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 							newChunks.add(chunkPos);
 							if (save.get()){
-								try {
-									new File("NewChunks/"+serverip+"/"+world).mkdirs();
-									FileWriter writer = new FileWriter("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt", true);
-									writer.write(String.valueOf(chunkPos));
-									writer.write("\r\n");   // write new line
-									writer.close();
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
+								saveNewChunkData();
 							}
 							return;
 						}
@@ -726,15 +525,7 @@ public class NewerNewChunks extends Module {
 						if (mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 							newChunks.add(chunkPos);
 							if (save.get()){
-								try {
-									new File("NewChunks/"+serverip+"/"+world).mkdirs();
-									FileWriter writer = new FileWriter("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt", true);
-									writer.write(String.valueOf(chunkPos));
-									writer.write("\r\n");   // write new line
-									writer.close();
-								} catch (IOException e) {
-									e.printStackTrace();
-								}
+								saveNewChunkData();
 							}
 							return;
 						}
@@ -762,18 +553,10 @@ public class NewerNewChunks extends Module {
 						for (int z = 0; z < 16; z++) {
 							FluidState fluid = chunk.getFluidState(x, y, z);
 
-							if (!fluid.isEmpty() && !fluid.isStill()) {
+							if (!fluid.isEmpty() && !fluid.isStill() && !olderoldChunks.contains(chunkPos)) {
 								oldChunks.add(oldpos);
 								if (save.get()){
-									try {
-										new File("NewChunks/"+serverip+"/"+world).mkdirs();
-										FileWriter writer = new FileWriter("NewChunks/"+serverip+"/"+world+"/OldChunkData.txt", true);
-										writer.write(String.valueOf(oldpos));
-										writer.write("\r\n");   // write new line
-										writer.close();
-									} catch (IOException e) {
-										e.printStackTrace();
-									}
+									saveOldChunkData();
 								}
 								return;
 							}
@@ -781,6 +564,85 @@ public class NewerNewChunks extends Module {
 					}
 				}
 			}
+		}
+	}
+	private void loadData() {
+		try {
+			List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/OldChunkData.txt"));
+
+			for (String line : allLines) {
+				String s = line;
+				String[] array = s.split(", ");
+				int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
+				int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
+				oldpos = new ChunkPos(X,Z);
+				oldChunks.add(oldpos);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt"));
+
+			for (String line : allLines) {
+				String s = line;
+				String[] array = s.split(", ");
+				int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
+				int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
+				chunkPos = new ChunkPos(X,Z);
+				if (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)){
+					newChunks.add(chunkPos);}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/FlowIsBelowY0ChunkData.txt"));
+
+			for (String line : allLines) {
+				String s = line;
+				String[] array = s.split(", ");
+				int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
+				int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
+				chunkPos = new ChunkPos(X,Z);
+				if (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)){
+					olderoldChunks.add(chunkPos);}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	private void saveNewChunkData() {
+		try {
+			new File("NewChunks/"+serverip+"/"+world).mkdirs();
+			FileWriter writer = new FileWriter("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt", true);
+			writer.write(String.valueOf(chunkPos));
+			writer.write("\r\n");   // write new line
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	private void saveOldChunkData() {
+		try {
+			new File("NewChunks/"+serverip+"/"+world).mkdirs();
+			FileWriter writer = new FileWriter("NewChunks/"+serverip+"/"+world+"/OldChunkData.txt", true);
+			writer.write(String.valueOf(oldpos));
+			writer.write("\r\n");   // write new line
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	private void saveOlderOldChunkData() {
+		try {
+			new File("NewChunks/"+serverip+"/"+world).mkdirs();
+			FileWriter writer = new FileWriter("NewChunks/"+serverip+"/"+world+"/FlowIsBelowY0ChunkData.txt", true);
+			writer.write(String.valueOf(chunkPos));
+			writer.write("\r\n");   // write new line
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 }

@@ -28,9 +28,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.settings.*;
-import pwn.noobs.trouserstreak.utils.BEntityUtils;
-import pwn.noobs.trouserstreak.utils.BPlayerUtils;
-import pwn.noobs.trouserstreak.utils.BWorldUtils;
 
 
 /**
@@ -103,9 +100,6 @@ public class AutoStaircase extends Module {
 
     // Fields
     private BlockPos playerPos;
-    private int ticksPassed;
-    private int blocksPlaced;
-    private boolean centered;
 
     Direction dir;
     @Override
@@ -121,15 +115,9 @@ public class AutoStaircase extends Module {
         mc.options.jumpKey.setPressed(false);
         mc.options.forwardKey.setPressed(false);
         mc.player.setMovementSpeed(0);
-        centered = false;
-        playerPos = BEntityUtils.playerPos(mc.player);
-
-        if (centerMode.get() != CenterMode.None) {
-            if (centerMode.get() == CenterMode.Snap) BWorldUtils.snapPlayer(playerPos);
-            else PlayerUtils.centerPlayer();
-        }
-
-        dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());}};
+        playerPos = mc.player.getBlockPos();
+        PlayerUtils.centerPlayer();
+        }};
 
         table.row();
 
@@ -142,15 +130,9 @@ public class AutoStaircase extends Module {
         mc.options.jumpKey.setPressed(false);
         mc.options.forwardKey.setPressed(false);
         mc.player.setMovementSpeed(0);
-        centered = false;
-        playerPos = BEntityUtils.playerPos(mc.player);
-
-        if (centerMode.get() != CenterMode.None) {
-            if (centerMode.get() == CenterMode.Snap) BWorldUtils.snapPlayer(playerPos);
-            else PlayerUtils.centerPlayer();
-        }
-
-        dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());}};
+        playerPos = mc.player.getBlockPos();
+        PlayerUtils.centerPlayer();
+        }};
 
         table.row();
 
@@ -163,15 +145,9 @@ public class AutoStaircase extends Module {
         mc.options.jumpKey.setPressed(false);
         mc.options.forwardKey.setPressed(false);
         mc.player.setMovementSpeed(0);
-        centered = false;
-        playerPos = BEntityUtils.playerPos(mc.player);
-
-        if (centerMode.get() != CenterMode.None) {
-            if (centerMode.get() == CenterMode.Snap) BWorldUtils.snapPlayer(playerPos);
-            else PlayerUtils.centerPlayer();
-        }
-
-        dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());}};
+        playerPos = mc.player.getBlockPos();
+        PlayerUtils.centerPlayer();
+        }};
 
         table.row();
 
@@ -184,15 +160,9 @@ public class AutoStaircase extends Module {
         mc.options.jumpKey.setPressed(false);
         mc.options.forwardKey.setPressed(false);
         mc.player.setMovementSpeed(0);
-        centered = false;
-        playerPos = BEntityUtils.playerPos(mc.player);
-
-        if (centerMode.get() != CenterMode.None) {
-            if (centerMode.get() == CenterMode.Snap) BWorldUtils.snapPlayer(playerPos);
-            else PlayerUtils.centerPlayer();
-        }
-
-        dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());}};
+        playerPos = mc.player.getBlockPos();
+        PlayerUtils.centerPlayer();
+        }};
 
         table.row();
 
@@ -203,18 +173,8 @@ public class AutoStaircase extends Module {
     public void onActivate() {
         mc.player.setVelocity(0,0,0);
         resetTimer = false;
-        ticksPassed = 0;
-        blocksPlaced = 0;
-
-        centered = false;
-        playerPos = BEntityUtils.playerPos(mc.player);
-
-        if (centerMode.get() != CenterMode.None) {
-            if (centerMode.get() == CenterMode.Snap) BWorldUtils.snapPlayer(playerPos);
-            else PlayerUtils.centerPlayer();
-        }
-
-        dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());
+        playerPos = mc.player.getBlockPos();
+        PlayerUtils.centerPlayer();
         if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
         BlockPos pos = playerPos.add(new Vec3i(0,-1.5,0));
         if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
@@ -255,11 +215,7 @@ public class AutoStaircase extends Module {
         if (mc.options.backKey.isPressed()){
             mc.options.jumpKey.setPressed(false);
             mc.player.setVelocity(0,-5,0);
-            ticksPassed = 0;
-            blocksPlaced = 0;
-
-            centered = false;
-            playerPos = BEntityUtils.playerPos(mc.player);
+            playerPos = mc.player.getBlockPos();
             PlayerUtils.centerPlayer();
         }
         if (mc.options.rightKey.isPressed())
@@ -304,20 +260,8 @@ public class AutoStaircase extends Module {
             mc.options.forwardKey.setPressed(true);
             mc.options.jumpKey.setPressed(true);
             mc.player.setVelocity(0, jump.get(), 0);
-
-                ticksPassed = 0;
-                blocksPlaced = 0;
-
-                centered = false;
-                playerPos = BEntityUtils.playerPos(mc.player);
-
-                if (centerMode.get() != CenterMode.None) {
-                    if (centerMode.get() == CenterMode.Snap) BWorldUtils.snapPlayer(playerPos);
-                    else PlayerUtils.centerPlayer();
-                }
-
-                dir = BPlayerUtils.direction(mc.gameRenderer.getCamera().getYaw());
-
+            playerPos = mc.player.getBlockPos();
+            PlayerUtils.centerPlayer();
         }
         if (mc.player.getMainHandStack().isEmpty()) {
             mc.options.forwardKey.setPressed(false);

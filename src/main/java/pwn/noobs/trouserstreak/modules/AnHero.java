@@ -28,7 +28,7 @@ public class AnHero extends Module {
             .name("Hero Multiplier")
             .description("The multiplier value for how fast to become an hero.")
             .defaultValue(1)
-            .sliderRange(1,10)
+            .sliderRange(0.5,10)
             .build()
     );
     public final Setting<Boolean> chatmsg = sgGeneral.add(new BoolSetting.Builder()

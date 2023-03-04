@@ -14,14 +14,13 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.AbstractBlock;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MovementType;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
-import pwn.noobs.trouserstreak.utils.BEntityUtils;
 
 public class TrouserFlight extends Module {
     public enum Mode {
@@ -150,12 +149,11 @@ public class TrouserFlight extends Module {
                     abilitiesOff();
                     shouldReturn = true;
                 }
-                else if (antiKickMode.get() == AntiKickMode.Normal) {
-                    BlockPos playerPos = BEntityUtils.playerPos(mc.player);
-                    BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
-                    if (mc.world.getBlockState(pos).isAir() && mode.get() == Mode.Velocity)
-                     mc.player.move(MovementType.SELF, new Vec3d(0,-0.2,0));
-                     mc.player.setVelocity(0,0,0);
+                else if (mode.get() == Mode.Velocity && antiKickMode.get() == AntiKickMode.Normal) {
+                    BlockPos plznolava = mc.player.getBlockPos().add(0,-1,0);
+                    if (!mc.player.isOnGround() && !mc.player.isTouchingWater() && !mc.world.getBlockState(plznolava).equals(Blocks.LAVA)){
+                     mc.player.move(MovementType.SELF, new Vec3d(0,-0.1,0));
+                    }
                 }
             } else if (antiKickMode.get() == AntiKickMode.Packet && offLeft == offTime.get()) {
                 // Resend movement packets
