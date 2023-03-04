@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pwn.noobs.trouserstreak.commands.CasterTimer;
 import pwn.noobs.trouserstreak.commands.LavaTimeCalculator;
+import pwn.noobs.trouserstreak.commands.NewChunkCounter;
 import pwn.noobs.trouserstreak.modules.*;
 
 
@@ -43,6 +44,7 @@ public class Trouser extends MeteorAddon {
         Modules.get().add(new AnHero());
         Commands.get().add(new LavaTimeCalculator());
         Commands.get().add(new CasterTimer());
+        Commands.get().add(new NewChunkCounter());
 
 	}
 

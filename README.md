@@ -37,14 +37,14 @@ In no particular order
 - Autoreplenish is recommended if building up, but disable search hotbar option.
 - Do not use Flammable blocks if building up, and firespread is on.
 - Reducing timing options while it's on can break it.
-- **AutoMountain:** AutoMountain builds stairs in the direction you aim. It builds upward if you are looking toward the horizon or higher, and builds downward if you are looking down. (Credits to etianl :D)(Frostburn donated the framework and idea for the code, and Banana the player centering utils. Credits to them for that.)
+- **AutoMountain:** AutoMountain builds stairs in the direction you aim. It builds upward if you are looking toward the horizon or higher, and builds downward if you are looking down. (Credits to etianl :D)(Frostburn donated the framework and idea for the code, credits to them for that. <3)
 - *AutoMountain Controls:* 
 - UseKey (Right Click) starts and pauses mountain building.
 - Left and RightKeys turn Mountain building.
 - ForwardKey Turns mountain up, Back Key turns mountain down.
-- JumpKey adjusts spacing of stairs according to the OnDemandSpacing value. 
+- JumpKey adjusts spacing of stairs when building up according to the OnDemandSpacing value. 
 - Holding ForwardKey or BackKey then holding Left or RightKey as well builds stairs diagonally. Release left or right key first to continue building in the direction you were prior. 
-- **AutoStaircase:** Builds stairs upward in the direction you are facing by running forward and jumping. (Credits to etianl for bringing it to life! As well as Credits to Frostburn, and Banana for the player centering utils to make it work correctly) I just had to fix up some stuff for this one but Frostburn had the base code there. I believe this is the first publicly available automatic staircase builder in a Meteor addon, correct me if I'm wrong maybe I didn't have to learn some Java to do this.
+- **AutoStaircase:** Builds stairs upward in the direction you are facing by running forward and jumping. (Credits to etianl for bringing it to life! As well as Credits to Frostburn for writing the original. <3) I just had to fix up some stuff for this one but Frostburn had the base code there. I believe this is the first publicly available automatic staircase builder in a Meteor addon, correct me if I'm wrong maybe I didn't have to learn some Java to do this.
 - **BetterScaffold:** Give you more options for scaffolding, bigger range and others. (Credits to Meteor-Tweaks)
 - **Boom+:** Throws entities or spawns them on the targeted block when you click (Credits to Allah-Hack) I just added some more fun things you might want to throw.
 - **ExplosionAura:** Spawns creepers at your position as you move that explode instantly. Like a bigger, more laggy Nuker module for creative mode. The use of the module Velocity is recommended to avoid being thrown around. (Credits to etianl :D)
@@ -77,11 +77,9 @@ In no particular order
 - If you are too far out of reach it breaks.
 - If view of the targeted block is obstructed it breaks.
 - **AutoMountain Bugs** 
-- AutoMountain can cause damage if you pause or disable the module while rubberbanding and building downward. There is a workaround included to fix this when pausing with the useKey.
-- Be prepared to Die in the name of building Mountains.
 - Some blocks may cause Automountain to attempt to build while not actually placing anything (Torches, walls, and doors did this until I fixed). If a block does not work please make an issue so I can correct it.
 -------------------------------------
-- **Blocks That do not work at all with AutoMountain**
+- *Blocks That do not work at all with AutoMountain*
 - SnowBlocks
 - maybe more?
 -------------------------------------
