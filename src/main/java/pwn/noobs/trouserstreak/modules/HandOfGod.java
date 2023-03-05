@@ -192,7 +192,7 @@ public class HandOfGod extends Module {
     private final Setting<Integer> roofheight = sgPcentered.add(new IntSetting.Builder()
             .name("height")
             .description("height")
-            .defaultValue(256)
+            .defaultValue(255)
             .sliderRange(64, 319)
             .visible(() -> roofer.get())
             .build());
