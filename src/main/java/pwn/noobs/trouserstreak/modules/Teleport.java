@@ -27,7 +27,7 @@ public class Teleport extends Module {
     private final Setting<Integer> reach = sgGeneral.add(new IntSetting.Builder()
             .name("reach")
             .description("Reach")
-            .defaultValue(64)
+            .defaultValue(48)
             .sliderRange(8, 96)
             .build());
     public final Setting<Double> tpTimer = sgGeneral.add(new DoubleSetting.Builder()
@@ -66,7 +66,7 @@ public class Teleport extends Module {
     );
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
-            .name("line-color-solid-bloc")
+            .name("line-color-solid-block")
             .description("The color of the lines of the blocks being rendered.")
             .defaultValue(new SettingColor(255, 0, 255, 255))
             .visible(() -> render.get())
