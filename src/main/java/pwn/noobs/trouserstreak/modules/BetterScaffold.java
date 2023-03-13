@@ -156,7 +156,7 @@ public class BetterScaffold extends Module {
 
 
     public BetterScaffold() {
-        super(Trouser.Main, "betterScaffold", "Automatically places blocks under you.");
+        super(Trouser.Main, "betterScaffold", "Automatically places blocks under you. Credits to MeteorTweaks.");
     }
 
     @Override

@@ -15,37 +15,36 @@ public class NewChunkCounter extends Command {
     }
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
+        NewerNewChunks n=new NewerNewChunks();
         builder.then(literal("NewChunks").executes(ctx -> {
-            NewerNewChunks n=new NewerNewChunks();
             n.chunkcounterticks=0;
             n.chunkcounter=true;
             int chunks = n.newchunksfound;
-            ChatUtils.sendMsg(Text.of(chunks+"  NewChunk locations have been saved by NewerNewChunks. :D"));
+            ChatUtils.sendMsg(Text.of(chunks+"  NewChunk locations have been saved by NewerNewChunks in this dimension."));
             return SINGLE_SUCCESS;
         }));
         builder.then(literal("OldChunks").executes(ctx -> {
-            NewerNewChunks n=new NewerNewChunks();
             n.chunkcounterticks=0;
             n.chunkcounter=true;
             int chunks = n.oldchunksfound;
-            ChatUtils.sendMsg(Text.of(chunks+"  OldChunk locations have been saved by NewerNewChunks. :D"));
+            ChatUtils.sendMsg(Text.of(chunks+"  OldChunk locations have been saved by NewerNewChunks in this dimension."));
             return SINGLE_SUCCESS;
         }));
         builder.then(literal("FlowBelowY0Chunks").executes(ctx -> {
-            NewerNewChunks n=new NewerNewChunks();
             n.chunkcounterticks=0;
             n.chunkcounter=true;
             int chunks = n.olderoldchunksfound;
-            ChatUtils.sendMsg(Text.of(chunks+"  FlowBelowY0Chunk locations have been saved by NewerNewChunks. :D"));
+            ChatUtils.sendMsg(Text.of(chunks+"  FlowBelowY0Chunk locations have been saved by NewerNewChunks in this dimension."));
             return SINGLE_SUCCESS;
         }));
-        builder.then(literal("AllChunks").executes(ctx -> {
-            NewerNewChunks n=new NewerNewChunks();
+        builder.executes(ctx -> {
             n.chunkcounterticks=0;
             n.chunkcounter=true;
-            int chunks = n.olderoldchunksfound+n.oldchunksfound+n.newchunksfound;
-            ChatUtils.sendMsg(Text.of(chunks+"  Total Chunk locations have been saved by NewerNewChunks. :D"));
+            int chunks1 = n.newchunksfound;
+            int chunks2 = n.olderoldchunksfound;
+            int chunks3 = n.oldchunksfound;
+            ChatUtils.sendMsg(Text.of("New: "+chunks1+" | FlowBelowY=0: "+chunks2+" | Old: "+chunks3+" | Chunk locations have been saved by NewerNewChunks in this dimension."));
             return SINGLE_SUCCESS;
-        }));
+        });
     }
 }

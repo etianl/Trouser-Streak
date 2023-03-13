@@ -16,21 +16,38 @@ public class LavaTimeCalculator extends Command {
 
     @Override
         public void build(LiteralArgumentBuilder<CommandSource> builder) {
+        builder.executes(ctx -> {
+            if (mc.player.getBlockY()>64) {
+                float TopY = mc.player.getBlockY();
+                float time = (((TopY - 64) * 60) / 20);
+
+                ChatUtils.sendMsg(Text.of("Lava will take " + time + " seconds to go from your elevation (Y" + TopY + ") to Y64(sea level) on a 45degree staircase at 20TPS)."));
+            } else if (mc.player.getBlockY()<=64) {
+                float TopY = mc.player.getBlockY();
+                float time = (((TopY - (-60)) * 60) / 20);
+
+                ChatUtils.sendMsg(Text.of("Lava will take " + time + " seconds to go from your elevation (Y" + TopY + ") to Y-60(Bottom of the world) on a 45degree staircase at 20TPS)."));
+            }
+            return SINGLE_SUCCESS;
+        });
         builder.then(argument("TopY", FloatArgumentType.floatArg()).executes(ctx -> {
-            float TopY = FloatArgumentType.getFloat(ctx, "TopY");
-            float time = (((TopY-64)*60)/20);
+            if (mc.player.getBlockY()>64) {
+                float TopY = FloatArgumentType.getFloat(ctx, "TopY");
+                float time = (((TopY - 64) * 60) / 20);
 
+                ChatUtils.sendMsg(Text.of("Lava will take " + time + " seconds to go from Y" + TopY + " to Y64(sea level) on a 45degree staircase at 20TPS)."));
+            } else if (mc.player.getBlockY()<=64) {
+                float TopY = FloatArgumentType.getFloat(ctx, "TopY");
+                float time = (((TopY - (-60)) * 60) / 20);
 
-
-            ChatUtils.sendMsg(Text.of("Lava will take "+time+" seconds to go from Y"+TopY+" to Y64(sea level) on a 45degree staircase at 20TPS)."));
+                ChatUtils.sendMsg(Text.of("Lava will take " + time + " seconds to go from Y" + TopY + " to Y-60(Bottom of the world) on a 45degree staircase at 20TPS)."));
+            }
             return SINGLE_SUCCESS;
         }));
         builder.then(argument("TopY", FloatArgumentType.floatArg()).then(argument("BottomY",FloatArgumentType.floatArg()).executes(ctx -> {
             float TopY = FloatArgumentType.getFloat(ctx, "TopY");
             float BottomY = FloatArgumentType.getFloat(ctx, "BottomY");
                 float time = (((TopY-BottomY)*60)/20);
-
-
 
                 ChatUtils.sendMsg(Text.of("Lava will take "+time+" seconds to go from  Y"+TopY+" to Y"+BottomY+" on a 45degree staircase at 20TPS)."));
                 return SINGLE_SUCCESS;
