@@ -42,6 +42,21 @@ public class AutoLavaCaster extends Module {
             .defaultValue(false)
             .build()
     );
+    private final Setting<Boolean> estlavatimebotY = sgTimer.add(new BoolSetting.Builder()
+            .name("ChooseBottomY")
+            .description("Estimates lava time automatically based on a 45 degree staircase from your Y level down to the Y level you choose.")
+            .defaultValue(false)
+            .visible(() -> estlavatime.get())
+            .build()
+    );
+    private final Setting<Integer> estbotY = sgTimer.add(new IntSetting.Builder()
+            .name("BottomYforEstimation")
+            .description("The bottom Y level the mountain should go to roughly")
+            .defaultValue(128)
+            .sliderRange(-64, 320)
+            .visible(() -> estlavatime.get() && estlavatimebotY.get())
+            .build()
+    );
     private final Setting<Integer> lavatime = sgTimer.add(new IntSetting.Builder()
             .name("LavaTimerInSeconds")
             .description("The amount of time to let lava flow, in seconds. Use .lavacalc Command to get a suggested time. Based on 20ticks/second.")
@@ -171,11 +186,13 @@ public class AutoLavaCaster extends Module {
     int layers;
     @Override
     public void onActivate() {
-        if (estlavatime.get()){
+        if (estlavatime.get() && !estlavatimebotY.get()){
             if (mc.player.getBlockY()>64)
             estimatedlavatime= (((mc.player.getBlockY()-64)*60)/20);
             else if (mc.player.getBlockY()<=64)
                 estimatedlavatime= (((mc.player.getBlockY()-(-60))*60)/20);
+        } else if (estlavatime.get() && estlavatimebotY.get()){
+                estimatedlavatime= (((mc.player.getBlockY()-estbotY.get())*60)/20);
         }
         if (Modules.get().get(Timer.class).isActive()) {
             error("Timer off.");
@@ -289,11 +306,13 @@ public class AutoLavaCaster extends Module {
                 }
             }
         else if (firstplace==false && ticks==40){
-                if (estlavatime.get()){
+                if (estlavatime.get() && !estlavatimebotY.get()){
                     if (mc.player.getBlockY()>64)
                         estimatedlavatime= (((mc.player.getBlockY()-64)*60)/20);
                     else if (mc.player.getBlockY()<=64)
                         estimatedlavatime= (((mc.player.getBlockY()-(-60))*60)/20);
+                } else if (estlavatime.get() && estlavatimebotY.get()){
+                    estimatedlavatime= (((mc.player.getBlockY()-estbotY.get())*60)/20);
                 }
         placeLava();
         if (estlavatime.get()){
@@ -310,15 +329,15 @@ public class AutoLavaCaster extends Module {
                 toggle();
                 return;
             }
-        else if (estlavatime.get() && ticks==(estimatedlavatime*20) || ticks==(lavatime.get()*20)){
+        else if (estlavatime.get() && ticks==(estimatedlavatime*20) || !estlavatime.get() && ticks==(lavatime.get()*20)){
             firstplace=false;
         pickupLiquid();
     }
-        else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get() || ticks==(lavatime.get()*20)+watertime1.get()){
+        else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get() || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime1.get()){
             placeWater();
             ChatUtils.sendMsg(Text.of("Finishing layer "+layers));
         }
-        else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get() || ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()){
+        else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get() || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()){
             pickupLiquid();
             if (!incY.get()){
                 ticks=0;
@@ -366,17 +385,17 @@ public class AutoLavaCaster extends Module {
             }
         }
         if (incY.get()){
-            if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+5 || ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+5){
+            if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+5 || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+5){
                 BlockPos pos = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ());
                 if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
                 lava = cast();
             }
-        else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+10 || ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+10){
+        else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+10 || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+10){
             mc.player.setPos(mc.player.getX(),mc.player.getY()+1,mc.player.getZ());
         }
-        else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+15 || ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+15){
+        else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+15 || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+15){
             BlockPos pos = mc.player.getBlockPos().add(new Vec3i(0,-1,0));
             if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
@@ -407,11 +426,13 @@ public class AutoLavaCaster extends Module {
                 }
             }
             else if (firstplace==false && ticks==40){
-                if (estlavatime.get()){
+                if (estlavatime.get() && !estlavatimebotY.get()){
                     if (mc.player.getBlockY()>64)
                         estimatedlavatime= (((mc.player.getBlockY()-64)*60)/20);
                     else if (mc.player.getBlockY()<=64)
                         estimatedlavatime= (((mc.player.getBlockY()-(-60))*60)/20);
+                } else if (estlavatime.get() && estlavatimebotY.get()){
+                    estimatedlavatime= (((mc.player.getBlockY()-estbotY.get())*60)/20);
                 }
                 placeLava();
                 if (estlavatime.get()){
@@ -428,15 +449,15 @@ public class AutoLavaCaster extends Module {
                 toggle();
                 return;
             }
-            else if (estlavatime.get() && ticks==(estimatedlavatime*20) || ticks==(lavatime.get()*20)){
+            else if (estlavatime.get() && ticks==(estimatedlavatime*20) || !estlavatime.get() && ticks==(lavatime.get()*20)){
                 firstplace=false;
                 pickupLiquid();
             }
-            else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get() || ticks==(lavatime.get()*20)+watertime1.get()){
+            else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get() || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime1.get()){
                 placeWater();
                 ChatUtils.sendMsg(Text.of("Finishing layer "+layers));
             }
-            else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get() || ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()){
+            else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get() || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()){
                 pickupLiquid();
                 if (!incY.get()){
                     ticks=0;
@@ -483,7 +504,7 @@ public class AutoLavaCaster extends Module {
                     }
                 }
             }if (incY.get()){
-                if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+5 || ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+5){
+                if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+5 || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+5){
                     BlockPos pos2 = new BlockPos(lava.getX()+1,lava.getY()+1,lava.getZ());
                     BlockPos pos3 = new BlockPos(lava.getX()-1,lava.getY()+1,lava.getZ());
                     BlockPos pos4 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ()+1);
@@ -495,22 +516,22 @@ public class AutoLavaCaster extends Module {
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos5), Direction.DOWN, pos5, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
-                else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+20 || ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+20){
+                else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+20 || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+20){
                     mc.player.setPos(mc.player.getX(),mc.player.getY()+1,mc.player.getZ());
                 }
-                else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+25 || ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+25){
+                else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+25 || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+25){
                     BlockPos pos1 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ());
                     if (mc.world.getBlockState(pos1).getMaterial().isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos1), Direction.DOWN, pos1, false));
                         mc.player.swingHand(Hand.MAIN_HAND);
                     }
                 }
-                else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+26 || ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+26){
+                else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+26 || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+26){
                     if (mc.player.getPitch()>=5){
                         mc.player.setPitch(mc.player.getPitch()-5);}
                     lava = cast();
                 }
-                else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+30 || ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+30){
+                else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+30 || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+30){
                     BlockPos pos = mc.player.getBlockPos().add(new Vec3i(0,-1,0));
                     if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
@@ -536,11 +557,13 @@ public class AutoLavaCaster extends Module {
                 }
             }
             else if (firstplace==false && ticks==40){
-                if (estlavatime.get()){
+                if (estlavatime.get() && !estlavatimebotY.get()){
                     if (mc.player.getBlockY()>64)
                         estimatedlavatime= (((mc.player.getBlockY()-64)*60)/20);
                     else if (mc.player.getBlockY()<=64)
                         estimatedlavatime= (((mc.player.getBlockY()-(-60))*60)/20);
+                } else if (estlavatime.get() && estlavatimebotY.get()){
+                    estimatedlavatime= (((mc.player.getBlockY()-estbotY.get())*60)/20);
                 }
                 placeLava();
                 if (estlavatime.get()){
@@ -557,15 +580,15 @@ public class AutoLavaCaster extends Module {
                 toggle();
                 return;
             }
-            else if (estlavatime.get() && ticks==(estimatedlavatime*20) || ticks==(lavatime.get()*20)){
+            else if (estlavatime.get() && ticks==(estimatedlavatime*20) || !estlavatime.get() && ticks==(lavatime.get()*20)){
                 firstplace=false;
                 pickupLiquid();
             }
-            else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime2.get() || ticks==(lavatime.get()*20)+watertime2.get()){
+            else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime2.get() || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime2.get()){
                 placeWater();
                 ChatUtils.sendMsg(Text.of("Finishing layer "+layers));
             }
-            else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get() || ticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()){
+            else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get() || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()){
                 pickupLiquid();
                 if (!incY.get()){
                     ticks=0;
@@ -612,7 +635,7 @@ public class AutoLavaCaster extends Module {
                     }
                 }
             }if (incY.get()){
-                if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+5 || ticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+5){
+                if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+5 || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+5){
                     BlockPos pos2 = new BlockPos(lava.getX()+1,lava.getY()+1,lava.getZ());
                     BlockPos pos3 = new BlockPos(lava.getX()-1,lava.getY()+1,lava.getZ());
                     BlockPos pos4 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ()+1);
@@ -624,22 +647,22 @@ public class AutoLavaCaster extends Module {
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos5), Direction.DOWN, pos5, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
-                else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+20 || ticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+20){
+                else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+20 || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+20){
                     mc.player.setPos(mc.player.getX(),mc.player.getY()+1,mc.player.getZ());
                 }
-                else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+25 || ticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+25){
+                else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+25 || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+25){
                     BlockPos pos1 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ());
                     if (mc.world.getBlockState(pos1).getMaterial().isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos1), Direction.DOWN, pos1, false));
                         mc.player.swingHand(Hand.MAIN_HAND);
                     }
                 }
-                else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+26 || ticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+26){
+                else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+26 || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+26){
                     if (mc.player.getPitch()>=5){
                         mc.player.setPitch(mc.player.getPitch()-5);}
                     lava = cast();
                 }
-                else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+30 || ticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+30){
+                else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+30 || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+30){
                     BlockPos pos = mc.player.getBlockPos().add(new Vec3i(0,-1,0));
                     if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
