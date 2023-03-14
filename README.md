@@ -28,7 +28,8 @@ In no particular order
 - **AutoDrop:** Drops the stack in your selected slot automatically, or you can choose a slot to dump. You can shift click your inventory items to slot one to dump your trash easily. (Credits to etianl :D)
 - **AutoLavaCaster** Simple timer based bot for lavacasting. Aim at the top of the block you want to cast on and activate the module. It places lava, then after an amount of time removes the lava, places the water after a specified delay, removes it after a specified delay, it will build the mountain upward, tower you up and repeat. Position yourself on a block above and diagonally, mostly perpendicular from the targeted block for best results. Use the ".lavacalc" command to determine roughly how long lava will take to finish. (Credits to etianl :D)
 - *AutoLavaCaster Notes:*
-- The EstimateLavaTimer estimates lava time automatically based on a 45 degree staircase from your Y level down to sea level, or Y-60 if you are below sea level.
+- The EstimateLavaTimer estimates lava time automatically based on a 45 degree staircase from your Y level down to sea level, or Y-60 if you are below sea level. 
+- You can also enable another option to choose the bottom Y level for EstimateLavaTimer
 - The .castertimer Command tells you how long each cycle has been running for. 
 - The .lavacalc command gives you an approximation of how long lava will take to flow across a 45 degree staircase at 20TPS.
 - Do not use Timer with this module.

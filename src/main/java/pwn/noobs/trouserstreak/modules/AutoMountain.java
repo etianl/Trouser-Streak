@@ -69,19 +69,11 @@ public class AutoMountain extends Module {
             .sliderMax(5)
             .build());
 
-    public final Setting<Boolean> timer = sgTimings.add(new BoolSetting.Builder()
-            .name("Timer")
-            .description("Timer on/off")
-            .defaultValue(false)
-            .build()
-    );
-
     public final Setting<Double> StairTimer = sgTimings.add(new DoubleSetting.Builder()
             .name("TimerMultiplier")
             .description("The multiplier value for Timer.")
             .defaultValue(1)
             .sliderRange(0.1, 10)
-            .visible(() -> timer.get())
             .build()
     );
     public final Setting<Boolean> delayakick = sgTimings.add(new BoolSetting.Builder()
@@ -414,7 +406,6 @@ public class AutoMountain extends Module {
             cascadingpileof();
         }
         mc.player.setVelocity(0,0,0);
-        if (timer.get()) {
             if (mc.world.getBlockState(mc.player.getBlockPos()).getBlock() == Blocks.AIR) {
                 resetTimer = false;
                 Modules.get().get(Timer.class).setOverride(StairTimer.get());
@@ -422,7 +413,6 @@ public class AutoMountain extends Module {
                 Modules.get().get(Timer.class).setOverride(Timer.OFF);
                 resetTimer = true;
             }
-        }
             mc.player.setPos(mc.player.getX(),Math.round(mc.player.getY())+0.25,mc.player.getZ());//this line here prevents you dying for realz
         if (mc.options.forwardKey.isPressed() && mc.options.rightKey.isPressed() && delayLeft <= 0 && offLeft > 0||lagpause.get() && timeSinceLastTick >= lag.get()){
             cookie++;
