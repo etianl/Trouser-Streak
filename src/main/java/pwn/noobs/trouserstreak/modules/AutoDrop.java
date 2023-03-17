@@ -42,24 +42,49 @@ public class AutoDrop extends Module {
 
     public AutoDrop() {super(Trouser.Main, "auto-drop", "Drops the stack in your selected slot automatically");}
     private int ticks=0;
+    private int previousslot=0;
+
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
-        ticks++;
         if (tool.get() == true){
         if (!(mc.player.getMainHandStack().getItem() instanceof BucketItem || mc.player.getMainHandStack().getItem() instanceof FlintAndSteelItem || mc.player.getMainHandStack().getItem() instanceof ToolItem || mc.player.getMainHandStack().getItem() instanceof ShearsItem)) {
             if (dropthisslot.get() && !mc.player.getInventory().getStack(dropslot.get()-1).isEmpty()){
-                if (ticks==1){mc.player.getInventory().selectedSlot = dropslot.get()-1;}
+                ticks++;
+                if (ticks==1){
+                    previousslot=mc.player.getInventory().selectedSlot;
+                    mc.player.getInventory().selectedSlot = dropslot.get()-1;
+                }
                 else if (ticks==2){mc.player.dropSelectedItem(true);}
-                else if (ticks>=2){ticks=0;}
-            } else if (!dropthisslot.get()) mc.player.dropSelectedItem(true);
+                else if (ticks>=2){
+                    mc.player.getInventory().selectedSlot = previousslot;
+                    ticks=0;
+                }
+            }
+            if (dropthisslot.get() && mc.player.getInventory().getStack(dropslot.get()-1).isEmpty() && ticks>=2){
+                mc.player.getInventory().selectedSlot = previousslot;
+                ticks=0;
+            }
+            if (!dropthisslot.get()) mc.player.dropSelectedItem(true);
         }else if (mc.player.getMainHandStack().getItem() instanceof BucketItem || mc.player.getMainHandStack().getItem() instanceof FlintAndSteelItem || mc.player.getMainHandStack().getItem() instanceof ToolItem || mc.player.getMainHandStack().getItem() instanceof ShearsItem){}
         }
         else {
             if (dropthisslot.get() && !mc.player.getInventory().getStack(dropslot.get()-1).isEmpty()){
-                if (ticks==1){mc.player.getInventory().selectedSlot = dropslot.get()-1;}
+                ticks++;
+                if (ticks==1){
+                    previousslot=mc.player.getInventory().selectedSlot;
+                    mc.player.getInventory().selectedSlot = dropslot.get()-1;
+                }
                 else if (ticks==2){mc.player.dropSelectedItem(true);}
-                else if (ticks>=2){ticks=0;}
-            } else if (!dropthisslot.get()) mc.player.dropSelectedItem(true);
+                else if (ticks>=2){
+                    mc.player.getInventory().selectedSlot = previousslot;
+                    ticks=0;
+                }
+            }
+            if (dropthisslot.get() && mc.player.getInventory().getStack(dropslot.get()-1).isEmpty() && ticks>=2){
+                mc.player.getInventory().selectedSlot = previousslot;
+                ticks=0;
+            }
+            if (!dropthisslot.get()) mc.player.dropSelectedItem(true);
         }
 
     }

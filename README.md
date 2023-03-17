@@ -25,7 +25,7 @@ In no particular order
 - **Airstrike+:** Rains whatever entities you desire from a list similar to Boom. It used to only rain fireballs, that's all I changed. (Credits to Allah-Hack) 
 - **AnHero:** Become An Hero! (A quick way back to spawn.) (Credits to etianl :D)
 - **AutoBuild:** Places blocks according to selection in a 5x5 grid. You can draw pictures with it! (Credits to Banana) I modified it so it places lengthways infront of you. This way you can draw stairs and place them infront of you, hop up em and keep going.
-- **AutoDrop:** Drops the stack in your selected slot automatically, or you can choose a slot to dump. You can shift click your inventory items to slot one to dump your trash easily. (Credits to etianl :D)
+- **AutoDrop:** Drops the stack in your selected slot automatically, or you can choose a slot to dump. You can shift click your inventory items to dump your trash easily. (Credits to etianl :D)
 - **AutoLavaCaster** Simple timer based bot for lavacasting. Aim at the top of the block you want to cast on and activate the module. It places lava, then after an amount of time removes the lava, places the water after a specified delay, removes it after a specified delay, it will build the mountain upward, tower you up and repeat. Position yourself on a block above and diagonally, mostly perpendicular from the targeted block for best results. Use the ".lavacalc" command to determine roughly how long lava will take to finish. (Credits to etianl :D)
 - *AutoLavaCaster Notes:*
 - The EstimateLavaTimer estimates lava time automatically based on a 45 degree staircase from your Y level down to sea level, or Y-60 if you are below sea level. 
@@ -71,7 +71,7 @@ In no particular order
 - **RedstoneNuker:** It's just the regular Nuker module from Meteor client, customized for only breaking things that generate redstone signals. Also with included AutoTool. To keep you safer when placing lots of TNT. (Credits to Meteor Client for Nuker code, and AutoTool code inthere.)
 - **ShulkerDupe:** Duplicates the contents of a shulker when pressing "Dupe" or "Dupe All" in the shulker menu. Only works on Vanilla, Forge, and Fabric servers 1.19 and below. Use multiconnect or viafabric (Credits to Allah-Hack, I just brought back the buttons, and make it dupe slot1 as well.)
 - **Teleport:** Sets your position ontop of targeted block, within a possible reach of 64 blocks. Rarely can cause damage, be careful. ***EXPERIMENTAL*** (Credits to etianl :D)
-- **TPFly:** It is a purely setPos based flight. Based off the ClickTP code, credits to Meteor for that. ***EXPERIMENTAL, movement is a little weird lol.*** (Credits to etianl :D)
+- **TPFly:** It is a purely setPos based flight. PointAndFly mode is based off the ClickTP and AirPlace code, credits to Meteor for that. ***EXPERIMENTAL, movement is a little weird lol.*** (Credits to etianl :D)
 - **TrouserFlight:** I just added a Normal mode antikick for Velocity flight cuz missing at the time.
 - **Voider+:** Replaces the world from the top down. (Credits to Allah-Hack) I added a 3x3 voiding script, a TP foward option for deleting strips, as well as options to set max and minimum height for voiding, and instead of just air it can do water and lava now too.
 
