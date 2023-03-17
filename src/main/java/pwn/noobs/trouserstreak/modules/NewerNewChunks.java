@@ -546,7 +546,7 @@ public class NewerNewChunks extends Module {
 						for (int z = 0; z < 16; z++) {
 							FluidState fluid = chunk.getFluidState(x, y, z);
 
-							if (!fluid.isEmpty() && !fluid.isStill() && !olderoldChunks.contains(chunkPos)) {
+							if (!fluid.isEmpty() && !fluid.isStill() || !newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)) {
 								oldChunks.add(oldpos);
 								if (save.get()){
 									saveOldChunkData();
