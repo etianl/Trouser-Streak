@@ -11,7 +11,7 @@ In no particular order
 - [Allah-Hack](https://github.com/TaxEvasiqn/allah-hack)
 - [Meteor-Rejects](https://github.com/AntiCope/meteor-rejects)
 - [Frostburn Client](https://github.com/evaan/FrostBurn)
-- [Banana](https://github.com/Bennooo/banana-for-everyone)
+- [Banana](https://github.com/Bennooo/banana-for-everyone) credits for the idea behind TrouserBuild
 - [1.17 Crafting Dupe](https://github.com/B2H990/NUMA-117-Crafting-Dupe/)
 - [InstantKillBow](https://github.com/Saturn5Vfive/InstantKillBow)
 - [LecternCrash](https://github.com/Coderx-Gamer/lectern-crash)
@@ -22,9 +22,8 @@ In no particular order
  </p>
 
 ## Features:
-- **Airstrike+:** Rains whatever entities you desire from a list similar to Boom. It used to only rain fireballs, that's all I changed. (Credits to Allah-Hack) 
+- **Airstrike+:** Rains whatever entities you desire from a list similar to Boom. It used to only rain fireballs, and I also changed the positioning of the spawning. (Credits to Allah-Hack) 
 - **AnHero:** Become An Hero! (A quick way back to spawn.) (Credits to etianl :D)
-- **AutoBuild:** Places blocks according to selection in a 5x5 grid. You can draw pictures with it! (Credits to Banana) I modified it so it places lengthways infront of you. This way you can draw stairs and place them infront of you, hop up em and keep going.
 - **AutoDrop:** Drops the stack in your selected slot automatically, or you can choose a slot to dump. You can shift click your inventory items to dump your trash easily. (Credits to etianl :D)
 - **AutoLavaCaster** Simple timer based bot for lavacasting. Aim at the top of the block you want to cast on and activate the module. It places lava, then after an amount of time removes the lava, places the water after a specified delay, removes it after a specified delay, it will build the mountain upward, tower you up and repeat. Position yourself on a block above and diagonally, mostly perpendicular from the targeted block for best results. Use the ".lavacalc" command to determine roughly how long lava will take to finish. (Credits to etianl :D)
 - *AutoLavaCaster Notes:*
@@ -51,8 +50,9 @@ In no particular order
 - **BetterScaffold:** Give you more options for scaffolding, bigger range and others. (Credits to Meteor-Tweaks)
 - **Boom+:** Throws entities or spawns them on the targeted block when you click (Credits to Allah-Hack) I just added some more fun things you might want to throw.
 - **ExplosionAura:** Spawns creepers at your position as you move that explode instantly. Like a bigger, more laggy Nuker module for creative mode. The use of the module Velocity is recommended to avoid being thrown around. (Credits to etianl :D)
+- **FlightAntikick:** Moves you down on a tick-based timer. Added in to substitute the lack of an antikick for velocity flight in MeteorClient. Bind it to the same key as flight. (Credits to etianl :D)
 - **HandOfGod:** Runs the "/fill" command on the world around you in different ways as you fly, and as you click. Operator status required. (Credits to etianl :D)
-- **Inventory Dupe (1.17):** Duplicates things in your crafting slots when the module is enabled and the Dupe button is pressed in your inventory. (Credit to ItsVen and Da0neDatGotAway for original creation of the dupe, and to B2H990 for making the fabric mod.)
+- **Inventory Dupe (1.17):** Duplicates things in your crafting slots when the module is enabled and the Dupe button is pressed in your inventory. (Credit to ItsVen and Da0neDatGotAway for original creation of the dupe, and to B2H990 for making the fabric mod. Credits to etianl for porting to Meteor.)
 - **InstaKill:** Shoots arrows and tridents with incredible power and velocity. Enabling multiple buttons causes the amount of packets to add up. (Credits to Saturn5Vfive)
 - **LecternCrash:** Crash 1.18.X vanilla servers and possibly below. (Credits to Coderx-Gamer)
 - **NewerNewChunks:** NewChunks module with the ability to save chunk data for later! Also with special options for tracing servers that have been updated from a version before the build limit updates, which throw false positives normally. (Credits to Meteor Rejects, and BleachHack from where it was ported, and etianl for updating :D.)
@@ -65,6 +65,7 @@ In no particular order
 - There is also an option for deleting chunk data in that particular dimension on the server.
 - The .newchunkcount command can tell you how many chunks have been saved in data in the dimension you are in.
 - *NewerNewChunks Special Options:*
+- These are to be used when the server has two distinct diamond layers, and two distinct lava pool layers underground at spawn.
 - The "IgnoreFlowBelow0" does not show a new chunk if liquid flow is only below Y zero, but does show a newchunk if flow is above Y zero, or both above AND below Y zero.
 - The "AdvancedMode" highlights chunks that have flow only below Y0. If there is nothing but these you are updating old chunks to the new build limits and the FlowIsBelowY0 coloured chunks are OLD. If they are mixed with newchunks the FlowIsBelowY0 coloured chunks are NEW.
 - AdvancedMode can be confusing, do not use if you can't interpret the chunk data.
@@ -72,11 +73,12 @@ In no particular order
 - **ShulkerDupe:** Duplicates the contents of a shulker when pressing "Dupe" or "Dupe All" in the shulker menu. Only works on Vanilla, Forge, and Fabric servers 1.19 and below. Use multiconnect or viafabric (Credits to Allah-Hack, I just brought back the buttons, and make it dupe slot1 as well.)
 - **Teleport:** Sets your position ontop of targeted block, within a possible reach of 64 blocks. Rarely can cause damage, be careful. ***EXPERIMENTAL*** (Credits to etianl :D)
 - **TPFly:** It is a purely setPos based flight. PointAndFly mode is based off the ClickTP and AirPlace code, credits to Meteor for that. ***EXPERIMENTAL, movement is a little weird lol.*** (Credits to etianl :D)
-- **TrouserFlight:** I just added a Normal mode antikick for Velocity flight cuz missing at the time.
+- **TrouserBuild:** It can build either horizontally or vertically according to a 5x5 grid centered on the block you are aiming at. Right click to build at the targeted location. (Credits to etianl, and to Banana for the checkboxes and idea. :D)
 - **Voider+:** Replaces the world from the top down. (Credits to Allah-Hack) I added a 3x3 voiding script, a TP foward option for deleting strips, as well as options to set max and minimum height for voiding, and instead of just air it can do water and lava now too.
 
 ## Known Bugs:
 - **AutoLavaCaster Bugs** 
+- The timing will break if the server is under 15TPS.
 - If you are too far out of reach it breaks.
 - If view of the targeted block is obstructed it breaks.
 - **AutoMountain Bugs** 
@@ -91,12 +93,11 @@ In no particular order
 -**More Bugs** 
 - TPFly can hurt you once in a while on disable. I tried to prevent this. You also rubberband if going toward a block because it attempts to teleport you through it.
 - Adjusting  TPFly antikick values while flying can be deadly
-- Normal Mode antikick for the velocity flight mode that I added can cause damage once in a while for an unknown reason.
 - .newchunkcount command shows exactly the chunks that are saved in chunk data, so when you are in normal mode or flowbelowY0 mode the returned values are not exactly in correlation to what is rendered on screen.
 - NewerNewChunks has to be turned on atleast once prior to running .newchunkcount for the counter to work.
 
 ## Requirements:
-- Latest dev build of Meteor-Client if using 1.19.3 or the full build of Meteor-Client if using 1.19.2
+- Latest dev build of Meteor-Client if using 1.19.4 or the full build of Meteor-Client if using 1.19.3. Meteor Client 0.5.1 is required for 1.19.2, which is required to connect to servers that have enforce secure chat = true.
 - Don't forget to try updating any other mods you are using if your game is still crashing.
 
 ## Total Download Count:

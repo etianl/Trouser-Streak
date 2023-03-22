@@ -15,6 +15,7 @@ import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.movement.Flight;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -303,8 +304,11 @@ public class AutoMountain extends Module {
         playerPos = mc.player.getBlockPos();
         PlayerUtils.centerPlayer();
         mc.player.setVelocity(0,0,0);
-        if (Modules.get().get(TrouserFlight.class).isActive()) {
-            Modules.get().get(TrouserFlight.class).toggle();
+        if (Modules.get().get(Flight.class).isActive()) {
+            Modules.get().get(Flight.class).toggle();
+        }
+        if (Modules.get().get(FlightAntikick.class).isActive()) {
+            Modules.get().get(FlightAntikick.class).toggle();
         }
         if (Modules.get().get(TPFly.class).isActive()) {
             Modules.get().get(TPFly.class).toggle();
@@ -378,7 +382,7 @@ public class AutoMountain extends Module {
         if (!pause == true) {
             if (adeathonoff.get() && pitchonPause >= 40 | floor==true | mc.player.getY()==downlimit.get() | mc.player.getY()==downlimit.get()+1 | mc.player.getY()==downlimit.get()-1){
             if (ticks<antideath.get()) {
-                if (!Modules.get().get(TrouserFlight.class).isActive() && !Modules.get().get(TrouserFlight.class).isActive()){
+                if (!Modules.get().get(Flight.class).isActive()){
                 mc.player.setVelocity(0,0,0);}}
             else if (ticks==antideath.get()){
                 mc.player.setPos(mc.player.getX(),mc.player.getY()+0.2,mc.player.getZ());
@@ -395,8 +399,11 @@ public class AutoMountain extends Module {
         }
         PlayerUtils.centerPlayer();
         if (pause = true){
-            if (Modules.get().get(TrouserFlight.class).isActive()) {
-                Modules.get().get(TrouserFlight.class).toggle();
+            if (Modules.get().get(Flight.class).isActive()) {
+                Modules.get().get(Flight.class).toggle();
+            }
+            if (Modules.get().get(FlightAntikick.class).isActive()) {
+                Modules.get().get(FlightAntikick.class).toggle();
             }
             if (Modules.get().get(TPFly.class).isActive()) {
                 Modules.get().get(TPFly.class).toggle();
