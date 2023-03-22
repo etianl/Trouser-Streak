@@ -409,14 +409,13 @@ public class NewerNewChunks extends Module {
 					chunkPos = new ChunkPos(pos);
 
 					for (Direction dir: searchDirs) {
-						if (detectmode.get()==DetectMode.Advanced){
-							if (pos.offset(dir).getY()>0 && !mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+							if (pos.offset(dir).getY()>=0 && !mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 								newChunks.add(chunkPos);
 								if (save.get()){
 									saveNewChunkData();
 								}
 								return;
-							}else if ((pos.offset(dir).getY()<0 && !mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill()) && (pos.offset(dir).getY()>0 && !mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill()) && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+							}else if (mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 								newChunks.add(chunkPos);
 								if (save.get()){
 									saveNewChunkData();
@@ -429,38 +428,8 @@ public class NewerNewChunks extends Module {
 								}
 								return;
 							}
-						}
-						if (detectmode.get()==DetectMode.IgnoreFlowBelow0){
-							if (pos.offset(dir).getY()>0 && mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
-								newChunks.add(chunkPos);
-								if (save.get()){
-									saveNewChunkData();
-								}
-								return;
-							} else if ((pos.offset(dir).getY()<0 && !mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill()) && (pos.offset(dir).getY()>0 && !mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill()) && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
-								newChunks.add(chunkPos);
-								if (save.get()){
-									saveNewChunkData();
-								}
-								return;
-							}
-							}
-						if (detectmode.get()==DetectMode.Normal){
-							if (pos.offset(dir).getY()<0 && !mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
-								olderoldChunks.add(chunkPos);
-								if (save.get()){
-									saveOlderOldChunkData();
-								}
-								return;
-							}else if (mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
-								newChunks.add(chunkPos);
-								if (save.get()){
-									saveNewChunkData();
-								}
-									return;
-							}
-						}
 					}
+
 				}
 			});
 		}
@@ -472,14 +441,13 @@ public class NewerNewChunks extends Module {
 				chunkPos = new ChunkPos(packet.getPos());
 
 				for (Direction dir: searchDirs) {
-					if (detectmode.get()==DetectMode.Advanced){
-						if (packet.getPos().offset(dir).getY()>0 && !mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+						if (packet.getPos().offset(dir).getY()>=0 && !mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 							newChunks.add(chunkPos);
 							if (save.get()){
 								saveNewChunkData();
 							}
 							return;
-						}else if ((packet.getPos().offset(dir).getY()<0 && !mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill()) && (packet.getPos().offset(dir).getY()>0 && !mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill()) && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+						}else if (mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 							newChunks.add(chunkPos);
 							if (save.get()){
 								saveNewChunkData();
@@ -492,37 +460,6 @@ public class NewerNewChunks extends Module {
 							}
 							return;
 						}
-					}
-					if (detectmode.get()==DetectMode.IgnoreFlowBelow0){
-						if (packet.getPos().offset(dir).getY()>0 && mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
-							newChunks.add(chunkPos);
-							if (save.get()){
-								saveNewChunkData();
-							}
-							return;
-						}else if ((packet.getPos().offset(dir).getY()<0 && !mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill()) && (packet.getPos().offset(dir).getY()>0 && !mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill()) && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
-							newChunks.add(chunkPos);
-							if (save.get()){
-								saveNewChunkData();
-							}
-							return;
-						}
-					}
-					if (detectmode.get()==DetectMode.Normal){
-						if (packet.getPos().offset(dir).getY()<0 && !mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() &&  (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
-							olderoldChunks.add(chunkPos);
-							if (save.get()){
-								saveOlderOldChunkData();
-							}
-							return;
-						}else if (mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
-							newChunks.add(chunkPos);
-							if (save.get()){
-								saveNewChunkData();
-							}
-							return;
-						}
-					}
 				}
 			}
 		}

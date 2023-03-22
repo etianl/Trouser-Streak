@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.movement.Flight;
 import meteordevelopment.meteorclient.systems.modules.movement.NoFall;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
@@ -81,8 +82,11 @@ public class AnHero extends Module {
         if (chatmsg.get()){
             ChatUtils.sendPlayerMsg(message.get());
         }
-        if (Modules.get().get(TrouserFlight.class).isActive()) {
-            Modules.get().get(TrouserFlight.class).toggle();
+        if (Modules.get().get(Flight.class).isActive()) {
+            Modules.get().get(Flight.class).toggle();
+        }
+        if (Modules.get().get(FlightAntikick.class).isActive()) {
+            Modules.get().get(FlightAntikick.class).toggle();
         }
         if (Modules.get().get(TPFly.class).isActive()) {
             Modules.get().get(TPFly.class).toggle();

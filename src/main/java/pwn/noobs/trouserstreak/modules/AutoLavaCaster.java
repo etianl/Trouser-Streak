@@ -226,7 +226,7 @@ public class AutoLavaCaster extends Module {
         if (sneaky.get()){
             mc.options.sneakKey.setPressed(true);
         }
-        BlockPos hover = new BlockPos(mc.player.getX(),mc.player.getY()-1,mc.player.getZ());
+        BlockPos hover = BlockPos.ofFloored(mc.player.getX(),mc.player.getY()-1,mc.player.getZ());
         if (mc.world.getBlockState(lava).getBlock() == Blocks.AIR){
             ticks = 0;
             toggle();
@@ -260,8 +260,8 @@ public class AutoLavaCaster extends Module {
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        BlockPos ceiling = new BlockPos(mc.player.getX(),mc.player.getY()+2,mc.player.getZ());
-        BlockPos hover = new BlockPos(mc.player.getX(),mc.player.getY()-1,mc.player.getZ());
+        BlockPos ceiling = BlockPos.ofFloored(mc.player.getX(),mc.player.getY()+2,mc.player.getZ());
+        BlockPos hover = BlockPos.ofFloored(mc.player.getX(),mc.player.getY()-1,mc.player.getZ());
         ticks++;
             if (incY.get() && (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof VerticallyAttachableBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof  BambooBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof Waterloggable)) {
                 cascadingpileof();
@@ -386,7 +386,7 @@ public class AutoLavaCaster extends Module {
         }
         if (incY.get()){
             if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+5 || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+5){
-                BlockPos pos = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ());
+                BlockPos pos = BlockPos.ofFloored(lava.getX(),lava.getY()+1,lava.getZ());
                 if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
@@ -505,10 +505,10 @@ public class AutoLavaCaster extends Module {
                 }
             }if (incY.get()){
                 if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+5 || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+5){
-                    BlockPos pos2 = new BlockPos(lava.getX()+1,lava.getY()+1,lava.getZ());
-                    BlockPos pos3 = new BlockPos(lava.getX()-1,lava.getY()+1,lava.getZ());
-                    BlockPos pos4 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ()+1);
-                    BlockPos pos5 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ()-1);
+                    BlockPos pos2 = BlockPos.ofFloored(lava.getX()+1,lava.getY()+1,lava.getZ());
+                    BlockPos pos3 = BlockPos.ofFloored(lava.getX()-1,lava.getY()+1,lava.getZ());
+                    BlockPos pos4 = BlockPos.ofFloored(lava.getX(),lava.getY()+1,lava.getZ()+1);
+                    BlockPos pos5 = BlockPos.ofFloored(lava.getX(),lava.getY()+1,lava.getZ()-1);
                     if (mc.world.getBlockState(pos2).getMaterial().isReplaceable() &&mc.world.getBlockState(pos3).getMaterial().isReplaceable() &&mc.world.getBlockState(pos4).getMaterial().isReplaceable() &&mc.world.getBlockState(pos5).getMaterial().isReplaceable()) {
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos2), Direction.DOWN, pos2, false));
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos3), Direction.DOWN, pos3, false));
@@ -520,7 +520,7 @@ public class AutoLavaCaster extends Module {
                     mc.player.setPos(mc.player.getX(),mc.player.getY()+1,mc.player.getZ());
                 }
                 else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+25 || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+25){
-                    BlockPos pos1 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ());
+                    BlockPos pos1 = BlockPos.ofFloored(lava.getX(),lava.getY()+1,lava.getZ());
                     if (mc.world.getBlockState(pos1).getMaterial().isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos1), Direction.DOWN, pos1, false));
                         mc.player.swingHand(Hand.MAIN_HAND);
@@ -636,10 +636,10 @@ public class AutoLavaCaster extends Module {
                 }
             }if (incY.get()){
                 if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+5 || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+5){
-                    BlockPos pos2 = new BlockPos(lava.getX()+1,lava.getY()+1,lava.getZ());
-                    BlockPos pos3 = new BlockPos(lava.getX()-1,lava.getY()+1,lava.getZ());
-                    BlockPos pos4 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ()+1);
-                    BlockPos pos5 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ()-1);
+                    BlockPos pos2 = BlockPos.ofFloored(lava.getX()+1,lava.getY()+1,lava.getZ());
+                    BlockPos pos3 = BlockPos.ofFloored(lava.getX()-1,lava.getY()+1,lava.getZ());
+                    BlockPos pos4 = BlockPos.ofFloored(lava.getX(),lava.getY()+1,lava.getZ()+1);
+                    BlockPos pos5 = BlockPos.ofFloored(lava.getX(),lava.getY()+1,lava.getZ()-1);
                     if (mc.world.getBlockState(pos2).getMaterial().isReplaceable() &&mc.world.getBlockState(pos3).getMaterial().isReplaceable() &&mc.world.getBlockState(pos4).getMaterial().isReplaceable() &&mc.world.getBlockState(pos5).getMaterial().isReplaceable()) {
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos2), Direction.DOWN, pos2, false));
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos3), Direction.DOWN, pos3, false));
@@ -651,7 +651,7 @@ public class AutoLavaCaster extends Module {
                     mc.player.setPos(mc.player.getX(),mc.player.getY()+1,mc.player.getZ());
                 }
                 else if (estlavatime.get() && ticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+25 || !estlavatime.get() && ticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+25){
-                    BlockPos pos1 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ());
+                    BlockPos pos1 = BlockPos.ofFloored(lava.getX(),lava.getY()+1,lava.getZ());
                     if (mc.world.getBlockState(pos1).getMaterial().isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos1), Direction.DOWN, pos1, false));
                         mc.player.swingHand(Hand.MAIN_HAND);

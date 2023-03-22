@@ -98,9 +98,9 @@ public class ExplosionAura extends Module {
             if (click.get()) {
                 HitResult hr = mc.cameraEntity.raycast(600, 0, true);
                 Vec3d owo = hr.getPos();
-                BlockPos pos = new BlockPos(owo);
+                BlockPos pos = BlockPos.ofFloored(owo);
                 ItemStack rst = mc.player.getMainHandStack();
-                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
+                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
                 ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
                 NbtCompound tag = new NbtCompound();
                 NbtList Pos = new NbtList();
@@ -128,9 +128,9 @@ public class ExplosionAura extends Module {
                     } else if (aticks>atickdelay.get()) {
                         HitResult hr = mc.cameraEntity.raycast(600, 0, true);
                         Vec3d owo = hr.getPos();
-                        BlockPos pos = new BlockPos(owo);
+                        BlockPos pos = BlockPos.ofFloored(owo);
                         ItemStack rst = mc.player.getMainHandStack();
-                        BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
+                        BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
                         ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
                         NbtCompound tag = new NbtCompound();
                         NbtList Pos = new NbtList();
@@ -154,7 +154,7 @@ public class ExplosionAura extends Module {
                     ticks++;
                 } else if (ticks>tickdelay.get()){
                 ItemStack rst = mc.player.getMainHandStack();
-                BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, new BlockPos(mc.player.getPos()), false);
+                BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getPos()), false);
                 ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
                 NbtCompound tag = new NbtCompound();
                 tag.putInt("ignited", (1));
@@ -173,7 +173,7 @@ public class ExplosionAura extends Module {
                     ticks++;
                 } else if (ticks>tickdelay.get()){
                 ItemStack rst = mc.player.getMainHandStack();
-                BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, new BlockPos(mc.player.getPos()), false);
+                BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getPos()), false);
                 ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
                 NbtCompound tag = new NbtCompound();
                 tag.putInt("ignited", (1));
@@ -192,7 +192,7 @@ public class ExplosionAura extends Module {
                     ticks++;
                 } else if (ticks>tickdelay.get()){
                 ItemStack rst = mc.player.getMainHandStack();
-                BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, new BlockPos(mc.player.getPos()), false);
+                BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getPos()), false);
                 ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
                 NbtCompound tag = new NbtCompound();
                 tag.putInt("ignited", (1));
@@ -211,7 +211,7 @@ public class ExplosionAura extends Module {
                     ticks++;
                 } else if (ticks>tickdelay.get()){
                 ItemStack rst = mc.player.getMainHandStack();
-                BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, new BlockPos(mc.player.getPos()), false);
+                BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getPos()), false);
                 ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
                 NbtCompound tag = new NbtCompound();
                 tag.putInt("ignited", (1));
@@ -230,7 +230,7 @@ public class ExplosionAura extends Module {
                     ticks++;
                 } else if (ticks>tickdelay.get()){
                 ItemStack rst = mc.player.getMainHandStack();
-                BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, new BlockPos(mc.player.getPos()), false);
+                BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getPos()), false);
                 ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
                 NbtCompound tag = new NbtCompound();
                 tag.putInt("ignited", (1));
@@ -249,7 +249,7 @@ public class ExplosionAura extends Module {
                     ticks++;
                 } else if (ticks>tickdelay.get()){
                 ItemStack rst = mc.player.getMainHandStack();
-                BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, new BlockPos(mc.player.getPos()), false);
+                BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getPos()), false);
                 ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
                 NbtCompound tag = new NbtCompound();
                 tag.putInt("ignited", (1));

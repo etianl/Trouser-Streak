@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.movement.Flight;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
@@ -248,12 +249,12 @@ public class HandOfGod extends Module {
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if (mc.options.attackKey.isPressed() && mc.currentScreen == null) {
-            HitResult hr = mc.cameraEntity.raycast(300, 0, fluids.get());
+            HitResult hr = mc.cameraEntity.raycast(900, 0, fluids.get());
             Vec3d god = hr.getPos();
-            BlockPos pos = new BlockPos(god);
+            BlockPos pos = BlockPos.ofFloored(god);
             if (lightning.get()) {
                 ItemStack rst = mc.player.getMainHandStack();
-                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
+                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
                 ItemStack Lightning = new ItemStack(Items.SALMON_SPAWN_EGG);
                 NbtCompound tag = new NbtCompound();
                 NbtList Pos = new NbtList();
@@ -300,12 +301,12 @@ public class HandOfGod extends Module {
                 if (aticks<=atickdelay.get()){
                     aticks++;
                 } else if (aticks>atickdelay.get()){
-                HitResult hr = mc.cameraEntity.raycast(300, 0, fluids.get());
+                HitResult hr = mc.cameraEntity.raycast(900, 0, fluids.get());
                 Vec3d god = hr.getPos();
-                BlockPos pos = new BlockPos(god);
+                BlockPos pos = BlockPos.ofFloored(god);
                 if (lightning.get()) {
                     ItemStack rst = mc.player.getMainHandStack();
-                    BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
+                    BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
                     ItemStack Lightning = new ItemStack(Items.SALMON_SPAWN_EGG);
                     NbtCompound tag = new NbtCompound();
                     NbtList Pos = new NbtList();
@@ -373,13 +374,11 @@ public class HandOfGod extends Module {
 
             }
             if (mgcersr.get()){
-                if (Modules.get().isActive(TrouserFlight.class) && TrouserFlight.trouserspeed>0.1){
-                    errticks++;
+                if (Modules.get().isActive(Flight.class)){
+                    if (errticks<3){
+                    errticks++;}
                     if (errticks==2){
-                        error("Fly Slower. Set Flight speed to 0.1 or less. :D");
-                    } else if (errticks==100){
-                        error("Fly slower. Set Flight speed to 0.1 or less. :D");
-                        errticks=3;
+                        error("Fly Slow. Set Flight speed to 0.1 or less. :D");
                     }
                 }
                 pX=mc.player.getBlockPos().getX();

@@ -113,7 +113,7 @@ public class AirstrikePlus extends Module {
     public void onTick(TickEvent.Post event) {
         ItemStack bomb = new ItemStack(Items.SALMON_SPAWN_EGG);
         ItemStack bfr = mc.player.getMainHandStack();
-        BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, new BlockPos(mc.player.getPos()), false);
+        BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, new BlockPos(mc.player.getBlockPos()), false);
         i++;
         if (mc.player.getAbilities().creativeMode) {
             if (i >= delay.get()) {
