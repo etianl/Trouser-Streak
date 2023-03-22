@@ -8,7 +8,10 @@ import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
+import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.movement.Flight;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
@@ -17,8 +20,6 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.util.math.Vec3i;
-import pwn.noobs.trouserstreak.Trouser;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.util.Hand;
@@ -26,8 +27,8 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.settings.*;
+import net.minecraft.util.math.Vec3i;
+import pwn.noobs.trouserstreak.Trouser;
 
 
 /**
@@ -181,8 +182,11 @@ public class AutoStaircase extends Module {
             mc.options.forwardKey.setPressed(false);
             mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
             mc.player.swingHand(Hand.MAIN_HAND);}
-        if (Modules.get().get(TrouserFlight.class).isActive()) {
-            Modules.get().get(TrouserFlight.class).toggle();
+        if (Modules.get().get(Flight.class).isActive()) {
+            Modules.get().get(Flight.class).toggle();
+        }
+        if (Modules.get().get(FlightAntikick.class).isActive()) {
+            Modules.get().get(FlightAntikick.class).toggle();
         }
         if (Modules.get().get(TPFly.class).isActive()) {
             Modules.get().get(TPFly.class).toggle();

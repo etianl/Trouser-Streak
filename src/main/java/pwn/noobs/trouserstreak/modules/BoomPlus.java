@@ -7,7 +7,9 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtDouble;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -21,8 +23,14 @@ public class BoomPlus extends Module {
     private final Setting<Modes> mode = sgGeneral.add(new EnumSetting.Builder<Modes>()
         .name("mode")
         .description("the mode")
-        .defaultValue(Modes.Instant)
+        .defaultValue(Modes.Fireball)
         .build());
+    public final Setting<Boolean> target = sgGeneral.add(new BoolSetting.Builder()
+            .name("OnTarget")
+            .description("spawns on target")
+            .defaultValue(false)
+            .build()
+    );
 
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
         .name("speed")
@@ -30,7 +38,7 @@ public class BoomPlus extends Module {
         .defaultValue(5)
         .min(1)
         .sliderMax(10)
-        .visible(() -> mode.get() != Modes.Lightning || mode.get() != Modes.Instant || mode.get() != Modes.Arrow || mode.get() == Modes.Creeper || mode.get() == Modes.TNT || mode.get() == Modes.WitherSkull || mode.get() == Modes.Spit || mode.get() == Modes.ShulkerBullet)
+        .visible(() -> mode.get() == Modes.Wither || mode.get() == Modes.Spit || mode.get() == Modes.ShulkerBullet || mode.get() == Modes.WitherSkull || mode.get() == Modes.TNT || mode.get() == Modes.Arrow || mode.get() == Modes.Creeper || mode.get() == Modes.Kitty || mode.get() == Modes.Fireball && !target.get())
         .build());
 
     private final Setting<Integer> power = sgGeneral.add(new IntSetting.Builder()
@@ -39,7 +47,7 @@ public class BoomPlus extends Module {
         .defaultValue(10)
         .min(1)
         .sliderMax(127)
-        .visible(() -> mode.get() == Modes.Instant || mode.get() == Modes.Motion || mode.get() == Modes.Creeper)
+        .visible(() -> mode.get() == Modes.Fireball || mode.get() == Modes.Creeper)
         .build());
 
     private final Setting<Integer> fuse = sgGeneral.add(new IntSetting.Builder()
@@ -62,13 +70,6 @@ public class BoomPlus extends Module {
             .min(0)
             .sliderMax(20)
             .visible(() -> auto.get())
-            .build()
-    );
-
-    public final Setting<Boolean> target = sgGeneral.add(new BoolSetting.Builder()
-            .name("OnTarget")
-            .description("spawns on target")
-            .defaultValue(false)
             .build()
     );
 
@@ -99,35 +100,14 @@ public class BoomPlus extends Module {
                 Vec3d sex = mc.player.getRotationVector().multiply(speed.get());
                 BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
                 switch (mode.get()) {
-                    case Instant -> {
-                        Vec3d aaa = mc.player.getRotationVector().multiply(100);
-                        ItemStack Instant = new ItemStack(Items.SALMON_SPAWN_EGG);
+                    case Fireball -> {
+                        ItemStack Motion = new ItemStack(Items.SALMON_SPAWN_EGG);
                         NbtCompound tag = new NbtCompound();
                         NbtList Pos = new NbtList();
-                        NbtList motion = new NbtList();
                         Pos.add(NbtDouble.of(pos.getX()));
                         Pos.add(NbtDouble.of(pos.getY()));
                         Pos.add(NbtDouble.of(pos.getZ()));
-                        motion.add(NbtDouble.of(aaa.x));
-                        motion.add(NbtDouble.of(aaa.y));
-                        motion.add(NbtDouble.of(aaa.z));
                         tag.put("Pos", Pos);
-                        tag.put("Motion", motion);
-                        tag.putInt("ExplosionPower", power.get());
-                        tag.putString("id", "minecraft:fireball");
-                        Instant.setSubNbt("EntityTag", tag);
-                        mc.interactionManager.clickCreativeStack(Instant, 36 + mc.player.getInventory().selectedSlot);
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                        mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                    }
-                    case Motion -> {
-                        ItemStack Motion = new ItemStack(Items.SALMON_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList motion = new NbtList();
-                        motion.add(NbtDouble.of(sex.x));
-                        motion.add(NbtDouble.of(sex.y));
-                        motion.add(NbtDouble.of(sex.z));
-                        tag.put("Motion", motion);
                         tag.putInt("ExplosionPower", power.get());
                         tag.putString("id", "minecraft:fireball");
                         Motion.setSubNbt("EntityTag", tag);
@@ -276,28 +256,7 @@ public class BoomPlus extends Module {
                 BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, new BlockPos(mc.player.getPos()), false);
                 BlockHitResult bhr1 = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
                 switch (mode.get()) {
-                    case Instant -> {
-                        Vec3d aaa = mc.player.getRotationVector().multiply(100);
-                        ItemStack Instant = new ItemStack(Items.SALMON_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList Pos = new NbtList();
-                        NbtList motion = new NbtList();
-                        Pos.add(NbtDouble.of(pos.getX()));
-                        Pos.add(NbtDouble.of(pos.getY()));
-                        Pos.add(NbtDouble.of(pos.getZ()));
-                        motion.add(NbtDouble.of(aaa.x));
-                        motion.add(NbtDouble.of(aaa.y));
-                        motion.add(NbtDouble.of(aaa.z));
-                        tag.put("Pos", Pos);
-                        tag.put("Motion", motion);
-                        tag.putInt("ExplosionPower", power.get());
-                        tag.putString("id", "minecraft:fireball");
-                        Instant.setSubNbt("EntityTag", tag);
-                        mc.interactionManager.clickCreativeStack(Instant, 36 + mc.player.getInventory().selectedSlot);
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                        mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                    }
-                    case Motion -> {
+                    case Fireball -> {
                         ItemStack Motion = new ItemStack(Items.SALMON_SPAWN_EGG);
                         NbtCompound tag = new NbtCompound();
                         NbtList motion = new NbtList();
@@ -459,35 +418,14 @@ public class BoomPlus extends Module {
                 Vec3d sex = mc.player.getRotationVector().multiply(speed.get());
                 BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
                 switch (mode.get()) {
-                    case Instant -> {
-                        Vec3d aaa = mc.player.getRotationVector().multiply(100);
-                        ItemStack Instant = new ItemStack(Items.SALMON_SPAWN_EGG);
+                    case Fireball -> {
+                        ItemStack Motion = new ItemStack(Items.SALMON_SPAWN_EGG);
                         NbtCompound tag = new NbtCompound();
                         NbtList Pos = new NbtList();
-                        NbtList motion = new NbtList();
                         Pos.add(NbtDouble.of(pos.getX()));
                         Pos.add(NbtDouble.of(pos.getY()));
                         Pos.add(NbtDouble.of(pos.getZ()));
-                        motion.add(NbtDouble.of(aaa.x));
-                        motion.add(NbtDouble.of(aaa.y));
-                        motion.add(NbtDouble.of(aaa.z));
                         tag.put("Pos", Pos);
-                        tag.put("Motion", motion);
-                        tag.putInt("ExplosionPower", power.get());
-                        tag.putString("id", "minecraft:fireball");
-                        Instant.setSubNbt("EntityTag", tag);
-                        mc.interactionManager.clickCreativeStack(Instant, 36 + mc.player.getInventory().selectedSlot);
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                        mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                    }
-                    case Motion -> {
-                        ItemStack Motion = new ItemStack(Items.SALMON_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList motion = new NbtList();
-                        motion.add(NbtDouble.of(sex.x));
-                        motion.add(NbtDouble.of(sex.y));
-                        motion.add(NbtDouble.of(sex.z));
-                        tag.put("Motion", motion);
                         tag.putInt("ExplosionPower", power.get());
                         tag.putString("id", "minecraft:fireball");
                         Motion.setSubNbt("EntityTag", tag);
@@ -636,28 +574,7 @@ public class BoomPlus extends Module {
             BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, new BlockPos(mc.player.getPos()), false);
                 BlockHitResult bhr1 = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, new BlockPos(mc.player.getEyePos()), false);
             switch (mode.get()) {
-                case Instant -> {
-                    Vec3d aaa = mc.player.getRotationVector().multiply(100);
-                    ItemStack Instant = new ItemStack(Items.SALMON_SPAWN_EGG);
-                    NbtCompound tag = new NbtCompound();
-                    NbtList Pos = new NbtList();
-                    NbtList motion = new NbtList();
-                    Pos.add(NbtDouble.of(pos.getX()));
-                    Pos.add(NbtDouble.of(pos.getY()));
-                    Pos.add(NbtDouble.of(pos.getZ()));
-                    motion.add(NbtDouble.of(aaa.x));
-                    motion.add(NbtDouble.of(aaa.y));
-                    motion.add(NbtDouble.of(aaa.z));
-                    tag.put("Pos", Pos);
-                    tag.put("Motion", motion);
-                    tag.putInt("ExplosionPower", power.get());
-                    tag.putString("id", "minecraft:fireball");
-                    Instant.setSubNbt("EntityTag", tag);
-                    mc.interactionManager.clickCreativeStack(Instant, 36 + mc.player.getInventory().selectedSlot);
-                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                    mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                }
-                case Motion -> {
+                case Fireball -> {
                     ItemStack Motion = new ItemStack(Items.SALMON_SPAWN_EGG);
                     NbtCompound tag = new NbtCompound();
                     NbtList motion = new NbtList();
@@ -805,6 +722,6 @@ public class BoomPlus extends Module {
         }}
     }
     public enum Modes {
-        Instant, Motion, Lightning, Kitty, Creeper, Arrow, TNT, WitherSkull, Spit, ShulkerBullet, Wither
+        Fireball, Lightning, Kitty, Creeper, Arrow, TNT, WitherSkull, Spit, ShulkerBullet, Wither
     }
 }

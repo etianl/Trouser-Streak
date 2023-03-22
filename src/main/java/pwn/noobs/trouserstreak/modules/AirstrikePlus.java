@@ -9,7 +9,6 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -113,7 +112,7 @@ public class AirstrikePlus extends Module {
     public void onTick(TickEvent.Post event) {
         ItemStack bomb = new ItemStack(Items.SALMON_SPAWN_EGG);
         ItemStack bfr = mc.player.getMainHandStack();
-        BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, new BlockPos(mc.player.getPos()), false);
+        BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, new BlockPos(mc.player.getBlockPos()), false);
         i++;
         if (mc.player.getAbilities().creativeMode) {
             if (i >= delay.get()) {
