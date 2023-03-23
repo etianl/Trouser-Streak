@@ -1,4 +1,4 @@
-//Written by etianll using some code from MeteorClient ClickTP as well as Airplace
+//Written by etianll
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
