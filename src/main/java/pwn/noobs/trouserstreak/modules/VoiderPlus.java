@@ -24,11 +24,25 @@ public class VoiderPlus extends Module {
         .defaultValue(45)
         .sliderRange(1, 90)
         .build());
+    public final Setting<Boolean> getplayerY = sgGeneral.add(new BoolSetting.Builder()
+            .name("UsePlayerY")
+            .description("Use the player's Y level for calculating where voider will start.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Integer> playerheight = sgGeneral.add(new IntSetting.Builder()
+            .name("maxheight(fromplayerY)")
+            .description("maxheight")
+            .defaultValue(0)
+            .sliderRange(-64, 64)
+            .visible(() -> getplayerY.get())
+            .build());
     private final Setting<Integer> maxheight = sgGeneral.add(new IntSetting.Builder()
         .name("maxheight")
         .description("maxheight")
         .defaultValue(128)
         .sliderRange(64, 319)
+            .visible(() -> !getplayerY.get())
         .build());
     private final Setting<Integer> minheight = sgGeneral.add(new IntSetting.Builder()
         .name("minheight")
@@ -51,7 +65,7 @@ public class VoiderPlus extends Module {
     public final Setting<Boolean> tgl = sgGeneral.add(new BoolSetting.Builder()
             .name("Toggle off after TP forward")
             .description("Turn module off after TP, or not.")
-            .defaultValue(true)
+            .defaultValue(false)
             .visible(() -> tpfwd.get())
             .build()
     );
@@ -60,7 +74,7 @@ public class VoiderPlus extends Module {
         super(Trouser.Main, "voider+", "Runs /fill on the world from the top down");
     }
 
-    int i = maxheight.get();
+    int i;
     private int passes=0;
     private int TPs=0;
     private int pX;
@@ -83,7 +97,11 @@ public class VoiderPlus extends Module {
     }
     @Override
     public void onActivate() {
+        if (!getplayerY.get()){
         i = maxheight.get();
+        }else if (getplayerY.get()){
+            i=mc.player.getBlockY()+playerheight.get();
+        }
         passes=0;
         TPs=0;
         sX=mc.player.getBlockPos().getX();
@@ -101,11 +119,15 @@ public class VoiderPlus extends Module {
                 ChatUtils.sendPlayerMsg("/fill " + (sX - radius.get()) + " " + i +" "+ (sZ - radius.get()) +" "+ (sX + radius.get()) + " " + i +" "+ (sZ + radius.get()) + " "+block);
                     i--;
                     if (i<=minheight.get()){
-                        i=maxheight.get();
+                        if (!getplayerY.get()){
+                            i = maxheight.get();
+                        }else if (getplayerY.get()){
+                            i=mc.player.getBlockY()+playerheight.get();
+                        }
                         toggle();
                     }
                 }  else if (!threebythree.get() &&tpfwd.get()){
-                    if (i>= maxheight.get()){
+                    if (i>= maxheight.get() || (i>= mc.player.getBlockY()+playerheight.get() && getplayerY.get())){
                         sX=mc.player.getBlockPos().getX();
                         sY=mc.player.getBlockPos().getY();
                         sZ=mc.player.getBlockPos().getZ();
@@ -127,126 +149,170 @@ public class VoiderPlus extends Module {
                                 ChatUtils.sendPlayerMsg("/tp "+sX+" "+sY+" "+(sZ+(radius.get()*2)));
                             }
                         }
-                        i=maxheight.get();
+                        if (!getplayerY.get()){
+                            i = maxheight.get();
+                        }else if (getplayerY.get()){
+                            i=mc.player.getBlockY()+playerheight.get();
+                        }
                         if (tgl.get()) toggle();
                     }
                 } else if (threebythree.get() && !tpfwd.get()){
-                    if (i<=maxheight.get() && passes==0 && TPs==0){
+                    if (i<=maxheight.get() && passes==0 && TPs==0 || (getplayerY.get() && i<=mc.player.getBlockY()+playerheight.get() && passes==0 && TPs==0 )){
                         i--;
                         pX=mc.player.getBlockPos().getX();
                         pZ=mc.player.getBlockPos().getZ();
                         ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + i +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + i +" "+ (pZ + radius.get()) + " "+block);
                         if (i<=minheight.get()){
-                            i=maxheight.get()+1;
+                            if (!getplayerY.get()){
+                                i = maxheight.get()+1;
+                            }else if (getplayerY.get()){
+                                i=mc.player.getBlockY()+playerheight.get()+1;
+                            }
                             passes=1;
                         }
-                    } else if (i==maxheight.get()+1 && passes == 1){
+                    } else if (i==maxheight.get()+1 && passes == 1 || (getplayerY.get() && i==mc.player.getBlockY()+playerheight.get()+1 && passes == 1)){
                         ChatUtils.sendPlayerMsg("/tp "+(sX+(radius.get()*2))+" "+sY+" "+sZ);
                         TPs=1;
                         i--;
-                    } else if (i<=maxheight.get() && passes == 1 && TPs==1){
+                    } else if (i<=maxheight.get() && passes == 1 && TPs==1 || (getplayerY.get() && i<=mc.player.getBlockY()+playerheight.get() && passes == 1 && TPs==1)){
                         i--;
                         pX=mc.player.getBlockPos().getX();
                         pZ=mc.player.getBlockPos().getZ();
                         ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + i +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + i +" "+ (pZ + radius.get()) + " "+block);
                         if (i<=minheight.get()){
-                            i=maxheight.get()+1;
+                            if (!getplayerY.get()){
+                                i = maxheight.get()+1;
+                            }else if (getplayerY.get()){
+                                i=mc.player.getBlockY()+playerheight.get()+1;
+                            }
                             passes=2;
                         }
-                    } else if (i==maxheight.get()+1 && passes == 2){
+                    } else if (i==maxheight.get()+1 && passes == 2 || (getplayerY.get() && i==mc.player.getBlockY()+playerheight.get()+1 && passes == 2 )){
                         ChatUtils.sendPlayerMsg("/tp "+(sX+(radius.get()*2))+" "+sY+" "+(sZ+(-(radius.get()*2))));
                         TPs=2;
                         i--;
-                    } else if (i<=maxheight.get() && passes == 2 && TPs==2){
+                    } else if (i<=maxheight.get() && passes == 2 && TPs==2 || (getplayerY.get() && i<=mc.player.getBlockY()+playerheight.get() && passes == 2 && TPs==2)){
                         i--;
                         pX=mc.player.getBlockPos().getX();
                         pZ=mc.player.getBlockPos().getZ();
                         ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + i +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + i +" "+ (pZ + radius.get()) + " "+block);
                         if (i<=minheight.get()){
-                            i=maxheight.get()+1;
+                            if (!getplayerY.get()){
+                                i = maxheight.get()+1;
+                            }else if (getplayerY.get()){
+                                i=mc.player.getBlockY()+playerheight.get()+1;
+                            }
                             passes=3;
                         }
-                    } else if (i==maxheight.get()+1 && passes == 3){
+                    } else if (i==maxheight.get()+1 && passes == 3 || (getplayerY.get() && i==mc.player.getBlockY()+playerheight.get()+1 && passes == 3)){
                         ChatUtils.sendPlayerMsg("/tp "+sX+" "+sY+" "+(sZ+(-(radius.get()*2))));
                         TPs=3;
                         i--;
-                    } else if (i<=maxheight.get() && passes == 3 && TPs==3){
+                    } else if (i<=maxheight.get() && passes == 3 && TPs==3 || (getplayerY.get() && i<=mc.player.getBlockY()+playerheight.get() && passes == 3 && TPs==3)){
                         i--;
                         pX=mc.player.getBlockPos().getX();
                         pZ=mc.player.getBlockPos().getZ();
                         ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + i +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + i +" "+ (pZ + radius.get()) + " "+block);
                         if (i<=minheight.get()){
-                            i=maxheight.get()+1;
+                            if (!getplayerY.get()){
+                                i = maxheight.get()+1;
+                            }else if (getplayerY.get()){
+                                i=mc.player.getBlockY()+playerheight.get()+1;
+                            }
                             passes=4;
                         }
-                    } else if (i==maxheight.get()+1 && passes == 4){
+                    } else if (i==maxheight.get()+1 && passes == 4 || (getplayerY.get() && i==mc.player.getBlockY()+playerheight.get()+1 && passes == 4 )){
                         ChatUtils.sendPlayerMsg("/tp "+(sX+(-(radius.get()*2)))+" "+sY+" "+(sZ+(-(radius.get()*2))));
                         TPs=4;
                         i--;
-                    } else if (i<=maxheight.get() && passes == 4 && TPs==4){
+                    } else if (i<=maxheight.get() && passes == 4 && TPs==4 || (getplayerY.get() && i<=mc.player.getBlockY()+playerheight.get() && passes == 4 && TPs==4)){
                         i--;
                         pX=mc.player.getBlockPos().getX();
                         pZ=mc.player.getBlockPos().getZ();
                         ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + i +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + i +" "+ (pZ + radius.get()) + " "+block);
                         if (i<=minheight.get()){
-                            i=maxheight.get()+1;
+                            if (!getplayerY.get()){
+                                i = maxheight.get()+1;
+                            }else if (getplayerY.get()){
+                                i=mc.player.getBlockY()+playerheight.get()+1;
+                            }
                             passes=5;
                         }
-                    } else if (i==maxheight.get()+1 && passes == 5){
+                    } else if (i==maxheight.get()+1 && passes == 5 || (getplayerY.get() && i==mc.player.getBlockY()+playerheight.get()+1 && passes == 5)){
                         ChatUtils.sendPlayerMsg("/tp "+(sX+(-(radius.get()*2)))+" "+sY+" "+sZ);
                         TPs=5;
                         i--;
-                    } else if (i<=maxheight.get() && passes == 5 && TPs==5){
+                    } else if (i<=maxheight.get() && passes == 5 && TPs==5 || (getplayerY.get() && i<=mc.player.getBlockY()+playerheight.get() && passes == 5 && TPs==5)){
                         i--;
                         pX=mc.player.getBlockPos().getX();
                         pZ=mc.player.getBlockPos().getZ();
                         ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + i +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + i +" "+ (pZ + radius.get()) + " "+block);
                         if (i<=minheight.get()){
-                            i=maxheight.get()+1;
+                            if (!getplayerY.get()){
+                                i = maxheight.get()+1;
+                            }else if (getplayerY.get()){
+                                i=mc.player.getBlockY()+playerheight.get()+1;
+                            }
                             passes=6;
                         }
-                    } else if (i==maxheight.get()+1 && passes == 6){
+                    } else if (i==maxheight.get()+1 && passes == 6 || (getplayerY.get() && i==mc.player.getBlockY()+playerheight.get()+1 && passes == 6)){
                         ChatUtils.sendPlayerMsg("/tp "+(sX+(-(radius.get()*2)))+" "+sY+" "+(sZ+(radius.get()*2)));
                         TPs=6;
                         i--;
-                    } else if (i<=maxheight.get() && passes == 6 && TPs==6){
+                    } else if (i<=maxheight.get() && passes == 6 && TPs==6 || (getplayerY.get() && i<=mc.player.getBlockY()+playerheight.get() && passes == 6 && TPs==6)){
                         i--;
                         pX=mc.player.getBlockPos().getX();
                         pZ=mc.player.getBlockPos().getZ();
                         ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + i +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + i +" "+ (pZ + radius.get()) + " "+block);
                         if (i<=minheight.get()){
-                            i=maxheight.get()+1;
+                            if (!getplayerY.get()){
+                                i = maxheight.get()+1;
+                            }else if (getplayerY.get()){
+                                i=mc.player.getBlockY()+playerheight.get()+1;
+                            }
                             passes=7;
                         }
-                    } else if (i==maxheight.get()+1 && passes == 7){
+                    } else if (i==maxheight.get()+1 && passes == 7 || (getplayerY.get() && i==mc.player.getBlockY()+playerheight.get()+1 && passes == 7)){
                         ChatUtils.sendPlayerMsg("/tp "+sX+" "+sY+" "+(sZ+(radius.get()*2)));
                         TPs=7;
                         i--;
-                    } else if (i<=maxheight.get() && passes == 7 && TPs==7){
+                    } else if (i<=maxheight.get() && passes == 7 && TPs==7 || (getplayerY.get() && i<=mc.player.getBlockY()+playerheight.get() && passes == 7 && TPs==7)){
                         i--;
                         pX=mc.player.getBlockPos().getX();
                         pZ=mc.player.getBlockPos().getZ();
                         ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + i +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + i +" "+ (pZ + radius.get()) + " "+block);
                         if (i<=minheight.get()){
-                            i=maxheight.get()+1;
+                            if (!getplayerY.get()){
+                                i = maxheight.get()+1;
+                            }else if (getplayerY.get()){
+                                i=mc.player.getBlockY()+playerheight.get()+1;
+                            }
                             passes=8;
                         }
-                    } else if (i==maxheight.get()+1 && passes == 8){
+                    } else if (i==maxheight.get()+1 && passes == 8 || (getplayerY.get() && i==mc.player.getBlockY()+playerheight.get()+1 && passes == 8)){
                         ChatUtils.sendPlayerMsg("/tp "+(sX+(radius.get()*2))+" "+sY+" "+(sZ+(radius.get()*2)));
                         TPs=8;
                         i--;
-                    } else if (i<=maxheight.get() && passes == 8 && TPs==8){
+                    } else if (i<=maxheight.get() && passes == 8 && TPs==8 || (getplayerY.get() && i<=mc.player.getBlockY()+playerheight.get() && passes == 8 && TPs==8)){
                         i--;
                         pX=mc.player.getBlockPos().getX();
                         pZ=mc.player.getBlockPos().getZ();
                         ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + i +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + i +" "+ (pZ + radius.get()) + " "+block);
                         if (i<=minheight.get()){
-                            i=maxheight.get()+1;
+                            if (!getplayerY.get()){
+                                i = maxheight.get()+1;
+                            }else if (getplayerY.get()){
+                                i=mc.player.getBlockY()+playerheight.get()+1;
+                            }
                             passes=9;
                         }
-                    } else if (i==maxheight.get()+1 && passes >= 9){
+                    } else if (i==maxheight.get()+1 && passes >= 9 || (getplayerY.get() && i==mc.player.getBlockY()+playerheight.get()+1 && passes >= 9)){
                         ChatUtils.sendPlayerMsg("/tp "+sX+" "+sY+" "+sZ);
-                        i = maxheight.get();
+                        if (!getplayerY.get()){
+                            i = maxheight.get();
+                        }else if (getplayerY.get()){
+                            i=mc.player.getBlockY()+playerheight.get();
+                        }
                         passes=0;
                         TPs=0;
                         toggle();

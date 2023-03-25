@@ -5,7 +5,7 @@ import pwn.noobs.trouserstreak.Trouser;
 
 public class InvDupeModule extends Module {
     public InvDupeModule() {
-        super(Trouser.Main, "1.17InventoryDupe", "Enable/Disable 1.17 InvDupe button.");
+        super(Trouser.Main, "1.17InventoryDupe", "InventoryDupe only works on servers with the version 1.17. (Not any version after or before.)");
     }
 
 }

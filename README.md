@@ -52,7 +52,7 @@ In no particular order
 - **ExplosionAura:** Spawns creepers at your position as you move that explode instantly. Like a bigger, more laggy Nuker module for creative mode. The use of the module Velocity is recommended to avoid being thrown around. (Credits to etianl :D)
 - **FlightAntikick:** Moves you down on a tick-based timer. Added in to substitute the lack of an antikick for velocity flight in MeteorClient. Bind it to the same key as flight. (Credits to etianl :D)
 - **HandOfGod:** Runs the "/fill" command on the world around you in different ways as you fly, and as you click. Operator status required. (Credits to etianl :D)
-- **Inventory Dupe (1.17):** Duplicates things in your crafting slots when the module is enabled and the Dupe button is pressed in your inventory. (Credit to ItsVen and Da0neDatGotAway for original creation of the dupe, and to B2H990 for making the fabric mod. Credits to etianl for porting to Meteor.)
+- **Inventory Dupe (1.17):** Duplicates things in your crafting slots when the module is enabled and the Dupe button is pressed in your inventory. Only works on Minecraft servers on the version 1.17, not any version before or after.(Credit to ItsVen and Da0neDatGotAway for original creation of the dupe, and to B2H990 for making the fabric mod. Credits to etianl for porting to Meteor.)
 - **InstaKill:** Shoots arrows and tridents with incredible power and velocity. Enabling multiple buttons causes the amount of packets to add up. (Credits to Saturn5Vfive)
 - **LecternCrash:** Crash 1.18.X vanilla servers and possibly below. (Credits to Coderx-Gamer)
 - **NewerNewChunks:** NewChunks module with the ability to save chunk data for later! Also with special options for tracing servers that have been updated from a version before the build limit updates, which throw false positives normally. (Credits to Meteor Rejects, and BleachHack from where it was ported, and etianl for updating :D.)
@@ -82,8 +82,6 @@ In no particular order
 - If you are too far out of reach it breaks.
 - If view of the targeted block is obstructed it breaks.
 - **AutoMountain Bugs** 
-- AutoMountain can cause damage if you pause or disable the module while rubberbanding and building downward. There is a workaround included to fix this when pausing with the useKey.
-- Be prepared to Die in the name of building Mountains.
 - Some blocks may cause Automountain to attempt to build while not actually placing anything (Torches, walls, and doors did this until I fixed). If a block does not work please make an issue so I can correct it.
 -------------------------------------
 - *Blocks That do not work at all with AutoMountain*
@@ -103,3 +101,5 @@ In no particular order
 ## Total Download Count:
 **Trouser-Streak :D**
 [![Github All Releases](https://img.shields.io/github/downloads/etianl/Trouser-Streak/total.svg)]()
+
+**Be prepared to Die in the name of building Mountains.**
