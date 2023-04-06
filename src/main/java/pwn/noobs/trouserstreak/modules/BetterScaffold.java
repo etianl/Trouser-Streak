@@ -54,6 +54,12 @@ public class BetterScaffold extends Module {
         .defaultValue(false)
         .build()
     );
+    private final Setting<Boolean> abovehead = sgGeneral.add(new BoolSetting.Builder()
+            .name("place-above-head")
+            .description("Whether or not to scaffold above your head.")
+            .defaultValue(false)
+            .build()
+    );
 
     private final Setting<Boolean> renderSwing = sgGeneral.add(new BoolSetting.Builder()
         .name("swing")

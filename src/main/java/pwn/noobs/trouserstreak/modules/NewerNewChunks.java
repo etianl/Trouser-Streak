@@ -362,7 +362,7 @@ public class NewerNewChunks extends Module {
 			synchronized (newChunks) {
 				for (ChunkPos c : newChunks) {
 					if (mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), 1024)) {
-						render(new Box(c.getStartPos(), c.getStartPos().add(16, renderHeight.get(), 16)), newChunksSideColor.get(), newChunksLineColor.get(), shapeMode.get(), event);
+						render(new Box(c.getStartPos().add(0, renderHeight.get(), 0), c.getStartPos().add(16, renderHeight.get(), 16)), newChunksSideColor.get(), newChunksLineColor.get(), shapeMode.get(), event);
 					}
 				}
 			}
@@ -372,11 +372,11 @@ public class NewerNewChunks extends Module {
 				for (ChunkPos c : olderoldChunks) {
 					if (mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), 1024)) {
 						if (detectmode.get()==DetectMode.Advanced) {
-							render(new Box(c.getStartPos(), c.getStartPos().add(16, renderHeight.get(), 16)), olderoldChunksSideColor.get(), olderoldChunksLineColor.get(), shapeMode.get(), event);
+							render(new Box(c.getStartPos().add(0, renderHeight.get(), 0), c.getStartPos().add(16, renderHeight.get(), 16)), olderoldChunksSideColor.get(), olderoldChunksLineColor.get(), shapeMode.get(), event);
 						} else if (detectmode.get()==DetectMode.Normal) {
-							render(new Box(c.getStartPos(), c.getStartPos().add(16, renderHeight.get(), 16)), newChunksSideColor.get(), newChunksLineColor.get(), shapeMode.get(), event);
+							render(new Box(c.getStartPos().add(0, renderHeight.get(), 0), c.getStartPos().add(16, renderHeight.get(), 16)), newChunksSideColor.get(), newChunksLineColor.get(), shapeMode.get(), event);
 						} else if (detectmode.get()==DetectMode.IgnoreFlowBelow0) {
-							render(new Box(c.getStartPos(), c.getStartPos().add(16, renderHeight.get(), 16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
+							render(new Box(c.getStartPos().add(0, renderHeight.get(), 0), c.getStartPos().add(16, renderHeight.get(), 16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
 						}
 					}
 				}
@@ -387,7 +387,7 @@ public class NewerNewChunks extends Module {
 			synchronized (oldChunks) {
 				for (ChunkPos c : oldChunks) {
 					if (mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), 1024)) {
-						render(new Box(c.getStartPos(), c.getStartPos().add(16, renderHeight.get(), 16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
+						render(new Box(c.getStartPos().add(0, renderHeight.get(), 0), c.getStartPos().add(16, renderHeight.get(), 16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
 					}
 				}
 			}
@@ -401,7 +401,38 @@ public class NewerNewChunks extends Module {
 
 	@EventHandler
 	private void onReadPacket(PacketEvent.Receive event) {
-		if (event.packet instanceof ChunkDeltaUpdateS2CPacket) {
+			if (event.packet instanceof ChunkDataS2CPacket && mc.world != null) {
+			ChunkDataS2CPacket packet = (ChunkDataS2CPacket) event.packet;
+
+			oldpos = new ChunkPos(packet.getX(), packet.getZ());
+
+			if (!olderoldChunks.contains(oldpos) && !newChunks.contains(oldpos) && mc.world.getChunkManager().getChunk(packet.getX(), packet.getZ()) == null) {
+				WorldChunk chunk = new WorldChunk(mc.world, oldpos);
+				try {
+					chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), new NbtCompound(), packet.getChunkData().getBlockEntities(packet.getX(), packet.getZ()));
+				} catch (ArrayIndexOutOfBoundsException e) {
+					return;
+				}
+
+
+				for (int x = 0; x < 16; x++) {
+					for (int y = mc.world.getBottomY(); y < mc.world.getTopY(); y++) {
+						for (int z = 0; z < 16; z++) {
+							FluidState fluid = chunk.getFluidState(x, y, z);
+
+							if (!fluid.isEmpty() && !fluid.isStill()) {
+								oldChunks.add(oldpos);
+								if (save.get()){
+									saveOldChunkData();
+								}
+								return;
+							}
+						}
+					}
+				}
+			}
+		}
+		else if (event.packet instanceof ChunkDeltaUpdateS2CPacket) {
 			ChunkDeltaUpdateS2CPacket packet = (ChunkDeltaUpdateS2CPacket) event.packet;
 
 			packet.visitUpdates((pos, state) -> {
@@ -409,13 +440,15 @@ public class NewerNewChunks extends Module {
 					chunkPos = new ChunkPos(pos);
 
 					for (Direction dir: searchDirs) {
-							if (pos.offset(dir).getY()>=0 && !mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+							if (pos.offset(dir).getY()>=0 && !mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+								if (olderoldChunks.contains(chunkPos)) olderoldChunks.remove(chunkPos);
 								newChunks.add(chunkPos);
 								if (save.get()){
 									saveNewChunkData();
 								}
 								return;
-							}else if (mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+							}else if (mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+								if (olderoldChunks.contains(chunkPos)) olderoldChunks.remove(chunkPos);
 								newChunks.add(chunkPos);
 								if (save.get()){
 									saveNewChunkData();
@@ -441,13 +474,15 @@ public class NewerNewChunks extends Module {
 				chunkPos = new ChunkPos(packet.getPos());
 
 				for (Direction dir: searchDirs) {
-						if (packet.getPos().offset(dir).getY()>=0 && !mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+						if (packet.getPos().offset(dir).getY()>=0 && !mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+							if (olderoldChunks.contains(chunkPos)) olderoldChunks.remove(chunkPos);
 							newChunks.add(chunkPos);
 							if (save.get()){
 								saveNewChunkData();
 							}
 							return;
-						}else if (mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+						}else if (mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+							if (olderoldChunks.contains(chunkPos)) olderoldChunks.remove(chunkPos);
 							newChunks.add(chunkPos);
 							if (save.get()){
 								saveNewChunkData();
@@ -460,38 +495,6 @@ public class NewerNewChunks extends Module {
 							}
 							return;
 						}
-				}
-			}
-		}
-
-		else if (event.packet instanceof ChunkDataS2CPacket && mc.world != null) {
-			ChunkDataS2CPacket packet = (ChunkDataS2CPacket) event.packet;
-
-			oldpos = new ChunkPos(packet.getX(), packet.getZ());
-
-			if (!olderoldChunks.contains(oldpos) && !newChunks.contains(oldpos) && mc.world.getChunkManager().getChunk(packet.getX(), packet.getZ()) == null) {
-				WorldChunk chunk = new WorldChunk(mc.world, oldpos);
-				try {
-					chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), new NbtCompound(), packet.getChunkData().getBlockEntities(packet.getX(), packet.getZ()));
-				} catch (ArrayIndexOutOfBoundsException e) {
-					return;
-				}
-
-
-				for (int x = 0; x < 16; x++) {
-					for (int y = mc.world.getBottomY(); y < mc.world.getTopY(); y++) {
-						for (int z = 0; z < 16; z++) {
-							FluidState fluid = chunk.getFluidState(x, y, z);
-
-							if (!fluid.isEmpty() && !fluid.isStill() || !newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)) {
-								oldChunks.add(oldpos);
-								if (save.get()){
-									saveOldChunkData();
-								}
-								return;
-							}
-						}
-					}
 				}
 			}
 		}
