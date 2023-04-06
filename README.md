@@ -102,5 +102,4 @@ In no particular order
 **Trouser-Streak :D**
 [![Github All Releases](https://img.shields.io/github/downloads/etianl/Trouser-Streak/total.svg)]()
 
-Please check out my little Youtube channel here
-https://www.youtube.com/@mountainsoflavainc.6913
+Be prepared to Die in the name of building Mountains.
