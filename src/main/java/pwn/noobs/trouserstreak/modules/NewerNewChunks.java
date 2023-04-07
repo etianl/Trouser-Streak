@@ -46,7 +46,7 @@ public class NewerNewChunks extends Module {
 		Advanced
 	}
 
-    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+	private final SettingGroup sgGeneral = settings.getDefaultGroup();
 	private final SettingGroup sgCdata = settings.createGroup("Saved Chunk Data");
 	private final SettingGroup sgcacheCdata = settings.createGroup("Cached Chunk Data");
 	private final SettingGroup sgRender = settings.createGroup("Render");
@@ -59,11 +59,11 @@ public class NewerNewChunks extends Module {
 			.build()
 	);
 	private final Setting<Boolean> remove = sgcacheCdata.add(new BoolSetting.Builder()
-        .name("RemoveOnModuleDisabled")
-        .description("Removes the cached chunks when disabling the module.")
-        .defaultValue(true)
-        .build()
-    );
+			.name("RemoveOnModuleDisabled")
+			.description("Removes the cached chunks when disabling the module.")
+			.defaultValue(true)
+			.build()
+	);
 	private final Setting<Boolean> worldleaveremove = sgcacheCdata.add(new BoolSetting.Builder()
 			.name("RemoveOnLeaveWorldOrChangeDimensions")
 			.description("Removes the cached chunks when leaving the world or changing dimensions.")
@@ -129,7 +129,7 @@ public class NewerNewChunks extends Module {
 	private final Setting<SettingColor> newChunksSideColor = sgRender.add(new ColorSetting.Builder()
 			.name("new-chunks-side-color")
 			.description("Color of the chunks that are (most likely) completely new.")
-			.defaultValue(new SettingColor(255, 0, 0, 75))
+			.defaultValue(new SettingColor(255, 0, 0, 95))
 			.visible(() -> (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both))
 			.build()
 	);
@@ -144,7 +144,7 @@ public class NewerNewChunks extends Module {
 	private final Setting<SettingColor> oldChunksSideColor = sgRender.add(new ColorSetting.Builder()
 			.name("old-chunks-side-color")
 			.description("Color of the chunks that have (most likely) been loaded before.")
-			.defaultValue(new SettingColor(0, 255, 0, 75))
+			.defaultValue(new SettingColor(0, 255, 0, 55))
 			.visible(() -> shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both)
 			.build()
 	);
@@ -152,14 +152,14 @@ public class NewerNewChunks extends Module {
 	private final Setting<SettingColor> newChunksLineColor = sgRender.add(new ColorSetting.Builder()
 			.name("new-chunks-line-color")
 			.description("Color of the chunks that are (most likely) completely new.")
-			.defaultValue(new SettingColor(255, 0, 0, 255))
+			.defaultValue(new SettingColor(255, 0, 0, 205))
 			.visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both))
 			.build()
 	);
 	private final Setting<SettingColor> olderoldChunksLineColor = sgRender.add(new ColorSetting.Builder()
 			.name("FlowIsBelowY0-line-color")
 			.description("MAY STILL BE NEW. Color of the chunks that have liquids flowing below Y=0")
-			.defaultValue(new SettingColor(255, 255, 0, 255))
+			.defaultValue(new SettingColor(255, 255, 0, 170))
 			.visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both) && detectmode.get()==DetectMode.Advanced)
 			.build()
 	);
@@ -167,7 +167,7 @@ public class NewerNewChunks extends Module {
 	private final Setting<SettingColor> oldChunksLineColor = sgRender.add(new ColorSetting.Builder()
 			.name("old-chunks-line-color")
 			.description("Color of the chunks that have (most likely) been loaded before.")
-			.defaultValue(new SettingColor(0, 255, 0, 255))
+			.defaultValue(new SettingColor(0, 255, 0, 130))
 			.visible(() -> shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both)
 			.build()
 	);
@@ -175,10 +175,10 @@ public class NewerNewChunks extends Module {
 	private String world;
 	private ChunkPos chunkPos;
 	private ChunkPos oldpos;
-    private final Set<ChunkPos> newChunks = Collections.synchronizedSet(new HashSet<>());
-    private final Set<ChunkPos> oldChunks = Collections.synchronizedSet(new HashSet<>());
+	private final Set<ChunkPos> newChunks = Collections.synchronizedSet(new HashSet<>());
+	private final Set<ChunkPos> oldChunks = Collections.synchronizedSet(new HashSet<>());
 	private final Set<ChunkPos> olderoldChunks = Collections.synchronizedSet(new HashSet<>());
-    private static final Direction[] searchDirs = new Direction[] { Direction.EAST, Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.UP };
+	private static final Direction[] searchDirs = new Direction[] { Direction.EAST, Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.UP };
 	private int autoremoveticks=0;
 	private int loadingticks=0;
 	private int reloadworld=0;
@@ -187,9 +187,9 @@ public class NewerNewChunks extends Module {
 	public static int newchunksfound=0;
 	public static int oldchunksfound=0;
 	public static int olderoldchunksfound=0;
-    public NewerNewChunks() {
-        super(Trouser.Main,"NewerNewChunks", "Estimates new chunks by checking liquid flow.");
-    }
+	public NewerNewChunks() {
+		super(Trouser.Main,"NewerNewChunks", "Estimates new chunks by checking liquid flow.");
+	}
 	@Override
 	public void onActivate() {
 		if (autoremove.get()) {
@@ -205,7 +205,7 @@ public class NewerNewChunks extends Module {
 			serverip = mc.getCurrentServerEntry().address.replace(':', '_');}
 		world= mc.world.getRegistryKey().getValue().toString().replace(':', '_');
 		if (save.get()){
-		new File("NewChunks/"+serverip+"/"+world).mkdirs();
+			new File("NewChunks/"+serverip+"/"+world).mkdirs();
 		}
 		if (load.get()){
 			loadData();
@@ -316,7 +316,7 @@ public class NewerNewChunks extends Module {
 			serverip=array[array.length-2];
 			world= mc.world.getRegistryKey().getValue().toString().replace(':', '_');
 		} else {
-		serverip = mc.getCurrentServerEntry().address.replace(':', '_');}
+			serverip = mc.getCurrentServerEntry().address.replace(':', '_');}
 		world= mc.world.getRegistryKey().getValue().toString().replace(':', '_');
 
 		if (delete.get()){
@@ -331,9 +331,9 @@ public class NewerNewChunks extends Module {
 		if (autoremove.get()) {
 			autoremoveticks++;
 			if (autoremoveticks==removedelay.get()*20){
-			newChunks.clear();
-			oldChunks.clear();
-			olderoldChunks.clear();
+				newChunks.clear();
+				oldChunks.clear();
+				olderoldChunks.clear();
 				if (load.get() && reload.get()){
 					loadData();
 				}
@@ -342,19 +342,19 @@ public class NewerNewChunks extends Module {
 			}
 		}
 		//autoreload when entering different dimensions
-			if (reloadworld<10){
+		if (reloadworld<10){
 			reloadworld++;
-			}
-			if (reloadworld==3){
-				if (worldleaveremove.get()){
+		}
+		if (reloadworld==3){
+			if (worldleaveremove.get()){
 				newChunks.clear();
 				oldChunks.clear();
 				olderoldChunks.clear();
-				}
-				if (load.get()){
-					loadData();
-				}
 			}
+			if (load.get()){
+				loadData();
+			}
+		}
 	}
 	@EventHandler
 	private void onRender(Render3DEvent event) {
@@ -396,12 +396,67 @@ public class NewerNewChunks extends Module {
 
 	private void render(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
 		event.renderer.box(
-			box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, lines, shapeMode, 0);
+				box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, lines, shapeMode, 0);
 	}
 
 	@EventHandler
 	private void onReadPacket(PacketEvent.Receive event) {
-			if (event.packet instanceof ChunkDataS2CPacket && mc.world != null) {
+		if (event.packet instanceof ChunkDeltaUpdateS2CPacket) {
+			ChunkDeltaUpdateS2CPacket packet = (ChunkDeltaUpdateS2CPacket) event.packet;
+
+			packet.visitUpdates((pos, state) -> {
+				if (!state.getFluidState().isEmpty() && !state.getFluidState().isStill()) {
+					chunkPos = new ChunkPos(pos);
+
+					for (Direction dir: searchDirs) {
+						if (pos.offset(dir).getY()<0 && mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+							if (oldChunks.contains(chunkPos)) oldChunks.remove(chunkPos);
+							olderoldChunks.add(chunkPos);
+							if (save.get()){
+								saveOlderOldChunkData();
+							}
+							return;
+						}else if (mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+							if (olderoldChunks.contains(chunkPos)) olderoldChunks.remove(chunkPos);
+							if (oldChunks.contains(chunkPos)) oldChunks.remove(chunkPos);
+							newChunks.add(chunkPos);
+							if (save.get()){
+								saveNewChunkData();
+							}
+							return;
+						}
+					}
+
+				}
+			});
+		}
+		if (event.packet instanceof BlockUpdateS2CPacket) {
+			BlockUpdateS2CPacket packet = (BlockUpdateS2CPacket) event.packet;
+
+			if (!packet.getState().getFluidState().isEmpty() && !packet.getState().getFluidState().isStill()) {
+				chunkPos = new ChunkPos(packet.getPos());
+
+				for (Direction dir: searchDirs) {
+					if (packet.getPos().offset(dir).getY()<0 && mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() &&  (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+						if (oldChunks.contains(chunkPos)) oldChunks.remove(chunkPos);
+						olderoldChunks.add(chunkPos);
+						if (save.get()){
+							saveOlderOldChunkData();
+						}
+						return;
+					}else if (mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+						if (olderoldChunks.contains(chunkPos)) olderoldChunks.remove(chunkPos);
+						if (oldChunks.contains(chunkPos)) oldChunks.remove(chunkPos);
+						newChunks.add(chunkPos);
+						if (save.get()){
+							saveNewChunkData();
+						}
+						return;
+					}
+				}
+			}
+		}
+		if (event.packet instanceof ChunkDataS2CPacket && mc.world != null) {
 			ChunkDataS2CPacket packet = (ChunkDataS2CPacket) event.packet;
 
 			oldpos = new ChunkPos(packet.getX(), packet.getZ());
@@ -429,72 +484,6 @@ public class NewerNewChunks extends Module {
 							}
 						}
 					}
-				}
-			}
-		}
-		else if (event.packet instanceof ChunkDeltaUpdateS2CPacket) {
-			ChunkDeltaUpdateS2CPacket packet = (ChunkDeltaUpdateS2CPacket) event.packet;
-
-			packet.visitUpdates((pos, state) -> {
-				if (!state.getFluidState().isEmpty() && !state.getFluidState().isStill()) {
-					chunkPos = new ChunkPos(pos);
-
-					for (Direction dir: searchDirs) {
-							if (pos.offset(dir).getY()>=0 && !mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
-								if (olderoldChunks.contains(chunkPos)) olderoldChunks.remove(chunkPos);
-								newChunks.add(chunkPos);
-								if (save.get()){
-									saveNewChunkData();
-								}
-								return;
-							}else if (mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
-								if (olderoldChunks.contains(chunkPos)) olderoldChunks.remove(chunkPos);
-								newChunks.add(chunkPos);
-								if (save.get()){
-									saveNewChunkData();
-								}
-								return;
-							}else if (pos.offset(dir).getY()<0 && !mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
-								olderoldChunks.add(chunkPos);
-								if (save.get()){
-									saveOlderOldChunkData();
-								}
-								return;
-							}
-					}
-
-				}
-			});
-		}
-
-		else if (event.packet instanceof BlockUpdateS2CPacket) {
-			BlockUpdateS2CPacket packet = (BlockUpdateS2CPacket) event.packet;
-
-			if (!packet.getState().getFluidState().isEmpty() && !packet.getState().getFluidState().isStill()) {
-				chunkPos = new ChunkPos(packet.getPos());
-
-				for (Direction dir: searchDirs) {
-						if (packet.getPos().offset(dir).getY()>=0 && !mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
-							if (olderoldChunks.contains(chunkPos)) olderoldChunks.remove(chunkPos);
-							newChunks.add(chunkPos);
-							if (save.get()){
-								saveNewChunkData();
-							}
-							return;
-						}else if (mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
-							if (olderoldChunks.contains(chunkPos)) olderoldChunks.remove(chunkPos);
-							newChunks.add(chunkPos);
-							if (save.get()){
-								saveNewChunkData();
-							}
-							return;
-						}else if (packet.getPos().offset(dir).getY()<0 && !mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() &&  (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
-							olderoldChunks.add(chunkPos);
-							if (save.get()){
-								saveOlderOldChunkData();
-							}
-							return;
-						}
 				}
 			}
 		}
