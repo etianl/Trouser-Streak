@@ -88,6 +88,32 @@ public class HandOfGod extends Module {
             .defaultValue(true)
             .build()
     );
+    public final Setting<Boolean> SwpAway = sgClick.add(new BoolSetting.Builder()
+            .name("Sweep Away")
+            .description("Right Click to sweep the whole world away")
+            .defaultValue(false)
+            .build()
+    );
+    private final Setting<String> sweepblock = sgClick.add(new StringSetting.Builder()
+            .name("SweepBlock")
+            .description("What is created when sweeping")
+            .defaultValue("air")
+            .visible(() -> SwpAway.get())
+            .build());
+    private final Setting<Integer> sweepradius = sgClick.add(new IntSetting.Builder()
+            .name("SweepAwayRadius")
+            .description("radius")
+            .defaultValue(45)
+            .sliderRange(1, 90)
+            .visible(() -> SwpAway.get())
+            .build());
+    private final Setting<Integer> sweepstart = sgClick.add(new IntSetting.Builder()
+            .name("SweepAwayStartingDistance")
+            .description("Starting distance from character for the sweeper.")
+            .defaultValue(3)
+            .sliderRange(1, 30)
+            .visible(() -> SwpAway.get())
+            .build());
     public final Setting<Boolean> rndplyr = sgPcentered.add(new BoolSetting.Builder()
             .name("NukeAroundPlayer")
             .description("Runs /fill air around you every tick.")
@@ -211,12 +237,17 @@ public class HandOfGod extends Module {
     }
 
     private int ticks=0;
+    private int swpr=0;
+    private boolean sweep=false;
     private int aticks=0;
     private int errticks=0;
     private int roofticks=0;
     private int pX;
     private int pY;
     private int pZ;
+    private int sX;
+    private int sY;
+    private int sZ;
     int i;
 
     @Override
@@ -343,6 +374,33 @@ public class HandOfGod extends Module {
                     aticks=0;
                 }
             }
+        if (SwpAway.get()){
+        if (mc.options.useKey.isPressed()){
+            sweep=true;
+        }else if (mc.options.useKey.isPressed()==false) sweep=false;
+        if (sweep==false){
+        sX=mc.player.getBlockX();
+        sY=mc.player.getBlockY();
+        sZ=mc.player.getBlockZ();
+        }
+            if (sweep==true){
+                switch (mc.player.getHorizontalFacing()){
+                    case NORTH -> {
+                        ChatUtils.sendPlayerMsg("/fill " + (sX - sweepradius.get()) + " " + (sY-sweepradius.get()) + " "+ (sZ - (sweepstart.get()+swpr)) +" "+ (sX + sweepradius.get()) + " " + (sY +sweepradius.get()) +" "+ (sZ - (sweepstart.get()+swpr)) +" "+sweepblock);
+                    }
+                    case WEST -> {
+                        ChatUtils.sendPlayerMsg("/fill " + (sX - (sweepstart.get()+swpr)) + " " + (sY-sweepradius.get()) + " "+ (sZ - sweepradius.get()) +" "+ (sX - (sweepstart.get()+swpr)) + " " + (sY+sweepradius.get()) +" "+ (sZ + sweepradius.get()) +" "+sweepblock);
+                    }
+                    case SOUTH -> {
+                        ChatUtils.sendPlayerMsg("/fill " + (sX - sweepradius.get()) + " " + (sY-sweepradius.get()) + " "+ (sZ + (sweepstart.get()+swpr)) +" "+ (sX + sweepradius.get()) + " " + (sY+sweepradius.get()) +" "+ (sZ + (sweepstart.get()+swpr)) +" "+sweepblock);
+                    }
+                    case EAST -> {
+                        ChatUtils.sendPlayerMsg("/fill " + (sX  + (sweepstart.get()+swpr)) + " " + (sY-sweepradius.get()) + " "+ (sZ - sweepradius.get()) +" "+ (sX + (sweepstart.get()+swpr)) + " " + (sY+sweepradius.get()) +" "+ (sZ + sweepradius.get()) +" "+sweepblock);
+                    }
+                }
+                swpr++;
+            } else swpr=0;
+        }
             if (rndplyr.get()){
                 if (ticks<=tickdelay.get()){
                     ticks++;
