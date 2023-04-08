@@ -41,7 +41,9 @@ public class TrouserSplashTextMixin {
                 "in ur servers, breaking ur blocks",
                 "Steve did nothing wrong.",
                 "Make Minecraft Great Again!",
-                "Make Mountains, not war."
+                "Make Mountains, not war.",
+                "Old versions of Meteor are not supported! -Meteor Client Discord",
+                "Stop and take time to smell the explosions."
         );
     }
 
