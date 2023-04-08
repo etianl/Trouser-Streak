@@ -202,7 +202,7 @@ public class AutoMountain extends Module {
     private BlockPos playerPos;
     private int cookie=0;
     private int speed=0;
-    private boolean go=false;
+    private boolean go=true;
     private float cookieyaw;
     private float pitchonPause;
     private boolean floor=false;
@@ -311,7 +311,6 @@ public class AutoMountain extends Module {
 
     @Override
     public void onDeactivate() {
-        go=true;
         speed=0;
         Modules.get().get(Timer.class).setOverride(Timer.OFF);
         resetTimer = true;
@@ -382,7 +381,7 @@ public class AutoMountain extends Module {
         else if (delayakick.get() && offLeft>offTime.get()){
             offLeft=offTime.get();
         }
-        if (delayLeft>0){
+        if (delayLeft>0 || go==false){
             BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
             if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
