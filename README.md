@@ -44,7 +44,7 @@ In no particular order
 - Left and RightKeys turn Mountain building.
 - ForwardKey Turns mountain up, Back Key turns mountain down.
 - JumpKey adjusts spacing of stairs according to the OnDemandSpacing value. 
-- Holding ForwardKey or BackKey then holding Left or RightKey as well builds stairs diagonally. Release left or right key first to continue building in the direction you were prior. 
+- Start building, then hold SneakKey and also hold Left or RightKey as well to build stairs diagonally. Release left or right key first to continue building in the direction you were prior. 
 - **AutoStaircase:** Builds stairs upward in the direction you are facing by running forward and jumping. (Credits to etianl for bringing it to life! As well as Credits to Frostburn for writing the original. <3) I just had to fix up some stuff for this one but Frostburn had the base code there. I believe this is the first publicly available automatic staircase builder in a Meteor addon, correct me if I'm wrong maybe I didn't have to learn some Java to do this.
 - **BetterAutoSign:** Automatically writes signs with the text you specify, and can also apply glow ink or dye. (Credits to Meteor-Tweaks)
 - **BetterScaffold:** Give you more options for scaffolding, bigger range and others. (Credits to Meteor-Tweaks)
