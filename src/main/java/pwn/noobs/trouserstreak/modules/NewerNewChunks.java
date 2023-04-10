@@ -198,7 +198,7 @@ public class NewerNewChunks extends Module {
 			olderoldChunks.clear();
 		}
 		if (mc.isInSingleplayer()==true){
-			String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("\\\\");
+			String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("/|\\\\");
 			serverip=array[array.length-2];
 			world= mc.world.getRegistryKey().getValue().toString().replace(':', '_');
 		} else {
@@ -312,7 +312,7 @@ public class NewerNewChunks extends Module {
 		}
 
 		if (mc.isInSingleplayer()==true){
-			String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("\\\\");
+			String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("/|\\\\");
 			serverip=array[array.length-2];
 			world= mc.world.getRegistryKey().getValue().toString().replace(':', '_');
 		} else {
