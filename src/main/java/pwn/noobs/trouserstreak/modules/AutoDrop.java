@@ -29,58 +29,30 @@ public class AutoDrop extends Module {
             .name("DrotSlot#")
             .description("Drops this Slot if items are in it.")
             .sliderMin(1)
-                    .sliderMax(9)
+            .sliderMax(9)
             .defaultValue(1)
-                    .visible(() -> dropthisslot.get())
+            .visible(() -> dropthisslot.get())
             .build());
 
-
     public AutoDrop() {super(Trouser.Main, "auto-drop", "Drops the stack in your selected slot automatically");}
-    private int ticks=0;
     private int previousslot=0;
+    private boolean getprevslot=false;
 
     @EventHandler
+    private void onPreTick(TickEvent.Pre event) {
+        if (tool.get() == true && (mc.player.getMainHandStack().getItem() instanceof BucketItem || mc.player.getMainHandStack().getItem() instanceof FlintAndSteelItem || mc.player.getMainHandStack().getItem() instanceof ToolItem || mc.player.getMainHandStack().getItem() instanceof ShearsItem))return;
+        if (dropthisslot.get() && !mc.player.getInventory().getStack(dropslot.get()-1).isEmpty()){
+                    previousslot=mc.player.getInventory().selectedSlot;
+                    mc.player.getInventory().selectedSlot = dropslot.get()-1;
+                    getprevslot=true;
+        }else if (!dropthisslot.get()) mc.player.dropSelectedItem(true);
+    }
+    @EventHandler
     private void onPostTick(TickEvent.Post event) {
-        if (tool.get() == true){
-        if (!(mc.player.getMainHandStack().getItem() instanceof BucketItem || mc.player.getMainHandStack().getItem() instanceof FlintAndSteelItem || mc.player.getMainHandStack().getItem() instanceof ToolItem || mc.player.getMainHandStack().getItem() instanceof ShearsItem)) {
-            if (dropthisslot.get() && !mc.player.getInventory().getStack(dropslot.get()-1).isEmpty()){
-                ticks++;
-                if (ticks==1){
-                    previousslot=mc.player.getInventory().selectedSlot;
-                    mc.player.getInventory().selectedSlot = dropslot.get()-1;
-                }
-                else if (ticks==2){mc.player.dropSelectedItem(true);}
-                else if (ticks>=2){
-                    mc.player.getInventory().selectedSlot = previousslot;
-                    ticks=0;
-                }
-            }
-            if (dropthisslot.get() && mc.player.getInventory().getStack(dropslot.get()-1).isEmpty() && ticks>=2){
-                mc.player.getInventory().selectedSlot = previousslot;
-                ticks=0;
-            }
-            if (!dropthisslot.get()) mc.player.dropSelectedItem(true);
-        }else if (mc.player.getMainHandStack().getItem() instanceof BucketItem || mc.player.getMainHandStack().getItem() instanceof FlintAndSteelItem || mc.player.getMainHandStack().getItem() instanceof ToolItem || mc.player.getMainHandStack().getItem() instanceof ShearsItem){}
+        if (getprevslot==true){
+            mc.player.dropSelectedItem(true);
+            mc.player.getInventory().selectedSlot = previousslot;
+            getprevslot=false;
         }
-        else {
-            if (dropthisslot.get() && !mc.player.getInventory().getStack(dropslot.get()-1).isEmpty()){
-                ticks++;
-                if (ticks==1){
-                    previousslot=mc.player.getInventory().selectedSlot;
-                    mc.player.getInventory().selectedSlot = dropslot.get()-1;
-                }
-                else if (ticks==2){mc.player.dropSelectedItem(true);}
-                else if (ticks>=2){
-                    mc.player.getInventory().selectedSlot = previousslot;
-                    ticks=0;
-                }
-            }
-            if (dropthisslot.get() && mc.player.getInventory().getStack(dropslot.get()-1).isEmpty() && ticks>=2){
-                mc.player.getInventory().selectedSlot = previousslot;
-                ticks=0;
-            }
-            if (!dropthisslot.get()) mc.player.dropSelectedItem(true);
-        }
-
     }
 }

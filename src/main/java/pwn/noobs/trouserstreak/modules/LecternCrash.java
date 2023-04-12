@@ -7,5 +7,4 @@ public class LecternCrash extends Module {
     public LecternCrash() {
         super(Trouser.Main, "LecternCrash", "Enable/Disable LecternCrash button");
     }
-
 }

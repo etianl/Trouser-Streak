@@ -33,7 +33,7 @@ public class Teleport extends Module {
     public final Setting<Double> tpTimer = sgGeneral.add(new DoubleSetting.Builder()
             .name("timer")
             .description("The multiplier value for speed of movement.")
-            .defaultValue(3)
+            .defaultValue(2)
             .sliderRange(1,10)
             .build()
     );
@@ -392,5 +392,4 @@ public class Teleport extends Module {
         HitResult blockHit = mc.cameraEntity.raycast(reach.get(), 0, liquids.get());
         return ((BlockHitResult) blockHit).getBlockPos();
     }
-
 }

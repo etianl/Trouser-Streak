@@ -171,8 +171,6 @@ public class RedstoneNuker extends Module {
             .build()
     );
 
-    // Rendering
-
     // Bounding box
     private final Setting<Boolean> enableRenderBounding = sgRender.add(new BoolSetting.Builder()
         .name("bounding-box")

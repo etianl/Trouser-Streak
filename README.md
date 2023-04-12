@@ -11,7 +11,7 @@ In no particular order
 - [Allah-Hack](https://github.com/TaxEvasiqn/allah-hack)
 - [Meteor-Rejects](https://github.com/AntiCope/meteor-rejects)
 - [Frostburn Client](https://github.com/evaan/FrostBurn)
-- [Banana](https://github.com/Bennooo/banana-for-everyone) credits for the idea behind TrouserBuild
+- [Banana](https://github.com/Bennooo/banana-for-everyone) Credits for checkbox array from AutoBuild, and the idea for TrouserBuild
 - [1.17 Crafting Dupe](https://github.com/B2H990/NUMA-117-Crafting-Dupe/)
 - [InstantKillBow](https://github.com/Saturn5Vfive/InstantKillBow)
 - [LecternCrash](https://github.com/Coderx-Gamer/lectern-crash)

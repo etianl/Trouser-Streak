@@ -23,21 +23,6 @@ public class BoomPlus extends Module {
         .description("the mode")
         .defaultValue(Modes.Fireball)
         .build());
-    public final Setting<Boolean> target = sgGeneral.add(new BoolSetting.Builder()
-            .name("OnTarget")
-            .description("spawns on target")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
-        .name("speed")
-        .description("fastness of thing")
-        .defaultValue(5)
-        .min(1)
-        .sliderMax(10)
-        .visible(() -> mode.get() == Modes.Wither || mode.get() == Modes.Spit || mode.get() == Modes.ShulkerBullet || mode.get() == Modes.WitherSkull || mode.get() == Modes.TNT || mode.get() == Modes.Arrow || mode.get() == Modes.Creeper || mode.get() == Modes.Kitty || mode.get() == Modes.Fireball && !target.get())
-        .build());
 
     private final Setting<Integer> power = sgGeneral.add(new IntSetting.Builder()
         .name("power")
@@ -54,6 +39,22 @@ public class BoomPlus extends Module {
             .defaultValue(20)
             .sliderRange(0, 120)
             .visible(() -> mode.get() == Modes.TNT || mode.get() == Modes.Creeper)
+            .build());
+    public final Setting<Boolean> target = sgGeneral.add(new BoolSetting.Builder()
+            .name("OnTarget")
+            .description("spawns on target")
+            .defaultValue(false)
+            .visible(() -> !(mode.get() == Modes.Lightning))
+            .build()
+    );
+
+    private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
+            .name("speed")
+            .description("fastness of thing")
+            .defaultValue(5)
+            .min(1)
+            .sliderMax(10)
+            .visible(() -> !target.get() && (mode.get() == Modes.Wither || mode.get() == Modes.Spit || mode.get() == Modes.ShulkerBullet || mode.get() == Modes.WitherSkull || mode.get() == Modes.TNT || mode.get() == Modes.Arrow || mode.get() == Modes.Creeper || mode.get() == Modes.Kitty || mode.get() == Modes.Fireball))
             .build());
     public final Setting<Boolean> auto = sgGeneral.add(new BoolSetting.Builder()
             .name("FULLAUTO")
@@ -75,10 +76,7 @@ public class BoomPlus extends Module {
         super(Trouser.Main, "boom+", "shoots something where you click");
     }
     private int aticks=0;
-    @Override
-    public void onActivate() {
-        aticks=0;
-    }
+
     @EventHandler
     public void onTick(TickEvent.Post event) {
         if (mc.player.getAbilities().creativeMode) {}
@@ -90,22 +88,29 @@ public class BoomPlus extends Module {
             if (aticks<=atickdelay.get()){
                 aticks++;
             } else if (aticks>atickdelay.get()) {
-                if (target.get()) {
-                HitResult hr = mc.cameraEntity.raycast(600, 0, true);
-                Vec3d owo = hr.getPos();
-                BlockPos pos = BlockPos.ofFloored(owo);
-                ItemStack rst = mc.player.getMainHandStack();
-                Vec3d sex = mc.player.getRotationVector().multiply(speed.get());
-                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
+                    NbtList motion = new NbtList();
+                    NbtCompound tag = new NbtCompound();
+                    NbtList Pos = new NbtList();
+                    HitResult hr = mc.cameraEntity.raycast(900, 0, true);
+                    Vec3d owo = hr.getPos();
+                    BlockPos pos = BlockPos.ofFloored(owo);
+                    ItemStack rst = mc.player.getMainHandStack();
+                    Vec3d sex = mc.player.getRotationVector().multiply(speed.get());
+                    BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
                 switch (mode.get()) {
                     case Fireball -> {
                         ItemStack Motion = new ItemStack(Items.SALMON_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList Pos = new NbtList();
-                        Pos.add(NbtDouble.of(pos.getX()));
-                        Pos.add(NbtDouble.of(pos.getY()));
-                        Pos.add(NbtDouble.of(pos.getZ()));
-                        tag.put("Pos", Pos);
+                        if (target.get()) {
+                            Pos.add(NbtDouble.of(pos.getX()));
+                            Pos.add(NbtDouble.of(pos.getY()));
+                            Pos.add(NbtDouble.of(pos.getZ()));
+                            tag.put("Pos", Pos);
+                        } else {
+                            motion.add(NbtDouble.of(sex.x));
+                            motion.add(NbtDouble.of(sex.y));
+                            motion.add(NbtDouble.of(sex.z));
+                            tag.put("Motion", motion);
+                        }
                         tag.putInt("ExplosionPower", power.get());
                         tag.putString("id", "minecraft:fireball");
                         Motion.setSubNbt("EntityTag", tag);
@@ -115,8 +120,6 @@ public class BoomPlus extends Module {
                     }
                     case Lightning -> {
                         ItemStack Lightning = new ItemStack(Items.SALMON_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList Pos = new NbtList();
                         Pos.add(NbtDouble.of(pos.getX()));
                         Pos.add(NbtDouble.of(pos.getY()));
                         Pos.add(NbtDouble.of(pos.getZ()));
@@ -129,12 +132,17 @@ public class BoomPlus extends Module {
                     }
                     case Kitty -> {
                         ItemStack Kitty = new ItemStack(Items.CAT_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList Pos = new NbtList();
-                        Pos.add(NbtDouble.of(pos.getX()));
-                        Pos.add(NbtDouble.of(pos.getY()));
-                        Pos.add(NbtDouble.of(pos.getZ()));
-                        tag.put("Pos", Pos);
+                        if (target.get()) {
+                            Pos.add(NbtDouble.of(pos.getX()));
+                            Pos.add(NbtDouble.of(pos.getY()));
+                            Pos.add(NbtDouble.of(pos.getZ()));
+                            tag.put("Pos", Pos);
+                        } else {
+                            motion.add(NbtDouble.of(sex.x));
+                            motion.add(NbtDouble.of(sex.y));
+                            motion.add(NbtDouble.of(sex.z));
+                            tag.put("Motion", motion);
+                        }
                         Kitty.setSubNbt("EntityTag", tag);
                         mc.interactionManager.clickCreativeStack(Kitty, 36 + mc.player.getInventory().selectedSlot);
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
@@ -142,12 +150,17 @@ public class BoomPlus extends Module {
                     }
                     case Wither -> {
                         ItemStack Kitty = new ItemStack(Items.CAT_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList Pos = new NbtList();
-                        Pos.add(NbtDouble.of(pos.getX()));
-                        Pos.add(NbtDouble.of(pos.getY()));
-                        Pos.add(NbtDouble.of(pos.getZ()));
-                        tag.put("Pos", Pos);
+                        if (target.get()) {
+                            Pos.add(NbtDouble.of(pos.getX()));
+                            Pos.add(NbtDouble.of(pos.getY()));
+                            Pos.add(NbtDouble.of(pos.getZ()));
+                            tag.put("Pos", Pos);
+                        } else {
+                            motion.add(NbtDouble.of(sex.x));
+                            motion.add(NbtDouble.of(sex.y));
+                            motion.add(NbtDouble.of(sex.z));
+                            tag.put("Motion", motion);
+                        }
                         tag.putString("id", "minecraft:wither");
                         Kitty.setSubNbt("EntityTag", tag);
                         mc.interactionManager.clickCreativeStack(Kitty, 36 + mc.player.getInventory().selectedSlot);
@@ -156,12 +169,17 @@ public class BoomPlus extends Module {
                     }
                     case TNT -> {
                         ItemStack TNT = new ItemStack(Items.CAT_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList Pos = new NbtList();
-                        Pos.add(NbtDouble.of(pos.getX()));
-                        Pos.add(NbtDouble.of(pos.getY()));
-                        Pos.add(NbtDouble.of(pos.getZ()));
-                        tag.put("Pos", Pos);
+                        if (target.get()) {
+                            Pos.add(NbtDouble.of(pos.getX()));
+                            Pos.add(NbtDouble.of(pos.getY()));
+                            Pos.add(NbtDouble.of(pos.getZ()));
+                            tag.put("Pos", Pos);
+                        } else {
+                            motion.add(NbtDouble.of(sex.x));
+                            motion.add(NbtDouble.of(sex.y));
+                            motion.add(NbtDouble.of(sex.z));
+                            tag.put("Motion", motion);
+                        }
                         tag.putString("id", "minecraft:tnt");
                         tag.putInt("Fuse", (fuse.get()));
                         TNT.setSubNbt("EntityTag", tag);
@@ -171,12 +189,17 @@ public class BoomPlus extends Module {
                     }
                     case WitherSkull -> {
                         ItemStack WitherSkull = new ItemStack(Items.CAT_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList Pos = new NbtList();
-                        Pos.add(NbtDouble.of(pos.getX()));
-                        Pos.add(NbtDouble.of(pos.getY()));
-                        Pos.add(NbtDouble.of(pos.getZ()));
-                        tag.put("Pos", Pos);
+                        if (target.get()) {
+                            Pos.add(NbtDouble.of(pos.getX()));
+                            Pos.add(NbtDouble.of(pos.getY()));
+                            Pos.add(NbtDouble.of(pos.getZ()));
+                            tag.put("Pos", Pos);
+                        } else {
+                            motion.add(NbtDouble.of(sex.x));
+                            motion.add(NbtDouble.of(sex.y));
+                            motion.add(NbtDouble.of(sex.z));
+                            tag.put("Motion", motion);
+                        }
                         tag.putString("id", "minecraft:wither_skull");
                         WitherSkull.setSubNbt("EntityTag", tag);
                         mc.interactionManager.clickCreativeStack(WitherSkull, 36 + mc.player.getInventory().selectedSlot);
@@ -185,12 +208,17 @@ public class BoomPlus extends Module {
                     }
                     case Spit -> {
                         ItemStack Spit = new ItemStack(Items.CAT_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList Pos = new NbtList();
-                        Pos.add(NbtDouble.of(pos.getX()));
-                        Pos.add(NbtDouble.of(pos.getY()));
-                        Pos.add(NbtDouble.of(pos.getZ()));
-                        tag.put("Pos", Pos);
+                        if (target.get()) {
+                            Pos.add(NbtDouble.of(pos.getX()));
+                            Pos.add(NbtDouble.of(pos.getY()));
+                            Pos.add(NbtDouble.of(pos.getZ()));
+                            tag.put("Pos", Pos);
+                        } else {
+                            motion.add(NbtDouble.of(sex.x));
+                            motion.add(NbtDouble.of(sex.y));
+                            motion.add(NbtDouble.of(sex.z));
+                            tag.put("Motion", motion);
+                        }
                         tag.putString("id", "minecraft:llama_spit");
                         Spit.setSubNbt("EntityTag", tag);
                         mc.interactionManager.clickCreativeStack(Spit, 36 + mc.player.getInventory().selectedSlot);
@@ -199,12 +227,17 @@ public class BoomPlus extends Module {
                     }
                     case ShulkerBullet -> {
                         ItemStack ShulkerBullet = new ItemStack(Items.CAT_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList Pos = new NbtList();
-                        Pos.add(NbtDouble.of(pos.getX()));
-                        Pos.add(NbtDouble.of(pos.getY()));
-                        Pos.add(NbtDouble.of(pos.getZ()));
-                        tag.put("Pos", Pos);
+                        if (target.get()) {
+                            Pos.add(NbtDouble.of(pos.getX()));
+                            Pos.add(NbtDouble.of(pos.getY()));
+                            Pos.add(NbtDouble.of(pos.getZ()));
+                            tag.put("Pos", Pos);
+                        } else {
+                            motion.add(NbtDouble.of(sex.x));
+                            motion.add(NbtDouble.of(sex.y));
+                            motion.add(NbtDouble.of(sex.z));
+                            tag.put("Motion", motion);
+                        }
                         tag.putString("id", "minecraft:shulker_bullet");
                         ShulkerBullet.setSubNbt("EntityTag", tag);
                         mc.interactionManager.clickCreativeStack(ShulkerBullet, 36 + mc.player.getInventory().selectedSlot);
@@ -213,12 +246,17 @@ public class BoomPlus extends Module {
                     }
                     case Creeper -> {
                         ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList Pos = new NbtList();
-                        Pos.add(NbtDouble.of(pos.getX()));
-                        Pos.add(NbtDouble.of(pos.getY()));
-                        Pos.add(NbtDouble.of(pos.getZ()));
-                        tag.put("Pos", Pos);
+                        if (target.get()) {
+                            Pos.add(NbtDouble.of(pos.getX()));
+                            Pos.add(NbtDouble.of(pos.getY()));
+                            Pos.add(NbtDouble.of(pos.getZ()));
+                            tag.put("Pos", Pos);
+                        } else {
+                            motion.add(NbtDouble.of(sex.x));
+                            motion.add(NbtDouble.of(sex.y));
+                            motion.add(NbtDouble.of(sex.z));
+                            tag.put("Motion", motion);
+                        }
                         tag.putInt("ignited", (1));
                         tag.putInt("Invulnerable", (1));
                         tag.putInt("Fuse", (fuse.get()));
@@ -231,12 +269,17 @@ public class BoomPlus extends Module {
                     }
                     case Arrow -> {
                         ItemStack Arrow = new ItemStack(Items.SALMON_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList Pos = new NbtList();
-                        Pos.add(NbtDouble.of(pos.getX()));
-                        Pos.add(NbtDouble.of(pos.getY()));
-                        Pos.add(NbtDouble.of(pos.getZ()));
-                        tag.put("Pos", Pos);
+                        if (target.get()) {
+                            Pos.add(NbtDouble.of(pos.getX()));
+                            Pos.add(NbtDouble.of(pos.getY()));
+                            Pos.add(NbtDouble.of(pos.getZ()));
+                            tag.put("Pos", Pos);
+                        } else {
+                            motion.add(NbtDouble.of(sex.x));
+                            motion.add(NbtDouble.of(sex.y));
+                            motion.add(NbtDouble.of(sex.z));
+                            tag.put("Motion", motion);
+                        }
                         tag.putString("id", "minecraft:arrow");
                         Arrow.setSubNbt("EntityTag", tag);
                         mc.interactionManager.clickCreativeStack(Arrow, 36 + mc.player.getInventory().selectedSlot);
@@ -244,162 +287,6 @@ public class BoomPlus extends Module {
                         mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
                     }
                 }
-            }
-            else {
-                HitResult hr = mc.cameraEntity.raycast(600, 0, true);
-                Vec3d owo = hr.getPos();
-                BlockPos pos = BlockPos.ofFloored(owo);
-                ItemStack rst = mc.player.getMainHandStack();
-                Vec3d sex = mc.player.getRotationVector().multiply(speed.get());
-                BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getPos()), false);
-                BlockHitResult bhr1 = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
-                switch (mode.get()) {
-                    case Fireball -> {
-                        ItemStack Motion = new ItemStack(Items.SALMON_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList motion = new NbtList();
-                        motion.add(NbtDouble.of(sex.x));
-                        motion.add(NbtDouble.of(sex.y));
-                        motion.add(NbtDouble.of(sex.z));
-                        tag.put("Motion", motion);
-                        tag.putInt("ExplosionPower", power.get());
-                        tag.putString("id", "minecraft:fireball");
-                        Motion.setSubNbt("EntityTag", tag);
-                        mc.interactionManager.clickCreativeStack(Motion, 36 + mc.player.getInventory().selectedSlot);
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                        mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                    }
-                    case Lightning -> {
-                        ItemStack Lightning = new ItemStack(Items.SALMON_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList Pos = new NbtList();
-                        Pos.add(NbtDouble.of(pos.getX()));
-                        Pos.add(NbtDouble.of(pos.getY()));
-                        Pos.add(NbtDouble.of(pos.getZ()));
-                        tag.put("Pos", Pos);
-                        tag.putString("id", "minecraft:lightning_bolt");
-                        Lightning.setSubNbt("EntityTag", tag);
-                        mc.interactionManager.clickCreativeStack(Lightning, 36 + mc.player.getInventory().selectedSlot);
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                        mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                    }
-                    case Kitty -> {
-                        ItemStack Kitty = new ItemStack(Items.CAT_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList motion = new NbtList();
-                        motion.add(NbtDouble.of(sex.x));
-                        motion.add(NbtDouble.of(sex.y));
-                        motion.add(NbtDouble.of(sex.z));
-                        tag.put("Motion", motion);
-                        Kitty.setSubNbt("EntityTag", tag);
-                        mc.interactionManager.clickCreativeStack(Kitty, 36 + mc.player.getInventory().selectedSlot);
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                        mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                    }
-                    case Wither -> {
-                        ItemStack Kitty = new ItemStack(Items.CAT_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList motion = new NbtList();
-                        motion.add(NbtDouble.of(sex.x));
-                        motion.add(NbtDouble.of(sex.y));
-                        motion.add(NbtDouble.of(sex.z));
-                        tag.put("Motion", motion);
-                        tag.putString("id", "minecraft:wither");
-                        Kitty.setSubNbt("EntityTag", tag);
-                        mc.interactionManager.clickCreativeStack(Kitty, 36 + mc.player.getInventory().selectedSlot);
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                        mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                    }
-                    case TNT -> {
-                        ItemStack TNT = new ItemStack(Items.CAT_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList motion = new NbtList();
-                        motion.add(NbtDouble.of(sex.x));
-                        motion.add(NbtDouble.of(sex.y));
-                        motion.add(NbtDouble.of(sex.z));
-                        tag.put("Motion", motion);
-                        tag.putString("id", "minecraft:tnt");
-                        tag.putInt("Fuse", (fuse.get()));
-                        TNT.setSubNbt("EntityTag", tag);
-                        mc.interactionManager.clickCreativeStack(TNT, 36 + mc.player.getInventory().selectedSlot);
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                        mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                    }
-                    case WitherSkull -> {
-                        ItemStack WitherSkull = new ItemStack(Items.CAT_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList motion = new NbtList();
-                        motion.add(NbtDouble.of(sex.x));
-                        motion.add(NbtDouble.of(sex.y));
-                        motion.add(NbtDouble.of(sex.z));
-                        tag.put("Motion", motion);
-                        tag.putString("id", "minecraft:wither_skull");
-                        WitherSkull.setSubNbt("EntityTag", tag);
-                        mc.interactionManager.clickCreativeStack(WitherSkull, 36 + mc.player.getInventory().selectedSlot);
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr1);
-                        mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                    }
-                    case Spit -> {
-                        ItemStack Spit = new ItemStack(Items.CAT_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList motion = new NbtList();
-                        motion.add(NbtDouble.of(sex.x));
-                        motion.add(NbtDouble.of(sex.y));
-                        motion.add(NbtDouble.of(sex.z));
-                        tag.put("Motion", motion);
-                        tag.putString("id", "minecraft:llama_spit");
-                        Spit.setSubNbt("EntityTag", tag);
-                        mc.interactionManager.clickCreativeStack(Spit, 36 + mc.player.getInventory().selectedSlot);
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                        mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                    }
-                    case ShulkerBullet -> {
-                        ItemStack ShulkerBullet = new ItemStack(Items.CAT_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList motion = new NbtList();
-                        motion.add(NbtDouble.of(sex.x));
-                        motion.add(NbtDouble.of(sex.y));
-                        motion.add(NbtDouble.of(sex.z));
-                        tag.put("Motion", motion);
-                        tag.putString("id", "minecraft:shulker_bullet");
-                        ShulkerBullet.setSubNbt("EntityTag", tag);
-                        mc.interactionManager.clickCreativeStack(ShulkerBullet, 36 + mc.player.getInventory().selectedSlot);
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr1);
-                        mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                    }
-                    case Creeper -> {
-                        ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList motion = new NbtList();
-                        motion.add(NbtDouble.of(sex.x));
-                        motion.add(NbtDouble.of(sex.y));
-                        motion.add(NbtDouble.of(sex.z));
-                        tag.put("Motion", motion);
-                        tag.putInt("ignited", (1));
-                        tag.putInt("Invulnerable", (1));
-                        tag.putInt("Fuse", (fuse.get()));
-                        tag.putInt("ExplosionRadius", power.get());
-                        Creeper.setSubNbt("EntityTag", tag);
-                        mc.interactionManager.clickCreativeStack(Creeper, 36 + mc.player.getInventory().selectedSlot);
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                        mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                    }
-                    case Arrow -> {
-                        ItemStack Arrow = new ItemStack(Items.SALMON_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList speed = new NbtList();
-                        speed.add(NbtDouble.of(sex.x));
-                        speed.add(NbtDouble.of(sex.y));
-                        speed.add(NbtDouble.of(sex.z));
-                        tag.put("Motion", speed);
-                        tag.putString("id", "minecraft:arrow");
-                        Arrow.setSubNbt("EntityTag", tag);
-                        mc.interactionManager.clickCreativeStack(Arrow, 36 + mc.player.getInventory().selectedSlot);
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr1);
-                        mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                    }
-                }
-            }
             aticks=0;
         }
         }
@@ -408,8 +295,10 @@ public class BoomPlus extends Module {
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if (mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player.getAbilities().creativeMode) {
-            if (target.get()) {
-                HitResult hr = mc.cameraEntity.raycast(600, 0, true);
+                NbtList motion = new NbtList();
+                NbtCompound tag = new NbtCompound();
+                NbtList Pos = new NbtList();
+                HitResult hr = mc.cameraEntity.raycast(900, 0, true);
                 Vec3d owo = hr.getPos();
                 BlockPos pos = BlockPos.ofFloored(owo);
                 ItemStack rst = mc.player.getMainHandStack();
@@ -418,12 +307,17 @@ public class BoomPlus extends Module {
                 switch (mode.get()) {
                     case Fireball -> {
                         ItemStack Motion = new ItemStack(Items.SALMON_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList Pos = new NbtList();
-                        Pos.add(NbtDouble.of(pos.getX()));
-                        Pos.add(NbtDouble.of(pos.getY()));
-                        Pos.add(NbtDouble.of(pos.getZ()));
-                        tag.put("Pos", Pos);
+                        if (target.get()) {
+                            Pos.add(NbtDouble.of(pos.getX()));
+                            Pos.add(NbtDouble.of(pos.getY()));
+                            Pos.add(NbtDouble.of(pos.getZ()));
+                            tag.put("Pos", Pos);
+                        } else {
+                            motion.add(NbtDouble.of(sex.x));
+                            motion.add(NbtDouble.of(sex.y));
+                            motion.add(NbtDouble.of(sex.z));
+                            tag.put("Motion", motion);
+                        }
                         tag.putInt("ExplosionPower", power.get());
                         tag.putString("id", "minecraft:fireball");
                         Motion.setSubNbt("EntityTag", tag);
@@ -433,8 +327,6 @@ public class BoomPlus extends Module {
                     }
                     case Lightning -> {
                         ItemStack Lightning = new ItemStack(Items.SALMON_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList Pos = new NbtList();
                         Pos.add(NbtDouble.of(pos.getX()));
                         Pos.add(NbtDouble.of(pos.getY()));
                         Pos.add(NbtDouble.of(pos.getZ()));
@@ -447,12 +339,17 @@ public class BoomPlus extends Module {
                     }
                     case Kitty -> {
                         ItemStack Kitty = new ItemStack(Items.CAT_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList Pos = new NbtList();
-                        Pos.add(NbtDouble.of(pos.getX()));
-                        Pos.add(NbtDouble.of(pos.getY()));
-                        Pos.add(NbtDouble.of(pos.getZ()));
-                        tag.put("Pos", Pos);
+                        if (target.get()) {
+                            Pos.add(NbtDouble.of(pos.getX()));
+                            Pos.add(NbtDouble.of(pos.getY()));
+                            Pos.add(NbtDouble.of(pos.getZ()));
+                            tag.put("Pos", Pos);
+                        } else {
+                            motion.add(NbtDouble.of(sex.x));
+                            motion.add(NbtDouble.of(sex.y));
+                            motion.add(NbtDouble.of(sex.z));
+                            tag.put("Motion", motion);
+                        }
                         Kitty.setSubNbt("EntityTag", tag);
                         mc.interactionManager.clickCreativeStack(Kitty, 36 + mc.player.getInventory().selectedSlot);
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
@@ -460,12 +357,17 @@ public class BoomPlus extends Module {
                     }
                     case Wither -> {
                         ItemStack Kitty = new ItemStack(Items.CAT_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList Pos = new NbtList();
-                        Pos.add(NbtDouble.of(pos.getX()));
-                        Pos.add(NbtDouble.of(pos.getY()));
-                        Pos.add(NbtDouble.of(pos.getZ()));
-                        tag.put("Pos", Pos);
+                        if (target.get()) {
+                            Pos.add(NbtDouble.of(pos.getX()));
+                            Pos.add(NbtDouble.of(pos.getY()));
+                            Pos.add(NbtDouble.of(pos.getZ()));
+                            tag.put("Pos", Pos);
+                        } else {
+                            motion.add(NbtDouble.of(sex.x));
+                            motion.add(NbtDouble.of(sex.y));
+                            motion.add(NbtDouble.of(sex.z));
+                            tag.put("Motion", motion);
+                        }
                         tag.putString("id", "minecraft:wither");
                         Kitty.setSubNbt("EntityTag", tag);
                         mc.interactionManager.clickCreativeStack(Kitty, 36 + mc.player.getInventory().selectedSlot);
@@ -474,12 +376,17 @@ public class BoomPlus extends Module {
                     }
                     case TNT -> {
                         ItemStack TNT = new ItemStack(Items.CAT_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList Pos = new NbtList();
-                        Pos.add(NbtDouble.of(pos.getX()));
-                        Pos.add(NbtDouble.of(pos.getY()));
-                        Pos.add(NbtDouble.of(pos.getZ()));
-                        tag.put("Pos", Pos);
+                        if (target.get()) {
+                            Pos.add(NbtDouble.of(pos.getX()));
+                            Pos.add(NbtDouble.of(pos.getY()));
+                            Pos.add(NbtDouble.of(pos.getZ()));
+                            tag.put("Pos", Pos);
+                        } else {
+                            motion.add(NbtDouble.of(sex.x));
+                            motion.add(NbtDouble.of(sex.y));
+                            motion.add(NbtDouble.of(sex.z));
+                            tag.put("Motion", motion);
+                        }
                         tag.putString("id", "minecraft:tnt");
                         tag.putInt("Fuse", (fuse.get()));
                         TNT.setSubNbt("EntityTag", tag);
@@ -489,12 +396,17 @@ public class BoomPlus extends Module {
                     }
                     case WitherSkull -> {
                         ItemStack WitherSkull = new ItemStack(Items.CAT_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList Pos = new NbtList();
-                        Pos.add(NbtDouble.of(pos.getX()));
-                        Pos.add(NbtDouble.of(pos.getY()));
-                        Pos.add(NbtDouble.of(pos.getZ()));
-                        tag.put("Pos", Pos);
+                        if (target.get()) {
+                            Pos.add(NbtDouble.of(pos.getX()));
+                            Pos.add(NbtDouble.of(pos.getY()));
+                            Pos.add(NbtDouble.of(pos.getZ()));
+                            tag.put("Pos", Pos);
+                        } else {
+                            motion.add(NbtDouble.of(sex.x));
+                            motion.add(NbtDouble.of(sex.y));
+                            motion.add(NbtDouble.of(sex.z));
+                            tag.put("Motion", motion);
+                        }
                         tag.putString("id", "minecraft:wither_skull");
                         WitherSkull.setSubNbt("EntityTag", tag);
                         mc.interactionManager.clickCreativeStack(WitherSkull, 36 + mc.player.getInventory().selectedSlot);
@@ -503,12 +415,17 @@ public class BoomPlus extends Module {
                     }
                     case Spit -> {
                         ItemStack Spit = new ItemStack(Items.CAT_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList Pos = new NbtList();
-                        Pos.add(NbtDouble.of(pos.getX()));
-                        Pos.add(NbtDouble.of(pos.getY()));
-                        Pos.add(NbtDouble.of(pos.getZ()));
-                        tag.put("Pos", Pos);
+                        if (target.get()) {
+                            Pos.add(NbtDouble.of(pos.getX()));
+                            Pos.add(NbtDouble.of(pos.getY()));
+                            Pos.add(NbtDouble.of(pos.getZ()));
+                            tag.put("Pos", Pos);
+                        } else {
+                            motion.add(NbtDouble.of(sex.x));
+                            motion.add(NbtDouble.of(sex.y));
+                            motion.add(NbtDouble.of(sex.z));
+                            tag.put("Motion", motion);
+                        }
                         tag.putString("id", "minecraft:llama_spit");
                         Spit.setSubNbt("EntityTag", tag);
                         mc.interactionManager.clickCreativeStack(Spit, 36 + mc.player.getInventory().selectedSlot);
@@ -517,12 +434,17 @@ public class BoomPlus extends Module {
                     }
                     case ShulkerBullet -> {
                         ItemStack ShulkerBullet = new ItemStack(Items.CAT_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList Pos = new NbtList();
-                        Pos.add(NbtDouble.of(pos.getX()));
-                        Pos.add(NbtDouble.of(pos.getY()));
-                        Pos.add(NbtDouble.of(pos.getZ()));
-                        tag.put("Pos", Pos);
+                        if (target.get()) {
+                            Pos.add(NbtDouble.of(pos.getX()));
+                            Pos.add(NbtDouble.of(pos.getY()));
+                            Pos.add(NbtDouble.of(pos.getZ()));
+                            tag.put("Pos", Pos);
+                        } else {
+                            motion.add(NbtDouble.of(sex.x));
+                            motion.add(NbtDouble.of(sex.y));
+                            motion.add(NbtDouble.of(sex.z));
+                            tag.put("Motion", motion);
+                        }
                         tag.putString("id", "minecraft:shulker_bullet");
                         ShulkerBullet.setSubNbt("EntityTag", tag);
                         mc.interactionManager.clickCreativeStack(ShulkerBullet, 36 + mc.player.getInventory().selectedSlot);
@@ -531,12 +453,17 @@ public class BoomPlus extends Module {
                     }
                     case Creeper -> {
                         ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList Pos = new NbtList();
-                        Pos.add(NbtDouble.of(pos.getX()));
-                        Pos.add(NbtDouble.of(pos.getY()));
-                        Pos.add(NbtDouble.of(pos.getZ()));
-                        tag.put("Pos", Pos);
+                        if (target.get()) {
+                            Pos.add(NbtDouble.of(pos.getX()));
+                            Pos.add(NbtDouble.of(pos.getY()));
+                            Pos.add(NbtDouble.of(pos.getZ()));
+                            tag.put("Pos", Pos);
+                        } else {
+                            motion.add(NbtDouble.of(sex.x));
+                            motion.add(NbtDouble.of(sex.y));
+                            motion.add(NbtDouble.of(sex.z));
+                            tag.put("Motion", motion);
+                        }
                         tag.putInt("ignited", (1));
                         tag.putInt("Invulnerable", (1));
                         tag.putInt("Fuse", (fuse.get()));
@@ -549,12 +476,17 @@ public class BoomPlus extends Module {
                     }
                     case Arrow -> {
                         ItemStack Arrow = new ItemStack(Items.SALMON_SPAWN_EGG);
-                        NbtCompound tag = new NbtCompound();
-                        NbtList Pos = new NbtList();
-                        Pos.add(NbtDouble.of(pos.getX()));
-                        Pos.add(NbtDouble.of(pos.getY()));
-                        Pos.add(NbtDouble.of(pos.getZ()));
-                        tag.put("Pos", Pos);
+                        if (target.get()) {
+                            Pos.add(NbtDouble.of(pos.getX()));
+                            Pos.add(NbtDouble.of(pos.getY()));
+                            Pos.add(NbtDouble.of(pos.getZ()));
+                            tag.put("Pos", Pos);
+                        } else {
+                            motion.add(NbtDouble.of(sex.x));
+                            motion.add(NbtDouble.of(sex.y));
+                            motion.add(NbtDouble.of(sex.z));
+                            tag.put("Motion", motion);
+                        }
                         tag.putString("id", "minecraft:arrow");
                         Arrow.setSubNbt("EntityTag", tag);
                         mc.interactionManager.clickCreativeStack(Arrow, 36 + mc.player.getInventory().selectedSlot);
@@ -562,162 +494,7 @@ public class BoomPlus extends Module {
                         mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
                     }
                 }
-            }
-            else {
-            HitResult hr = mc.cameraEntity.raycast(600, 0, true);
-            Vec3d owo = hr.getPos();
-            BlockPos pos = BlockPos.ofFloored(owo);
-            ItemStack rst = mc.player.getMainHandStack();
-            Vec3d sex = mc.player.getRotationVector().multiply(speed.get());
-            BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getPos()), false);
-                BlockHitResult bhr1 = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
-            switch (mode.get()) {
-                case Fireball -> {
-                    ItemStack Motion = new ItemStack(Items.SALMON_SPAWN_EGG);
-                    NbtCompound tag = new NbtCompound();
-                    NbtList motion = new NbtList();
-                    motion.add(NbtDouble.of(sex.x));
-                    motion.add(NbtDouble.of(sex.y));
-                    motion.add(NbtDouble.of(sex.z));
-                    tag.put("Motion", motion);
-                    tag.putInt("ExplosionPower", power.get());
-                    tag.putString("id", "minecraft:fireball");
-                    Motion.setSubNbt("EntityTag", tag);
-                    mc.interactionManager.clickCreativeStack(Motion, 36 + mc.player.getInventory().selectedSlot);
-                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                    mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                }
-                case Lightning -> {
-                    ItemStack Lightning = new ItemStack(Items.SALMON_SPAWN_EGG);
-                    NbtCompound tag = new NbtCompound();
-                    NbtList Pos = new NbtList();
-                    Pos.add(NbtDouble.of(pos.getX()));
-                    Pos.add(NbtDouble.of(pos.getY()));
-                    Pos.add(NbtDouble.of(pos.getZ()));
-                    tag.put("Pos", Pos);
-                    tag.putString("id", "minecraft:lightning_bolt");
-                    Lightning.setSubNbt("EntityTag", tag);
-                    mc.interactionManager.clickCreativeStack(Lightning, 36 + mc.player.getInventory().selectedSlot);
-                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                    mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                }
-                case Kitty -> {
-                    ItemStack Kitty = new ItemStack(Items.CAT_SPAWN_EGG);
-                    NbtCompound tag = new NbtCompound();
-                    NbtList motion = new NbtList();
-                    motion.add(NbtDouble.of(sex.x));
-                    motion.add(NbtDouble.of(sex.y));
-                    motion.add(NbtDouble.of(sex.z));
-                    tag.put("Motion", motion);
-                    Kitty.setSubNbt("EntityTag", tag);
-                    mc.interactionManager.clickCreativeStack(Kitty, 36 + mc.player.getInventory().selectedSlot);
-                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                    mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                }
-                case Wither -> {
-                    ItemStack Kitty = new ItemStack(Items.CAT_SPAWN_EGG);
-                    NbtCompound tag = new NbtCompound();
-                    NbtList motion = new NbtList();
-                    motion.add(NbtDouble.of(sex.x));
-                    motion.add(NbtDouble.of(sex.y));
-                    motion.add(NbtDouble.of(sex.z));
-                    tag.put("Motion", motion);
-                    tag.putString("id", "minecraft:wither");
-                    Kitty.setSubNbt("EntityTag", tag);
-                    mc.interactionManager.clickCreativeStack(Kitty, 36 + mc.player.getInventory().selectedSlot);
-                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                    mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                }
-                case TNT -> {
-                    ItemStack TNT = new ItemStack(Items.CAT_SPAWN_EGG);
-                    NbtCompound tag = new NbtCompound();
-                    NbtList motion = new NbtList();
-                    motion.add(NbtDouble.of(sex.x));
-                    motion.add(NbtDouble.of(sex.y));
-                    motion.add(NbtDouble.of(sex.z));
-                    tag.put("Motion", motion);
-                    tag.putString("id", "minecraft:tnt");
-                    tag.putInt("Fuse", (fuse.get()));
-                    TNT.setSubNbt("EntityTag", tag);
-                    mc.interactionManager.clickCreativeStack(TNT, 36 + mc.player.getInventory().selectedSlot);
-                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                    mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                }
-                case WitherSkull -> {
-                    ItemStack WitherSkull = new ItemStack(Items.CAT_SPAWN_EGG);
-                    NbtCompound tag = new NbtCompound();
-                    NbtList motion = new NbtList();
-                    motion.add(NbtDouble.of(sex.x));
-                    motion.add(NbtDouble.of(sex.y));
-                    motion.add(NbtDouble.of(sex.z));
-                    tag.put("Motion", motion);
-                    tag.putString("id", "minecraft:wither_skull");
-                    WitherSkull.setSubNbt("EntityTag", tag);
-                    mc.interactionManager.clickCreativeStack(WitherSkull, 36 + mc.player.getInventory().selectedSlot);
-                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr1);
-                    mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                }
-                case Spit -> {
-                    ItemStack Spit = new ItemStack(Items.CAT_SPAWN_EGG);
-                    NbtCompound tag = new NbtCompound();
-                    NbtList motion = new NbtList();
-                    motion.add(NbtDouble.of(sex.x));
-                    motion.add(NbtDouble.of(sex.y));
-                    motion.add(NbtDouble.of(sex.z));
-                    tag.put("Motion", motion);
-                    tag.putString("id", "minecraft:llama_spit");
-                    Spit.setSubNbt("EntityTag", tag);
-                    mc.interactionManager.clickCreativeStack(Spit, 36 + mc.player.getInventory().selectedSlot);
-                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                    mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                }
-                case ShulkerBullet -> {
-                    ItemStack ShulkerBullet = new ItemStack(Items.CAT_SPAWN_EGG);
-                    NbtCompound tag = new NbtCompound();
-                    NbtList motion = new NbtList();
-                    motion.add(NbtDouble.of(sex.x));
-                    motion.add(NbtDouble.of(sex.y));
-                    motion.add(NbtDouble.of(sex.z));
-                    tag.put("Motion", motion);
-                    tag.putString("id", "minecraft:shulker_bullet");
-                    ShulkerBullet.setSubNbt("EntityTag", tag);
-                    mc.interactionManager.clickCreativeStack(ShulkerBullet, 36 + mc.player.getInventory().selectedSlot);
-                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr1);
-                    mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                }
-                case Creeper -> {
-                    ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
-                    NbtCompound tag = new NbtCompound();
-                    NbtList motion = new NbtList();
-                    motion.add(NbtDouble.of(sex.x));
-                    motion.add(NbtDouble.of(sex.y));
-                    motion.add(NbtDouble.of(sex.z));
-                    tag.put("Motion", motion);
-                    tag.putInt("ignited", (1));
-                    tag.putInt("Invulnerable", (1));
-                    tag.putInt("Fuse", (fuse.get()));
-                    tag.putInt("ExplosionRadius", power.get());
-                    Creeper.setSubNbt("EntityTag", tag);
-                    mc.interactionManager.clickCreativeStack(Creeper, 36 + mc.player.getInventory().selectedSlot);
-                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                    mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                }
-                case Arrow -> {
-                    ItemStack Arrow = new ItemStack(Items.SALMON_SPAWN_EGG);
-                    NbtCompound tag = new NbtCompound();
-                    NbtList speed = new NbtList();
-                    speed.add(NbtDouble.of(sex.x));
-                    speed.add(NbtDouble.of(sex.y));
-                    speed.add(NbtDouble.of(sex.z));
-                    tag.put("Motion", speed);
-                    tag.putString("id", "minecraft:arrow");
-                    Arrow.setSubNbt("EntityTag", tag);
-                    mc.interactionManager.clickCreativeStack(Arrow, 36 + mc.player.getInventory().selectedSlot);
-                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr1);
-                    mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                }
-            }
-        }}
+        }
     }
     public enum Modes {
         Fireball, Lightning, Kitty, Creeper, Arrow, TNT, WitherSkull, Spit, ShulkerBullet, Wither
