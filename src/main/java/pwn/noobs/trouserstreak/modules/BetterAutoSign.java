@@ -3,13 +3,13 @@
  *  Copyright (c) 2022 Meteor Tweaks.
  *  Licensed Under the GNU Lesser General Public License v3.0
  */
+//plz come back meteor tweaks I miss you
 
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.mixin.AbstractSignEditScreenAccessor;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
@@ -84,7 +84,6 @@ public class BetterAutoSign extends Module {
     public BetterAutoSign() {
         super(Trouser.Main, "Better-auto-sign", "Automatically writes signs and can dye them as well. Credits to MeteorTweaks.");
     }
-
 
 
     @EventHandler
@@ -166,5 +165,4 @@ public class BetterAutoSign extends Module {
                 || Items.MAGENTA_DYE.equals(item)
                 || Items.LIGHT_GRAY_DYE.equals(item);
     }
-
 }

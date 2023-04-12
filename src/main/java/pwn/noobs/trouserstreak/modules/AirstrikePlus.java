@@ -67,6 +67,7 @@ public class AirstrikePlus extends Module {
         .description("speed of entities")
         .defaultValue(5)
         .sliderRange(1, 10)
+            .visible(() -> !(mode.get() == Modes.Wither | mode.get() == Modes.Lightning))
         .build());
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
@@ -113,38 +114,32 @@ public class AirstrikePlus extends Module {
         ItemStack bomb = new ItemStack(Items.SALMON_SPAWN_EGG);
         ItemStack bfr = mc.player.getMainHandStack();
         BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, new BlockPos(mc.player.getBlockPos()), false);
+        Vec3d cpos = pickRandomPos();
+        NbtCompound tag = new NbtCompound();
+        NbtList speedlist = new NbtList();
+        NbtList pos = new NbtList();
         i++;
         if (mc.player.getAbilities().creativeMode) {
             if (i >= delay.get()) {
                 switch (mode.get()) {
                     case Fireball -> {
-                Vec3d cpos = pickRandomPos();
-
-                NbtCompound tag = new NbtCompound();
-                NbtList speedlist = new NbtList();
-                NbtList pos = new NbtList();
-                speedlist.add(NbtDouble.of(0));
-                speedlist.add(NbtDouble.of(-speed.get()));
-                speedlist.add(NbtDouble.of(0));
-                pos.add(NbtDouble.of(cpos.x));
-                pos.add(NbtDouble.of(mc.player.getY()+height.get()));
-                pos.add(NbtDouble.of(cpos.z));
-                tag.put("ExplosionPower", NbtDouble.of(power.get()));
-                tag.put("power", speedlist);
-                tag.put("Pos", pos);
-                tag.putString("id", "minecraft:fireball");
-                bomb.setSubNbt("EntityTag", tag);
-                mc.interactionManager.clickCreativeStack(bomb, 36 + mc.player.getInventory().selectedSlot);
-                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                mc.interactionManager.clickCreativeStack(bfr, 36 + mc.player.getInventory().selectedSlot);
-                i = 0;
-            }
+                        speedlist.add(NbtDouble.of(0));
+                        speedlist.add(NbtDouble.of(-speed.get()));
+                        speedlist.add(NbtDouble.of(0));
+                        pos.add(NbtDouble.of(cpos.x));
+                        pos.add(NbtDouble.of(mc.player.getY()+height.get()));
+                        pos.add(NbtDouble.of(cpos.z));
+                        tag.put("ExplosionPower", NbtDouble.of(power.get()));
+                        tag.put("power", speedlist);
+                        tag.put("Pos", pos);
+                        tag.putString("id", "minecraft:fireball");
+                        bomb.setSubNbt("EntityTag", tag);
+                        mc.interactionManager.clickCreativeStack(bomb, 36 + mc.player.getInventory().selectedSlot);
+                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
+                        mc.interactionManager.clickCreativeStack(bfr, 36 + mc.player.getInventory().selectedSlot);
+                        i = 0;
+                    }
                     case Creeper -> {
-                        Vec3d cpos = pickRandomPos();
-
-                        NbtCompound tag = new NbtCompound();
-                        NbtList speedlist = new NbtList();
-                        NbtList pos = new NbtList();
                         speedlist.add(NbtDouble.of(0));
                         speedlist.add(NbtDouble.of(-speed.get()));
                         speedlist.add(NbtDouble.of(0));
@@ -154,7 +149,7 @@ public class AirstrikePlus extends Module {
                         tag.putInt("ignited", (1));
                         tag.putInt("Invulnerable", (1));
                         tag.put("ExplosionRadius", NbtDouble.of(power.get()));
-                        tag.put("power", speedlist);
+                        tag.put("Motion", speedlist);
                         tag.put("Pos", pos);
                         tag.putInt("Fuse", (fuse.get()));
                         tag.putString("id", "minecraft:creeper");
@@ -165,14 +160,6 @@ public class AirstrikePlus extends Module {
                         i = 0;
                     }
                     case Lightning -> {
-                        Vec3d cpos = pickRandomPos();
-
-                        NbtCompound tag = new NbtCompound();
-                        NbtList speedlist = new NbtList();
-                        NbtList pos = new NbtList();
-                        speedlist.add(NbtDouble.of(0));
-                        speedlist.add(NbtDouble.of(-speed.get()));
-                        speedlist.add(NbtDouble.of(0));
                         pos.add(NbtDouble.of(cpos.x));
                         pos.add(NbtDouble.of(mc.player.getY()+height.get()));
                         pos.add(NbtDouble.of(cpos.z));
@@ -185,11 +172,6 @@ public class AirstrikePlus extends Module {
                         i = 0;
                     }
                     case Kitty -> {
-                        Vec3d cpos = pickRandomPos();
-
-                        NbtCompound tag = new NbtCompound();
-                        NbtList speedlist = new NbtList();
-                        NbtList pos = new NbtList();
                         speedlist.add(NbtDouble.of(0));
                         speedlist.add(NbtDouble.of(-speed.get()));
                         speedlist.add(NbtDouble.of(0));
@@ -197,6 +179,7 @@ public class AirstrikePlus extends Module {
                         pos.add(NbtDouble.of(mc.player.getY()+height.get()));
                         pos.add(NbtDouble.of(cpos.z));
                         tag.putInt("Invulnerable", (1));
+                        tag.put("Motion", speedlist);
                         tag.put("Pos", pos);
                         tag.putString("id", "minecraft:cat");
                         bomb.setSubNbt("EntityTag", tag);
@@ -206,14 +189,6 @@ public class AirstrikePlus extends Module {
                         i = 0;
                     }
                     case Wither -> {
-                        Vec3d cpos = pickRandomPos();
-
-                        NbtCompound tag = new NbtCompound();
-                        NbtList speedlist = new NbtList();
-                        NbtList pos = new NbtList();
-                        speedlist.add(NbtDouble.of(0));
-                        speedlist.add(NbtDouble.of(-speed.get()));
-                        speedlist.add(NbtDouble.of(0));
                         pos.add(NbtDouble.of(cpos.x));
                         pos.add(NbtDouble.of(mc.player.getY()+height.get()));
                         pos.add(NbtDouble.of(cpos.z));
@@ -226,17 +201,13 @@ public class AirstrikePlus extends Module {
                         i = 0;
                     }
                     case TNT -> {
-                        Vec3d cpos = pickRandomPos();
-
-                        NbtCompound tag = new NbtCompound();
-                        NbtList speedlist = new NbtList();
-                        NbtList pos = new NbtList();
                         speedlist.add(NbtDouble.of(0));
                         speedlist.add(NbtDouble.of(-speed.get()));
                         speedlist.add(NbtDouble.of(0));
                         pos.add(NbtDouble.of(cpos.x));
                         pos.add(NbtDouble.of(mc.player.getY()+height.get()));
                         pos.add(NbtDouble.of(cpos.z));
+                        tag.put("Motion", speedlist);
                         tag.put("Pos", pos);
                         tag.putString("id", "minecraft:tnt");
                         tag.putInt("Fuse", (fuse.get()));
@@ -247,17 +218,13 @@ public class AirstrikePlus extends Module {
                         i = 0;
                     }
                     case Spit -> {
-                        Vec3d cpos = pickRandomPos();
-
-                        NbtCompound tag = new NbtCompound();
-                        NbtList speedlist = new NbtList();
-                        NbtList pos = new NbtList();
                         speedlist.add(NbtDouble.of(0));
                         speedlist.add(NbtDouble.of(-speed.get()));
                         speedlist.add(NbtDouble.of(0));
                         pos.add(NbtDouble.of(cpos.x));
                         pos.add(NbtDouble.of(mc.player.getY()+height.get()));
                         pos.add(NbtDouble.of(cpos.z));
+                        tag.put("Motion", speedlist);
                         tag.put("Pos", pos);
                         tag.putString("id", "minecraft:llama_spit");
                         bomb.setSubNbt("EntityTag", tag);
@@ -268,17 +235,13 @@ public class AirstrikePlus extends Module {
                     }
 
                     case ShulkerBullet -> {
-                        Vec3d cpos = pickRandomPos();
-
-                        NbtCompound tag = new NbtCompound();
-                        NbtList speedlist = new NbtList();
-                        NbtList pos = new NbtList();
                         speedlist.add(NbtDouble.of(0));
                         speedlist.add(NbtDouble.of(-speed.get()));
                         speedlist.add(NbtDouble.of(0));
                         pos.add(NbtDouble.of(cpos.x));
                         pos.add(NbtDouble.of(mc.player.getY()+height.get()));
                         pos.add(NbtDouble.of(cpos.z));
+                        tag.put("Motion", speedlist);
                         tag.put("Pos", pos);
                         tag.putString("id", "minecraft:shulker_bullet");
                         bomb.setSubNbt("EntityTag", tag);
@@ -288,17 +251,13 @@ public class AirstrikePlus extends Module {
                         i = 0;
                     }
                     case Arrow -> {
-                        Vec3d cpos = pickRandomPos();
-
-                        NbtCompound tag = new NbtCompound();
-                        NbtList speedlist = new NbtList();
-                        NbtList pos = new NbtList();
                         speedlist.add(NbtDouble.of(0));
                         speedlist.add(NbtDouble.of(-speed.get()));
                         speedlist.add(NbtDouble.of(0));
                         pos.add(NbtDouble.of(cpos.x));
                         pos.add(NbtDouble.of(mc.player.getY()+height.get()));
                         pos.add(NbtDouble.of(cpos.z));
+                        tag.put("Motion", speedlist);
                         tag.put("Pos", pos);
                         tag.putString("id", "minecraft:arrow");
                         bomb.setSubNbt("EntityTag", tag);
@@ -310,11 +269,6 @@ public class AirstrikePlus extends Module {
                     case CatsAndDogs -> {
                         catdog++;
                         if (catdog<=1) {
-                            Vec3d cpos = pickRandomPos();
-
-                            NbtCompound tag = new NbtCompound();
-                            NbtList speedlist = new NbtList();
-                            NbtList pos = new NbtList();
                             speedlist.add(NbtDouble.of(0));
                             speedlist.add(NbtDouble.of(-speed.get()));
                             speedlist.add(NbtDouble.of(0));
@@ -322,6 +276,7 @@ public class AirstrikePlus extends Module {
                             pos.add(NbtDouble.of(mc.player.getY()+height.get()));
                             pos.add(NbtDouble.of(cpos.z));
                             tag.putInt("Invulnerable", (1));
+                            tag.put("Motion", speedlist);
                             tag.put("Pos", pos);
                             tag.putString("id", "minecraft:cat");
                             bomb.setSubNbt("EntityTag", tag);
@@ -330,26 +285,22 @@ public class AirstrikePlus extends Module {
                             mc.interactionManager.clickCreativeStack(bfr, 36 + mc.player.getInventory().selectedSlot);
                             i = 0;
                         } else if (catdog>=2){
-                        Vec3d cpos = pickRandomPos();
-
-                        NbtCompound tag = new NbtCompound();
-                        NbtList speedlist = new NbtList();
-                        NbtList pos = new NbtList();
-                        speedlist.add(NbtDouble.of(0));
-                        speedlist.add(NbtDouble.of(-speed.get()));
-                        speedlist.add(NbtDouble.of(0));
-                        pos.add(NbtDouble.of(cpos.x));
-                        pos.add(NbtDouble.of(mc.player.getY()+height.get()));
-                        pos.add(NbtDouble.of(cpos.z));
+                            speedlist.add(NbtDouble.of(0));
+                            speedlist.add(NbtDouble.of(-speed.get()));
+                            speedlist.add(NbtDouble.of(0));
+                            pos.add(NbtDouble.of(cpos.x));
+                            pos.add(NbtDouble.of(mc.player.getY()+height.get()));
+                            pos.add(NbtDouble.of(cpos.z));
                             tag.putInt("Invulnerable", (1));
-                        tag.put("Pos", pos);
-                        tag.putString("id", "minecraft:wolf");
-                        bomb.setSubNbt("EntityTag", tag);
-                        mc.interactionManager.clickCreativeStack(bomb, 36 + mc.player.getInventory().selectedSlot);
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                        mc.interactionManager.clickCreativeStack(bfr, 36 + mc.player.getInventory().selectedSlot);
-                        i = 0;
-                        catdog=0;
+                            tag.put("Motion", speedlist);
+                            tag.put("Pos", pos);
+                            tag.putString("id", "minecraft:wolf");
+                            bomb.setSubNbt("EntityTag", tag);
+                            mc.interactionManager.clickCreativeStack(bomb, 36 + mc.player.getInventory().selectedSlot);
+                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
+                            mc.interactionManager.clickCreativeStack(bfr, 36 + mc.player.getInventory().selectedSlot);
+                            i = 0;
+                            catdog=0;
                         }
                     }
                 }

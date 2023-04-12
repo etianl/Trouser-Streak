@@ -524,102 +524,118 @@ public class AutoMountain extends Module {
                 switch (mc.player.getMovementDirection()) {
                     case NORTH -> {            //UP
                         if (mc.options.jumpKey.isPressed()){
-                            BlockPos un1 = playerPos.add(new Vec3i(0,spcoffset.get()+3,0));
-                            BlockPos un2 = playerPos.add(new Vec3i(0,spcoffset.get()+2,-1));
-                            BlockPos un4 = playerPos.add(new Vec3i(0,spcoffset.get()+1,-1));
-                            BlockPos un3 = playerPos.add(new Vec3i(0,spcoffset.get()+3,-1));
+                            BlockPos un1 = playerPos.add(new Vec3i(0,spcoffset.get()+2,0));
+                            BlockPos un2 = playerPos.add(new Vec3i(0,spcoffset.get()+1,-1));
+                            BlockPos un3 = playerPos.add(new Vec3i(0,spcoffset.get()+2,-1));
+                            BlockPos un4 = playerPos.add(new Vec3i(0,spcoffset.get()+3,-1));
                             BlockPos pos = playerPos.add(new Vec3i(0,spcoffset.get(),-1));
-                            if (!mc.world.getBlockState(un1).getMaterial().isSolid() && !mc.world.getBlockState(un2).getMaterial().isSolid() && !mc.world.getBlockState(un3).getMaterial().isSolid() && !mc.world.getBlockState(un4).getMaterial().isSolid() && !mc.world.getBlockState(un1).getMaterial().isLiquid() && !mc.world.getBlockState(un2).getMaterial().isLiquid() && !mc.world.getBlockState(un3).getMaterial().isLiquid() && !mc.world.getBlockState(un4).getMaterial().isLiquid() && !mc.world.getBlockState(un1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(un2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(un3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(un4).getMaterial().equals(Material.POWDER_SNOW) && mc.world.getBlockState(pos).getMaterial().isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
-                                mc.player.setPosition(mc.player.getX(),mc.player.getY()+1+spcoffset.get(),mc.player.getZ()-1);}
-                            else {if (InvertUpDir.get()) mc.player.setPitch(75);}
+                            if (!mc.world.getBlockState(un1).getMaterial().isSolid() && !mc.world.getBlockState(un2).getMaterial().isSolid() && !mc.world.getBlockState(un3).getMaterial().isSolid() && !mc.world.getBlockState(un4).getMaterial().isSolid() && !mc.world.getBlockState(un1).getMaterial().isLiquid() && !mc.world.getBlockState(un2).getMaterial().isLiquid() && !mc.world.getBlockState(un3).getMaterial().isLiquid() && !mc.world.getBlockState(un4).getMaterial().isLiquid() && !mc.world.getBlockState(un1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(un2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(un3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(un4).getMaterial().equals(Material.POWDER_SNOW)){
+                                if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
+                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                    mc.player.swingHand(Hand.MAIN_HAND);
+                                }
+                                mc.player.setPosition(mc.player.getX(),mc.player.getY()+1+spcoffset.get(),mc.player.getZ()-1);
+                            } else {if (InvertUpDir.get()) mc.player.setPitch(75);}
                         } else {
-                            BlockPos un1 = playerPos.add(new Vec3i(0,3,0));
-                            BlockPos un2 = playerPos.add(new Vec3i(0,2,-1));
-                            BlockPos un4 = playerPos.add(new Vec3i(0,1,-1));
-                            BlockPos un3 = playerPos.add(new Vec3i(0,3,-1));
+                            BlockPos un1 = playerPos.add(new Vec3i(0,2,0));
+                            BlockPos un2 = playerPos.add(new Vec3i(0,1,-1));
+                            BlockPos un3 = playerPos.add(new Vec3i(0,2,-1));
+                            BlockPos un4 = playerPos.add(new Vec3i(0,3,-1));
                             BlockPos pos = playerPos.add(new Vec3i(0,0,-1));
-                            if (!mc.world.getBlockState(un1).getMaterial().isSolid() && !mc.world.getBlockState(un2).getMaterial().isSolid() && !mc.world.getBlockState(un3).getMaterial().isSolid() && !mc.world.getBlockState(un4).getMaterial().isSolid() && !mc.world.getBlockState(un1).getMaterial().isLiquid() && !mc.world.getBlockState(un2).getMaterial().isLiquid() && !mc.world.getBlockState(un3).getMaterial().isLiquid() && !mc.world.getBlockState(un4).getMaterial().isLiquid() && !mc.world.getBlockState(un1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(un2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(un3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(un4).getMaterial().equals(Material.POWDER_SNOW) && mc.world.getBlockState(pos).getMaterial().isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
-                                mc.player.setPosition(mc.player.getX(),mc.player.getY()+1,mc.player.getZ()-1);}
-                            else {if (InvertUpDir.get()) mc.player.setPitch(75);}
+                            if (!mc.world.getBlockState(un1).getMaterial().isSolid() && !mc.world.getBlockState(un2).getMaterial().isSolid() && !mc.world.getBlockState(un3).getMaterial().isSolid() && !mc.world.getBlockState(un4).getMaterial().isSolid() && !mc.world.getBlockState(un1).getMaterial().isLiquid() && !mc.world.getBlockState(un2).getMaterial().isLiquid() && !mc.world.getBlockState(un3).getMaterial().isLiquid() && !mc.world.getBlockState(un4).getMaterial().isLiquid() && !mc.world.getBlockState(un1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(un2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(un3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(un4).getMaterial().equals(Material.POWDER_SNOW)){
+                                if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
+                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                    mc.player.swingHand(Hand.MAIN_HAND);
+                                }
+                                mc.player.setPosition(mc.player.getX(),mc.player.getY()+1,mc.player.getZ()-1);
+                            } else {if (InvertUpDir.get()) mc.player.setPitch(75);}
                         }
                     }
                     case EAST -> {            //UP
                         if (mc.options.jumpKey.isPressed()){
-                            BlockPos ue1 = playerPos.add(new Vec3i(0,spcoffset.get()+3,0));
-                            BlockPos ue2 = playerPos.add(new Vec3i(+1,spcoffset.get()+2,0));
-                            BlockPos ue4 = playerPos.add(new Vec3i(+1,spcoffset.get()+1,0));
-                            BlockPos ue3 = playerPos.add(new Vec3i(+1,spcoffset.get()+3,0));
+                            BlockPos ue1 = playerPos.add(new Vec3i(0,spcoffset.get()+2,0));
+                            BlockPos ue2 = playerPos.add(new Vec3i(+1,spcoffset.get()+1,0));
+                            BlockPos ue3 = playerPos.add(new Vec3i(+1,spcoffset.get()+2,0));
+                            BlockPos ue4 = playerPos.add(new Vec3i(+1,spcoffset.get()+3,0));
                             BlockPos pos = playerPos.add(new Vec3i(1,spcoffset.get(),0));
-                            if (!mc.world.getBlockState(ue1).getMaterial().isSolid() && !mc.world.getBlockState(ue2).getMaterial().isSolid() && !mc.world.getBlockState(ue3).getMaterial().isSolid()  && !mc.world.getBlockState(ue4).getMaterial().isSolid() && !mc.world.getBlockState(ue1).getMaterial().isLiquid() && !mc.world.getBlockState(ue2).getMaterial().isLiquid() && !mc.world.getBlockState(ue3).getMaterial().isLiquid() && !mc.world.getBlockState(ue4).getMaterial().isLiquid() && !mc.world.getBlockState(ue1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ue2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ue3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ue4).getMaterial().equals(Material.POWDER_SNOW) && mc.world.getBlockState(pos).getMaterial().isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
-                                mc.player.setPosition(mc.player.getX()+1,mc.player.getY()+1+spcoffset.get(),mc.player.getZ());}
-                            else {if (InvertUpDir.get()) mc.player.setPitch(75);}
+                            if (!mc.world.getBlockState(ue1).getMaterial().isSolid() && !mc.world.getBlockState(ue2).getMaterial().isSolid() && !mc.world.getBlockState(ue3).getMaterial().isSolid() && !mc.world.getBlockState(ue4).getMaterial().isSolid() && !mc.world.getBlockState(ue1).getMaterial().isLiquid() && !mc.world.getBlockState(ue2).getMaterial().isLiquid() && !mc.world.getBlockState(ue3).getMaterial().isLiquid() && !mc.world.getBlockState(ue4).getMaterial().isLiquid() && !mc.world.getBlockState(ue1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ue2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ue3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ue4).getMaterial().equals(Material.POWDER_SNOW)){
+                                if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
+                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                    mc.player.swingHand(Hand.MAIN_HAND);
+                                }
+                                mc.player.setPosition(mc.player.getX()+1,mc.player.getY()+1+spcoffset.get(),mc.player.getZ());
+                            } else {if (InvertUpDir.get()) mc.player.setPitch(75);}
                         } else {
-                            BlockPos ue1 = playerPos.add(new Vec3i(0,3,0));
-                            BlockPos ue2 = playerPos.add(new Vec3i(+1,2,0));
-                            BlockPos ue4 = playerPos.add(new Vec3i(+1,1,0));
-                            BlockPos ue3 = playerPos.add(new Vec3i(+1,3,0));
+                            BlockPos ue1 = playerPos.add(new Vec3i(0,2,0));
+                            BlockPos ue2 = playerPos.add(new Vec3i(+1,1,0));
+                            BlockPos ue3 = playerPos.add(new Vec3i(+1,2,0));
+                            BlockPos ue4 = playerPos.add(new Vec3i(+1,3,0));
                             BlockPos pos = playerPos.add(new Vec3i(1,0,0));
-                            if (!mc.world.getBlockState(ue1).getMaterial().isSolid() && !mc.world.getBlockState(ue2).getMaterial().isSolid() && !mc.world.getBlockState(ue3).getMaterial().isSolid()  && !mc.world.getBlockState(ue4).getMaterial().isSolid() && !mc.world.getBlockState(ue1).getMaterial().isLiquid() && !mc.world.getBlockState(ue2).getMaterial().isLiquid() && !mc.world.getBlockState(ue3).getMaterial().isLiquid() && !mc.world.getBlockState(ue4).getMaterial().isLiquid() && !mc.world.getBlockState(ue1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ue2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ue3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ue4).getMaterial().equals(Material.POWDER_SNOW) && mc.world.getBlockState(pos).getMaterial().isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
-                                mc.player.setPosition(mc.player.getX()+1,mc.player.getY()+1,mc.player.getZ());}
-                            else {if (InvertUpDir.get()) mc.player.setPitch(75);}
+                            if (!mc.world.getBlockState(ue1).getMaterial().isSolid() && !mc.world.getBlockState(ue2).getMaterial().isSolid() && !mc.world.getBlockState(ue3).getMaterial().isSolid() && !mc.world.getBlockState(ue4).getMaterial().isSolid() && !mc.world.getBlockState(ue1).getMaterial().isLiquid() && !mc.world.getBlockState(ue2).getMaterial().isLiquid() && !mc.world.getBlockState(ue3).getMaterial().isLiquid() && !mc.world.getBlockState(ue4).getMaterial().isLiquid() && !mc.world.getBlockState(ue1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ue2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ue3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ue4).getMaterial().equals(Material.POWDER_SNOW)){
+                                if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
+                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                    mc.player.swingHand(Hand.MAIN_HAND);
+                                }
+                                mc.player.setPosition(mc.player.getX()+1,mc.player.getY()+1,mc.player.getZ());
+                            } else {if (InvertUpDir.get()) mc.player.setPitch(75);}
                         }
                     }
                     case SOUTH -> {            //UP
                         if (mc.options.jumpKey.isPressed()){
-                            BlockPos us1 = playerPos.add(new Vec3i(0,spcoffset.get()+3,0));
-                            BlockPos us2 = playerPos.add(new Vec3i(0,spcoffset.get()+2,+1));
-                            BlockPos us4 = playerPos.add(new Vec3i(0,spcoffset.get()+1,+1));
-                            BlockPos us3 = playerPos.add(new Vec3i(0,spcoffset.get()+3,+1));
+                            BlockPos us1 = playerPos.add(new Vec3i(0,spcoffset.get()+2,0));
+                            BlockPos us2 = playerPos.add(new Vec3i(0,spcoffset.get()+1,+1));
+                            BlockPos us3 = playerPos.add(new Vec3i(0,spcoffset.get()+2,+1));
+                            BlockPos us4 = playerPos.add(new Vec3i(0,spcoffset.get()+3,+1));
                             BlockPos pos = playerPos.add(new Vec3i(0,spcoffset.get(),1));
-                            if (!mc.world.getBlockState(us1).getMaterial().isSolid() && !mc.world.getBlockState(us2).getMaterial().isSolid() && !mc.world.getBlockState(us3).getMaterial().isSolid() && !mc.world.getBlockState(us4).getMaterial().isSolid() && !mc.world.getBlockState(us1).getMaterial().isLiquid() && !mc.world.getBlockState(us2).getMaterial().isLiquid() && !mc.world.getBlockState(us3).getMaterial().isLiquid() && !mc.world.getBlockState(us4).getMaterial().isLiquid() && !mc.world.getBlockState(us1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(us2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(us3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(us4).getMaterial().equals(Material.POWDER_SNOW) && mc.world.getBlockState(pos).getMaterial().isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
-                                mc.player.setPosition(mc.player.getX(),mc.player.getY()+1+spcoffset.get(),mc.player.getZ()+1);}
-                            else {if (InvertUpDir.get()) mc.player.setPitch(75);}
+                            if (!mc.world.getBlockState(us1).getMaterial().isSolid() && !mc.world.getBlockState(us2).getMaterial().isSolid() && !mc.world.getBlockState(us3).getMaterial().isSolid() && !mc.world.getBlockState(us4).getMaterial().isSolid() && !mc.world.getBlockState(us1).getMaterial().isLiquid() && !mc.world.getBlockState(us2).getMaterial().isLiquid() && !mc.world.getBlockState(us3).getMaterial().isLiquid() && !mc.world.getBlockState(us4).getMaterial().isLiquid() && !mc.world.getBlockState(us1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(us2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(us3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(us4).getMaterial().equals(Material.POWDER_SNOW)){
+                                if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
+                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                    mc.player.swingHand(Hand.MAIN_HAND);
+                                }
+                                mc.player.setPosition(mc.player.getX(),mc.player.getY()+1+spcoffset.get(),mc.player.getZ()+1);
+                            } else {if (InvertUpDir.get()) mc.player.setPitch(75);}
                         } else {
-                            BlockPos us1 = playerPos.add(new Vec3i(0,3,0));
-                            BlockPos us2 = playerPos.add(new Vec3i(0,2,+1));
-                            BlockPos us4 = playerPos.add(new Vec3i(0,1,+1));
-                            BlockPos us3 = playerPos.add(new Vec3i(0,3,+1));
+                            BlockPos us1 = playerPos.add(new Vec3i(0,2,0));
+                            BlockPos us2 = playerPos.add(new Vec3i(0,1,+1));
+                            BlockPos us3 = playerPos.add(new Vec3i(0,2,+1));
+                            BlockPos us4 = playerPos.add(new Vec3i(0,3,+1));
                             BlockPos pos = playerPos.add(new Vec3i(0,0,1));
-                            if (!mc.world.getBlockState(us1).getMaterial().isSolid() && !mc.world.getBlockState(us2).getMaterial().isSolid() && !mc.world.getBlockState(us3).getMaterial().isSolid() && !mc.world.getBlockState(us4).getMaterial().isSolid() && !mc.world.getBlockState(us1).getMaterial().isLiquid() && !mc.world.getBlockState(us2).getMaterial().isLiquid() && !mc.world.getBlockState(us3).getMaterial().isLiquid() && !mc.world.getBlockState(us4).getMaterial().isLiquid() && !mc.world.getBlockState(us1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(us2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(us3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(us4).getMaterial().equals(Material.POWDER_SNOW) && mc.world.getBlockState(pos).getMaterial().isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
-                                mc.player.setPosition(mc.player.getX(),mc.player.getY()+1,mc.player.getZ()+1);}
-                            else {if (InvertUpDir.get()) mc.player.setPitch(75);}
+                            if (!mc.world.getBlockState(us1).getMaterial().isSolid() && !mc.world.getBlockState(us2).getMaterial().isSolid() && !mc.world.getBlockState(us3).getMaterial().isSolid() && !mc.world.getBlockState(us4).getMaterial().isSolid() && !mc.world.getBlockState(us1).getMaterial().isLiquid() && !mc.world.getBlockState(us2).getMaterial().isLiquid() && !mc.world.getBlockState(us3).getMaterial().isLiquid() && !mc.world.getBlockState(us4).getMaterial().isLiquid() && !mc.world.getBlockState(us1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(us2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(us3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(us4).getMaterial().equals(Material.POWDER_SNOW)){
+                                if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
+                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                    mc.player.swingHand(Hand.MAIN_HAND);
+                                }
+                                mc.player.setPosition(mc.player.getX(),mc.player.getY()+1,mc.player.getZ()+1);
+                            } else {if (InvertUpDir.get()) mc.player.setPitch(75);}
                         }
                     }
                     case WEST -> {            //UP
                         if (mc.options.jumpKey.isPressed()){
-                            BlockPos uw1 = playerPos.add(new Vec3i(0,spcoffset.get()+3,0));
-                            BlockPos uw2 = playerPos.add(new Vec3i(-1,spcoffset.get()+2,0));
-                            BlockPos uw4 = playerPos.add(new Vec3i(-1,spcoffset.get()+1,0));
-                            BlockPos uw3 = playerPos.add(new Vec3i(-1,spcoffset.get()+3,0));
+                            BlockPos uw1 = playerPos.add(new Vec3i(0,spcoffset.get()+2,0));
+                            BlockPos uw2 = playerPos.add(new Vec3i(-1,spcoffset.get()+1,0));
+                            BlockPos uw3 = playerPos.add(new Vec3i(-1,spcoffset.get()+2,0));
+                            BlockPos uw4 = playerPos.add(new Vec3i(-1,spcoffset.get()+3,0));
                             BlockPos pos = playerPos.add(new Vec3i(-1,spcoffset.get(),0));
-                            if (!mc.world.getBlockState(uw1).getMaterial().isSolid() && !mc.world.getBlockState(uw2).getMaterial().isSolid() && !mc.world.getBlockState(uw3).getMaterial().isSolid() && !mc.world.getBlockState(uw4).getMaterial().isSolid() && !mc.world.getBlockState(uw1).getMaterial().isLiquid() && !mc.world.getBlockState(uw2).getMaterial().isLiquid() && !mc.world.getBlockState(uw3).getMaterial().isLiquid() && !mc.world.getBlockState(uw4).getMaterial().isLiquid() && !mc.world.getBlockState(uw1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(uw2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(uw3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(uw4).getMaterial().equals(Material.POWDER_SNOW) && mc.world.getBlockState(pos).getMaterial().isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
-                                mc.player.setPosition(mc.player.getX()-1,mc.player.getY()+1+spcoffset.get(),mc.player.getZ());}
-                            else {if (InvertUpDir.get()) mc.player.setPitch(75);}
+                            if (!mc.world.getBlockState(uw1).getMaterial().isSolid() && !mc.world.getBlockState(uw2).getMaterial().isSolid() && !mc.world.getBlockState(uw3).getMaterial().isSolid() && !mc.world.getBlockState(uw4).getMaterial().isSolid() && !mc.world.getBlockState(uw1).getMaterial().isLiquid() && !mc.world.getBlockState(uw2).getMaterial().isLiquid() && !mc.world.getBlockState(uw3).getMaterial().isLiquid() && !mc.world.getBlockState(uw4).getMaterial().isLiquid() && !mc.world.getBlockState(uw1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(uw2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(uw3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(uw4).getMaterial().equals(Material.POWDER_SNOW)){
+                                if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
+                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                    mc.player.swingHand(Hand.MAIN_HAND);
+                                }
+                                mc.player.setPosition(mc.player.getX()-1,mc.player.getY()+1+spcoffset.get(),mc.player.getZ());
+                            } else {if (InvertUpDir.get()) mc.player.setPitch(75);}
                             }else {
-                            BlockPos uw1 = playerPos.add(new Vec3i(0,3,0));
-                            BlockPos uw2 = playerPos.add(new Vec3i(-1,2,0));
-                            BlockPos uw4 = playerPos.add(new Vec3i(-1,1,0));
-                            BlockPos uw3 = playerPos.add(new Vec3i(-1,3,0));
+                            BlockPos uw1 = playerPos.add(new Vec3i(0,2,0));
+                            BlockPos uw2 = playerPos.add(new Vec3i(-1,1,0));
+                            BlockPos uw3 = playerPos.add(new Vec3i(-1,2,0));
+                            BlockPos uw4 = playerPos.add(new Vec3i(-1,3,0));
                             BlockPos pos = playerPos.add(new Vec3i(-1,0,0));
-                            if (!mc.world.getBlockState(uw1).getMaterial().isSolid() && !mc.world.getBlockState(uw2).getMaterial().isSolid() && !mc.world.getBlockState(uw3).getMaterial().isSolid() && !mc.world.getBlockState(uw4).getMaterial().isSolid() && !mc.world.getBlockState(uw1).getMaterial().isLiquid() && !mc.world.getBlockState(uw2).getMaterial().isLiquid() && !mc.world.getBlockState(uw3).getMaterial().isLiquid() && !mc.world.getBlockState(uw4).getMaterial().isLiquid() && !mc.world.getBlockState(uw1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(uw2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(uw3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(uw4).getMaterial().equals(Material.POWDER_SNOW) && mc.world.getBlockState(pos).getMaterial().isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
-                                mc.player.setPosition(mc.player.getX()-1,mc.player.getY()+1,mc.player.getZ());}
-                            else {if (InvertUpDir.get()) mc.player.setPitch(75);}
+                            if (!mc.world.getBlockState(uw1).getMaterial().isSolid() && !mc.world.getBlockState(uw2).getMaterial().isSolid() && !mc.world.getBlockState(uw3).getMaterial().isSolid() && !mc.world.getBlockState(uw4).getMaterial().isSolid() && !mc.world.getBlockState(uw1).getMaterial().isLiquid() && !mc.world.getBlockState(uw2).getMaterial().isLiquid() && !mc.world.getBlockState(uw3).getMaterial().isLiquid() && !mc.world.getBlockState(uw4).getMaterial().isLiquid() && !mc.world.getBlockState(uw1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(uw2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(uw3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(uw4).getMaterial().equals(Material.POWDER_SNOW)){
+                                if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
+                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                    mc.player.swingHand(Hand.MAIN_HAND);
+                                }
+                                mc.player.setPosition(mc.player.getX()-1,mc.player.getY()+1,mc.player.getZ());
+                            } else {if (InvertUpDir.get()) mc.player.setPitch(75);}
                         }
                     }
                     default -> {}
@@ -640,102 +656,110 @@ public class AutoMountain extends Module {
                 switch (mc.player.getMovementDirection()) {
                     case NORTH -> {            //DOWN
                         if (mc.options.jumpKey.isPressed()){
-                            BlockPos dn1 = playerPos.add(new Vec3i(0, -spcoffset.get()-2,-1));
-                            BlockPos dn2 = playerPos.add(new Vec3i(0,-spcoffset.get()-1,-1));
-                            BlockPos dn3 = playerPos.add(new Vec3i(0,-spcoffset.get(),-1));
-                            BlockPos dn4 = playerPos.add(new Vec3i(0,-spcoffset.get()+1,-1));
+                            BlockPos dn1 = playerPos.add(new Vec3i(0,-spcoffset.get()-1,-1));
+                            BlockPos dn2 = playerPos.add(new Vec3i(0,-spcoffset.get(),-1));
+                            BlockPos dn3 = playerPos.add(new Vec3i(0,-spcoffset.get()+1,-1));
                             BlockPos pos = playerPos.add(new Vec3i(0,-spcoffset.get()-2,-1));
-                            if (!mc.world.getBlockState(dn1).getMaterial().isSolid() && !mc.world.getBlockState(dn2).getMaterial().isSolid() && !mc.world.getBlockState(dn3).getMaterial().isSolid() && !mc.world.getBlockState(dn4).getMaterial().isSolid() && !mc.world.getBlockState(dn1).getMaterial().isLiquid() && !mc.world.getBlockState(dn2).getMaterial().isLiquid() && !mc.world.getBlockState(dn3).getMaterial().isLiquid() && !mc.world.getBlockState(dn4).getMaterial().isLiquid() && !mc.world.getBlockState(dn1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dn2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dn3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dn4).getMaterial().equals(Material.POWDER_SNOW) && mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
-                                mc.player.setPosition(mc.player.getX(),mc.player.getY()-1-spcoffset.get(),mc.player.getZ()-1);}
-                            else {if (InvertDownDir.get()) mc.player.setPitch(35);}
+                            if (!mc.world.getBlockState(dn1).getMaterial().isSolid() && !mc.world.getBlockState(dn2).getMaterial().isSolid() && !mc.world.getBlockState(dn3).getMaterial().isSolid() && !mc.world.getBlockState(dn1).getMaterial().isLiquid() && !mc.world.getBlockState(dn2).getMaterial().isLiquid() && !mc.world.getBlockState(dn3).getMaterial().isLiquid() && !mc.world.getBlockState(dn1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dn2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dn3).getMaterial().equals(Material.POWDER_SNOW)) {
+                                if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
+                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                    mc.player.swingHand(Hand.MAIN_HAND);
+                                }
+                                mc.player.setPosition(mc.player.getX(),mc.player.getY()-1-spcoffset.get(),mc.player.getZ()-1);
+                            } else {if (InvertDownDir.get()) mc.player.setPitch(35);}
                             } else {
-                            BlockPos dn1 = playerPos.add(new Vec3i(0,-2,-1));
-                            BlockPos dn2 = playerPos.add(new Vec3i(0,-1,-1));
-                            BlockPos dn3 = playerPos.add(new Vec3i(0,0,-1));
-                            BlockPos dn4 = playerPos.add(new Vec3i(0,1,-1));
+                            BlockPos dn1 = playerPos.add(new Vec3i(0,-1,-1));
+                            BlockPos dn2 = playerPos.add(new Vec3i(0,0,-1));
+                            BlockPos dn3 = playerPos.add(new Vec3i(0,1,-1));
                             BlockPos pos = playerPos.add(new Vec3i(0,-2,-1));
-                            if (!mc.world.getBlockState(dn1).getMaterial().isSolid() && !mc.world.getBlockState(dn2).getMaterial().isSolid() && !mc.world.getBlockState(dn3).getMaterial().isSolid() && !mc.world.getBlockState(dn4).getMaterial().isSolid() && !mc.world.getBlockState(dn1).getMaterial().isLiquid() && !mc.world.getBlockState(dn2).getMaterial().isLiquid() && !mc.world.getBlockState(dn3).getMaterial().isLiquid() && !mc.world.getBlockState(dn4).getMaterial().isLiquid() && !mc.world.getBlockState(dn1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dn2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dn3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dn4).getMaterial().equals(Material.POWDER_SNOW) && mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
-                                mc.player.setPosition(mc.player.getX(),mc.player.getY()-1,mc.player.getZ()-1);}
-                            else {if (InvertDownDir.get()) mc.player.setPitch(35);}
+                            if (!mc.world.getBlockState(dn1).getMaterial().isSolid() && !mc.world.getBlockState(dn2).getMaterial().isSolid() && !mc.world.getBlockState(dn3).getMaterial().isSolid() && !mc.world.getBlockState(dn1).getMaterial().isLiquid() && !mc.world.getBlockState(dn2).getMaterial().isLiquid() && !mc.world.getBlockState(dn3).getMaterial().isLiquid() && !mc.world.getBlockState(dn1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dn2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dn3).getMaterial().equals(Material.POWDER_SNOW)) {
+                                if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
+                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                    mc.player.swingHand(Hand.MAIN_HAND);
+                                }
+                                mc.player.setPosition(mc.player.getX(),mc.player.getY()-1,mc.player.getZ()-1);
+                            } else {if (InvertDownDir.get()) mc.player.setPitch(35);}
                         }
                     }
                     case EAST -> {            //DOWN
                         if (mc.options.jumpKey.isPressed()){
-                            BlockPos de1 = playerPos.add(new Vec3i(1,-spcoffset.get()-2,0));
-                            BlockPos de2 = playerPos.add(new Vec3i(1,-spcoffset.get()-1,0));
-                            BlockPos de3 = playerPos.add(new Vec3i(1,-spcoffset.get(),0));
-                            BlockPos de4 = playerPos.add(new Vec3i(1,-spcoffset.get()+1,0));
+                            BlockPos de1 = playerPos.add(new Vec3i(1,-spcoffset.get()-1,0));
+                            BlockPos de2 = playerPos.add(new Vec3i(1,-spcoffset.get(),0));
+                            BlockPos de3 = playerPos.add(new Vec3i(1,-spcoffset.get()+1,0));
                             BlockPos pos = playerPos.add(new Vec3i(1,-spcoffset.get()-2,0));
-                            if (!mc.world.getBlockState(de1).getMaterial().isSolid() && !mc.world.getBlockState(de2).getMaterial().isSolid() && !mc.world.getBlockState(de3).getMaterial().isSolid() && !mc.world.getBlockState(de4).getMaterial().isSolid() && !mc.world.getBlockState(de1).getMaterial().isLiquid() && !mc.world.getBlockState(de2).getMaterial().isLiquid() && !mc.world.getBlockState(de3).getMaterial().isLiquid() && !mc.world.getBlockState(de4).getMaterial().isLiquid() && !mc.world.getBlockState(de1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(de2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(de3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(de4).getMaterial().equals(Material.POWDER_SNOW) && mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
-                                mc.player.setPosition(mc.player.getX()+1,mc.player.getY()-1-spcoffset.get(),mc.player.getZ());}
-                            else {if (InvertDownDir.get()) mc.player.setPitch(35);}
+                            if (!mc.world.getBlockState(de1).getMaterial().isSolid() && !mc.world.getBlockState(de2).getMaterial().isSolid() && !mc.world.getBlockState(de3).getMaterial().isSolid() && !mc.world.getBlockState(de1).getMaterial().isLiquid() && !mc.world.getBlockState(de2).getMaterial().isLiquid() && !mc.world.getBlockState(de3).getMaterial().isLiquid() && !mc.world.getBlockState(de1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(de2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(de3).getMaterial().equals(Material.POWDER_SNOW)) {
+                                if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
+                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                    mc.player.swingHand(Hand.MAIN_HAND);
+                                }
+                                mc.player.setPosition(mc.player.getX()+1,mc.player.getY()-1-spcoffset.get(),mc.player.getZ());
+                            } else {if (InvertDownDir.get()) mc.player.setPitch(35);}
                             } else {
-                            BlockPos de1 = playerPos.add(new Vec3i(1,-2,0));
-                            BlockPos de2 = playerPos.add(new Vec3i(1,-1,0));
-                            BlockPos de3 = playerPos.add(new Vec3i(1,0,0));
-                            BlockPos de4 = playerPos.add(new Vec3i(1,1,0));
+                            BlockPos de1 = playerPos.add(new Vec3i(1,-1,0));
+                            BlockPos de2 = playerPos.add(new Vec3i(1,0,0));
+                            BlockPos de3 = playerPos.add(new Vec3i(1,1,0));
                             BlockPos pos = playerPos.add(new Vec3i(1,-2,0));
-                            if (!mc.world.getBlockState(de1).getMaterial().isSolid() && !mc.world.getBlockState(de2).getMaterial().isSolid() && !mc.world.getBlockState(de3).getMaterial().isSolid() && !mc.world.getBlockState(de4).getMaterial().isSolid() && !mc.world.getBlockState(de1).getMaterial().isLiquid() && !mc.world.getBlockState(de2).getMaterial().isLiquid() && !mc.world.getBlockState(de3).getMaterial().isLiquid() && !mc.world.getBlockState(de4).getMaterial().isLiquid() && !mc.world.getBlockState(de1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(de2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(de3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(de4).getMaterial().equals(Material.POWDER_SNOW) && mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
-                                mc.player.setPosition(mc.player.getX()+1,mc.player.getY()-1,mc.player.getZ());}
-                            else {if (InvertDownDir.get()) mc.player.setPitch(35);}
+                            if (!mc.world.getBlockState(de1).getMaterial().isSolid() && !mc.world.getBlockState(de2).getMaterial().isSolid() && !mc.world.getBlockState(de3).getMaterial().isSolid() && !mc.world.getBlockState(de1).getMaterial().isLiquid() && !mc.world.getBlockState(de2).getMaterial().isLiquid() && !mc.world.getBlockState(de3).getMaterial().isLiquid() && !mc.world.getBlockState(de1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(de2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(de3).getMaterial().equals(Material.POWDER_SNOW)) {
+                                if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
+                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                    mc.player.swingHand(Hand.MAIN_HAND);
+                                }
+                                mc.player.setPosition(mc.player.getX()+1,mc.player.getY()-1,mc.player.getZ());
+                            } else {if (InvertDownDir.get()) mc.player.setPitch(35);}
                         }
                     }
                     case SOUTH -> {            //DOWN
                         if (mc.options.jumpKey.isPressed()){
-                            BlockPos ds1 = playerPos.add(new Vec3i(0,-spcoffset.get()-2,1));
-                            BlockPos ds2 = playerPos.add(new Vec3i(0,-spcoffset.get()-1,1));
-                            BlockPos ds3 = playerPos.add(new Vec3i(0,-spcoffset.get(),1));
-                            BlockPos ds4 = playerPos.add(new Vec3i(0,-spcoffset.get()+1,1));
+                            BlockPos ds1 = playerPos.add(new Vec3i(0,-spcoffset.get()-1,1));
+                            BlockPos ds2 = playerPos.add(new Vec3i(0,-spcoffset.get(),1));
+                            BlockPos ds3 = playerPos.add(new Vec3i(0,-spcoffset.get()+1,1));
                             BlockPos pos = playerPos.add(new Vec3i(0,-spcoffset.get()-2,1));
-                            if (!mc.world.getBlockState(ds1).getMaterial().isSolid() && !mc.world.getBlockState(ds2).getMaterial().isSolid() && !mc.world.getBlockState(ds3).getMaterial().isSolid() && !mc.world.getBlockState(ds4).getMaterial().isSolid() && !mc.world.getBlockState(ds1).getMaterial().isLiquid() && !mc.world.getBlockState(ds2).getMaterial().isLiquid() && !mc.world.getBlockState(ds3).getMaterial().isLiquid() && !mc.world.getBlockState(ds4).getMaterial().isLiquid() && !mc.world.getBlockState(ds1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ds2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ds3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ds4).getMaterial().equals(Material.POWDER_SNOW) && mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
-                                mc.player.setPosition(mc.player.getX(),mc.player.getY()-1- spcoffset.get(),mc.player.getZ()+1);}
-                            else {if (InvertDownDir.get()) mc.player.setPitch(35);}
+                            if (!mc.world.getBlockState(ds1).getMaterial().isSolid() && !mc.world.getBlockState(ds2).getMaterial().isSolid() && !mc.world.getBlockState(ds3).getMaterial().isSolid() && !mc.world.getBlockState(ds1).getMaterial().isLiquid() && !mc.world.getBlockState(ds2).getMaterial().isLiquid() && !mc.world.getBlockState(ds3).getMaterial().isLiquid() && !mc.world.getBlockState(ds1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ds2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ds3).getMaterial().equals(Material.POWDER_SNOW)) {
+                                if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
+                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                    mc.player.swingHand(Hand.MAIN_HAND);
+                                }
+                                mc.player.setPosition(mc.player.getX(),mc.player.getY()-1- spcoffset.get(),mc.player.getZ()+1);
+                            } else {if (InvertDownDir.get()) mc.player.setPitch(35);}
                             } else {
-                            BlockPos ds1 = playerPos.add(new Vec3i(0,-2,1));
-                            BlockPos ds2 = playerPos.add(new Vec3i(0,-1,1));
-                            BlockPos ds3 = playerPos.add(new Vec3i(0,0,1));
-                            BlockPos ds4 = playerPos.add(new Vec3i(0,1,1));
+                            BlockPos ds1 = playerPos.add(new Vec3i(0,-1,1));
+                            BlockPos ds2 = playerPos.add(new Vec3i(0,0,1));
+                            BlockPos ds3 = playerPos.add(new Vec3i(0,1,1));
                             BlockPos pos = playerPos.add(new Vec3i(0,-2,1));
-                            if (!mc.world.getBlockState(ds1).getMaterial().isSolid() && !mc.world.getBlockState(ds2).getMaterial().isSolid() && !mc.world.getBlockState(ds3).getMaterial().isSolid() && !mc.world.getBlockState(ds4).getMaterial().isSolid() && !mc.world.getBlockState(ds1).getMaterial().isLiquid() && !mc.world.getBlockState(ds2).getMaterial().isLiquid() && !mc.world.getBlockState(ds3).getMaterial().isLiquid() && !mc.world.getBlockState(ds4).getMaterial().isLiquid() && !mc.world.getBlockState(ds1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ds2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ds3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ds4).getMaterial().equals(Material.POWDER_SNOW) && mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
-                                mc.player.setPosition(mc.player.getX(),mc.player.getY()-1,mc.player.getZ()+1);}
-                            else {if (InvertDownDir.get()) mc.player.setPitch(35);}
+                            if (!mc.world.getBlockState(ds1).getMaterial().isSolid() && !mc.world.getBlockState(ds2).getMaterial().isSolid() && !mc.world.getBlockState(ds3).getMaterial().isSolid() && !mc.world.getBlockState(ds1).getMaterial().isLiquid() && !mc.world.getBlockState(ds2).getMaterial().isLiquid() && !mc.world.getBlockState(ds3).getMaterial().isLiquid() && !mc.world.getBlockState(ds1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ds2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ds3).getMaterial().equals(Material.POWDER_SNOW)) {
+                                if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
+                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                    mc.player.swingHand(Hand.MAIN_HAND);
+                                }
+                                mc.player.setPosition(mc.player.getX(),mc.player.getY()-1,mc.player.getZ()+1);
+                            } else {if (InvertDownDir.get()) mc.player.setPitch(35);}
                         }
                     }
                     case WEST -> {            //DOWN
                         if (mc.options.jumpKey.isPressed()){
-                            BlockPos dw1 = playerPos.add(new Vec3i(-1,-spcoffset.get()-2,0));
-                            BlockPos dw2 = playerPos.add(new Vec3i(-1,-spcoffset.get()-1,0));
-                            BlockPos dw3 = playerPos.add(new Vec3i(-1,-spcoffset.get(),0));
-                            BlockPos dw4 = playerPos.add(new Vec3i(-1,-spcoffset.get()+1,0));
+                            BlockPos dw1 = playerPos.add(new Vec3i(-1,-spcoffset.get()-1,0));
+                            BlockPos dw2 = playerPos.add(new Vec3i(-1,-spcoffset.get(),0));
+                            BlockPos dw3 = playerPos.add(new Vec3i(-1,-spcoffset.get()+1,0));
                             BlockPos pos = playerPos.add(new Vec3i(-1,-spcoffset.get()-2,0));
-                            if (!mc.world.getBlockState(dw1).getMaterial().isSolid() && !mc.world.getBlockState(dw2).getMaterial().isSolid() && !mc.world.getBlockState(dw3).getMaterial().isSolid() && !mc.world.getBlockState(dw4).getMaterial().isSolid() && !mc.world.getBlockState(dw1).getMaterial().isLiquid() && !mc.world.getBlockState(dw2).getMaterial().isLiquid() && !mc.world.getBlockState(dw3).getMaterial().isLiquid() && !mc.world.getBlockState(dw4).getMaterial().isLiquid() && !mc.world.getBlockState(dw1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dw2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dw3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dw4).getMaterial().equals(Material.POWDER_SNOW) && mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
-                                mc.player.setPosition(mc.player.getX()-1,mc.player.getY()-1-spcoffset.get(),mc.player.getZ());}
-                            else {if (InvertDownDir.get()) mc.player.setPitch(35);}
+                            if (!mc.world.getBlockState(dw1).getMaterial().isSolid() && !mc.world.getBlockState(dw2).getMaterial().isSolid() && !mc.world.getBlockState(dw3).getMaterial().isSolid() && !mc.world.getBlockState(dw1).getMaterial().isLiquid() && !mc.world.getBlockState(dw2).getMaterial().isLiquid() && !mc.world.getBlockState(dw3).getMaterial().isLiquid() && !mc.world.getBlockState(dw1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dw2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dw3).getMaterial().equals(Material.POWDER_SNOW)) {
+                                if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
+                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                    mc.player.swingHand(Hand.MAIN_HAND);
+                                }
+                                mc.player.setPosition(mc.player.getX()-1,mc.player.getY()-1-spcoffset.get(),mc.player.getZ());
+                            } else {if (InvertDownDir.get()) mc.player.setPitch(35);}
                             }else {
-                            BlockPos dw1 = playerPos.add(new Vec3i(-1,-2,0));
-                            BlockPos dw2 = playerPos.add(new Vec3i(-1,-1,0));
-                            BlockPos dw3 = playerPos.add(new Vec3i(-1,0,0));
-                            BlockPos dw4 = playerPos.add(new Vec3i(-1,1,0));
+                            BlockPos dw1 = playerPos.add(new Vec3i(-1,-1,0));
+                            BlockPos dw2 = playerPos.add(new Vec3i(-1,0,0));
+                            BlockPos dw3 = playerPos.add(new Vec3i(-1,1,0));
                             BlockPos pos = playerPos.add(new Vec3i(-1,-2,0));
-                            if (!mc.world.getBlockState(dw1).getMaterial().isSolid() && !mc.world.getBlockState(dw2).getMaterial().isSolid() && !mc.world.getBlockState(dw3).getMaterial().isSolid() && !mc.world.getBlockState(dw4).getMaterial().isSolid() && !mc.world.getBlockState(dw1).getMaterial().isLiquid() && !mc.world.getBlockState(dw2).getMaterial().isLiquid() && !mc.world.getBlockState(dw3).getMaterial().isLiquid() && !mc.world.getBlockState(dw4).getMaterial().isLiquid() && !mc.world.getBlockState(dw1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dw2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dw3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dw4).getMaterial().equals(Material.POWDER_SNOW) && mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
-                                mc.player.setPosition(mc.player.getX()-1,mc.player.getY()-1,mc.player.getZ());}
-                            else {if (InvertDownDir.get()) mc.player.setPitch(35);}
+                            if (!mc.world.getBlockState(dw1).getMaterial().isSolid() && !mc.world.getBlockState(dw2).getMaterial().isSolid() && !mc.world.getBlockState(dw3).getMaterial().isSolid() && !mc.world.getBlockState(dw1).getMaterial().isLiquid() && !mc.world.getBlockState(dw2).getMaterial().isLiquid() && !mc.world.getBlockState(dw3).getMaterial().isLiquid() && !mc.world.getBlockState(dw1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dw2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dw3).getMaterial().equals(Material.POWDER_SNOW)) {
+                                if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
+                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                    mc.player.swingHand(Hand.MAIN_HAND);
+                                }
+                                mc.player.setPosition(mc.player.getX()-1,mc.player.getY()-1,mc.player.getZ());
+                            } else {if (InvertDownDir.get()) mc.player.setPitch(35);}
                         }
                     }
                     default -> {}
