@@ -3,6 +3,7 @@
  *  Copyright (c) 2022 Meteor Tweaks.
  *  Licensed Under the GNU Lesser General Public License v3.0
  */
+//plz come back meteor tweaks I miss you
 
 package pwn.noobs.trouserstreak.modules;
 
@@ -85,7 +86,6 @@ public class BetterAutoSign extends Module {
     }
 
 
-
     @EventHandler
     private void onOpenScreen(OpenScreenEvent event) {
         if(!(event.screen instanceof SignEditScreen)) return;
@@ -165,5 +165,4 @@ public class BetterAutoSign extends Module {
                 || Items.MAGENTA_DYE.equals(item)
                 || Items.LIGHT_GRAY_DYE.equals(item);
     }
-
 }

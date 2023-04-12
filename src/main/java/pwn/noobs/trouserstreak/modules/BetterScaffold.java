@@ -2,6 +2,7 @@
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
  * Copyright (c) Meteor Development.
  */
+//plz come back meteor tweaks I miss you
 
 package pwn.noobs.trouserstreak.modules;
 
@@ -53,6 +54,12 @@ public class BetterScaffold extends Module {
         .description("Whether or not to scaffold upwards faster.")
         .defaultValue(false)
         .build()
+    );
+    private final Setting<Boolean> abovehead = sgGeneral.add(new BoolSetting.Builder()
+            .name("place-above-head")
+            .description("Whether or not to scaffold above your head.")
+            .defaultValue(false)
+            .build()
     );
 
     private final Setting<Boolean> renderSwing = sgGeneral.add(new BoolSetting.Builder()
@@ -120,8 +127,6 @@ public class BetterScaffold extends Module {
         .build()
     );
 
-
-
     // Render
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
@@ -154,9 +159,8 @@ public class BetterScaffold extends Module {
     private boolean lastWasSneaking;
     private double lastSneakingY;
 
-
     public BetterScaffold() {
-        super(Trouser.Main, "betterScaffold", "Automatically places blocks under you.");
+        super(Trouser.Main, "betterScaffold", "Automatically places blocks under you. Credits to MeteorTweaks.");
     }
 
     @Override

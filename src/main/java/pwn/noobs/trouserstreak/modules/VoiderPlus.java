@@ -102,8 +102,6 @@ public class VoiderPlus extends Module {
         }else if (getplayerY.get()){
             i=mc.player.getBlockY()+playerheight.get();
         }
-        passes=0;
-        TPs=0;
         sX=mc.player.getBlockPos().getX();
         sY=mc.player.getBlockPos().getY();
         sZ=mc.player.getBlockPos().getZ();

@@ -1,4 +1,4 @@
-//Written by etianll
+//Written by etianll because meteor is still missing the normal mode antikick for the velocity option in their flight
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;

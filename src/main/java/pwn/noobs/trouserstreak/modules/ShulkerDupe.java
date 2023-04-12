@@ -245,4 +245,5 @@ public class ShulkerDupe extends Module {
         None,
         Fortune,
         SilkTouch
-    }}
+    }
+}

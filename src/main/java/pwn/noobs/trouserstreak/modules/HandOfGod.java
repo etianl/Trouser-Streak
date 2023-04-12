@@ -324,6 +324,9 @@ public class HandOfGod extends Module {
 
     @EventHandler
     public void onTick(TickEvent.Pre event) {
+        pX=mc.player.getBlockPos().getX();
+        pY=mc.player.getBlockPos().getY();
+        pZ=mc.player.getBlockPos().getZ();
         if (!(mc.player.hasPermissionLevel(4))) {
             toggle();
             error("Must have OP");
@@ -419,9 +422,6 @@ public class HandOfGod extends Module {
                 }
             }
             if (voider.get()){
-                    pX=mc.player.getBlockPos().getX();
-                    pY=mc.player.getBlockPos().getY();
-                    pZ=mc.player.getBlockPos().getZ();
                     if (i>= mc.player.getBlockPos().getY()-vrange.get()){
                     ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + i +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + i +" "+ (pZ + radius.get()) +" air");
                         i--;
@@ -439,9 +439,6 @@ public class HandOfGod extends Module {
                         error("Fly Slow. Set Flight speed to 0.1 or less. :D");
                     }
                 }
-                pX=mc.player.getBlockPos().getX();
-                pY=mc.player.getBlockPos().getY();
-                pZ=mc.player.getBlockPos().getZ();
                     if (mc.options.jumpKey.isPressed()){
                         ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY+mgcdist.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcdist.get()) +" "+ (pZ + mgcradius.get()) +" air");
                     }
@@ -518,8 +515,6 @@ public class HandOfGod extends Module {
                 if (roofticks<=rooftickdelay.get()){
                     roofticks++;
                 } else if (roofticks>rooftickdelay.get()) {
-                    pX=mc.player.getBlockPos().getX();
-                    pZ=mc.player.getBlockPos().getZ();
                     ChatUtils.sendPlayerMsg("/fill " + (pX - roofradius.get()) + " " + roofheight.get() +" "+ (pZ - roofradius.get()) +" "+ (pX + roofradius.get()) + " " + roofheight.get() +" "+ (pZ + roofradius.get()) + " "+roofblock);
                     roofticks=0;
                 }
