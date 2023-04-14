@@ -409,19 +409,17 @@ public class NewerNewChunks extends Module {
 					chunkPos = new ChunkPos(pos);
 
 					for (Direction dir: searchDirs) {
-						if (pos.offset(dir).getY()<0 && mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
-							if (oldChunks.contains(chunkPos)) oldChunks.remove(chunkPos);
-							olderoldChunks.add(chunkPos);
-							if (save.get()){
-								saveOlderOldChunkData();
-							}
-							return;
-						}else if (mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+						if (pos.offset(dir).getY()>0 && mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 							if (olderoldChunks.contains(chunkPos)) olderoldChunks.remove(chunkPos);
-							if (oldChunks.contains(chunkPos)) oldChunks.remove(chunkPos);
 							newChunks.add(chunkPos);
 							if (save.get()){
 								saveNewChunkData();
+							}
+							return;
+						}else if (pos.offset(dir).getY()<=0 && mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+							olderoldChunks.add(chunkPos);
+							if (save.get()){
+								saveOlderOldChunkData();
 							}
 							return;
 						}
@@ -437,19 +435,18 @@ public class NewerNewChunks extends Module {
 				chunkPos = new ChunkPos(packet.getPos());
 
 				for (Direction dir: searchDirs) {
-					if (packet.getPos().offset(dir).getY()<0 && mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() &&  (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+					if (packet.getPos().offset(dir).getY()>0 && mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+						if (olderoldChunks.contains(chunkPos)) olderoldChunks.remove(chunkPos);
+						newChunks.add(chunkPos);
+						if (save.get()){
+							saveNewChunkData();
+						}
+						return;
+					}else if (packet.getPos().offset(dir).getY()<=0 && mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() &&  (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 						if (oldChunks.contains(chunkPos)) oldChunks.remove(chunkPos);
 						olderoldChunks.add(chunkPos);
 						if (save.get()){
 							saveOlderOldChunkData();
-						}
-						return;
-					}else if (mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
-						if (olderoldChunks.contains(chunkPos)) olderoldChunks.remove(chunkPos);
-						if (oldChunks.contains(chunkPos)) oldChunks.remove(chunkPos);
-						newChunks.add(chunkPos);
-						if (save.get()){
-							saveNewChunkData();
 						}
 						return;
 					}
@@ -461,7 +458,7 @@ public class NewerNewChunks extends Module {
 
 			oldpos = new ChunkPos(packet.getX(), packet.getZ());
 
-			if (!olderoldChunks.contains(oldpos) && !newChunks.contains(oldpos) && mc.world.getChunkManager().getChunk(packet.getX(), packet.getZ()) == null) {
+			if (mc.world.getChunkManager().getChunk(packet.getX(), packet.getZ()) == null) {
 				WorldChunk chunk = new WorldChunk(mc.world, oldpos);
 				try {
 					chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), new NbtCompound(), packet.getChunkData().getBlockEntities(packet.getX(), packet.getZ()));
@@ -475,7 +472,7 @@ public class NewerNewChunks extends Module {
 						for (int z = 0; z < 16; z++) {
 							FluidState fluid = chunk.getFluidState(x, y, z);
 
-							if (!fluid.isEmpty() && !fluid.isStill()) {
+							if (!olderoldChunks.contains(oldpos) && !newChunks.contains(oldpos) && !fluid.isEmpty() && !fluid.isStill()) {
 								oldChunks.add(oldpos);
 								if (save.get()){
 									saveOldChunkData();
