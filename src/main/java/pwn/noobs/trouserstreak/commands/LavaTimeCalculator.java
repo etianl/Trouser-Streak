@@ -6,6 +6,7 @@ import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
+import pwn.noobs.trouserstreak.modules.AutoMountain;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
@@ -52,5 +53,20 @@ public class LavaTimeCalculator extends Command {
                 ChatUtils.sendMsg(Text.of("Lava will take "+time+" seconds to go from  Y"+TopY+" to Y"+BottomY+" on a 45degree staircase at 20TPS)."));
                 return SINGLE_SUCCESS;
             })));
-        }
+        builder.then(literal("lastmountain").executes(ctx -> {
+            if (((((2+new AutoMountain().highestblock.getY()-new AutoMountain().lowestblock.getY())*60)/20)+(((new AutoMountain().lowestblock.getY()-new AutoMountain().groundY)*30)/20)) <= (((((2+new AutoMountain().highestblock.getY()-new AutoMountain().lowestblock.getY())*60)/20)/2)+(((new AutoMountain().highestblock.getY()-new AutoMountain().groundY2)*30)/20))){
+                float time= (((((2+new AutoMountain().highestblock.getY()-new AutoMountain().lowestblock.getY())*60)/20)/2)+(((new AutoMountain().highestblock.getY()-new AutoMountain().groundY2)*30)/20));
+                if (new AutoMountain().lowestblock.getY()==666){
+                    error("Use AutoMountain first to get the lowest block from the last Mountain.");
+                }else ChatUtils.sendMsg(Text.of("Lava will take "+time+" seconds to flow to the ground across your last Mountain"));
+            }
+            else if (((((2+new AutoMountain().highestblock.getY()-new AutoMountain().lowestblock.getY())*60)/20)+(((new AutoMountain().lowestblock.getY()-new AutoMountain().groundY)*30)/20)) > (((((2+new AutoMountain().highestblock.getY()-new AutoMountain().lowestblock.getY())*60)/20)/2)+(((new AutoMountain().highestblock.getY()-new AutoMountain().groundY2)*30)/20))){
+                float time= ((((2+new AutoMountain().highestblock.getY()-new AutoMountain().lowestblock.getY())*60)/20)+(((new AutoMountain().lowestblock.getY()-new AutoMountain().groundY)*30)/20));
+            if (new AutoMountain().lowestblock.getY()==666){
+                error("Use AutoMountain first to get the lowest block from the last Mountain.");
+            }else ChatUtils.sendMsg(Text.of("Lava will take "+time+" seconds to flow to the ground across your last Mountain"));
+            }
+            return SINGLE_SUCCESS;
+        }));
+    }
 }

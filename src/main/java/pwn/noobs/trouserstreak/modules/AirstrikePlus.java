@@ -37,6 +37,7 @@ public class AirstrikePlus extends Module {
         .description("radius they spawn from the player")
         .defaultValue(30)
         .sliderRange(1, 100)
+            .min(1)
         .build());
 
     private final Setting<Integer> power = sgGeneral.add(new IntSetting.Builder()
@@ -44,6 +45,8 @@ public class AirstrikePlus extends Module {
         .description("power of explosions")
         .defaultValue(10)
         .sliderRange(1, 127)
+            .min(1)
+            .max(127)
             .visible(() -> mode.get() == Modes.Fireball || mode.get() == Modes.Creeper)
         .build());
 
@@ -51,7 +54,8 @@ public class AirstrikePlus extends Module {
             .name("Creeper/TNT fuse")
             .description("In ticks")
             .defaultValue(40)
-            .sliderRange(1, 120)
+            .sliderRange(0, 120)
+            .min(0)
             .visible(() -> mode.get() == Modes.TNT || mode.get() == Modes.Creeper)
             .build());
 
@@ -68,6 +72,8 @@ public class AirstrikePlus extends Module {
         .description("speed of entities")
         .defaultValue(5)
         .sliderRange(1, 10)
+            .min(1)
+            .max(10)
             .visible(() -> !(mode.get() == Modes.Wither | mode.get() == Modes.Lightning))
         .build());
 
@@ -75,7 +81,8 @@ public class AirstrikePlus extends Module {
         .name("delay")
         .description("its in ticks")
         .defaultValue(2)
-        .sliderRange(1, 20)
+        .sliderRange(0, 20)
+            .min(0)
         .build());
 
 

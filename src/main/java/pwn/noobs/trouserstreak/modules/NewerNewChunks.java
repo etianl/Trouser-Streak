@@ -428,7 +428,7 @@ public class NewerNewChunks extends Module {
 				}
 			});
 		}
-		if (event.packet instanceof BlockUpdateS2CPacket) {
+		else if (event.packet instanceof BlockUpdateS2CPacket) {
 			BlockUpdateS2CPacket packet = (BlockUpdateS2CPacket) event.packet;
 
 			if (!packet.getState().getFluidState().isEmpty() && !packet.getState().getFluidState().isStill()) {
@@ -453,7 +453,7 @@ public class NewerNewChunks extends Module {
 				}
 			}
 		}
-		if (event.packet instanceof ChunkDataS2CPacket && mc.world != null) {
+		else if (event.packet instanceof ChunkDataS2CPacket && mc.world != null) {
 			ChunkDataS2CPacket packet = (ChunkDataS2CPacket) event.packet;
 
 			oldpos = new ChunkPos(packet.getX(), packet.getZ());

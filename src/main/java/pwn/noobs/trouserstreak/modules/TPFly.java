@@ -3,16 +3,18 @@ package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -84,7 +86,7 @@ public class TPFly extends Module {
     public void onDeactivate() {
         mc.player.setVelocity(0,0.01,0);
         if (!mc.options.sneakKey.isPressed()){
-        mc.player.setPos(mc.player.getX(),mc.player.getY()+0.1,mc.player.getZ());
+            mc.player.setPos(mc.player.getX(),mc.player.getY()+0.1,mc.player.getZ());
         } //this line here prevents you dying for realz
         else if (mc.options.sneakKey.isPressed()) {
             mc.options.sneakKey.setPressed(false);
@@ -113,6 +115,11 @@ public class TPFly extends Module {
     private void onTick(TickEvent.Pre event) {
         mc.player.setVelocity(0,0,0);
         mc.player.setMovementSpeed(0);
+    }
+    @EventHandler
+    private void onSendPacket(PacketEvent.Send event) {
+        if (event.packet instanceof PlayerMoveC2SPacket)
+            ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
     }
     @EventHandler
     private void onTick(TickEvent.Post event) {

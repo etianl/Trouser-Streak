@@ -25,12 +25,21 @@ In no particular order
 - **Airstrike+:** Rains whatever entities you desire from a list similar to Boom. It used to only rain fireballs, and I also changed the positioning of the spawning. (Credits to Allah-Hack) 
 - **AnHero:** Become An Hero! (A quick way back to spawn.) (Credits to etianl :D)
 - **AutoDrop:** Drops the stack in your selected slot automatically, or you can choose a slot to dump. You can shift click your inventory items to dump your trash easily. (Credits to etianl :D)
-- **AutoLavaCaster** Simple timer based bot for lavacasting. Aim at the top of the block you want to cast on and activate the module. It places lava, then after an amount of time removes the lava, places the water after a specified delay, removes it after a specified delay, it will build the mountain upward, tower you up and repeat. Position yourself on a block above and diagonally, mostly perpendicular from the targeted block for best results. Use the ".lavacalc" command to determine roughly how long lava will take to finish. (Credits to etianl :D)
+- **AutoLavaCaster** Simple timer based bot for lavacasting. Aim at the top of the block you want to cast on and activate the module. It places lava, then after an amount of time removes the lava, places the water after a specified delay, removes it after a specified delay, it will build the mountain upward, tower you up and repeat. Position yourself on a block above and diagonally, mostly perpendicular from the targeted block for best results. (Credits to etianl :D)
 - *AutoLavaCaster Notes:*
-- The EstimateLavaTimer estimates lava time automatically based on a 45 degree staircase from your Y level down to sea level, or Y-60 if you are below sea level. 
-- You can also enable another option to choose the bottom Y level for EstimateLavaTimer
+- If not choosing the amount of time lava flows for, there are lava timing estimation modes.
+- The UseLastAutoMountain timing mode uses your last Mountain to predict the LavaTimer and calculates the flow rate if the top of the mountain is a 45 degree angle and the rest is going straight down to the ground.
+- Do not disable the AutoMountain before done building the mountain you want to cast on, it can break the timing for the above option. Pause by pressing useKey if you intend to make more stairs on that mountain.
+- The FortyFiveDegreeStairs timing mode estimates based on 45degree stairs down to sealevel(Y63), or down to Y-60 if you are below Y64.
+- The ChooseBottomY timing mode estimates time based on 45degree stairs going down to the Y level you set in the timer options from your position.
+- If you insist upon **not** starting AutoMountain paused, you can get the correct timing for the UseLastLowestBlockfromAutoMountain in AutoLavaCaster by
+1: ENABLE ResetLowestBlockOnDEACTIVATE in AutoLavaCaster and
+2: DISABLE ResetLowestBlockOnACTIVATE in AutoMountain.	
+This will return the lowest block placed with AutoMountain until AutoLavacast is used.
+- You can reset lowestblock after doing the above by enabling and disabling AutoLavaCaster or by pressing the button in AutoMountain options.
+- The AutoPosition option moves you to automatically to a position suitable for casting if you are not on a block. May break caster if you enable it while right at the edge of a block. (Not actually on a block)
 - The .castertimer Command tells you how long each cycle has been running for. 
-- The .lavacalc command gives you an approximation of how long lava will take to flow across a 45 degree staircase at 20TPS.
+- The .lavacalc command gives you an approximation of how long lava will take to flow from top to bottom across a 45 degree staircase at 20TPS (input numbers), or the last Mountain you made from your Y level.
 - Do not use Timer with this module.
 - Rotating your character will break AutoLavaCaster. Disable rotate options in Freecam, Killaura, and any others that will rotate you when casting.
 - Fish buckets, and other water buckets with entities do not work. Put the fishy somewhere safe before mountaining.
@@ -39,6 +48,7 @@ In no particular order
 - Do not use Flammable blocks if building up, and firespread is on.
 - Reducing timing options while it's on can break it.
 - **AutoMountain:** AutoMountain builds stairs in the direction you aim. It builds upward if you are looking toward the horizon or higher, and builds downward if you are looking down. (Credits to etianl :D)(Frostburn donated the framework and idea for the code, credits to them for that. <3)
+- The MountainMakerBot option builds stairs from bottom to top, and when it goes u it starts lavacasting on your staircase. Just click and wait for a mountain. Not intended for use in a closed in space (cave).
 - *AutoMountain Controls:* 
 - UseKey (Right Click) starts and pauses mountain building.
 - Left and RightKeys turn Mountain building.
@@ -78,21 +88,16 @@ In no particular order
 
 ## Known Bugs:
 - **AutoLavaCaster Bugs** 
+- The UseLastLowestBlockfromAutoMountain timing mode may not time correctly if AutoMountain is turned off before completing the mountain you want to cast on. Pause by pressing useKey if you intend to make more stairs on that mountain.
 - The timing will break if the server is under 15TPS.
 - If you are too far out of reach it breaks.
 - If view of the targeted block is obstructed it breaks.
+- If using AutoPosition and only slightly standing on a block (as far off the edge as you can get holdingshift) it will break.
 - **AutoMountain Bugs** 
 - Some blocks may cause Automountain to attempt to build while not actually placing anything (Torches, walls, and doors did this until I fixed). If a block does not work please make an issue so I can correct it.
--------------------------------------
-- *Blocks That do not work at all with AutoMountain*
-- SnowBlocks
-- maybe more?
--------------------------------------
 -**More Bugs** 
-- TPFly can hurt you once in a while on disable. I tried to prevent this. You also rubberband if going toward a block because it attempts to teleport you through it.
-- Adjusting  TPFly antikick values while flying can be deadly
 - .newchunkcount command shows exactly the chunks that are saved in chunk data, so when you are in normal mode or flowbelowY0 mode the returned values are not exactly in correlation to what is rendered on screen.
-- NewerNewChunks has to be turned on atleast once prior to running .newchunkcount for the counter to work.
+- NewerNewChunks has to be turned on atleast once prior to running .newchunkcount for the counter to work even if you already have data in that world.
 
 ## Requirements:
 - Latest dev build of Meteor-Client if using 1.19.4 or the full build of Meteor-Client if using 1.19.3. Meteor Client 0.5.1 is required for 1.19.2, which is required to connect to servers that have enforce secure chat = true.
@@ -101,6 +106,7 @@ In no particular order
 ## Total Download Count:
 **Trouser-Streak :D**
 [![Github All Releases](https://img.shields.io/github/downloads/etianl/Trouser-Streak/total.svg)]()
+plz give me star on githoob kthx
 
 Please check out my little Youtube channel here
 https://www.youtube.com/@mountainsoflavainc.6913
