@@ -28,8 +28,8 @@ In no particular order
 - **AutoLavaCaster** Simple timer based bot for lavacasting. Aim at the top of the block you want to cast on and activate the module. It places lava, then after an amount of time removes the lava, places the water after a specified delay, removes it after a specified delay, it will build the mountain upward, tower you up and repeat. Position yourself on a block above and diagonally, mostly perpendicular from the targeted block for best results. (Credits to etianl :D)
 - *AutoLavaCaster Notes:*
 - If not choosing the amount of time lava flows for, there are lava timing estimation modes.
-- The UseLastAutoMountain timing mode uses your last Mountain to predict the LavaTimer and calculates the flow rate if the top of the mountain is a 45 degree angle and the rest is going straight down to the ground.
-- Do not disable the AutoMountain before done building the mountain you want to cast on, it can break the timing for the above option. Pause by pressing useKey if you intend to make more stairs on that mountain.
+- The UseLastMountain timing mode uses your last Mountain to predict the LavaTimer and calculates the flow rate if the top of the mountain is a 45 degree angle and the rest is going straight down to the ground.
+- Do not disable AutoMountain before done building the mountain you want to cast on, it can break the timing for the above option. Pause by pressing useKey if you intend to make more stairs on that mountain.
 - The FortyFiveDegreeStairs timing mode estimates based on 45degree stairs down to sealevel(Y63), or down to Y-60 if you are below Y64.
 - The ChooseBottomY timing mode estimates time based on 45degree stairs going down to the Y level you set in the timer options from your position.
 - If you insist upon **not** starting AutoMountain paused, you can get the correct timing for the UseLastLowestBlockfromAutoMountain in AutoLavaCaster by
