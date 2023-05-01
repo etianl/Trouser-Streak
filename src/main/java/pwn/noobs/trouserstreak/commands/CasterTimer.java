@@ -18,7 +18,7 @@ public class CasterTimer extends Command {
         public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
             AutoLavaCaster a=new AutoLavaCaster();
-           int time = a.ticks/20;
+           int time = a.lavamountainticks/20;
            if (!(time==0)){
             ChatUtils.sendMsg(Text.of("This Cycle has been going for "+time+" Seconds."));}
            else if (time==0){
