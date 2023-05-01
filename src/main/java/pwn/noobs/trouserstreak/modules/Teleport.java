@@ -28,7 +28,9 @@ public class Teleport extends Module {
             .name("reach")
             .description("Reach")
             .defaultValue(48)
-            .sliderRange(8, 96)
+            .sliderRange(8,96)
+            .min (8)
+            .max (96)
             .build());
     public final Setting<Double> tpTimer = sgGeneral.add(new DoubleSetting.Builder()
             .name("timer")

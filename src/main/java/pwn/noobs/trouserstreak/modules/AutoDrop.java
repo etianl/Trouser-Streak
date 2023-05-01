@@ -33,8 +33,9 @@ public class AutoDrop extends Module {
     private final Setting<Integer> dropslot = sgGeneral.add(new IntSetting.Builder()
             .name("DrotSlot#")
             .description("Drops this Slot if items are in it.")
-            .sliderMin(1)
-            .sliderMax(9)
+            .sliderRange(1,9)
+            .min(1)
+            .max(9)
             .defaultValue(1)
             .visible(() -> dropthisslot.get())
             .build());
