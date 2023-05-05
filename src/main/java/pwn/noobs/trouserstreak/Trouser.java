@@ -1,6 +1,6 @@
 package pwn.noobs.trouserstreak;
 
-import meteordevelopment.meteorclient.systems.commands.Commands;
+import meteordevelopment.meteorclient.commands.Commands;
 import pwn.noobs.trouserstreak.commands.CasterTimer;
 import pwn.noobs.trouserstreak.commands.LavaTimeCalculator;
 import pwn.noobs.trouserstreak.commands.NewChunkCounter;
@@ -42,10 +42,9 @@ public class Trouser extends MeteorAddon {
         Modules.get().add(new RedstoneNuker());
         Modules.get().add(new AnHero());
         Modules.get().add(new FlightAntikick());
-        Commands.get().add(new LavaTimeCalculator());
-        Commands.get().add(new CasterTimer());
-        Commands.get().add(new NewChunkCounter());
-
+        Commands.add(new LavaTimeCalculator());
+        Commands.add(new CasterTimer());
+        Commands.add(new NewChunkCounter());
 	}
 
 	@Override
