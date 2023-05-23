@@ -37,13 +37,21 @@ public class NewChunkCounter extends Command {
             ChatUtils.sendMsg(Text.of(chunks+"  FlowBelowY0Chunk locations have been saved by NewerNewChunks in this dimension."));
             return SINGLE_SUCCESS;
         }));
+        builder.then(literal("LightingExploitChunks").executes(ctx -> {
+            n.chunkcounterticks=0;
+            n.chunkcounter=true;
+            int chunks = n.lightingexploitchunksfound;
+            ChatUtils.sendMsg(Text.of(chunks+"  LightingExploitChunk locations have been saved by NewerNewChunks in this dimension."));
+            return SINGLE_SUCCESS;
+        }));
         builder.executes(ctx -> {
             n.chunkcounterticks=0;
             n.chunkcounter=true;
             int chunks1 = n.newchunksfound;
             int chunks2 = n.olderoldchunksfound;
+            int chunks4 = n.lightingexploitchunksfound;
             int chunks3 = n.oldchunksfound;
-            ChatUtils.sendMsg(Text.of("New: "+chunks1+" | FlowBelowY=0: "+chunks2+" | Old: "+chunks3+" | Chunk locations have been saved by NewerNewChunks in this dimension."));
+            ChatUtils.sendMsg(Text.of("New: "+chunks1+" | FlowBelowY=0: "+chunks2+" | LightingExploitChunk: "+chunks4+" | Old: "+chunks3+" | Chunk locations have been saved by NewerNewChunks in this dimension."));
             return SINGLE_SUCCESS;
         });
     }

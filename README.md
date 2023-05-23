@@ -65,8 +65,10 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - **Inventory Dupe (1.17):** Duplicates things in your crafting slots when the module is enabled and the Dupe button is pressed in your inventory. Only works on Minecraft servers on the version 1.17, not any version before or after.(Credit to ItsVen and Da0neDatGotAway for original creation of the dupe, and to B2H990 for making the fabric mod. Credits to etianl for porting to Meteor.)
 - **InstaKill:** Shoots arrows and tridents with incredible power and velocity. Enabling multiple buttons causes the amount of packets to add up. (Credits to Saturn5Vfive)
 - **LecternCrash:** Crash 1.18.X vanilla servers and possibly below. (Credits to Coderx-Gamer)
-- **NewerNewChunks:** NewChunks module with the ability to save chunk data for later! Also with special options for tracing servers that have been updated from a version before the build limit updates, which throw false positives normally. (Credits to Meteor Rejects, and BleachHack from where it was ported, and etianl for updating :D.)
+- **NewerNewChunks:** NewChunks module with new newchunk estimation exploits, and the ability to save chunk data for later! Also with special options for tracing servers that have been updated from a version before the build limit updates, which throw false positives normally. (Credits to Meteor Rejects, and BleachHack from where it was ported, and etianl for updating :D.)
 - *NewerNewChunks Notes:*
+- The LightingExploit option estimates possible newchunks based on lighting update packets. SOME OF THESE CHUNKS MAY BE OLD. Advanced Mode is needed to filter any false positives out. See Special Options notes for usage.
+- The LightingExploit option works best if you move fast, because if you hang out in an area you will recieve lighting updates that occur naturally in old chunks.
 - NewerNewChunks stores your NewChunks data as text files seperately per server and per dimension in the NewChunks folder in your Minecraft folder.
 - Save and Load ChunkData options are for the stored files.
 - This enables you to chunk trace multiple different servers and dimensions without mixing NewChunks data.
@@ -74,11 +76,17 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - Send chunk data to your friends! Just copy the appropriate folder and send it.
 - There is also an option for deleting chunk data in that particular dimension on the server.
 - The .newchunkcount command can tell you how many chunks have been saved in data in the dimension you are in.
-- *NewerNewChunks Special Options:*
+-------------------------------------------------------------------------------------
+- ***NewerNewChunks Special Options:***
 - These are to be used when the server has two distinct diamond layers, and two distinct lava pool layers underground at spawn.
+-------------------------------------------------------------------------------------
+- The "AdvancedMode" highlights chunks that have flow only below Y0 as well as chunks that have been detected with the LightingExploit option. 
+- If there is nothing but FlowBelowY0 chunks and a fewLightingExploit chunks as well as OldChunks, then you are updating Old Chunks to the new build limits and those are OLDCHUNKS. If the FlowIsBelowY0 and/or LightingExploit coloured chunks are mixed with NewChunks they are NEWCHUNKS.
+- When using Advanced mode if the LightingExploit chunks appear infrequently and are combined with Old Chunks, then the chunks you are in are OLD. If there is alot of LightingExploit chunks appearing and/or they are mixed with NewChunks then the chunks are NEW.
+-------------------------------------------------------------------------------------
 - The "IgnoreFlowBelow0" does not show a new chunk if liquid flow is only below Y zero, but does show a newchunk if flow is above Y zero, or both above AND below Y zero.
-- The "AdvancedMode" highlights chunks that have flow only below Y0. If there is nothing but these you are updating old chunks to the new build limits and the FlowIsBelowY0 coloured chunks are OLD. If they are mixed with newchunks the FlowIsBelowY0 coloured chunks are NEW.
 - AdvancedMode can be confusing, do not use if you can't interpret the chunk data.
+-------------------------------------------------------------------------------------
 - **RedstoneNuker:** It's just the regular Nuker module from Meteor client, customized for only breaking things that generate redstone signals. Also with included AutoTool. To keep you safer when placing lots of TNT. (Credits to Meteor Client for Nuker code, and AutoTool code inthere.)
 - **ShulkerDupe:** Duplicates the contents of a shulker when pressing "Dupe" or "Dupe All" in the shulker menu. Only works on Vanilla, Forge, and Fabric servers 1.19 and below. Use multiconnect or viafabric (Credits to Allah-Hack, I just brought back the buttons, and make it dupe slot1 as well.)
 - **Teleport:** Sets your position ontop of targeted block, within a possible reach of 64 blocks. Rarely can cause damage, be careful. ***EXPERIMENTAL*** (Credits to etianl :D)
@@ -96,11 +104,12 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - **AutoMountain Bugs** 
 - Some blocks may cause Automountain to attempt to build while not actually placing anything (Torches, walls, and doors did this until I fixed). If a block does not work please make an issue so I can correct it.
 -**More Bugs** 
+- NewerNewChunks can rarely boot you from the server when going through a nether portal. (something to do with newchunk loading for the dimension you are entering, I'm not entirely sure.)
 - .newchunkcount command shows exactly the chunks that are saved in chunk data, so when you are in normal mode or flowbelowY0 mode the returned values are not exactly in correlation to what is rendered on screen.
 - NewerNewChunks has to be turned on atleast once prior to running .newchunkcount for the counter to work even if you already have data in that world.
 
 ## Requirements:
-- Latest dev build of Meteor-Client if using 1.19.4 or the full build of Meteor-Client if using 1.19.3. Meteor Client 0.5.1 is required for 1.19.2, which is required to connect to servers that have enforce secure chat = true.
+- Latest dev build of Meteor-Client 0.5.3 if using 1.19.4 or the full build of Meteor-Client 0.5.2 if using 1.19.3. Meteor Client 0.5.1 is required for 1.19.2, which is required to connect to servers that have enforce secure chat = true. Or instead of using old versions you could try [VIaFabricPlus](https://github.com/FlorianMichael/ViaFabricPlus), which will let you connect to almost any version from a 1.19.4 client.
 - Don't forget to try updating any other mods you are using if your game is still crashing.
 
 ## Total Download Count:
