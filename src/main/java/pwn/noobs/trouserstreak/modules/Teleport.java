@@ -114,10 +114,9 @@ public class Teleport extends Module {
     private void onMouseButton(MouseButtonEvent event) {
         if (mc.options.attackKey.isPressed()){
             notponactivateplz=false;
-            ticks=0;}
-        if (mc.options.attackKey.isPressed()){
-            notponactivateplz=false;
-            TPnow=true;}
+            TPnow=true;
+            ticks=0;
+        }
     }
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
