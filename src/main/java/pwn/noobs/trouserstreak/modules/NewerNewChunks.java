@@ -489,7 +489,8 @@ public class NewerNewChunks extends Module {
 								saveNewChunkData();
 							}
 							return;
-						}else if (pos.offset(dir).getY()<=0 && mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!lightingexploitChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+						}else if (pos.offset(dir).getY()<=0 && mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+							if (lightingexploitChunks.contains(chunkPos)) lightingexploitChunks.remove(chunkPos);
 							olderoldChunks.add(chunkPos);
 							if (save.get()){
 								saveOlderOldChunkData();
@@ -527,8 +528,8 @@ public class NewerNewChunks extends Module {
 							saveNewChunkData();
 						}
 						return;
-					}else if (packet.getPos().offset(dir).getY()<=0 && mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() &&  (!lightingexploitChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
-						if (oldChunks.contains(chunkPos)) oldChunks.remove(chunkPos);
+					}else if (packet.getPos().offset(dir).getY()<=0 && mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() &&  (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+						if (lightingexploitChunks.contains(chunkPos)) lightingexploitChunks.remove(chunkPos);
 						olderoldChunks.add(chunkPos);
 						if (save.get()){
 							saveOlderOldChunkData();
