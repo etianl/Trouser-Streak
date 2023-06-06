@@ -6,6 +6,7 @@ import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pwn.noobs.trouserstreak.commands.BaseFinderCommands;
 import pwn.noobs.trouserstreak.commands.CasterTimer;
 import pwn.noobs.trouserstreak.commands.LavaTimeCalculator;
 import pwn.noobs.trouserstreak.commands.NewChunkCounter;
@@ -16,15 +17,16 @@ public class Trouser extends MeteorAddon {
 	public static final Logger LOG = LoggerFactory.getLogger(Trouser.class);
 	public static final Category Main = new Category("TrouserStreak");
 
-	@Override
-	public void onInitialize() {
-		LOG.info("Initializing PantsMod!");
+    @Override
+    public void onInitialize() {
+        LOG.info("Initializing PantsMod!");
 
         Modules.get().add(new AutoLavaCaster());
         Modules.get().add(new AutoMountain());
+        Modules.get().add(new NewerNewChunks());
+        Modules.get().add(new BaseFinder());
         Modules.get().add(new ShulkerDupe());
         Modules.get().add(new InvDupeModule());
-        Modules.get().add(new NewerNewChunks());
         Modules.get().add(new InstantKill());
         Modules.get().add(new LecternCrash());
         Modules.get().add(new Teleport());
@@ -45,8 +47,8 @@ public class Trouser extends MeteorAddon {
         Commands.get().add(new LavaTimeCalculator());
         Commands.get().add(new CasterTimer());
         Commands.get().add(new NewChunkCounter());
-
-	}
+        Commands.get().add(new BaseFinderCommands());
+    }
 
 	@Override
 	public void onRegisterCategories() {

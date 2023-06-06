@@ -56,6 +56,14 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - JumpKey adjusts spacing of stairs according to the OnDemandSpacing value. 
 - Start building, then hold SneakKey and also hold Left or RightKey as well to build stairs diagonally. Release left or right key first to continue building in the direction you were prior. 
 - **AutoStaircase:** Builds stairs upward in the direction you are facing by running forward and jumping. (Credits to etianl for bringing it to life! As well as Credits to Frostburn for writing the original. <3) I just had to fix up some stuff for this one but Frostburn had the base code there. I believe this is the first publicly available automatic staircase builder in a Meteor addon, correct me if I'm wrong maybe I didn't have to learn some Java to do this.
+- **BaseFinder:** Automatically detects if a Base or Build could be in a chunk by checking every block in each chunk to see if there are "Un-natural" blocks within them. (Credits to etianl :D, and to Meteor-Rejects for some code from newchunks.)
+- *BaseFinder Notes:*
+- The Blocks Lists have been tuned to reduce any false positives while throwing the maximum amount of "good" results for builds. Adjust if you feel you need to, or add/remove things as needed.
+- The Number of Blocks to Find options is the total amount any of the blocks from one of the lists to find before throwing a base coord.
+- The Blocks are checked in the lists in order from top to bottom. (Top position checked first)
+- Do not do the same block in more than one list, it will be a waste of CPU time. The torches and signs in by default are fine because they are actually two different blocks, "WALL_TORCH" and just "TORCH".
+- .base command returns the nearest base to you, .base add or remove will add or remove the location you are in as a base coord, or you can input X,Y. There are buttons in the options menu to do the same things.
+- Base location data will be stored in the "BaseChunks" folder, in your Minecraft folder.
 - **BetterAutoSign:** Automatically writes signs with the text you specify, and can also apply glow ink or dye. (Credits to Meteor-Tweaks)
 - **BetterScaffold:** Give you more options for scaffolding, bigger range and others. (Credits to Meteor-Tweaks)
 - **Boom+:** Throws entities or spawns them on the targeted block when you click (Credits to Allah-Hack) I just added some more fun things you might want to throw.
@@ -104,6 +112,7 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - **AutoMountain Bugs** 
 - Some blocks may cause Automountain to attempt to build while not actually placing anything (Torches, walls, and doors did this until I fixed). If a block does not work please make an issue so I can correct it.
 -**More Bugs** 
+- BaseFinder can cause chunks to load a bit more slowly due to the immense amount of block checking it has to do.
 - NewerNewChunks can rarely boot you from the server when going through a nether portal. (something to do with newchunk loading for the dimension you are entering, I'm not entirely sure.)
 - .newchunkcount command shows exactly the chunks that are saved in chunk data, so when you are in normal mode or flowbelowY0 mode the returned values are not exactly in correlation to what is rendered on screen.
 - NewerNewChunks has to be turned on atleast once prior to running .newchunkcount for the counter to work even if you already have data in that world.
