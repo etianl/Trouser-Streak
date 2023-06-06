@@ -1,6 +1,7 @@
 package pwn.noobs.trouserstreak;
 
 import meteordevelopment.meteorclient.commands.Commands;
+import pwn.noobs.trouserstreak.commands.BaseFinderCommands;
 import pwn.noobs.trouserstreak.commands.CasterTimer;
 import pwn.noobs.trouserstreak.commands.LavaTimeCalculator;
 import pwn.noobs.trouserstreak.commands.NewChunkCounter;
@@ -22,9 +23,10 @@ public class Trouser extends MeteorAddon {
 
         Modules.get().add(new AutoLavaCaster());
         Modules.get().add(new AutoMountain());
+        Modules.get().add(new NewerNewChunks());
+        Modules.get().add(new BaseFinder());
         Modules.get().add(new ShulkerDupe());
         Modules.get().add(new InvDupeModule());
-        Modules.get().add(new NewerNewChunks());
         Modules.get().add(new InstantKill());
         Modules.get().add(new LecternCrash());
         Modules.get().add(new Teleport());
@@ -45,6 +47,7 @@ public class Trouser extends MeteorAddon {
         Commands.add(new LavaTimeCalculator());
         Commands.add(new CasterTimer());
         Commands.add(new NewChunkCounter());
+        Commands.add(new BaseFinderCommands());
 	}
 
 	@Override
