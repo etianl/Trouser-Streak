@@ -160,14 +160,14 @@ public class NewerNewChunks extends Module {
 			.name("FlowIsBelowY0-side-color")
 			.description("MAY STILL BE NEW. Color of the chunks that have liquids flowing below Y=0")
 			.defaultValue(new SettingColor(255, 255, 0, 75))
-			.visible(() -> (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both) && detectmode.get()==DetectMode.Advanced)
+			.visible(() -> (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both) && detectmode.get()== DetectMode.Advanced)
 			.build()
 	);
 	private final Setting<SettingColor> lightingexploitChunksSideColor = sgRender.add(new ColorSetting.Builder()
 			.name("LightingExploitChunks-side-color")
 			.description("MAY POSSIBLY BE OLD. Color of the chunks that have been triggered via lighting packets")
 			.defaultValue(new SettingColor(0, 0, 255, 75))
-			.visible(() -> (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both) && detectmode.get()==DetectMode.Advanced && lightexploit.get())
+			.visible(() -> (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both) && detectmode.get()== DetectMode.Advanced && lightexploit.get())
 			.build()
 	);
 
@@ -190,14 +190,14 @@ public class NewerNewChunks extends Module {
 			.name("FlowIsBelowY0-line-color")
 			.description("MAY STILL BE NEW. Color of the chunks that have liquids flowing below Y=0")
 			.defaultValue(new SettingColor(255, 255, 0, 170))
-			.visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both) && detectmode.get()==DetectMode.Advanced)
+			.visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both) && detectmode.get()== DetectMode.Advanced)
 			.build()
 	);
 	private final Setting<SettingColor> lightingexploitChunksLineColor = sgRender.add(new ColorSetting.Builder()
 			.name("LightingExploitChunks-line-color")
 			.description("MAY POSSIBLY BE OLD. Color of the chunks that have been triggered via lighting packets")
 			.defaultValue(new SettingColor(0, 0, 255, 170))
-			.visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both) && detectmode.get()==DetectMode.Advanced && lightexploit.get())
+			.visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both) && detectmode.get()== DetectMode.Advanced && lightexploit.get())
 			.build()
 	);
 
@@ -312,7 +312,7 @@ public class NewerNewChunks extends Module {
 
 	@EventHandler
 	private void onPreTick(TickEvent.Pre event) {
-		if (detectmode.get()==DetectMode.Normal && lightexploit.get()){
+		if (detectmode.get()== DetectMode.Normal && lightexploit.get()){
 			if (errticks<6){
 				errticks++;}
 			if (errticks==5){
@@ -427,11 +427,11 @@ public class NewerNewChunks extends Module {
 			synchronized (olderoldChunks) {
 				for (ChunkPos c : olderoldChunks) {
 					if (mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
-						if (detectmode.get()==DetectMode.Advanced) {
+						if (detectmode.get()== DetectMode.Advanced) {
 							render(new Box(c.getStartPos().add(0, renderHeight.get(), 0), c.getStartPos().add(16, renderHeight.get(), 16)), olderoldChunksSideColor.get(), olderoldChunksLineColor.get(), shapeMode.get(), event);
-						} else if (detectmode.get()==DetectMode.Normal) {
+						} else if (detectmode.get()== DetectMode.Normal) {
 							render(new Box(c.getStartPos().add(0, renderHeight.get(), 0), c.getStartPos().add(16, renderHeight.get(), 16)), newChunksSideColor.get(), newChunksLineColor.get(), shapeMode.get(), event);
-						} else if (detectmode.get()==DetectMode.IgnoreFlowBelow0AndLightingExploit) {
+						} else if (detectmode.get()== DetectMode.IgnoreFlowBelow0AndLightingExploit) {
 							render(new Box(c.getStartPos().add(0, renderHeight.get(), 0), c.getStartPos().add(16, renderHeight.get(), 16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
 						}
 					}
@@ -442,13 +442,13 @@ public class NewerNewChunks extends Module {
 			synchronized (lightingexploitChunks) {
 				for (ChunkPos c : lightingexploitChunks) {
 					if (mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
-						if (detectmode.get()==DetectMode.Advanced && lightexploit.get()) {
+						if (detectmode.get()== DetectMode.Advanced && lightexploit.get()) {
 							render(new Box(c.getStartPos().add(0, renderHeight.get(), 0), c.getStartPos().add(16, renderHeight.get(), 16)), lightingexploitChunksSideColor.get(), lightingexploitChunksLineColor.get(), shapeMode.get(), event);
-						} else if ((detectmode.get()==DetectMode.Normal) && lightexploit.get()) {
+						} else if ((detectmode.get()== DetectMode.Normal) && lightexploit.get()) {
 							render(new Box(c.getStartPos().add(0, renderHeight.get(), 0), c.getStartPos().add(16, renderHeight.get(), 16)), newChunksSideColor.get(), newChunksLineColor.get(), shapeMode.get(), event);
-						} else if ((detectmode.get()==DetectMode.IgnoreFlowBelow0AndLightingExploit) && lightexploit.get()) {
+						} else if ((detectmode.get()== DetectMode.IgnoreFlowBelow0AndLightingExploit) && lightexploit.get()) {
 							render(new Box(c.getStartPos().add(0, renderHeight.get(), 0), c.getStartPos().add(16, renderHeight.get(), 16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
-						} else if ((detectmode.get()==DetectMode.Advanced | detectmode.get()==DetectMode.Normal | detectmode.get()==DetectMode.IgnoreFlowBelow0AndLightingExploit) && !lightexploit.get()) {
+						} else if ((detectmode.get()== DetectMode.Advanced | detectmode.get()== DetectMode.Normal | detectmode.get()== DetectMode.IgnoreFlowBelow0AndLightingExploit) && !lightexploit.get()) {
 							render(new Box(c.getStartPos().add(0, renderHeight.get(), 0), c.getStartPos().add(16, renderHeight.get(), 16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
 						}
 					}
