@@ -156,7 +156,7 @@ public class BaseFinder extends Module {
             .description("How many blocks it takes, from of any of the listed blocks to throw a base location.")
             .min(1)
             .sliderRange(1,100)
-            .defaultValue(20)
+            .defaultValue(22)
             .build());
     private final Setting<Integer> blowkfind6 = sglists.add(new IntSetting.Builder()
             .name("(List #6) Number Of Blocks to Find")
