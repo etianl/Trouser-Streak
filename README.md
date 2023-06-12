@@ -75,6 +75,8 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - **LecternCrash:** Crash 1.18.X vanilla servers and possibly below. (Credits to Coderx-Gamer)
 - **NewerNewChunks:** NewChunks module with new newchunk estimation exploits, and the ability to save chunk data for later! Also with special options for tracing servers that have been updated from a version before the build limit updates, which throw false positives normally. (Credits to Meteor Rejects, and BleachHack from where it was ported, and etianl for updating :D.)
 - *NewerNewChunks Notes:*
+- ***LIGHTING EXPLOIT STUFF IS ONLY AVAILABLE FOR TROUSER 1.19.4 and prior!!!***
+- Trouser-Streak for 1.20 does not contain the LightingExploit as part of NewerNewChunks because Mojang patched it. :P
 - The LightingExploit option estimates possible newchunks based on lighting update packets. SOME OF THESE CHUNKS MAY BE OLD. Advanced Mode is needed to filter any false positives out. See Special Options notes for usage.
 - The LightingExploit option works best if you move fast, because if you hang out in an area you will recieve lighting updates that occur naturally in old chunks.
 - NewerNewChunks stores your NewChunks data as text files seperately per server and per dimension in the NewChunks folder in your Minecraft folder.
@@ -88,12 +90,13 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - ***NewerNewChunks Special Options:***
 - These are to be used when the server has two distinct diamond layers, and two distinct lava pool layers underground at spawn.
 -------------------------------------------------------------------------------------
-- The "AdvancedMode" highlights chunks that have flow only below Y0 as well as chunks that have been detected with the LightingExploit option. 
-- If there is nothing but FlowBelowY0 chunks and a fewLightingExploit chunks as well as OldChunks, then you are updating Old Chunks to the new build limits and those are OLDCHUNKS. If the FlowIsBelowY0 and/or LightingExploit coloured chunks are mixed with NewChunks they are NEWCHUNKS.
-- When using Advanced mode if the LightingExploit chunks appear infrequently and are combined with Old Chunks, then the chunks you are in are OLD. If there is alot of LightingExploit chunks appearing and/or they are mixed with NewChunks then the chunks are NEW.
--------------------------------------------------------------------------------------
-- The "IgnoreFlowBelow0" does not show a new chunk if liquid flow is only below Y zero, but does show a newchunk if flow is above Y zero, or both above AND below Y zero.
+- The **"AdvancedMode"** highlights chunks that have flow only below Y0 as well as chunks that have been detected with the LightingExploit option. 
+- If there is nothing but FlowBelowY0 chunks and OldChunks as well as a few LightingExploit chunks**(If<=1.19.4)**, then you are updating Old Chunks to the new build limits and those are OLDCHUNKS. If the FlowIsBelowY0 are mixed with NewChunks and LightingExploit **(If<=1.19.4)** coloured chunks they are NEWCHUNKS.
+- **(If<=1.19.4** When using Advanced mode if the LightingExploit chunks appear infrequently and are combined with Old Chunks, then the chunks you are in are OLD. If there is alot of LightingExploit chunks appearing and/or they are mixed with NewChunks then the chunks are NEW.
 - AdvancedMode can be confusing, do not use if you can't interpret the chunk data.
+-------------------------------------------------------------------------------------
+- The **"IgnoreFlowBelow0"** will render as an oldchunk if liquid flow is only below Y zero, and will show as a newchunk if flow is above Y zero, or both above AND below Y zero.
+
 -------------------------------------------------------------------------------------
 - **RedstoneNuker:** It's just the regular Nuker module from Meteor client, customized for only breaking things that generate redstone signals. Also with included AutoTool. To keep you safer when placing lots of TNT. (Credits to Meteor Client for Nuker code, and AutoTool code inthere.)
 - **ShulkerDupe:** Duplicates the contents of a shulker when pressing "Dupe" or "Dupe All" in the shulker menu. Only works on Vanilla, Forge, and Fabric servers 1.19 and below. Use multiconnect or viafabric (Credits to Allah-Hack, I just brought back the buttons, and make it dupe slot1 as well.)
@@ -118,8 +121,12 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - NewerNewChunks has to be turned on atleast once prior to running .newchunkcount for the counter to work even if you already have data in that world.
 
 ## Requirements:
-- Latest dev build of Meteor-Client 0.5.3 if using 1.19.4 or the full build of Meteor-Client 0.5.2 if using 1.19.3. Meteor Client 0.5.1 is required for 1.19.2, which is required to connect to servers that have enforce secure chat = true. Or instead of using old versions you could try [VIaFabricPlus](https://github.com/FlorianMichael/ViaFabricPlus), which will let you connect to almost any version from a 1.19.4 client.
-- Don't forget to try updating any other mods you are using if your game is still crashing.
+- If you are using Minecraft version **1.20**, then use the latest **MeteorClient Dev Build of v0.5.4**
+- If you are using Minecraft version **1.19.4**, then use **MeteorClient "Full Release" v0.5.3**
+- If you are using Minecraft version **1.19.3**, then use **MeteorClient "Full Release" v0.5.2** (v0.5.2 NOT SUPPORTED BY METEOR OR AVAILABLE FOR DOWNLOAD)
+- If you are using Minecraft version **1.19.2**, then use **MeteorClient "Full Release" v0.5.1** (v0.5.1 NOT SUPPORTED BY METEOR OR AVAILABLE FOR DOWNLOAD)
+- Please try [ViaFabricPlus](https://github.com/FlorianMichael/ViaFabricPlus), which will let you connect to almost any version from a 1.20 client.
+- Don't forget to try updating any other mods you are using if your game is crashing.
 
 ## Total Download Count:
 **Trouser-Streak :D**

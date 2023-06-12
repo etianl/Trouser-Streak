@@ -9,6 +9,7 @@ import net.minecraft.text.Text;
 import pwn.noobs.trouserstreak.modules.BaseFinder;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class BaseFinderCommands extends Command {
     public BaseFinderCommands() {

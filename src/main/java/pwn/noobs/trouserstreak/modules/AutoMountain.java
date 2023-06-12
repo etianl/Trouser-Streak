@@ -27,7 +27,6 @@ import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.*;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.entity.Entity;
 import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.text.Text;
@@ -661,7 +660,7 @@ public class AutoMountain extends Module {
                             BlockPos un3 = playerPos.add(new Vec3i(0,spcoffset.get()+2,-1));
                             BlockPos un4 = playerPos.add(new Vec3i(0,spcoffset.get()+3,-1));
                             BlockPos pos = playerPos.add(new Vec3i(0,spcoffset.get(),-1));
-                            if (!mc.world.getBlockState(un1).getMaterial().isSolid() && !mc.world.getBlockState(un2).getMaterial().isSolid() && !mc.world.getBlockState(un3).getMaterial().isSolid() && !mc.world.getBlockState(un4).getMaterial().isSolid() && !mc.world.getBlockState(un1).getMaterial().isLiquid() && !mc.world.getBlockState(un2).getMaterial().isLiquid() && !mc.world.getBlockState(un3).getMaterial().isLiquid() && !mc.world.getBlockState(un4).getMaterial().isLiquid() && !mc.world.getBlockState(un1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(un2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(un3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(un4).getMaterial().equals(Material.POWDER_SNOW)){
+                            if (mc.world.getBlockState(un1).getMaterial().isReplaceable() && mc.world.getBlockState(un2).getMaterial().isReplaceable() && mc.world.getBlockState(un3).getMaterial().isReplaceable() && mc.world.getBlockState(un4).getMaterial().isReplaceable() && mc.world.getFluidState(un1).isEmpty() && mc.world.getFluidState(un2).isEmpty() && mc.world.getFluidState(un3).isEmpty() && mc.world.getFluidState(un4).isEmpty() && !mc.world.getBlockState(un1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un4).isOf(Blocks.POWDER_SNOW)){
                                 if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
                                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                                     mc.player.swingHand(Hand.MAIN_HAND);
@@ -674,7 +673,7 @@ public class AutoMountain extends Module {
                             BlockPos un3 = playerPos.add(new Vec3i(0,2,-1));
                             BlockPos un4 = playerPos.add(new Vec3i(0,3,-1));
                             BlockPos pos = playerPos.add(new Vec3i(0,0,-1));
-                            if (!mc.world.getBlockState(un1).getMaterial().isSolid() && !mc.world.getBlockState(un2).getMaterial().isSolid() && !mc.world.getBlockState(un3).getMaterial().isSolid() && !mc.world.getBlockState(un4).getMaterial().isSolid() && !mc.world.getBlockState(un1).getMaterial().isLiquid() && !mc.world.getBlockState(un2).getMaterial().isLiquid() && !mc.world.getBlockState(un3).getMaterial().isLiquid() && !mc.world.getBlockState(un4).getMaterial().isLiquid() && !mc.world.getBlockState(un1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(un2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(un3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(un4).getMaterial().equals(Material.POWDER_SNOW)){
+                            if (mc.world.getBlockState(un1).getMaterial().isReplaceable() && mc.world.getBlockState(un2).getMaterial().isReplaceable() && mc.world.getBlockState(un3).getMaterial().isReplaceable() && mc.world.getBlockState(un4).getMaterial().isReplaceable() && mc.world.getFluidState(un1).isEmpty() && mc.world.getFluidState(un2).isEmpty() && mc.world.getFluidState(un3).isEmpty() && mc.world.getFluidState(un4).isEmpty() && !mc.world.getBlockState(un1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un4).isOf(Blocks.POWDER_SNOW)){
                                 if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
                                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                                     mc.player.swingHand(Hand.MAIN_HAND);
@@ -690,7 +689,7 @@ public class AutoMountain extends Module {
                             BlockPos ue3 = playerPos.add(new Vec3i(+1,spcoffset.get()+2,0));
                             BlockPos ue4 = playerPos.add(new Vec3i(+1,spcoffset.get()+3,0));
                             BlockPos pos = playerPos.add(new Vec3i(1,spcoffset.get(),0));
-                            if (!mc.world.getBlockState(ue1).getMaterial().isSolid() && !mc.world.getBlockState(ue2).getMaterial().isSolid() && !mc.world.getBlockState(ue3).getMaterial().isSolid() && !mc.world.getBlockState(ue4).getMaterial().isSolid() && !mc.world.getBlockState(ue1).getMaterial().isLiquid() && !mc.world.getBlockState(ue2).getMaterial().isLiquid() && !mc.world.getBlockState(ue3).getMaterial().isLiquid() && !mc.world.getBlockState(ue4).getMaterial().isLiquid() && !mc.world.getBlockState(ue1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ue2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ue3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ue4).getMaterial().equals(Material.POWDER_SNOW)){
+                            if (mc.world.getBlockState(ue1).getMaterial().isReplaceable() && mc.world.getBlockState(ue2).getMaterial().isReplaceable() && mc.world.getBlockState(ue3).getMaterial().isReplaceable() && mc.world.getBlockState(ue4).getMaterial().isReplaceable() && mc.world.getFluidState(ue1).isEmpty() && mc.world.getFluidState(ue2).isEmpty() && mc.world.getFluidState(ue3).isEmpty() && mc.world.getFluidState(ue4).isEmpty() && !mc.world.getBlockState(ue1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue4).isOf(Blocks.POWDER_SNOW)){
                                 if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
                                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                                     mc.player.swingHand(Hand.MAIN_HAND);
@@ -703,7 +702,7 @@ public class AutoMountain extends Module {
                             BlockPos ue3 = playerPos.add(new Vec3i(+1,2,0));
                             BlockPos ue4 = playerPos.add(new Vec3i(+1,3,0));
                             BlockPos pos = playerPos.add(new Vec3i(1,0,0));
-                            if (!mc.world.getBlockState(ue1).getMaterial().isSolid() && !mc.world.getBlockState(ue2).getMaterial().isSolid() && !mc.world.getBlockState(ue3).getMaterial().isSolid() && !mc.world.getBlockState(ue4).getMaterial().isSolid() && !mc.world.getBlockState(ue1).getMaterial().isLiquid() && !mc.world.getBlockState(ue2).getMaterial().isLiquid() && !mc.world.getBlockState(ue3).getMaterial().isLiquid() && !mc.world.getBlockState(ue4).getMaterial().isLiquid() && !mc.world.getBlockState(ue1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ue2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ue3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ue4).getMaterial().equals(Material.POWDER_SNOW)){
+                            if (mc.world.getBlockState(ue1).getMaterial().isReplaceable() && mc.world.getBlockState(ue2).getMaterial().isReplaceable() && mc.world.getBlockState(ue3).getMaterial().isReplaceable() && mc.world.getBlockState(ue4).getMaterial().isReplaceable() && mc.world.getFluidState(ue1).isEmpty() && mc.world.getFluidState(ue2).isEmpty() && mc.world.getFluidState(ue3).isEmpty() && mc.world.getFluidState(ue4).isEmpty() && !mc.world.getBlockState(ue1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue4).isOf(Blocks.POWDER_SNOW)){
                                 if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
                                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                                     mc.player.swingHand(Hand.MAIN_HAND);
@@ -719,7 +718,7 @@ public class AutoMountain extends Module {
                             BlockPos us3 = playerPos.add(new Vec3i(0,spcoffset.get()+2,+1));
                             BlockPos us4 = playerPos.add(new Vec3i(0,spcoffset.get()+3,+1));
                             BlockPos pos = playerPos.add(new Vec3i(0,spcoffset.get(),1));
-                            if (!mc.world.getBlockState(us1).getMaterial().isSolid() && !mc.world.getBlockState(us2).getMaterial().isSolid() && !mc.world.getBlockState(us3).getMaterial().isSolid() && !mc.world.getBlockState(us4).getMaterial().isSolid() && !mc.world.getBlockState(us1).getMaterial().isLiquid() && !mc.world.getBlockState(us2).getMaterial().isLiquid() && !mc.world.getBlockState(us3).getMaterial().isLiquid() && !mc.world.getBlockState(us4).getMaterial().isLiquid() && !mc.world.getBlockState(us1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(us2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(us3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(us4).getMaterial().equals(Material.POWDER_SNOW)){
+                            if (mc.world.getBlockState(us1).getMaterial().isReplaceable() && mc.world.getBlockState(us2).getMaterial().isReplaceable() && mc.world.getBlockState(us3).getMaterial().isReplaceable() && mc.world.getBlockState(us4).getMaterial().isReplaceable() && mc.world.getFluidState(us1).isEmpty() && mc.world.getFluidState(us2).isEmpty() && mc.world.getFluidState(us3).isEmpty() && mc.world.getFluidState(us4).isEmpty() && !mc.world.getBlockState(us1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us4).isOf(Blocks.POWDER_SNOW)){
                                 if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
                                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                                     mc.player.swingHand(Hand.MAIN_HAND);
@@ -732,7 +731,7 @@ public class AutoMountain extends Module {
                             BlockPos us3 = playerPos.add(new Vec3i(0,2,+1));
                             BlockPos us4 = playerPos.add(new Vec3i(0,3,+1));
                             BlockPos pos = playerPos.add(new Vec3i(0,0,1));
-                            if (!mc.world.getBlockState(us1).getMaterial().isSolid() && !mc.world.getBlockState(us2).getMaterial().isSolid() && !mc.world.getBlockState(us3).getMaterial().isSolid() && !mc.world.getBlockState(us4).getMaterial().isSolid() && !mc.world.getBlockState(us1).getMaterial().isLiquid() && !mc.world.getBlockState(us2).getMaterial().isLiquid() && !mc.world.getBlockState(us3).getMaterial().isLiquid() && !mc.world.getBlockState(us4).getMaterial().isLiquid() && !mc.world.getBlockState(us1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(us2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(us3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(us4).getMaterial().equals(Material.POWDER_SNOW)){
+                            if (mc.world.getBlockState(us1).getMaterial().isReplaceable() && mc.world.getBlockState(us2).getMaterial().isReplaceable() && mc.world.getBlockState(us3).getMaterial().isReplaceable() && mc.world.getBlockState(us4).getMaterial().isReplaceable() && mc.world.getFluidState(us1).isEmpty() && mc.world.getFluidState(us2).isEmpty() && mc.world.getFluidState(us3).isEmpty() && mc.world.getFluidState(us4).isEmpty() && !mc.world.getBlockState(us1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us4).isOf(Blocks.POWDER_SNOW)){
                                 if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
                                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                                     mc.player.swingHand(Hand.MAIN_HAND);
@@ -748,7 +747,7 @@ public class AutoMountain extends Module {
                             BlockPos uw3 = playerPos.add(new Vec3i(-1,spcoffset.get()+2,0));
                             BlockPos uw4 = playerPos.add(new Vec3i(-1,spcoffset.get()+3,0));
                             BlockPos pos = playerPos.add(new Vec3i(-1,spcoffset.get(),0));
-                            if (!mc.world.getBlockState(uw1).getMaterial().isSolid() && !mc.world.getBlockState(uw2).getMaterial().isSolid() && !mc.world.getBlockState(uw3).getMaterial().isSolid() && !mc.world.getBlockState(uw4).getMaterial().isSolid() && !mc.world.getBlockState(uw1).getMaterial().isLiquid() && !mc.world.getBlockState(uw2).getMaterial().isLiquid() && !mc.world.getBlockState(uw3).getMaterial().isLiquid() && !mc.world.getBlockState(uw4).getMaterial().isLiquid() && !mc.world.getBlockState(uw1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(uw2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(uw3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(uw4).getMaterial().equals(Material.POWDER_SNOW)){
+                            if (mc.world.getBlockState(uw1).getMaterial().isReplaceable() && mc.world.getBlockState(uw2).getMaterial().isReplaceable() && mc.world.getBlockState(uw3).getMaterial().isReplaceable() && mc.world.getBlockState(uw4).getMaterial().isReplaceable() && mc.world.getFluidState(uw1).isEmpty() && mc.world.getFluidState(uw2).isEmpty() && mc.world.getFluidState(uw3).isEmpty() && mc.world.getFluidState(uw4).isEmpty() && !mc.world.getBlockState(uw1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw4).isOf(Blocks.POWDER_SNOW)){
                                 if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
                                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                                     mc.player.swingHand(Hand.MAIN_HAND);
@@ -761,7 +760,7 @@ public class AutoMountain extends Module {
                             BlockPos uw3 = playerPos.add(new Vec3i(-1,2,0));
                             BlockPos uw4 = playerPos.add(new Vec3i(-1,3,0));
                             BlockPos pos = playerPos.add(new Vec3i(-1,0,0));
-                            if (!mc.world.getBlockState(uw1).getMaterial().isSolid() && !mc.world.getBlockState(uw2).getMaterial().isSolid() && !mc.world.getBlockState(uw3).getMaterial().isSolid() && !mc.world.getBlockState(uw4).getMaterial().isSolid() && !mc.world.getBlockState(uw1).getMaterial().isLiquid() && !mc.world.getBlockState(uw2).getMaterial().isLiquid() && !mc.world.getBlockState(uw3).getMaterial().isLiquid() && !mc.world.getBlockState(uw4).getMaterial().isLiquid() && !mc.world.getBlockState(uw1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(uw2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(uw3).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(uw4).getMaterial().equals(Material.POWDER_SNOW)){
+                            if (mc.world.getBlockState(uw1).getMaterial().isReplaceable() && mc.world.getBlockState(uw2).getMaterial().isReplaceable() && mc.world.getBlockState(uw3).getMaterial().isReplaceable() && mc.world.getBlockState(uw4).getMaterial().isReplaceable() && mc.world.getFluidState(uw1).isEmpty() && mc.world.getFluidState(uw2).isEmpty() && mc.world.getFluidState(uw3).isEmpty() && mc.world.getFluidState(uw4).isEmpty() && !mc.world.getBlockState(uw1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw4).isOf(Blocks.POWDER_SNOW)){
                                 if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
                                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                                     mc.player.swingHand(Hand.MAIN_HAND);
@@ -792,7 +791,7 @@ public class AutoMountain extends Module {
                             BlockPos dn2 = playerPos.add(new Vec3i(0,-spcoffset.get(),-1));
                             BlockPos dn3 = playerPos.add(new Vec3i(0,-spcoffset.get()+1,-1));
                             BlockPos pos = playerPos.add(new Vec3i(0,-spcoffset.get()-2,-1));
-                            if (!mc.world.getBlockState(dn1).getMaterial().isSolid() && !mc.world.getBlockState(dn2).getMaterial().isSolid() && !mc.world.getBlockState(dn3).getMaterial().isSolid() && !mc.world.getBlockState(dn1).getMaterial().isLiquid() && !mc.world.getBlockState(dn2).getMaterial().isLiquid() && !mc.world.getBlockState(dn3).getMaterial().isLiquid() && !mc.world.getBlockState(dn1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dn2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dn3).getMaterial().equals(Material.POWDER_SNOW)) {
+                            if (mc.world.getBlockState(dn1).getMaterial().isReplaceable() && mc.world.getBlockState(dn2).getMaterial().isReplaceable() && mc.world.getBlockState(dn3).getMaterial().isReplaceable() && mc.world.getFluidState(dn1).isEmpty() && mc.world.getFluidState(dn2).isEmpty() && mc.world.getFluidState(dn3).isEmpty() && !mc.world.getBlockState(dn1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dn2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dn3).isOf(Blocks.POWDER_SNOW)) {
                                 if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
                                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                                     mc.player.swingHand(Hand.MAIN_HAND);
@@ -804,7 +803,7 @@ public class AutoMountain extends Module {
                             BlockPos dn2 = playerPos.add(new Vec3i(0,0,-1));
                             BlockPos dn3 = playerPos.add(new Vec3i(0,1,-1));
                             BlockPos pos = playerPos.add(new Vec3i(0,-2,-1));
-                            if (!mc.world.getBlockState(dn1).getMaterial().isSolid() && !mc.world.getBlockState(dn2).getMaterial().isSolid() && !mc.world.getBlockState(dn3).getMaterial().isSolid() && !mc.world.getBlockState(dn1).getMaterial().isLiquid() && !mc.world.getBlockState(dn2).getMaterial().isLiquid() && !mc.world.getBlockState(dn3).getMaterial().isLiquid() && !mc.world.getBlockState(dn1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dn2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dn3).getMaterial().equals(Material.POWDER_SNOW)) {
+                            if (mc.world.getBlockState(dn1).getMaterial().isReplaceable() && mc.world.getBlockState(dn2).getMaterial().isReplaceable() && mc.world.getBlockState(dn3).getMaterial().isReplaceable() && mc.world.getFluidState(dn1).isEmpty() && mc.world.getFluidState(dn2).isEmpty() && mc.world.getFluidState(dn3).isEmpty() && !mc.world.getBlockState(dn1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dn2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dn3).isOf(Blocks.POWDER_SNOW)) {
                                 if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
                                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                                     mc.player.swingHand(Hand.MAIN_HAND);
@@ -819,7 +818,7 @@ public class AutoMountain extends Module {
                             BlockPos de2 = playerPos.add(new Vec3i(1,-spcoffset.get(),0));
                             BlockPos de3 = playerPos.add(new Vec3i(1,-spcoffset.get()+1,0));
                             BlockPos pos = playerPos.add(new Vec3i(1,-spcoffset.get()-2,0));
-                            if (!mc.world.getBlockState(de1).getMaterial().isSolid() && !mc.world.getBlockState(de2).getMaterial().isSolid() && !mc.world.getBlockState(de3).getMaterial().isSolid() && !mc.world.getBlockState(de1).getMaterial().isLiquid() && !mc.world.getBlockState(de2).getMaterial().isLiquid() && !mc.world.getBlockState(de3).getMaterial().isLiquid() && !mc.world.getBlockState(de1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(de2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(de3).getMaterial().equals(Material.POWDER_SNOW)) {
+                            if (mc.world.getBlockState(de1).getMaterial().isReplaceable() && mc.world.getBlockState(de2).getMaterial().isReplaceable() && mc.world.getBlockState(de3).getMaterial().isReplaceable() && mc.world.getFluidState(de1).isEmpty() && mc.world.getFluidState(de2).isEmpty() && mc.world.getFluidState(de3).isEmpty() && !mc.world.getBlockState(de1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(de2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(de3).isOf(Blocks.POWDER_SNOW)) {
                                 if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
                                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                                     mc.player.swingHand(Hand.MAIN_HAND);
@@ -831,7 +830,7 @@ public class AutoMountain extends Module {
                             BlockPos de2 = playerPos.add(new Vec3i(1,0,0));
                             BlockPos de3 = playerPos.add(new Vec3i(1,1,0));
                             BlockPos pos = playerPos.add(new Vec3i(1,-2,0));
-                            if (!mc.world.getBlockState(de1).getMaterial().isSolid() && !mc.world.getBlockState(de2).getMaterial().isSolid() && !mc.world.getBlockState(de3).getMaterial().isSolid() && !mc.world.getBlockState(de1).getMaterial().isLiquid() && !mc.world.getBlockState(de2).getMaterial().isLiquid() && !mc.world.getBlockState(de3).getMaterial().isLiquid() && !mc.world.getBlockState(de1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(de2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(de3).getMaterial().equals(Material.POWDER_SNOW)) {
+                            if (mc.world.getBlockState(de1).getMaterial().isReplaceable() && mc.world.getBlockState(de2).getMaterial().isReplaceable() && mc.world.getBlockState(de3).getMaterial().isReplaceable() && mc.world.getFluidState(de1).isEmpty() && mc.world.getFluidState(de2).isEmpty() && mc.world.getFluidState(de3).isEmpty() && !mc.world.getBlockState(de1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(de2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(de3).isOf(Blocks.POWDER_SNOW)) {
                                 if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
                                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                                     mc.player.swingHand(Hand.MAIN_HAND);
@@ -846,7 +845,7 @@ public class AutoMountain extends Module {
                             BlockPos ds2 = playerPos.add(new Vec3i(0,-spcoffset.get(),1));
                             BlockPos ds3 = playerPos.add(new Vec3i(0,-spcoffset.get()+1,1));
                             BlockPos pos = playerPos.add(new Vec3i(0,-spcoffset.get()-2,1));
-                            if (!mc.world.getBlockState(ds1).getMaterial().isSolid() && !mc.world.getBlockState(ds2).getMaterial().isSolid() && !mc.world.getBlockState(ds3).getMaterial().isSolid() && !mc.world.getBlockState(ds1).getMaterial().isLiquid() && !mc.world.getBlockState(ds2).getMaterial().isLiquid() && !mc.world.getBlockState(ds3).getMaterial().isLiquid() && !mc.world.getBlockState(ds1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ds2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ds3).getMaterial().equals(Material.POWDER_SNOW)) {
+                            if (mc.world.getBlockState(ds1).getMaterial().isReplaceable() && mc.world.getBlockState(ds2).getMaterial().isReplaceable() && mc.world.getBlockState(ds3).getMaterial().isReplaceable() && mc.world.getFluidState(ds1).isEmpty() && mc.world.getFluidState(ds2).isEmpty() && mc.world.getFluidState(ds3).isEmpty() && !mc.world.getBlockState(ds1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ds2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ds3).isOf(Blocks.POWDER_SNOW)) {
                                 if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
                                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                                     mc.player.swingHand(Hand.MAIN_HAND);
@@ -858,7 +857,7 @@ public class AutoMountain extends Module {
                             BlockPos ds2 = playerPos.add(new Vec3i(0,0,1));
                             BlockPos ds3 = playerPos.add(new Vec3i(0,1,1));
                             BlockPos pos = playerPos.add(new Vec3i(0,-2,1));
-                            if (!mc.world.getBlockState(ds1).getMaterial().isSolid() && !mc.world.getBlockState(ds2).getMaterial().isSolid() && !mc.world.getBlockState(ds3).getMaterial().isSolid() && !mc.world.getBlockState(ds1).getMaterial().isLiquid() && !mc.world.getBlockState(ds2).getMaterial().isLiquid() && !mc.world.getBlockState(ds3).getMaterial().isLiquid() && !mc.world.getBlockState(ds1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ds2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(ds3).getMaterial().equals(Material.POWDER_SNOW)) {
+                            if (mc.world.getBlockState(ds1).getMaterial().isReplaceable() && mc.world.getBlockState(ds2).getMaterial().isReplaceable() && mc.world.getBlockState(ds3).getMaterial().isReplaceable() && mc.world.getFluidState(ds1).isEmpty() && mc.world.getFluidState(ds2).isEmpty() && mc.world.getFluidState(ds3).isEmpty() && !mc.world.getBlockState(ds1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ds2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ds3).isOf(Blocks.POWDER_SNOW)) {
                                 if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
                                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                                     mc.player.swingHand(Hand.MAIN_HAND);
@@ -873,7 +872,7 @@ public class AutoMountain extends Module {
                             BlockPos dw2 = playerPos.add(new Vec3i(-1,-spcoffset.get(),0));
                             BlockPos dw3 = playerPos.add(new Vec3i(-1,-spcoffset.get()+1,0));
                             BlockPos pos = playerPos.add(new Vec3i(-1,-spcoffset.get()-2,0));
-                            if (!mc.world.getBlockState(dw1).getMaterial().isSolid() && !mc.world.getBlockState(dw2).getMaterial().isSolid() && !mc.world.getBlockState(dw3).getMaterial().isSolid() && !mc.world.getBlockState(dw1).getMaterial().isLiquid() && !mc.world.getBlockState(dw2).getMaterial().isLiquid() && !mc.world.getBlockState(dw3).getMaterial().isLiquid() && !mc.world.getBlockState(dw1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dw2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dw3).getMaterial().equals(Material.POWDER_SNOW)) {
+                            if (mc.world.getBlockState(dw1).getMaterial().isReplaceable() && mc.world.getBlockState(dw2).getMaterial().isReplaceable() && mc.world.getBlockState(dw3).getMaterial().isReplaceable() && mc.world.getFluidState(dw1).isEmpty() && mc.world.getFluidState(dw2).isEmpty() && mc.world.getFluidState(dw3).isEmpty() && !mc.world.getBlockState(dw1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dw2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dw3).isOf(Blocks.POWDER_SNOW)) {
                                 if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
                                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                                     mc.player.swingHand(Hand.MAIN_HAND);
@@ -885,7 +884,7 @@ public class AutoMountain extends Module {
                             BlockPos dw2 = playerPos.add(new Vec3i(-1,0,0));
                             BlockPos dw3 = playerPos.add(new Vec3i(-1,1,0));
                             BlockPos pos = playerPos.add(new Vec3i(-1,-2,0));
-                            if (!mc.world.getBlockState(dw1).getMaterial().isSolid() && !mc.world.getBlockState(dw2).getMaterial().isSolid() && !mc.world.getBlockState(dw3).getMaterial().isSolid() && !mc.world.getBlockState(dw1).getMaterial().isLiquid() && !mc.world.getBlockState(dw2).getMaterial().isLiquid() && !mc.world.getBlockState(dw3).getMaterial().isLiquid() && !mc.world.getBlockState(dw1).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dw2).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(dw3).getMaterial().equals(Material.POWDER_SNOW)) {
+                            if (mc.world.getBlockState(dw1).getMaterial().isReplaceable() && mc.world.getBlockState(dw2).getMaterial().isReplaceable() && mc.world.getBlockState(dw3).getMaterial().isReplaceable() && mc.world.getFluidState(dw1).isEmpty() && mc.world.getFluidState(dw2).isEmpty() && mc.world.getFluidState(dw3).isEmpty() && !mc.world.getBlockState(dw1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dw2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dw3).isOf(Blocks.POWDER_SNOW)) {
                                 if (mc.world.getBlockState(pos).getMaterial().isReplaceable()){
                                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                                     mc.player.swingHand(Hand.MAIN_HAND);
@@ -905,16 +904,6 @@ public class AutoMountain extends Module {
             }
         }
         PlayerUtils.centerPlayer();
-    }
-
-    private boolean shouldFlyDown(double currentY, double lastY) {
-        if (currentY >= lastY) {
-            return true;
-        } else return lastY - currentY < 0.03130D;
-    }
-
-    private boolean isEntityOnAir(Entity entity) {
-        return entity.world.getStatesInBox(entity.getBoundingBox().expand(0.0625).stretch(0.0, -0.55, 0.0)).allMatch(AbstractBlock.AbstractBlockState::isAir);
     }
     private void seekground() {
         if (!(mc.world.getBlockState(lowestblock.add(new Vec3i(0,-1,0))).getBlock() ==Blocks.AIR)) groundY=lowestblock.getY();
