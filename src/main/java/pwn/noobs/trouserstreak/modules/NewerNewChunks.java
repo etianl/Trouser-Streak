@@ -46,7 +46,7 @@ import java.util.Set;
 public class NewerNewChunks extends Module {
 	public enum DetectMode {
 		Normal,
-		IgnoreFlowBelow0AndLightingExploit,
+		IgnoreFlowBelow0,
 		Advanced
 	}
 
@@ -60,12 +60,6 @@ public class NewerNewChunks extends Module {
 			.name("Chunk Detection Mode")
 			.description("Anything other than normal is for old servers where build limits are being increased due to updates.")
 			.defaultValue(DetectMode.Normal)
-			.build()
-	);
-	private final Setting<Boolean> lightexploit = sgGeneral.add(new BoolSetting.Builder()
-			.name("LightingExploit")
-			.description("Estimates newchunks based on lighting packets. THESE MAY POSSIBLY BE OLD. Advanced Mode needed to help determine false positives.")
-			.defaultValue(false)
 			.build()
 	);
 	private final Setting<Boolean> remove = sgcacheCdata.add(new BoolSetting.Builder()
@@ -111,14 +105,9 @@ public class NewerNewChunks extends Module {
 		WTable table = theme.table();
 		WButton deletedata = table.add(theme.button("**DELETE CHUNK DATA**")).expandX().minWidth(100).widget();
 		deletedata.action = () -> {
-			newChunks.clear();
-			oldChunks.clear();
-			olderoldChunks.clear();
-			lightingexploitChunks.clear();
-			new File("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt").delete();
-			new File("NewChunks/"+serverip+"/"+world+"/OldChunkData.txt").delete();
-			new File("NewChunks/"+serverip+"/"+world+"/FlowIsBelowY0ChunkData.txt").delete();
-			new File("NewChunks/"+serverip+"/"+world+"/LightingExploitChunkData.txt").delete();
+			if (deletewarning==0) error("PRESS AGAIN WITHIN 5s TO DELETE ALL CHUNK DATA FOR THIS DIMENSION.");
+			deletewarningTicks=0;
+			deletewarning++;
 		};
 		table.row();
 		return table;
@@ -160,17 +149,9 @@ public class NewerNewChunks extends Module {
 			.name("FlowIsBelowY0-side-color")
 			.description("MAY STILL BE NEW. Color of the chunks that have liquids flowing below Y=0")
 			.defaultValue(new SettingColor(255, 255, 0, 75))
-			.visible(() -> (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both) && detectmode.get()==DetectMode.Advanced)
+			.visible(() -> (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both) && detectmode.get()== DetectMode.Advanced)
 			.build()
 	);
-	private final Setting<SettingColor> lightingexploitChunksSideColor = sgRender.add(new ColorSetting.Builder()
-			.name("LightingExploitChunks-side-color")
-			.description("MAY POSSIBLY BE OLD. Color of the chunks that have been triggered via lighting packets")
-			.defaultValue(new SettingColor(0, 0, 255, 75))
-			.visible(() -> (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both) && detectmode.get()==DetectMode.Advanced && lightexploit.get())
-			.build()
-	);
-
 	private final Setting<SettingColor> oldChunksSideColor = sgRender.add(new ColorSetting.Builder()
 			.name("old-chunks-side-color")
 			.description("Color of the chunks that have (most likely) been loaded before.")
@@ -178,7 +159,6 @@ public class NewerNewChunks extends Module {
 			.visible(() -> shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both)
 			.build()
 	);
-
 	private final Setting<SettingColor> newChunksLineColor = sgRender.add(new ColorSetting.Builder()
 			.name("new-chunks-line-color")
 			.description("Color of the chunks that are (most likely) completely new.")
@@ -190,17 +170,9 @@ public class NewerNewChunks extends Module {
 			.name("FlowIsBelowY0-line-color")
 			.description("MAY STILL BE NEW. Color of the chunks that have liquids flowing below Y=0")
 			.defaultValue(new SettingColor(255, 255, 0, 170))
-			.visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both) && detectmode.get()==DetectMode.Advanced)
+			.visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both) && detectmode.get()== DetectMode.Advanced)
 			.build()
 	);
-	private final Setting<SettingColor> lightingexploitChunksLineColor = sgRender.add(new ColorSetting.Builder()
-			.name("LightingExploitChunks-line-color")
-			.description("MAY POSSIBLY BE OLD. Color of the chunks that have been triggered via lighting packets")
-			.defaultValue(new SettingColor(0, 0, 255, 170))
-			.visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both) && detectmode.get()==DetectMode.Advanced && lightexploit.get())
-			.build()
-	);
-
 	private final Setting<SettingColor> oldChunksLineColor = sgRender.add(new ColorSetting.Builder()
 			.name("old-chunks-line-color")
 			.description("Color of the chunks that have (most likely) been loaded before.")
@@ -208,7 +180,8 @@ public class NewerNewChunks extends Module {
 			.visible(() -> shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both)
 			.build()
 	);
-
+	private int deletewarningTicks=666;
+	private int deletewarning=0;
 	private String serverip;
 	private String world;
 	private ChunkPos chunkPos;
@@ -216,9 +189,7 @@ public class NewerNewChunks extends Module {
 	private final Set<ChunkPos> newChunks = Collections.synchronizedSet(new HashSet<>());
 	private final Set<ChunkPos> oldChunks = Collections.synchronizedSet(new HashSet<>());
 	private final Set<ChunkPos> olderoldChunks = Collections.synchronizedSet(new HashSet<>());
-	private final Set<ChunkPos> lightingexploitChunks = Collections.synchronizedSet(new HashSet<>());
 	private static final Direction[] searchDirs = new Direction[] { Direction.EAST, Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.UP };
-	private int errticks=0;
 	private int autoreloadticks=0;
 	private int loadingticks=0;
 	private int reloadworld=0;
@@ -227,9 +198,8 @@ public class NewerNewChunks extends Module {
 	public static int newchunksfound=0;
 	public static int oldchunksfound=0;
 	public static int olderoldchunksfound=0;
-	public static int lightingexploitchunksfound=0;
 	public NewerNewChunks() {
-		super(Trouser.Main,"NewerNewChunks", "Estimates new chunks by checking liquid flow, and by using lighting update packets.");
+		super(Trouser.Main,"NewerNewChunks", "Estimates if chunks are new or old by checking liquid flow.");
 	}
 	@Override
 	public void onActivate() {
@@ -237,7 +207,6 @@ public class NewerNewChunks extends Module {
 			newChunks.clear();
 			oldChunks.clear();
 			olderoldChunks.clear();
-			lightingexploitChunks.clear();
 		}
 		if (mc.isInSingleplayer()==true){
 			String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("/|\\\\");
@@ -267,7 +236,6 @@ public class NewerNewChunks extends Module {
 			newChunks.clear();
 			oldChunks.clear();
 			olderoldChunks.clear();
-			lightingexploitChunks.clear();
 		}
 		super.onDeactivate();
 	}
@@ -278,12 +246,10 @@ public class NewerNewChunks extends Module {
 			newchunksfound=0;
 			oldchunksfound=0;
 			olderoldchunksfound=0;
-			lightingexploitchunksfound=0;
 			if (worldleaveremove.get()) {
 				newChunks.clear();
 				oldChunks.clear();
 				olderoldChunks.clear();
-				lightingexploitChunks.clear();
 			}
 		}
 		if (event.screen instanceof DownloadingTerrainScreen) {
@@ -291,7 +257,6 @@ public class NewerNewChunks extends Module {
 			newchunksfound=0;
 			oldchunksfound=0;
 			olderoldchunksfound=0;
-			lightingexploitchunksfound=0;
 			reloadworld=0;
 		}
 	}
@@ -301,24 +266,27 @@ public class NewerNewChunks extends Module {
 		newchunksfound=0;
 		oldchunksfound=0;
 		olderoldchunksfound=0;
-		lightingexploitchunksfound=0;
 		if (worldleaveremove.get()) {
 			newChunks.clear();
 			oldChunks.clear();
 			olderoldChunks.clear();
-			lightingexploitChunks.clear();
 		}
 	}
 
 	@EventHandler
 	private void onPreTick(TickEvent.Pre event) {
-		if (detectmode.get()==DetectMode.Normal && lightexploit.get()){
-			if (errticks<6){
-				errticks++;}
-			if (errticks==5){
-				error("ADVANCED MODE RECOMMENDED. Required to determine false positives from the LightingExploit from OldChunks.");
-			}
-		} else errticks=0;
+		if (deletewarningTicks<=100) deletewarningTicks++;
+		else deletewarning=0;
+		if (deletewarning>=2){
+			newChunks.clear();
+			oldChunks.clear();
+			olderoldChunks.clear();
+			new File("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt").delete();
+			new File("NewChunks/"+serverip+"/"+world+"/OldChunkData.txt").delete();
+			new File("NewChunks/"+serverip+"/"+world+"/FlowIsBelowY0ChunkData.txt").delete();
+			error("Chunk Data deleted for this Dimension.");
+			deletewarning=0;
+		}
 		if (load.get()){
 			loadingticks++;
 			if (loadingticks<2){
@@ -334,7 +302,6 @@ public class NewerNewChunks extends Module {
 				newchunksfound=0;
 				oldchunksfound=0;
 				olderoldchunksfound=0;
-				lightingexploitchunksfound=0;
 				chunkcounter=false;}
 			if (chunkcounter=true && chunkcounterticks<1){
 				try {
@@ -364,15 +331,6 @@ public class NewerNewChunks extends Module {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				try {
-					List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/LightingExploitChunkData.txt"));
-
-					for (String line : allLines) {
-						lightingexploitchunksfound++;
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
 			}
 		}
 
@@ -390,7 +348,6 @@ public class NewerNewChunks extends Module {
 				newChunks.clear();
 				oldChunks.clear();
 				olderoldChunks.clear();
-				lightingexploitChunks.clear();
 				if (load.get()){
 					loadData();
 				}
@@ -407,7 +364,6 @@ public class NewerNewChunks extends Module {
 				newChunks.clear();
 				oldChunks.clear();
 				olderoldChunks.clear();
-				lightingexploitChunks.clear();
 			}
 				loadData();
 		}
@@ -427,28 +383,11 @@ public class NewerNewChunks extends Module {
 			synchronized (olderoldChunks) {
 				for (ChunkPos c : olderoldChunks) {
 					if (mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
-						if (detectmode.get()==DetectMode.Advanced) {
+						if (detectmode.get()== DetectMode.Advanced) {
 							render(new Box(c.getStartPos().add(0, renderHeight.get(), 0), c.getStartPos().add(16, renderHeight.get(), 16)), olderoldChunksSideColor.get(), olderoldChunksLineColor.get(), shapeMode.get(), event);
-						} else if (detectmode.get()==DetectMode.Normal) {
+						} else if (detectmode.get()== DetectMode.Normal) {
 							render(new Box(c.getStartPos().add(0, renderHeight.get(), 0), c.getStartPos().add(16, renderHeight.get(), 16)), newChunksSideColor.get(), newChunksLineColor.get(), shapeMode.get(), event);
-						} else if (detectmode.get()==DetectMode.IgnoreFlowBelow0AndLightingExploit) {
-							render(new Box(c.getStartPos().add(0, renderHeight.get(), 0), c.getStartPos().add(16, renderHeight.get(), 16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
-						}
-					}
-				}
-			}
-		}
-		if (lightingexploitChunksLineColor.get().a > 5 || lightingexploitChunksSideColor.get().a > 5) {
-			synchronized (lightingexploitChunks) {
-				for (ChunkPos c : lightingexploitChunks) {
-					if (mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
-						if (detectmode.get()==DetectMode.Advanced && lightexploit.get()) {
-							render(new Box(c.getStartPos().add(0, renderHeight.get(), 0), c.getStartPos().add(16, renderHeight.get(), 16)), lightingexploitChunksSideColor.get(), lightingexploitChunksLineColor.get(), shapeMode.get(), event);
-						} else if ((detectmode.get()==DetectMode.Normal) && lightexploit.get()) {
-							render(new Box(c.getStartPos().add(0, renderHeight.get(), 0), c.getStartPos().add(16, renderHeight.get(), 16)), newChunksSideColor.get(), newChunksLineColor.get(), shapeMode.get(), event);
-						} else if ((detectmode.get()==DetectMode.IgnoreFlowBelow0AndLightingExploit) && lightexploit.get()) {
-							render(new Box(c.getStartPos().add(0, renderHeight.get(), 0), c.getStartPos().add(16, renderHeight.get(), 16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
-						} else if ((detectmode.get()==DetectMode.Advanced | detectmode.get()==DetectMode.Normal | detectmode.get()==DetectMode.IgnoreFlowBelow0AndLightingExploit) && !lightexploit.get()) {
+						} else if (detectmode.get()== DetectMode.IgnoreFlowBelow0) {
 							render(new Box(c.getStartPos().add(0, renderHeight.get(), 0), c.getStartPos().add(16, renderHeight.get(), 16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
 						}
 					}
@@ -483,33 +422,18 @@ public class NewerNewChunks extends Module {
 					for (Direction dir: searchDirs) {
 						if (pos.offset(dir).getY()>0 && mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 							if (olderoldChunks.contains(chunkPos)) olderoldChunks.remove(chunkPos);
-							if (lightingexploitChunks.contains(chunkPos)) lightingexploitChunks.remove(chunkPos);
 							newChunks.add(chunkPos);
 							if (save.get()){
 								saveNewChunkData();
 							}
 							return;
 						}else if (pos.offset(dir).getY()<=0 && mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
-							if (lightingexploitChunks.contains(chunkPos)) lightingexploitChunks.remove(chunkPos);
 							olderoldChunks.add(chunkPos);
 							if (save.get()){
 								saveOlderOldChunkData();
 							}
 							return;
 						}
-					}
-				}
-				if (lightexploit.get()){
-					try {
-						if (!packet.shouldSkipLightingUpdates() && !lightingexploitChunks.contains(chunkPos) && !oldChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !newChunks.contains(chunkPos)){
-							lightingexploitChunks.add(chunkPos);
-							if (save.get()){
-								saveLightingExploitChunkData();
-							}
-						}
-					}
-					catch (Exception e){
-						e.printStackTrace();
 					}
 				}
 			});
@@ -522,14 +446,12 @@ public class NewerNewChunks extends Module {
 				for (Direction dir: searchDirs) {
 					if (packet.getPos().offset(dir).getY()>0 && mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 						if (olderoldChunks.contains(chunkPos)) olderoldChunks.remove(chunkPos);
-						if (lightingexploitChunks.contains(chunkPos)) lightingexploitChunks.remove(chunkPos);
 						newChunks.add(chunkPos);
 						if (save.get()){
 							saveNewChunkData();
 						}
 						return;
 					}else if (packet.getPos().offset(dir).getY()<=0 && mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() &&  (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
-						if (lightingexploitChunks.contains(chunkPos)) lightingexploitChunks.remove(chunkPos);
 						olderoldChunks.add(chunkPos);
 						if (save.get()){
 							saveOlderOldChunkData();
@@ -552,13 +474,11 @@ public class NewerNewChunks extends Module {
 					return;
 				}
 
-
 				for (int x = 0; x < 16; x++) {
 					for (int y = mc.world.getBottomY(); y < mc.world.getTopY(); y++) {
 						for (int z = 0; z < 16; z++) {
 							FluidState fluid = chunk.getFluidState(x, y, z);
-
-							if (!oldChunks.contains(oldpos) && !lightingexploitChunks.contains(oldpos) && !olderoldChunks.contains(oldpos) && !newChunks.contains(oldpos) && !fluid.isEmpty() && !fluid.isStill()) {
+							if (!oldChunks.contains(oldpos) && !olderoldChunks.contains(oldpos) && !newChunks.contains(oldpos) && !fluid.isEmpty() && !fluid.isStill()) {
 								oldChunks.add(oldpos);
 								if (save.get()){
 									saveOldChunkData();
@@ -595,7 +515,7 @@ public class NewerNewChunks extends Module {
 				int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
 				int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
 				chunkPos = new ChunkPos(X,Z);
-				if (!lightingexploitChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)){
+				if (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)){
 					newChunks.add(chunkPos);}
 			}
 		} catch (IOException e) {
@@ -610,24 +530,8 @@ public class NewerNewChunks extends Module {
 				int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
 				int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
 				chunkPos = new ChunkPos(X,Z);
-				if (!lightingexploitChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)){
+				if (!newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)){
 					olderoldChunks.add(chunkPos);}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		try {
-			List<String> allLines = Files.readAllLines(Paths.get("NewChunks/"+serverip+"/"+world+"/LightingExploitChunkData.txt"));
-
-			for (String line : allLines) {
-				String s = line;
-				String[] array = s.split(", ");
-				int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
-				int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
-				chunkPos = new ChunkPos(X,Z);
-				if (!lightingexploitChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)){
-				lightingexploitChunks.add(chunkPos );
-				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -659,17 +563,6 @@ public class NewerNewChunks extends Module {
 		try {
 			new File("NewChunks/"+serverip+"/"+world).mkdirs();
 			FileWriter writer = new FileWriter("NewChunks/"+serverip+"/"+world+"/FlowIsBelowY0ChunkData.txt", true);
-			writer.write(String.valueOf(chunkPos));
-			writer.write("\r\n");   // write new line
-			writer.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	private void saveLightingExploitChunkData() {
-		try {
-			new File("NewChunks/"+serverip+"/"+world).mkdirs();
-			FileWriter writer = new FileWriter("NewChunks/"+serverip+"/"+world+"/LightingExploitChunkData.txt", true);
 			writer.write(String.valueOf(chunkPos));
 			writer.write("\r\n");   // write new line
 			writer.close();

@@ -66,24 +66,40 @@ public class BaseFinder extends Module {
             .defaultValue(40)
             .visible(() -> nearestbasemsg.get())
             .build());
+    private final Setting<Boolean> skybuildfind = sglists.add(new BoolSetting.Builder()
+            .name("Sky Build Finder")
+            .description("If Blocks higher than terrain can naturally generate, flag chunk as possible build.")
+            .defaultValue(true)
+            .build());
+    private final Setting<Integer> skybuildint = sglists.add(new IntSetting.Builder()
+            .name("Sky Build Y Threshold")
+            .description("If Blocks higher than this Y value, flag chunk as possible build.")
+                    .min(258)
+            .sliderRange(258,319)
+            .defaultValue(260)
+            .visible(() -> skybuildfind.get())
+            .build());
     private final Setting<List<Block>> Blawcks1 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #1 (Default)")
             .description("If the total amount of any of these found is greater than the Number, throw a base location. Blocks are checked in listed order from top to bottom.")
             .defaultValue(
                     Blocks.BLACK_BED, Blocks.BROWN_BED, Blocks.GRAY_BED, Blocks.LIGHT_BLUE_BED, Blocks.LIGHT_GRAY_BED, Blocks.MAGENTA_BED, Blocks.PINK_BED,
+                    Blocks.CHERRY_BUTTON, Blocks.CHERRY_DOOR, Blocks.CHERRY_FENCE, Blocks.CHERRY_FENCE_GATE, Blocks.CHERRY_PLANKS, Blocks.CHERRY_PRESSURE_PLATE, Blocks.CHERRY_STAIRS, Blocks.CHERRY_WOOD, Blocks.CHERRY_TRAPDOOR, Blocks.CHERRY_SLAB,
+                    Blocks.BAMBOO_BLOCK, Blocks.BAMBOO_BUTTON, Blocks.BAMBOO_DOOR, Blocks.BAMBOO_FENCE, Blocks.BAMBOO_FENCE_GATE, Blocks.BAMBOO_MOSAIC, Blocks.BAMBOO_MOSAIC_SLAB, Blocks.BAMBOO_MOSAIC_STAIRS, Blocks.BAMBOO_PLANKS, Blocks.BAMBOO_PRESSURE_PLATE, Blocks.BAMBOO_SLAB, Blocks.BAMBOO_STAIRS, Blocks.BAMBOO_TRAPDOOR, Blocks.DECORATED_POT, Blocks.SNIFFER_EGG,
                     Blocks.BLACK_CONCRETE, Blocks.BLUE_CONCRETE, Blocks.CYAN_CONCRETE, Blocks.BROWN_CONCRETE, Blocks.WHITE_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.MAGENTA_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE, Blocks.PINK_CONCRETE, Blocks.GRAY_CONCRETE, Blocks.LIGHT_GRAY_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.GREEN_CONCRETE, Blocks.RED_CONCRETE,
                     Blocks.BLACK_CONCRETE_POWDER, Blocks.BLUE_CONCRETE_POWDER, Blocks.CYAN_CONCRETE_POWDER, Blocks.BROWN_CONCRETE_POWDER, Blocks.WHITE_CONCRETE_POWDER, Blocks.ORANGE_CONCRETE_POWDER, Blocks.MAGENTA_CONCRETE_POWDER, Blocks.LIGHT_BLUE_CONCRETE_POWDER, Blocks.YELLOW_CONCRETE_POWDER, Blocks.LIME_CONCRETE_POWDER, Blocks.PINK_CONCRETE_POWDER, Blocks.GRAY_CONCRETE_POWDER, Blocks.LIGHT_GRAY_CONCRETE_POWDER, Blocks.PURPLE_CONCRETE_POWDER, Blocks.GREEN_CONCRETE_POWDER, Blocks.RED_CONCRETE_POWDER,
                     Blocks.COPPER_BLOCK, Blocks.EXPOSED_COPPER, Blocks.WEATHERED_COPPER, Blocks.OXIDIZED_COPPER, Blocks.SOUL_TORCH, Blocks.SOUL_WALL_TORCH,
                     Blocks.WHITE_STAINED_GLASS, Blocks.ORANGE_STAINED_GLASS, Blocks.LIGHT_BLUE_STAINED_GLASS, Blocks.YELLOW_STAINED_GLASS, Blocks.LIME_STAINED_GLASS, Blocks.PINK_STAINED_GLASS, Blocks.GRAY_STAINED_GLASS, Blocks.LIGHT_GRAY_STAINED_GLASS, Blocks.CYAN_STAINED_GLASS, Blocks.PURPLE_STAINED_GLASS, Blocks.BLUE_STAINED_GLASS, Blocks.BROWN_STAINED_GLASS, Blocks.GREEN_STAINED_GLASS, Blocks.RED_STAINED_GLASS, Blocks.BLACK_STAINED_GLASS,
                     Blocks.CRIMSON_PRESSURE_PLATE, Blocks.CRIMSON_BUTTON, Blocks.CRIMSON_DOOR, Blocks.CRIMSON_FENCE, Blocks.CRIMSON_FENCE_GATE, Blocks.CRIMSON_PLANKS, Blocks.CRIMSON_SIGN, Blocks.CRIMSON_WALL_SIGN, Blocks.CRIMSON_SLAB, Blocks.CRIMSON_STAIRS, Blocks.CRIMSON_TRAPDOOR,
                     Blocks.WARPED_PRESSURE_PLATE, Blocks.WARPED_BUTTON, Blocks.WARPED_DOOR, Blocks.WARPED_FENCE, Blocks.WARPED_FENCE_GATE, Blocks.WARPED_PLANKS, Blocks.WARPED_SIGN, Blocks.WARPED_WALL_SIGN, Blocks.WARPED_SLAB, Blocks.WARPED_STAIRS, Blocks.WARPED_TRAPDOOR,
-                    Blocks.SCAFFOLDING, Blocks.OAK_SIGN, Blocks.SPRUCE_SIGN, Blocks.ACACIA_SIGN, Blocks.ACACIA_WALL_SIGN, Blocks.BIRCH_SIGN, Blocks.BIRCH_WALL_SIGN, Blocks.DARK_OAK_SIGN, Blocks.DARK_OAK_WALL_SIGN, Blocks.JUNGLE_SIGN, Blocks.JUNGLE_WALL_SIGN, Blocks.MANGROVE_SIGN, Blocks.MANGROVE_WALL_SIGN, Blocks.SLIME_BLOCK, Blocks.SPONGE, Blocks.TINTED_GLASS,
+                    Blocks.SCAFFOLDING, Blocks.CHERRY_SIGN, Blocks.CHERRY_WALL_SIGN, Blocks.OAK_SIGN, Blocks.SPRUCE_SIGN, Blocks.ACACIA_SIGN, Blocks.ACACIA_WALL_SIGN, Blocks.BIRCH_SIGN, Blocks.BIRCH_WALL_SIGN, Blocks.DARK_OAK_SIGN, Blocks.DARK_OAK_WALL_SIGN, Blocks.JUNGLE_SIGN, Blocks.JUNGLE_WALL_SIGN, Blocks.MANGROVE_SIGN, Blocks.MANGROVE_WALL_SIGN, Blocks.SLIME_BLOCK, Blocks.SPONGE, Blocks.TINTED_GLASS,
+                    Blocks.ACACIA_HANGING_SIGN, Blocks.ACACIA_WALL_HANGING_SIGN, Blocks.BAMBOO_HANGING_SIGN, Blocks.BAMBOO_WALL_HANGING_SIGN, Blocks.BIRCH_HANGING_SIGN, Blocks.BIRCH_WALL_HANGING_SIGN, Blocks.CHERRY_HANGING_SIGN, Blocks.CHERRY_WALL_HANGING_SIGN, Blocks.CRIMSON_HANGING_SIGN, Blocks.CRIMSON_WALL_HANGING_SIGN, Blocks.DARK_OAK_HANGING_SIGN, Blocks.DARK_OAK_WALL_HANGING_SIGN, Blocks.JUNGLE_HANGING_SIGN, Blocks.JUNGLE_WALL_HANGING_SIGN, Blocks.MANGROVE_HANGING_SIGN, Blocks.MANGROVE_WALL_HANGING_SIGN, Blocks.OAK_HANGING_SIGN, Blocks.OAK_WALL_HANGING_SIGN, Blocks.SPRUCE_HANGING_SIGN, Blocks.SPRUCE_WALL_HANGING_SIGN, Blocks.WARPED_HANGING_SIGN, Blocks.WARPED_WALL_HANGING_SIGN,
                     Blocks.CHISELED_QUARTZ_BLOCK, Blocks.QUARTZ_PILLAR, Blocks.QUARTZ_BRICKS, Blocks.QUARTZ_STAIRS, Blocks.OCHRE_FROGLIGHT, Blocks.PEARLESCENT_FROGLIGHT, Blocks.VERDANT_FROGLIGHT, Blocks.PETRIFIED_OAK_SLAB,
                     Blocks.STRIPPED_ACACIA_WOOD, Blocks.BIRCH_WOOD, Blocks.STRIPPED_BIRCH_LOG, Blocks.STRIPPED_BIRCH_WOOD, Blocks.CRIMSON_HYPHAE, Blocks.STRIPPED_CRIMSON_HYPHAE, Blocks.STRIPPED_CRIMSON_STEM, Blocks.DARK_OAK_WOOD, Blocks.STRIPPED_DARK_OAK_LOG, Blocks.STRIPPED_DARK_OAK_WOOD, Blocks.STRIPPED_JUNGLE_LOG, Blocks.STRIPPED_JUNGLE_WOOD, Blocks.MANGROVE_WOOD, Blocks.STRIPPED_MANGROVE_LOG, Blocks.STRIPPED_MANGROVE_WOOD, Blocks.WARPED_HYPHAE, Blocks.STRIPPED_WARPED_HYPHAE, Blocks.STRIPPED_WARPED_STEM,
                     Blocks.SHULKER_BOX, Blocks.BLACK_SHULKER_BOX, Blocks.BLUE_SHULKER_BOX, Blocks.BROWN_SHULKER_BOX, Blocks.CYAN_SHULKER_BOX, Blocks.GRAY_SHULKER_BOX, Blocks.GREEN_SHULKER_BOX, Blocks.LIGHT_BLUE_SHULKER_BOX, Blocks.LIGHT_GRAY_SHULKER_BOX, Blocks.LIME_SHULKER_BOX, Blocks.MAGENTA_SHULKER_BOX, Blocks.ORANGE_SHULKER_BOX, Blocks.PINK_SHULKER_BOX, Blocks.PURPLE_SHULKER_BOX, Blocks.RED_SHULKER_BOX, Blocks.WHITE_SHULKER_BOX, Blocks.YELLOW_SHULKER_BOX,
                     Blocks.LAVA_CAULDRON, Blocks.POWDER_SNOW_CAULDRON, Blocks.ACTIVATOR_RAIL, Blocks.BEACON, Blocks.BEEHIVE, Blocks.REPEATING_COMMAND_BLOCK, Blocks.COMMAND_BLOCK, Blocks.CHAIN_COMMAND_BLOCK, Blocks.COAL_BLOCK, Blocks.DIAMOND_BLOCK, Blocks.EMERALD_BLOCK, Blocks.IRON_BLOCK, Blocks.NETHERITE_BLOCK, Blocks.RAW_GOLD_BLOCK, Blocks.CAKE, Blocks.CONDUIT, Blocks.DAYLIGHT_DETECTOR, Blocks.DETECTOR_RAIL, Blocks.DRIED_KELP_BLOCK, Blocks.DROPPER, Blocks.ENCHANTING_TABLE,
                     Blocks.CREEPER_HEAD, Blocks.CREEPER_WALL_HEAD, Blocks.DRAGON_WALL_HEAD, Blocks.DRAGON_HEAD, Blocks.PLAYER_HEAD, Blocks.PLAYER_WALL_HEAD, Blocks.ZOMBIE_HEAD, Blocks.ZOMBIE_WALL_HEAD, Blocks.SKELETON_WALL_SKULL, Blocks.WITHER_SKELETON_SKULL, Blocks.WITHER_SKELETON_WALL_SKULL,
-                    Blocks.HONEY_BLOCK, Blocks.HONEYCOMB_BLOCK, Blocks.HOPPER, Blocks.JUKEBOX, Blocks.LIGHTNING_ROD, Blocks.LODESTONE, Blocks.OBSERVER, Blocks.PACKED_MUD, Blocks.POWERED_RAIL, Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE, Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE, Blocks.BIRCH_PRESSURE_PLATE, Blocks.JUNGLE_PRESSURE_PLATE, Blocks.DARK_OAK_PRESSURE_PLATE, Blocks.MANGROVE_PRESSURE_PLATE, Blocks.CRIMSON_PRESSURE_PLATE, Blocks.WARPED_PRESSURE_PLATE, Blocks.RESPAWN_ANCHOR
+                    Blocks.HONEY_BLOCK, Blocks.HONEYCOMB_BLOCK, Blocks.HOPPER, Blocks.JUKEBOX, Blocks.LIGHTNING_ROD, Blocks.LODESTONE, Blocks.OBSERVER, Blocks.POWERED_RAIL, Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE, Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE, Blocks.BIRCH_PRESSURE_PLATE, Blocks.JUNGLE_PRESSURE_PLATE, Blocks.DARK_OAK_PRESSURE_PLATE, Blocks.MANGROVE_PRESSURE_PLATE, Blocks.CRIMSON_PRESSURE_PLATE, Blocks.WARPED_PRESSURE_PLATE, Blocks.RESPAWN_ANCHOR
                     )
             .filter(this::filterBlocks)
             .build()
@@ -98,7 +114,7 @@ public class BaseFinder extends Module {
     private final Setting<List<Block>> Blawcks3 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #3 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location. Blocks are checked in numerical listed order from top to bottom.")
-            .defaultValue(Blocks.CRAFTING_TABLE, Blocks.ENDER_CHEST, Blocks.SMOOTH_QUARTZ, Blocks.NOTE_BLOCK)
+            .defaultValue(Blocks.CRAFTING_TABLE, Blocks.BREWING_STAND, Blocks.ENDER_CHEST, Blocks.SMOOTH_QUARTZ, Blocks.NOTE_BLOCK)
             .filter(this::filterBlocks)
             .build()
     );
@@ -117,9 +133,16 @@ public class BaseFinder extends Module {
             .build()
     );
     private final Setting<List<Block>> Blawcks6 = sglists.add(new BlockListSetting.Builder()
-            .name("Block List #6 (Extra Custom)")
+            .name("Block List #6 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location. Blocks are checked in numerical listed order from top to bottom.")
             .defaultValue(Blocks.TORCH)
+            .filter(this::filterBlocks)
+            .build()
+    );
+    private final Setting<List<Block>> Blawcks7 = sglists.add(new BlockListSetting.Builder()
+            .name("Block List #7 (Extra Custom)")
+            .description("If the total amount of any of these found is greater than the Number specified, throw a base location. Blocks are checked in numerical listed order from top to bottom.")
+            .defaultValue()
             .filter(this::filterBlocks)
             .build()
     );
@@ -142,7 +165,7 @@ public class BaseFinder extends Module {
             .description("How many blocks it takes, from of any of the listed blocks to throw a base location.")
             .min(1)
             .sliderRange(1,100)
-            .defaultValue(3)
+            .defaultValue(4)
             .build());
     private final Setting<Integer> blowkfind4 = sglists.add(new IntSetting.Builder()
             .name("(List #4) Number Of Blocks to Find")
@@ -163,7 +186,14 @@ public class BaseFinder extends Module {
             .description("How many blocks it takes, from of any of the listed blocks to throw a base location.")
             .min(1)
             .sliderRange(1,100)
-            .defaultValue(24)
+            .defaultValue(26)
+            .build());
+    private final Setting<Integer> blowkfind7 = sglists.add(new IntSetting.Builder()
+            .name("(List #6) Number Of Blocks to Find")
+            .description("How many blocks it takes, from of any of the listed blocks to throw a base location.")
+            .min(1)
+            .sliderRange(1,100)
+            .defaultValue(1)
             .build());
     private final Setting<Boolean> remove = sgcacheCdata.add(new BoolSetting.Builder()
             .name("RemoveOnModuleDisabled")
@@ -244,7 +274,8 @@ public class BaseFinder extends Module {
         WButton deletedata = table.add(theme.button("**DELETE ALL BASE DATA**")).expandX().minWidth(100).widget();
         deletedata.action = () -> {
             if (!(mc.world==null) && mc.world.isChunkLoaded(mc.player.getChunkPos().x,mc.player.getChunkPos().z)){
-            if (deletewarning==0) error("THIS WILL DELETE ALL BASE DATA FOR THIS DIMENSION. PRESS AGAIN TO PROCEED.");
+            if (deletewarning==0) error("PRESS AGAIN WITHIN 5s TO DELETE ALL BASE DATA FOR THIS DIMENSION.");
+            deletewarningTicks=0;
             deletewarning++;
             }
         };
@@ -295,6 +326,7 @@ public class BaseFinder extends Module {
             .visible(() -> shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both)
             .build()
     );
+    private int deletewarningTicks=666;
     private int deletewarning=0;
     private boolean checkingchunk1=false;
     private int found1 = 0;
@@ -308,6 +340,8 @@ public class BaseFinder extends Module {
     private int found5 = 0;
     private boolean checkingchunk6=false;
     private int found6 = 0;
+    private boolean checkingchunk7=false;
+    private int found7 = 0;
     public static int closestbaseX=2000000000;
     public static int closestbaseZ=2000000000;
     private static int closestX=2000000000;
@@ -323,6 +357,7 @@ public class BaseFinder extends Module {
     private final Set<BlockPos> blockpositions4 = Collections.synchronizedSet(new HashSet<>());
     private final Set<BlockPos> blockpositions5 = Collections.synchronizedSet(new HashSet<>());
     private final Set<BlockPos> blockpositions6 = Collections.synchronizedSet(new HashSet<>());
+    private final Set<BlockPos> blockpositions7 = Collections.synchronizedSet(new HashSet<>());
     public static int isBaseFinderModuleOn=0;
     private int autoreloadticks=0;
     private int loadingticks=0;
@@ -333,7 +368,7 @@ public class BaseFinder extends Module {
     public static int RemoveCoordX=1500000000;
     public static int RemoveCoordZ=1500000000;
     public int findnearestbaseticks=0;
-    public static boolean findnearestbase;
+    public static boolean findnearestbase=false;
     public BaseFinder() {
         super(Trouser.Main,"BaseFinder", "Estimates if a build or base may be in the chunk based on the blocks it contains. May cause lag.");
     }
@@ -396,6 +431,8 @@ public class BaseFinder extends Module {
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
+        if (deletewarningTicks<=100) deletewarningTicks++;
+        else deletewarning=0;
         if (deletewarning>=2){
                 baseChunks.clear();
                 new File("BaseChunks/"+serverip+"/"+world+"/BaseChunkData.txt").delete();
@@ -534,7 +571,7 @@ public class BaseFinder extends Module {
                     return;
                 }
 
-                if (Blawcks1.get().size()>0 || Blawcks2.get().size()>0 || Blawcks3.get().size()>0 || Blawcks4.get().size()>0 || Blawcks5.get().size()>0 || Blawcks6.get().size()>0){
+                if (Blawcks1.get().size()>0 || Blawcks2.get().size()>0 || Blawcks3.get().size()>0 || Blawcks4.get().size()>0 || Blawcks5.get().size()>0 || Blawcks6.get().size()>0 || Blawcks7.get().size()>0){
                     try {
                 for (int x = 0; x < 16; x++) {
                     for (int y = mc.world.getBottomY(); y < mc.world.getTopY(); y++) {
@@ -542,6 +579,15 @@ public class BaseFinder extends Module {
                             BlockState blerks = chunk.getBlockState(new BlockPos(x, y, z));
                             blockposi=new BlockPos(x, y, z);
                             if (!(blerks.getBlock()==Blocks.AIR)){
+                                if (skybuildfind.get() && y>skybuildint.get()) {
+                                    if (!baseChunks.contains(basepos)){
+                                        baseChunks.add(basepos);
+                                        if (save.get()) {
+                                            saveBaseChunkData();
+                                        }
+                                        ChatUtils.sendMsg(Text.of("(SkyBuild)Possible build located near X"+basepos.getCenterX()+" x Z"+basepos.getCenterZ()));
+                                    }
+                                }
                                 if (!(blerks.getBlock()==Blocks.STONE)){
                                     if (!(blerks.getBlock()==Blocks.DEEPSLATE) && !(blerks.getBlock()==Blocks.DIRT) && !(blerks.getBlock()==Blocks.GRASS_BLOCK) && !(blerks.getBlock()==Blocks.WATER) && !(blerks.getBlock()==Blocks.SAND) && !(blerks.getBlock()==Blocks.GRAVEL)  && !(blerks.getBlock()==Blocks.BEDROCK)&& !(blerks.getBlock()==Blocks.NETHERRACK) && !(blerks.getBlock()==Blocks.LAVA)){
                                         if (Blawcks1.get().size()>0){
@@ -592,6 +638,14 @@ public class BaseFinder extends Module {
                                                 }
                                             }
                                         }
+                                        if (Blawcks7.get().size()>0){
+                                            for (int b = 0; b < Blawcks7.get().size(); b++){
+                                                if (blerks.getBlock()==Blawcks7.get().get(b)) {
+                                                    blockpositions7.add(blockposi);
+                                                    found7= blockpositions7.size();
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -601,6 +655,7 @@ public class BaseFinder extends Module {
                             if (Blawcks4.get().size()>0)checkingchunk4=true;
                             if (Blawcks5.get().size()>0)checkingchunk5=true;
                             if (Blawcks6.get().size()>0)checkingchunk6=true;
+                            if (Blawcks7.get().size()>0)checkingchunk7=true;
                         }
                     }
                 }
@@ -721,6 +776,26 @@ public class BaseFinder extends Module {
                                 blockpositions6.clear();
                                 found6 = 0;
                                 checkingchunk6=false;
+                            }
+                        }
+
+                        //CheckList 7
+                        if (Blawcks7.get().size()>0){
+                            if (checkingchunk7==true && found7>=blowkfind7.get()) {
+                                if (!baseChunks.contains(basepos)){
+                                    baseChunks.add(basepos);
+                                    if (save.get()) {
+                                        saveBaseChunkData();
+                                    }
+                                    ChatUtils.sendMsg(Text.of("(List7)Possible build located near X"+basepos.getCenterX()+" x Z"+basepos.getCenterZ()));
+                                }
+                                blockpositions7.clear();
+                                found7 = 0;
+                                checkingchunk7=false;
+                            } else if (checkingchunk7==true && found7<blowkfind7.get()){
+                                blockpositions7.clear();
+                                found7 = 0;
+                                checkingchunk7=false;
                             }
                         }
                     }

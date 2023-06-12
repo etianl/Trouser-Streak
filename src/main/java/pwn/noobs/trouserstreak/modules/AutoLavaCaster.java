@@ -218,8 +218,8 @@ public class AutoLavaCaster extends Module {
             Modules.get().get(TPFly.class).toggle();
         }
         BlockPos hover = new BlockPos(mc.player.getBlockX(),mc.player.getBlockY()-1,mc.player.getBlockZ());
-        if (mc.world.getBlockState(hover).getMaterial().isReplaceable() && !aposition.get() && !aMountain.autocasttimenow==true){
-            if (mc.world.getBlockState(hover).getMaterial().isReplaceable()){
+        if (mc.world.getBlockState(hover).isReplaceable() && !aposition.get() && !aMountain.autocasttimenow==true){
+            if (mc.world.getBlockState(hover).isReplaceable()){
                 error("Not on a block, try again.");
             }
             if (mc.options.sneakKey.isPressed()){
@@ -381,7 +381,7 @@ public class AutoLavaCaster extends Module {
                 }
                 if (lavamountainticks >= 2){
                     BlockPos pos = mc.player.getBlockPos().add(new Vec3i(0,-1,0));
-                    if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
+                    if (mc.world.getBlockState(pos).isReplaceable()) {
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
@@ -460,8 +460,8 @@ public class AutoLavaCaster extends Module {
                 return;
             }
             if (incY.get()){
-                if (!mc.world.getBlockState(ceiling).getMaterial().isReplaceable()){
-                    if (!mc.world.getBlockState(ceiling).getMaterial().isReplaceable()){
+                if (!mc.world.getBlockState(ceiling).isReplaceable()){
+                    if (!mc.world.getBlockState(ceiling).isReplaceable()){
                         error("Hit the ceiling");
                     }
                     if (mc.options.sneakKey.isPressed()){
@@ -500,7 +500,7 @@ public class AutoLavaCaster extends Module {
         if (incY.get()){
             if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+5 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+5){
                 BlockPos pos = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ());
-                if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
+                if (mc.world.getBlockState(pos).isReplaceable()) {
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
                 lava = new BlockPos(lava.getX(), lava.getY()+1, lava.getZ());
@@ -510,7 +510,7 @@ public class AutoLavaCaster extends Module {
         }
         else if ((estlavatime.get() || aMountain.autocasttimenow==true) && (lavamountainticks>=(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+10 && lavamountainticks<=(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+15) || !estlavatime.get() && !aMountain.autocasttimenow==true && (lavamountainticks>=(lavatime.get()*20)+watertime1.get()+waterdelay.get()+10 && lavamountainticks<=(lavatime.get()*20)+watertime1.get()+waterdelay.get()+15)) {
                 BlockPos pos = mc.player.getBlockPos().add(new Vec3i(0,-1,0));
-                if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
+                if (mc.world.getBlockState(pos).isReplaceable()) {
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
         }
@@ -532,7 +532,7 @@ public class AutoLavaCaster extends Module {
                 }
                 if (lavamountainticks >= 2){
                     BlockPos pos = mc.player.getBlockPos().add(new Vec3i(0,-1,0));
-                    if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
+                    if (mc.world.getBlockState(pos).isReplaceable()) {
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
@@ -611,8 +611,8 @@ public class AutoLavaCaster extends Module {
                     return;
                 }
                 if (incY.get()){
-                    if (!mc.world.getBlockState(ceiling).getMaterial().isReplaceable()){
-                        if (!mc.world.getBlockState(ceiling).getMaterial().isReplaceable()){
+                    if (!mc.world.getBlockState(ceiling).isReplaceable()){
+                        if (!mc.world.getBlockState(ceiling).isReplaceable()){
                             error("Hit the ceiling");
                         }
                         if (mc.options.sneakKey.isPressed()){
@@ -650,34 +650,34 @@ public class AutoLavaCaster extends Module {
             }if (incY.get()){
                 if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+4 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+4){
                     BlockPos pos2 = new BlockPos(lava.getX()+1,lava.getY()+1,lava.getZ());
-                    if (mc.world.getBlockState(pos2).getMaterial().isReplaceable()) {
+                    if (mc.world.getBlockState(pos2).isReplaceable()) {
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos2), Direction.DOWN, pos2, false));
                         }
                 }
                 else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+8 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+8) {
                     BlockPos pos3 = new BlockPos(lava.getX()-1,lava.getY()+1,lava.getZ());
-                    if (mc.world.getBlockState(pos3).getMaterial().isReplaceable()){
+                    if (mc.world.getBlockState(pos3).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos3), Direction.DOWN, pos3, false));
                         mc.player.swingHand(Hand.MAIN_HAND);
                     }
                 }
                 else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+12 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+12) {
                     BlockPos pos4 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ()+1);
-                    if (mc.world.getBlockState(pos4).getMaterial().isReplaceable()){
+                    if (mc.world.getBlockState(pos4).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos4), Direction.DOWN, pos4, false));
                         mc.player.swingHand(Hand.MAIN_HAND);
                     }
                 }
                 else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+16 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+16) {
                     BlockPos pos5 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ()-1);
-                    if (mc.world.getBlockState(pos5).getMaterial().isReplaceable()){
+                    if (mc.world.getBlockState(pos5).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos5), Direction.DOWN, pos5, false));
                         mc.player.swingHand(Hand.MAIN_HAND);
                     }
                 }
                 else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+20 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+20){
                     BlockPos pos1 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ());
-                    if (mc.world.getBlockState(pos1).getMaterial().isReplaceable()){
+                    if (mc.world.getBlockState(pos1).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos1), Direction.DOWN, pos1, false));
                         mc.player.swingHand(Hand.MAIN_HAND);
                     }
@@ -690,7 +690,7 @@ public class AutoLavaCaster extends Module {
                 }
                 else if ((estlavatime.get() || aMountain.autocasttimenow==true) && (lavamountainticks>=(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+25 && lavamountainticks<=(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+30) || !estlavatime.get() && !aMountain.autocasttimenow==true && (lavamountainticks>=(lavatime.get()*20)+watertime1.get()+waterdelay.get()+25 && lavamountainticks<=(lavatime.get()*20)+watertime1.get()+waterdelay.get()+30)) {
                     BlockPos pos = mc.player.getBlockPos().add(new Vec3i(0,-1,0));
-                    if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
+                    if (mc.world.getBlockState(pos).isReplaceable()) {
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
@@ -713,7 +713,7 @@ public class AutoLavaCaster extends Module {
                 }
                 if (lavamountainticks >= 2){
                     BlockPos pos = mc.player.getBlockPos().add(new Vec3i(0,-1,0));
-                    if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
+                    if (mc.world.getBlockState(pos).isReplaceable()) {
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
@@ -792,8 +792,8 @@ public class AutoLavaCaster extends Module {
                     return;
                 }
                 if (incY.get()){
-                    if (!mc.world.getBlockState(ceiling).getMaterial().isReplaceable()){
-                        if (!mc.world.getBlockState(ceiling).getMaterial().isReplaceable()){
+                    if (!mc.world.getBlockState(ceiling).isReplaceable()){
+                        if (!mc.world.getBlockState(ceiling).isReplaceable()){
                             error("Hit the ceiling");
                         }
                         if (mc.options.sneakKey.isPressed()){
@@ -831,31 +831,31 @@ public class AutoLavaCaster extends Module {
             }if (incY.get()){
                 if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+4 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+4){
                     BlockPos pos2 = new BlockPos(lava.getX()+1,lava.getY()+1,lava.getZ());
-                    if (mc.world.getBlockState(pos2).getMaterial().isReplaceable()) {
+                    if (mc.world.getBlockState(pos2).isReplaceable()) {
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos2), Direction.DOWN, pos2, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+8 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+8){
                     BlockPos pos3 = new BlockPos(lava.getX()-1,lava.getY()+1,lava.getZ());
-                    if (mc.world.getBlockState(pos3).getMaterial().isReplaceable()) {
+                    if (mc.world.getBlockState(pos3).isReplaceable()) {
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos3), Direction.DOWN, pos3, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+12 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+12){
                     BlockPos pos4 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ()+1);
-                    if (mc.world.getBlockState(pos4).getMaterial().isReplaceable()) {
+                    if (mc.world.getBlockState(pos4).isReplaceable()) {
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos4), Direction.DOWN, pos4, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+16 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+16){
                     BlockPos pos5 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ()-1);
-                    if (mc.world.getBlockState(pos5).getMaterial().isReplaceable()) {
+                    if (mc.world.getBlockState(pos5).isReplaceable()) {
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos5), Direction.DOWN, pos5, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+20 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+20){
                     BlockPos pos1 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ());
-                    if (mc.world.getBlockState(pos1).getMaterial().isReplaceable()){
+                    if (mc.world.getBlockState(pos1).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos1), Direction.DOWN, pos1, false));
                         mc.player.swingHand(Hand.MAIN_HAND);
                     }
@@ -868,7 +868,7 @@ public class AutoLavaCaster extends Module {
                 }
                 else if ((estlavatime.get() || aMountain.autocasttimenow==true) && (lavamountainticks>=(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+25 && lavamountainticks<=(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+30) || !estlavatime.get() && !aMountain.autocasttimenow==true && (lavamountainticks>=(lavatime.get()*20)+watertime2.get()+waterdelay.get()+25 && lavamountainticks<=(lavatime.get()*20)+watertime2.get()+waterdelay.get()+30)) {
                     BlockPos pos = mc.player.getBlockPos().add(new Vec3i(0,-1,0));
-                    if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
+                    if (mc.world.getBlockState(pos).isReplaceable()) {
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
@@ -968,11 +968,11 @@ public class AutoLavaCaster extends Module {
     }
     private void autoposition() {
         BlockPos pos = mc.player.getBlockPos().add(new Vec3i(0,-1,0));
-        if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
+        if (mc.world.getBlockState(pos).isReplaceable()) {
                     if (aMountain.autocasttimenow==true && aMountain.wasfacing==Direction.EAST|| aMountain.autocasttimenow==false && mc.player.getYaw()>=90 && mc.player.getYaw()<=180 || tryanotherpos==true){ //NORTHWEST
                         BlockPos isair = BlockPos.ofFloored(lava.getX()+2.5,lava.getY()+3,lava.getZ()+2.5);
                         BlockPos isair2 = BlockPos.ofFloored(lava.getX()+2.5,lava.getY()+4,lava.getZ()+2.5);
-                        if (!mc.world.getBlockState(isair).getMaterial().isSolid() && !mc.world.getBlockState(isair).getMaterial().isLiquid() && !mc.world.getBlockState(isair).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(isair2).getMaterial().isSolid() && !mc.world.getBlockState(isair2).getMaterial().isLiquid() && !mc.world.getBlockState(isair2).getMaterial().equals(Material.POWDER_SNOW)) {
+                        if (mc.world.getBlockState(isair).isReplaceable() && mc.world.getFluidState(isair).isEmpty() && !mc.world.getBlockState(isair).isOf(Blocks.POWDER_SNOW) && mc.world.getBlockState(isair2).isReplaceable() && mc.world.getFluidState(isair2).isEmpty() && !mc.world.getBlockState(isair2).isOf(Blocks.POWDER_SNOW)) {
                             mc.player.setPos(lava.getX()+2.5,lava.getY()+3,lava.getZ()+2.5);
                             tryanotherpos=false;
                         } else {
@@ -981,7 +981,7 @@ public class AutoLavaCaster extends Module {
                     } else if (aMountain.autocasttimenow==true && aMountain.wasfacing==Direction.SOUTH|| aMountain.autocasttimenow==false && mc.player.getYaw()>=-180 && mc.player.getYaw()<-90 || tryanotherpos==true){ //NORTHEAST
                         BlockPos isair = BlockPos.ofFloored(lava.getX()-1.5,lava.getY()+3,lava.getZ()+2.5);
                         BlockPos isair2 = BlockPos.ofFloored(lava.getX()-1.5,lava.getY()+4,lava.getZ()+2.5);
-                        if (!mc.world.getBlockState(isair).getMaterial().isSolid() && !mc.world.getBlockState(isair).getMaterial().isLiquid() && !mc.world.getBlockState(isair).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(isair2).getMaterial().isSolid() && !mc.world.getBlockState(isair2).getMaterial().isLiquid() && !mc.world.getBlockState(isair2).getMaterial().equals(Material.POWDER_SNOW)) {
+                        if (mc.world.getBlockState(isair).isReplaceable() && mc.world.getFluidState(isair).isEmpty() && !mc.world.getBlockState(isair).isOf(Blocks.POWDER_SNOW) && mc.world.getBlockState(isair2).isReplaceable() && mc.world.getFluidState(isair2).isEmpty() && !mc.world.getBlockState(isair2).isOf(Blocks.POWDER_SNOW)) {
                             mc.player.setPos(lava.getX()-1.5,lava.getY()+3,lava.getZ()+2.5);
                             tryanotherpos=false;
                         } else {
@@ -990,16 +990,16 @@ public class AutoLavaCaster extends Module {
                     } else if (aMountain.autocasttimenow==true && aMountain.wasfacing==Direction.WEST|| aMountain.autocasttimenow==false && mc.player.getYaw()>=-90 && mc.player.getYaw()<0 || tryanotherpos==true){ //SOUTHEAST
                         BlockPos isair = BlockPos.ofFloored(lava.getX()-1.5,lava.getY()+3,lava.getZ()-1.5);
                         BlockPos isair2 = BlockPos.ofFloored(lava.getX()-1.5,lava.getY()+4,lava.getZ()-1.5);
-                        if (!mc.world.getBlockState(isair).getMaterial().isSolid() && !mc.world.getBlockState(isair).getMaterial().isLiquid() && !mc.world.getBlockState(isair).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(isair2).getMaterial().isSolid() && !mc.world.getBlockState(isair2).getMaterial().isLiquid() && !mc.world.getBlockState(isair2).getMaterial().equals(Material.POWDER_SNOW)) {
+                        if (mc.world.getBlockState(isair).isReplaceable() && mc.world.getFluidState(isair).isEmpty() && !mc.world.getBlockState(isair).isOf(Blocks.POWDER_SNOW) && mc.world.getBlockState(isair2).isReplaceable() && mc.world.getFluidState(isair2).isEmpty() && !mc.world.getBlockState(isair2).isOf(Blocks.POWDER_SNOW)) {
                             mc.player.setPos(lava.getX()-1.5,lava.getY()+3,lava.getZ()-1.5);
                             tryanotherpos=false;
                         } else {
                             error("Position is occupied, trying another.");
-                            tryanotherpos=true;};
+                            tryanotherpos=true;}
                     } else if (aMountain.autocasttimenow==true && aMountain.wasfacing==Direction.NORTH|| aMountain.autocasttimenow==false && mc.player.getYaw()>=0 && mc.player.getYaw()<90 || tryanotherpos==true){ //SOUTHWEST
                         BlockPos isair = BlockPos.ofFloored(lava.getX()+2.5,lava.getY()+3,lava.getZ()-1.5);
                         BlockPos isair2 = BlockPos.ofFloored(lava.getX()+2.5,lava.getY()+4,lava.getZ()-1.5);
-                        if (!mc.world.getBlockState(isair).getMaterial().isSolid() && !mc.world.getBlockState(isair).getMaterial().isLiquid() && !mc.world.getBlockState(isair).getMaterial().equals(Material.POWDER_SNOW) && !mc.world.getBlockState(isair2).getMaterial().isSolid() && !mc.world.getBlockState(isair2).getMaterial().isLiquid() && !mc.world.getBlockState(isair2).getMaterial().equals(Material.POWDER_SNOW)) {
+                        if (mc.world.getBlockState(isair).isReplaceable() && mc.world.getFluidState(isair).isEmpty() && !mc.world.getBlockState(isair).isOf(Blocks.POWDER_SNOW) && mc.world.getBlockState(isair2).isReplaceable() && mc.world.getFluidState(isair2).isEmpty() && !mc.world.getBlockState(isair2).isOf(Blocks.POWDER_SNOW)) {
                             mc.player.setPos(lava.getX()+2.5,lava.getY()+3,lava.getZ()-1.5);
                             tryanotherpos=false;
                         } else {

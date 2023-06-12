@@ -80,7 +80,6 @@ public class BetterAutoSign extends Module {
             .build()
     );
 
-
     public BetterAutoSign() {
         super(Trouser.Main, "Better-auto-sign", "Automatically writes signs and can dye them as well. Credits to MeteorTweaks.");
     }
@@ -91,7 +90,7 @@ public class BetterAutoSign extends Module {
         if(!(event.screen instanceof SignEditScreen)) return;
 
         SignBlockEntity sign = ((AbstractSignEditScreenAccessor) event.screen).getSign();
-        mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(),
+        mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(),true,
                 lineOne.get(),
                 lineTwo.get(),
                 lineThree.get(),

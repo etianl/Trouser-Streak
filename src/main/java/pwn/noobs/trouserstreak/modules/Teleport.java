@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Material;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -128,9 +128,9 @@ public class Teleport extends Module {
                 startpos = mc.player.getPos();}
             if (location.getX()+0.5-startpos.getX() <= 8 && location.getX()+0.5-startpos.getX()>=-8 && location.getY()+0.5-startpos.getY()<=8 && location.getY()+0.5-startpos.getY()>=-8 && location.getZ()+0.5-startpos.getZ()<=8 && location.getZ()+0.5-startpos.getZ()>=-8 ){
                 BlockPos tptarget= new BlockPos(location.getX(), location.getY()+1, location.getZ());
-                if (mc.world.getBlockState(location).getMaterial().isSolid() && mc.world.getBlockState(tptarget).getMaterial().isSolid() && ticks==2 && notponactivateplz==false){
+                if (!mc.world.getBlockState(location).isReplaceable() && !mc.world.getBlockState(tptarget).isReplaceable() && ticks==2 && notponactivateplz==false){
                     error("Blocks in the target zone.");
-                } else if (liquids.get() && !mc.world.getBlockState(location).getMaterial().equals(Material.AIR) && !mc.world.getBlockState(tptarget).getMaterial().equals(Material.AIR) && ticks==2 && notponactivateplz==false){
+                } else if (liquids.get() && !mc.world.getBlockState(location).isOf(Blocks.AIR) && !mc.world.getBlockState(tptarget).isOf(Blocks.AIR) && ticks==2 && notponactivateplz==false){
                     error("Blocks in the target zone.");
                 }
                 else if (ticks==2 && notponactivateplz==false){
@@ -160,11 +160,11 @@ public class Teleport extends Module {
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.5), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.5)+1.05), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.5));
                     mc.player.setVelocity(0,0.05,0);}
                 BlockPos tptarget= new BlockPos(location.getX(), location.getY()+1, location.getZ());
-                if (mc.world.getBlockState(location).getMaterial().isSolid() && mc.world.getBlockState(tptarget).getMaterial().isSolid() && ticks==3 && notponactivateplz==false){
+                if (!mc.world.getBlockState(location).isReplaceable() && !mc.world.getBlockState(tptarget).isReplaceable() && ticks==3 && notponactivateplz==false){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.5), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.5)+1.05), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.5));
                     mc.player.setVelocity(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
-                } else if (liquids.get() && !mc.world.getBlockState(location).getMaterial().equals(Material.AIR) && !mc.world.getBlockState(tptarget).getMaterial().equals(Material.AIR) && ticks==3 && notponactivateplz==false){
+                } else if (liquids.get() && !mc.world.getBlockState(location).isOf(Blocks.AIR) && !mc.world.getBlockState(tptarget).isOf(Blocks.AIR) && ticks==3 && notponactivateplz==false){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.5), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.5)+1.05), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.5));
                     mc.player.setVelocity(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
@@ -202,11 +202,11 @@ public class Teleport extends Module {
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.75), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.75)+1.075), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.75));
                     mc.player.setVelocity(0,0.05,0);}
                 BlockPos tptarget= new BlockPos(location.getX(), location.getY()+1, location.getZ());
-                if (mc.world.getBlockState(location).getMaterial().isSolid() && mc.world.getBlockState(tptarget).getMaterial().isSolid() && ticks==5 && notponactivateplz==false){
+                if (!mc.world.getBlockState(location).isReplaceable() && !mc.world.getBlockState(tptarget).isReplaceable() && ticks==5 && notponactivateplz==false){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.75), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.75)+1.075), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.75));
                     mc.player.setVelocity(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
-                } else if (liquids.get() && !mc.world.getBlockState(location).getMaterial().equals(Material.AIR) && !mc.world.getBlockState(tptarget).getMaterial().equals(Material.AIR) && ticks==5 && notponactivateplz==false){
+                } else if (liquids.get() && !mc.world.getBlockState(location).isOf(Blocks.AIR) && !mc.world.getBlockState(tptarget).isOf(Blocks.AIR) && ticks==5 && notponactivateplz==false){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.75), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.75)+1.075), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.75));
                     mc.player.setVelocity(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
@@ -256,11 +256,11 @@ public class Teleport extends Module {
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.875), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.875)+1.0875), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.875));
                     mc.player.setVelocity(0,0.05,0);}
                 BlockPos tptarget= new BlockPos(location.getX(), location.getY()+1, location.getZ());
-                if (mc.world.getBlockState(location).getMaterial().isSolid() && mc.world.getBlockState(tptarget).getMaterial().isSolid() && ticks==9 && notponactivateplz==false){
+                if (!mc.world.getBlockState(location).isReplaceable() && !mc.world.getBlockState(tptarget).isReplaceable() && ticks==9 && notponactivateplz==false){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.875), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.875)+1.0875), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.875));
                     mc.player.setVelocity(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
-                } else if (liquids.get() && !mc.world.getBlockState(location).getMaterial().equals(Material.AIR) && !mc.world.getBlockState(tptarget).getMaterial().equals(Material.AIR) && ticks==9 && notponactivateplz==false){
+                } else if (liquids.get() && !mc.world.getBlockState(location).isOf(Blocks.AIR) && !mc.world.getBlockState(tptarget).isOf(Blocks.AIR) && ticks==9 && notponactivateplz==false){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.875), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.875)+1.0875), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.875));
                     mc.player.setVelocity(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
@@ -322,11 +322,11 @@ public class Teleport extends Module {
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.9166666666666667), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.9166666666666667)+1.09166666666666667), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.9166666666666667));
                     mc.player.setVelocity(0,0.05,0);}
                 BlockPos tptarget= new BlockPos(location.getX(), location.getY()+1, location.getZ());
-                if (mc.world.getBlockState(location).getMaterial().isSolid() && mc.world.getBlockState(tptarget).getMaterial().isSolid() && ticks==13 && notponactivateplz==false){
+                if (!mc.world.getBlockState(location).isReplaceable() && !mc.world.getBlockState(tptarget).isReplaceable() && ticks==13 && notponactivateplz==false){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.9166666666666667), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.9166666666666667)+1.09166666666666667), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.9166666666666667));
                     mc.player.setVelocity(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
-                } else if (liquids.get() && !mc.world.getBlockState(location).getMaterial().equals(Material.AIR) && !mc.world.getBlockState(tptarget).getMaterial().equals(Material.AIR) && ticks==13 && notponactivateplz==false){
+                } else if (liquids.get() && !mc.world.getBlockState(location).isOf(Blocks.AIR) && !mc.world.getBlockState(tptarget).isOf(Blocks.AIR) && ticks==13 && notponactivateplz==false){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.9166666666666667), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.9166666666666667)+1.09166666666666667), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.9166666666666667));
                     mc.player.setVelocity(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
@@ -369,15 +369,15 @@ public class Teleport extends Module {
 
         if (render.get()){
             if (!liquids.get()){
-                if (!mc.world.getBlockState(location).getMaterial().equals(Material.AIR) && !mc.world.getBlockState(location).getMaterial().isLiquid()){
+                if (!mc.world.getBlockState(location).isOf(Blocks.AIR) && !mc.world.getFluidState(location).isEmpty()){
                     event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                }else if (mc.world.getBlockState(location).getMaterial().equals(Material.AIR) || mc.world.getBlockState(location).getMaterial().isLiquid()){
+                }else if (mc.world.getBlockState(location).isOf(Blocks.AIR) || mc.world.getFluidState(location).isEmpty()){
                     event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor2.get(), lineColor2.get(), shapeMode.get(), 0);
                 }
             }else if (liquids.get()) {
-                if (!mc.world.getBlockState(location).getMaterial().equals(Material.AIR)){
+                if (!mc.world.getBlockState(location).isOf(Blocks.AIR)){
                     event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                }else if (mc.world.getBlockState(location).getMaterial().equals(Material.AIR)){
+                }else if (mc.world.getBlockState(location).isOf(Blocks.AIR)){
                     event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor2.get(), lineColor2.get(), shapeMode.get(), 0);
                 }
             }

@@ -1,6 +1,7 @@
 package pwn.noobs.trouserstreak.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -18,8 +19,10 @@ public class ShulkerBoxScreenMixin extends Screen {
         super(title);
     }
 
-    @Inject(at = @At("TAIL"), method = "render(Lnet/minecraft/client/util/math/MatrixStack;IIF)V")
-    public void renderScreen(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+    @Override
+    protected void init()
+    {
+        super.init();
         if(Modules.get().isActive(ShulkerDupe.class)) {
             addDrawableChild(new ButtonWidget.Builder(Text.literal("Dupe"), button -> dupe())
                     .position(240, height / 2 + 35 - 140)
