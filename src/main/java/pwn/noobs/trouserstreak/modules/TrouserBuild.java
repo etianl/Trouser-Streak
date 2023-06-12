@@ -345,135 +345,135 @@ public class TrouserBuild extends Module {
 if (playerdir == Direction.NORTH){
         //1st row
         if (ett){
-            if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Nettpos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Nettpos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nettpos), Direction.DOWN, Nettpos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
         if (tva){
-            if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Ntvapos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Ntvapos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntvapos), Direction.DOWN, Ntvapos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
         if (tree){
-            if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Ntreepos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Ntreepos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntreepos), Direction.DOWN, Ntreepos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
         if (fyra){
-            if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Nfyrapos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Nfyrapos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfyrapos), Direction.DOWN, Nfyrapos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
         if (fem){
-            if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Nfempos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Nfempos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfempos), Direction.DOWN, Nfempos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
 
             //2nd row
         if (ett1){
-            if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Nett1pos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Nett1pos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nett1pos), Direction.DOWN, Nett1pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
         if (tva1){
-            if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Ntva1pos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Ntva1pos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntva1pos), Direction.DOWN, Ntva1pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
         if (tree1){
-            if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Ntree1pos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Ntree1pos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntree1pos), Direction.DOWN, Ntree1pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
         if (fyra1){
-            if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Nfyra1pos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Nfyra1pos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfyra1pos), Direction.DOWN, Nfyra1pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
         if (fem1){
-            if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Nfem1pos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Nfem1pos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfem1pos), Direction.DOWN, Nfem1pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
 
             //3rd row
         if (ett2){
-            if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Nett2pos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Nett2pos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nett2pos), Direction.DOWN, Nett2pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
         if (tva2){
-            if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Ntva2pos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Ntva2pos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntva2pos), Direction.DOWN, Ntva2pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
         if (tree2){
-            if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Ntree2pos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Ntree2pos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntree2pos), Direction.DOWN, Ntree2pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
         if (fyra2){
-            if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Nfyra2pos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Nfyra2pos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfyra2pos), Direction.DOWN, Nfyra2pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
         if (fem2){
-            if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Nfem2pos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Nfem2pos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfem2pos), Direction.DOWN, Nfem2pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
 
             //4th row
         if (ett3){
-            if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Nett3pos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Nett3pos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nett3pos), Direction.DOWN, Nett3pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
         if (tva3){
-            if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Ntva3pos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Ntva3pos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntva3pos), Direction.DOWN, Ntva3pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
         if (tree3){
-            if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Ntree3pos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Ntree3pos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntree3pos), Direction.DOWN, Ntree3pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
         if (fyra3){
-            if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Nfyra3pos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Nfyra3pos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfyra3pos), Direction.DOWN, Nfyra3pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
         if (fem3){
-            if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Nfem3pos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Nfem3pos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfem3pos), Direction.DOWN, Nfem3pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
 
             //5th row
         if (ett4){
-            if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Nett4pos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Nett4pos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nett4pos), Direction.DOWN, Nett4pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
         if (tva4){
-            if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Ntva4pos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Ntva4pos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntva4pos), Direction.DOWN, Ntva4pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
         if (tree4){
-            if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Ntree4pos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Ntree4pos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntree4pos), Direction.DOWN, Ntree4pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
         if (fyra4){
-            if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Nfyra4pos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Nfyra4pos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfyra4pos), Direction.DOWN, Nfyra4pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
         if (fem4){
-            if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Nfem4pos).getMaterial().isReplaceable()){
+            if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Nfem4pos).isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfem4pos), Direction.DOWN, Nfem4pos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);}
         }
@@ -482,135 +482,135 @@ if (playerdir == Direction.NORTH){
         if (playerdir == Direction.SOUTH){
             //1st row
             if (ett){
-                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Settpos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Settpos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Settpos), Direction.DOWN, Settpos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tva){
-                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Stvapos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Stvapos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stvapos), Direction.DOWN, Stvapos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tree){
-                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Streepos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Streepos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Streepos), Direction.DOWN, Streepos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fyra){
-                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Sfyrapos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Sfyrapos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfyrapos), Direction.DOWN, Sfyrapos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fem){
-                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Sfempos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Sfempos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfempos), Direction.DOWN, Sfempos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
 
             //2nd row
             if (ett1){
-                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Sett1pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Sett1pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sett1pos), Direction.DOWN, Sett1pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tva1){
-                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Stva1pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Stva1pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stva1pos), Direction.DOWN, Stva1pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tree1){
-                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Stree1pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Stree1pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stree1pos), Direction.DOWN, Stree1pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fyra1){
-                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Sfyra1pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Sfyra1pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfyra1pos), Direction.DOWN, Sfyra1pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fem1){
-                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Sfem1pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Sfem1pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfem1pos), Direction.DOWN, Sfem1pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
 
             //3rd row
             if (ett2){
-                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Sett2pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Sett2pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sett2pos), Direction.DOWN, Sett2pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tva2){
-                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Stva2pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Stva2pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stva2pos), Direction.DOWN, Stva2pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tree2){
-                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Stree2pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Stree2pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stree2pos), Direction.DOWN, Stree2pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fyra2){
-                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Sfyra2pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Sfyra2pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfyra2pos), Direction.DOWN, Sfyra2pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fem2){
-                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Sfem2pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Sfem2pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfem2pos), Direction.DOWN, Sfem2pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
 
             //4th row
             if (ett3){
-                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Sett3pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Sett3pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sett3pos), Direction.DOWN, Sett3pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tva3){
-                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Stva3pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Stva3pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stva3pos), Direction.DOWN, Stva3pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tree3){
-                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Stree3pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Stree3pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stree3pos), Direction.DOWN, Stree3pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fyra3){
-                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Sfyra3pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Sfyra3pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfyra3pos), Direction.DOWN, Sfyra3pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fem3){
-                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Sfem3pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Sfem3pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfem3pos), Direction.DOWN, Sfem3pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
 
             //5th row
             if (ett4){
-                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Sett4pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Sett4pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sett4pos), Direction.DOWN, Sett4pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tva4){
-                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Stva4pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Stva4pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stva4pos), Direction.DOWN, Stva4pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tree4){
-                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Stree4pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Stree4pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stree4pos), Direction.DOWN, Stree4pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fyra4){
-                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Sfyra4pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Sfyra4pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfyra4pos), Direction.DOWN, Sfyra4pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fem4){
-                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Sfem4pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Sfem4pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfem4pos), Direction.DOWN, Sfem4pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
@@ -619,135 +619,135 @@ if (playerdir == Direction.NORTH){
         if (playerdir == Direction.EAST){
             //1st row
             if (ett){
-                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Eettpos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Eettpos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Eettpos), Direction.DOWN, Eettpos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tva){
-                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Etvapos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Etvapos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etvapos), Direction.DOWN, Etvapos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tree){
-                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Etreepos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Etreepos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etreepos), Direction.DOWN, Etreepos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fyra){
-                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Efyrapos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Efyrapos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efyrapos), Direction.DOWN, Efyrapos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fem){
-                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Efempos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Efempos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efempos), Direction.DOWN, Efempos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
 
             //2nd row
             if (ett1){
-                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Eett1pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Eett1pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Eett1pos), Direction.DOWN, Eett1pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tva1){
-                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Etva1pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Etva1pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etva1pos), Direction.DOWN, Etva1pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tree1){
-                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Etree1pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Etree1pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etree1pos), Direction.DOWN, Etree1pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fyra1){
-                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Efyra1pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Efyra1pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efyra1pos), Direction.DOWN, Efyra1pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fem1){
-                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Efem1pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Efem1pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efem1pos), Direction.DOWN, Efem1pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
 
             //3rd row
             if (ett2){
-                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Eett2pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Eett2pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Eett2pos), Direction.DOWN, Eett2pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tva2){
-                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Etva2pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Etva2pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etva2pos), Direction.DOWN, Etva2pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tree2){
-                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Etree2pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Etree2pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etree2pos), Direction.DOWN, Etree2pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fyra2){
-                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Efyra2pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Efyra2pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efyra2pos), Direction.DOWN, Efyra2pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fem2){
-                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Efem2pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Efem2pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efem2pos), Direction.DOWN, Efem2pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
 
             //4th row
             if (ett3){
-                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Eett3pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Eett3pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Eett3pos), Direction.DOWN, Eett3pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tva3){
-                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Etva3pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Etva3pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etva3pos), Direction.DOWN, Etva3pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tree3){
-                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Etree3pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Etree3pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etree3pos), Direction.DOWN, Etree3pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fyra3){
-                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Efyra3pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Efyra3pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efyra3pos), Direction.DOWN, Efyra3pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fem3){
-                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Efem3pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Efem3pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efem3pos), Direction.DOWN, Efem3pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
 
             //5th row
             if (ett4){
-                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Eett4pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Eett4pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Eett4pos), Direction.DOWN, Eett4pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tva4){
-                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Etva4pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Etva4pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etva4pos), Direction.DOWN, Etva4pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tree4){
-                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Etree4pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Etree4pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etree4pos), Direction.DOWN, Etree4pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fyra4){
-                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Efyra4pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Efyra4pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efyra4pos), Direction.DOWN, Efyra4pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fem4){
-                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Efem4pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Efem4pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efem4pos), Direction.DOWN, Efem4pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
@@ -756,135 +756,135 @@ if (playerdir == Direction.NORTH){
         if (playerdir == Direction.WEST){
             //1st row
             if (ett){
-                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wettpos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wettpos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wettpos), Direction.DOWN, Wettpos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tva){
-                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wtvapos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wtvapos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtvapos), Direction.DOWN, Wtvapos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tree){
-                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wtreepos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wtreepos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtreepos), Direction.DOWN, Wtreepos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fyra){
-                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wfyrapos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wfyrapos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfyrapos), Direction.DOWN, Wfyrapos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fem){
-                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wfempos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wfempos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfempos), Direction.DOWN, Wfempos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
 
             //2nd row
             if (ett1){
-                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wett1pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wett1pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wett1pos), Direction.DOWN, Wett1pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tva1){
-                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wtva1pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wtva1pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtva1pos), Direction.DOWN, Wtva1pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tree1){
-                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wtree1pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wtree1pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtree1pos), Direction.DOWN, Wtree1pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fyra1){
-                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wfyra1pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wfyra1pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfyra1pos), Direction.DOWN, Wfyra1pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fem1){
-                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wfem1pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wfem1pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfem1pos), Direction.DOWN, Wfem1pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
 
             //3rd row
             if (ett2){
-                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wett2pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wett2pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wett2pos), Direction.DOWN, Wett2pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tva2){
-                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wtva2pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wtva2pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtva2pos), Direction.DOWN, Wtva2pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tree2){
-                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wtree2pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wtree2pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtree2pos), Direction.DOWN, Wtree2pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fyra2){
-                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wfyra2pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wfyra2pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfyra2pos), Direction.DOWN, Wfyra2pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fem2){
-                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wfem2pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wfem2pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfem2pos), Direction.DOWN, Wfem2pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
 
             //4th row
             if (ett3){
-                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wett3pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wett3pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wett3pos), Direction.DOWN, Wett3pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tva3){
-                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wtva3pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wtva3pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtva3pos), Direction.DOWN, Wtva3pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tree3){
-                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wtree3pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wtree3pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtree3pos), Direction.DOWN, Wtree3pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fyra3){
-                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wfyra3pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wfyra3pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfyra3pos), Direction.DOWN, Wfyra3pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fem3){
-                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wfem3pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wfem3pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfem3pos), Direction.DOWN, Wfem3pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
 
             //5th row
             if (ett4){
-                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wett4pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wett4pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wett4pos), Direction.DOWN, Wett4pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tva4){
-                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wtva4pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wtva4pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtva4pos), Direction.DOWN, Wtva4pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (tree4){
-                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wtree4pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wtree4pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtree4pos), Direction.DOWN, Wtree4pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fyra4){
-                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wfyra4pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wfyra4pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfyra4pos), Direction.DOWN, Wfyra4pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
             if (fem4){
-                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wfem4pos).getMaterial().isReplaceable()){
+                if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wfem4pos).isReplaceable()){
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfem4pos), Direction.DOWN, Wfem4pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
@@ -1000,135 +1000,135 @@ if (playerdir == Direction.NORTH){
             if (playerdir == Direction.NORTH){
                 //1st row
                 if (ett){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Nettpos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Nettpos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nettpos), Direction.DOWN, Nettpos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Ntvapos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Ntvapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntvapos), Direction.DOWN, Ntvapos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Ntreepos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Ntreepos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntreepos), Direction.DOWN, Ntreepos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Nfyrapos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Nfyrapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfyrapos), Direction.DOWN, Nfyrapos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Nfempos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Nfempos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfempos), Direction.DOWN, Nfempos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
 
                 //2nd row
                 if (ett1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Nett1pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Nett1pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nett1pos), Direction.DOWN, Nett1pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Ntva1pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Ntva1pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntva1pos), Direction.DOWN, Ntva1pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Ntree1pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Ntree1pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntree1pos), Direction.DOWN, Ntree1pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Nfyra1pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Nfyra1pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfyra1pos), Direction.DOWN, Nfyra1pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Nfem1pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Nfem1pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfem1pos), Direction.DOWN, Nfem1pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
 
                 //3rd row
                 if (ett2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Nett2pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Nett2pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nett2pos), Direction.DOWN, Nett2pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Ntva2pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Ntva2pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntva2pos), Direction.DOWN, Ntva2pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Ntree2pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Ntree2pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntree2pos), Direction.DOWN, Ntree2pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Nfyra2pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Nfyra2pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfyra2pos), Direction.DOWN, Nfyra2pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Nfem2pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Nfem2pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfem2pos), Direction.DOWN, Nfem2pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
 
                 //4th row
                 if (ett3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Nett3pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Nett3pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nett3pos), Direction.DOWN, Nett3pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Ntva3pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Ntva3pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntva3pos), Direction.DOWN, Ntva3pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Ntree3pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Ntree3pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntree3pos), Direction.DOWN, Ntree3pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Nfyra3pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Nfyra3pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfyra3pos), Direction.DOWN, Nfyra3pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Nfem3pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Nfem3pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfem3pos), Direction.DOWN, Nfem3pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
 
                 //5th row
                 if (ett4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Nett4pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Nett4pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nett4pos), Direction.DOWN, Nett4pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Ntva4pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Ntva4pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntva4pos), Direction.DOWN, Ntva4pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Ntree4pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Ntree4pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntree4pos), Direction.DOWN, Ntree4pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Nfyra4pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Nfyra4pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfyra4pos), Direction.DOWN, Nfyra4pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Nfem4pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Nfem4pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfem4pos), Direction.DOWN, Nfem4pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
@@ -1137,135 +1137,135 @@ if (playerdir == Direction.NORTH){
             if (playerdir == Direction.SOUTH){
                 //1st row
                 if (ett){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Settpos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Settpos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Settpos), Direction.DOWN, Settpos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Stvapos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Stvapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stvapos), Direction.DOWN, Stvapos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Streepos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Streepos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Streepos), Direction.DOWN, Streepos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Sfyrapos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Sfyrapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfyrapos), Direction.DOWN, Sfyrapos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Sfempos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Sfempos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfempos), Direction.DOWN, Sfempos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
 
                 //2nd row
                 if (ett1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Sett1pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Sett1pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sett1pos), Direction.DOWN, Sett1pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Stva1pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Stva1pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stva1pos), Direction.DOWN, Stva1pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Stree1pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Stree1pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stree1pos), Direction.DOWN, Stree1pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Sfyra1pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Sfyra1pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfyra1pos), Direction.DOWN, Sfyra1pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Sfem1pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Sfem1pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfem1pos), Direction.DOWN, Sfem1pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
 
                 //3rd row
                 if (ett2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Sett2pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Sett2pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sett2pos), Direction.DOWN, Sett2pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Stva2pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Stva2pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stva2pos), Direction.DOWN, Stva2pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Stree2pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Stree2pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stree2pos), Direction.DOWN, Stree2pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Sfyra2pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Sfyra2pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfyra2pos), Direction.DOWN, Sfyra2pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Sfem2pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Sfem2pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfem2pos), Direction.DOWN, Sfem2pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
 
                 //4th row
                 if (ett3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Sett3pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Sett3pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sett3pos), Direction.DOWN, Sett3pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Stva3pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Stva3pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stva3pos), Direction.DOWN, Stva3pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Stree3pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Stree3pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stree3pos), Direction.DOWN, Stree3pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Sfyra3pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Sfyra3pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfyra3pos), Direction.DOWN, Sfyra3pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Sfem3pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Sfem3pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfem3pos), Direction.DOWN, Sfem3pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
 
                 //5th row
                 if (ett4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Sett4pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Sett4pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sett4pos), Direction.DOWN, Sett4pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Stva4pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Stva4pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stva4pos), Direction.DOWN, Stva4pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Stree4pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Stree4pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stree4pos), Direction.DOWN, Stree4pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Sfyra4pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Sfyra4pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfyra4pos), Direction.DOWN, Sfyra4pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Sfem4pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Sfem4pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfem4pos), Direction.DOWN, Sfem4pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
@@ -1274,135 +1274,135 @@ if (playerdir == Direction.NORTH){
             if (playerdir == Direction.EAST){
                 //1st row
                 if (ett){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Eettpos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Eettpos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Eettpos), Direction.DOWN, Eettpos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Etvapos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Etvapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etvapos), Direction.DOWN, Etvapos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Etreepos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Etreepos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etreepos), Direction.DOWN, Etreepos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Efyrapos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Efyrapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efyrapos), Direction.DOWN, Efyrapos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Efempos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Efempos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efempos), Direction.DOWN, Efempos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
 
                 //2nd row
                 if (ett1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Eett1pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Eett1pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Eett1pos), Direction.DOWN, Eett1pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Etva1pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Etva1pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etva1pos), Direction.DOWN, Etva1pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Etree1pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Etree1pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etree1pos), Direction.DOWN, Etree1pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Efyra1pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Efyra1pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efyra1pos), Direction.DOWN, Efyra1pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Efem1pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Efem1pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efem1pos), Direction.DOWN, Efem1pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
 
                 //3rd row
                 if (ett2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Eett2pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Eett2pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Eett2pos), Direction.DOWN, Eett2pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Etva2pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Etva2pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etva2pos), Direction.DOWN, Etva2pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Etree2pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Etree2pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etree2pos), Direction.DOWN, Etree2pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Efyra2pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Efyra2pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efyra2pos), Direction.DOWN, Efyra2pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Efem2pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Efem2pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efem2pos), Direction.DOWN, Efem2pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
 
                 //4th row
                 if (ett3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Eett3pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Eett3pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Eett3pos), Direction.DOWN, Eett3pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Etva3pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Etva3pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etva3pos), Direction.DOWN, Etva3pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Etree3pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Etree3pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etree3pos), Direction.DOWN, Etree3pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Efyra3pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Efyra3pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efyra3pos), Direction.DOWN, Efyra3pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Efem3pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Efem3pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efem3pos), Direction.DOWN, Efem3pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
 
                 //5th row
                 if (ett4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Eett4pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Eett4pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Eett4pos), Direction.DOWN, Eett4pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Etva4pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Etva4pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etva4pos), Direction.DOWN, Etva4pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Etree4pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Etree4pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etree4pos), Direction.DOWN, Etree4pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Efyra4pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Efyra4pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efyra4pos), Direction.DOWN, Efyra4pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Efem4pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Efem4pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efem4pos), Direction.DOWN, Efem4pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
@@ -1411,135 +1411,135 @@ if (playerdir == Direction.NORTH){
             if (playerdir == Direction.WEST){
                 //1st row
                 if (ett){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wettpos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wettpos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wettpos), Direction.DOWN, Wettpos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wtvapos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wtvapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtvapos), Direction.DOWN, Wtvapos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wtreepos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wtreepos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtreepos), Direction.DOWN, Wtreepos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wfyrapos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wfyrapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfyrapos), Direction.DOWN, Wfyrapos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wfempos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wfempos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfempos), Direction.DOWN, Wfempos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
 
                 //2nd row
                 if (ett1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wett1pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wett1pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wett1pos), Direction.DOWN, Wett1pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wtva1pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wtva1pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtva1pos), Direction.DOWN, Wtva1pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wtree1pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wtree1pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtree1pos), Direction.DOWN, Wtree1pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wfyra1pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wfyra1pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfyra1pos), Direction.DOWN, Wfyra1pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wfem1pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wfem1pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfem1pos), Direction.DOWN, Wfem1pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
 
                 //3rd row
                 if (ett2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wett2pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wett2pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wett2pos), Direction.DOWN, Wett2pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wtva2pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wtva2pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtva2pos), Direction.DOWN, Wtva2pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wtree2pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wtree2pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtree2pos), Direction.DOWN, Wtree2pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wfyra2pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wfyra2pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfyra2pos), Direction.DOWN, Wfyra2pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wfem2pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wfem2pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfem2pos), Direction.DOWN, Wfem2pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
 
                 //4th row
                 if (ett3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wett3pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wett3pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wett3pos), Direction.DOWN, Wett3pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wtva3pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wtva3pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtva3pos), Direction.DOWN, Wtva3pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wtree3pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wtree3pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtree3pos), Direction.DOWN, Wtree3pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wfyra3pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wfyra3pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfyra3pos), Direction.DOWN, Wfyra3pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wfem3pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wfem3pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfem3pos), Direction.DOWN, Wfem3pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
 
                 //5th row
                 if (ett4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wett4pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wett4pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wett4pos), Direction.DOWN, Wett4pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wtva4pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wtva4pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtva4pos), Direction.DOWN, Wtva4pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wtree4pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wtree4pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtree4pos), Direction.DOWN, Wtree4pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wfyra4pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wfyra4pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfyra4pos), Direction.DOWN, Wfyra4pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wfem4pos).getMaterial().isReplaceable()){
+                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wfem4pos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfem4pos), Direction.DOWN, Wfem4pos, false));
                             mc.player.swingHand(Hand.MAIN_HAND);}
                 }
