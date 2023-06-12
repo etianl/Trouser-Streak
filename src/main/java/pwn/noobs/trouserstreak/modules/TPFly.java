@@ -129,25 +129,25 @@ public class TPFly extends Module {
         if (mode.get() == Modes.WASDFly && mc.options.forwardKey.isPressed()){
             if (mc.player.getMovementDirection() == Direction.NORTH) {
                 BlockPos pos12 = playerPos.add(new Vec3i(0,0,-range.get()));
-                if (!mc.world.getBlockState(pos12).getMaterial().isSolid() && mc.world.getBlockState(pos12).getBlock() != Blocks.LAVA){
+                if (mc.world.getBlockState(pos12).isReplaceable() && mc.world.getBlockState(pos12).getBlock() != Blocks.LAVA){
                 mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()-range.get());
                 }
             }
             if (mc.player.getMovementDirection() == Direction.SOUTH) {
                 BlockPos pos13 = playerPos.add(new Vec3i(0,0,range.get()));
-                if (!mc.world.getBlockState(pos13).getMaterial().isSolid() && mc.world.getBlockState(pos13).getBlock() != Blocks.LAVA){
+                if (mc.world.getBlockState(pos13).isReplaceable() && mc.world.getBlockState(pos13).getBlock() != Blocks.LAVA){
                 mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()+range.get());
                 }
             }
             if (mc.player.getMovementDirection() == Direction.EAST) {
                 BlockPos pos14 = playerPos.add(new Vec3i(range.get(),0,0));
-                if (!mc.world.getBlockState(pos14).getMaterial().isSolid() && mc.world.getBlockState(pos14).getBlock() != Blocks.LAVA){
+                if (mc.world.getBlockState(pos14).isReplaceable() && mc.world.getBlockState(pos14).getBlock() != Blocks.LAVA){
                 mc.player.setPos(mc.player.getX()+range.get(),mc.player.getY(),mc.player.getZ());
                 }
             }
             if (mc.player.getMovementDirection() == Direction.WEST) {
                 BlockPos pos15 = playerPos.add(new Vec3i(-range.get(),0,0));
-                if (!mc.world.getBlockState(pos15).getMaterial().isSolid() && mc.world.getBlockState(pos15).getBlock() != Blocks.LAVA){
+                if (mc.world.getBlockState(pos15).isReplaceable() && mc.world.getBlockState(pos15).getBlock() != Blocks.LAVA){
                 mc.player.setPos(mc.player.getX()-range.get(),mc.player.getY(),mc.player.getZ());
                 }
             }
@@ -156,25 +156,25 @@ public class TPFly extends Module {
         if (mc.options.backKey.isPressed()){
             if (mc.player.getMovementDirection() == Direction.NORTH) {
                 BlockPos pos16 = playerPos.add(new Vec3i(0,0,range.get()));
-                if (!mc.world.getBlockState(pos16).getMaterial().isSolid() && mc.world.getBlockState(pos16).getBlock() != Blocks.LAVA){
+                if (mc.world.getBlockState(pos16).isReplaceable() && mc.world.getBlockState(pos16).getBlock() != Blocks.LAVA){
                 mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()+range.get());
                 }
             }
             if (mc.player.getMovementDirection() == Direction.SOUTH) {
                 BlockPos pos17 = playerPos.add(new Vec3i(0,0,-range.get()));
-                if (!mc.world.getBlockState(pos17).getMaterial().isSolid() && mc.world.getBlockState(pos17).getBlock() != Blocks.LAVA){
+                if (mc.world.getBlockState(pos17).isReplaceable() && mc.world.getBlockState(pos17).getBlock() != Blocks.LAVA){
                 mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()-range.get());
                 }
             }
             if (mc.player.getMovementDirection() == Direction.EAST) {
                 BlockPos pos18 = playerPos.add(new Vec3i(-range.get(),0,0));
-                if (!mc.world.getBlockState(pos18).getMaterial().isSolid() && mc.world.getBlockState(pos18).getBlock() != Blocks.LAVA){
+                if (mc.world.getBlockState(pos18).isReplaceable() && mc.world.getBlockState(pos18).getBlock() != Blocks.LAVA){
                 mc.player.setPos(mc.player.getX()-range.get(),mc.player.getY(),mc.player.getZ());
                 }
             }
             if (mc.player.getMovementDirection() == Direction.WEST) {
                 BlockPos pos19 = playerPos.add(new Vec3i(range.get(),0,0));
-                if (!mc.world.getBlockState(pos19).getMaterial().isSolid() && mc.world.getBlockState(pos19).getBlock() != Blocks.LAVA){
+                if (mc.world.getBlockState(pos19).isReplaceable() && mc.world.getBlockState(pos19).getBlock() != Blocks.LAVA){
                 mc.player.setPos(mc.player.getX()+range.get(),mc.player.getY(),mc.player.getZ());
                 }
             }
@@ -183,25 +183,25 @@ public class TPFly extends Module {
         if (mc.options.leftKey.isPressed()){
             if (mc.player.getMovementDirection() == Direction.NORTH) {
                 BlockPos pos20 = playerPos.add(new Vec3i(0,0,-range.get()));
-                if (!mc.world.getBlockState(pos20).getMaterial().isSolid() && mc.world.getBlockState(pos20).getBlock() != Blocks.LAVA){
+                if (mc.world.getBlockState(pos20).isReplaceable() && mc.world.getBlockState(pos20).getBlock() != Blocks.LAVA){
                 mc.player.setPos(mc.player.getX()-range.get(),mc.player.getY(),mc.player.getZ());
                 }
             }
             if (mc.player.getMovementDirection() == Direction.SOUTH) {
                 BlockPos pos21 = playerPos.add(new Vec3i(0,0,range.get()));
-                if (!mc.world.getBlockState(pos21).getMaterial().isSolid() && mc.world.getBlockState(pos21).getBlock() != Blocks.LAVA){
+                if (mc.world.getBlockState(pos21).isReplaceable() && mc.world.getBlockState(pos21).getBlock() != Blocks.LAVA){
                 mc.player.setPos(mc.player.getX()+range.get(),mc.player.getY(),mc.player.getZ());
                 }
             }
             if (mc.player.getMovementDirection() == Direction.EAST) {
                 BlockPos pos22 = playerPos.add(new Vec3i(range.get(),0,0));
-                if (!mc.world.getBlockState(pos22).getMaterial().isSolid() && mc.world.getBlockState(pos22).getBlock() != Blocks.LAVA){
+                if (mc.world.getBlockState(pos22).isReplaceable() && mc.world.getBlockState(pos22).getBlock() != Blocks.LAVA){
                 mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()-range.get());
                 }
             }
             if (mc.player.getMovementDirection() == Direction.WEST) {
                 BlockPos pos23 = playerPos.add(new Vec3i(-range.get(),0,0));
-                if (!mc.world.getBlockState(pos23).getMaterial().isSolid() && mc.world.getBlockState(pos23).getBlock() != Blocks.LAVA){
+                if (mc.world.getBlockState(pos23).isReplaceable() && mc.world.getBlockState(pos23).getBlock() != Blocks.LAVA){
                 mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()+range.get());
                 }
             }
@@ -210,25 +210,25 @@ public class TPFly extends Module {
         if (mc.options.rightKey.isPressed()){
             if (mc.player.getMovementDirection() == Direction.NORTH) {
                 BlockPos pos24 = playerPos.add(new Vec3i(0,0,-range.get()));
-                if (!mc.world.getBlockState(pos24).getMaterial().isSolid() && mc.world.getBlockState(pos24).getBlock() != Blocks.LAVA){
+                if (mc.world.getBlockState(pos24).isReplaceable() && mc.world.getBlockState(pos24).getBlock() != Blocks.LAVA){
                 mc.player.setPos(mc.player.getX()+range.get(),mc.player.getY(),mc.player.getZ());
                 }
             }
             if (mc.player.getMovementDirection() == Direction.SOUTH) {
                 BlockPos pos25 = playerPos.add(new Vec3i(0,0,range.get()));
-                if (!mc.world.getBlockState(pos25).getMaterial().isSolid() && mc.world.getBlockState(pos25).getBlock() != Blocks.LAVA){
+                if (mc.world.getBlockState(pos25).isReplaceable() && mc.world.getBlockState(pos25).getBlock() != Blocks.LAVA){
                 mc.player.setPos(mc.player.getX()-range.get(),mc.player.getY(),mc.player.getZ());
                 }
             }
             if (mc.player.getMovementDirection() == Direction.EAST) {
                 BlockPos pos26 = playerPos.add(new Vec3i(range.get(),0,0));
-                if (!mc.world.getBlockState(pos26).getMaterial().isSolid() && mc.world.getBlockState(pos26).getBlock() != Blocks.LAVA){
+                if (mc.world.getBlockState(pos26).isReplaceable() && mc.world.getBlockState(pos26).getBlock() != Blocks.LAVA){
                 mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()+range.get());
                 }
             }
             if (mc.player.getMovementDirection() == Direction.WEST) {
                 BlockPos pos27 = playerPos.add(new Vec3i(-range.get(),0,0));
-                if (!mc.world.getBlockState(pos27).getMaterial().isSolid() && mc.world.getBlockState(pos27).getBlock() != Blocks.LAVA){
+                if (mc.world.getBlockState(pos27).isReplaceable() && mc.world.getBlockState(pos27).getBlock() != Blocks.LAVA){
                 mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()-range.get());
                 }
             }
@@ -242,7 +242,7 @@ public class TPFly extends Module {
             BlockPos pos9 = playerPos.add(new Vec3i(0,4,0));
             BlockPos pos10 = playerPos.add(new Vec3i(0,5,0));
             BlockPos pos11 = playerPos.add(new Vec3i(0,6,0));
-            if (!mc.world.getBlockState(pos6).getMaterial().isSolid() && !mc.world.getBlockState(pos7).getMaterial().isSolid() && !mc.world.getBlockState(pos8).getMaterial().isSolid() && !mc.world.getBlockState(pos9).getMaterial().isSolid() && !mc.world.getBlockState(pos10).getMaterial().isSolid() && !mc.world.getBlockState(pos11).getMaterial().isSolid() && mc.world.getBlockState(pos6).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos7).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos8).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos9).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos10).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos11).getBlock() != Blocks.LAVA){
+            if (mc.world.getBlockState(pos6).isReplaceable() && mc.world.getBlockState(pos7).isReplaceable() && mc.world.getBlockState(pos8).isReplaceable() && mc.world.getBlockState(pos9).isReplaceable() && mc.world.getBlockState(pos10).isReplaceable() && mc.world.getBlockState(pos11).isReplaceable() && mc.world.getBlockState(pos6).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos7).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos8).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos9).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos10).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos11).getBlock() != Blocks.LAVA){
             mc.player.setPos(mc.player.getX(),mc.player.getY()+upspeed.get(),mc.player.getZ());
             }
 
@@ -284,7 +284,7 @@ public class TPFly extends Module {
             BlockPos pos3 = playerPos.add(new Vec3i(0,-4,0));
             BlockPos pos4 = playerPos.add(new Vec3i(0,-5,0));
             BlockPos pos5 = playerPos.add(new Vec3i(0,-6,0));
-            if (!mc.world.getBlockState(pos).getMaterial().isSolid() && !mc.world.getBlockState(pos1).getMaterial().isSolid() && !mc.world.getBlockState(pos2).getMaterial().isSolid() && !mc.world.getBlockState(pos3).getMaterial().isSolid() && !mc.world.getBlockState(pos4).getMaterial().isSolid() && !mc.world.getBlockState(pos5).getMaterial().isSolid() && mc.world.getBlockState(pos).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos1).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos2).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos3).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos4).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos5).getBlock() != Blocks.LAVA){
+            if (mc.world.getBlockState(pos).isReplaceable() && mc.world.getBlockState(pos1).isReplaceable() && mc.world.getBlockState(pos2).isReplaceable() && mc.world.getBlockState(pos3).isReplaceable() && mc.world.getBlockState(pos4).isReplaceable() && mc.world.getBlockState(pos5).isReplaceable() && mc.world.getBlockState(pos).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos1).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos2).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos3).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos4).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos5).getBlock() != Blocks.LAVA){
             mc.player.setPos(mc.player.getX(),mc.player.getY()-downspeed.get(),mc.player.getZ());
             }
         } else if (mc.options.sneakKey.isPressed() && mc.options.backKey.isPressed()){
@@ -359,7 +359,7 @@ public class TPFly extends Module {
             BlockPos pos9 = playerPos.add(new Vec3i(0,4,0));
             BlockPos pos10 = playerPos.add(new Vec3i(0,5,0));
             BlockPos pos11 = playerPos.add(new Vec3i(0,6,0));
-            if (!mc.world.getBlockState(pos6).getMaterial().isSolid() && !mc.world.getBlockState(pos7).getMaterial().isSolid() && !mc.world.getBlockState(pos8).getMaterial().isSolid() && !mc.world.getBlockState(pos9).getMaterial().isSolid() && !mc.world.getBlockState(pos10).getMaterial().isSolid() && !mc.world.getBlockState(pos11).getMaterial().isSolid() && mc.world.getBlockState(pos6).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos7).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos8).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos9).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos10).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos11).getBlock() != Blocks.LAVA){
+            if (mc.world.getBlockState(pos6).isReplaceable() && mc.world.getBlockState(pos7).isReplaceable() && mc.world.getBlockState(pos8).isReplaceable() && mc.world.getBlockState(pos9).isReplaceable() && mc.world.getBlockState(pos10).isReplaceable() && mc.world.getBlockState(pos11).isReplaceable() && mc.world.getBlockState(pos6).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos7).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos8).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos9).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos10).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos11).getBlock() != Blocks.LAVA){
                 mc.player.setPos(mc.player.getX(),mc.player.getY()+upspeed.get(),mc.player.getZ());
             }
         }
@@ -371,14 +371,14 @@ public class TPFly extends Module {
             BlockPos pos3 = playerPos.add(new Vec3i(0,-4,0));
             BlockPos pos4 = playerPos.add(new Vec3i(0,-5,0));
             BlockPos pos5 = playerPos.add(new Vec3i(0,-6,0));
-            if (!mc.world.getBlockState(pos).getMaterial().isSolid() && !mc.world.getBlockState(pos1).getMaterial().isSolid() && !mc.world.getBlockState(pos2).getMaterial().isSolid() && !mc.world.getBlockState(pos3).getMaterial().isSolid() && !mc.world.getBlockState(pos4).getMaterial().isSolid() && !mc.world.getBlockState(pos5).getMaterial().isSolid() && mc.world.getBlockState(pos).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos1).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos2).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos3).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos4).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos5).getBlock() != Blocks.LAVA){
+            if (mc.world.getBlockState(pos).isReplaceable() && mc.world.getBlockState(pos1).isReplaceable() && mc.world.getBlockState(pos2).isReplaceable() && mc.world.getBlockState(pos3).isReplaceable() && mc.world.getBlockState(pos4).isReplaceable() && mc.world.getBlockState(pos5).isReplaceable() && mc.world.getBlockState(pos).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos1).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos2).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos3).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos4).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos5).getBlock() != Blocks.LAVA){
                 mc.player.setPos(mc.player.getX(),mc.player.getY()-downspeed.get(),mc.player.getZ());
             }
         }
         if (akick.get() && delayLeft > 0) delayLeft--;
         BlockPos playerPos1 = mc.player.getBlockPos();
         BlockPos pos1 = playerPos1.add(BlockPos.ofFloored(0,-0.65,0));
-        if (!mc.world.getBlockState(pos1).isAir()){
+        if (mc.world.getBlockState(pos1).isAir()){
             mc.player.setMovementSpeed(0);
             mc.player.setVelocity(0,0,0);
         }

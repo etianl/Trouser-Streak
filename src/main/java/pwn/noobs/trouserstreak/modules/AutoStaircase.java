@@ -4,13 +4,17 @@ import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.settings.DoubleSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.Flight;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
-import pwn.noobs.trouserstreak.Trouser;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.util.Hand;
@@ -18,8 +22,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.settings.*;
+import pwn.noobs.trouserstreak.Trouser;
 
 /**
  * @Author majorsopa
@@ -66,7 +69,7 @@ public class AutoStaircase extends Module {
         PlayerUtils.centerPlayer();
         if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
         BlockPos pos = mc.player.getBlockPos().add(0,-1,0);
-        if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {;
+        if (mc.world.getBlockState(pos).isReplaceable()) {;
             mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
             mc.player.swingHand(Hand.MAIN_HAND);}
         if (Modules.get().get(Flight.class).isActive()) {
@@ -146,12 +149,12 @@ public class AutoStaircase extends Module {
         if (mc.player == null || mc.world == null) {toggle(); return;}
         if (!mc.player.isOnGround() || !(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
         BlockPos pos = mc.player.getBlockPos().offset(mc.player.getMovementDirection());
-        if (mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
+        if (mc.world.getBlockState(pos).isReplaceable()) {
             mc.options.forwardKey.setPressed(false);
             mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
             mc.player.swingHand(Hand.MAIN_HAND);
         }
-        if (!mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
+        if (!mc.world.getBlockState(pos).isReplaceable()) {
             mc.options.forwardKey.setPressed(true);
             mc.options.jumpKey.setPressed(true);
             PlayerUtils.centerPlayer();

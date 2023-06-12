@@ -22,11 +22,13 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
 import net.minecraft.network.packet.s2c.play.ChunkDeltaUpdateS2CPacket;
+import net.minecraft.server.world.ChunkHolder;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.world.chunk.light.LightingProvider;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.io.File;
@@ -111,14 +113,9 @@ public class NewerNewChunks extends Module {
 		WTable table = theme.table();
 		WButton deletedata = table.add(theme.button("**DELETE CHUNK DATA**")).expandX().minWidth(100).widget();
 		deletedata.action = () -> {
-			newChunks.clear();
-			oldChunks.clear();
-			olderoldChunks.clear();
-			lightingexploitChunks.clear();
-			new File("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt").delete();
-			new File("NewChunks/"+serverip+"/"+world+"/OldChunkData.txt").delete();
-			new File("NewChunks/"+serverip+"/"+world+"/FlowIsBelowY0ChunkData.txt").delete();
-			new File("NewChunks/"+serverip+"/"+world+"/LightingExploitChunkData.txt").delete();
+			if (deletewarning==0) error("PRESS AGAIN WITHIN 5s TO DELETE ALL CHUNK DATA FOR THIS DIMENSION.");
+			deletewarningTicks=0;
+			deletewarning++;
 		};
 		table.row();
 		return table;
@@ -208,7 +205,8 @@ public class NewerNewChunks extends Module {
 			.visible(() -> shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both)
 			.build()
 	);
-
+	private int deletewarningTicks=666;
+	private int deletewarning=0;
 	private String serverip;
 	private String world;
 	private ChunkPos chunkPos;
@@ -312,6 +310,20 @@ public class NewerNewChunks extends Module {
 
 	@EventHandler
 	private void onPreTick(TickEvent.Pre event) {
+		if (deletewarningTicks<=100) deletewarningTicks++;
+		else deletewarning=0;
+		if (deletewarning>=2){
+			newChunks.clear();
+			oldChunks.clear();
+			olderoldChunks.clear();
+			lightingexploitChunks.clear();
+			new File("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt").delete();
+			new File("NewChunks/"+serverip+"/"+world+"/OldChunkData.txt").delete();
+			new File("NewChunks/"+serverip+"/"+world+"/FlowIsBelowY0ChunkData.txt").delete();
+			new File("NewChunks/"+serverip+"/"+world+"/LightingExploitChunkData.txt").delete();
+			error("Chunk Data deleted for this Dimension.");
+			deletewarning=0;
+		}
 		if (detectmode.get()==DetectMode.Normal && lightexploit.get()){
 			if (errticks<6){
 				errticks++;}
@@ -552,12 +564,10 @@ public class NewerNewChunks extends Module {
 					return;
 				}
 
-
 				for (int x = 0; x < 16; x++) {
 					for (int y = mc.world.getBottomY(); y < mc.world.getTopY(); y++) {
 						for (int z = 0; z < 16; z++) {
 							FluidState fluid = chunk.getFluidState(x, y, z);
-
 							if (!oldChunks.contains(oldpos) && !lightingexploitChunks.contains(oldpos) && !olderoldChunks.contains(oldpos) && !newChunks.contains(oldpos) && !fluid.isEmpty() && !fluid.isStill()) {
 								oldChunks.add(oldpos);
 								if (save.get()){

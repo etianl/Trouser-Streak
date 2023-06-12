@@ -66,6 +66,19 @@ public class BaseFinder extends Module {
             .defaultValue(40)
             .visible(() -> nearestbasemsg.get())
             .build());
+    private final Setting<Boolean> skybuildfind = sglists.add(new BoolSetting.Builder()
+            .name("Sky Build Finder")
+            .description("If Blocks higher than terrain can naturally generate, flag chunk as possible build.")
+            .defaultValue(true)
+            .build());
+    private final Setting<Integer> skybuildint = sglists.add(new IntSetting.Builder()
+            .name("Sky Build Y Threshold")
+            .description("If Blocks higher than this Y value, flag chunk as possible build.")
+                    .min(258)
+            .sliderRange(258,319)
+            .defaultValue(260)
+            .visible(() -> skybuildfind.get())
+            .build());
     private final Setting<List<Block>> Blawcks1 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #1 (Default)")
             .description("If the total amount of any of these found is greater than the Number, throw a base location. Blocks are checked in listed order from top to bottom.")
@@ -98,7 +111,7 @@ public class BaseFinder extends Module {
     private final Setting<List<Block>> Blawcks3 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #3 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location. Blocks are checked in numerical listed order from top to bottom.")
-            .defaultValue(Blocks.CRAFTING_TABLE, Blocks.ENDER_CHEST, Blocks.SMOOTH_QUARTZ, Blocks.NOTE_BLOCK)
+            .defaultValue(Blocks.CRAFTING_TABLE, Blocks.BREWING_STAND, Blocks.ENDER_CHEST, Blocks.SMOOTH_QUARTZ, Blocks.NOTE_BLOCK)
             .filter(this::filterBlocks)
             .build()
     );
@@ -117,9 +130,16 @@ public class BaseFinder extends Module {
             .build()
     );
     private final Setting<List<Block>> Blawcks6 = sglists.add(new BlockListSetting.Builder()
-            .name("Block List #6 (Extra Custom)")
+            .name("Block List #6 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location. Blocks are checked in numerical listed order from top to bottom.")
             .defaultValue(Blocks.TORCH)
+            .filter(this::filterBlocks)
+            .build()
+    );
+    private final Setting<List<Block>> Blawcks7 = sglists.add(new BlockListSetting.Builder()
+            .name("Block List #7 (Extra Custom)")
+            .description("If the total amount of any of these found is greater than the Number specified, throw a base location. Blocks are checked in numerical listed order from top to bottom.")
+            .defaultValue()
             .filter(this::filterBlocks)
             .build()
     );
@@ -142,7 +162,7 @@ public class BaseFinder extends Module {
             .description("How many blocks it takes, from of any of the listed blocks to throw a base location.")
             .min(1)
             .sliderRange(1,100)
-            .defaultValue(3)
+            .defaultValue(4)
             .build());
     private final Setting<Integer> blowkfind4 = sglists.add(new IntSetting.Builder()
             .name("(List #4) Number Of Blocks to Find")
@@ -163,7 +183,14 @@ public class BaseFinder extends Module {
             .description("How many blocks it takes, from of any of the listed blocks to throw a base location.")
             .min(1)
             .sliderRange(1,100)
-            .defaultValue(24)
+            .defaultValue(26)
+            .build());
+    private final Setting<Integer> blowkfind7 = sglists.add(new IntSetting.Builder()
+            .name("(List #6) Number Of Blocks to Find")
+            .description("How many blocks it takes, from of any of the listed blocks to throw a base location.")
+            .min(1)
+            .sliderRange(1,100)
+            .defaultValue(1)
             .build());
     private final Setting<Boolean> remove = sgcacheCdata.add(new BoolSetting.Builder()
             .name("RemoveOnModuleDisabled")
@@ -244,7 +271,8 @@ public class BaseFinder extends Module {
         WButton deletedata = table.add(theme.button("**DELETE ALL BASE DATA**")).expandX().minWidth(100).widget();
         deletedata.action = () -> {
             if (!(mc.world==null) && mc.world.isChunkLoaded(mc.player.getChunkPos().x,mc.player.getChunkPos().z)){
-            if (deletewarning==0) error("THIS WILL DELETE ALL BASE DATA FOR THIS DIMENSION. PRESS AGAIN TO PROCEED.");
+            if (deletewarning==0) error("PRESS AGAIN WITHIN 5s TO DELETE ALL BASE DATA FOR THIS DIMENSION.");
+            deletewarningTicks=0;
             deletewarning++;
             }
         };
@@ -295,6 +323,7 @@ public class BaseFinder extends Module {
             .visible(() -> shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both)
             .build()
     );
+    private int deletewarningTicks=666;
     private int deletewarning=0;
     private boolean checkingchunk1=false;
     private int found1 = 0;
@@ -308,6 +337,8 @@ public class BaseFinder extends Module {
     private int found5 = 0;
     private boolean checkingchunk6=false;
     private int found6 = 0;
+    private boolean checkingchunk7=false;
+    private int found7 = 0;
     public static int closestbaseX=2000000000;
     public static int closestbaseZ=2000000000;
     private static int closestX=2000000000;
@@ -323,6 +354,7 @@ public class BaseFinder extends Module {
     private final Set<BlockPos> blockpositions4 = Collections.synchronizedSet(new HashSet<>());
     private final Set<BlockPos> blockpositions5 = Collections.synchronizedSet(new HashSet<>());
     private final Set<BlockPos> blockpositions6 = Collections.synchronizedSet(new HashSet<>());
+    private final Set<BlockPos> blockpositions7 = Collections.synchronizedSet(new HashSet<>());
     public static int isBaseFinderModuleOn=0;
     private int autoreloadticks=0;
     private int loadingticks=0;
@@ -333,7 +365,7 @@ public class BaseFinder extends Module {
     public static int RemoveCoordX=1500000000;
     public static int RemoveCoordZ=1500000000;
     public int findnearestbaseticks=0;
-    public static boolean findnearestbase;
+    public static boolean findnearestbase=false;
     public BaseFinder() {
         super(Trouser.Main,"BaseFinder", "Estimates if a build or base may be in the chunk based on the blocks it contains. May cause lag.");
     }
@@ -396,6 +428,8 @@ public class BaseFinder extends Module {
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
+        if (deletewarningTicks<=100) deletewarningTicks++;
+        else deletewarning=0;
         if (deletewarning>=2){
                 baseChunks.clear();
                 new File("BaseChunks/"+serverip+"/"+world+"/BaseChunkData.txt").delete();
@@ -534,7 +568,7 @@ public class BaseFinder extends Module {
                     return;
                 }
 
-                if (Blawcks1.get().size()>0 || Blawcks2.get().size()>0 || Blawcks3.get().size()>0 || Blawcks4.get().size()>0 || Blawcks5.get().size()>0 || Blawcks6.get().size()>0){
+                if (Blawcks1.get().size()>0 || Blawcks2.get().size()>0 || Blawcks3.get().size()>0 || Blawcks4.get().size()>0 || Blawcks5.get().size()>0 || Blawcks6.get().size()>0 || Blawcks7.get().size()>0){
                     try {
                 for (int x = 0; x < 16; x++) {
                     for (int y = mc.world.getBottomY(); y < mc.world.getTopY(); y++) {
@@ -542,6 +576,15 @@ public class BaseFinder extends Module {
                             BlockState blerks = chunk.getBlockState(new BlockPos(x, y, z));
                             blockposi=new BlockPos(x, y, z);
                             if (!(blerks.getBlock()==Blocks.AIR)){
+                                if (skybuildfind.get() && y>skybuildint.get()) {
+                                    if (!baseChunks.contains(basepos)){
+                                        baseChunks.add(basepos);
+                                        if (save.get()) {
+                                            saveBaseChunkData();
+                                        }
+                                        ChatUtils.sendMsg(Text.of("(SkyBuild)Possible build located near X"+basepos.getCenterX()+" x Z"+basepos.getCenterZ()));
+                                    }
+                                }
                                 if (!(blerks.getBlock()==Blocks.STONE)){
                                     if (!(blerks.getBlock()==Blocks.DEEPSLATE) && !(blerks.getBlock()==Blocks.DIRT) && !(blerks.getBlock()==Blocks.GRASS_BLOCK) && !(blerks.getBlock()==Blocks.WATER) && !(blerks.getBlock()==Blocks.SAND) && !(blerks.getBlock()==Blocks.GRAVEL)  && !(blerks.getBlock()==Blocks.BEDROCK)&& !(blerks.getBlock()==Blocks.NETHERRACK) && !(blerks.getBlock()==Blocks.LAVA)){
                                         if (Blawcks1.get().size()>0){
@@ -592,6 +635,14 @@ public class BaseFinder extends Module {
                                                 }
                                             }
                                         }
+                                        if (Blawcks7.get().size()>0){
+                                            for (int b = 0; b < Blawcks7.get().size(); b++){
+                                                if (blerks.getBlock()==Blawcks7.get().get(b)) {
+                                                    blockpositions7.add(blockposi);
+                                                    found7= blockpositions7.size();
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -601,6 +652,7 @@ public class BaseFinder extends Module {
                             if (Blawcks4.get().size()>0)checkingchunk4=true;
                             if (Blawcks5.get().size()>0)checkingchunk5=true;
                             if (Blawcks6.get().size()>0)checkingchunk6=true;
+                            if (Blawcks7.get().size()>0)checkingchunk7=true;
                         }
                     }
                 }
@@ -721,6 +773,26 @@ public class BaseFinder extends Module {
                                 blockpositions6.clear();
                                 found6 = 0;
                                 checkingchunk6=false;
+                            }
+                        }
+
+                        //CheckList 7
+                        if (Blawcks7.get().size()>0){
+                            if (checkingchunk7==true && found7>=blowkfind7.get()) {
+                                if (!baseChunks.contains(basepos)){
+                                    baseChunks.add(basepos);
+                                    if (save.get()) {
+                                        saveBaseChunkData();
+                                    }
+                                    ChatUtils.sendMsg(Text.of("(List7)Possible build located near X"+basepos.getCenterX()+" x Z"+basepos.getCenterZ()));
+                                }
+                                blockpositions7.clear();
+                                found7 = 0;
+                                checkingchunk7=false;
+                            } else if (checkingchunk7==true && found7<blowkfind7.get()){
+                                blockpositions7.clear();
+                                found7 = 0;
+                                checkingchunk7=false;
                             }
                         }
                     }
