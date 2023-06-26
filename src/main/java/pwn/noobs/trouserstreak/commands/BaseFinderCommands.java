@@ -23,15 +23,8 @@ public class BaseFinderCommands extends Command {
                 error("Please turn on BaseFinder module and run the command again.");
                 return SINGLE_SUCCESS;
             } else {
-                if (b.closestbaseX<1000000000 && b.closestbaseZ<1000000000){
-                    b.findnearestbase=true;
-                    ChatUtils.sendMsg(Text.of("#Nearest possible base at X"+b.closestbaseX+" x Z"+b.closestbaseZ));
-                    b.findnearestbase=false;
-                    return SINGLE_SUCCESS;
-                }else {
-                    error("No Bases Logged Yet.");
-                    return SINGLE_SUCCESS;
-                }
+                b.findnearestbaseticks=1;
+                return SINGLE_SUCCESS;
             }
         });
         builder.then(literal("add").executes(ctx -> {
