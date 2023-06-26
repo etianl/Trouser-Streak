@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
@@ -20,6 +21,7 @@ import net.minecraft.block.*;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.WorldSavePath;
@@ -41,7 +43,7 @@ import java.util.Set;
 
 /*
     This BaseFinder was made from the newchunks code,
-    Ported from: https://github.com/BleachDrinker420/BleachHack/blob/master/BleachHack-Fabric-1.16/src/main/java/bleach/hack/module/mods/NewChunks.java
+    Newchunks was Ported from: https://github.com/BleachDrinker420/BleachHack/blob/master/BleachHack-Fabric-1.16/src/main/java/bleach/hack/module/mods/NewChunks.java
     Ported for meteor-rejects
     updated and modified by etianll :D
 */
@@ -53,25 +55,12 @@ public class BaseFinder extends Module {
     private final SettingGroup sgRender = settings.createGroup("Render");
 
     // general
-    private final Setting<Boolean> nearestbasemsg = sgGeneral.add(new BoolSetting.Builder()
-            .name("NearestBaseNotifications (Spam)")
-            .description("Spams you with messages about where the nearest base is.")
-            .defaultValue(false)
-            .build()
-    );
-    private final Setting<Integer> basemsgticks = sgGeneral.add(new IntSetting.Builder()
-            .name("NearestBaseMsgDelay")
-            .description("# of Blocks to Find")
-            .sliderRange(1,100)
-            .defaultValue(40)
-            .visible(() -> nearestbasemsg.get())
-            .build());
-    private final Setting<Boolean> skybuildfind = sglists.add(new BoolSetting.Builder()
+    private final Setting<Boolean> skybuildfind = sgGeneral.add(new BoolSetting.Builder()
             .name("Sky Build Finder")
             .description("If Blocks higher than terrain can naturally generate, flag chunk as possible build.")
             .defaultValue(true)
             .build());
-    private final Setting<Integer> skybuildint = sglists.add(new IntSetting.Builder()
+    private final Setting<Integer> skybuildint = sgGeneral.add(new IntSetting.Builder()
             .name("Sky Build Y Threshold")
             .description("If Blocks higher than this Y value, flag chunk as possible build.")
                     .min(258)
@@ -114,7 +103,7 @@ public class BaseFinder extends Module {
     private final Setting<List<Block>> Blawcks3 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #3 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location. Blocks are checked in numerical listed order from top to bottom.")
-            .defaultValue(Blocks.CRAFTING_TABLE, Blocks.BREWING_STAND, Blocks.ENDER_CHEST, Blocks.SMOOTH_QUARTZ, Blocks.NOTE_BLOCK)
+            .defaultValue(Blocks.CRAFTING_TABLE, Blocks.BREWING_STAND, Blocks.ENDER_CHEST, Blocks.SMOOTH_QUARTZ, Blocks.REDSTONE_BLOCK)
             .filter(this::filterBlocks)
             .build()
     );
@@ -128,14 +117,14 @@ public class BaseFinder extends Module {
     private final Setting<List<Block>> Blawcks5 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #5 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location. Blocks are checked in numerical listed order from top to bottom.")
-            .defaultValue(Blocks.WALL_TORCH, Blocks.REDSTONE_TORCH, Blocks.REDSTONE_WALL_TORCH, Blocks.POLISHED_DIORITE, Blocks.QUARTZ_BLOCK, Blocks.RED_BED, Blocks.WHITE_BED, Blocks.YELLOW_BED, Blocks.ORANGE_BED, Blocks.BLUE_BED, Blocks.CYAN_BED, Blocks.GREEN_BED, Blocks.LIME_BED, Blocks.PURPLE_BED)
+            .defaultValue(Blocks.POLISHED_DIORITE, Blocks.QUARTZ_BLOCK, Blocks.RED_BED, Blocks.WHITE_BED, Blocks.YELLOW_BED, Blocks.ORANGE_BED, Blocks.BLUE_BED, Blocks.CYAN_BED, Blocks.GREEN_BED, Blocks.LIME_BED, Blocks.PURPLE_BED, Blocks.NOTE_BLOCK)
             .filter(this::filterBlocks)
             .build()
     );
     private final Setting<List<Block>> Blawcks6 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #6 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location. Blocks are checked in numerical listed order from top to bottom.")
-            .defaultValue(Blocks.TORCH)
+            .defaultValue(Blocks.REDSTONE_TORCH, Blocks.REDSTONE_WALL_TORCH)
             .filter(this::filterBlocks)
             .build()
     );
@@ -179,17 +168,17 @@ public class BaseFinder extends Module {
             .description("How many blocks it takes, from of any of the listed blocks to throw a base location.")
             .min(1)
             .sliderRange(1,100)
-            .defaultValue(22)
+            .defaultValue(6)
             .build());
     private final Setting<Integer> blowkfind6 = sglists.add(new IntSetting.Builder()
             .name("(List #6) Number Of Blocks to Find")
             .description("How many blocks it takes, from of any of the listed blocks to throw a base location.")
             .min(1)
             .sliderRange(1,100)
-            .defaultValue(26)
+            .defaultValue(12)
             .build());
     private final Setting<Integer> blowkfind7 = sglists.add(new IntSetting.Builder()
-            .name("(List #6) Number Of Blocks to Find")
+            .name("(List #7) Number Of Blocks to Find")
             .description("How many blocks it takes, from of any of the listed blocks to throw a base location.")
             .min(1)
             .sliderRange(1,100)
@@ -241,11 +230,7 @@ public class BaseFinder extends Module {
             if(isBaseFinderModuleOn==0){
                 error("Please turn on BaseFinder module and push the button again.");
             } else {
-                if (closestbaseX<1000000000 && closestbaseZ<1000000000){
-                findnearestbase=true;
-                ChatUtils.sendMsg(Text.of("#Nearest possible base near X"+closestbaseX+" x Z"+closestbaseZ));
-                findnearestbase=false;
-                }else error("No Bases Logged Yet.");
+                findnearestbaseticks=1;
             }
         };
         table.row();
@@ -306,26 +291,34 @@ public class BaseFinder extends Module {
             .sliderRange(-128,512)
             .build()
     );
-    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
-            .name("shape-mode")
-            .description("How the shapes are rendered.")
-            .defaultValue(ShapeMode.Both)
+    private final Setting<Boolean> trcr = sgRender.add(new BoolSetting.Builder()
+            .name("Tracers")
+            .description("Show tracers to the base chunks.")
+            .defaultValue(true)
+            .build()
+    );
+    public final Setting<Integer> trcrdist = sgRender.add(new IntSetting.Builder()
+            .name("Tracer Distance (in chunks)")
+            .description("How far from the base chunk to still render a tracer.")
+            .defaultValue(32)
+            .sliderRange(1,1024)
+            .visible(() -> trcr.get())
             .build()
     );
     private final Setting<SettingColor> baseChunksSideColor = sgRender.add(new ColorSetting.Builder()
-            .name("Base-chunks-side-color")
-            .description("Color of the chunks that may contain bases or builds.")
+            .name("Base-chunks-waypoint-color")
+            .description("Color of the waypoints indicating chunks that may contain bases or builds.")
             .defaultValue(new SettingColor(255, 127, 0, 40, true))
-            .visible(() -> shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both)
             .build()
     );
     private final Setting<SettingColor> baseChunksLineColor = sgRender.add(new ColorSetting.Builder()
-            .name("Base-chunks-line-color")
-            .description("Color of the chunks that may contain bases or builds.")
-            .defaultValue(new SettingColor(255, 127, 0, 80, true))
-            .visible(() -> shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both)
+            .name("Base-chunks-tracer-color")
+            .description("Color of tracers to the chunks that may contain bases or builds.")
+            .defaultValue(new SettingColor(255, 127, 0, 255, true))
+            .visible(() -> trcr.get())
             .build()
     );
+
     private int deletewarningTicks=666;
     private int deletewarning=0;
     private boolean checkingchunk1=false;
@@ -367,8 +360,7 @@ public class BaseFinder extends Module {
     public static int AddCoordZ=2000000000;
     public static int RemoveCoordX=1500000000;
     public static int RemoveCoordZ=1500000000;
-    public int findnearestbaseticks=0;
-    public static boolean findnearestbase=false;
+    public static int findnearestbaseticks=0;
     public BaseFinder() {
         super(Trouser.Main,"BaseFinder", "Estimates if a build or base may be in the chunk based on the blocks it contains. May cause lag.");
     }
@@ -478,15 +470,8 @@ public class BaseFinder extends Module {
             RemoveCoordX=1500000000;
             RemoveCoordZ=1500000000;
         }
-        if (findnearestbase=true){
-            findnearestbaseticks++;
-            if (findnearestbaseticks>=1){
-                findnearestbaseticks=0;
-                closestX=2000000000;
-                closestZ=2000000000;
-                findnearestbase=false;}
-            if (findnearestbase=true && findnearestbaseticks<1){
-                if (baseChunks.stream().toList().size()>0){
+        if (findnearestbaseticks==1){
+            if (baseChunks.stream().toList().size()>0){
                 for (int b = 0; b < baseChunks.stream().toList().size(); b++){
                     if(Math.abs(baseChunks.stream().toList().get(b).getCenterX()-mc.player.getChunkPos().getCenterX())<closestX || Math.abs(baseChunks.stream().toList().get(b).getCenterZ()-mc.player.getChunkPos().getCenterZ())<closestZ){
                         closestX=Math.abs(baseChunks.stream().toList().get(b).getCenterX()-mc.player.getChunkPos().getCenterX());
@@ -495,17 +480,14 @@ public class BaseFinder extends Module {
                         closestbaseZ=baseChunks.stream().toList().get(b).getCenterZ();
                     }
                 }
-                }
+                if (closestbaseX<1000000000 && closestbaseZ<1000000000)
+                    ChatUtils.sendMsg(Text.of("#Nearest possible base at X"+closestbaseX+" x Z"+closestbaseZ));
+                if (!(closestbaseX<1000000000 && closestbaseZ<1000000000))
+                    error("No Bases Logged Yet.");
             }
-            if (nearestbasemsg.get()){
-                if (closestbaseX<1000000000 && closestbaseZ<1000000000){
-                basenotifticks++;
-                if (basenotifticks>=basemsgticks.get()){
-                    ChatUtils.sendMsg(Text.of("Nearest possible base near X"+closestbaseX+" x Z"+closestbaseZ));
-                    basenotifticks=0;
-                }
-            }
-            }
+            findnearestbaseticks=0;
+            closestX=2000000000;
+            closestZ=2000000000;
         }
 
         if (mc.isInSingleplayer()==true){
@@ -544,7 +526,7 @@ public class BaseFinder extends Module {
             synchronized (baseChunks) {
                 for (ChunkPos c : baseChunks) {
                     if (mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
-                        render(new Box(c.getStartPos().add(7, renderHeightYbottom.get(), 7), c.getStartPos().add(8, renderHeightY.get(), 8)), baseChunksSideColor.get(), baseChunksLineColor.get(), shapeMode.get(), event);
+                        render(new Box(c.getStartPos().add(7, renderHeightYbottom.get(), 7), c.getStartPos().add(8, renderHeightY.get(), 8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
                     }
                 }
             }
@@ -552,13 +534,16 @@ public class BaseFinder extends Module {
     }
 
     private void render(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
+        if (trcr.get() && Math.abs(box.minX-RenderUtils.center.x)<=trcrdist.get()*16 && Math.abs(box.minZ-RenderUtils.center.z)<=trcrdist.get()*16)
+            event.renderer.line(
+                RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
         event.renderer.box(
-                box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, lines, shapeMode, 0);
+                box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
     }
 
     @EventHandler
     private void onReadPacket(PacketEvent.Receive event) {
-        if (event.packet instanceof ChunkDataS2CPacket && mc.world != null) {
+        if (!(event.packet instanceof PlayerMoveC2SPacket) && event.packet instanceof ChunkDataS2CPacket && mc.world != null) {
             ChunkDataS2CPacket packet = (ChunkDataS2CPacket) event.packet;
 
             basepos = new ChunkPos(packet.getX(), packet.getZ());

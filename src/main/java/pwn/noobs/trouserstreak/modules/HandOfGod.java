@@ -25,8 +25,22 @@ import net.minecraft.util.math.Vec3d;
 import pwn.noobs.trouserstreak.Trouser;
 
 public class HandOfGod extends Module {
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgClick = settings.createGroup("Click Options");
     private final SettingGroup sgPcentered = settings.createGroup("Player-Centered Options");
+    public final Setting<Boolean> autosave = sgGeneral.add(new BoolSetting.Builder()
+            .name("AutoSave and CTRL+S shortcut")
+            .description("For saving your progress incase of server shutdown.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Integer> autosavedelay = sgGeneral.add(new IntSetting.Builder()
+            .name("AutoSave Delay (Seconds)")
+            .description("How many seconds between saving the world.")
+            .defaultValue(20)
+            .min(1)
+            .sliderMax(60)
+            .build());
 
     private final Setting<String> block = sgClick.add(new StringSetting.Builder()
             .name("ClickBlock")
@@ -234,6 +248,7 @@ public class HandOfGod extends Module {
     private int ticks=0;
     private int swpr=0;
     private boolean sweep=false;
+    private int asaveticks=0;
     private int aticks=0;
     private int errticks=0;
     private int roofticks=0;
@@ -325,6 +340,17 @@ public class HandOfGod extends Module {
         if (!(mc.player.hasPermissionLevel(4))) {
             toggle();
             error("Must have OP");
+        }
+        if (autosave.get()){
+            asaveticks++;
+            if (asaveticks>=autosavedelay.get()*20){
+                ChatUtils.sendPlayerMsg("/save-all");
+                asaveticks=0;
+            }
+            if (mc.options.sneakKey.isPressed() && mc.options.backKey.isPressed()){
+                ChatUtils.sendPlayerMsg("/save-all");
+                asaveticks=0;
+            }
         }
             if (auto.get() && mc.options.attackKey.isPressed() && mc.currentScreen == null) {
                 if (aticks<=atickdelay.get()){
