@@ -969,7 +969,7 @@ public class AutoLavaCaster extends Module {
     private void autoposition() {
         BlockPos pos = mc.player.getBlockPos().add(new Vec3i(0,-1,0));
         if (mc.world.getBlockState(pos).isReplaceable()) {
-                    if (aMountain.autocasttimenow==true && aMountain.wasfacing==Direction.EAST|| aMountain.autocasttimenow==false && mc.player.getYaw()>=90 && mc.player.getYaw()<=180 || tryanotherpos==true){ //NORTHWEST
+                    if (aMountain.autocasttimenow==true && aMountain.wasfacingBOT==Direction.EAST|| aMountain.autocasttimenow==false && mc.player.getYaw()>=90 && mc.player.getYaw()<=180 || tryanotherpos==true){ //NORTHWEST
                         BlockPos isair = BlockPos.ofFloored(lava.getX()+2.5,lava.getY()+3,lava.getZ()+2.5);
                         BlockPos isair2 = BlockPos.ofFloored(lava.getX()+2.5,lava.getY()+4,lava.getZ()+2.5);
                         if (mc.world.getBlockState(isair).isReplaceable() && mc.world.getFluidState(isair).isEmpty() && !mc.world.getBlockState(isair).isOf(Blocks.POWDER_SNOW) && mc.world.getBlockState(isair2).isReplaceable() && mc.world.getFluidState(isair2).isEmpty() && !mc.world.getBlockState(isair2).isOf(Blocks.POWDER_SNOW)) {
@@ -978,7 +978,7 @@ public class AutoLavaCaster extends Module {
                         } else {
                             error("Position is occupied, trying another.");
                             tryanotherpos=true;}
-                    } else if (aMountain.autocasttimenow==true && aMountain.wasfacing==Direction.SOUTH|| aMountain.autocasttimenow==false && mc.player.getYaw()>=-180 && mc.player.getYaw()<-90 || tryanotherpos==true){ //NORTHEAST
+                    } else if (aMountain.autocasttimenow==true && aMountain.wasfacingBOT==Direction.SOUTH|| aMountain.autocasttimenow==false && mc.player.getYaw()>=-180 && mc.player.getYaw()<-90 || tryanotherpos==true){ //NORTHEAST
                         BlockPos isair = BlockPos.ofFloored(lava.getX()-1.5,lava.getY()+3,lava.getZ()+2.5);
                         BlockPos isair2 = BlockPos.ofFloored(lava.getX()-1.5,lava.getY()+4,lava.getZ()+2.5);
                         if (mc.world.getBlockState(isair).isReplaceable() && mc.world.getFluidState(isair).isEmpty() && !mc.world.getBlockState(isair).isOf(Blocks.POWDER_SNOW) && mc.world.getBlockState(isair2).isReplaceable() && mc.world.getFluidState(isair2).isEmpty() && !mc.world.getBlockState(isair2).isOf(Blocks.POWDER_SNOW)) {
@@ -987,7 +987,7 @@ public class AutoLavaCaster extends Module {
                         } else {
                             error("Position is occupied, trying another.");
                             tryanotherpos=true;}
-                    } else if (aMountain.autocasttimenow==true && aMountain.wasfacing==Direction.WEST|| aMountain.autocasttimenow==false && mc.player.getYaw()>=-90 && mc.player.getYaw()<0 || tryanotherpos==true){ //SOUTHEAST
+                    } else if (aMountain.autocasttimenow==true && aMountain.wasfacingBOT==Direction.WEST|| aMountain.autocasttimenow==false && mc.player.getYaw()>=-90 && mc.player.getYaw()<0 || tryanotherpos==true){ //SOUTHEAST
                         BlockPos isair = BlockPos.ofFloored(lava.getX()-1.5,lava.getY()+3,lava.getZ()-1.5);
                         BlockPos isair2 = BlockPos.ofFloored(lava.getX()-1.5,lava.getY()+4,lava.getZ()-1.5);
                         if (mc.world.getBlockState(isair).isReplaceable() && mc.world.getFluidState(isair).isEmpty() && !mc.world.getBlockState(isair).isOf(Blocks.POWDER_SNOW) && mc.world.getBlockState(isair2).isReplaceable() && mc.world.getFluidState(isair2).isEmpty() && !mc.world.getBlockState(isair2).isOf(Blocks.POWDER_SNOW)) {
@@ -996,7 +996,7 @@ public class AutoLavaCaster extends Module {
                         } else {
                             error("Position is occupied, trying another.");
                             tryanotherpos=true;}
-                    } else if (aMountain.autocasttimenow==true && aMountain.wasfacing==Direction.NORTH|| aMountain.autocasttimenow==false && mc.player.getYaw()>=0 && mc.player.getYaw()<90 || tryanotherpos==true){ //SOUTHWEST
+                    } else if (aMountain.autocasttimenow==true && aMountain.wasfacingBOT==Direction.NORTH|| aMountain.autocasttimenow==false && mc.player.getYaw()>=0 && mc.player.getYaw()<90 || tryanotherpos==true){ //SOUTHWEST
                         BlockPos isair = BlockPos.ofFloored(lava.getX()+2.5,lava.getY()+3,lava.getZ()-1.5);
                         BlockPos isair2 = BlockPos.ofFloored(lava.getX()+2.5,lava.getY()+4,lava.getZ()-1.5);
                         if (mc.world.getBlockState(isair).isReplaceable() && mc.world.getFluidState(isair).isEmpty() && !mc.world.getBlockState(isair).isOf(Blocks.POWDER_SNOW) && mc.world.getBlockState(isair2).isReplaceable() && mc.world.getFluidState(isair2).isEmpty() && !mc.world.getBlockState(isair2).isOf(Blocks.POWDER_SNOW)) {

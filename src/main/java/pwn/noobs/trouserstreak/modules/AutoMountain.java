@@ -59,6 +59,12 @@ public class AutoMountain extends Module {
             .defaultValue(false)
             .build()
     );
+    public final Setting<Boolean> mouseT = sgGeneral.add(new BoolSetting.Builder()
+            .name("MouseTurn")
+            .description("Changes building direction based on your looking direction")
+            .defaultValue(true)
+            .build()
+    );
     public final Setting<Boolean> startPaused = sgGeneral.add(new BoolSetting.Builder()
             .name("Start Paused")
             .description("AutoMountain is Paused when module activated, for more control.")
@@ -253,7 +259,9 @@ public class AutoMountain extends Module {
     private int lowblockY=-1;
     private int highblockY=-1;
     public static boolean isthisfirstblock;
-    public static Direction wasfacing;
+    public static Direction wasfacingBOT;
+    private Direction wasfacing;
+    private int prevPitch;
 
     @EventHandler
     private void onScreenOpen(OpenScreenEvent event) {
@@ -278,11 +286,13 @@ public class AutoMountain extends Module {
         if (autolavamountain.get()) ChatUtils.sendMsg(Text.of("Press UseKey (RightClick) to Build a Mountain! Please wait while the bot works."));
         else ChatUtils.sendMsg(Text.of("Press UseKey (RightClick) to Build Stairs!"));
         } else if (startPaused.get() == false){
+            wasfacing=mc.player.getHorizontalFacing();
+            prevPitch=Math.round(mc.player.getPitch());
             if (swap.get()){
                 cascadingpileof();
             }
             if (autolavamountain.get()){
-                wasfacing=mc.player.getHorizontalFacing();
+                wasfacingBOT=mc.player.getHorizontalFacing();
                 lavamountainingredients();
             }
             mc.player.setVelocity(0,0,0);
@@ -332,55 +342,46 @@ public class AutoMountain extends Module {
     private void onRender(Render3DEvent event) {
         if (render.get()) {
             if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
-                if (mc.player.getPitch() <= 40){            //UP
-                    switch (mc.player.getMovementDirection()) {
-                        case NORTH -> {
+                if ((mouseT.get() && mc.player.getPitch() <= 40) || (!mouseT.get() && prevPitch <= 40)){            //UP
+                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {
                             BlockPos pos1 = playerPos.add(new Vec3i(0, +spcoffset.get(), -1));
                             event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                        }
-                        case SOUTH -> {
+                    }
+                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {
                             BlockPos pos1 = playerPos.add(new Vec3i(0, +spcoffset.get(), 1));
                             event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                        }
-                        case EAST -> {
+                    }
+                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {
                             BlockPos pos1 = playerPos.add(new Vec3i(1, +spcoffset.get(), 0));
                             event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                        }
-                        case WEST -> {
+                    }
+                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {
                             BlockPos pos1 = playerPos.add(new Vec3i(-1, +spcoffset.get(), 0));
                             event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                        }
-                        default -> {
-                        }
                     }
                 }
-                else if (mc.player.getPitch() >= 40){            //DOWN
-                    switch (mc.player.getMovementDirection()) {
-                        case NORTH -> {
+                else if ((mouseT.get() && mc.player.getPitch() > 40) || (!mouseT.get() && prevPitch > 40)){            //DOWN
+                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {
                             BlockPos pos1 = playerPos.add(new Vec3i(0, -spcoffset.get()-2, -1));
                             event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                        }
-                        case SOUTH -> {
+                    }
+                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {
                             BlockPos pos1 = playerPos.add(new Vec3i(0, -spcoffset.get()-2, 1));
                             event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                        }
-                        case EAST -> {
+                    }
+                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {
                             BlockPos pos1 = playerPos.add(new Vec3i(1, -spcoffset.get()-2, 0));
                             event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                        }
-                        case WEST -> {
+                    }
+                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {
                             BlockPos pos1 = playerPos.add(new Vec3i(-1, -spcoffset.get()-2, 0));
                             event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                        }
-                        default -> {
-                        }
                     }
                 }
             }
             else if (!mc.options.jumpKey.isPressed() || autolavamountain.get()) {
-                if (mc.player.getPitch() <= 40 || autolavamountain.get()) {            //UP
-                    switch (mc.player.getMovementDirection()) {
-                        case NORTH -> {
+                if (((mouseT.get() && mc.player.getPitch() <= 40) || autolavamountain.get()) || (!mouseT.get() && prevPitch <= 40 && !autolavamountain.get())) {            //UP
+                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {
                             BlockPos pos1 = playerPos.add(new Vec3i(0, 0, -1));
                             event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                             if (autolavamountain.get() && pause==false){
@@ -394,8 +395,8 @@ public class AutoMountain extends Module {
                                 event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                                 event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                             }
-                        }
-                        case SOUTH -> {
+                    }
+                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {
                             BlockPos pos1 = playerPos.add(new Vec3i(0, 0, 1));
                             event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                             if (autolavamountain.get() && pause==false){
@@ -409,8 +410,8 @@ public class AutoMountain extends Module {
                                 event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                                 event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                             }
-                        }
-                        case EAST -> {
+                    }
+                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {
                             BlockPos pos1 = playerPos.add(new Vec3i(1, 0, 0));
                             event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                             if (autolavamountain.get() && pause==false){
@@ -424,8 +425,8 @@ public class AutoMountain extends Module {
                                 event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                                 event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                             }
-                        }
-                        case WEST -> {
+                    }
+                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {
                             BlockPos pos1 = playerPos.add(new Vec3i(-1, 0, 0));
                             event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                             if (autolavamountain.get() && pause==false){
@@ -439,30 +440,23 @@ public class AutoMountain extends Module {
                                 event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                                 event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                             }
-                        }
-                        default -> {
-                        }
                     }
-                } else if (mc.player.getPitch() >= 40) {            //DOWN
-                    switch (mc.player.getMovementDirection()) {
-                        case NORTH -> {
+                } else if ((mouseT.get() && mc.player.getPitch() > 40) || (!mouseT.get() && prevPitch > 40)) {            //DOWN
+                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {
                             BlockPos pos1 = playerPos.add(new Vec3i(0, -2, -1));
                             event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                        }
-                        case SOUTH -> {
+                    }
+                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {
                             BlockPos pos1 = playerPos.add(new Vec3i(0, -2, 1));
                             event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                        }
-                        case EAST -> {
+                    }
+                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {
                             BlockPos pos1 = playerPos.add(new Vec3i(1, -2, 0));
                             event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                        }
-                        case WEST -> {
+                    }
+                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {
                             BlockPos pos1 = playerPos.add(new Vec3i(-1, -2, 0));
                             event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                        }
-                        default -> {
-                        }
                     }
                 }
             }
@@ -503,17 +497,55 @@ public class AutoMountain extends Module {
         if (pause == false)return;
         if (!autolavamountain.get()){
         if (mc.options.forwardKey.isPressed()){
-            mc.player.setPitch(35);
+            if (mouseT.get())mc.player.setPitch(35);
+            if (!mouseT.get())prevPitch=35;
         }
         if (mc.options.backKey.isPressed()){
-            mc.player.setPitch(75);
+            if (mouseT.get())mc.player.setPitch(75);
+            if (!mouseT.get())prevPitch=75;
         }
         if ((lagpause.get() && timeSinceLastTick >= lag.get()) || !(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof VerticallyAttachableBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FallingBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BambooBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FlowerPotBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LadderBlock ||  pause == false) return;
         if (mc.options.leftKey.isPressed() && !mc.options.sneakKey.isPressed()){
-            mc.player.setYaw(mc.player.getYaw()-90);
+            if (mouseT.get())mc.player.setYaw(mc.player.getYaw()-90);
+            if (!mouseT.get()){
+                if (wasfacing==Direction.NORTH){
+                    wasfacing=Direction.WEST;
+                    return;
+                }
+                if (wasfacing==Direction.SOUTH){
+                    wasfacing=Direction.EAST;
+                    return;
+                }
+                if (wasfacing==Direction.WEST){
+                    wasfacing=Direction.SOUTH;
+                    return;
+                }
+                if (wasfacing==Direction.EAST){
+                    wasfacing=Direction.NORTH;
+                    return;
+                }
+            }
         }
         if (mc.options.rightKey.isPressed() && !mc.options.sneakKey.isPressed()){
-            mc.player.setYaw(mc.player.getYaw()+90);
+            if (mouseT.get())mc.player.setYaw(mc.player.getYaw()+90);
+            if (!mouseT.get()){
+                if (wasfacing==Direction.NORTH){
+                    wasfacing=Direction.EAST;
+                    return;
+                }
+                if (wasfacing==Direction.SOUTH){
+                    wasfacing=Direction.WEST;
+                    return;
+                }
+                if (wasfacing==Direction.WEST){
+                    wasfacing=Direction.NORTH;
+                    return;
+                }
+                if (wasfacing==Direction.EAST){
+                    wasfacing=Direction.SOUTH;
+                    return;
+                }
+            }
         }
         }
     }
@@ -536,9 +568,11 @@ public class AutoMountain extends Module {
             speed=0;
         }
         if (pause==false){
+            wasfacing=mc.player.getHorizontalFacing();
+            prevPitch=Math.round(mc.player.getPitch());
             if (autolavamountain.get()){
+                wasfacingBOT=mc.player.getHorizontalFacing();
                 isthisfirstblock=true;
-                wasfacing=mc.player.getHorizontalFacing();
                 lavamountainingredients();
             }
             mc.player.setNoGravity(false);
@@ -550,10 +584,10 @@ public class AutoMountain extends Module {
             cascadingpileof();
         }
         if (autolavamountain.get()){
-            if (wasfacing==Direction.NORTH) mc.player.setYaw(180);
-            if (wasfacing==Direction.SOUTH) mc.player.setYaw(0);
-            if (wasfacing==Direction.WEST) mc.player.setYaw(90);
-            if (wasfacing==Direction.EAST) mc.player.setYaw(-90);
+            if (wasfacingBOT==Direction.NORTH) mc.player.setYaw(180);
+            if (wasfacingBOT==Direction.SOUTH) mc.player.setYaw(0);
+            if (wasfacingBOT==Direction.WEST) mc.player.setYaw(90);
+            if (wasfacingBOT==Direction.EAST) mc.player.setYaw(-90);
         }
         if (!delayakick.get()){
             offLeft=666666666;
@@ -586,9 +620,31 @@ public class AutoMountain extends Module {
             cookie++;
             if (cookie==munscher.get()){
                 cookieyaw=mc.player.getYaw();
-                mc.player.setYaw(mc.player.getYaw()+90);
+                if (mouseT.get())mc.player.setYaw(mc.player.getYaw()+90);
+                if (!mouseT.get()){
+                    if (wasfacing==Direction.NORTH){
+                        wasfacing=Direction.EAST;
+                    } else if (wasfacing==Direction.SOUTH){
+                        wasfacing=Direction.WEST;
+                    } else if (wasfacing==Direction.WEST){
+                        wasfacing=Direction.NORTH;
+                    } else if (wasfacing==Direction.EAST){
+                        wasfacing=Direction.SOUTH;
+                    }
+                }
             }else if (cookie>=munscher.get()+munscher.get()){
-                mc.player.setYaw(mc.player.getYaw()-90);
+                if (mouseT.get())mc.player.setYaw(mc.player.getYaw()-90);
+                if (!mouseT.get()){
+                    if (wasfacing==Direction.NORTH){
+                        wasfacing=Direction.WEST;
+                    } else if (wasfacing==Direction.SOUTH){
+                        wasfacing=Direction.EAST;
+                    } else if (wasfacing==Direction.WEST){
+                        wasfacing=Direction.SOUTH;
+                    } else if (wasfacing==Direction.EAST){
+                        wasfacing=Direction.NORTH;
+                    }
+                }
                 cookie=0;
             }
         }
@@ -596,9 +652,31 @@ public class AutoMountain extends Module {
             cookie++;
             if (cookie==munscher.get()){
                 cookieyaw=mc.player.getYaw();
-                mc.player.setYaw(mc.player.getYaw()-90);
+                if (mouseT.get())mc.player.setYaw(mc.player.getYaw()-90);
+                if (!mouseT.get()){
+                    if (wasfacing==Direction.NORTH){
+                        wasfacing=Direction.WEST;
+                    } else if (wasfacing==Direction.SOUTH){
+                        wasfacing=Direction.EAST;
+                    } else if (wasfacing==Direction.WEST){
+                        wasfacing=Direction.SOUTH;
+                    } else if (wasfacing==Direction.EAST){
+                        wasfacing=Direction.NORTH;
+                    }
+                }
             }else if (cookie>=munscher.get()+munscher.get()){
-                mc.player.setYaw(mc.player.getYaw()+90);
+                if (mouseT.get())mc.player.setYaw(mc.player.getYaw()+90);
+                if (!mouseT.get()){
+                    if (wasfacing==Direction.NORTH){
+                        wasfacing=Direction.EAST;
+                    } else if (wasfacing==Direction.SOUTH){
+                        wasfacing=Direction.WEST;
+                    } else if (wasfacing==Direction.WEST){
+                        wasfacing=Direction.NORTH;
+                    } else if (wasfacing==Direction.EAST){
+                        wasfacing=Direction.SOUTH;
+                    }
+                }
                 cookie=0;
             }
         }
@@ -626,10 +704,10 @@ public class AutoMountain extends Module {
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
         if (pause==true && autolavamountain.get()) {
-            if (wasfacing==Direction.NORTH) mc.player.setYaw(180);
-            if (wasfacing==Direction.SOUTH) mc.player.setYaw(0);
-            if (wasfacing==Direction.WEST) mc.player.setYaw(90);
-            if (wasfacing==Direction.EAST) mc.player.setYaw(-90);
+            if (wasfacingBOT==Direction.NORTH) mc.player.setYaw(180);
+            if (wasfacingBOT==Direction.SOUTH) mc.player.setYaw(0);
+            if (wasfacingBOT==Direction.WEST) mc.player.setYaw(90);
+            if (wasfacingBOT==Direction.EAST) mc.player.setYaw(-90);
             mc.player.setNoGravity(true);
             if (mc.player.getY() >= limit.get()-4 | mc.player.getY() > lowestblock.getY()+botlimit.get()){
                 autocasttimenow=true;
@@ -646,14 +724,13 @@ public class AutoMountain extends Module {
         }
         if (pause == false) return;
 
-        if (mc.player.getPitch() <= 40 || autolavamountain.get()){
+        if (((mouseT.get() && mc.player.getPitch() <= 40 || autolavamountain.get())) || (!mouseT.get() && prevPitch <= 40)){
             if (delayLeft > 0) delayLeft--;
             else if ((!lagpause.get() || timeSinceLastTick < lag.get()) && delayLeft <= 0 && offLeft > 0 && (mc.player.getY() <= limit.get() &&  mc.player.getY() >= downlimit.get() && !autolavamountain.get() || mc.player.getY() <= limit.get()-4 && mc.player.getY() <= lowestblock.getY()+botlimit.get()+1 && autolavamountain.get())) {
                 offLeft--;
                 if (mc.player == null || mc.world == null) {toggle(); return;}
                 if ((lagpause.get() && timeSinceLastTick >= lag.get()) || !(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof VerticallyAttachableBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FallingBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BambooBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FlowerPotBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LadderBlock ||  pause == false || go==false) return;
-                switch (mc.player.getMovementDirection()) {
-                    case NORTH -> {            //UP
+                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {            //UP
                         if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
                             BlockPos un1 = playerPos.add(new Vec3i(0,spcoffset.get()+2,0));
                             BlockPos un2 = playerPos.add(new Vec3i(0,spcoffset.get()+1,-1));
@@ -666,7 +743,12 @@ public class AutoMountain extends Module {
                                     mc.player.swingHand(Hand.MAIN_HAND);
                                 }
                                 mc.player.setPosition(mc.player.getX(),mc.player.getY()+1+spcoffset.get(),mc.player.getZ()-1);
-                            } else {if (InvertUpDir.get() && !autolavamountain.get()) mc.player.setPitch(75);}
+                            } else {
+                                if (InvertUpDir.get() && !autolavamountain.get()){
+                                    if (mouseT.get())mc.player.setPitch(75);
+                                    if (!mouseT.get())prevPitch=75;
+                                }
+                            }
                         } else {
                             BlockPos un1 = playerPos.add(new Vec3i(0,2,0));
                             BlockPos un2 = playerPos.add(new Vec3i(0,1,-1));
@@ -679,10 +761,15 @@ public class AutoMountain extends Module {
                                     mc.player.swingHand(Hand.MAIN_HAND);
                                 }
                                 mc.player.setPosition(mc.player.getX(),mc.player.getY()+1,mc.player.getZ()-1);
-                            } else {if (InvertUpDir.get() && !autolavamountain.get()) mc.player.setPitch(75);}
+                            } else {
+                                if (InvertUpDir.get() && !autolavamountain.get()){
+                                    if (mouseT.get())mc.player.setPitch(75);
+                                    if (!mouseT.get())prevPitch=75;
+                                }
+                            }
                         }
                     }
-                    case EAST -> {            //UP
+                if ((mouseT.get() && mc.player.getMovementDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {            //UP
                         if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
                             BlockPos ue1 = playerPos.add(new Vec3i(0,spcoffset.get()+2,0));
                             BlockPos ue2 = playerPos.add(new Vec3i(+1,spcoffset.get()+1,0));
@@ -695,7 +782,12 @@ public class AutoMountain extends Module {
                                     mc.player.swingHand(Hand.MAIN_HAND);
                                 }
                                 mc.player.setPosition(mc.player.getX()+1,mc.player.getY()+1+spcoffset.get(),mc.player.getZ());
-                            } else {if (InvertUpDir.get() && !autolavamountain.get()) mc.player.setPitch(75);}
+                            } else {
+                                if (InvertUpDir.get() && !autolavamountain.get()){
+                                    if (mouseT.get())mc.player.setPitch(75);
+                                    if (!mouseT.get())prevPitch=75;
+                                }
+                            }
                         } else {
                             BlockPos ue1 = playerPos.add(new Vec3i(0,2,0));
                             BlockPos ue2 = playerPos.add(new Vec3i(+1,1,0));
@@ -708,10 +800,15 @@ public class AutoMountain extends Module {
                                     mc.player.swingHand(Hand.MAIN_HAND);
                                 }
                                 mc.player.setPosition(mc.player.getX()+1,mc.player.getY()+1,mc.player.getZ());
-                            } else {if (InvertUpDir.get() && !autolavamountain.get()) mc.player.setPitch(75);}
+                            } else {
+                                if (InvertUpDir.get() && !autolavamountain.get()){
+                                    if (mouseT.get())mc.player.setPitch(75);
+                                    if (!mouseT.get())prevPitch=75;
+                                }
+                            }
                         }
                     }
-                    case SOUTH -> {            //UP
+                if ((mouseT.get() && mc.player.getMovementDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {            //UP
                         if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
                             BlockPos us1 = playerPos.add(new Vec3i(0,spcoffset.get()+2,0));
                             BlockPos us2 = playerPos.add(new Vec3i(0,spcoffset.get()+1,+1));
@@ -724,7 +821,12 @@ public class AutoMountain extends Module {
                                     mc.player.swingHand(Hand.MAIN_HAND);
                                 }
                                 mc.player.setPosition(mc.player.getX(),mc.player.getY()+1+spcoffset.get(),mc.player.getZ()+1);
-                            } else {if (InvertUpDir.get() && !autolavamountain.get()) mc.player.setPitch(75);}
+                            } else {
+                                if (InvertUpDir.get() && !autolavamountain.get()){
+                                    if (mouseT.get())mc.player.setPitch(75);
+                                    if (!mouseT.get())prevPitch=75;
+                                }
+                            }
                         } else {
                             BlockPos us1 = playerPos.add(new Vec3i(0,2,0));
                             BlockPos us2 = playerPos.add(new Vec3i(0,1,+1));
@@ -737,10 +839,15 @@ public class AutoMountain extends Module {
                                     mc.player.swingHand(Hand.MAIN_HAND);
                                 }
                                 mc.player.setPosition(mc.player.getX(),mc.player.getY()+1,mc.player.getZ()+1);
-                            } else {if (InvertUpDir.get() && !autolavamountain.get()) mc.player.setPitch(75);}
+                            } else {
+                                if (InvertUpDir.get() && !autolavamountain.get()){
+                                    if (mouseT.get())mc.player.setPitch(75);
+                                    if (!mouseT.get())prevPitch=75;
+                                }
+                            }
                         }
                     }
-                    case WEST -> {            //UP
+                if ((mouseT.get() && mc.player.getMovementDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {            //UP
                         if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
                             BlockPos uw1 = playerPos.add(new Vec3i(0,spcoffset.get()+2,0));
                             BlockPos uw2 = playerPos.add(new Vec3i(-1,spcoffset.get()+1,0));
@@ -753,7 +860,12 @@ public class AutoMountain extends Module {
                                     mc.player.swingHand(Hand.MAIN_HAND);
                                 }
                                 mc.player.setPosition(mc.player.getX()-1,mc.player.getY()+1+spcoffset.get(),mc.player.getZ());
-                            } else {if (InvertUpDir.get() && !autolavamountain.get()) mc.player.setPitch(75);}
+                            } else {
+                                if (InvertUpDir.get() && !autolavamountain.get()){
+                                    if (mouseT.get())mc.player.setPitch(75);
+                                    if (!mouseT.get())prevPitch=75;
+                                }
+                            }
                             }else {
                             BlockPos uw1 = playerPos.add(new Vec3i(0,2,0));
                             BlockPos uw2 = playerPos.add(new Vec3i(-1,1,0));
@@ -766,26 +878,29 @@ public class AutoMountain extends Module {
                                     mc.player.swingHand(Hand.MAIN_HAND);
                                 }
                                 mc.player.setPosition(mc.player.getX()-1,mc.player.getY()+1,mc.player.getZ());
-                            } else {if (InvertUpDir.get() && !autolavamountain.get()) mc.player.setPitch(75);}
+                            } else {
+                                if (InvertUpDir.get() && !autolavamountain.get()){
+                                    if (mouseT.get())mc.player.setPitch(75);
+                                    if (!mouseT.get())prevPitch=75;
+                                }
+                            }
                         }
                     }
-                    default -> {}
-                }
                 if (mc.player.getY() >= limit.get()-1 && InvertUpDir.get() && !autolavamountain.get()){
-                    mc.player.setPitch(75);
+                    if (mouseT.get())mc.player.setPitch(75);
+                    if (!mouseT.get())prevPitch=75;
                 }
             } else if (mc.player.getY() <= downlimit.get() && !InvertDownDir.get()|| mc.player.getY() >= limit.get() && !InvertUpDir.get() && !autolavamountain.get()|| mc.player.getY() >= lowestblock.getY()+botlimit.get()+1 && autolavamountain.get()|| delayLeft <= 0 && offLeft <= 0) {
                 delayLeft = delay.get();
                 offLeft = offTime.get();
             }
-        } else if (mc.player.getPitch() >= 40 && !autolavamountain.get()){
+        } else if ((mouseT.get() && mc.player.getPitch() > 40 && !autolavamountain.get()) || (!mouseT.get() && prevPitch > 40)){
             if (delayLeft > 0) delayLeft--;
             else if ((!lagpause.get() || timeSinceLastTick < lag.get()) && delayLeft <= 0 && offLeft > 0 && mc.player.getY() <= limit.get() && mc.player.getY() >= downlimit.get()) {
                 offLeft--;
                 if (mc.player == null || mc.world == null) {toggle(); return;}
                 if ((lagpause.get() && timeSinceLastTick >= lag.get()) || !(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof VerticallyAttachableBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FallingBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BambooBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FlowerPotBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LadderBlock ||  pause == false || go==false) return;
-                switch (mc.player.getMovementDirection()) {
-                    case NORTH -> {            //DOWN
+                if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {            //DOWN
                         if (mc.options.jumpKey.isPressed()){
                             BlockPos dn1 = playerPos.add(new Vec3i(0,-spcoffset.get()-1,-1));
                             BlockPos dn2 = playerPos.add(new Vec3i(0,-spcoffset.get(),-1));
@@ -809,10 +924,15 @@ public class AutoMountain extends Module {
                                     mc.player.swingHand(Hand.MAIN_HAND);
                                 }
                                 mc.player.setPosition(mc.player.getX(),mc.player.getY()-1,mc.player.getZ()-1);
-                            } else {if (InvertDownDir.get()) mc.player.setPitch(35);}
+                            } else {
+                                if (InvertDownDir.get()){
+                                    if (mouseT.get())mc.player.setPitch(35);
+                                    if (!mouseT.get())prevPitch=35;
+                                }
+                            }
                         }
                     }
-                    case EAST -> {            //DOWN
+                if ((mouseT.get() && mc.player.getMovementDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {            //DOWN
                         if (mc.options.jumpKey.isPressed()){
                             BlockPos de1 = playerPos.add(new Vec3i(1,-spcoffset.get()-1,0));
                             BlockPos de2 = playerPos.add(new Vec3i(1,-spcoffset.get(),0));
@@ -824,7 +944,12 @@ public class AutoMountain extends Module {
                                     mc.player.swingHand(Hand.MAIN_HAND);
                                 }
                                 mc.player.setPosition(mc.player.getX()+1,mc.player.getY()-1-spcoffset.get(),mc.player.getZ());
-                            } else {if (InvertDownDir.get()) mc.player.setPitch(35);}
+                            } else {
+                                if (InvertDownDir.get()){
+                                    if (mouseT.get())mc.player.setPitch(35);
+                                    if (!mouseT.get())prevPitch=35;
+                                }
+                            }
                             } else {
                             BlockPos de1 = playerPos.add(new Vec3i(1,-1,0));
                             BlockPos de2 = playerPos.add(new Vec3i(1,0,0));
@@ -836,10 +961,15 @@ public class AutoMountain extends Module {
                                     mc.player.swingHand(Hand.MAIN_HAND);
                                 }
                                 mc.player.setPosition(mc.player.getX()+1,mc.player.getY()-1,mc.player.getZ());
-                            } else {if (InvertDownDir.get()) mc.player.setPitch(35);}
+                            } else {
+                                if (InvertDownDir.get()){
+                                    if (mouseT.get())mc.player.setPitch(35);
+                                    if (!mouseT.get())prevPitch=35;
+                                }
+                            }
                         }
                     }
-                    case SOUTH -> {            //DOWN
+                if ((mouseT.get() && mc.player.getMovementDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {            //DOWN
                         if (mc.options.jumpKey.isPressed()){
                             BlockPos ds1 = playerPos.add(new Vec3i(0,-spcoffset.get()-1,1));
                             BlockPos ds2 = playerPos.add(new Vec3i(0,-spcoffset.get(),1));
@@ -851,7 +981,12 @@ public class AutoMountain extends Module {
                                     mc.player.swingHand(Hand.MAIN_HAND);
                                 }
                                 mc.player.setPosition(mc.player.getX(),mc.player.getY()-1- spcoffset.get(),mc.player.getZ()+1);
-                            } else {if (InvertDownDir.get()) mc.player.setPitch(35);}
+                            } else {
+                                if (InvertDownDir.get()){
+                                    if (mouseT.get())mc.player.setPitch(35);
+                                    if (!mouseT.get())prevPitch=35;
+                                }
+                            }
                             } else {
                             BlockPos ds1 = playerPos.add(new Vec3i(0,-1,1));
                             BlockPos ds2 = playerPos.add(new Vec3i(0,0,1));
@@ -863,10 +998,15 @@ public class AutoMountain extends Module {
                                     mc.player.swingHand(Hand.MAIN_HAND);
                                 }
                                 mc.player.setPosition(mc.player.getX(),mc.player.getY()-1,mc.player.getZ()+1);
-                            } else {if (InvertDownDir.get()) mc.player.setPitch(35);}
+                            } else {
+                                if (InvertDownDir.get()){
+                                    if (mouseT.get())mc.player.setPitch(35);
+                                    if (!mouseT.get())prevPitch=35;
+                                }
+                            }
                         }
                     }
-                    case WEST -> {            //DOWN
+                if ((mouseT.get() && mc.player.getMovementDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {            //DOWN
                         if (mc.options.jumpKey.isPressed()){
                             BlockPos dw1 = playerPos.add(new Vec3i(-1,-spcoffset.get()-1,0));
                             BlockPos dw2 = playerPos.add(new Vec3i(-1,-spcoffset.get(),0));
@@ -878,7 +1018,12 @@ public class AutoMountain extends Module {
                                     mc.player.swingHand(Hand.MAIN_HAND);
                                 }
                                 mc.player.setPosition(mc.player.getX()-1,mc.player.getY()-1-spcoffset.get(),mc.player.getZ());
-                            } else {if (InvertDownDir.get()) mc.player.setPitch(35);}
+                            } else {
+                                if (InvertDownDir.get()){
+                                    if (mouseT.get())mc.player.setPitch(35);
+                                    if (!mouseT.get())prevPitch=35;
+                                }
+                            }
                             }else {
                             BlockPos dw1 = playerPos.add(new Vec3i(-1,-1,0));
                             BlockPos dw2 = playerPos.add(new Vec3i(-1,0,0));
@@ -890,13 +1035,17 @@ public class AutoMountain extends Module {
                                     mc.player.swingHand(Hand.MAIN_HAND);
                                 }
                                 mc.player.setPosition(mc.player.getX()-1,mc.player.getY()-1,mc.player.getZ());
-                            } else {if (InvertDownDir.get()) mc.player.setPitch(35);}
+                            } else {
+                                if (InvertDownDir.get()){
+                                    if (mouseT.get())mc.player.setPitch(35);
+                                    if (!mouseT.get())prevPitch=35;
+                                }
+                            }
                         }
                     }
-                    default -> {}
-                }
                 if (mc.player.getY() <= downlimit.get()+1 && InvertDownDir.get()){
-                    mc.player.setPitch(35);
+                    if (mouseT.get())mc.player.setPitch(35);
+                    if (!mouseT.get())prevPitch=35;
                 }
             } else if (mc.player.getY() <= downlimit.get() || mc.player.getY() >= limit.get() || delayLeft <= 0 && offLeft <= 0) {
                 delayLeft = delay.get();

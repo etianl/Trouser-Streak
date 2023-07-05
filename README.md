@@ -60,15 +60,15 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - *BaseFinder Notes:*
 - The Blocks Lists have been tuned to reduce any false positives while throwing the maximum amount of "good" results for builds. Adjust if you feel you need to, or add/remove things as needed.
 - The Number of Blocks to Find options is the total amount any of the blocks from one of the lists to find before throwing a base coord.
-- The Blocks are checked in the lists in order from top to bottom. (Top position checked first)
 - Do not do the same block in more than one list, it will be a waste of CPU time. The torches and signs in by default are fine because they are actually two different blocks, "WALL_TORCH" and just "TORCH".
+- The "Unnatural Spawner Finder" option locates spawners and if they do not have one of the blocks that spawners have around them in nature (Mossy Cobblestone, Stone Brick Stairs, Cobweb, Nether Brick Fence, and Chain), then flag the spawner as unnatural.
 - .base command returns the nearest base to you, .base add or remove will add or remove the location you are in as a base coord, or you can input X,Y. There are buttons in the options menu to do the same things.
 - Base location data will be stored in the "BaseChunks" folder, in your Minecraft folder.
 - **BetterAutoSign:** Automatically writes signs with the text you specify, and can also apply glow ink or dye. (Credits to Meteor-Tweaks)
 - **BetterScaffold:** Give you more options for scaffolding, bigger range and others. (Credits to Meteor-Tweaks)
 - **Boom+:** Throws entities or spawns them on the targeted block when you click (Credits to Allah-Hack) I just added some more fun things you might want to throw.
 - **ExplosionAura:** Spawns creepers at your position as you move that explode instantly. Like a bigger, more laggy Nuker module for creative mode. The use of the module Velocity is recommended to avoid being thrown around. (Credits to etianl :D)
-- **FlightAntikick:** Moves you down on a tick-based timer. Added in to substitute the lack of an antikick for velocity flight in MeteorClient. Bind it to the same key as flight. (Credits to etianl :D)
+- **FlightAntikick:** Moves you down on a tick-based timer. Added in to substitute the lack of an antikick for velocity flight in MeteorClient (not a great antikick it's just something). Bind it to the same key as flight. (Credits to etianl :D)
 - **HandOfGod:** Runs the "/fill" command on the world around you in different ways as you fly, and as you click. Operator status required. (Credits to etianl :D)
 - **Inventory Dupe (1.17):** Duplicates things in your crafting slots when the module is enabled and the Dupe button is pressed in your inventory. Only works on Minecraft servers on the version 1.17, not any version before or after.(Credit to ItsVen and Da0neDatGotAway for original creation of the dupe, and to B2H990 for making the fabric mod. Credits to etianl for porting to Meteor.)
 - **InstaKill:** Shoots arrows and tridents with incredible power and velocity. Enabling multiple buttons causes the amount of packets to add up. (Credits to Saturn5Vfive)
@@ -76,7 +76,7 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - **NewerNewChunks:** NewChunks module with new newchunk estimation exploits, and the ability to save chunk data for later! Also with special options for tracing servers that have been updated from a version before the build limit updates, which throw false positives normally. (Credits to Meteor Rejects, and BleachHack from where it was ported, and etianl for updating :D.)
 - *NewerNewChunks Notes:*
 - ***LIGHTING EXPLOIT STUFF IS ONLY AVAILABLE FOR TROUSER 1.19.4 and prior!!!***
-- Trouser-Streak for 1.20 does not contain the LightingExploit as part of NewerNewChunks because Mojang patched it. :P
+- Trouser-Streak for 1.20 and up does not contain the LightingExploit as part of NewerNewChunks because Mojang patched it. :P
 - The LightingExploit option estimates possible newchunks based on lighting update packets. SOME OF THESE CHUNKS MAY BE OLD. Advanced Mode is needed to filter any false positives out. See Special Options notes for usage.
 - The LightingExploit option works best if you move fast, because if you hang out in an area you will recieve lighting updates that occur naturally in old chunks.
 - NewerNewChunks stores your NewChunks data as text files seperately per server and per dimension in the NewChunks folder in your Minecraft folder.
@@ -91,8 +91,8 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - These are to be used when the server has two distinct diamond layers, and two distinct lava pool layers underground at spawn.
 -------------------------------------------------------------------------------------
 - The **"AdvancedMode"** highlights chunks that have flow only below Y0 as well as chunks that have been detected with the LightingExploit option. 
-- If there is nothing but FlowBelowY0 chunks and OldChunks as well as a few LightingExploit chunks**(If<=1.19.4)**, then you are updating Old Chunks to the new build limits and those are OLDCHUNKS. If the FlowIsBelowY0 are mixed with NewChunks and LightingExploit **(If<=1.19.4)** coloured chunks they are NEWCHUNKS.
-- **(If<=1.19.4** When using Advanced mode if the LightingExploit chunks appear infrequently and are combined with Old Chunks, then the chunks you are in are OLD. If there is alot of LightingExploit chunks appearing and/or they are mixed with NewChunks then the chunks are NEW.
+- If there is nothing but FlowBelowY0 chunks and OldChunks as well as a few LightingExploit chunks**(If MC Version<=1.19.4)**, then you are updating Old Chunks to the new build limits and those are OLDCHUNKS. If the FlowIsBelowY0 are mixed with NewChunks and LightingExploit **(If MC Version<=1.19.4)** coloured chunks they are NEWCHUNKS.
+- **(If MC Version<=1.19.4** When using Advanced mode if the LightingExploit chunks appear infrequently and are combined with Old Chunks, then the chunks you are in are OLD. If there is alot of LightingExploit chunks appearing and/or they are mixed with NewChunks then the chunks are NEW.
 - AdvancedMode can be confusing, do not use if you can't interpret the chunk data.
 -------------------------------------------------------------------------------------
 - The **"IgnoreFlowBelow0"** will render as an oldchunk if liquid flow is only below Y zero, and will show as a newchunk if flow is above Y zero, or both above AND below Y zero.
@@ -122,11 +122,11 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - NewerNewChunks has to be turned on atleast once prior to running .newchunkcount for the counter to work even if you already have data in that world.
 
 ## Requirements:
-- If you are using Minecraft version **1.20**, then use the latest **MeteorClient Dev Build of v0.5.4**
+- If you are using Minecraft version **1.20.1**, then use the latest **MeteorClient Dev Build of v0.5.4**
 - If you are using Minecraft version **1.19.4**, then use **MeteorClient "Full Release" v0.5.3**
 - If you are using Minecraft version **1.19.3**, then use **MeteorClient "Full Release" v0.5.2** (v0.5.2 NOT SUPPORTED BY METEOR OR AVAILABLE FOR DOWNLOAD)
 - If you are using Minecraft version **1.19.2**, then use **MeteorClient "Full Release" v0.5.1** (v0.5.1 NOT SUPPORTED BY METEOR OR AVAILABLE FOR DOWNLOAD)
-- Please try [ViaFabricPlus](https://github.com/FlorianMichael/ViaFabricPlus), which will let you connect to almost any version from a 1.20 client.
+- Please try [ViaFabricPlus](https://github.com/FlorianMichael/ViaFabricPlus), which will let you connect to almost any version from a new version client.
 - Don't forget to try updating any other mods you are using if your game is crashing.
 
 ## Total Download Count:
