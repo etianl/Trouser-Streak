@@ -75,10 +75,8 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - **LecternCrash:** Crash 1.18.X vanilla servers and possibly below. (Credits to Coderx-Gamer)
 - **NewerNewChunks:** NewChunks module with new newchunk estimation exploits, and the ability to save chunk data for later! Also with special options for tracing servers that have been updated from a version before the build limit updates, which throw false positives normally. (Credits to Meteor Rejects, and BleachHack from where it was ported, and etianl for updating :D.)
 - *NewerNewChunks Notes:*
-- ***LIGHTING EXPLOIT STUFF IS ONLY AVAILABLE FOR TROUSER 1.19.4 and prior!!!***
-- Trouser-Streak for 1.20 and up does not contain the LightingExploit as part of NewerNewChunks because Mojang patched it. :P
-- The LightingExploit option estimates possible newchunks based on lighting update packets. SOME OF THESE CHUNKS MAY BE OLD. Advanced Mode is needed to filter any false positives out. See Special Options notes for usage.
-- The LightingExploit option works best if you move fast, because if you hang out in an area you will recieve lighting updates that occur naturally in old chunks.
+- The **TickExploit** option estimates possible newchunks based on block ticking packets. SOME OF THESE CHUNKS MAY BE OLD. Advanced Mode is needed to filter any false positives out. See Special Options notes for usage.
+- The **TickExploit** option can produce false positives if you are hanging around in the same location for a while. It's best to keep moving fast for it to work best.
 - NewerNewChunks stores your NewChunks data as text files seperately per server and per dimension in the NewChunks folder in your Minecraft folder.
 - Save and Load ChunkData options are for the stored files.
 - This enables you to chunk trace multiple different servers and dimensions without mixing NewChunks data.
@@ -88,11 +86,10 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - The .newchunkcount command can tell you how many chunks have been saved in data in the dimension you are in.
 -------------------------------------------------------------------------------------
 - ***NewerNewChunks Special Options:***
-- These are to be used when the server has two distinct diamond layers, and two distinct lava pool layers underground at spawn.
--------------------------------------------------------------------------------------
-- The **"AdvancedMode"** highlights chunks that have flow only below Y0 as well as chunks that have been detected with the LightingExploit option. 
-- If there is nothing but FlowBelowY0 chunks and OldChunks as well as a few LightingExploit chunks**(If MC Version<=1.19.4)**, then you are updating Old Chunks to the new build limits and those are OLDCHUNKS. If the FlowIsBelowY0 are mixed with NewChunks and LightingExploit **(If MC Version<=1.19.4)** coloured chunks they are NEWCHUNKS.
-- **(If MC Version<=1.19.4** When using Advanced mode if the LightingExploit chunks appear infrequently and are combined with Old Chunks, then the chunks you are in are OLD. If there is alot of LightingExploit chunks appearing and/or they are mixed with NewChunks then the chunks are NEW.
+(These are to be used when the server has two distinct diamond layers, and two distinct lava pool layers underground at spawn.)
+- The **"AdvancedMode"** highlights chunks that have flow only below Y0 as well as chunks that have been detected with the TickExploit option. 
+- If there is nothing but FlowBelowY0 chunks and OldChunks as well as a few TickExploit chunks, then you are updating Old Chunks to the new build limits and those are OLDCHUNKS. If the FlowIsBelowY0 are mixed with NewChunks and Tick Exploit coloured chunks they are NEWCHUNKS.
+- When using Advanced mode if the Tick Exploit chunks appear infrequently and are combined with Old Chunks, then the chunks you are in are OLD. If there is alot of Tick Exploit chunks appearing and/or they are mixed with NewChunks then the chunks are NEW.
 - AdvancedMode can be confusing, do not use if you can't interpret the chunk data.
 -------------------------------------------------------------------------------------
 - The **"IgnoreFlowBelow0"** will render as an oldchunk if liquid flow is only below Y zero, and will show as a newchunk if flow is above Y zero, or both above AND below Y zero.
