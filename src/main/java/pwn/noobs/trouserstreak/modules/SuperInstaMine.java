@@ -27,7 +27,7 @@ public class SuperInstaMine extends Module {
             .name("Break Modes (Range)")
             .description("The range around the center block to break more blocks")
             .defaultValue(0)
-                    .sliderRange(-1,7)
+            .sliderRange(-1,7)
             .min(-1)
             .max(7)
             .build()
@@ -200,7 +200,6 @@ public class SuperInstaMine extends Module {
 
             if (shouldMine() && range.get()==-1) {
                 if (rotate.get()) {
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                     Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
                     switch (playermovingdirection){
                         case NORTH -> {
@@ -220,8 +219,9 @@ public class SuperInstaMine extends Module {
                             if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
                         }
                     }
-                } else {
                     mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+
+                } else {
                     mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
                     switch (playermovingdirection){
                         case NORTH -> {
@@ -241,16 +241,16 @@ public class SuperInstaMine extends Module {
                             if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
                         }
                     }
+                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+
                 }
                 mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
 
             if (shouldMine() && range.get()==0) {
                 if (rotate.get()) {
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                     Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
                 } else {
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                     mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
                 }
                 mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
@@ -258,7 +258,6 @@ public class SuperInstaMine extends Module {
 
             if (shouldMine() && range.get()==1) {
                 if (rotate.get()) {
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                     Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
                     switch (playermovingdirection){
                         case NORTH -> {
@@ -278,8 +277,8 @@ public class SuperInstaMine extends Module {
                             if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
                         }
                     }
-                } else {
                     mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                } else {
                     mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
                     switch (playermovingdirection){
                         case NORTH -> {
@@ -299,13 +298,13 @@ public class SuperInstaMine extends Module {
                             if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
                         }
                     }
+                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 }
 
                 mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
             if (shouldMine() && range.get()==2) {
                 if (rotate.get()) {
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                     Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
                     if (playermovingdirection == Direction.NORTH || playermovingdirection == Direction.SOUTH) {
                         if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
@@ -319,8 +318,8 @@ public class SuperInstaMine extends Module {
                         if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
                         if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
                     }
-                } else {
                     mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                } else {
                     mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
                     if (playermovingdirection == Direction.NORTH || playermovingdirection == Direction.SOUTH) {
                         if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
@@ -334,13 +333,13 @@ public class SuperInstaMine extends Module {
                         if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
                         if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
                     }
+                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 }
 
                 mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
             if (shouldMine() && range.get()==3) {
                 if (rotate.get()) {
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                     Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
                     if (playermovingdirection==Direction.NORTH || playermovingdirection==Direction.SOUTH && (playerpitch<=30 && playerpitch>=-30)) {
                         if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
@@ -380,8 +379,8 @@ public class SuperInstaMine extends Module {
                         if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)
                             mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
                     }
-                } else {
                     mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                } else {
                     mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
                     if (playermovingdirection==Direction.NORTH || playermovingdirection==Direction.SOUTH && (playerpitch<=30 && playerpitch>=-30)) {
                         if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
@@ -421,13 +420,13 @@ public class SuperInstaMine extends Module {
                         if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)
                             mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
                     }
+                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 }
 
                 mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
             if (shouldMine() && range.get()==4) {
                 if (rotate.get()) {
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                     Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
                     if ((playermovingdirection==Direction.NORTH || playermovingdirection==Direction.SOUTH) && playerpitch<=30 && playerpitch>=-30) {
                         if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
@@ -499,8 +498,8 @@ public class SuperInstaMine extends Module {
                         if (mc.world.getBlockState(blockPos8).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos8).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos8).getBlock() != Blocks.LAVA)
                             mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
                     }
-                } else {
                     mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                } else {
                     mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
                     if ((playermovingdirection==Direction.NORTH || playermovingdirection==Direction.SOUTH) && playerpitch<=30 && playerpitch>=-30) {
                         if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
@@ -572,13 +571,13 @@ public class SuperInstaMine extends Module {
                         if (mc.world.getBlockState(blockPos8).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos8).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos8).getBlock() != Blocks.LAVA)
                             mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
                     }
+                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 }
 
                 mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
             if (shouldMine() && range.get()==5) {
                 if (rotate.get()) {
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                     Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
                     if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
                     if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
@@ -600,8 +599,8 @@ public class SuperInstaMine extends Module {
                     if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
                     if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
                     if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
-                } else {
                     mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                } else {
                     mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
                     if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
                     if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
@@ -623,13 +622,13 @@ public class SuperInstaMine extends Module {
                     if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
                     if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
                     if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
+                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 }
 
                 mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
             if (shouldMine() && range.get()==6) {
                 if (rotate.get()) {
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                     Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
                     if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
                     if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
@@ -667,8 +666,8 @@ public class SuperInstaMine extends Module {
                     if (mc.world.getBlockState(blockPos21).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos21).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos21).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos21, direction));
                     if (mc.world.getBlockState(blockPos22).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos22).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos22).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos22, direction));
                     if (mc.world.getBlockState(blockPos22).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos22).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos22).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos22, direction));
-                } else {
                     mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                } else {
                     mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
                     if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
                     if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
@@ -706,13 +705,13 @@ public class SuperInstaMine extends Module {
                     if (mc.world.getBlockState(blockPos21).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos21).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos21).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos21, direction));
                     if (mc.world.getBlockState(blockPos22).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos22).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos22).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos22, direction));
                     if (mc.world.getBlockState(blockPos22).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos22).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos22).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos22, direction));
+                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 }
 
                 mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
             if (shouldMine() && range.get()==7) {
                 if (rotate.get()) {
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                     Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
                     if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
                     if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
@@ -766,8 +765,8 @@ public class SuperInstaMine extends Module {
                     if (mc.world.getBlockState(blockPos25).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos25).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos25).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos25, direction));
                     if (mc.world.getBlockState(blockPos26).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos26).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos26).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos26, direction));
                     if (mc.world.getBlockState(blockPos26).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos26).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos26).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos26, direction));
-                } else {
                     mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                } else {
                     mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
                     if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
                     if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
@@ -821,6 +820,7 @@ public class SuperInstaMine extends Module {
                     if (mc.world.getBlockState(blockPos25).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos25).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos25).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos25, direction));
                     if (mc.world.getBlockState(blockPos26).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos26).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos26).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos26, direction));
                     if (mc.world.getBlockState(blockPos26).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos26).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos26).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos26, direction));
+                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 }
 
                 mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
