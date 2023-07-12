@@ -8,8 +8,8 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Blocks;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
@@ -32,6 +32,18 @@ public class SuperInstaMine extends Module {
             .max(7)
             .build()
     );
+    private final Setting<Boolean> aorient = sgGeneral.add(new BoolSetting.Builder()
+            .name("AutoOrientBreakDirection")
+            .description("For Break Mode 3 and 4. Automatically chooses whether to break upright or horizontal.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Modes> mode = sgGeneral.add(new EnumSetting.Builder<Modes>()
+            .name("Break Direction Mode")
+            .description("For Break Mode 3 and 4. Choose whether to break upright or horizontal.")
+            .defaultValue(Modes.Vertical)
+            .visible(() -> !aorient.get())
+            .build());
     private final Setting<Integer> tickDelay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
             .description("The delay between breaks.")
@@ -47,7 +59,12 @@ public class SuperInstaMine extends Module {
             .defaultValue(false)
             .build()
     );
-
+    private final Setting<Boolean> swing = sgGeneral.add(new BoolSetting.Builder()
+            .name("Swing Hand")
+            .description("Do or Do Not swing hand when instamining.")
+            .defaultValue(true)
+            .build()
+    );
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
             .description("Faces the blocks being mined server side.")
@@ -200,630 +217,685 @@ public class SuperInstaMine extends Module {
 
             if (shouldMine() && range.get()==-1) {
                 if (rotate.get()) {
-                    Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
+                    if (BlockUtils.canBreak(blockPos))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
                     switch (playermovingdirection){
                         case NORTH -> {
-                            if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                            if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                            if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                            if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
                         }
                         case SOUTH -> {
-                            if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                            if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                            if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                            if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
                         }
                         case EAST -> {
-                            if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                            if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                            if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                            if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
                         }
                         case WEST -> {
-                            if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                            if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                            if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                            if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
                         }
                     }
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
 
                 } else {
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
                     switch (playermovingdirection){
                         case NORTH -> {
-                            if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                            if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                            if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                            if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
                         }
                         case SOUTH -> {
-                            if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                            if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                            if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                            if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
                         }
                         case EAST -> {
-                            if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                            if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                            if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                            if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
                         }
                         case WEST -> {
-                            if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                            if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                            if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                            if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
                         }
                     }
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
-
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 }
-                mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+                if (swing.get()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
 
             if (shouldMine() && range.get()==0) {
                 if (rotate.get()) {
-                    Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
+                    if (BlockUtils.canBreak(blockPos))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
                 } else {
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
                 }
-                mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+                if (swing.get()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
 
             if (shouldMine() && range.get()==1) {
                 if (rotate.get()) {
-                    Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
+                    if (BlockUtils.canBreak(blockPos))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
                     switch (playermovingdirection){
                         case NORTH -> {
-                            if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                            if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                            if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                            if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
                         }
                         case SOUTH -> {
-                            if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                            if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                            if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                            if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
                         }
                         case EAST -> {
-                            if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                            if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                            if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                            if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
                         }
                         case WEST -> {
-                            if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                            if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                            if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                            if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
                         }
                     }
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 } else {
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
                     switch (playermovingdirection){
                         case NORTH -> {
-                            if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                            if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                            if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                            if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
                         }
                         case SOUTH -> {
-                            if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                            if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                            if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                            if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
                         }
                         case EAST -> {
-                            if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                            if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                            if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                            if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
                         }
                         case WEST -> {
-                            if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                            if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                            if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                            if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
                         }
                     }
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 }
 
-                mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+                if (swing.get()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
             if (shouldMine() && range.get()==2) {
                 if (rotate.get()) {
-                    Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
+                    if (BlockUtils.canBreak(blockPos))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
                     if (playermovingdirection == Direction.NORTH || playermovingdirection == Direction.SOUTH) {
-                        if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                        if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                        if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                        if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
                     }
                     if (playermovingdirection == Direction.EAST || playermovingdirection == Direction.WEST) {
-                        if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                        if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                        if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                        if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
                     }
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 } else {
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
                     if (playermovingdirection == Direction.NORTH || playermovingdirection == Direction.SOUTH) {
-                        if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                        if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                        if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                        if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
                     }
                     if (playermovingdirection == Direction.EAST || playermovingdirection == Direction.WEST) {
-                        if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                        if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                        if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                        if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
                     }
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 }
 
-                mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+                if (swing.get()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
             if (shouldMine() && range.get()==3) {
                 if (rotate.get()) {
-                    Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
-                    if (playermovingdirection==Direction.NORTH || playermovingdirection==Direction.SOUTH && (playerpitch<=30 && playerpitch>=-30)) {
-                        if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                        if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                        if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                        if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                        if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                        if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                        if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                        if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
+                    if (BlockUtils.canBreak(blockPos))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
+                    if ((aorient.get() && playerpitch<=30 && playerpitch>=-30) || (mode.get() == Modes.Vertical && !aorient.get())) {
+                        if (playermovingdirection == Direction.NORTH || playermovingdirection == Direction.SOUTH && (playerpitch <= 30 && playerpitch >= -30)) {
+                            if (BlockUtils.canBreak(blockPos2))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                            if (BlockUtils.canBreak(blockPos2))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                            if (BlockUtils.canBreak(blockPos1))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                            if (BlockUtils.canBreak(blockPos1))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                            if (BlockUtils.canBreak(blockPos9))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
+                            if (BlockUtils.canBreak(blockPos9))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
+                            if (BlockUtils.canBreak(blockPos18))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
+                            if (BlockUtils.canBreak(blockPos18))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
+                        }
+                        if (playermovingdirection == Direction.EAST || playermovingdirection == Direction.WEST && (playerpitch <= 30 && playerpitch >= -30)) {
+                            if (BlockUtils.canBreak(blockPos4))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                            if (BlockUtils.canBreak(blockPos4))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                            if (BlockUtils.canBreak(blockPos3))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                            if (BlockUtils.canBreak(blockPos3))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                            if (BlockUtils.canBreak(blockPos9))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
+                            if (BlockUtils.canBreak(blockPos9))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
+                            if (BlockUtils.canBreak(blockPos18))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
+                            if (BlockUtils.canBreak(blockPos18))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
+                        }
                     }
-                    if (playermovingdirection==Direction.EAST || playermovingdirection==Direction.WEST && (playerpitch<=30 && playerpitch>=-30)) {
-                        if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                        if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                        if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                        if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                        if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                        if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                        if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                        if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
+                    if ((aorient.get() && playerpitch>30 | playerpitch<-30) || (mode.get() == Modes.Horizontal && !aorient.get())){
+                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
                     }
-                    if (playerpitch>30 | playerpitch<-30) {
-                        if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                        if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                        if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                        if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                        if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                        if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                        if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                        if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                    }
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 } else {
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
-                    if (playermovingdirection==Direction.NORTH || playermovingdirection==Direction.SOUTH && (playerpitch<=30 && playerpitch>=-30)) {
-                        if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                        if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                        if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                        if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                        if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                        if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                        if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                        if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
+                    if ((aorient.get() && playerpitch<=30 && playerpitch>=-30) || (mode.get() == Modes.Vertical && !aorient.get())) {
+                        if (playermovingdirection == Direction.NORTH || playermovingdirection == Direction.SOUTH && (playerpitch <= 30 && playerpitch >= -30)) {
+                            if (BlockUtils.canBreak(blockPos2))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                            if (BlockUtils.canBreak(blockPos2))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                            if (BlockUtils.canBreak(blockPos1))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                            if (BlockUtils.canBreak(blockPos1))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                            if (BlockUtils.canBreak(blockPos9))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
+                            if (BlockUtils.canBreak(blockPos9))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
+                            if (BlockUtils.canBreak(blockPos18))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
+                            if (BlockUtils.canBreak(blockPos18))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
+                        }
+                        if (playermovingdirection == Direction.EAST || playermovingdirection == Direction.WEST && (playerpitch <= 30 && playerpitch >= -30)) {
+                            if (BlockUtils.canBreak(blockPos4))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                            if (BlockUtils.canBreak(blockPos4))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                            if (BlockUtils.canBreak(blockPos3))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                            if (BlockUtils.canBreak(blockPos3))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                            if (BlockUtils.canBreak(blockPos9))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
+                            if (BlockUtils.canBreak(blockPos9))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
+                            if (BlockUtils.canBreak(blockPos18))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
+                            if (BlockUtils.canBreak(blockPos18))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
+                        }
                     }
-                    if (playermovingdirection==Direction.EAST || playermovingdirection==Direction.WEST && (playerpitch<=30 && playerpitch>=-30)) {
-                        if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                        if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                        if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                        if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                        if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                        if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                        if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                        if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
+                    if ((aorient.get() && playerpitch>30 | playerpitch<-30) || (mode.get() == Modes.Horizontal && !aorient.get())){
+                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
                     }
-                    if (playerpitch>30 | playerpitch<-30) {
-                        if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                        if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                        if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                        if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                        if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                        if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                        if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                        if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                    }
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 }
 
-                mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+                if (swing.get()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
             if (shouldMine() && range.get()==4) {
                 if (rotate.get()) {
-                    Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
-                    if ((playermovingdirection==Direction.NORTH || playermovingdirection==Direction.SOUTH) && playerpitch<=30 && playerpitch>=-30) {
-                        if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                        if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                        if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                        if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                        if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                        if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                        if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                        if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
-                        if (mc.world.getBlockState(blockPos10).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos10).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos10).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos10, direction));
-                        if (mc.world.getBlockState(blockPos10).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos10).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos10).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos10, direction));
-                        if (mc.world.getBlockState(blockPos11).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos11).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos11).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos11, direction));
-                        if (mc.world.getBlockState(blockPos11).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos11).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos11).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos11, direction));
-                        if (mc.world.getBlockState(blockPos19).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos19).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos19).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos19, direction));
-                        if (mc.world.getBlockState(blockPos19).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos19).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos19).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos19, direction));
-                        if (mc.world.getBlockState(blockPos20).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos20).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos20).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos20, direction));
-                        if (mc.world.getBlockState(blockPos20).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos20).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos20).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos20, direction));
+                    if (BlockUtils.canBreak(blockPos))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
+                    if ((aorient.get() && playerpitch<=30 && playerpitch>=-30) || (mode.get() == Modes.Vertical && !aorient.get())) {
+                        if (playermovingdirection == Direction.NORTH || playermovingdirection == Direction.SOUTH) {
+                            if (BlockUtils.canBreak(blockPos2))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                            if (BlockUtils.canBreak(blockPos2))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                            if (BlockUtils.canBreak(blockPos1))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                            if (BlockUtils.canBreak(blockPos1))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                            if (BlockUtils.canBreak(blockPos9))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
+                            if (BlockUtils.canBreak(blockPos9))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
+                            if (BlockUtils.canBreak(blockPos18))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
+                            if (BlockUtils.canBreak(blockPos18))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
+                            if (BlockUtils.canBreak(blockPos10))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos10, direction));
+                            if (BlockUtils.canBreak(blockPos10))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos10, direction));
+                            if (BlockUtils.canBreak(blockPos11))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos11, direction));
+                            if (BlockUtils.canBreak(blockPos11))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos11, direction));
+                            if (BlockUtils.canBreak(blockPos19))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos19, direction));
+                            if (BlockUtils.canBreak(blockPos19))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos19, direction));
+                            if (BlockUtils.canBreak(blockPos20))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos20, direction));
+                            if (BlockUtils.canBreak(blockPos20))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos20, direction));
+                        }
+                        if (playermovingdirection == Direction.EAST || playermovingdirection == Direction.WEST) {
+                            if (BlockUtils.canBreak(blockPos4))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                            if (BlockUtils.canBreak(blockPos4))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                            if (BlockUtils.canBreak(blockPos3))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                            if (BlockUtils.canBreak(blockPos3))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                            if (BlockUtils.canBreak(blockPos9))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
+                            if (BlockUtils.canBreak(blockPos9))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
+                            if (BlockUtils.canBreak(blockPos18))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
+                            if (BlockUtils.canBreak(blockPos18))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
+                            if (BlockUtils.canBreak(blockPos12))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos12, direction));
+                            if (BlockUtils.canBreak(blockPos12))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos12, direction));
+                            if (BlockUtils.canBreak(blockPos13))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos13, direction));
+                            if (BlockUtils.canBreak(blockPos13))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos13, direction));
+                            if (BlockUtils.canBreak(blockPos21))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos21, direction));
+                            if (BlockUtils.canBreak(blockPos21))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos21, direction));
+                            if (BlockUtils.canBreak(blockPos22))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos22, direction));
+                            if (BlockUtils.canBreak(blockPos22))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos22, direction));
+                        }
                     }
-                    if ((playermovingdirection==Direction.EAST || playermovingdirection==Direction.WEST) && playerpitch<=30 && playerpitch>=-30) {
-                        if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                        if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                        if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                        if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                        if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                        if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                        if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                        if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
-                        if (mc.world.getBlockState(blockPos12).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos12).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos12).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos12, direction));
-                        if (mc.world.getBlockState(blockPos12).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos12).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos12).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos12, direction));
-                        if (mc.world.getBlockState(blockPos13).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos13).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos13).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos13, direction));
-                        if (mc.world.getBlockState(blockPos13).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos13).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos13).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos13, direction));
-                        if (mc.world.getBlockState(blockPos21).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos21).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos21).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos21, direction));
-                        if (mc.world.getBlockState(blockPos21).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos21).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos21).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos21, direction));
-                        if (mc.world.getBlockState(blockPos22).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos22).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos22).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos22, direction));
-                        if (mc.world.getBlockState(blockPos22).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos22).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos22).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos22, direction));
+                        if ((aorient.get() && playerpitch>30 | playerpitch<-30) || (mode.get() == Modes.Horizontal && !aorient.get())){
+                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                        if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
+                        if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
+                        if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
+                        if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
+                        if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
+                        if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
+                        if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
+                        if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
                     }
-                    if (playerpitch>30 | playerpitch<-30) {
-                        if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                        if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                        if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                        if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                        if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                        if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                        if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                        if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                        if (mc.world.getBlockState(blockPos5).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos5).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos5).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
-                        if (mc.world.getBlockState(blockPos5).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos5).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos5).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
-                        if (mc.world.getBlockState(blockPos6).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos6).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos6).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
-                        if (mc.world.getBlockState(blockPos6).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos6).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos6).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
-                        if (mc.world.getBlockState(blockPos7).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos7).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos7).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
-                        if (mc.world.getBlockState(blockPos7).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos7).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos7).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
-                        if (mc.world.getBlockState(blockPos8).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos8).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos8).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
-                        if (mc.world.getBlockState(blockPos8).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos8).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos8).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
-                    }
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 } else {
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
-                    if ((playermovingdirection==Direction.NORTH || playermovingdirection==Direction.SOUTH) && playerpitch<=30 && playerpitch>=-30) {
-                        if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                        if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                        if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                        if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                        if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                        if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                        if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                        if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
-                        if (mc.world.getBlockState(blockPos10).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos10).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos10).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos10, direction));
-                        if (mc.world.getBlockState(blockPos10).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos10).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos10).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos10, direction));
-                        if (mc.world.getBlockState(blockPos11).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos11).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos11).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos11, direction));
-                        if (mc.world.getBlockState(blockPos11).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos11).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos11).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos11, direction));
-                        if (mc.world.getBlockState(blockPos19).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos19).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos19).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos19, direction));
-                        if (mc.world.getBlockState(blockPos19).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos19).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos19).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos19, direction));
-                        if (mc.world.getBlockState(blockPos20).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos20).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos20).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos20, direction));
-                        if (mc.world.getBlockState(blockPos20).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos20).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos20).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos20, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
+                    if ((aorient.get() && playerpitch<=30 && playerpitch>=-30) || (mode.get() == Modes.Vertical && !aorient.get())) {
+                        if (playermovingdirection == Direction.NORTH || playermovingdirection == Direction.SOUTH) {
+                            if (BlockUtils.canBreak(blockPos2))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                            if (BlockUtils.canBreak(blockPos2))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                            if (BlockUtils.canBreak(blockPos1))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                            if (BlockUtils.canBreak(blockPos1))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                            if (BlockUtils.canBreak(blockPos9))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
+                            if (BlockUtils.canBreak(blockPos9))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
+                            if (BlockUtils.canBreak(blockPos18))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
+                            if (BlockUtils.canBreak(blockPos18))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
+                            if (BlockUtils.canBreak(blockPos10))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos10, direction));
+                            if (BlockUtils.canBreak(blockPos10))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos10, direction));
+                            if (BlockUtils.canBreak(blockPos11))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos11, direction));
+                            if (BlockUtils.canBreak(blockPos11))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos11, direction));
+                            if (BlockUtils.canBreak(blockPos19))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos19, direction));
+                            if (BlockUtils.canBreak(blockPos19))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos19, direction));
+                            if (BlockUtils.canBreak(blockPos20))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos20, direction));
+                            if (BlockUtils.canBreak(blockPos20))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos20, direction));
+                        }
+                        if (playermovingdirection == Direction.EAST || playermovingdirection == Direction.WEST) {
+                            if (BlockUtils.canBreak(blockPos4))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                            if (BlockUtils.canBreak(blockPos4))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                            if (BlockUtils.canBreak(blockPos3))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                            if (BlockUtils.canBreak(blockPos3))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                            if (BlockUtils.canBreak(blockPos9))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
+                            if (BlockUtils.canBreak(blockPos9))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
+                            if (BlockUtils.canBreak(blockPos18))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
+                            if (BlockUtils.canBreak(blockPos18))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
+                            if (BlockUtils.canBreak(blockPos12))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos12, direction));
+                            if (BlockUtils.canBreak(blockPos12))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos12, direction));
+                            if (BlockUtils.canBreak(blockPos13))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos13, direction));
+                            if (BlockUtils.canBreak(blockPos13))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos13, direction));
+                            if (BlockUtils.canBreak(blockPos21))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos21, direction));
+                            if (BlockUtils.canBreak(blockPos21))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos21, direction));
+                            if (BlockUtils.canBreak(blockPos22))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos22, direction));
+                            if (BlockUtils.canBreak(blockPos22))
+                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos22, direction));
+                        }
                     }
-                    if ((playermovingdirection==Direction.EAST || playermovingdirection==Direction.WEST) && playerpitch<=30 && playerpitch>=-30) {
-                        if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                        if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                        if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                        if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                        if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                        if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                        if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                        if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
-                        if (mc.world.getBlockState(blockPos12).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos12).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos12).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos12, direction));
-                        if (mc.world.getBlockState(blockPos12).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos12).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos12).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos12, direction));
-                        if (mc.world.getBlockState(blockPos13).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos13).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos13).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos13, direction));
-                        if (mc.world.getBlockState(blockPos13).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos13).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos13).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos13, direction));
-                        if (mc.world.getBlockState(blockPos21).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos21).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos21).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos21, direction));
-                        if (mc.world.getBlockState(blockPos21).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos21).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos21).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos21, direction));
-                        if (mc.world.getBlockState(blockPos22).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos22).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos22).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos22, direction));
-                        if (mc.world.getBlockState(blockPos22).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos22).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos22).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos22, direction));
+                    if ((aorient.get() && playerpitch>30 | playerpitch<-30) || (mode.get() == Modes.Horizontal && !aorient.get())){
+                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                        if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
+                        if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
+                        if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
+                        if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
+                        if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
+                        if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
+                        if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
+                        if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
                     }
-                    if (playerpitch>30 | playerpitch<-30) {
-                        if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                        if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                        if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                        if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                        if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                        if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                        if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                        if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                        if (mc.world.getBlockState(blockPos5).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos5).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos5).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
-                        if (mc.world.getBlockState(blockPos5).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos5).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos5).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
-                        if (mc.world.getBlockState(blockPos6).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos6).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos6).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
-                        if (mc.world.getBlockState(blockPos6).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos6).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos6).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
-                        if (mc.world.getBlockState(blockPos7).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos7).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos7).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
-                        if (mc.world.getBlockState(blockPos7).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos7).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos7).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
-                        if (mc.world.getBlockState(blockPos8).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos8).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos8).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
-                        if (mc.world.getBlockState(blockPos8).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos8).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos8).getBlock() != Blocks.LAVA)
-                            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
-                    }
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 }
 
-                mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+                if (swing.get()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
             if (shouldMine() && range.get()==5) {
                 if (rotate.get()) {
-                    Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
-                    if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                    if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                    if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                    if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                    if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                    if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                    if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                    if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                    if (mc.world.getBlockState(blockPos5).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos5).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos5).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
-                    if (mc.world.getBlockState(blockPos5).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos5).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos5).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
-                    if (mc.world.getBlockState(blockPos6).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos6).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos6).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
-                    if (mc.world.getBlockState(blockPos6).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos6).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos6).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
-                    if (mc.world.getBlockState(blockPos7).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos7).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos7).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
-                    if (mc.world.getBlockState(blockPos7).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos7).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos7).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
-                    if (mc.world.getBlockState(blockPos8).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos8).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos8).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
-                    if (mc.world.getBlockState(blockPos8).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos8).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos8).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
-                    if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                    if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                    if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                    if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                    if (BlockUtils.canBreak(blockPos))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
+                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
+                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
+                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
+                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
+                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
+                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
+                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
+                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
+                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
+                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
+                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
+                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 } else {
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
-                    if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                    if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                    if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                    if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                    if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                    if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                    if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                    if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                    if (mc.world.getBlockState(blockPos5).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos5).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos5).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
-                    if (mc.world.getBlockState(blockPos5).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos5).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos5).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
-                    if (mc.world.getBlockState(blockPos6).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos6).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos6).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
-                    if (mc.world.getBlockState(blockPos6).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos6).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos6).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
-                    if (mc.world.getBlockState(blockPos7).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos7).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos7).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
-                    if (mc.world.getBlockState(blockPos7).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos7).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos7).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
-                    if (mc.world.getBlockState(blockPos8).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos8).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos8).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
-                    if (mc.world.getBlockState(blockPos8).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos8).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos8).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
-                    if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                    if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                    if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                    if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
+                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
+                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
+                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
+                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
+                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
+                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
+                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
+                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
+                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
+                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
+                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
+                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 }
 
-                mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+                if (swing.get()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
             if (shouldMine() && range.get()==6) {
                 if (rotate.get()) {
-                    Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
-                    if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                    if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                    if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                    if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                    if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                    if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                    if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                    if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                    if (mc.world.getBlockState(blockPos5).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos5).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos5).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
-                    if (mc.world.getBlockState(blockPos5).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos5).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos5).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
-                    if (mc.world.getBlockState(blockPos6).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos6).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos6).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
-                    if (mc.world.getBlockState(blockPos6).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos6).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos6).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
-                    if (mc.world.getBlockState(blockPos7).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos7).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos7).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
-                    if (mc.world.getBlockState(blockPos7).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos7).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos7).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
-                    if (mc.world.getBlockState(blockPos8).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos8).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos8).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
-                    if (mc.world.getBlockState(blockPos8).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos8).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos8).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
-                    if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                    if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                    if (mc.world.getBlockState(blockPos10).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos10).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos10).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos10, direction));
-                    if (mc.world.getBlockState(blockPos10).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos10).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos10).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos10, direction));
-                    if (mc.world.getBlockState(blockPos11).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos11).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos11).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos11, direction));
-                    if (mc.world.getBlockState(blockPos11).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos11).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos11).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos11, direction));
-                    if (mc.world.getBlockState(blockPos12).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos12).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos12).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos12, direction));
-                    if (mc.world.getBlockState(blockPos12).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos12).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos12).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos12, direction));
-                    if (mc.world.getBlockState(blockPos13).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos13).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos13).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos13, direction));
-                    if (mc.world.getBlockState(blockPos13).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos13).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos13).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos13, direction));
-                    if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                    if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
-                    if (mc.world.getBlockState(blockPos19).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos19).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos19).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos19, direction));
-                    if (mc.world.getBlockState(blockPos19).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos19).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos19).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos19, direction));
-                    if (mc.world.getBlockState(blockPos20).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos20).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos20).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos20, direction));
-                    if (mc.world.getBlockState(blockPos20).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos20).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos20).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos20, direction));
-                    if (mc.world.getBlockState(blockPos21).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos21).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos21).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos21, direction));
-                    if (mc.world.getBlockState(blockPos21).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos21).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos21).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos21, direction));
-                    if (mc.world.getBlockState(blockPos22).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos22).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos22).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos22, direction));
-                    if (mc.world.getBlockState(blockPos22).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos22).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos22).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos22, direction));
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                    if (BlockUtils.canBreak(blockPos))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
+                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
+                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
+                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
+                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
+                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
+                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
+                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
+                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
+                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
+                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
+                    if (BlockUtils.canBreak(blockPos10))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos10, direction));
+                    if (BlockUtils.canBreak(blockPos10))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos10, direction));
+                    if (BlockUtils.canBreak(blockPos11))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos11, direction));
+                    if (BlockUtils.canBreak(blockPos11))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos11, direction));
+                    if (BlockUtils.canBreak(blockPos12))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos12, direction));
+                    if (BlockUtils.canBreak(blockPos12))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos12, direction));
+                    if (BlockUtils.canBreak(blockPos13))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos13, direction));
+                    if (BlockUtils.canBreak(blockPos13))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos13, direction));
+                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
+                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
+                    if (BlockUtils.canBreak(blockPos19))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos19, direction));
+                    if (BlockUtils.canBreak(blockPos19))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos19, direction));
+                    if (BlockUtils.canBreak(blockPos20))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos20, direction));
+                    if (BlockUtils.canBreak(blockPos20))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos20, direction));
+                    if (BlockUtils.canBreak(blockPos21))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos21, direction));
+                    if (BlockUtils.canBreak(blockPos21))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos21, direction));
+                    if (BlockUtils.canBreak(blockPos22))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos22, direction));
+                    if (BlockUtils.canBreak(blockPos22))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos22, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 } else {
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
-                    if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                    if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                    if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                    if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                    if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                    if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                    if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                    if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                    if (mc.world.getBlockState(blockPos5).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos5).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos5).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
-                    if (mc.world.getBlockState(blockPos5).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos5).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos5).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
-                    if (mc.world.getBlockState(blockPos6).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos6).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos6).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
-                    if (mc.world.getBlockState(blockPos6).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos6).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos6).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
-                    if (mc.world.getBlockState(blockPos7).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos7).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos7).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
-                    if (mc.world.getBlockState(blockPos7).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos7).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos7).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
-                    if (mc.world.getBlockState(blockPos8).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos8).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos8).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
-                    if (mc.world.getBlockState(blockPos8).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos8).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos8).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
-                    if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                    if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                    if (mc.world.getBlockState(blockPos10).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos10).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos10).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos10, direction));
-                    if (mc.world.getBlockState(blockPos10).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos10).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos10).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos10, direction));
-                    if (mc.world.getBlockState(blockPos11).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos11).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos11).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos11, direction));
-                    if (mc.world.getBlockState(blockPos11).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos11).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos11).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos11, direction));
-                    if (mc.world.getBlockState(blockPos12).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos12).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos12).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos12, direction));
-                    if (mc.world.getBlockState(blockPos12).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos12).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos12).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos12, direction));
-                    if (mc.world.getBlockState(blockPos13).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos13).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos13).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos13, direction));
-                    if (mc.world.getBlockState(blockPos13).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos13).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos13).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos13, direction));
-                    if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                    if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
-                    if (mc.world.getBlockState(blockPos19).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos19).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos19).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos19, direction));
-                    if (mc.world.getBlockState(blockPos19).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos19).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos19).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos19, direction));
-                    if (mc.world.getBlockState(blockPos20).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos20).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos20).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos20, direction));
-                    if (mc.world.getBlockState(blockPos20).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos20).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos20).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos20, direction));
-                    if (mc.world.getBlockState(blockPos21).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos21).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos21).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos21, direction));
-                    if (mc.world.getBlockState(blockPos21).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos21).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos21).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos21, direction));
-                    if (mc.world.getBlockState(blockPos22).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos22).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos22).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos22, direction));
-                    if (mc.world.getBlockState(blockPos22).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos22).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos22).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos22, direction));
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
+                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
+                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
+                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
+                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
+                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
+                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
+                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
+                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
+                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
+                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
+                    if (BlockUtils.canBreak(blockPos10))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos10, direction));
+                    if (BlockUtils.canBreak(blockPos10))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos10, direction));
+                    if (BlockUtils.canBreak(blockPos11))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos11, direction));
+                    if (BlockUtils.canBreak(blockPos11))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos11, direction));
+                    if (BlockUtils.canBreak(blockPos12))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos12, direction));
+                    if (BlockUtils.canBreak(blockPos12))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos12, direction));
+                    if (BlockUtils.canBreak(blockPos13))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos13, direction));
+                    if (BlockUtils.canBreak(blockPos13))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos13, direction));
+                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
+                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
+                    if (BlockUtils.canBreak(blockPos19))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos19, direction));
+                    if (BlockUtils.canBreak(blockPos19))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos19, direction));
+                    if (BlockUtils.canBreak(blockPos20))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos20, direction));
+                    if (BlockUtils.canBreak(blockPos20))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos20, direction));
+                    if (BlockUtils.canBreak(blockPos21))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos21, direction));
+                    if (BlockUtils.canBreak(blockPos21))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos21, direction));
+                    if (BlockUtils.canBreak(blockPos22))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos22, direction));
+                    if (BlockUtils.canBreak(blockPos22))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos22, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 }
 
-                mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+                if (swing.get()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
             if (shouldMine() && range.get()==7) {
                 if (rotate.get()) {
-                    Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
-                    if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                    if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                    if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                    if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                    if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                    if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                    if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                    if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                    if (mc.world.getBlockState(blockPos5).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos5).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos5).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
-                    if (mc.world.getBlockState(blockPos5).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos5).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos5).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
-                    if (mc.world.getBlockState(blockPos6).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos6).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos6).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
-                    if (mc.world.getBlockState(blockPos6).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos6).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos6).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
-                    if (mc.world.getBlockState(blockPos7).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos7).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos7).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
-                    if (mc.world.getBlockState(blockPos7).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos7).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos7).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
-                    if (mc.world.getBlockState(blockPos8).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos8).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos8).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
-                    if (mc.world.getBlockState(blockPos8).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos8).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos8).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
-                    if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                    if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                    if (mc.world.getBlockState(blockPos10).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos10).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos10).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos10, direction));
-                    if (mc.world.getBlockState(blockPos10).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos10).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos10).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos10, direction));
-                    if (mc.world.getBlockState(blockPos11).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos11).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos11).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos11, direction));
-                    if (mc.world.getBlockState(blockPos11).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos11).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos11).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos11, direction));
-                    if (mc.world.getBlockState(blockPos12).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos12).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos12).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos12, direction));
-                    if (mc.world.getBlockState(blockPos12).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos12).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos12).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos12, direction));
-                    if (mc.world.getBlockState(blockPos13).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos13).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos13).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos13, direction));
-                    if (mc.world.getBlockState(blockPos13).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos13).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos13).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos13, direction));
-                    if (mc.world.getBlockState(blockPos14).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos14).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos14).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos14, direction));
-                    if (mc.world.getBlockState(blockPos14).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos14).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos14).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos14, direction));
-                    if (mc.world.getBlockState(blockPos15).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos15).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos15).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos15, direction));
-                    if (mc.world.getBlockState(blockPos15).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos15).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos15).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos15, direction));
-                    if (mc.world.getBlockState(blockPos16).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos16).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos16).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos16, direction));
-                    if (mc.world.getBlockState(blockPos16).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos16).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos16).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos16, direction));
-                    if (mc.world.getBlockState(blockPos17).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos17).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos17).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos17, direction));
-                    if (mc.world.getBlockState(blockPos17).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos17).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos17).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos17, direction));
-                    if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                    if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
-                    if (mc.world.getBlockState(blockPos19).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos19).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos19).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos19, direction));
-                    if (mc.world.getBlockState(blockPos19).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos19).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos19).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos19, direction));
-                    if (mc.world.getBlockState(blockPos20).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos20).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos20).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos20, direction));
-                    if (mc.world.getBlockState(blockPos20).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos20).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos20).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos20, direction));
-                    if (mc.world.getBlockState(blockPos21).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos21).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos21).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos21, direction));
-                    if (mc.world.getBlockState(blockPos21).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos21).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos21).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos21, direction));
-                    if (mc.world.getBlockState(blockPos22).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos22).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos22).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos22, direction));
-                    if (mc.world.getBlockState(blockPos22).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos22).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos22).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos22, direction));
-                    if (mc.world.getBlockState(blockPos23).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos23).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos23).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos23, direction));
-                    if (mc.world.getBlockState(blockPos23).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos23).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos23).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos23, direction));
-                    if (mc.world.getBlockState(blockPos24).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos24).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos24).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos24, direction));
-                    if (mc.world.getBlockState(blockPos24).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos24).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos24).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos24, direction));
-                    if (mc.world.getBlockState(blockPos25).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos25).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos25).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos25, direction));
-                    if (mc.world.getBlockState(blockPos25).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos25).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos25).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos25, direction));
-                    if (mc.world.getBlockState(blockPos26).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos26).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos26).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos26, direction));
-                    if (mc.world.getBlockState(blockPos26).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos26).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos26).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos26, direction));
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                    if (BlockUtils.canBreak(blockPos))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
+                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
+                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
+                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
+                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
+                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
+                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
+                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
+                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
+                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
+                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
+                    if (BlockUtils.canBreak(blockPos10))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos10, direction));
+                    if (BlockUtils.canBreak(blockPos10))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos10, direction));
+                    if (BlockUtils.canBreak(blockPos11))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos11, direction));
+                    if (BlockUtils.canBreak(blockPos11))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos11, direction));
+                    if (BlockUtils.canBreak(blockPos12))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos12, direction));
+                    if (BlockUtils.canBreak(blockPos12))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos12, direction));
+                    if (BlockUtils.canBreak(blockPos13))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos13, direction));
+                    if (BlockUtils.canBreak(blockPos13))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos13, direction));
+                    if (BlockUtils.canBreak(blockPos14))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos14, direction));
+                    if (BlockUtils.canBreak(blockPos14))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos14, direction));
+                    if (BlockUtils.canBreak(blockPos15))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos15, direction));
+                    if (BlockUtils.canBreak(blockPos15))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos15, direction));
+                    if (BlockUtils.canBreak(blockPos16))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos16, direction));
+                    if (BlockUtils.canBreak(blockPos16))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos16, direction));
+                    if (BlockUtils.canBreak(blockPos17))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos17, direction));
+                    if (BlockUtils.canBreak(blockPos17))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos17, direction));
+                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
+                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
+                    if (BlockUtils.canBreak(blockPos19))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos19, direction));
+                    if (BlockUtils.canBreak(blockPos19))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos19, direction));
+                    if (BlockUtils.canBreak(blockPos20))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos20, direction));
+                    if (BlockUtils.canBreak(blockPos20))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos20, direction));
+                    if (BlockUtils.canBreak(blockPos21))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos21, direction));
+                    if (BlockUtils.canBreak(blockPos21))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos21, direction));
+                    if (BlockUtils.canBreak(blockPos22))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos22, direction));
+                    if (BlockUtils.canBreak(blockPos22))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos22, direction));
+                    if (BlockUtils.canBreak(blockPos23))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos23, direction));
+                    if (BlockUtils.canBreak(blockPos23))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos23, direction));
+                    if (BlockUtils.canBreak(blockPos24))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos24, direction));
+                    if (BlockUtils.canBreak(blockPos24))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos24, direction));
+                    if (BlockUtils.canBreak(blockPos25))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos25, direction));
+                    if (BlockUtils.canBreak(blockPos25))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos25, direction));
+                    if (BlockUtils.canBreak(blockPos26))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos26, direction));
+                    if (BlockUtils.canBreak(blockPos26))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos26, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 } else {
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
-                    if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                    if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                    if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                    if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                    if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                    if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                    if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                    if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                    if (mc.world.getBlockState(blockPos5).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos5).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos5).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
-                    if (mc.world.getBlockState(blockPos5).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos5).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos5).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
-                    if (mc.world.getBlockState(blockPos6).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos6).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos6).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
-                    if (mc.world.getBlockState(blockPos6).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos6).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos6).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
-                    if (mc.world.getBlockState(blockPos7).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos7).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos7).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
-                    if (mc.world.getBlockState(blockPos7).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos7).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos7).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
-                    if (mc.world.getBlockState(blockPos8).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos8).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos8).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
-                    if (mc.world.getBlockState(blockPos8).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos8).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos8).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
-                    if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                    if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                    if (mc.world.getBlockState(blockPos10).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos10).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos10).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos10, direction));
-                    if (mc.world.getBlockState(blockPos10).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos10).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos10).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos10, direction));
-                    if (mc.world.getBlockState(blockPos11).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos11).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos11).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos11, direction));
-                    if (mc.world.getBlockState(blockPos11).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos11).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos11).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos11, direction));
-                    if (mc.world.getBlockState(blockPos12).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos12).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos12).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos12, direction));
-                    if (mc.world.getBlockState(blockPos12).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos12).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos12).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos12, direction));
-                    if (mc.world.getBlockState(blockPos13).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos13).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos13).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos13, direction));
-                    if (mc.world.getBlockState(blockPos13).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos13).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos13).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos13, direction));
-                    if (mc.world.getBlockState(blockPos14).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos14).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos14).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos14, direction));
-                    if (mc.world.getBlockState(blockPos14).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos14).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos14).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos14, direction));
-                    if (mc.world.getBlockState(blockPos15).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos15).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos15).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos15, direction));
-                    if (mc.world.getBlockState(blockPos15).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos15).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos15).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos15, direction));
-                    if (mc.world.getBlockState(blockPos16).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos16).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos16).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos16, direction));
-                    if (mc.world.getBlockState(blockPos16).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos16).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos16).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos16, direction));
-                    if (mc.world.getBlockState(blockPos17).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos17).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos17).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos17, direction));
-                    if (mc.world.getBlockState(blockPos17).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos17).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos17).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos17, direction));
-                    if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                    if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
-                    if (mc.world.getBlockState(blockPos19).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos19).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos19).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos19, direction));
-                    if (mc.world.getBlockState(blockPos19).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos19).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos19).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos19, direction));
-                    if (mc.world.getBlockState(blockPos20).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos20).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos20).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos20, direction));
-                    if (mc.world.getBlockState(blockPos20).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos20).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos20).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos20, direction));
-                    if (mc.world.getBlockState(blockPos21).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos21).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos21).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos21, direction));
-                    if (mc.world.getBlockState(blockPos21).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos21).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos21).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos21, direction));
-                    if (mc.world.getBlockState(blockPos22).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos22).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos22).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos22, direction));
-                    if (mc.world.getBlockState(blockPos22).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos22).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos22).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos22, direction));
-                    if (mc.world.getBlockState(blockPos23).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos23).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos23).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos23, direction));
-                    if (mc.world.getBlockState(blockPos23).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos23).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos23).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos23, direction));
-                    if (mc.world.getBlockState(blockPos24).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos24).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos24).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos24, direction));
-                    if (mc.world.getBlockState(blockPos24).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos24).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos24).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos24, direction));
-                    if (mc.world.getBlockState(blockPos25).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos25).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos25).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos25, direction));
-                    if (mc.world.getBlockState(blockPos25).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos25).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos25).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos25, direction));
-                    if (mc.world.getBlockState(blockPos26).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos26).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos26).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos26, direction));
-                    if (mc.world.getBlockState(blockPos26).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos26).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos26).getBlock() != Blocks.LAVA)mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos26, direction));
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
+                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
+                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
+                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
+                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
+                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
+                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
+                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
+                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
+                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
+                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
+                    if (BlockUtils.canBreak(blockPos10))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos10, direction));
+                    if (BlockUtils.canBreak(blockPos10))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos10, direction));
+                    if (BlockUtils.canBreak(blockPos11))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos11, direction));
+                    if (BlockUtils.canBreak(blockPos11))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos11, direction));
+                    if (BlockUtils.canBreak(blockPos12))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos12, direction));
+                    if (BlockUtils.canBreak(blockPos12))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos12, direction));
+                    if (BlockUtils.canBreak(blockPos13))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos13, direction));
+                    if (BlockUtils.canBreak(blockPos13))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos13, direction));
+                    if (BlockUtils.canBreak(blockPos14))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos14, direction));
+                    if (BlockUtils.canBreak(blockPos14))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos14, direction));
+                    if (BlockUtils.canBreak(blockPos15))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos15, direction));
+                    if (BlockUtils.canBreak(blockPos15))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos15, direction));
+                    if (BlockUtils.canBreak(blockPos16))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos16, direction));
+                    if (BlockUtils.canBreak(blockPos16))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos16, direction));
+                    if (BlockUtils.canBreak(blockPos17))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos17, direction));
+                    if (BlockUtils.canBreak(blockPos17))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos17, direction));
+                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
+                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
+                    if (BlockUtils.canBreak(blockPos19))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos19, direction));
+                    if (BlockUtils.canBreak(blockPos19))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos19, direction));
+                    if (BlockUtils.canBreak(blockPos20))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos20, direction));
+                    if (BlockUtils.canBreak(blockPos20))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos20, direction));
+                    if (BlockUtils.canBreak(blockPos21))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos21, direction));
+                    if (BlockUtils.canBreak(blockPos21))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos21, direction));
+                    if (BlockUtils.canBreak(blockPos22))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos22, direction));
+                    if (BlockUtils.canBreak(blockPos22))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos22, direction));
+                    if (BlockUtils.canBreak(blockPos23))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos23, direction));
+                    if (BlockUtils.canBreak(blockPos23))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos23, direction));
+                    if (BlockUtils.canBreak(blockPos24))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos24, direction));
+                    if (BlockUtils.canBreak(blockPos24))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos24, direction));
+                    if (BlockUtils.canBreak(blockPos25))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos25, direction));
+                    if (BlockUtils.canBreak(blockPos25))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos25, direction));
+                    if (BlockUtils.canBreak(blockPos26))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos26, direction));
+                    if (BlockUtils.canBreak(blockPos26))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos26, direction));
+                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 }
 
-                mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+                if (swing.get()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
         } else {
             ticks++;
@@ -838,122 +910,153 @@ public class SuperInstaMine extends Module {
     @EventHandler
     private void onRender(Render3DEvent event) {
         if (!render.get() || !shouldMine()) return;
-        if (mc.world.getBlockState(blockPos).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos).getBlock() != Blocks.LAVA)event.renderer.box(blockPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-        if (((range.get()==-1 && playermovingdirection==Direction.SOUTH) || (range.get()==1 && playermovingdirection==Direction.NORTH) || (range.get()==2 && (playermovingdirection==Direction.NORTH | playermovingdirection==Direction.SOUTH))) && mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-        if (((range.get()==-1 && playermovingdirection==Direction.NORTH) || (range.get()==1 && playermovingdirection==Direction.SOUTH) || (range.get()==2 && (playermovingdirection==Direction.NORTH | playermovingdirection==Direction.SOUTH))) && mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-        if (((range.get()==-1 && playermovingdirection==Direction.WEST) || (range.get()==1 && playermovingdirection==Direction.EAST) || (range.get()==2 && (playermovingdirection==Direction.EAST | playermovingdirection==Direction.WEST))) && mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-        if (((range.get()==-1 && playermovingdirection==Direction.EAST) || (range.get()==1 && playermovingdirection==Direction.WEST) || (range.get()==2 && (playermovingdirection==Direction.EAST | playermovingdirection==Direction.WEST))) && mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        if (BlockUtils.canBreak(blockPos))event.renderer.box(blockPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        if (((range.get()==-1 && playermovingdirection==Direction.SOUTH) || (range.get()==1 && playermovingdirection==Direction.NORTH) || (range.get()==2 && (playermovingdirection==Direction.NORTH | playermovingdirection==Direction.SOUTH))) && BlockUtils.canBreak(blockPos1))event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        if (((range.get()==-1 && playermovingdirection==Direction.NORTH) || (range.get()==1 && playermovingdirection==Direction.SOUTH) || (range.get()==2 && (playermovingdirection==Direction.NORTH | playermovingdirection==Direction.SOUTH))) && BlockUtils.canBreak(blockPos2))event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        if (((range.get()==-1 && playermovingdirection==Direction.WEST) || (range.get()==1 && playermovingdirection==Direction.EAST) || (range.get()==2 && (playermovingdirection==Direction.EAST | playermovingdirection==Direction.WEST))) && BlockUtils.canBreak(blockPos3))event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        if (((range.get()==-1 && playermovingdirection==Direction.EAST) || (range.get()==1 && playermovingdirection==Direction.WEST) || (range.get()==2 && (playermovingdirection==Direction.EAST | playermovingdirection==Direction.WEST))) && BlockUtils.canBreak(blockPos4))event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         if (range.get()==3){
-            if ((playermovingdirection==Direction.NORTH || playermovingdirection==Direction.SOUTH) && playerpitch<=30 && playerpitch>=-30){
-                if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if ((aorient.get() && playerpitch<=30 && playerpitch>=-30) || (mode.get() == Modes.Vertical && !aorient.get())) {
+                if ((playermovingdirection == Direction.NORTH || playermovingdirection == Direction.SOUTH)) {
+                    if (BlockUtils.canBreak(blockPos1))
+                        event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    if (BlockUtils.canBreak(blockPos2))
+                        event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    if (BlockUtils.canBreak(blockPos9))
+                        event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    if (BlockUtils.canBreak(blockPos18))
+                        event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                }
+                if ((playermovingdirection == Direction.EAST || playermovingdirection == Direction.WEST)) {
+                    if (BlockUtils.canBreak(blockPos9))
+                        event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    if (BlockUtils.canBreak(blockPos18))
+                        event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    if (BlockUtils.canBreak(blockPos3))
+                        event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    if (BlockUtils.canBreak(blockPos4))
+                        event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                }
             }
-            if ((playermovingdirection==Direction.EAST|| playermovingdirection==Direction.WEST) && playerpitch<=30 && playerpitch>=-30){
-                if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            }
-            if (playerpitch>30 | playerpitch<-30){
-                if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if ((aorient.get() && playerpitch>30 | playerpitch<-30) || (mode.get() == Modes.Horizontal && !aorient.get())){
+                if (BlockUtils.canBreak(blockPos1))event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                if (BlockUtils.canBreak(blockPos2))event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                if (BlockUtils.canBreak(blockPos3))event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                if (BlockUtils.canBreak(blockPos4))event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
             }
         }
         if (range.get()==4){
-            if ((playermovingdirection==Direction.NORTH || playermovingdirection==Direction.SOUTH) && playerpitch<=30 && playerpitch>=-30){
-                if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos10).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos10).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos10).getBlock() != Blocks.LAVA)event.renderer.box(blockPos10, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos11).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos11).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos11).getBlock() != Blocks.LAVA)event.renderer.box(blockPos11, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos19).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos19).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos19).getBlock() != Blocks.LAVA)event.renderer.box(blockPos19, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos20).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos20).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos20).getBlock() != Blocks.LAVA)event.renderer.box(blockPos20, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if ((aorient.get() && playerpitch<=30 && playerpitch>=-30) || (mode.get() == Modes.Vertical && !aorient.get())) {
+                if (playermovingdirection == Direction.NORTH || playermovingdirection == Direction.SOUTH) {
+                    if (BlockUtils.canBreak(blockPos1))
+                        event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    if (BlockUtils.canBreak(blockPos2))
+                        event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    if (BlockUtils.canBreak(blockPos9))
+                        event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    if (BlockUtils.canBreak(blockPos18))
+                        event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    if (BlockUtils.canBreak(blockPos10))
+                        event.renderer.box(blockPos10, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    if (BlockUtils.canBreak(blockPos11))
+                        event.renderer.box(blockPos11, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    if (BlockUtils.canBreak(blockPos19))
+                        event.renderer.box(blockPos19, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    if (BlockUtils.canBreak(blockPos20))
+                        event.renderer.box(blockPos20, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                }
+                if (playermovingdirection == Direction.EAST || playermovingdirection == Direction.WEST) {
+                    if (BlockUtils.canBreak(blockPos9))
+                        event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    if (BlockUtils.canBreak(blockPos18))
+                        event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    if (BlockUtils.canBreak(blockPos3))
+                        event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    if (BlockUtils.canBreak(blockPos4))
+                        event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    if (BlockUtils.canBreak(blockPos12))
+                        event.renderer.box(blockPos12, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    if (BlockUtils.canBreak(blockPos13))
+                        event.renderer.box(blockPos13, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    if (BlockUtils.canBreak(blockPos21))
+                        event.renderer.box(blockPos21, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    if (BlockUtils.canBreak(blockPos22))
+                        event.renderer.box(blockPos22, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                }
             }
-            if ((playermovingdirection==Direction.EAST || playermovingdirection==Direction.WEST) && playerpitch<=30 && playerpitch>=-30){
-                if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos12).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos12).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos12).getBlock() != Blocks.LAVA)event.renderer.box(blockPos12, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos13).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos13).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos13).getBlock() != Blocks.LAVA)event.renderer.box(blockPos13, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos21).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos21).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos21).getBlock() != Blocks.LAVA)event.renderer.box(blockPos21, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos22).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos22).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos22).getBlock() != Blocks.LAVA)event.renderer.box(blockPos22, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            }
-            if (playerpitch>30 | playerpitch<-30){
-                if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos5).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos5).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos5).getBlock() != Blocks.LAVA)event.renderer.box(blockPos5, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos6).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos6).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos6).getBlock() != Blocks.LAVA)event.renderer.box(blockPos6, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos7).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos7).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos7).getBlock() != Blocks.LAVA)event.renderer.box(blockPos7, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (mc.world.getBlockState(blockPos8).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos8).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos8).getBlock() != Blocks.LAVA)event.renderer.box(blockPos8, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if ((aorient.get() && playerpitch>30 | playerpitch<-30) || (mode.get() == Modes.Horizontal && !aorient.get())){
+                if (BlockUtils.canBreak(blockPos1))event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                if (BlockUtils.canBreak(blockPos2))event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                if (BlockUtils.canBreak(blockPos3))event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                if (BlockUtils.canBreak(blockPos4))event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                if (BlockUtils.canBreak(blockPos5))event.renderer.box(blockPos5, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                if (BlockUtils.canBreak(blockPos6))event.renderer.box(blockPos6, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                if (BlockUtils.canBreak(blockPos7))event.renderer.box(blockPos7, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                if (BlockUtils.canBreak(blockPos8))event.renderer.box(blockPos8, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
             }
         }
         if (range.get()==5){
-            if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos5).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos5).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos5).getBlock() != Blocks.LAVA)event.renderer.box(blockPos5, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos6).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos6).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos6).getBlock() != Blocks.LAVA)event.renderer.box(blockPos6, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos7).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos7).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos7).getBlock() != Blocks.LAVA)event.renderer.box(blockPos7, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos8).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos8).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos8).getBlock() != Blocks.LAVA)event.renderer.box(blockPos8, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos1))event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos2))event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos3))event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos4))event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos5))event.renderer.box(blockPos5, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos6))event.renderer.box(blockPos6, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos7))event.renderer.box(blockPos7, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos8))event.renderer.box(blockPos8, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos9))event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos18))event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         }
         if (range.get()==6){
-            if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos5).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos5).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos5).getBlock() != Blocks.LAVA)event.renderer.box(blockPos5, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos6).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos6).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos6).getBlock() != Blocks.LAVA)event.renderer.box(blockPos6, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos7).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos7).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos7).getBlock() != Blocks.LAVA)event.renderer.box(blockPos7, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos8).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos8).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos8).getBlock() != Blocks.LAVA)event.renderer.box(blockPos8, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos10).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos10).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos10).getBlock() != Blocks.LAVA)event.renderer.box(blockPos10, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos11).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos11).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos11).getBlock() != Blocks.LAVA)event.renderer.box(blockPos11, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos12).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos12).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos12).getBlock() != Blocks.LAVA)event.renderer.box(blockPos12, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos13).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos13).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos13).getBlock() != Blocks.LAVA)event.renderer.box(blockPos13, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos19).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos19).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos19).getBlock() != Blocks.LAVA)event.renderer.box(blockPos19, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos20).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos20).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos20).getBlock() != Blocks.LAVA)event.renderer.box(blockPos20, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos21).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos21).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos21).getBlock() != Blocks.LAVA)event.renderer.box(blockPos21, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos22).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos22).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos22).getBlock() != Blocks.LAVA)event.renderer.box(blockPos22, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos1))event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos2))event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos3))event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos4))event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos5))event.renderer.box(blockPos5, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos6))event.renderer.box(blockPos6, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos7))event.renderer.box(blockPos7, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos8))event.renderer.box(blockPos8, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos9))event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos10))event.renderer.box(blockPos10, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos11))event.renderer.box(blockPos11, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos12))event.renderer.box(blockPos12, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos13))event.renderer.box(blockPos13, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos18))event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos19))event.renderer.box(blockPos19, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos20))event.renderer.box(blockPos20, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos21))event.renderer.box(blockPos21, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos22))event.renderer.box(blockPos22, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         }
         if (range.get()==7){
-            if (mc.world.getBlockState(blockPos1).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos1).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos1).getBlock() != Blocks.LAVA)event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos2).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos2).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos2).getBlock() != Blocks.LAVA)event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos3).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos3).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos3).getBlock() != Blocks.LAVA)event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos4).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos4).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos4).getBlock() != Blocks.LAVA)event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos5).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos5).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos5).getBlock() != Blocks.LAVA)event.renderer.box(blockPos5, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos6).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos6).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos6).getBlock() != Blocks.LAVA)event.renderer.box(blockPos6, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos7).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos7).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos7).getBlock() != Blocks.LAVA)event.renderer.box(blockPos7, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos8).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos8).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos8).getBlock() != Blocks.LAVA)event.renderer.box(blockPos8, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos9).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos9).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos9).getBlock() != Blocks.LAVA)event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos10).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos10).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos10).getBlock() != Blocks.LAVA)event.renderer.box(blockPos10, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos11).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos11).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos11).getBlock() != Blocks.LAVA)event.renderer.box(blockPos11, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos12).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos12).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos12).getBlock() != Blocks.LAVA)event.renderer.box(blockPos12, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos13).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos13).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos13).getBlock() != Blocks.LAVA)event.renderer.box(blockPos13, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos14).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos14).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos14).getBlock() != Blocks.LAVA)event.renderer.box(blockPos14, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos15).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos15).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos15).getBlock() != Blocks.LAVA)event.renderer.box(blockPos15, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos16).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos16).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos16).getBlock() != Blocks.LAVA)event.renderer.box(blockPos16, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos17).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos17).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos17).getBlock() != Blocks.LAVA)event.renderer.box(blockPos17, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos18).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos18).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos18).getBlock() != Blocks.LAVA)event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos19).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos19).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos19).getBlock() != Blocks.LAVA)event.renderer.box(blockPos19, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos20).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos20).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos20).getBlock() != Blocks.LAVA)event.renderer.box(blockPos20, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos21).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos21).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos21).getBlock() != Blocks.LAVA)event.renderer.box(blockPos21, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos22).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos22).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos22).getBlock() != Blocks.LAVA)event.renderer.box(blockPos22, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos23).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos23).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos23).getBlock() != Blocks.LAVA)event.renderer.box(blockPos23, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos24).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos24).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos24).getBlock() != Blocks.LAVA)event.renderer.box(blockPos24, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos25).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos25).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos25).getBlock() != Blocks.LAVA)event.renderer.box(blockPos25, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (mc.world.getBlockState(blockPos26).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos26).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos26).getBlock() != Blocks.LAVA)event.renderer.box(blockPos26, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos1))event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos2))event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos3))event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos4))event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos5))event.renderer.box(blockPos5, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos6))event.renderer.box(blockPos6, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos7))event.renderer.box(blockPos7, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos8))event.renderer.box(blockPos8, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos9))event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos10))event.renderer.box(blockPos10, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos11))event.renderer.box(blockPos11, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos12))event.renderer.box(blockPos12, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos13))event.renderer.box(blockPos13, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos14))event.renderer.box(blockPos14, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos15))event.renderer.box(blockPos15, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos16))event.renderer.box(blockPos16, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos17))event.renderer.box(blockPos17, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos18))event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos19))event.renderer.box(blockPos19, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos20))event.renderer.box(blockPos20, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos21))event.renderer.box(blockPos21, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos22))event.renderer.box(blockPos22, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos23))event.renderer.box(blockPos23, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos24))event.renderer.box(blockPos24, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos25))event.renderer.box(blockPos25, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (BlockUtils.canBreak(blockPos26))event.renderer.box(blockPos26, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         }
+    }
+    public enum Modes {
+        Horizontal, Vertical
     }
 }

@@ -1,7 +1,5 @@
 package pwn.noobs.trouserstreak.modules;
 
-import meteordevelopment.meteorclient.events.game.GameLeftEvent;
-import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -10,7 +8,6 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.Flight;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -273,18 +270,6 @@ public class HandOfGod extends Module {
         if (voider.get()){
             i=mc.player.getBlockPos().getY();
         }
-    }
-
-    @EventHandler
-    private void onScreenOpen(OpenScreenEvent event) {
-        if (event.screen instanceof DisconnectedScreen) {
-            toggle();
-        }
-    }
-
-    @EventHandler
-    private void onGameLeft(GameLeftEvent event) {
-        toggle();
     }
 
     @EventHandler

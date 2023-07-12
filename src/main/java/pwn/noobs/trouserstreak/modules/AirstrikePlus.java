@@ -3,10 +3,7 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.EnumSetting;
-import meteordevelopment.meteorclient.settings.IntSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.DeathScreen;
@@ -27,6 +24,11 @@ import java.util.Random;
 
 public class AirstrikePlus extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final Setting<Boolean> disconnectdisable = sgGeneral.add(new BoolSetting.Builder()
+            .name("Disable on Disconnect")
+            .description("Disables module on disconnecting")
+            .defaultValue(false)
+            .build());
     private final Setting<Modes> mode = sgGeneral.add(new EnumSetting.Builder<Modes>()
         .name("mode")
         .description("the mode")
@@ -103,13 +105,13 @@ public class AirstrikePlus extends Module {
     }
     @EventHandler
     private void onScreenOpen(OpenScreenEvent event) {
-        if (event.screen instanceof DisconnectedScreen) {
+        if (disconnectdisable.get() && event.screen instanceof DisconnectedScreen) {
             toggle();
         }
     }
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
-        toggle();
+        if (disconnectdisable.get())toggle();
     }
 
     @EventHandler
