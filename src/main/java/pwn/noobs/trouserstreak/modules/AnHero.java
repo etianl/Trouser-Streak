@@ -1,8 +1,3 @@
-/*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
- * Copyright (c) Meteor Development.
- */
-
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
@@ -69,7 +64,6 @@ public class AnHero extends Module {
             toggle();
         }
     }
-
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
         if (nofallwason==true && !Modules.get().get(NoFall.class).isActive()){
@@ -110,6 +104,13 @@ public class AnHero extends Module {
     }
     @EventHandler
     public void onPreTick(TickEvent.Pre event) {
+        if (mc.player.getHealth()==0) {
+            if (nofallwason==true && !Modules.get().get(NoFall.class).isActive()){
+                Modules.get().get(NoFall.class).toggle();
+            }
+            Modules.get().get(Timer.class).setOverride(Timer.OFF);
+            toggle();
+        }
         ticks++;
         Modules.get().get(Timer.class).setOverride(toasterbath.get());
         if (ticks==1){
@@ -129,5 +130,3 @@ public class AnHero extends Module {
         }
         }
     }
-
-

@@ -276,18 +276,6 @@ public class HandOfGod extends Module {
     }
 
     @EventHandler
-    private void onScreenOpen(OpenScreenEvent event) {
-        if (event.screen instanceof DisconnectedScreen) {
-            toggle();
-        }
-    }
-
-    @EventHandler
-    private void onGameLeft(GameLeftEvent event) {
-        toggle();
-    }
-
-    @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if (mc.options.attackKey.isPressed() && mc.currentScreen == null) {
             HitResult hr = mc.cameraEntity.raycast(900, 0, fluids.get());
