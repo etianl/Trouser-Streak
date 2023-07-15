@@ -82,6 +82,8 @@ public class BaseFinder extends Module {
             .defaultValue(
                     Blocks.BLACK_BED, Blocks.BROWN_BED, Blocks.GRAY_BED, Blocks.LIGHT_BLUE_BED, Blocks.LIGHT_GRAY_BED, Blocks.MAGENTA_BED, Blocks.PINK_BED,
                     Blocks.CHERRY_BUTTON, Blocks.CHERRY_DOOR, Blocks.CHERRY_FENCE, Blocks.CHERRY_FENCE_GATE, Blocks.CHERRY_PLANKS, Blocks.CHERRY_PRESSURE_PLATE, Blocks.CHERRY_STAIRS, Blocks.CHERRY_WOOD, Blocks.CHERRY_TRAPDOOR, Blocks.CHERRY_SLAB,
+                    Blocks.MANGROVE_PLANKS, Blocks.MANGROVE_BUTTON, Blocks.MANGROVE_DOOR, Blocks.MANGROVE_FENCE, Blocks.MANGROVE_FENCE_GATE, Blocks.MANGROVE_STAIRS, Blocks.MANGROVE_SLAB, Blocks.MANGROVE_TRAPDOOR,
+                    Blocks.BIRCH_DOOR, Blocks.BIRCH_FENCE_GATE, Blocks.BIRCH_BUTTON, Blocks.OAK_BUTTON, Blocks.ACACIA_BUTTON, Blocks.DARK_OAK_BUTTON, Blocks.POLISHED_BLACKSTONE_BUTTON, Blocks.SPRUCE_BUTTON,
                     Blocks.BAMBOO_BLOCK, Blocks.BAMBOO_BUTTON, Blocks.BAMBOO_DOOR, Blocks.BAMBOO_FENCE, Blocks.BAMBOO_FENCE_GATE, Blocks.BAMBOO_MOSAIC, Blocks.BAMBOO_MOSAIC_SLAB, Blocks.BAMBOO_MOSAIC_STAIRS, Blocks.BAMBOO_PLANKS, Blocks.BAMBOO_PRESSURE_PLATE, Blocks.BAMBOO_SLAB, Blocks.BAMBOO_STAIRS, Blocks.BAMBOO_TRAPDOOR, Blocks.DECORATED_POT, Blocks.CHISELED_BOOKSHELF,
                     Blocks.BLACK_CONCRETE, Blocks.BLUE_CONCRETE, Blocks.CYAN_CONCRETE, Blocks.BROWN_CONCRETE, Blocks.WHITE_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.MAGENTA_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE, Blocks.PINK_CONCRETE, Blocks.GRAY_CONCRETE, Blocks.LIGHT_GRAY_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.GREEN_CONCRETE, Blocks.RED_CONCRETE,
                     Blocks.BLACK_CONCRETE_POWDER, Blocks.BLUE_CONCRETE_POWDER, Blocks.CYAN_CONCRETE_POWDER, Blocks.BROWN_CONCRETE_POWDER, Blocks.WHITE_CONCRETE_POWDER, Blocks.ORANGE_CONCRETE_POWDER, Blocks.MAGENTA_CONCRETE_POWDER, Blocks.LIGHT_BLUE_CONCRETE_POWDER, Blocks.YELLOW_CONCRETE_POWDER, Blocks.LIME_CONCRETE_POWDER, Blocks.PINK_CONCRETE_POWDER, Blocks.GRAY_CONCRETE_POWDER, Blocks.LIGHT_GRAY_CONCRETE_POWDER, Blocks.PURPLE_CONCRETE_POWDER, Blocks.GREEN_CONCRETE_POWDER, Blocks.RED_CONCRETE_POWDER,
@@ -312,6 +314,12 @@ public class BaseFinder extends Module {
             .defaultValue(true)
             .build()
     );
+    private final Setting<Boolean> nearesttrcr = sgRender.add(new BoolSetting.Builder()
+            .name("Tracer to NearestBase Only")
+            .description("Show only one tracer to the nearest base chunk.")
+            .defaultValue(true)
+            .build()
+    );
     public final Setting<Integer> trcrdist = sgRender.add(new IntSetting.Builder()
             .name("Tracer Distance (in chunks)")
             .description("How far from the base chunk to still render a tracer.")
@@ -350,10 +358,9 @@ public class BaseFinder extends Module {
     private int found6 = 0;
     private boolean checkingchunk7=false;
     private int found7 = 0;
-    public static int closestbaseX=2000000000;
-    public static int closestbaseZ=2000000000;
-    private static int closestX=2000000000;
-    private static int closestZ=2000000000;
+    private int closestbaseX=2000000000;
+    private int closestbaseZ=2000000000;
+    private double basedistance=2000000000;
     private String serverip;
     private String world;
     private ChunkPos basepos;
@@ -495,25 +502,30 @@ public class BaseFinder extends Module {
             RemoveCoordX=1500000000;
             RemoveCoordZ=1500000000;
         }
-        if (findnearestbaseticks==1){
-            if (baseChunks.stream().toList().size()>0){
-                for (int b = 0; b < baseChunks.stream().toList().size(); b++){
-                    if(Math.abs(baseChunks.stream().toList().get(b).getCenterX()-mc.player.getChunkPos().getCenterX())<closestX || Math.abs(baseChunks.stream().toList().get(b).getCenterZ()-mc.player.getChunkPos().getCenterZ())<closestZ){
-                        closestX=Math.abs(baseChunks.stream().toList().get(b).getCenterX()-mc.player.getChunkPos().getCenterX());
-                        closestZ=Math.abs(baseChunks.stream().toList().get(b).getCenterZ()-mc.player.getChunkPos().getCenterZ());
-                        closestbaseX=baseChunks.stream().toList().get(b).getCenterX();
-                        closestbaseZ=baseChunks.stream().toList().get(b).getCenterZ();
+
+            try {
+                if (baseChunks.stream().toList().size() > 0) {
+                    for (int b = 0; b < baseChunks.stream().toList().size(); b++) {
+                        if (basedistance> Math.sqrt(Math.pow(baseChunks.stream().toList().get(b).x - mc.player.getChunkPos().x, 2) + Math.pow(baseChunks.stream().toList().get(b).z - mc.player.getChunkPos().z, 2))) {
+                            closestbaseX = baseChunks.stream().toList().get(b).x;
+                            closestbaseZ = baseChunks.stream().toList().get(b).z;
+                            basedistance=Math.sqrt(Math.pow(baseChunks.stream().toList().get(b).x - mc.player.getChunkPos().x, 2) + Math.pow(baseChunks.stream().toList().get(b).z - mc.player.getChunkPos().z, 2));
+                        }
                     }
+                    basedistance = 2000000000;
                 }
-                if (closestbaseX<1000000000 && closestbaseZ<1000000000)
-                    ChatUtils.sendMsg(Text.of("#Nearest possible base at X"+closestbaseX+" x Z"+closestbaseZ));
-                if (!(closestbaseX<1000000000 && closestbaseZ<1000000000))
-                    error("No Bases Logged Yet.");
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            findnearestbaseticks=0;
-            closestX=2000000000;
-            closestZ=2000000000;
-        }
+                    if (findnearestbaseticks==1) {
+                        if (closestbaseX < 1000000000 && closestbaseZ < 1000000000)
+                            ChatUtils.sendMsg(Text.of("#Nearest possible base at X" + closestbaseX*16 + " x Z" + closestbaseZ*16));
+                        if (!(closestbaseX < 1000000000 && closestbaseZ < 1000000000))
+                            error("No Bases Logged Yet.");
+                        findnearestbaseticks = 0;
+                    }
+
+
 
         if (mc.isInSingleplayer()==true){
             String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("/|\\\\");
@@ -548,6 +560,7 @@ public class BaseFinder extends Module {
     @EventHandler
     private void onRender(Render3DEvent event) {
         if (baseChunksLineColor.get().a > 5 || baseChunksSideColor.get().a > 5){
+            if (!nearesttrcr.get()){
             synchronized (baseChunks) {
                 for (ChunkPos c : baseChunks) {
                     if (mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
@@ -555,13 +568,31 @@ public class BaseFinder extends Module {
                     }
                 }
             }
+            } else if (nearesttrcr.get()){
+                synchronized (baseChunks) {
+                    for (ChunkPos c : baseChunks) {
+                        if (mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
+                            render(new Box(c.getStartPos().add(7, renderHeightYbottom.get(), 7), c.getStartPos().add(8, renderHeightY.get(), 8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
+                        }
+                    }
+                }
+                render2(new Box(new ChunkPos(closestbaseX,closestbaseZ).getStartPos().add(7, renderHeightYbottom.get(), 7), new ChunkPos(closestbaseX,closestbaseZ).getStartPos().add(8, renderHeightY.get(), 8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
+            }
         }
     }
 
     private void render(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
         if (trcr.get() && Math.abs(box.minX-RenderUtils.center.x)<=trcrdist.get()*16 && Math.abs(box.minZ-RenderUtils.center.z)<=trcrdist.get()*16)
+            if (!nearesttrcr.get())
             event.renderer.line(
                 RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
+        event.renderer.box(
+                box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
+    }
+    private void render2(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
+        if (trcr.get() && Math.abs(box.minX-RenderUtils.center.x)<=trcrdist.get()*16 && Math.abs(box.minZ-RenderUtils.center.z)<=trcrdist.get()*16)
+            event.renderer.line(
+                    RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
         event.renderer.box(
                 box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
     }
