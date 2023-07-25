@@ -71,7 +71,7 @@ public class VoiderPlus extends Module {
     );
 
     public VoiderPlus() {
-        super(Trouser.Main, "voider+", "Runs /fill on the world from the top down");
+        super(Trouser.Main, "voider+", "Runs /fill on the world from the top down (Must have OP status)");
     }
 
     int i;
@@ -109,10 +109,6 @@ public class VoiderPlus extends Module {
 
     @EventHandler
     public void onTick(TickEvent.Post event) {
-        if (!(mc.player.hasPermissionLevel(4))) {
-            toggle();
-            error("Must have OP");
-        }
                 if (!threebythree.get() && !tpfwd.get()){
                 ChatUtils.sendPlayerMsg("/fill " + (sX - radius.get()) + " " + i +" "+ (sZ - radius.get()) +" "+ (sX + radius.get()) + " " + i +" "+ (sZ + radius.get()) + " "+block);
                     i--;

@@ -44,8 +44,11 @@ public class FlightAntikick extends Module {
             offLeft--;
             BlockPos playerPos = mc.player.getBlockPos();
             BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
-            if (mc.world.getBlockState(pos).isAir())
+            if (mc.world.getBlockState(pos).isAir()){
                 mc.player.move(MovementType.SELF, new Vec3d(0,-0.1,0));
+            } else if (!mc.world.getBlockState(pos).isAir() && mc.player.getY()>pos.getY()+0.1){
+                mc.player.move(MovementType.SELF, new Vec3d(0,-0.1,0));
+            }
         } else if (delayLeft <= 0 && offLeft <= 0) {
             delayLeft = delay.get();
             offLeft = offTime.get();

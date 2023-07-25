@@ -1,10 +1,7 @@
 package pwn.noobs.trouserstreak;
 
 import meteordevelopment.meteorclient.commands.Commands;
-import pwn.noobs.trouserstreak.commands.BaseFinderCommands;
-import pwn.noobs.trouserstreak.commands.CasterTimer;
-import pwn.noobs.trouserstreak.commands.LavaTimeCalculator;
-import pwn.noobs.trouserstreak.commands.NewChunkCounter;
+import pwn.noobs.trouserstreak.commands.*;
 import pwn.noobs.trouserstreak.modules.*;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.systems.modules.Category;
@@ -50,6 +47,7 @@ public class Trouser extends MeteorAddon {
         Commands.add(new CasterTimer());
         Commands.add(new NewChunkCounter());
         Commands.add(new BaseFinderCommands());
+        Commands.add(new WorldBorderCoordsCommand());
 	}
 
 	@Override

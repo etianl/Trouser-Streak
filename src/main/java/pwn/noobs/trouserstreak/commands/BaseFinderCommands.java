@@ -6,6 +6,7 @@ import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.ChunkPos;
 import pwn.noobs.trouserstreak.modules.BaseFinder;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
@@ -59,6 +60,21 @@ public class BaseFinderCommands extends Command {
             ChatUtils.sendMsg(Text.of("Base near X"+mc.player.getChunkPos().getCenterX()+", Z"+mc.player.getChunkPos().getCenterZ()+" removed from the BaseFinder."));
             return SINGLE_SUCCESS;}
         }));
+        builder.then(literal("rmv").then(literal("last").executes(ctx -> {
+            if(b.isBaseFinderModuleOn==0){
+                error("Please turn on BaseFinder module and run the command again.");
+                return SINGLE_SUCCESS;
+            } else if(b.isBaseFinderModuleOn!=0 && (b.LastBaseFound.x==2000000000 || b.LastBaseFound.z==2000000000)){
+                error("Please find a base and run the command again.");
+                return SINGLE_SUCCESS;
+            } else {
+                b.RemoveCoordX= b.LastBaseFound.x;
+                b.RemoveCoordZ= b.LastBaseFound.z;
+                ChatUtils.sendMsg(Text.of("Base near X"+b.LastBaseFound.getCenterX()+", Z"+b.LastBaseFound.getCenterZ()+" removed from the BaseFinder."));
+                b.LastBaseFound= new ChunkPos(2000000000, 2000000000);
+                return SINGLE_SUCCESS;
+            }
+        })));
         builder.then(literal("rmv").then(argument("x",FloatArgumentType.floatArg()).then(argument("z",FloatArgumentType.floatArg()).executes(ctx -> {
             if(b.isBaseFinderModuleOn==0){
                 error("Please turn on BaseFinder module and run the command again.");

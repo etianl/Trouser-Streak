@@ -242,7 +242,7 @@ public class HandOfGod extends Module {
             .build()
     );
     public HandOfGod() {
-        super(Trouser.Main, "HandOfGod", "Changes the world as you fly around, and replaces blocks with whatever you please when you click. Must be OP");
+        super(Trouser.Main, "HandOfGod", "Changes the world as you fly around, and replaces blocks with whatever you please when you click. (Must have OP status)");
     }
 
     private int ticks=0;
@@ -325,10 +325,6 @@ public class HandOfGod extends Module {
         pX=mc.player.getBlockPos().getX();
         pY=mc.player.getBlockPos().getY();
         pZ=mc.player.getBlockPos().getZ();
-        if (!(mc.player.hasPermissionLevel(4))) {
-            toggle();
-            error("Must have OP");
-        }
         if (autosave.get()){
             asaveticks++;
             if (asaveticks>=autosavedelay.get()*20){
