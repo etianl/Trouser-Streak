@@ -539,12 +539,9 @@ public class NewerNewChunks extends Module {
 			BlockUpdateS2CPacket packet = (BlockUpdateS2CPacket) event.packet;
 			if (tickexploit.get()){
 				try {
-					if (!packet.getState().hasRandomTicks() && !tickexploitChunks.contains(chunkPos) && !oldChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !newChunks.contains(chunkPos)){
-						tickexploitChunks.add(chunkPos);
-						if (save.get()){
-							saveTickExploitChunkData();
-						}
-					} else if (packet.getState().hasRandomTicks() && !tickexploitChunks.contains(chunkPos) && !oldChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !newChunks.contains(chunkPos)){
+					//I cannot tell if the addition of "!packet.getState().hasRandomTicks() || packet.getState().hasRandomTicks())" below even does anything
+					//It might just work on BlockUpdate packet, in testing it's hard to tell what gives more "false positives"
+					if ((!packet.getState().hasRandomTicks() || packet.getState().hasRandomTicks()) && !tickexploitChunks.contains(chunkPos) && !oldChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !newChunks.contains(chunkPos)){
 						tickexploitChunks.add(chunkPos);
 						if (save.get()){
 							saveTickExploitChunkData();

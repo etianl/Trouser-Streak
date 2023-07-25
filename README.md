@@ -62,7 +62,10 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - The Number of Blocks to Find options is the total amount any of the blocks from one of the lists to find before throwing a base coord.
 - Do not do the same block in more than one list, it will be a waste of CPU time. The torches and signs in by default are fine because they are actually two different blocks, "WALL_TORCH" and just "TORCH".
 - The "Unnatural Spawner Finder" option locates spawners and if they do not have one of the blocks that spawners have around them in nature (Mossy Cobblestone, Stone Brick Stairs, Cobweb, Nether Brick Fence, and Chain), then flag the spawner as unnatural.
-- .base command returns the nearest base to you, .base add or remove will add or remove the location you are in as a base coord, or you can input X,Y. There are buttons in the options menu to do the same things.
+- .base command returns the nearest base to you
+- .base add or rmv will add or remove the location you are in as a base coord, or you can input X,Y after add/rmv (ex: .base add 69 420)
+- .base rmv last will remove the last single base coordinate found. (Good for removing false positives)
+- There are buttons in the options menu to do the same things as the commands listed above.
 - Base location data will be stored in the "BaseChunks" folder, in your Minecraft folder.
 - **BetterAutoSign:** Automatically writes signs with the text you specify, and can also apply glow ink or dye. (Credits to Meteor-Tweaks)
 - **BetterScaffold:** Give you more options for scaffolding, bigger range and others. (Credits to Meteor-Tweaks)
@@ -103,6 +106,7 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - **TrailMaker:** Leaves blocks behind you in a trail. Has a place delay option to spread placement further apart. Select the blocks you want to use in the block list setting for it to work. (Credits to etianl :D)
 - **TrouserBuild:** It can build either horizontally or vertically according to a 5x5 grid centered on the block you are aiming at. Right click to build at the targeted location. (Credits to etianl, and to Banana for the checkboxes and idea. :D)
 - **Voider+:** Replaces the world from the top down. (Credits to Allah-Hack) I added a 3x3 voiding script, a TP foward option for deleting strips, as well as options to set max and minimum height for voiding, and instead of just air it can do water and lava now too.
+- **WorldBorderCoordsCommand** Type .wb in chat to tell you the precise coordinates of each of the world borders. (Credits to etianl :D)
 
 ## Known Bugs:
 - **AutoLavaCaster Bugs** 
