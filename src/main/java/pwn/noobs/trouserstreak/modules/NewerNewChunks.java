@@ -308,6 +308,14 @@ public class NewerNewChunks extends Module {
 
 	@EventHandler
 	private void onPreTick(TickEvent.Pre event) {
+		if (mc.player.getHealth()==0) {
+			chunkcounterticks=0;
+			newchunksfound=0;
+			oldchunksfound=0;
+			olderoldchunksfound=0;
+			tickexploitchunksfound=0;
+			reloadworld=0;
+		}
 		if (deletewarningTicks<=100) deletewarningTicks++;
 		else deletewarning=0;
 		if (deletewarning>=2){
@@ -436,7 +444,7 @@ public class NewerNewChunks extends Module {
 		if (reloadworld<10){
 			reloadworld++;
 		}
-		if (reloadworld==3){
+		if (reloadworld==5){
 			if (worldleaveremove.get()){
 				newChunks.clear();
 				oldChunks.clear();
