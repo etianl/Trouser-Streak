@@ -106,7 +106,7 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - **TrailMaker:** Leaves blocks behind you in a trail. Has a place delay option to spread placement further apart. Select the blocks you want to use in the block list setting for it to work. (Credits to etianl :D)
 - **TrouserBuild:** It can build either horizontally or vertically according to a 5x5 grid centered on the block you are aiming at. Right click to build at the targeted location. (Credits to etianl, and to Banana for the checkboxes and idea. :D)
 - **Voider+:** Replaces the world from the top down. (Credits to Allah-Hack) I added a 3x3 voiding script, a TP foward option for deleting strips, as well as options to set max and minimum height for voiding, and instead of just air it can do water and lava now too.
-- **WorldBorderCoordsCommand** Type .wb in chat to tell you the precise coordinates of each of the world borders. (Credits to etianl :D)
+- **WorldInfoCommand** Type .world in chat to tell you the precise coordinates of each of the world borders, as well as some other world info. (Credits to etianl :D)
 
 ## Known Bugs:
 - **AutoLavaCaster Bugs** 
@@ -125,8 +125,6 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 ## Requirements:
 - If you are using Minecraft version **1.20.1**, then use the latest **MeteorClient Dev Build of v0.5.4**
 - If you are using Minecraft version **1.19.4**, then use **MeteorClient "Full Release" v0.5.3**
-- If you are using Minecraft version **1.19.3**, then use **MeteorClient "Full Release" v0.5.2** (v0.5.2 NOT SUPPORTED BY METEOR OR AVAILABLE FOR DOWNLOAD)
-- If you are using Minecraft version **1.19.2**, then use **MeteorClient "Full Release" v0.5.1** (v0.5.1 NOT SUPPORTED BY METEOR OR AVAILABLE FOR DOWNLOAD)
 - Please try [ViaFabricPlus](https://github.com/FlorianMichael/ViaFabricPlus), which will let you connect to almost any version from a new version client.
 - Don't forget to try updating any other mods you are using if your game is crashing.
 
