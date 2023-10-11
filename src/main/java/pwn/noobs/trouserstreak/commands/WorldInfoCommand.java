@@ -19,7 +19,7 @@ public class WorldInfoCommand extends Command {
     }
 
     @Override
-        public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
             ChatUtils.sendMsg(Text.of("East World Border X: "+(int) mc.world.getWorldBorder().getBoundEast()+", West World Border X: "+(int) mc.world.getWorldBorder().getBoundWest()+", South World Border Z: "+(int) mc.world.getWorldBorder().getBoundSouth()+", North World Border Z: "+(int) mc.world.getWorldBorder().getBoundNorth()));
             ChatUtils.sendMsg(Text.of("Default WorldSpawn Location (May be different if changed): "+mc.world.getSpawnPos()));
@@ -27,5 +27,5 @@ public class WorldInfoCommand extends Command {
             ChatUtils.sendMsg(Text.of("DO_DAYLIGHT_CYCLE: "+mc.world.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE)));
             return SINGLE_SUCCESS;
         });
-        }
+    }
 }

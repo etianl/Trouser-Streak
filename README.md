@@ -123,8 +123,9 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - NewerNewChunks has to be turned on atleast once prior to running .newchunkcount for the counter to work even if you already have data in that world.
 
 ## Requirements:
-- If you are using Minecraft version **1.20.1**, then use the latest **MeteorClient Dev Build of v0.5.4**
-- If you are using Minecraft version **1.19.4**, then use **MeteorClient "Full Release" v0.5.3**
+- If you are using Minecraft version **1.20.2**, then use the latest **MeteorClient Dev Build of v0.5.5**
+- If you are using Minecraft version **1.20.1**, then use **MeteorClient "Full Release" v0.5.4**
+- If you are using Minecraft version **1.19.4**, then use **MeteorClient "Full Release" v0.5.3** No longer available for download.
 - Please try [ViaFabricPlus](https://github.com/FlorianMichael/ViaFabricPlus), which will let you connect to almost any version from a new version client.
 - Don't forget to try updating any other mods you are using if your game is crashing.
 
