@@ -1,8 +1,3 @@
-/*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
- * Copyright (c) Meteor Development.
- */
-
 package pwn.noobs.trouserstreak.mixin;
 
 import meteordevelopment.meteorclient.systems.config.Config;
