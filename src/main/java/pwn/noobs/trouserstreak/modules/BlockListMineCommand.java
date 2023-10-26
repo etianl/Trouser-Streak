@@ -25,14 +25,6 @@ public class BlockListMineCommand extends Module {
             .description("Blocklists.")
             .defaultValue(Modes.UnnaturalBlocks)
             .build());
-    private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
-            .name("Block Scan Range")
-            .description("The range in chunks in which blocks are detected from the block list for adding to the command.")
-            .defaultValue(3)
-            .min(1)
-            .sliderRange(0, 32)
-            .build()
-    );
     private final Setting<List<Block>> Blawcks1 = sglists.add(new BlockListSetting.Builder()
             .name("Unnatural Blocks)")
             .description("Blocks to add to the #mine command. These blocks never spawn naturally. Edit as needed.")
@@ -77,16 +69,16 @@ public class BlockListMineCommand extends Module {
 
 
     public BlockListMineCommand() {
-        super(Trouser.Main,"BlockList#MineCommand", "Adds a custom #mine command to your message history containing all the blocks in the blocklist that are near you. Press T then up arrow, then ENTER key to execute the command. BETTER CHAT module is recommended for infinitely long commands.");
+        super(Trouser.Main,"BlockList#MineCommand", "Adds a custom #mine command to your message history containing all the blocks in the blocklist that are in the chunk you are in. Press T then up arrow, then ENTER key to execute the command. BETTER CHAT module is recommended for infinitely long commands.");
     }
     @Override
     public void onActivate() {
         String blockListString = "";
         Chunk chunk = mc.world.getChunk(mc.player.getBlockPos());
         Set<BlockState> addedBlocks = new HashSet<>();
-        for (int x = 0; x < (range.get()*16); x++) {
+        for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 320; y++) {
-                for (int z = 0; z < (range.get()*16); z++) {
+                for (int z = 0; z < 16; z++) {
                     BlockState blockState = chunk.getBlockState(new BlockPos(x, y, z));
                     if ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock()))) {
                         blockListString += blockState.getBlock().asItem().toString() + " ";
