@@ -69,7 +69,7 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - Base location data will be stored in the "BaseChunks" folder, in your Minecraft folder.
 - **BetterAutoSign:** Automatically writes signs with the text you specify, and can also apply glow ink or dye. (Credits to Meteor-Tweaks)
 - **BetterScaffold:** Give you more options for scaffolding, bigger range and others. (Credits to Meteor-Tweaks)
-- **BlockListMineCommand** Adds a custom #mine command to your message history containing all the blocks in the custom blocklist that are near you. Press T then up arrow, then ENTER key to execute the command. BETTER CHAT module is recommended for infinitely long commands. (Credits to etianl :D)
+- **BlockListMineCommand** Adds a custom #mine command to your message history containing all the blocks in the custom blocklist that are in the same chunk as you. Press T then up arrow, then ENTER key to execute the command. BETTER CHAT module is recommended for infinitely long commands. (Credits to etianl :D)
 - **Boom+:** Throws entities or spawns them on the targeted block when you click (Credits to Allah-Hack) I just added some more fun things you might want to throw.
 - **ExplosionAura:** Spawns creepers at your position as you move that explode instantly. Like a bigger, more laggy Nuker module for creative mode. The use of the module Velocity is recommended to avoid being thrown around. (Credits to etianl :D)
 - **FlightAntikick:** Moves you down on a tick-based timer. Added in to substitute the lack of a "Normal" mode antikick for velocity flight in MeteorClient (not a great antikick it's just something). Bind it to the same key as Flight. (Credits to etianl :D)
