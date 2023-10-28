@@ -24,7 +24,7 @@ public class NbtEditor extends Module {
     private final Setting<String> nom = sgGeneral.add(new StringSetting.Builder()
             .name("Custom Name")
             .description("Name the Thing")
-            .defaultValue("WATCH MOUNTAINS OF LAVA INC ON YOUTUBE")
+            .defaultValue("MOUNTAINSOFLAVAINC")
             .build());
     private final Setting<String> nomcolor = sgGeneral.add(new StringSetting.Builder()
             .name("Custom Name Color")
