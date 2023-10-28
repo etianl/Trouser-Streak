@@ -1,13 +1,13 @@
 package pwn.noobs.trouserstreak;
 
-import meteordevelopment.meteorclient.commands.Commands;
-import pwn.noobs.trouserstreak.commands.*;
-import pwn.noobs.trouserstreak.modules.*;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
+import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pwn.noobs.trouserstreak.commands.*;
+import pwn.noobs.trouserstreak.modules.*;
 
 
 public class Trouser extends MeteorAddon {
@@ -34,6 +34,8 @@ public class Trouser extends MeteorAddon {
         Modules.get().add(new InstantKill());
         Modules.get().add(new LecternCrash());
         Modules.get().add(new AutoDrop());
+        Modules.get().add(new BlockListMineCommand());
+        Modules.get().add(new NbtEditor());
         Modules.get().add(new AnHero());
         Modules.get().add(new RedstoneNuker());
         Modules.get().add(new SuperInstaMine());
@@ -43,7 +45,6 @@ public class Trouser extends MeteorAddon {
         Modules.get().add(new BetterScaffold());
         Modules.get().add(new BetterAutoSign());
         Modules.get().add(new FlightAntikick());
-        Modules.get().add(new BlockListMineCommand());
         Commands.add(new LavaTimeCalculator());
         Commands.add(new CasterTimer());
         Commands.add(new NewChunkCounter());

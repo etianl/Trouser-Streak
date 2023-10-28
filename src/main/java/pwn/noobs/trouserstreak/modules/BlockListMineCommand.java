@@ -13,7 +13,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 import pwn.noobs.trouserstreak.Trouser;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class BlockListMineCommand extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -24,6 +27,13 @@ public class BlockListMineCommand extends Module {
             .name("Unnatural Blocks or Custom Blocklist")
             .description("Blocklists.")
             .defaultValue(Modes.UnnaturalBlocks)
+            .build());
+    private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
+            .name("Block Scan Range (vertical)")
+            .description("How far from the player's Y level to scan for matching blocks in the list. (Will only scan within the game's )")
+            .sliderRange(0, 384)
+            .min(1)
+            .defaultValue(30)
             .build());
     private final Setting<List<Block>> Blawcks1 = sglists.add(new BlockListSetting.Builder()
             .name("Unnatural Blocks)")
@@ -55,7 +65,7 @@ public class BlockListMineCommand extends Module {
                     Blocks.LAVA_CAULDRON, Blocks.POWDER_SNOW_CAULDRON, Blocks.ACTIVATOR_RAIL, Blocks.BEACON, Blocks.BEEHIVE, Blocks.REPEATING_COMMAND_BLOCK, Blocks.COMMAND_BLOCK, Blocks.CHAIN_COMMAND_BLOCK, Blocks.EMERALD_BLOCK, Blocks.IRON_BLOCK, Blocks.NETHERITE_BLOCK, Blocks.RAW_GOLD_BLOCK, Blocks.CONDUIT, Blocks.DAYLIGHT_DETECTOR, Blocks.DETECTOR_RAIL, Blocks.DRIED_KELP_BLOCK, Blocks.DROPPER, Blocks.ENCHANTING_TABLE,
                     Blocks.PIGLIN_HEAD, Blocks.PIGLIN_WALL_HEAD, Blocks.CREEPER_HEAD, Blocks.CREEPER_WALL_HEAD, Blocks.DRAGON_WALL_HEAD, Blocks.DRAGON_HEAD, Blocks.PLAYER_HEAD, Blocks.PLAYER_WALL_HEAD, Blocks.ZOMBIE_HEAD, Blocks.ZOMBIE_WALL_HEAD, Blocks.SKELETON_WALL_SKULL, Blocks.WITHER_SKELETON_SKULL, Blocks.WITHER_SKELETON_WALL_SKULL,
                     Blocks.HONEY_BLOCK, Blocks.HONEYCOMB_BLOCK, Blocks.HOPPER, Blocks.JUKEBOX, Blocks.LIGHTNING_ROD, Blocks.LODESTONE, Blocks.OBSERVER, Blocks.POWERED_RAIL, Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE, Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE, Blocks.BIRCH_PRESSURE_PLATE, Blocks.JUNGLE_PRESSURE_PLATE, Blocks.DARK_OAK_PRESSURE_PLATE, Blocks.MANGROVE_PRESSURE_PLATE, Blocks.CRIMSON_PRESSURE_PLATE, Blocks.WARPED_PRESSURE_PLATE, Blocks.RESPAWN_ANCHOR, Blocks.CALIBRATED_SCULK_SENSOR, Blocks.SNIFFER_EGG
-                    )
+            )
             .visible(() -> (mode.get() == Modes.UnnaturalBlocks))
             .build()
     );
@@ -74,26 +84,168 @@ public class BlockListMineCommand extends Module {
     @Override
     public void onActivate() {
         String blockListString = "";
-        Chunk chunk = mc.world.getChunk(mc.player.getBlockPos());
         Set<BlockState> addedBlocks = new HashSet<>();
+
+        Chunk playerchunk = mc.world.getChunk(mc.player.getBlockPos());
         for (int x = 0; x < 16; x++) {
-            for (int y = 0; y < 320; y++) {
+            for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
                 for (int z = 0; z < 16; z++) {
-                    BlockState blockState = chunk.getBlockState(new BlockPos(x, y, z));
-                    if ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock()))) {
-                        blockListString += blockState.getBlock().asItem().toString() + " ";
-                        addedBlocks.add(blockState);
+                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopY()) {
+                        BlockState blockState = playerchunk.getBlockState(new BlockPos(x, y, z));
+                        if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
+                            if (!addedBlocks.contains(blockState)){
+                                blockListString += blockState.getBlock().asItem().toString() + " ";
+                                addedBlocks.add(blockState);
+                            }
+                        }
                     }
                 }
             }
         }
+
+        Chunk playerchunk2 = mc.world.getChunk(new BlockPos(mc.player.getBlockX()+16, mc.player.getBlockY(), mc.player.getBlockZ()));
+        for (int x = 0; x < 16; x++) {
+            for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
+                for (int z = 0; z < 16; z++) {
+                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopY()) {
+                        BlockState blockState = playerchunk2.getBlockState(new BlockPos(x, y, z));
+                        if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
+                            if (!addedBlocks.contains(blockState)){
+                                blockListString += blockState.getBlock().asItem().toString() + " ";
+                                addedBlocks.add(blockState);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Chunk playerchunk3 = mc.world.getChunk(new BlockPos(mc.player.getBlockX()-16, mc.player.getBlockY(), mc.player.getBlockZ()));
+        for (int x = 0; x < 16; x++) {
+            for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
+                for (int z = 0; z < 16; z++) {
+                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopY()) {
+                        BlockState blockState = playerchunk3.getBlockState(new BlockPos(x, y, z));
+                        if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
+                            if (!addedBlocks.contains(blockState)){
+                                blockListString += blockState.getBlock().asItem().toString() + " ";
+                                addedBlocks.add(blockState);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Chunk playerchunk4 = mc.world.getChunk(new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ()+16));
+        for (int x = 0; x < 16; x++) {
+            for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
+                for (int z = 0; z < 16; z++) {
+                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopY()) {
+                        BlockState blockState = playerchunk4.getBlockState(new BlockPos(x, y, z));
+                        if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
+                            if (!addedBlocks.contains(blockState)){
+                                blockListString += blockState.getBlock().asItem().toString() + " ";
+                                addedBlocks.add(blockState);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Chunk playerchunk5 = mc.world.getChunk(new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ()-16));
+        for (int x = 0; x < 16; x++) {
+            for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
+                for (int z = 0; z < 16; z++) {
+                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopY()) {
+                        BlockState blockState = playerchunk5.getBlockState(new BlockPos(x, y, z));
+                        if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
+                            if (!addedBlocks.contains(blockState)){
+                                blockListString += blockState.getBlock().asItem().toString() + " ";
+                                addedBlocks.add(blockState);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Chunk playerchunk6 = mc.world.getChunk(new BlockPos(mc.player.getBlockX()-16, mc.player.getBlockY(), mc.player.getBlockZ()-16));
+        for (int x = 0; x < 16; x++) {
+            for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
+                for (int z = 0; z < 16; z++) {
+                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopY()) {
+                        BlockState blockState = playerchunk6.getBlockState(new BlockPos(x, y, z));
+                        if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
+                            if (!addedBlocks.contains(blockState)){
+                                blockListString += blockState.getBlock().asItem().toString() + " ";
+                                addedBlocks.add(blockState);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Chunk playerchunk7 = mc.world.getChunk(new BlockPos(mc.player.getBlockX()+16, mc.player.getBlockY(), mc.player.getBlockZ()+16));
+        for (int x = 0; x < 16; x++) {
+            for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
+                for (int z = 0; z < 16; z++) {
+                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopY()) {
+                        BlockState blockState = playerchunk7.getBlockState(new BlockPos(x, y, z));
+                        if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
+                            if (!addedBlocks.contains(blockState)){
+                                blockListString += blockState.getBlock().asItem().toString() + " ";
+                                addedBlocks.add(blockState);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Chunk playerchunk8 = mc.world.getChunk(new BlockPos(mc.player.getBlockX()-16, mc.player.getBlockY(), mc.player.getBlockZ()+16));
+        for (int x = 0; x < 16; x++) {
+            for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
+                for (int z = 0; z < 16; z++) {
+                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopY()) {
+                        BlockState blockState = playerchunk8.getBlockState(new BlockPos(x, y, z));
+                        if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
+                            if (!addedBlocks.contains(blockState)){
+                                blockListString += blockState.getBlock().asItem().toString() + " ";
+                                addedBlocks.add(blockState);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Chunk playerchunk9 = mc.world.getChunk(new BlockPos(mc.player.getBlockX()+16, mc.player.getBlockY(), mc.player.getBlockZ()-16));
+        for (int x = 0; x < 16; x++) {
+            for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
+                for (int z = 0; z < 16; z++) {
+                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopY()) {
+                        BlockState blockState = playerchunk9.getBlockState(new BlockPos(x, y, z));
+                        if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
+                            if (!addedBlocks.contains(blockState)){
+                                blockListString += blockState.getBlock().asItem().toString() + " ";
+                                addedBlocks.add(blockState);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         if (!blockListString.isEmpty()) {
             String[] blockNames = blockListString.split(" ");
             Set<String> uniqueBlockNames = new HashSet<>(Arrays.asList(blockNames));
             blockListString = String.join(" ", uniqueBlockNames);
             mc.inGameHud.getChatHud().addToMessageHistory("#mine " + blockListString);
-        }
-        ChatUtils.sendMsg(Text.of("Press T, then the up key, then ENTER to execute the #mine command. **REQUIRES BARITONE**"));
+            ChatUtils.sendMsg(Text.of("Press T, then the up key, then ENTER to execute the #mine command. **REQUIRES BARITONE**"));
+        } else if (blockListString.isEmpty()) error("No blocks in the list within range.");
         toggle();
     }
     @EventHandler
