@@ -50,6 +50,7 @@ public class Trouser extends MeteorAddon {
         Commands.add(new NewChunkCounter());
         Commands.add(new BaseFinderCommands());
         Commands.add(new WorldInfoCommand());
+        Commands.add(new GetNbtCommand());
 	}
 
 	@Override

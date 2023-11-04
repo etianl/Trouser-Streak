@@ -55,6 +55,12 @@ public class AirstrikePlus extends Module {
             .description("Color the Name")
             .defaultValue("red")
             .build());
+    public final Setting<Boolean> customname = sgOptions.add(new BoolSetting.Builder()
+            .name("CustomNameVisible")
+            .description("CustomNameVisible or not.")
+            .defaultValue(true)
+            .build()
+    );
     private final Setting<Integer> health = sgOptions.add(new IntSetting.Builder()
             .name("Health Points")
             .description("How much health.")
@@ -247,19 +253,19 @@ public class AirstrikePlus extends Module {
                     entityTag.putInt("AbsorptionAmount", absorption.get());
                     entityTag.putInt("Age", age.get());
                     entityTag.putInt("ExplosionPower", exppower.get());
-                    entityTag.putBoolean("Invulnerable", invincible.get());
-                    entityTag.putBoolean("Silent", silence.get());
-                    entityTag.putBoolean("Glowing", glow.get());
-                    entityTag.putBoolean("PersistenceRequired", persist.get());
-                    entityTag.putBoolean("NoGravity", nograv.get());
-                    entityTag.putBoolean("NoAI", noAI.get());
-                    entityTag.putBoolean("HasVisualFire", falsefire.get());
-                    entityTag.putBoolean("powered", powah.get());
-                    entityTag.putBoolean("ignited", ignite.get());
                     entityTag.putInt("ExplosionRadius", exppower.get());
+                    if (invincible.get())entityTag.putBoolean("Invulnerable", invincible.get());
+                    if (silence.get())entityTag.putBoolean("Silent", silence.get());
+                    if (glow.get())entityTag.putBoolean("Glowing", glow.get());
+                    if (persist.get())entityTag.putBoolean("PersistenceRequired", persist.get());
+                    if (nograv.get())entityTag.putBoolean("NoGravity", nograv.get());
+                    if(noAI.get())entityTag.putBoolean("NoAI", noAI.get());
+                    if(falsefire.get())entityTag.putBoolean("HasVisualFire", falsefire.get());
+                    if(powah.get())entityTag.putBoolean("powered", powah.get());
+                    if(ignite.get())entityTag.putBoolean("ignited", ignite.get());
                     entityTag.putInt("Fuse", fuse.get());
                     entityTag.putInt("Size", size.get());
-                    entityTag.putBoolean("CustomNameVisible", true);
+                    if(customname.get())entityTag.putBoolean("CustomNameVisible", customname.get());
                     entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
                     tag.put("EntityTag", entityTag);
                     bomb.setNbt(tag);
@@ -289,19 +295,19 @@ public class AirstrikePlus extends Module {
                         entityTag.putInt("AbsorptionAmount", absorption.get());
                         entityTag.putInt("Age", age.get());
                         entityTag.putInt("ExplosionPower", exppower.get());
-                        entityTag.putBoolean("Invulnerable", invincible.get());
-                        entityTag.putBoolean("Silent", silence.get());
-                        entityTag.putBoolean("Glowing", glow.get());
-                        entityTag.putBoolean("PersistenceRequired", persist.get());
-                        entityTag.putBoolean("NoGravity", nograv.get());
-                        entityTag.putBoolean("NoAI", noAI.get());
-                        entityTag.putBoolean("HasVisualFire", falsefire.get());
-                        entityTag.putBoolean("powered", powah.get());
-                        entityTag.putBoolean("ignited", ignite.get());
                         entityTag.putInt("ExplosionRadius", exppower.get());
+                        if (invincible.get())entityTag.putBoolean("Invulnerable", invincible.get());
+                        if (silence.get())entityTag.putBoolean("Silent", silence.get());
+                        if (glow.get())entityTag.putBoolean("Glowing", glow.get());
+                        if (persist.get())entityTag.putBoolean("PersistenceRequired", persist.get());
+                        if (nograv.get())entityTag.putBoolean("NoGravity", nograv.get());
+                        if(noAI.get())entityTag.putBoolean("NoAI", noAI.get());
+                        if(falsefire.get())entityTag.putBoolean("HasVisualFire", falsefire.get());
+                        if(powah.get())entityTag.putBoolean("powered", powah.get());
+                        if(ignite.get())entityTag.putBoolean("ignited", ignite.get());
                         entityTag.putInt("Fuse", fuse.get());
                         entityTag.putInt("Size", size.get());
-                        entityTag.putBoolean("CustomNameVisible", true);
+                        if(customname.get())entityTag.putBoolean("CustomNameVisible", customname.get());
                         entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
                         tag.put("EntityTag", entityTag);
                         bomb.setNbt(tag);
@@ -329,19 +335,19 @@ public class AirstrikePlus extends Module {
                         entityTag.putInt("AbsorptionAmount", absorption.get());
                         entityTag.putInt("Age", age.get());
                         entityTag.putInt("ExplosionPower", exppower.get());
-                        entityTag.putBoolean("Invulnerable", invincible.get());
-                        entityTag.putBoolean("Silent", silence.get());
-                        entityTag.putBoolean("Glowing", glow.get());
-                        entityTag.putBoolean("PersistenceRequired", persist.get());
-                        entityTag.putBoolean("NoGravity", nograv.get());
-                        entityTag.putBoolean("NoAI", noAI.get());
-                        entityTag.putBoolean("HasVisualFire", falsefire.get());
-                        entityTag.putBoolean("powered", powah.get());
-                        entityTag.putBoolean("ignited", ignite.get());
                         entityTag.putInt("ExplosionRadius", exppower.get());
+                        if (invincible.get())entityTag.putBoolean("Invulnerable", invincible.get());
+                        if (silence.get())entityTag.putBoolean("Silent", silence.get());
+                        if (glow.get())entityTag.putBoolean("Glowing", glow.get());
+                        if (persist.get())entityTag.putBoolean("PersistenceRequired", persist.get());
+                        if (nograv.get())entityTag.putBoolean("NoGravity", nograv.get());
+                        if(noAI.get())entityTag.putBoolean("NoAI", noAI.get());
+                        if(falsefire.get())entityTag.putBoolean("HasVisualFire", falsefire.get());
+                        if(powah.get())entityTag.putBoolean("powered", powah.get());
+                        if(ignite.get())entityTag.putBoolean("ignited", ignite.get());
                         entityTag.putInt("Fuse", fuse.get());
                         entityTag.putInt("Size", size.get());
-                        entityTag.putBoolean("CustomNameVisible", true);
+                        if(customname.get())entityTag.putBoolean("CustomNameVisible", customname.get());
                         entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
                         tag.put("EntityTag", entityTag);
                         bomb.setNbt(tag);
