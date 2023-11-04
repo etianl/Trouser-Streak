@@ -11,12 +11,12 @@ import pwn.noobs.trouserstreak.modules.*;
 
 
 public class Trouser extends MeteorAddon {
-	public static final Logger LOG = LoggerFactory.getLogger(Trouser.class);
-	public static final Category Main = new Category("TrouserStreak");
+    public static final Logger LOG = LoggerFactory.getLogger(Trouser.class);
+    public static final Category Main = new Category("TrouserStreak");
 
-	@Override
-	public void onInitialize() {
-		LOG.info("Initializing PantsMod!");
+    @Override
+    public void onInitialize() {
+        LOG.info("Initializing PantsMod!");
 
         Modules.get().add(new AutoLavaCaster());
         Modules.get().add(new AutoMountain());
@@ -50,12 +50,13 @@ public class Trouser extends MeteorAddon {
         Commands.add(new NewChunkCounter());
         Commands.add(new BaseFinderCommands());
         Commands.add(new WorldInfoCommand());
-	}
+        Commands.add(new GetNbtCommand());
+    }
 
-	@Override
-	public void onRegisterCategories() {
-		Modules.registerCategory(Main);
-	}
+    @Override
+    public void onRegisterCategories() {
+        Modules.registerCategory(Main);
+    }
 
     public String getPackage() {
         return "pwn.noobs.trouserstreak";
