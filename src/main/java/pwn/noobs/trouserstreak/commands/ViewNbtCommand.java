@@ -31,7 +31,7 @@ public class ViewNbtCommand extends Command {
             else error("No item in main hand.");
             return SINGLE_SUCCESS;
         });
-        builder.then(literal("Save").executes(ctx -> {
+        builder.then(literal("save").executes(ctx -> {
             if (!mc.player.getMainHandStack().isEmpty()){
                 if (mc.player.getMainHandStack().getNbt() == null){
                     error("No NBT data for item.");
