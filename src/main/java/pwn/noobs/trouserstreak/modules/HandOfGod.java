@@ -1,7 +1,5 @@
 package pwn.noobs.trouserstreak.modules;
 
-import meteordevelopment.meteorclient.events.game.GameLeftEvent;
-import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -10,7 +8,6 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.Flight;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -262,6 +259,10 @@ public class HandOfGod extends Module {
 
     @Override
     public void onActivate() {
+        if (!(mc.player.hasPermissionLevel(4)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+            toggle();
+            error("Must have OP");
+        }
         roofticks=0;
         if (roofer.get()){
             pX=mc.player.getBlockPos().getX();
@@ -526,5 +527,3 @@ public class HandOfGod extends Module {
             }
         }
     }
-
-

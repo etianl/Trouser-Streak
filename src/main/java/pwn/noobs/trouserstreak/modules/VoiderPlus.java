@@ -73,7 +73,6 @@ public class VoiderPlus extends Module {
     public VoiderPlus() {
         super(Trouser.Main, "voider+", "Runs /fill on the world from the top down (Must have OP status)");
     }
-
     int i;
     private int passes=0;
     private int TPs=0;
@@ -97,6 +96,10 @@ public class VoiderPlus extends Module {
     }
     @Override
     public void onActivate() {
+        if (!(mc.player.hasPermissionLevel(4)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+            toggle();
+            error("Must have OP");
+        }
         if (!getplayerY.get()){
         i = maxheight.get();
         }else if (getplayerY.get()){
@@ -106,7 +109,6 @@ public class VoiderPlus extends Module {
         sY=mc.player.getBlockPos().getY();
         sZ=mc.player.getBlockPos().getZ();
     }
-
     @EventHandler
     public void onTick(TickEvent.Post event) {
                 if (!threebythree.get() && !tpfwd.get()){

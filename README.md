@@ -110,7 +110,7 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - **TrouserBuild:** It can build either horizontally or vertically according to a 5x5 grid centered on the block you are aiming at. Right click to build at the targeted location. (Credits to etianl, and to Banana for the checkboxes and idea. :D)
 - **ViewNbtCommand:** Returns the nbt data for the item in your hand in the chat box. There is also a Save option for the command that saves the data to a text file in your .minecraft folder in the "SavedNBT" folder.
 - **Voider+:** Replaces the world from the top down. (Credits to Allah-Hack) I added a 3x3 voiding script, a TP foward option for deleting strips, as well as options to set max and minimum height for voiding, and instead of just air it can do whatever block you want now too.
-- **WorldInfoCommand** Type .world in chat to tell you the gamerules on the server, the players that have played there (may not work on all servers), as well as some other world info like world border coordinates. (Credits to etianl :D)
+- **WorldInfoCommand** Type .world in chat to tell you some info about the server like world border coordinates and other things, and sometimes the players that have played there (players does not work on all servers). (Credits to etianl :D)
 
 ## Known Bugs:
 - **AutoLavaCaster Bugs** 
@@ -125,6 +125,7 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - NewerNewChunks can rarely boot you from the server when going back and forth through a nether portal. For example, it sometimes may boot you if you just came out of a portal then you re-enter it immediately after exiting.
 - .newchunkcount command shows exactly the chunks that are saved in chunk data, so when you are in normal mode or flowbelowY0 mode the returned values are not exactly in correlation to what is rendered on screen.
 - NewerNewChunks has to be turned on atleast once prior to running .newchunkcount for the counter to work even if you already have data in that world.
+- Joining a server with HandOfGod or Voider already on causes the module to be turned off due to "Not being OP" even if you are an operator 
 
 ## Requirements:
 - If you are using Minecraft version **1.20.2**, then use the latest **MeteorClient Dev Build of v0.5.5**

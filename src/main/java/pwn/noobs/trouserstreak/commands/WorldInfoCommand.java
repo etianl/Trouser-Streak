@@ -6,6 +6,7 @@ import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.WorldSavePath;
+import net.minecraft.world.GameRules;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -26,22 +27,22 @@ public class WorldInfoCommand extends Command {
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
             ChatUtils.sendMsg(Text.of("East World Border X: "+(int) mc.world.getWorldBorder().getBoundEast()+", West World Border X: "+(int) mc.world.getWorldBorder().getBoundWest()+", South World Border Z: "+(int) mc.world.getWorldBorder().getBoundSouth()+", North World Border Z: "+(int) mc.world.getWorldBorder().getBoundNorth()));
-            ChatUtils.sendMsg(Text.of("Default WorldSpawn Location (May be different if changed): "+mc.world.getSpawnPos()));
+            ChatUtils.sendMsg(Text.of("WorldSpawn Location: x"+mc.world.getLevelProperties().getSpawnX()+" y"+mc.world.getLevelProperties().getSpawnY()+" z"+mc.world.getLevelProperties().getSpawnZ()));
             ChatUtils.sendMsg(Text.of("Difficulty: "+mc.world.getDifficulty().toString()));
             ChatUtils.sendMsg(Text.of("Simulation Distance (chunks): "+mc.world.getSimulationDistance()));
             ChatUtils.sendMsg(Text.of("Day Count: "+Math.floor(mc.world.getTime()/24000)));
-            ChatUtils.sendMsg(Text.of("GameRules: "+mc.world.getGameRules().toNbt().toString()));
+            ChatUtils.sendMsg(Text.of("DO_DAYLIGHT_CYCLE: "+mc.world.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE)));
             ChatUtils.sendMsg(Text.of("KnownPlayers (Names with a period are bedrock players): "+mc.world.getScoreboard().getKnownPlayers()));
             return SINGLE_SUCCESS;
         });
         builder.then(literal("save").executes(ctx -> {
             if (!mc.player.getMainHandStack().isEmpty()){
                 ChatUtils.sendMsg(Text.of("East World Border X: "+(int) mc.world.getWorldBorder().getBoundEast()+", West World Border X: "+(int) mc.world.getWorldBorder().getBoundWest()+", South World Border Z: "+(int) mc.world.getWorldBorder().getBoundSouth()+", North World Border Z: "+(int) mc.world.getWorldBorder().getBoundNorth()));
-                ChatUtils.sendMsg(Text.of("Default WorldSpawn Location (May be different if changed): "+mc.world.getSpawnPos()));
+                ChatUtils.sendMsg(Text.of("WorldSpawn Location: x"+mc.world.getLevelProperties().getSpawnX()+" y"+mc.world.getLevelProperties().getSpawnY()+" z"+mc.world.getLevelProperties().getSpawnZ()));
                 ChatUtils.sendMsg(Text.of("Difficulty: "+mc.world.getDifficulty().toString()));
                 ChatUtils.sendMsg(Text.of("Simulation Distance (chunks): "+mc.world.getSimulationDistance()));
                 ChatUtils.sendMsg(Text.of("Day Count: "+Math.floor(mc.world.getTime()/24000)));
-                ChatUtils.sendMsg(Text.of("GameRules: "+mc.world.getGameRules().toNbt().toString()));
+                ChatUtils.sendMsg(Text.of("DO_DAYLIGHT_CYCLE: "+mc.world.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE)));
                 ChatUtils.sendMsg(Text.of("KnownPlayers (Names with a period are bedrock players): "+mc.world.getScoreboard().getKnownPlayers()));
 
                 String serverip;
@@ -63,7 +64,7 @@ public class WorldInfoCommand extends Command {
                     FileWriter writer = new FileWriter("SavedWorldInfo/"+serverip+"/WorldInfoData.txt", true);
                     writer.write("East World Border X: "+(int) mc.world.getWorldBorder().getBoundEast()+", West World Border X: "+(int) mc.world.getWorldBorder().getBoundWest()+", South World Border Z: "+(int) mc.world.getWorldBorder().getBoundSouth()+", North World Border Z: "+(int) mc.world.getWorldBorder().getBoundNorth());
                     writer.write("\r\n");   // write new line
-                    writer.write("Default WorldSpawn Location (May be different if changed): "+mc.world.getSpawnPos());
+                    writer.write("WorldSpawn Location: x"+mc.world.getLevelProperties().getSpawnX()+" y"+mc.world.getLevelProperties().getSpawnY()+" z"+mc.world.getLevelProperties().getSpawnZ());
                     writer.write("\r\n");   // write new line
                     writer.write("Difficulty: "+mc.world.getDifficulty().toString());
                     writer.write("\r\n");   // write new line
@@ -71,7 +72,7 @@ public class WorldInfoCommand extends Command {
                     writer.write("\r\n");   // write new line
                     writer.write("Day Count: "+Math.floor(mc.world.getTime()/24000));
                     writer.write("\r\n");   // write new line
-                    writer.write("GameRules: "+mc.world.getGameRules().toNbt().toString());
+                    writer.write("DO_DAYLIGHT_CYCLE: "+mc.world.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE));
                     writer.write("\r\n");   // write new line
                     writer.write("KnownPlayers (Names with a period are bedrock players): "+mc.world.getScoreboard().getKnownPlayers());
                     writer.write("\r\n");   // write new line
