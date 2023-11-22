@@ -1,7 +1,5 @@
 package pwn.noobs.trouserstreak.modules;
 
-import meteordevelopment.meteorclient.events.game.GameLeftEvent;
-import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -10,7 +8,6 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.Flight;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -262,6 +259,10 @@ public class HandOfGod extends Module {
 
     @Override
     public void onActivate() {
+        if (!(mc.player.hasPermissionLevel(4)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+            toggle();
+            error("Must have OP");
+        }
         roofticks=0;
         if (roofer.get()){
             pX=mc.player.getBlockPos().getX();
@@ -299,13 +300,13 @@ public class HandOfGod extends Module {
             }
             switch (mc.player.getHorizontalFacing()){
                 case NORTH, SOUTH -> {
-            int x1 = Math.round(pos.getX()) + cwidth.get();
-            int y1 = Math.round(pos.getY()) + cheight.get();
-            int z1 = Math.round(pos.getZ()) + cdepth.get();
-            int x2 = Math.round(pos.getX()) - cwidth.get();
-            int y2 = Math.round(pos.getY()) - cheight.get();
-            int z2 = Math.round(pos.getZ()) - cdepth.get();
-            ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + block);
+                    int x1 = Math.round(pos.getX()) + cwidth.get();
+                    int y1 = Math.round(pos.getY()) + cheight.get();
+                    int z1 = Math.round(pos.getZ()) + cdepth.get();
+                    int x2 = Math.round(pos.getX()) - cwidth.get();
+                    int y2 = Math.round(pos.getY()) - cheight.get();
+                    int z2 = Math.round(pos.getZ()) - cdepth.get();
+                    ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + block);
                 }
                 case EAST, WEST -> {
                     int x1 = Math.round(pos.getX()) + cdepth.get();
@@ -336,10 +337,10 @@ public class HandOfGod extends Module {
                 asaveticks=0;
             }
         }
-            if (auto.get() && mc.options.attackKey.isPressed() && mc.currentScreen == null) {
-                if (aticks<=atickdelay.get()){
-                    aticks++;
-                } else if (aticks>atickdelay.get()){
+        if (auto.get() && mc.options.attackKey.isPressed() && mc.currentScreen == null) {
+            if (aticks<=atickdelay.get()){
+                aticks++;
+            } else if (aticks>atickdelay.get()){
                 HitResult hr = mc.cameraEntity.raycast(900, 0, fluids.get());
                 Vec3d god = hr.getPos();
                 BlockPos pos = BlockPos.ofFloored(god);
@@ -359,38 +360,38 @@ public class HandOfGod extends Module {
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                     mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
                 }
-                    switch (mc.player.getHorizontalFacing()){
-                        case NORTH, SOUTH -> {
-                            int x1 = Math.round(pos.getX()) + cwidth.get();
-                            int y1 = Math.round(pos.getY()) + cheight.get();
-                            int z1 = Math.round(pos.getZ()) + cdepth.get();
-                            int x2 = Math.round(pos.getX()) - cwidth.get();
-                            int y2 = Math.round(pos.getY()) - cheight.get();
-                            int z2 = Math.round(pos.getZ()) - cdepth.get();
-                            ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + block);
-                        }
-                        case EAST, WEST -> {
-                            int x1 = Math.round(pos.getX()) + cdepth.get();
-                            int y1 = Math.round(pos.getY()) + cheight.get();
-                            int z1 = Math.round(pos.getZ()) + cwidth.get();
-                            int x2 = Math.round(pos.getX()) - cdepth.get();
-                            int y2 = Math.round(pos.getY()) - cheight.get();
-                            int z2 = Math.round(pos.getZ()) - cwidth.get();
-                            ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + block);
-                        }
+                switch (mc.player.getHorizontalFacing()){
+                    case NORTH, SOUTH -> {
+                        int x1 = Math.round(pos.getX()) + cwidth.get();
+                        int y1 = Math.round(pos.getY()) + cheight.get();
+                        int z1 = Math.round(pos.getZ()) + cdepth.get();
+                        int x2 = Math.round(pos.getX()) - cwidth.get();
+                        int y2 = Math.round(pos.getY()) - cheight.get();
+                        int z2 = Math.round(pos.getZ()) - cdepth.get();
+                        ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + block);
                     }
-                    aticks=0;
+                    case EAST, WEST -> {
+                        int x1 = Math.round(pos.getX()) + cdepth.get();
+                        int y1 = Math.round(pos.getY()) + cheight.get();
+                        int z1 = Math.round(pos.getZ()) + cwidth.get();
+                        int x2 = Math.round(pos.getX()) - cdepth.get();
+                        int y2 = Math.round(pos.getY()) - cheight.get();
+                        int z2 = Math.round(pos.getZ()) - cwidth.get();
+                        ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + block);
+                    }
                 }
+                aticks=0;
             }
-        if (SwpAway.get()){
-        if (mc.options.useKey.isPressed()){
-            sweep=true;
-        }else if (mc.options.useKey.isPressed()==false) sweep=false;
-        if (sweep==false){
-        sX=mc.player.getBlockX();
-        sY=mc.player.getBlockY();
-        sZ=mc.player.getBlockZ();
         }
+        if (SwpAway.get()){
+            if (mc.options.useKey.isPressed()){
+                sweep=true;
+            }else if (mc.options.useKey.isPressed()==false) sweep=false;
+            if (sweep==false){
+                sX=mc.player.getBlockX();
+                sY=mc.player.getBlockY();
+                sZ=mc.player.getBlockZ();
+            }
             if (sweep==true){
                 switch (mc.player.getHorizontalFacing()){
                     case NORTH -> {
@@ -409,122 +410,120 @@ public class HandOfGod extends Module {
                 swpr++;
             } else swpr=0;
         }
-            if (rndplyr.get()){
-                if (ticks<=tickdelay.get()){
-                    ticks++;
-                } else if (ticks>tickdelay.get()){
-                    switch (mc.player.getHorizontalFacing()){
-                        case NORTH, SOUTH -> {
-                            ChatUtils.sendPlayerMsg("/execute at @p run fill ~"+pwidth.get()+" ~"+pheight.get()+" ~"+pdepth.get()+" ~-"+pwidth.get()+" ~-"+pheight.get()+" ~-"+pdepth.get()+" air");
+        if (rndplyr.get()){
+            if (ticks<=tickdelay.get()){
+                ticks++;
+            } else if (ticks>tickdelay.get()){
+                switch (mc.player.getHorizontalFacing()){
+                    case NORTH, SOUTH -> {
+                        ChatUtils.sendPlayerMsg("/execute at @p run fill ~"+pwidth.get()+" ~"+pheight.get()+" ~"+pdepth.get()+" ~-"+pwidth.get()+" ~-"+pheight.get()+" ~-"+pdepth.get()+" air");
 
-                        }
-                        case EAST, WEST -> {
-                            ChatUtils.sendPlayerMsg("/execute at @p run fill ~"+pdepth.get()+" ~"+pheight.get()+" ~"+pwidth.get()+" ~-"+pdepth.get()+" ~-"+pheight.get()+" ~-"+pwidth.get()+" air");
-
-                        }
                     }
-                    ticks=0;
+                    case EAST, WEST -> {
+                        ChatUtils.sendPlayerMsg("/execute at @p run fill ~"+pdepth.get()+" ~"+pheight.get()+" ~"+pwidth.get()+" ~-"+pdepth.get()+" ~-"+pheight.get()+" ~-"+pwidth.get()+" air");
+
+                    }
                 }
+                ticks=0;
             }
-            if (voider.get()){
-                    if (i>= mc.player.getBlockPos().getY()-vrange.get()){
-                    ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + i +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + i +" "+ (pZ + radius.get()) +" air");
-                        i--;
-                    }else if (i<= mc.player.getBlockPos().getY()-vrange.get()){
-                        i=pY+vrange.get();
-                    }
+        }
+        if (voider.get()){
+            if (i>= mc.player.getBlockPos().getY()-vrange.get()){
+                ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + i +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + i +" "+ (pZ + radius.get()) +" air");
+                i--;
+            }else if (i<= mc.player.getBlockPos().getY()-vrange.get()){
+                i=pY+vrange.get();
+            }
 
 
-            }
-            if (mgcersr.get()){
-                if (Modules.get().isActive(Flight.class)){
-                    if (errticks<3){
+        }
+        if (mgcersr.get()){
+            if (Modules.get().isActive(Flight.class)){
+                if (errticks<3){
                     errticks++;}
-                    if (errticks==2){
-                        error("Fly Slow. Set Flight speed to 0.1 or less. :D");
-                    }
+                if (errticks==2){
+                    error("Fly Slow. Set Flight speed to 0.1 or less. :D");
                 }
-                    if (mc.options.jumpKey.isPressed()){
-                        ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY+mgcdist.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcdist.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                    }
-                    if (mc.options.sneakKey.isPressed()){
-                        ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcdist.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + (pY-mgcdist.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                    }
-                    if (mc.options.forwardKey.isPressed()){
-                    switch (mc.player.getHorizontalFacing()){
-                        case NORTH -> {
-                            ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
-                        }
-                        case WEST -> {
-                            ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                        }
-                        case SOUTH -> {
-                            ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
-                        }
-                        case EAST -> {
-                            ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                        }
-                    }
-                    }
-                        if (mc.options.backKey.isPressed()){
-                            switch (mc.player.getHorizontalFacing()){
-                                case NORTH -> {
-                                    ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
-                                }
-                                case WEST -> {
-                                    ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                                }
-                                case SOUTH -> {
-                                    ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
-                                }
-                                case EAST -> {
-                                    ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                                }
-                            }
-                        }
-                            if (mc.options.rightKey.isPressed()){
-                                switch (mc.player.getHorizontalFacing()){
-                                    case NORTH -> {
-                                        ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                                    }
-                                    case WEST -> {
-                                        ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
-                                    }
-                                    case SOUTH -> {
-                                        ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                                    }
-                                    case EAST -> {
-                                        ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
-                                    }
-                                }
-                            }
-                                if (mc.options.leftKey.isPressed()){
-                                    switch (mc.player.getHorizontalFacing()){
-                                        case NORTH -> {
-                                            ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                                        }
-                                        case WEST -> {
-                                            ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
-                                        }
-                                        case SOUTH -> {
-                                            ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                                        }
-                                        case EAST -> {
-                                            ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
-                                        }
-                                    }
-                    }
-
             }
-            if (roofer.get()){
-                if (roofticks<=rooftickdelay.get()){
-                    roofticks++;
-                } else if (roofticks>rooftickdelay.get()) {
-                    ChatUtils.sendPlayerMsg("/fill " + (pX - roofradius.get()) + " " + roofheight.get() +" "+ (pZ - roofradius.get()) +" "+ (pX + roofradius.get()) + " " + roofheight.get() +" "+ (pZ + roofradius.get()) + " "+roofblock);
-                    roofticks=0;
+            if (mc.options.jumpKey.isPressed()){
+                ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY+mgcdist.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcdist.get()) +" "+ (pZ + mgcradius.get()) +" air");
+            }
+            if (mc.options.sneakKey.isPressed()){
+                ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcdist.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + (pY-mgcdist.get()) +" "+ (pZ + mgcradius.get()) +" air");
+            }
+            if (mc.options.forwardKey.isPressed()){
+                switch (mc.player.getHorizontalFacing()){
+                    case NORTH -> {
+                        ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
+                    }
+                    case WEST -> {
+                        ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                    }
+                    case SOUTH -> {
+                        ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
+                    }
+                    case EAST -> {
+                        ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                    }
                 }
+            }
+            if (mc.options.backKey.isPressed()){
+                switch (mc.player.getHorizontalFacing()){
+                    case NORTH -> {
+                        ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
+                    }
+                    case WEST -> {
+                        ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                    }
+                    case SOUTH -> {
+                        ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
+                    }
+                    case EAST -> {
+                        ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                    }
+                }
+            }
+            if (mc.options.rightKey.isPressed()){
+                switch (mc.player.getHorizontalFacing()){
+                    case NORTH -> {
+                        ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                    }
+                    case WEST -> {
+                        ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
+                    }
+                    case SOUTH -> {
+                        ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                    }
+                    case EAST -> {
+                        ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
+                    }
+                }
+            }
+            if (mc.options.leftKey.isPressed()){
+                switch (mc.player.getHorizontalFacing()){
+                    case NORTH -> {
+                        ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                    }
+                    case WEST -> {
+                        ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
+                    }
+                    case SOUTH -> {
+                        ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                    }
+                    case EAST -> {
+                        ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
+                    }
+                }
+            }
+
+        }
+        if (roofer.get()){
+            if (roofticks<=rooftickdelay.get()){
+                roofticks++;
+            } else if (roofticks>rooftickdelay.get()) {
+                ChatUtils.sendPlayerMsg("/fill " + (pX - roofradius.get()) + " " + roofheight.get() +" "+ (pZ - roofradius.get()) +" "+ (pX + roofradius.get()) + " " + roofheight.get() +" "+ (pZ + roofradius.get()) + " "+roofblock);
+                roofticks=0;
             }
         }
     }
-
-
+}

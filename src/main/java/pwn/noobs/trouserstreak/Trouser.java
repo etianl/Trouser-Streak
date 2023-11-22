@@ -24,6 +24,7 @@ public class Trouser extends MeteorAddon {
         Modules.get().add(new TrouserBuild());
         Modules.get().add(new TrailMaker());
         Modules.get().add(new NewerNewChunks());
+        Modules.get().add(new SuperInstaMine());
         Modules.get().add(new BaseFinder());
         Modules.get().add(new Teleport());
         Modules.get().add(new TPFly());
@@ -34,17 +35,16 @@ public class Trouser extends MeteorAddon {
         Modules.get().add(new InstantKill());
         Modules.get().add(new LecternCrash());
         Modules.get().add(new AutoDrop());
-        Modules.get().add(new BlockListMineCommand());
         Modules.get().add(new NbtEditor());
         Modules.get().add(new AnHero());
         Modules.get().add(new RedstoneNuker());
-        Modules.get().add(new SuperInstaMine());
         Modules.get().add(new AirstrikePlus());
         Modules.get().add(new BoomPlus());
         Modules.get().add(new VoiderPlus());
         Modules.get().add(new BetterScaffold());
         Modules.get().add(new BetterAutoSign());
         Modules.get().add(new FlightAntikick());
+        Modules.get().add(new BlockListMineCommand());
         Commands.add(new LavaTimeCalculator());
         Commands.add(new CasterTimer());
         Commands.add(new NewChunkCounter());
