@@ -42,7 +42,7 @@ public class NbtEditor extends Module {
 
     private final Setting<String> entity = sgOptions.add(new StringSetting.Builder()
             .name("Entity to Spawn")
-            .description("What is created. Ex: fireball, villager, minecart, lightning, magma cube, area effect cloud")
+            .description("What is created. Ex: fireball, villager, minecart, lightning_bolt, magma cube, area effect cloud")
             .defaultValue("wither")
             .visible(() -> mode.get() == Modes.Entity)
             .build());

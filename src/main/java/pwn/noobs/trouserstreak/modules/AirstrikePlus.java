@@ -32,7 +32,7 @@ public class AirstrikePlus extends Module {
             .build());
     private final Setting<String> entity = sgGeneral.add(new StringSetting.Builder()
             .name("Entity to Spawn")
-            .description("What is created. Ex: fireball, villager, minecart, lightning, magma_cube, tnt")
+            .description("What is created. Ex: fireball, villager, minecart, lightning_bolt, magma_cube, tnt")
             .defaultValue("fireball")
             .build());
     private final Setting<Boolean> mixer = sgGeneral.add(new BoolSetting.Builder()
@@ -42,7 +42,7 @@ public class AirstrikePlus extends Module {
             .build());
     private final Setting<String> entity2 = sgGeneral.add(new StringSetting.Builder()
             .name("Entity2 to Spawn")
-            .description("What is created. Ex: fireball, villager, minecart, lightning, magma_cube, tnt")
+            .description("What is created. Ex: fireball, villager, minecart, lightning_bolt, magma_cube, tnt")
             .defaultValue("wither")
             .visible(() -> mixer.get())
             .build());
@@ -158,36 +158,36 @@ public class AirstrikePlus extends Module {
             .sliderRange(0, 100)
             .build());
     private final Setting<Integer> radius = sgGeneral.add(new IntSetting.Builder()
-        .name("radius")
-        .description("radius they spawn from the player")
-        .defaultValue(30)
-        .sliderRange(1, 100)
+            .name("radius")
+            .description("radius they spawn from the player")
+            .defaultValue(30)
+            .sliderRange(1, 100)
             .min(1)
-        .build());
+            .build());
 
     private final Setting<Integer> height = sgGeneral.add(new IntSetting.Builder()
-        .name("HeightAboveHead")
-        .description("How far from your Characters Y level to spawn at.")
-        .defaultValue(20)
-        .sliderRange(-63, 319)
-        .build());
+            .name("HeightAboveHead")
+            .description("How far from your Characters Y level to spawn at.")
+            .defaultValue(20)
+            .sliderRange(-63, 319)
+            .build());
 
     private final Setting<Integer> speed = sgGeneral.add(new IntSetting.Builder()
-        .name("speed")
-        .description("speed of entities")
-        .defaultValue(5)
-        .sliderRange(1, 10)
+            .name("speed")
+            .description("speed of entities")
+            .defaultValue(5)
+            .sliderRange(1, 10)
             .min(1)
             .max(10)
             .build());
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
-        .name("delay")
-        .description("its in ticks")
-        .defaultValue(2)
-        .sliderRange(0, 20)
+            .name("delay")
+            .description("its in ticks")
+            .defaultValue(2)
+            .sliderRange(0, 20)
             .min(0)
-        .build());
+            .build());
 
 
     public AirstrikePlus() {

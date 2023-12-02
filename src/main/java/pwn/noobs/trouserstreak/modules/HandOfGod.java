@@ -3,11 +3,16 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.Flight;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -25,6 +30,8 @@ public class HandOfGod extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgClick = settings.createGroup("Click Options");
     private final SettingGroup sgPcentered = settings.createGroup("Player-Centered Options");
+    private final SettingGroup sgTroll = settings.createGroup("Troll Other Players!");
+
     public final Setting<Boolean> autosave = sgGeneral.add(new BoolSetting.Builder()
             .name("AutoSave and CTRL+S shortcut")
             .description("For saving your progress incase of server shutdown.")
@@ -39,10 +46,22 @@ public class HandOfGod extends Module {
             .sliderMax(60)
             .build());
 
-    private final Setting<String> block = sgClick.add(new StringSetting.Builder()
+    private final Setting<Block> block = sgClick.add(new BlockSetting.Builder()
             .name("ClickBlock")
-            .description("What is created when clicking")
-            .defaultValue("air")
+            .description("What is created when clicking (Default: Lava)")
+            .defaultValue(Blocks.LAVA)
+            .build());
+    public final Setting<Boolean> replace = sgClick.add(new BoolSetting.Builder()
+            .name("Replace Blocks")
+            .description("Replace certain blocks in the selection instead of all blocks")
+            .defaultValue(false)
+            .build()
+    );
+    private final Setting<Block> blocktoreplace = sgClick.add(new BlockSetting.Builder()
+            .name("Block to Replace.")
+            .description("What is replaced when clicking or using the Sweep Away option")
+            .defaultValue(Blocks.GRASS_BLOCK)
+            .visible(() -> replace.get())
             .build());
 
     private final Setting<Integer> cwidth = sgClick.add(new IntSetting.Builder()
@@ -91,7 +110,7 @@ public class HandOfGod extends Module {
     public final Setting<Boolean> fluids = sgClick.add(new BoolSetting.Builder()
             .name("IncludeFluids")
             .description("Includes fluids when targeting, or not.")
-            .defaultValue(true)
+            .defaultValue(false)
             .build()
     );
     public final Setting<Boolean> SwpAway = sgClick.add(new BoolSetting.Builder()
@@ -100,10 +119,10 @@ public class HandOfGod extends Module {
             .defaultValue(false)
             .build()
     );
-    private final Setting<String> sweepblock = sgClick.add(new StringSetting.Builder()
+    private final Setting<Block> sweepblock = sgClick.add(new BlockSetting.Builder()
             .name("SweepBlock")
-            .description("What is created when sweeping")
-            .defaultValue("air")
+            .description("What is created when sweeping (Default: Air)")
+            .defaultValue(Blocks.AIR)
             .visible(() -> SwpAway.get())
             .build());
     private final Setting<Integer> sweepradius = sgClick.add(new IntSetting.Builder()
@@ -120,6 +139,24 @@ public class HandOfGod extends Module {
             .sliderRange(1, 30)
             .visible(() -> SwpAway.get())
             .build());
+    public final Setting<Boolean> pReplace = sgPcentered.add(new BoolSetting.Builder()
+            .name("Replace Blocks")
+            .description("Replace certain blocks in the selection instead of all blocks")
+            .defaultValue(false)
+            .build()
+    );
+    private final Setting<Block> pblocktoreplace = sgPcentered.add(new BlockSetting.Builder()
+            .name("Block to Replace.")
+            .description("What is replaced around the character")
+            .defaultValue(Blocks.GRASS_BLOCK)
+            .visible(() -> pReplace.get())
+            .build());
+    private final Setting<Block> pblock = sgPcentered.add(new BlockSetting.Builder()
+            .name("Replacement Block")
+            .description("What is put in place of the replaced blocks (Default: Lava)")
+            .defaultValue(Blocks.LAVA)
+            .visible(() -> pReplace.get())
+            .build());
     public final Setting<Boolean> rndplyr = sgPcentered.add(new BoolSetting.Builder()
             .name("NukeAroundPlayer")
             .description("Runs /fill air around you every tick.")
@@ -128,7 +165,7 @@ public class HandOfGod extends Module {
     );
     public final Setting<Integer> pwidth = sgPcentered.add(new IntSetting.Builder()
             .name("PlayerWidth")
-            .description("Width removed around player")
+            .description("Width /fill'd around player")
             .defaultValue(10)
             .min(1)
             .sliderMax(30)
@@ -137,7 +174,7 @@ public class HandOfGod extends Module {
     );
     public final Setting<Integer> pheight = sgPcentered.add(new IntSetting.Builder()
             .name("PlayerHeight")
-            .description("Height removed around player")
+            .description("Height /fill'd around player")
             .defaultValue(10)
             .min(1)
             .sliderMax(30)
@@ -146,7 +183,7 @@ public class HandOfGod extends Module {
     );
     public final Setting<Integer> pdepth = sgPcentered.add(new IntSetting.Builder()
             .name("PlayerDepth")
-            .description("Depth removed around player")
+            .description("Depth /fill'd around player")
             .defaultValue(10)
             .min(1)
             .sliderMax(30)
@@ -156,7 +193,7 @@ public class HandOfGod extends Module {
     public final Setting<Integer> tickdelay = sgPcentered.add(new IntSetting.Builder()
             .name("TickDelayAroundPlayer")
             .description("Tick Delay for running /fill around the player.")
-            .defaultValue(0)
+            .defaultValue(2)
             .min(0)
             .sliderMax(100)
             .visible(() -> rndplyr.get())
@@ -209,10 +246,10 @@ public class HandOfGod extends Module {
             .defaultValue(false)
             .build()
     );
-    private final Setting<String> roofblock = sgPcentered.add(new StringSetting.Builder()
+    private final Setting<Block> roofblock = sgPcentered.add(new BlockSetting.Builder()
             .name("RooferBlock")
             .description("What is created.")
-            .defaultValue("obsidian")
+            .defaultValue(Blocks.OBSIDIAN)
             .visible(() -> roofer.get())
             .build());
     private final Setting<Integer> roofradius = sgPcentered.add(new IntSetting.Builder()
@@ -238,8 +275,76 @@ public class HandOfGod extends Module {
             .visible(() -> roofer.get())
             .build()
     );
+    public final Setting<Boolean> troll = sgTroll.add(new BoolSetting.Builder()
+            .name("/fill Around All Other Players")
+            .description("Runs /fill on all player locations around you")
+            .defaultValue(false)
+            .build()
+    );
+    public final Setting<Boolean> trollfriends = sgTroll.add(new BoolSetting.Builder()
+            .name("/fill Friends")
+            .description("Runs /fill around friends too")
+            .defaultValue(false)
+            .visible(() -> troll.get())
+            .build()
+    );
+    public final Setting<Integer> trolltickdelay = sgTroll.add(new IntSetting.Builder()
+            .name("TickDelayAroundOtherPlayers")
+            .description("Tick Delay for running /fill around other players.")
+            .defaultValue(2)
+            .min(0)
+            .sliderMax(100)
+            .visible(() -> troll.get())
+            .build()
+    );
+    private final Setting<Block> trollblock = sgTroll.add(new BlockSetting.Builder()
+            .name("OtherPlayersBlock")
+            .description("What is created around the players (Default: Lava)")
+            .defaultValue(Blocks.LAVA)
+            .visible(() -> troll.get())
+            .build());
+    public final Setting<Boolean> trollreplace = sgTroll.add(new BoolSetting.Builder()
+            .name("Replace Blocks")
+            .description("Replace certain blocks in the selection instead of all blocks")
+            .defaultValue(false)
+            .visible(() -> troll.get())
+            .build()
+    );
+    private final Setting<Block> trollblocktoreplace = sgTroll.add(new BlockSetting.Builder()
+            .name("Block to Replace.")
+            .description("What is replaced around the players.")
+            .defaultValue(Blocks.GRASS_BLOCK)
+            .visible(() -> troll.get() && trollreplace.get())
+            .build());
+    public final Setting<Integer> trollwidth = sgTroll.add(new IntSetting.Builder()
+            .name("OtherPlayerWidth")
+            .description("Width /fill'd around player")
+            .defaultValue(10)
+            .min(1)
+            .sliderMax(30)
+            .visible(() -> troll.get())
+            .build()
+    );
+    public final Setting<Integer> trollheight = sgTroll.add(new IntSetting.Builder()
+            .name("OtherPlayerHeight")
+            .description("Height /fill'd around player")
+            .defaultValue(10)
+            .min(1)
+            .sliderMax(30)
+            .visible(() -> troll.get())
+            .build()
+    );
+    public final Setting<Integer> trolldepth = sgTroll.add(new IntSetting.Builder()
+            .name("OtherPlayerDepth")
+            .description("Depth /fill'd around player")
+            .defaultValue(10)
+            .min(1)
+            .sliderMax(30)
+            .visible(() -> troll.get())
+            .build()
+    );
     public HandOfGod() {
-        super(Trouser.Main, "HandOfGod", "Changes the world as you fly around, and replaces blocks with whatever you please when you click. (Must have OP status)");
+        super(Trouser.Main, "HandOfGod", "Modify the world and troll players with automated /fill commands. (Must have OP status)");
     }
 
     private int ticks=0;
@@ -249,6 +354,7 @@ public class HandOfGod extends Module {
     private int aticks=0;
     private int errticks=0;
     private int roofticks=0;
+    private int trollticks=0;
     private int pX;
     private int pY;
     private int pZ;
@@ -267,10 +373,15 @@ public class HandOfGod extends Module {
         if (roofer.get()){
             pX=mc.player.getBlockPos().getX();
             pZ=mc.player.getBlockPos().getZ();
-            ChatUtils.sendPlayerMsg("/fill " + (pX - roofradius.get()) + " " + roofheight.get() +" "+ (pZ - roofradius.get()) +" "+ (pX + roofradius.get()) + " " + roofheight.get() +" "+ (pZ + roofradius.get()) + " "+roofblock);
+            String rfullString = roofblock.get().toString();
+            String[] rparts = rfullString.split(":");
+            String rblock = rparts[1];
+            String rblockName = rblock.replace("}", "");
+            ChatUtils.sendPlayerMsg("/fill " + (pX - roofradius.get()) + " " + roofheight.get() +" "+ (pZ - roofradius.get()) +" "+ (pX + roofradius.get()) + " " + roofheight.get() +" "+ (pZ + roofradius.get()) + " "+rblockName);
         }
         aticks=0;
         ticks=0;
+        trollticks=0;
         if (voider.get()){
             i=mc.player.getBlockPos().getY();
         }
@@ -298,15 +409,24 @@ public class HandOfGod extends Module {
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                 mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
             }
+            String fullString = block.get().toString();
+            String[] parts = fullString.split(":");
+            String block = parts[1];
+            String blockName = block.replace("}", "");
+            String repfullString = blocktoreplace.get().toString();
+            String[] repparts = repfullString.split(":");
+            String repblock = repparts[1];
+            String repblockName = repblock.replace("}", "");
             switch (mc.player.getHorizontalFacing()){
                 case NORTH, SOUTH -> {
-            int x1 = Math.round(pos.getX()) + cwidth.get();
-            int y1 = Math.round(pos.getY()) + cheight.get();
-            int z1 = Math.round(pos.getZ()) + cdepth.get();
-            int x2 = Math.round(pos.getX()) - cwidth.get();
-            int y2 = Math.round(pos.getY()) - cheight.get();
-            int z2 = Math.round(pos.getZ()) - cdepth.get();
-            ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + block);
+                    int x1 = Math.round(pos.getX()) + cwidth.get();
+                    int y1 = Math.round(pos.getY()) + cheight.get();
+                    int z1 = Math.round(pos.getZ()) + cdepth.get();
+                    int x2 = Math.round(pos.getX()) - cwidth.get();
+                    int y2 = Math.round(pos.getY()) - cheight.get();
+                    int z2 = Math.round(pos.getZ()) - cdepth.get();
+                    if (!replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName);
+                    else if (replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName + " replace " + repblockName);
                 }
                 case EAST, WEST -> {
                     int x1 = Math.round(pos.getX()) + cdepth.get();
@@ -315,7 +435,8 @@ public class HandOfGod extends Module {
                     int x2 = Math.round(pos.getX()) - cdepth.get();
                     int y2 = Math.round(pos.getY()) - cheight.get();
                     int z2 = Math.round(pos.getZ()) - cwidth.get();
-                    ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + block);
+                    if (!replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName);
+                    else if (replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName + " replace " + repblockName);
                 }
             }
         }
@@ -360,6 +481,14 @@ public class HandOfGod extends Module {
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                     mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
                 }
+                    String fullString = block.get().toString();
+                    String[] parts = fullString.split(":");
+                    String block = parts[1];
+                    String blockName = block.replace("}", "");
+                    String repfullString = blocktoreplace.get().toString();
+                    String[] repparts = repfullString.split(":");
+                    String repblock = repparts[1];
+                    String repblockName = repblock.replace("}", "");
                     switch (mc.player.getHorizontalFacing()){
                         case NORTH, SOUTH -> {
                             int x1 = Math.round(pos.getX()) + cwidth.get();
@@ -368,7 +497,8 @@ public class HandOfGod extends Module {
                             int x2 = Math.round(pos.getX()) - cwidth.get();
                             int y2 = Math.round(pos.getY()) - cheight.get();
                             int z2 = Math.round(pos.getZ()) - cdepth.get();
-                            ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + block);
+                            if (!replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName);
+                            else if (replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName + " replace " + repblockName);
                         }
                         case EAST, WEST -> {
                             int x1 = Math.round(pos.getX()) + cdepth.get();
@@ -377,7 +507,8 @@ public class HandOfGod extends Module {
                             int x2 = Math.round(pos.getX()) - cdepth.get();
                             int y2 = Math.round(pos.getY()) - cheight.get();
                             int z2 = Math.round(pos.getZ()) - cwidth.get();
-                            ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + block);
+                            if (!replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName);
+                            else if (replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName + " replace " + repblockName);
                         }
                     }
                     aticks=0;
@@ -393,18 +524,30 @@ public class HandOfGod extends Module {
         sZ=mc.player.getBlockZ();
         }
             if (sweep==true){
+                String sfullString = sweepblock.get().toString();
+                String[] sparts = sfullString.split(":");
+                String sblock = sparts[1];
+                String sblockName = sblock.replace("}", "");
+                String repfullString = blocktoreplace.get().toString();
+                String[] repparts = repfullString.split(":");
+                String repblock = repparts[1];
+                String repblockName = repblock.replace("}", "");
                 switch (mc.player.getHorizontalFacing()){
                     case NORTH -> {
-                        ChatUtils.sendPlayerMsg("/fill " + (sX - sweepradius.get()) + " " + (sY-sweepradius.get()) + " "+ (sZ - (sweepstart.get()+swpr)) +" "+ (sX + sweepradius.get()) + " " + (sY +sweepradius.get()) +" "+ (sZ - (sweepstart.get()+swpr)) +" "+sweepblock);
+                        if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX - sweepradius.get()) + " " + (sY-sweepradius.get()) + " "+ (sZ - (sweepstart.get()+swpr)) +" "+ (sX + sweepradius.get()) + " " + (sY +sweepradius.get()) +" "+ (sZ - (sweepstart.get()+swpr)) + " " + sblockName);
+                        else if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX - sweepradius.get()) + " " + (sY-sweepradius.get()) + " "+ (sZ - (sweepstart.get()+swpr)) +" "+ (sX + sweepradius.get()) + " " + (sY +sweepradius.get()) +" "+ (sZ - (sweepstart.get()+swpr)) + " " + sblockName + " replace " + repblockName);
                     }
                     case WEST -> {
-                        ChatUtils.sendPlayerMsg("/fill " + (sX - (sweepstart.get()+swpr)) + " " + (sY-sweepradius.get()) + " "+ (sZ - sweepradius.get()) +" "+ (sX - (sweepstart.get()+swpr)) + " " + (sY+sweepradius.get()) +" "+ (sZ + sweepradius.get()) +" "+sweepblock);
+                        if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX - (sweepstart.get()+swpr)) + " " + (sY-sweepradius.get()) + " "+ (sZ - sweepradius.get()) +" "+ (sX - (sweepstart.get()+swpr)) + " " + (sY+sweepradius.get()) +" "+ (sZ + sweepradius.get()) + " " + sblockName);
+                        else if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX - (sweepstart.get()+swpr)) + " " + (sY-sweepradius.get()) + " "+ (sZ - sweepradius.get()) +" "+ (sX - (sweepstart.get()+swpr)) + " " + (sY+sweepradius.get()) +" "+ (sZ + sweepradius.get()) + " " + sblockName + " replace " + repblockName);
                     }
                     case SOUTH -> {
-                        ChatUtils.sendPlayerMsg("/fill " + (sX - sweepradius.get()) + " " + (sY-sweepradius.get()) + " "+ (sZ + (sweepstart.get()+swpr)) +" "+ (sX + sweepradius.get()) + " " + (sY+sweepradius.get()) +" "+ (sZ + (sweepstart.get()+swpr)) +" "+sweepblock);
+                        if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX - sweepradius.get()) + " " + (sY-sweepradius.get()) + " "+ (sZ + (sweepstart.get()+swpr)) +" "+ (sX + sweepradius.get()) + " " + (sY+sweepradius.get()) +" "+ (sZ + (sweepstart.get()+swpr)) + " " + sblockName);
+                        else if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX - sweepradius.get()) + " " + (sY-sweepradius.get()) + " "+ (sZ + (sweepstart.get()+swpr)) +" "+ (sX + sweepradius.get()) + " " + (sY+sweepradius.get()) +" "+ (sZ + (sweepstart.get()+swpr)) + " " + sblockName + " replace " + repblockName);
                     }
                     case EAST -> {
-                        ChatUtils.sendPlayerMsg("/fill " + (sX  + (sweepstart.get()+swpr)) + " " + (sY-sweepradius.get()) + " "+ (sZ - sweepradius.get()) +" "+ (sX + (sweepstart.get()+swpr)) + " " + (sY+sweepradius.get()) +" "+ (sZ + sweepradius.get()) +" "+sweepblock);
+                        if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX  + (sweepstart.get()+swpr)) + " " + (sY-sweepradius.get()) + " "+ (sZ - sweepradius.get()) +" "+ (sX + (sweepstart.get()+swpr)) + " " + (sY+sweepradius.get()) +" "+ (sZ + sweepradius.get()) + " " + sblockName);
+                        else if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX  + (sweepstart.get()+swpr)) + " " + (sY-sweepradius.get()) + " "+ (sZ - sweepradius.get()) +" "+ (sX + (sweepstart.get()+swpr)) + " " + (sY+sweepradius.get()) +" "+ (sZ + sweepradius.get()) + " " + sblockName + " replace " + repblockName);
                     }
                 }
                 swpr++;
@@ -414,22 +557,39 @@ public class HandOfGod extends Module {
                 if (ticks<=tickdelay.get()){
                     ticks++;
                 } else if (ticks>tickdelay.get()){
+                    String pfullString = pblock.get().toString();
+                    String[] pparts = pfullString.split(":");
+                    String pblock = pparts[1];
+                    String pBlockName = pblock.replace("}", "");
+                    String prepfullString = pblocktoreplace.get().toString();
+                    String[] prepparts = prepfullString.split(":");
+                    String prepblock = prepparts[1];
+                    String pRepblockName = prepblock.replace("}", "");
                     switch (mc.player.getHorizontalFacing()){
                         case NORTH, SOUTH -> {
-                            ChatUtils.sendPlayerMsg("/execute at @p run fill ~"+pwidth.get()+" ~"+pheight.get()+" ~"+pdepth.get()+" ~-"+pwidth.get()+" ~-"+pheight.get()+" ~-"+pdepth.get()+" air");
-
+                            if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill ~"+pwidth.get()+" ~"+pheight.get()+" ~"+pdepth.get()+" ~-"+pwidth.get()+" ~-"+pheight.get()+" ~-"+pdepth.get()+" air");
+                            else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill ~"+pwidth.get()+" ~"+pheight.get()+" ~"+pdepth.get()+" ~-"+pwidth.get()+" ~-"+pheight.get()+" ~-"+pdepth.get()+" "+pBlockName+" replace "+pRepblockName);
                         }
                         case EAST, WEST -> {
-                            ChatUtils.sendPlayerMsg("/execute at @p run fill ~"+pdepth.get()+" ~"+pheight.get()+" ~"+pwidth.get()+" ~-"+pdepth.get()+" ~-"+pheight.get()+" ~-"+pwidth.get()+" air");
-
+                            if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill ~"+pdepth.get()+" ~"+pheight.get()+" ~"+pwidth.get()+" ~-"+pdepth.get()+" ~-"+pheight.get()+" ~-"+pwidth.get()+" air");
+                            else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill ~"+pdepth.get()+" ~"+pheight.get()+" ~"+pwidth.get()+" ~-"+pdepth.get()+" ~-"+pheight.get()+" ~-"+pwidth.get()+" "+pBlockName+" replace "+pRepblockName);
                         }
                     }
                     ticks=0;
                 }
             }
             if (voider.get()){
+                String pfullString = pblock.get().toString();
+                String[] pparts = pfullString.split(":");
+                String pblock = pparts[1];
+                String pBlockName = pblock.replace("}", "");
+                String prepfullString = pblocktoreplace.get().toString();
+                String[] prepparts = prepfullString.split(":");
+                String prepblock = prepparts[1];
+                String pRepblockName = prepblock.replace("}", "");
                     if (i>= mc.player.getBlockPos().getY()-vrange.get()){
-                    ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + i +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + i +" "+ (pZ + radius.get()) +" air");
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + i +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + i +" "+ (pZ + radius.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + i +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + i +" "+ (pZ + radius.get()) +" "+pBlockName+" replace "+pRepblockName);
                         i--;
                     }else if (i<= mc.player.getBlockPos().getY()-vrange.get()){
                         i=pY+vrange.get();
@@ -445,73 +605,99 @@ public class HandOfGod extends Module {
                         error("Fly Slow. Set Flight speed to 0.1 or less. :D");
                     }
                 }
+                String pfullString = pblock.get().toString();
+                String[] pparts = pfullString.split(":");
+                String pblock = pparts[1];
+                String pBlockName = pblock.replace("}", "");
+                String prepfullString = pblocktoreplace.get().toString();
+                String[] prepparts = prepfullString.split(":");
+                String prepblock = prepparts[1];
+                String pRepblockName = prepblock.replace("}", "");
                     if (mc.options.jumpKey.isPressed()){
-                        ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY+mgcdist.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcdist.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY+mgcdist.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcdist.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY+mgcdist.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcdist.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
                     if (mc.options.sneakKey.isPressed()){
-                        ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcdist.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + (pY-mgcdist.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcdist.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + (pY-mgcdist.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcdist.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + (pY-mgcdist.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
                     if (mc.options.forwardKey.isPressed()){
                     switch (mc.player.getHorizontalFacing()){
                         case NORTH -> {
-                            ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
+                            if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
+                            else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
                         }
                         case WEST -> {
-                            ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                            if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                            else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
                         }
                         case SOUTH -> {
-                            ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
+                            if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
+                            else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
                         }
                         case EAST -> {
-                            ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                            if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                            else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
                         }
                     }
                     }
                         if (mc.options.backKey.isPressed()){
                             switch (mc.player.getHorizontalFacing()){
                                 case NORTH -> {
-                                    ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
+                                    if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
+                                    else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
                                 }
                                 case WEST -> {
-                                    ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                                    if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                                    else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
                                 }
                                 case SOUTH -> {
-                                    ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
+                                    if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
+                                    else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
                                 }
                                 case EAST -> {
-                                    ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                                    if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                                    else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
                                 }
                             }
                         }
                             if (mc.options.rightKey.isPressed()){
                                 switch (mc.player.getHorizontalFacing()){
                                     case NORTH -> {
-                                        ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
                                     }
                                     case WEST -> {
-                                        ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
+                                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
+                                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
                                     }
                                     case SOUTH -> {
-                                        ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
                                     }
                                     case EAST -> {
-                                        ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
+                                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
+                                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
                                     }
                                 }
                             }
                                 if (mc.options.leftKey.isPressed()){
                                     switch (mc.player.getHorizontalFacing()){
                                         case NORTH -> {
-                                            ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                                            if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                                            else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
                                         }
                                         case WEST -> {
-                                            ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
+                                            if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
+                                            else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
                                         }
                                         case SOUTH -> {
-                                            ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                                            if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                                            else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
                                         }
                                         case EAST -> {
-                                            ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
+                                            if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
+                                            else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
                                         }
                                     }
                     }
@@ -521,8 +707,44 @@ public class HandOfGod extends Module {
                 if (roofticks<=rooftickdelay.get()){
                     roofticks++;
                 } else if (roofticks>rooftickdelay.get()) {
-                    ChatUtils.sendPlayerMsg("/fill " + (pX - roofradius.get()) + " " + roofheight.get() +" "+ (pZ - roofradius.get()) +" "+ (pX + roofradius.get()) + " " + roofheight.get() +" "+ (pZ + roofradius.get()) + " "+roofblock);
+                    String rfullString = roofblock.get().toString();
+                    String[] rparts = rfullString.split(":");
+                    String rblock = rparts[1];
+                    String rblockName = rblock.replace("}", "");
+                    ChatUtils.sendPlayerMsg("/fill " + (pX - roofradius.get()) + " " + roofheight.get() +" "+ (pZ - roofradius.get()) +" "+ (pX + roofradius.get()) + " " + roofheight.get() +" "+ (pZ + roofradius.get()) + " "+rblockName);
                     roofticks=0;
+                }
+            }
+            if (troll.get()) {
+                if (trollticks<=trolltickdelay.get()){
+                    trollticks++;
+                } else if (trollticks>trolltickdelay.get()){
+                for (Entity entity : mc.world.getEntities()) {
+                    if (entity instanceof PlayerEntity && entity != mc.player){
+                    if (!trollfriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) {
+                        return;
+                    }
+                    String tfullString = trollblock.get().toString();
+                    String[] tparts = tfullString.split(":");
+                    String tblock = tparts[1];
+                    String tBlockName = tblock.replace("}", "");
+                    String trepfullString = trollblocktoreplace.get().toString();
+                    String[] trepparts = trepfullString.split(":");
+                    String trepblock = trepparts[1];
+                    String tRepblockName = trepblock.replace("}", "");
+                    switch (entity.getHorizontalFacing()){
+                        case NORTH, SOUTH -> {
+                            if (!trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trollwidth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trolldepth.get())+" "+(entity.getBlockPos().getX()-trollwidth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trolldepth.get())+" "+tBlockName);
+                            else if (trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trollwidth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trolldepth.get())+" "+(entity.getBlockPos().getX()-trollwidth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trolldepth.get())+" "+tBlockName+" replace "+tRepblockName);
+                        }
+                        case EAST, WEST -> {
+                            if (!trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trolldepth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trollwidth.get())+" "+(entity.getBlockPos().getX()-trolldepth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trollwidth.get())+" "+tBlockName);
+                            else if (trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trolldepth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trollwidth.get())+" "+(entity.getBlockPos().getX()-trolldepth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trollwidth.get())+" "+tBlockName+" replace "+tRepblockName);
+                        }
+                    }
+                    }
+                }
+                trollticks=0;
                 }
             }
         }
