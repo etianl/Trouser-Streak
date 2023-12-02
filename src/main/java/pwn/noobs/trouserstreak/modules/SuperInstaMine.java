@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.Items;
+import net.minecraft.item.ToolItem;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.Hand;
@@ -216,685 +217,353 @@ public class SuperInstaMine extends Module {
             ticks = 0;
 
             if (shouldMine() && range.get()==-1) {
-                if (rotate.get()) {
-                    if (BlockUtils.canBreak(blockPos))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
+                    if (rotate.get() && ((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
+                    else if (!rotate.get() && ((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
                     switch (playermovingdirection){
                         case NORTH -> {
-                            if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                            if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
                         }
                         case SOUTH -> {
-                            if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                            if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
                         }
                         case EAST -> {
-                            if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                            if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
                         }
                         case WEST -> {
-                            if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                            if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
                         }
                     }
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
-
-                } else {
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
-                    switch (playermovingdirection){
-                        case NORTH -> {
-                            if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                            if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                        }
-                        case SOUTH -> {
-                            if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                            if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                        }
-                        case EAST -> {
-                            if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                            if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                        }
-                        case WEST -> {
-                            if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                            if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                        }
-                    }
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
-                }
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 if (swing.get()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
 
             if (shouldMine() && range.get()==0) {
                 if (rotate.get()) {
-                    if (BlockUtils.canBreak(blockPos))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
                 } else {
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
                 }
                 if (swing.get()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
 
             if (shouldMine() && range.get()==1) {
-                if (rotate.get()) {
-                    if (BlockUtils.canBreak(blockPos))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
+                    if (rotate.get() && ((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
+                    else if (!rotate.get() && ((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
                     switch (playermovingdirection){
                         case NORTH -> {
-                            if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                            if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
                         }
                         case SOUTH -> {
-                            if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                            if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
                         }
                         case EAST -> {
-                            if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                            if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
                         }
                         case WEST -> {
-                            if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                            if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
                         }
                     }
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
-                } else {
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
-                    switch (playermovingdirection){
-                        case NORTH -> {
-                            if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                            if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                        }
-                        case SOUTH -> {
-                            if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                            if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                        }
-                        case EAST -> {
-                            if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                            if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                        }
-                        case WEST -> {
-                            if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                            if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                        }
-                    }
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
-                }
-
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 if (swing.get()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
             if (shouldMine() && range.get()==2) {
-                if (rotate.get()) {
-                    if (BlockUtils.canBreak(blockPos))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
+                    if (rotate.get() && ((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
+                    else if (!rotate.get() && ((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
                     if (playermovingdirection == Direction.NORTH || playermovingdirection == Direction.SOUTH) {
-                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
                     }
                     if (playermovingdirection == Direction.EAST || playermovingdirection == Direction.WEST) {
-                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
                     }
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
-                } else {
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
-                    if (playermovingdirection == Direction.NORTH || playermovingdirection == Direction.SOUTH) {
-                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                    }
-                    if (playermovingdirection == Direction.EAST || playermovingdirection == Direction.WEST) {
-                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                    }
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
-                }
-
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 if (swing.get()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
             if (shouldMine() && range.get()==3) {
-                if (rotate.get()) {
-                    if (BlockUtils.canBreak(blockPos))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
+                    if (rotate.get() && ((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
+                    else if (!rotate.get() && ((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
                     if ((aorient.get() && playerpitch<=30 && playerpitch>=-30) || (mode.get() == Modes.Vertical && !aorient.get())) {
                         if (playermovingdirection == Direction.NORTH || playermovingdirection == Direction.SOUTH && (playerpitch <= 30 && playerpitch >= -30)) {
-                            if (BlockUtils.canBreak(blockPos2))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                            if (BlockUtils.canBreak(blockPos2))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                            if (BlockUtils.canBreak(blockPos1))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                            if (BlockUtils.canBreak(blockPos1))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                            if (BlockUtils.canBreak(blockPos9))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos9)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos9)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                            if (BlockUtils.canBreak(blockPos9))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos9)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos9)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                            if (BlockUtils.canBreak(blockPos18))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos18)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos18)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                            if (BlockUtils.canBreak(blockPos18))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos18)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos18)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
                         }
                         if (playermovingdirection == Direction.EAST || playermovingdirection == Direction.WEST && (playerpitch <= 30 && playerpitch >= -30)) {
-                            if (BlockUtils.canBreak(blockPos4))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                            if (BlockUtils.canBreak(blockPos4))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                            if (BlockUtils.canBreak(blockPos3))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                            if (BlockUtils.canBreak(blockPos3))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                            if (BlockUtils.canBreak(blockPos9))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos9)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos9)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                            if (BlockUtils.canBreak(blockPos9))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos9)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos9)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                            if (BlockUtils.canBreak(blockPos18))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos18)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos18)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                            if (BlockUtils.canBreak(blockPos18))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos18)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos18)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
                         }
                     }
                     if ((aorient.get() && playerpitch>30 | playerpitch<-30) || (mode.get() == Modes.Horizontal && !aorient.get())){
-                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
                     }
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
-                } else {
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
-                    if ((aorient.get() && playerpitch<=30 && playerpitch>=-30) || (mode.get() == Modes.Vertical && !aorient.get())) {
-                        if (playermovingdirection == Direction.NORTH || playermovingdirection == Direction.SOUTH && (playerpitch <= 30 && playerpitch >= -30)) {
-                            if (BlockUtils.canBreak(blockPos2))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                            if (BlockUtils.canBreak(blockPos2))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                            if (BlockUtils.canBreak(blockPos1))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                            if (BlockUtils.canBreak(blockPos1))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                            if (BlockUtils.canBreak(blockPos9))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                            if (BlockUtils.canBreak(blockPos9))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                            if (BlockUtils.canBreak(blockPos18))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                            if (BlockUtils.canBreak(blockPos18))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
-                        }
-                        if (playermovingdirection == Direction.EAST || playermovingdirection == Direction.WEST && (playerpitch <= 30 && playerpitch >= -30)) {
-                            if (BlockUtils.canBreak(blockPos4))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                            if (BlockUtils.canBreak(blockPos4))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                            if (BlockUtils.canBreak(blockPos3))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                            if (BlockUtils.canBreak(blockPos3))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                            if (BlockUtils.canBreak(blockPos9))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                            if (BlockUtils.canBreak(blockPos9))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                            if (BlockUtils.canBreak(blockPos18))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                            if (BlockUtils.canBreak(blockPos18))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
-                        }
-                    }
-                    if ((aorient.get() && playerpitch>30 | playerpitch<-30) || (mode.get() == Modes.Horizontal && !aorient.get())){
-                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                    }
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
-                }
-
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 if (swing.get()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
             if (shouldMine() && range.get()==4) {
-                if (rotate.get()) {
-                    if (BlockUtils.canBreak(blockPos))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
+                    if (rotate.get() && ((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
+                    else if (!rotate.get() && ((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
                     if ((aorient.get() && playerpitch<=30 && playerpitch>=-30) || (mode.get() == Modes.Vertical && !aorient.get())) {
                         if (playermovingdirection == Direction.NORTH || playermovingdirection == Direction.SOUTH) {
-                            if (BlockUtils.canBreak(blockPos2))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                            if (BlockUtils.canBreak(blockPos2))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                            if (BlockUtils.canBreak(blockPos1))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                            if (BlockUtils.canBreak(blockPos1))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                            if (BlockUtils.canBreak(blockPos9))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos9)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos9)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                            if (BlockUtils.canBreak(blockPos9))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos9)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos9)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                            if (BlockUtils.canBreak(blockPos18))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos18)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos18)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                            if (BlockUtils.canBreak(blockPos18))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos18)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos18)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
-                            if (BlockUtils.canBreak(blockPos10))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos10)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos10)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos10, direction));
-                            if (BlockUtils.canBreak(blockPos10))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos10)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos10)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos10, direction));
-                            if (BlockUtils.canBreak(blockPos11))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos11)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos11)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos11, direction));
-                            if (BlockUtils.canBreak(blockPos11))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos11)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos11)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos11, direction));
-                            if (BlockUtils.canBreak(blockPos19))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos19)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos19)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos19, direction));
-                            if (BlockUtils.canBreak(blockPos19))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos19)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos19)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos19, direction));
-                            if (BlockUtils.canBreak(blockPos20))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos20)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos20)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos20, direction));
-                            if (BlockUtils.canBreak(blockPos20))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos20)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos20)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos20, direction));
                         }
                         if (playermovingdirection == Direction.EAST || playermovingdirection == Direction.WEST) {
-                            if (BlockUtils.canBreak(blockPos4))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                            if (BlockUtils.canBreak(blockPos4))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                            if (BlockUtils.canBreak(blockPos3))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                            if (BlockUtils.canBreak(blockPos3))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                            if (BlockUtils.canBreak(blockPos9))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos9)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos9)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                            if (BlockUtils.canBreak(blockPos9))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos9)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos9)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                            if (BlockUtils.canBreak(blockPos18))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos18)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos18)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                            if (BlockUtils.canBreak(blockPos18))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos18)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos18)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
-                            if (BlockUtils.canBreak(blockPos12))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos12)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos12)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos12, direction));
-                            if (BlockUtils.canBreak(blockPos12))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos12)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos12)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos12, direction));
-                            if (BlockUtils.canBreak(blockPos13))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos13)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos13)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos13, direction));
-                            if (BlockUtils.canBreak(blockPos13))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos13)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos13)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos13, direction));
-                            if (BlockUtils.canBreak(blockPos21))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos21)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos21)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos21, direction));
-                            if (BlockUtils.canBreak(blockPos21))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos21)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos21)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos21, direction));
-                            if (BlockUtils.canBreak(blockPos22))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos22)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos22)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos22, direction));
-                            if (BlockUtils.canBreak(blockPos22))
+                            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos22)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos22)))
                                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos22, direction));
                         }
                     }
                         if ((aorient.get() && playerpitch>30 | playerpitch<-30) || (mode.get() == Modes.Horizontal && !aorient.get())){
-                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                        if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
-                        if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
-                        if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
-                        if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
-                        if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
-                        if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
-                        if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
-                        if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos5)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos5)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos5)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos5)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos6)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos6)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos6)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos6)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos7)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos7)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos7)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos7)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos8)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos8)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
+                        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos8)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos8)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
                     }
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
-                } else {
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
-                    if ((aorient.get() && playerpitch<=30 && playerpitch>=-30) || (mode.get() == Modes.Vertical && !aorient.get())) {
-                        if (playermovingdirection == Direction.NORTH || playermovingdirection == Direction.SOUTH) {
-                            if (BlockUtils.canBreak(blockPos2))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                            if (BlockUtils.canBreak(blockPos2))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                            if (BlockUtils.canBreak(blockPos1))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                            if (BlockUtils.canBreak(blockPos1))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                            if (BlockUtils.canBreak(blockPos9))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                            if (BlockUtils.canBreak(blockPos9))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                            if (BlockUtils.canBreak(blockPos18))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                            if (BlockUtils.canBreak(blockPos18))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
-                            if (BlockUtils.canBreak(blockPos10))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos10, direction));
-                            if (BlockUtils.canBreak(blockPos10))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos10, direction));
-                            if (BlockUtils.canBreak(blockPos11))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos11, direction));
-                            if (BlockUtils.canBreak(blockPos11))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos11, direction));
-                            if (BlockUtils.canBreak(blockPos19))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos19, direction));
-                            if (BlockUtils.canBreak(blockPos19))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos19, direction));
-                            if (BlockUtils.canBreak(blockPos20))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos20, direction));
-                            if (BlockUtils.canBreak(blockPos20))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos20, direction));
-                        }
-                        if (playermovingdirection == Direction.EAST || playermovingdirection == Direction.WEST) {
-                            if (BlockUtils.canBreak(blockPos4))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                            if (BlockUtils.canBreak(blockPos4))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                            if (BlockUtils.canBreak(blockPos3))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                            if (BlockUtils.canBreak(blockPos3))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                            if (BlockUtils.canBreak(blockPos9))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                            if (BlockUtils.canBreak(blockPos9))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                            if (BlockUtils.canBreak(blockPos18))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                            if (BlockUtils.canBreak(blockPos18))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
-                            if (BlockUtils.canBreak(blockPos12))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos12, direction));
-                            if (BlockUtils.canBreak(blockPos12))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos12, direction));
-                            if (BlockUtils.canBreak(blockPos13))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos13, direction));
-                            if (BlockUtils.canBreak(blockPos13))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos13, direction));
-                            if (BlockUtils.canBreak(blockPos21))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos21, direction));
-                            if (BlockUtils.canBreak(blockPos21))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos21, direction));
-                            if (BlockUtils.canBreak(blockPos22))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos22, direction));
-                            if (BlockUtils.canBreak(blockPos22))
-                                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos22, direction));
-                        }
-                    }
-                    if ((aorient.get() && playerpitch>30 | playerpitch<-30) || (mode.get() == Modes.Horizontal && !aorient.get())){
-                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                        if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                        if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                        if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                        if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                        if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
-                        if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
-                        if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
-                        if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
-                        if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
-                        if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
-                        if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
-                        if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
-                    }
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
-                }
-
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 if (swing.get()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
             if (shouldMine() && range.get()==5) {
-                if (rotate.get()) {
-                    if (BlockUtils.canBreak(blockPos))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
-                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
-                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
-                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
-                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
-                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
-                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
-                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
-                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
-                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
-                } else {
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
-                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
-                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
-                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
-                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
-                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
-                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
-                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
-                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
-                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
-                }
-
+                    if (rotate.get() && ((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
+                    else if (!rotate.get() && ((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos5)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos5)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos5)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos5)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos6)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos6)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos6)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos6)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos7)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos7)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos7)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos7)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos8)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos8)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos8)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos8)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos9)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos9)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos9)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos9)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos18)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos18)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos18)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos18)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 if (swing.get()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
             if (shouldMine() && range.get()==6) {
-                if (rotate.get()) {
-                    if (BlockUtils.canBreak(blockPos))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
-                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
-                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
-                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
-                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
-                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
-                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
-                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
-                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
-                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                    if (BlockUtils.canBreak(blockPos10))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos10, direction));
-                    if (BlockUtils.canBreak(blockPos10))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos10, direction));
-                    if (BlockUtils.canBreak(blockPos11))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos11, direction));
-                    if (BlockUtils.canBreak(blockPos11))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos11, direction));
-                    if (BlockUtils.canBreak(blockPos12))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos12, direction));
-                    if (BlockUtils.canBreak(blockPos12))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos12, direction));
-                    if (BlockUtils.canBreak(blockPos13))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos13, direction));
-                    if (BlockUtils.canBreak(blockPos13))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos13, direction));
-                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
-                    if (BlockUtils.canBreak(blockPos19))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos19, direction));
-                    if (BlockUtils.canBreak(blockPos19))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos19, direction));
-                    if (BlockUtils.canBreak(blockPos20))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos20, direction));
-                    if (BlockUtils.canBreak(blockPos20))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos20, direction));
-                    if (BlockUtils.canBreak(blockPos21))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos21, direction));
-                    if (BlockUtils.canBreak(blockPos21))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos21, direction));
-                    if (BlockUtils.canBreak(blockPos22))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos22, direction));
-                    if (BlockUtils.canBreak(blockPos22))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos22, direction));
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
-                } else {
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
-                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
-                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
-                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
-                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
-                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
-                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
-                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
-                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
-                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                    if (BlockUtils.canBreak(blockPos10))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos10, direction));
-                    if (BlockUtils.canBreak(blockPos10))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos10, direction));
-                    if (BlockUtils.canBreak(blockPos11))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos11, direction));
-                    if (BlockUtils.canBreak(blockPos11))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos11, direction));
-                    if (BlockUtils.canBreak(blockPos12))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos12, direction));
-                    if (BlockUtils.canBreak(blockPos12))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos12, direction));
-                    if (BlockUtils.canBreak(blockPos13))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos13, direction));
-                    if (BlockUtils.canBreak(blockPos13))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos13, direction));
-                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
-                    if (BlockUtils.canBreak(blockPos19))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos19, direction));
-                    if (BlockUtils.canBreak(blockPos19))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos19, direction));
-                    if (BlockUtils.canBreak(blockPos20))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos20, direction));
-                    if (BlockUtils.canBreak(blockPos20))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos20, direction));
-                    if (BlockUtils.canBreak(blockPos21))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos21, direction));
-                    if (BlockUtils.canBreak(blockPos21))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos21, direction));
-                    if (BlockUtils.canBreak(blockPos22))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos22, direction));
-                    if (BlockUtils.canBreak(blockPos22))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos22, direction));
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
-                }
-
+                    if (rotate.get() && ((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
+                    else if (!rotate.get() && ((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos5)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos5)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos5)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos5)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos6)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos6)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos6)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos6)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos7)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos7)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos7)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos7)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos8)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos8)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos8)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos8)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos9)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos9)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos9)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos9)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos10)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos10)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos10, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos10)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos10)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos10, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos11)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos11)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos11, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos11)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos11)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos11, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos12)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos12)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos12, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos12)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos12)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos12, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos13)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos13)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos13, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos13)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos13)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos13, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos18)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos18)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos18)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos18)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos19)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos19)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos19, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos19)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos19)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos19, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos20)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos20)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos20, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos20)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos20)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos20, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos21)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos21)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos21, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos21)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos21)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos21, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos22)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos22)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos22, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos22)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos22)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos22, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 if (swing.get()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
             if (shouldMine() && range.get()==7) {
-                if (rotate.get()) {
-                    if (BlockUtils.canBreak(blockPos))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
-                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
-                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
-                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
-                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
-                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
-                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
-                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
-                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
-                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                    if (BlockUtils.canBreak(blockPos10))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos10, direction));
-                    if (BlockUtils.canBreak(blockPos10))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos10, direction));
-                    if (BlockUtils.canBreak(blockPos11))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos11, direction));
-                    if (BlockUtils.canBreak(blockPos11))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos11, direction));
-                    if (BlockUtils.canBreak(blockPos12))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos12, direction));
-                    if (BlockUtils.canBreak(blockPos12))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos12, direction));
-                    if (BlockUtils.canBreak(blockPos13))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos13, direction));
-                    if (BlockUtils.canBreak(blockPos13))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos13, direction));
-                    if (BlockUtils.canBreak(blockPos14))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos14, direction));
-                    if (BlockUtils.canBreak(blockPos14))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos14, direction));
-                    if (BlockUtils.canBreak(blockPos15))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos15, direction));
-                    if (BlockUtils.canBreak(blockPos15))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos15, direction));
-                    if (BlockUtils.canBreak(blockPos16))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos16, direction));
-                    if (BlockUtils.canBreak(blockPos16))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos16, direction));
-                    if (BlockUtils.canBreak(blockPos17))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos17, direction));
-                    if (BlockUtils.canBreak(blockPos17))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos17, direction));
-                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
-                    if (BlockUtils.canBreak(blockPos19))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos19, direction));
-                    if (BlockUtils.canBreak(blockPos19))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos19, direction));
-                    if (BlockUtils.canBreak(blockPos20))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos20, direction));
-                    if (BlockUtils.canBreak(blockPos20))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos20, direction));
-                    if (BlockUtils.canBreak(blockPos21))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos21, direction));
-                    if (BlockUtils.canBreak(blockPos21))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos21, direction));
-                    if (BlockUtils.canBreak(blockPos22))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos22, direction));
-                    if (BlockUtils.canBreak(blockPos22))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos22, direction));
-                    if (BlockUtils.canBreak(blockPos23))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos23, direction));
-                    if (BlockUtils.canBreak(blockPos23))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos23, direction));
-                    if (BlockUtils.canBreak(blockPos24))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos24, direction));
-                    if (BlockUtils.canBreak(blockPos24))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos24, direction));
-                    if (BlockUtils.canBreak(blockPos25))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos25, direction));
-                    if (BlockUtils.canBreak(blockPos25))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos25, direction));
-                    if (BlockUtils.canBreak(blockPos26))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos26, direction));
-                    if (BlockUtils.canBreak(blockPos26))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos26, direction));
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
-                } else {
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
-                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
-                    if (BlockUtils.canBreak(blockPos1))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
-                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
-                    if (BlockUtils.canBreak(blockPos2))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
-                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
-                    if (BlockUtils.canBreak(blockPos3))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
-                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
-                    if (BlockUtils.canBreak(blockPos4))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
-                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
-                    if (BlockUtils.canBreak(blockPos5))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
-                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
-                    if (BlockUtils.canBreak(blockPos6))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
-                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
-                    if (BlockUtils.canBreak(blockPos7))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
-                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
-                    if (BlockUtils.canBreak(blockPos8))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
-                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
-                    if (BlockUtils.canBreak(blockPos9))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
-                    if (BlockUtils.canBreak(blockPos10))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos10, direction));
-                    if (BlockUtils.canBreak(blockPos10))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos10, direction));
-                    if (BlockUtils.canBreak(blockPos11))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos11, direction));
-                    if (BlockUtils.canBreak(blockPos11))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos11, direction));
-                    if (BlockUtils.canBreak(blockPos12))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos12, direction));
-                    if (BlockUtils.canBreak(blockPos12))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos12, direction));
-                    if (BlockUtils.canBreak(blockPos13))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos13, direction));
-                    if (BlockUtils.canBreak(blockPos13))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos13, direction));
-                    if (BlockUtils.canBreak(blockPos14))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos14, direction));
-                    if (BlockUtils.canBreak(blockPos14))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos14, direction));
-                    if (BlockUtils.canBreak(blockPos15))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos15, direction));
-                    if (BlockUtils.canBreak(blockPos15))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos15, direction));
-                    if (BlockUtils.canBreak(blockPos16))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos16, direction));
-                    if (BlockUtils.canBreak(blockPos16))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos16, direction));
-                    if (BlockUtils.canBreak(blockPos17))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos17, direction));
-                    if (BlockUtils.canBreak(blockPos17))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos17, direction));
-                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
-                    if (BlockUtils.canBreak(blockPos18))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
-                    if (BlockUtils.canBreak(blockPos19))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos19, direction));
-                    if (BlockUtils.canBreak(blockPos19))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos19, direction));
-                    if (BlockUtils.canBreak(blockPos20))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos20, direction));
-                    if (BlockUtils.canBreak(blockPos20))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos20, direction));
-                    if (BlockUtils.canBreak(blockPos21))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos21, direction));
-                    if (BlockUtils.canBreak(blockPos21))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos21, direction));
-                    if (BlockUtils.canBreak(blockPos22))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos22, direction));
-                    if (BlockUtils.canBreak(blockPos22))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos22, direction));
-                    if (BlockUtils.canBreak(blockPos23))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos23, direction));
-                    if (BlockUtils.canBreak(blockPos23))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos23, direction));
-                    if (BlockUtils.canBreak(blockPos24))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos24, direction));
-                    if (BlockUtils.canBreak(blockPos24))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos24, direction));
-                    if (BlockUtils.canBreak(blockPos25))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos25, direction));
-                    if (BlockUtils.canBreak(blockPos25))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos25, direction));
-                    if (BlockUtils.canBreak(blockPos26))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos26, direction));
-                    if (BlockUtils.canBreak(blockPos26))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos26, direction));
-                    if (BlockUtils.canBreak(blockPos))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
-                }
-
+                    if (rotate.get() && ((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
+                    else if (!rotate.get() && ((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos1, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos1, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos2, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos2, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos3, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos3, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos4, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos4, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos5)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos5)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos5, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos5)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos5)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos5, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos6)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos6)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos6, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos6)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos6)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos6, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos7)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos7)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos7, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos7)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos7)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos7, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos8)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos8)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos8, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos8)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos8)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos8, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos9)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos9)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos9, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos9)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos9)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos9, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos10)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos10)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos10, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos10)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos10)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos10, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos11)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos11)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos11, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos11)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos11)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos11, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos12)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos12)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos12, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos12)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos12)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos12, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos13)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos13)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos13, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos13)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos13)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos13, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos14)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos14)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos14, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos14)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos14)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos14, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos15)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos15)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos15, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos15)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos15)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos15, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos16)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos16)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos16, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos16)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos16)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos16, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos17)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos17)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos17, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos17)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos17)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos17, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos18)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos18)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos18, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos18)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos18)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos18, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos19)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos19)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos19, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos19)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos19)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos19, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos20)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos20)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos20, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos20)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos20)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos20, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos21)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos21)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos21, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos21)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos21)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos21, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos22)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos22)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos22, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos22)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos22)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos22, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos23)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos23)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos23, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos23)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos23)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos23, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos24)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos24)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos24, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos24)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos24)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos24, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos25)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos25)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos25, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos25)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos25)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos25, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos26)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos26)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos26, direction));
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos26)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos26)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos26, direction));
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                 if (swing.get()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
         } else {
@@ -910,150 +579,150 @@ public class SuperInstaMine extends Module {
     @EventHandler
     private void onRender(Render3DEvent event) {
         if (!render.get() || !shouldMine()) return;
-        if (BlockUtils.canBreak(blockPos))event.renderer.box(blockPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-        if (((range.get()==-1 && playermovingdirection==Direction.SOUTH) || (range.get()==1 && playermovingdirection==Direction.NORTH) || (range.get()==2 && (playermovingdirection==Direction.NORTH | playermovingdirection==Direction.SOUTH))) && BlockUtils.canBreak(blockPos1))event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-        if (((range.get()==-1 && playermovingdirection==Direction.NORTH) || (range.get()==1 && playermovingdirection==Direction.SOUTH) || (range.get()==2 && (playermovingdirection==Direction.NORTH | playermovingdirection==Direction.SOUTH))) && BlockUtils.canBreak(blockPos2))event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-        if (((range.get()==-1 && playermovingdirection==Direction.WEST) || (range.get()==1 && playermovingdirection==Direction.EAST) || (range.get()==2 && (playermovingdirection==Direction.EAST | playermovingdirection==Direction.WEST))) && BlockUtils.canBreak(blockPos3))event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-        if (((range.get()==-1 && playermovingdirection==Direction.EAST) || (range.get()==1 && playermovingdirection==Direction.WEST) || (range.get()==2 && (playermovingdirection==Direction.EAST | playermovingdirection==Direction.WEST))) && BlockUtils.canBreak(blockPos4))event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos)))event.renderer.box(blockPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        if (((range.get()==-1 && playermovingdirection==Direction.SOUTH) || (range.get()==1 && playermovingdirection==Direction.NORTH) || (range.get()==2 && (playermovingdirection==Direction.NORTH | playermovingdirection==Direction.SOUTH))) && (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1))))event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        if (((range.get()==-1 && playermovingdirection==Direction.NORTH) || (range.get()==1 && playermovingdirection==Direction.SOUTH) || (range.get()==2 && (playermovingdirection==Direction.NORTH | playermovingdirection==Direction.SOUTH))) && (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2))))event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        if (((range.get()==-1 && playermovingdirection==Direction.WEST) || (range.get()==1 && playermovingdirection==Direction.EAST) || (range.get()==2 && (playermovingdirection==Direction.EAST | playermovingdirection==Direction.WEST))) && (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3))))event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        if (((range.get()==-1 && playermovingdirection==Direction.EAST) || (range.get()==1 && playermovingdirection==Direction.WEST) || (range.get()==2 && (playermovingdirection==Direction.EAST | playermovingdirection==Direction.WEST))) && (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4))))event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         if (range.get()==3){
             if ((aorient.get() && playerpitch<=30 && playerpitch>=-30) || (mode.get() == Modes.Vertical && !aorient.get())) {
                 if ((playermovingdirection == Direction.NORTH || playermovingdirection == Direction.SOUTH)) {
-                    if (BlockUtils.canBreak(blockPos1))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))
                         event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    if (BlockUtils.canBreak(blockPos2))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))
                         event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    if (BlockUtils.canBreak(blockPos9))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos9)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos9)))
                         event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    if (BlockUtils.canBreak(blockPos18))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos10)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos18)))
                         event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                 }
                 if ((playermovingdirection == Direction.EAST || playermovingdirection == Direction.WEST)) {
-                    if (BlockUtils.canBreak(blockPos9))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos9)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos9)))
                         event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    if (BlockUtils.canBreak(blockPos18))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos18)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos18)))
                         event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    if (BlockUtils.canBreak(blockPos3))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))
                         event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    if (BlockUtils.canBreak(blockPos4))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))
                         event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                 }
             }
             if ((aorient.get() && playerpitch>30 | playerpitch<-30) || (mode.get() == Modes.Horizontal && !aorient.get())){
-                if (BlockUtils.canBreak(blockPos1))event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (BlockUtils.canBreak(blockPos2))event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (BlockUtils.canBreak(blockPos3))event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (BlockUtils.canBreak(blockPos4))event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
             }
         }
         if (range.get()==4){
             if ((aorient.get() && playerpitch<=30 && playerpitch>=-30) || (mode.get() == Modes.Vertical && !aorient.get())) {
                 if (playermovingdirection == Direction.NORTH || playermovingdirection == Direction.SOUTH) {
-                    if (BlockUtils.canBreak(blockPos1))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))
                         event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    if (BlockUtils.canBreak(blockPos2))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))
                         event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    if (BlockUtils.canBreak(blockPos9))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos9)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos9)))
                         event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    if (BlockUtils.canBreak(blockPos18))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos18)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos18)))
                         event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    if (BlockUtils.canBreak(blockPos10))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos10)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos10)))
                         event.renderer.box(blockPos10, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    if (BlockUtils.canBreak(blockPos11))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos11)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos11)))
                         event.renderer.box(blockPos11, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    if (BlockUtils.canBreak(blockPos19))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos19)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos19)))
                         event.renderer.box(blockPos19, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    if (BlockUtils.canBreak(blockPos20))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos20)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos20)))
                         event.renderer.box(blockPos20, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                 }
                 if (playermovingdirection == Direction.EAST || playermovingdirection == Direction.WEST) {
-                    if (BlockUtils.canBreak(blockPos9))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos9)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos9)))
                         event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    if (BlockUtils.canBreak(blockPos18))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos18)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos18)))
                         event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    if (BlockUtils.canBreak(blockPos3))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))
                         event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    if (BlockUtils.canBreak(blockPos4))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))
                         event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    if (BlockUtils.canBreak(blockPos12))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos12)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos12)))
                         event.renderer.box(blockPos12, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    if (BlockUtils.canBreak(blockPos13))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos13)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos13)))
                         event.renderer.box(blockPos13, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    if (BlockUtils.canBreak(blockPos21))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos21)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos21)))
                         event.renderer.box(blockPos21, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    if (BlockUtils.canBreak(blockPos22))
+                    if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos22)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos22)))
                         event.renderer.box(blockPos22, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                 }
             }
             if ((aorient.get() && playerpitch>30 | playerpitch<-30) || (mode.get() == Modes.Horizontal && !aorient.get())){
-                if (BlockUtils.canBreak(blockPos1))event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (BlockUtils.canBreak(blockPos2))event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (BlockUtils.canBreak(blockPos3))event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (BlockUtils.canBreak(blockPos4))event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (BlockUtils.canBreak(blockPos5))event.renderer.box(blockPos5, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (BlockUtils.canBreak(blockPos6))event.renderer.box(blockPos6, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (BlockUtils.canBreak(blockPos7))event.renderer.box(blockPos7, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                if (BlockUtils.canBreak(blockPos8))event.renderer.box(blockPos8, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos5)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos5)))event.renderer.box(blockPos5, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos6)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos6)))event.renderer.box(blockPos6, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos7)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos7)))event.renderer.box(blockPos7, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos8)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos8)))event.renderer.box(blockPos8, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
             }
         }
         if (range.get()==5){
-            if (BlockUtils.canBreak(blockPos1))event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos2))event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos3))event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos4))event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos5))event.renderer.box(blockPos5, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos6))event.renderer.box(blockPos6, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos7))event.renderer.box(blockPos7, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos8))event.renderer.box(blockPos8, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos9))event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos18))event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos5)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos5)))event.renderer.box(blockPos5, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos6)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos6)))event.renderer.box(blockPos6, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos7)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos7)))event.renderer.box(blockPos7, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos8)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos8)))event.renderer.box(blockPos8, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos9)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos9)))event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos18)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos18)))event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         }
         if (range.get()==6){
-            if (BlockUtils.canBreak(blockPos1))event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos2))event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos3))event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos4))event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos5))event.renderer.box(blockPos5, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos6))event.renderer.box(blockPos6, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos7))event.renderer.box(blockPos7, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos8))event.renderer.box(blockPos8, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos9))event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos10))event.renderer.box(blockPos10, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos11))event.renderer.box(blockPos11, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos12))event.renderer.box(blockPos12, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos13))event.renderer.box(blockPos13, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos18))event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos19))event.renderer.box(blockPos19, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos20))event.renderer.box(blockPos20, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos21))event.renderer.box(blockPos21, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos22))event.renderer.box(blockPos22, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos5)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos5)))event.renderer.box(blockPos5, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos6)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos6)))event.renderer.box(blockPos6, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos7)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos7)))event.renderer.box(blockPos7, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos8)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos8)))event.renderer.box(blockPos8, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos9)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos9)))event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos10)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos10)))event.renderer.box(blockPos10, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos11)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos11)))event.renderer.box(blockPos11, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos12)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos12)))event.renderer.box(blockPos12, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos13)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos13)))event.renderer.box(blockPos13, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos18)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos18)))event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos19)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos19)))event.renderer.box(blockPos19, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos20)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos20)))event.renderer.box(blockPos20, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos21)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos21)))event.renderer.box(blockPos21, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos22)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos22)))event.renderer.box(blockPos22, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         }
         if (range.get()==7){
-            if (BlockUtils.canBreak(blockPos1))event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos2))event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos3))event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos4))event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos5))event.renderer.box(blockPos5, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos6))event.renderer.box(blockPos6, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos7))event.renderer.box(blockPos7, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos8))event.renderer.box(blockPos8, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos9))event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos10))event.renderer.box(blockPos10, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos11))event.renderer.box(blockPos11, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos12))event.renderer.box(blockPos12, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos13))event.renderer.box(blockPos13, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos14))event.renderer.box(blockPos14, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos15))event.renderer.box(blockPos15, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos16))event.renderer.box(blockPos16, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos17))event.renderer.box(blockPos17, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos18))event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos19))event.renderer.box(blockPos19, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos20))event.renderer.box(blockPos20, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos21))event.renderer.box(blockPos21, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos22))event.renderer.box(blockPos22, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos23))event.renderer.box(blockPos23, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos24))event.renderer.box(blockPos24, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos25))event.renderer.box(blockPos25, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            if (BlockUtils.canBreak(blockPos26))event.renderer.box(blockPos26, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos3)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos3)))event.renderer.box(blockPos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos4)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos4)))event.renderer.box(blockPos4, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos5)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos5)))event.renderer.box(blockPos5, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos6)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos6)))event.renderer.box(blockPos6, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos7)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos7)))event.renderer.box(blockPos7, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos8)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos8)))event.renderer.box(blockPos8, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos9)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos9)))event.renderer.box(blockPos9, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos10)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos10)))event.renderer.box(blockPos10, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos11)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos11)))event.renderer.box(blockPos11, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos12)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos12)))event.renderer.box(blockPos12, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos13)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos13)))event.renderer.box(blockPos13, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos14)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos14)))event.renderer.box(blockPos14, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos15)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos15)))event.renderer.box(blockPos15, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos16)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos16)))event.renderer.box(blockPos16, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos17)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos17)))event.renderer.box(blockPos17, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos18)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos18)))event.renderer.box(blockPos18, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos19)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos19)))event.renderer.box(blockPos19, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos20)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos20)))event.renderer.box(blockPos20, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos21)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos21)))event.renderer.box(blockPos21, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos22)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos22)))event.renderer.box(blockPos22, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos23)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos23)))event.renderer.box(blockPos23, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos24)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos24)))event.renderer.box(blockPos24, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos25)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos25)))event.renderer.box(blockPos25, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof ToolItem)) && BlockUtils.canBreak(blockPos26)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos26)))event.renderer.box(blockPos26, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         }
     }
     public enum Modes {

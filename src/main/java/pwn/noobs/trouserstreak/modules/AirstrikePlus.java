@@ -32,7 +32,7 @@ public class AirstrikePlus extends Module {
             .build());
     private final Setting<String> entity = sgGeneral.add(new StringSetting.Builder()
             .name("Entity to Spawn")
-            .description("What is created. Ex: fireball, villager, minecart, lightning, magma_cube, tnt")
+            .description("What is created. Ex: fireball, villager, minecart, lightning_bolt, magma_cube, tnt")
             .defaultValue("fireball")
             .build());
     private final Setting<Boolean> mixer = sgGeneral.add(new BoolSetting.Builder()
@@ -42,7 +42,7 @@ public class AirstrikePlus extends Module {
             .build());
     private final Setting<String> entity2 = sgGeneral.add(new StringSetting.Builder()
             .name("Entity2 to Spawn")
-            .description("What is created. Ex: fireball, villager, minecart, lightning, magma_cube, tnt")
+            .description("What is created. Ex: fireball, villager, minecart, lightning_bolt, magma_cube, tnt")
             .defaultValue("wither")
             .visible(() -> mixer.get())
             .build());

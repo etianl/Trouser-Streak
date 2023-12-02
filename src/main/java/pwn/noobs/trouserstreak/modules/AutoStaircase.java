@@ -84,8 +84,8 @@ public class AutoStaircase extends Module {
     public void onDeactivate() {
         mc.options.forwardKey.setPressed(false);
         mc.options.jumpKey.setPressed(false);
-        Modules.get().get(Timer.class).setOverride(Timer.OFF);
         resetTimer = true;
+        Modules.get().get(Timer.class).setOverride(Timer.OFF);
     }
 
     @EventHandler
@@ -95,8 +95,8 @@ public class AutoStaircase extends Module {
                 resetTimer = false;
                 Modules.get().get(Timer.class).setOverride(StairTimer.get());
             } else if (!resetTimer) {
-                Modules.get().get(Timer.class).setOverride(Timer.OFF);
                 resetTimer = true;
+                Modules.get().get(Timer.class).setOverride(Timer.OFF);
         }
         if (mc.player.getMainHandStack().isEmpty()) {
             mc.options.forwardKey.setPressed(false);

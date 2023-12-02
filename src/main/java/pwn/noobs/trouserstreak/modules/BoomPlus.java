@@ -22,7 +22,7 @@ public class BoomPlus extends Module {
 
     private final Setting<String> entity = sgGeneral.add(new StringSetting.Builder()
             .name("Entity to Spawn")
-            .description("What is created. Ex: fireball, villager, minecart, lightning, magma_cube, tnt")
+            .description("What is created. Ex: fireball, villager, minecart, lightning_bolt, magma_cube, tnt")
             .defaultValue("fireball")
             .build());
     private final Setting<String> nom = sgGeneral.add(new StringSetting.Builder()
@@ -173,11 +173,11 @@ public class BoomPlus extends Module {
 
     @EventHandler
     public void onTick(TickEvent.Post event) {
-        if (mc.player.getAbilities().creativeMode) {}
-        else {
+        if (!mc.player.getAbilities().creativeMode) {
             error("You need to be in creative mode.");
             toggle();
         }
+
         if (auto.get() && mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player.getAbilities().creativeMode) {
             if (aticks<=atickdelay.get()){
                 aticks++;
