@@ -44,8 +44,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-
 /*
     This BaseFinder was made from the newchunks code,
     Newchunks was Ported from: https://github.com/BleachDrinker420/BleachHack/blob/master/BleachHack-Fabric-1.16/src/main/java/bleach/hack/module/mods/NewChunks.java
