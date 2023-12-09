@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "id": "streak-addon",
-  "version": "0.7.5",
+  "version": "0.7.6",
   "name": "TrouserStreak",
   "description": "Trouser-Streak is a compilation of modules, updated to the latest version and optimized for maximum grief. I did not make all of these.",
   "authors": [
-    "etianll, and various authors"
+    "etianl, and various authors"
   ],
   "contact": {
     "repo": "https://github.com/etianl/Trouser-Streak/"

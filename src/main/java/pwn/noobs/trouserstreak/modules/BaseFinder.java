@@ -30,6 +30,7 @@ import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.WorldChunk;
 import pwn.noobs.trouserstreak.Trouser;
@@ -604,7 +605,7 @@ public class BaseFinder extends Module {
             synchronized (baseChunks) {
                 for (ChunkPos c : baseChunks) {
                     if (mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
-                        render(new Box(c.getStartPos().add(7, renderHeightYbottom.get(), 7), c.getStartPos().add(8, renderHeightY.get(), 8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
+                        render(new Box(new Vec3d(c.getStartPos().getX()+7, c.getStartPos().getY()+renderHeightYbottom.get(), c.getStartPos().getZ()+7), new Vec3d(c.getStartPos().getX()+8, c.getStartPos().getY()+renderHeightY.get(), c.getStartPos().getZ()+8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
                     }
                 }
             }
@@ -612,11 +613,11 @@ public class BaseFinder extends Module {
                 synchronized (baseChunks) {
                     for (ChunkPos c : baseChunks) {
                         if (mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
-                            render(new Box(c.getStartPos().add(7, renderHeightYbottom.get(), 7), c.getStartPos().add(8, renderHeightY.get(), 8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
+                            render(new Box(new Vec3d(c.getStartPos().getX()+7, c.getStartPos().getY()+renderHeightYbottom.get(), c.getStartPos().getZ()+7), new Vec3d(c.getStartPos().getX()+8, c.getStartPos().getY()+renderHeightY.get(), c.getStartPos().getZ()+8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
                         }
                     }
                 }
-                render2(new Box(new ChunkPos(closestbaseX,closestbaseZ).getStartPos().add(7, renderHeightYbottom.get(), 7), new ChunkPos(closestbaseX,closestbaseZ).getStartPos().add(8, renderHeightY.get(), 8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
+                render2(new Box(new Vec3d(new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getX()+7, new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getY()+renderHeightYbottom.get(), new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getZ()+7), new Vec3d (new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getX()+8, new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getY()+renderHeightY.get(), new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getZ()+8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
             }
         }
     }
