@@ -30,6 +30,7 @@ import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.WorldChunk;
 import pwn.noobs.trouserstreak.Trouser;
@@ -66,7 +67,7 @@ public class BaseFinder extends Module {
     private final Setting<Integer> skybuildint = sgGeneral.add(new IntSetting.Builder()
             .name("Sky Build Y Threshold")
             .description("If Blocks higher than this Y value, flag chunk as possible build.")
-                    .min(258)
+            .min(258)
             .sliderRange(258,319)
             .defaultValue(260)
             .visible(() -> skybuildfind.get())
@@ -113,7 +114,7 @@ public class BaseFinder extends Module {
                     Blocks.LAVA_CAULDRON, Blocks.POWDER_SNOW_CAULDRON, Blocks.ACTIVATOR_RAIL, Blocks.BEACON, Blocks.BEEHIVE, Blocks.REPEATING_COMMAND_BLOCK, Blocks.COMMAND_BLOCK, Blocks.CHAIN_COMMAND_BLOCK, Blocks.EMERALD_BLOCK, Blocks.IRON_BLOCK, Blocks.NETHERITE_BLOCK, Blocks.RAW_GOLD_BLOCK, Blocks.CONDUIT, Blocks.DAYLIGHT_DETECTOR, Blocks.DETECTOR_RAIL, Blocks.DRIED_KELP_BLOCK, Blocks.DROPPER, Blocks.ENCHANTING_TABLE,
                     Blocks.PIGLIN_HEAD, Blocks.PIGLIN_WALL_HEAD, Blocks.CREEPER_HEAD, Blocks.CREEPER_WALL_HEAD, Blocks.DRAGON_WALL_HEAD, Blocks.DRAGON_HEAD, Blocks.PLAYER_HEAD, Blocks.PLAYER_WALL_HEAD, Blocks.ZOMBIE_HEAD, Blocks.ZOMBIE_WALL_HEAD, Blocks.SKELETON_WALL_SKULL, Blocks.WITHER_SKELETON_SKULL, Blocks.WITHER_SKELETON_WALL_SKULL,
                     Blocks.HONEY_BLOCK, Blocks.HONEYCOMB_BLOCK, Blocks.HOPPER, Blocks.JUKEBOX, Blocks.LIGHTNING_ROD, Blocks.LODESTONE, Blocks.OBSERVER, Blocks.POWERED_RAIL, Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE, Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE, Blocks.BIRCH_PRESSURE_PLATE, Blocks.JUNGLE_PRESSURE_PLATE, Blocks.DARK_OAK_PRESSURE_PLATE, Blocks.MANGROVE_PRESSURE_PLATE, Blocks.CRIMSON_PRESSURE_PLATE, Blocks.WARPED_PRESSURE_PLATE, Blocks.RESPAWN_ANCHOR, Blocks.CALIBRATED_SCULK_SENSOR, Blocks.SNIFFER_EGG
-                    )
+            )
             .filter(this::filterBlocks)
             .build()
     );
@@ -297,9 +298,9 @@ public class BaseFinder extends Module {
         WButton deletedata = table.add(theme.button("**DELETE ALL BASE DATA**")).expandX().minWidth(100).widget();
         deletedata.action = () -> {
             if (!(mc.world==null) && mc.world.isChunkLoaded(mc.player.getChunkPos().x,mc.player.getChunkPos().z)){
-            if (deletewarning==0) error("PRESS AGAIN WITHIN 5s TO DELETE ALL BASE DATA FOR THIS DIMENSION.");
-            deletewarningTicks=0;
-            deletewarning++;
+                if (deletewarning==0) error("PRESS AGAIN WITHIN 5s TO DELETE ALL BASE DATA FOR THIS DIMENSION.");
+                deletewarningTicks=0;
+                deletewarning++;
             }
         };
         table.row();
@@ -494,14 +495,14 @@ public class BaseFinder extends Module {
         if (deletewarningTicks<=100) deletewarningTicks++;
         else deletewarning=0;
         if (deletewarning>=2){
-                baseChunks.clear();
-                new File("BaseChunks/"+serverip+"/"+world+"/BaseChunkData.txt").delete();
-                closestbaseX=2000000000;
-                closestbaseZ=2000000000;
-                basedistance=2000000000;
+            baseChunks.clear();
+            new File("BaseChunks/"+serverip+"/"+world+"/BaseChunkData.txt").delete();
+            closestbaseX=2000000000;
+            closestbaseZ=2000000000;
+            basedistance=2000000000;
             LastBaseFound= new ChunkPos(2000000000, 2000000000);
             error("Base Data deleted for this Dimension.");
-                deletewarning=0;
+            deletewarning=0;
         }
         if (load.get()){
             loadingticks++;
@@ -543,27 +544,27 @@ public class BaseFinder extends Module {
             RemoveCoordZ=1500000000;
         }
 
-            try {
-                if (baseChunks.stream().toList().size() > 0) {
-                    for (int b = 0; b < baseChunks.stream().toList().size(); b++) {
-                        if (basedistance> Math.sqrt(Math.pow(baseChunks.stream().toList().get(b).x - mc.player.getChunkPos().x, 2) + Math.pow(baseChunks.stream().toList().get(b).z - mc.player.getChunkPos().z, 2))) {
-                            closestbaseX = baseChunks.stream().toList().get(b).x;
-                            closestbaseZ = baseChunks.stream().toList().get(b).z;
-                            basedistance=Math.sqrt(Math.pow(baseChunks.stream().toList().get(b).x - mc.player.getChunkPos().x, 2) + Math.pow(baseChunks.stream().toList().get(b).z - mc.player.getChunkPos().z, 2));
-                        }
+        try {
+            if (baseChunks.stream().toList().size() > 0) {
+                for (int b = 0; b < baseChunks.stream().toList().size(); b++) {
+                    if (basedistance> Math.sqrt(Math.pow(baseChunks.stream().toList().get(b).x - mc.player.getChunkPos().x, 2) + Math.pow(baseChunks.stream().toList().get(b).z - mc.player.getChunkPos().z, 2))) {
+                        closestbaseX = baseChunks.stream().toList().get(b).x;
+                        closestbaseZ = baseChunks.stream().toList().get(b).z;
+                        basedistance=Math.sqrt(Math.pow(baseChunks.stream().toList().get(b).x - mc.player.getChunkPos().x, 2) + Math.pow(baseChunks.stream().toList().get(b).z - mc.player.getChunkPos().z, 2));
                     }
-                    basedistance = 2000000000;
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+                basedistance = 2000000000;
             }
-                    if (findnearestbaseticks==1) {
-                        if (closestbaseX < 1000000000 && closestbaseZ < 1000000000)
-                            ChatUtils.sendMsg(Text.of("#Nearest possible base at X" + closestbaseX*16 + " x Z" + closestbaseZ*16));
-                        if (!(closestbaseX < 1000000000 && closestbaseZ < 1000000000))
-                            error("No Bases Logged Yet.");
-                        findnearestbaseticks = 0;
-                    }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (findnearestbaseticks==1) {
+            if (closestbaseX < 1000000000 && closestbaseZ < 1000000000)
+                ChatUtils.sendMsg(Text.of("#Nearest possible base at X" + closestbaseX*16 + " x Z" + closestbaseZ*16));
+            if (!(closestbaseX < 1000000000 && closestbaseZ < 1000000000))
+                error("No Bases Logged Yet.");
+            findnearestbaseticks = 0;
+        }
 
 
 
@@ -601,22 +602,22 @@ public class BaseFinder extends Module {
     private void onRender(Render3DEvent event) {
         if (baseChunksLineColor.get().a > 5 || baseChunksSideColor.get().a > 5){
             if (!nearesttrcr.get()){
-            synchronized (baseChunks) {
-                for (ChunkPos c : baseChunks) {
-                    if (mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
-                        render(new Box(c.getStartPos().add(7, renderHeightYbottom.get(), 7), c.getStartPos().add(8, renderHeightY.get(), 8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
+                synchronized (baseChunks) {
+                    for (ChunkPos c : baseChunks) {
+                        if (mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
+                            render(new Box(new Vec3d(c.getStartPos().getX()+7, c.getStartPos().getY()+renderHeightYbottom.get(), c.getStartPos().getZ()+7), new Vec3d(c.getStartPos().getX()+8, c.getStartPos().getY()+renderHeightY.get(), c.getStartPos().getZ()+8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
+                        }
                     }
                 }
-            }
             } else if (nearesttrcr.get()){
                 synchronized (baseChunks) {
                     for (ChunkPos c : baseChunks) {
                         if (mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
-                            render(new Box(c.getStartPos().add(7, renderHeightYbottom.get(), 7), c.getStartPos().add(8, renderHeightY.get(), 8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
+                            render(new Box(new Vec3d(c.getStartPos().getX()+7, c.getStartPos().getY()+renderHeightYbottom.get(), c.getStartPos().getZ()+7), new Vec3d(c.getStartPos().getX()+8, c.getStartPos().getY()+renderHeightY.get(), c.getStartPos().getZ()+8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
                         }
                     }
                 }
-                render2(new Box(new ChunkPos(closestbaseX,closestbaseZ).getStartPos().add(7, renderHeightYbottom.get(), 7), new ChunkPos(closestbaseX,closestbaseZ).getStartPos().add(8, renderHeightY.get(), 8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
+                render2(new Box(new Vec3d(new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getX()+7, new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getY()+renderHeightYbottom.get(), new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getZ()+7), new Vec3d (new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getX()+8, new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getY()+renderHeightY.get(), new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getZ()+8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
             }
         }
     }
@@ -624,8 +625,8 @@ public class BaseFinder extends Module {
     private void render(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
         if (trcr.get() && Math.abs(box.minX-RenderUtils.center.x)<=trcrdist.get()*16 && Math.abs(box.minZ-RenderUtils.center.z)<=trcrdist.get()*16)
             if (!nearesttrcr.get())
-            event.renderer.line(
-                RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
+                event.renderer.line(
+                        RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
         event.renderer.box(
                 box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
     }
@@ -654,98 +655,98 @@ public class BaseFinder extends Module {
 
                 if (Blawcks1.get().size()>0 || Blawcks2.get().size()>0 || Blawcks3.get().size()>0 || Blawcks4.get().size()>0 || Blawcks5.get().size()>0 || Blawcks6.get().size()>0 || Blawcks7.get().size()>0){
                     try {
-                for (int x = 0; x < 16; x++) {
-                    for (int y = mc.world.getBottomY(); y < mc.world.getTopY(); y++) {
-                        for (int z = 0; z < 16; z++) {
-                            BlockState blerks = chunk.getBlockState(new BlockPos(x, y, z));
-                            blockposi=new BlockPos(x, y, z);
-                            if (!(blerks.getBlock()==Blocks.AIR)){
-                                if (skybuildfind.get() && y>skybuildint.get()) {
-                                    if (!baseChunks.contains(basepos)){
-                                        baseChunks.add(basepos);
-                                        if (save.get()) {
-                                            saveBaseChunkData();
+                        for (int x = 0; x < 16; x++) {
+                            for (int y = mc.world.getBottomY(); y < mc.world.getTopY(); y++) {
+                                for (int z = 0; z < 16; z++) {
+                                    BlockState blerks = chunk.getBlockState(new BlockPos(x, y, z));
+                                    blockposi=new BlockPos(x, y, z);
+                                    if (!(blerks.getBlock()==Blocks.AIR)){
+                                        if (skybuildfind.get() && y>skybuildint.get()) {
+                                            if (!baseChunks.contains(basepos)){
+                                                baseChunks.add(basepos);
+                                                if (save.get()) {
+                                                    saveBaseChunkData();
+                                                }
+                                                if (basefoundspamTicks==0){
+                                                    ChatUtils.sendMsg(Text.of("(Skybuild)Possible build located near X"+basepos.getCenterX()+", Y"+y+", Z"+basepos.getCenterZ()));
+                                                    LastBaseFound= new ChunkPos(basepos.x, basepos.z);
+                                                    basefound=true;
+                                                }
+                                            }
                                         }
-                                        if (basefoundspamTicks==0){
-                                        ChatUtils.sendMsg(Text.of("(Skybuild)Possible build located near X"+basepos.getCenterX()+", Y"+y+", Z"+basepos.getCenterZ()));
-                                            LastBaseFound= new ChunkPos(basepos.x, basepos.z);
-                                            basefound=true;
+                                        if (!(blerks.getBlock()==Blocks.STONE)){
+                                            if (!(blerks.getBlock()==Blocks.DEEPSLATE) && !(blerks.getBlock()==Blocks.DIRT) && !(blerks.getBlock()==Blocks.GRASS_BLOCK) && !(blerks.getBlock()==Blocks.WATER) && !(blerks.getBlock()==Blocks.SAND) && !(blerks.getBlock()==Blocks.GRAVEL)  && !(blerks.getBlock()==Blocks.BEDROCK)&& !(blerks.getBlock()==Blocks.NETHERRACK) && !(blerks.getBlock()==Blocks.LAVA)){
+                                                if (spawner.get()){
+                                                    if (blerks.getBlock()==Blocks.SPAWNER){
+                                                        spawnerY=y;
+                                                        spawnerfound=true;
+                                                    }
+                                                    //dungeon MOSSY_COBBLESTONE, mineshaft COBWEB, fortress NETHER_BRICK_FENCE, stronghold STONE_BRICK_STAIRS, bastion CHAIN
+                                                    if (mc.world.getRegistryKey() == World.OVERWORLD && (blerks.getBlock()==Blocks.MOSSY_COBBLESTONE || blerks.getBlock()==Blocks.COBWEB || blerks.getBlock()==Blocks.STONE_BRICK_STAIRS || blerks.getBlock()==Blocks.BUDDING_AMETHYST))spawnernaturalblocks=true;
+                                                    else if (mc.world.getRegistryKey() == World.NETHER && (blerks.getBlock()==Blocks.NETHER_BRICK_FENCE || blerks.getBlock()==Blocks.CHAIN))spawnernaturalblocks=true;
+                                                }
+                                                if (Blawcks1.get().size()>0){
+                                                    if (Blawcks1.get().contains(blerks.getBlock())) {
+                                                        blockpositions1.add(blockposi);
+                                                        found1= blockpositions1.size();
+                                                        lastblockfound1=blerks.getBlock().toString();
+                                                    }
+                                                }
+                                                if (Blawcks2.get().size()>0){
+                                                    if (Blawcks2.get().contains(blerks.getBlock())) {
+                                                        blockpositions2.add(blockposi);
+                                                        found2= blockpositions2.size();
+                                                        lastblockfound2=blerks.getBlock().toString();
+                                                    }
+                                                }
+                                                if (Blawcks3.get().size()>0){
+                                                    if (Blawcks3.get().contains(blerks.getBlock())) {
+                                                        blockpositions3.add(blockposi);
+                                                        found3= blockpositions3.size();
+                                                        lastblockfound3=blerks.getBlock().toString();
+                                                    }
+                                                }
+                                                if (Blawcks4.get().size()>0){
+                                                    if (Blawcks4.get().contains(blerks.getBlock())) {
+                                                        blockpositions4.add(blockposi);
+                                                        found4= blockpositions4.size();
+                                                        lastblockfound4=blerks.getBlock().toString();
+                                                    }
+                                                }
+                                                if (Blawcks5.get().size()>0){
+                                                    if (Blawcks5.get().contains(blerks.getBlock())) {
+                                                        blockpositions5.add(blockposi);
+                                                        found5= blockpositions5.size();
+                                                        lastblockfound5=blerks.getBlock().toString();
+                                                    }
+                                                }
+                                                if (Blawcks6.get().size()>0){
+                                                    if (Blawcks6.get().contains(blerks.getBlock())) {
+                                                        blockpositions6.add(blockposi);
+                                                        found6= blockpositions6.size();
+                                                        lastblockfound6=blerks.getBlock().toString();
+                                                    }
+                                                }
+                                                if (Blawcks7.get().size()>0){
+                                                    if (Blawcks7.get().contains(blerks.getBlock())) {
+                                                        blockpositions7.add(blockposi);
+                                                        found7= blockpositions7.size();
+                                                        lastblockfound7=blerks.getBlock().toString();
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
-                                }
-                                if (!(blerks.getBlock()==Blocks.STONE)){
-                                    if (!(blerks.getBlock()==Blocks.DEEPSLATE) && !(blerks.getBlock()==Blocks.DIRT) && !(blerks.getBlock()==Blocks.GRASS_BLOCK) && !(blerks.getBlock()==Blocks.WATER) && !(blerks.getBlock()==Blocks.SAND) && !(blerks.getBlock()==Blocks.GRAVEL)  && !(blerks.getBlock()==Blocks.BEDROCK)&& !(blerks.getBlock()==Blocks.NETHERRACK) && !(blerks.getBlock()==Blocks.LAVA)){
-                                        if (spawner.get()){
-                                            if (blerks.getBlock()==Blocks.SPAWNER){
-                                                spawnerY=y;
-                                                spawnerfound=true;
-                                            }
-                                            //dungeon MOSSY_COBBLESTONE, mineshaft COBWEB, fortress NETHER_BRICK_FENCE, stronghold STONE_BRICK_STAIRS, bastion CHAIN
-                                            if (mc.world.getRegistryKey() == World.OVERWORLD && (blerks.getBlock()==Blocks.MOSSY_COBBLESTONE || blerks.getBlock()==Blocks.COBWEB || blerks.getBlock()==Blocks.STONE_BRICK_STAIRS || blerks.getBlock()==Blocks.BUDDING_AMETHYST))spawnernaturalblocks=true;
-                                            else if (mc.world.getRegistryKey() == World.NETHER && (blerks.getBlock()==Blocks.NETHER_BRICK_FENCE || blerks.getBlock()==Blocks.CHAIN))spawnernaturalblocks=true;
-                                        }
-                                        if (Blawcks1.get().size()>0){
-                                            if (Blawcks1.get().contains(blerks.getBlock())) {
-                                                blockpositions1.add(blockposi);
-                                                found1= blockpositions1.size();
-                                                lastblockfound1=blerks.getBlock().toString();
-                                            }
-                                        }
-                                        if (Blawcks2.get().size()>0){
-                                            if (Blawcks2.get().contains(blerks.getBlock())) {
-                                                    blockpositions2.add(blockposi);
-                                                    found2= blockpositions2.size();
-                                                lastblockfound2=blerks.getBlock().toString();
-                                            }
-                                        }
-                                        if (Blawcks3.get().size()>0){
-                                            if (Blawcks3.get().contains(blerks.getBlock())) {
-                                                    blockpositions3.add(blockposi);
-                                                    found3= blockpositions3.size();
-                                                lastblockfound3=blerks.getBlock().toString();
-                                            }
-                                        }
-                                        if (Blawcks4.get().size()>0){
-                                            if (Blawcks4.get().contains(blerks.getBlock())) {
-                                                    blockpositions4.add(blockposi);
-                                                    found4= blockpositions4.size();
-                                                lastblockfound4=blerks.getBlock().toString();
-                                            }
-                                        }
-                                        if (Blawcks5.get().size()>0){
-                                            if (Blawcks5.get().contains(blerks.getBlock())) {
-                                                    blockpositions5.add(blockposi);
-                                                    found5= blockpositions5.size();
-                                                lastblockfound5=blerks.getBlock().toString();
-                                            }
-                                        }
-                                        if (Blawcks6.get().size()>0){
-                                            if (Blawcks6.get().contains(blerks.getBlock())) {
-                                                    blockpositions6.add(blockposi);
-                                                    found6= blockpositions6.size();
-                                                lastblockfound6=blerks.getBlock().toString();
-                                            }
-                                        }
-                                        if (Blawcks7.get().size()>0){
-                                            if (Blawcks7.get().contains(blerks.getBlock())) {
-                                                blockpositions7.add(blockposi);
-                                                found7= blockpositions7.size();
-                                                lastblockfound7=blerks.getBlock().toString();
-                                            }
-                                        }
-                                    }
+                                    if (Blawcks1.get().size()>0)checkingchunk1=true;
+                                    if (Blawcks2.get().size()>0)checkingchunk2=true;
+                                    if (Blawcks3.get().size()>0)checkingchunk3=true;
+                                    if (Blawcks4.get().size()>0)checkingchunk4=true;
+                                    if (Blawcks5.get().size()>0)checkingchunk5=true;
+                                    if (Blawcks6.get().size()>0)checkingchunk6=true;
+                                    if (Blawcks7.get().size()>0)checkingchunk7=true;
                                 }
                             }
-                            if (Blawcks1.get().size()>0)checkingchunk1=true;
-                            if (Blawcks2.get().size()>0)checkingchunk2=true;
-                            if (Blawcks3.get().size()>0)checkingchunk3=true;
-                            if (Blawcks4.get().size()>0)checkingchunk4=true;
-                            if (Blawcks5.get().size()>0)checkingchunk5=true;
-                            if (Blawcks6.get().size()>0)checkingchunk6=true;
-                            if (Blawcks7.get().size()>0)checkingchunk7=true;
                         }
-                    }
-                }
                         //CheckList 1
                         if (Blawcks1.get().size()>0){
                             if (checkingchunk1==true && found1>=blowkfind1.get()) {

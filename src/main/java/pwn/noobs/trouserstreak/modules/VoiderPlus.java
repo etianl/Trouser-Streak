@@ -13,6 +13,12 @@ import pwn.noobs.trouserstreak.Trouser;
 
 public class VoiderPlus extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    public final Setting<Boolean> notOP = sgGeneral.add(new BoolSetting.Builder()
+            .name("Toggle Module if not OP")
+            .description("Turn this off to prevent the bug of module always being turned off when you join server.")
+            .defaultValue(true)
+            .build()
+    );
     private final Setting<String> block = sgGeneral.add(new StringSetting.Builder()
             .name("Block to be used for /fill")
             .description("What is created.")
@@ -96,7 +102,7 @@ public class VoiderPlus extends Module {
     }
     @Override
     public void onActivate() {
-        if (!(mc.player.hasPermissionLevel(4)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+        if (notOP.get() && !(mc.player.hasPermissionLevel(4)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
             toggle();
             error("Must have OP");
         }

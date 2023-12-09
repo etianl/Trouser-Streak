@@ -32,6 +32,12 @@ public class HandOfGod extends Module {
     private final SettingGroup sgPcentered = settings.createGroup("Player-Centered Options");
     private final SettingGroup sgTroll = settings.createGroup("Troll Other Players!");
 
+    public final Setting<Boolean> notOP = sgGeneral.add(new BoolSetting.Builder()
+            .name("Toggle Module if not OP")
+            .description("Turn this off to prevent the bug of module always being turned off when you join server.")
+            .defaultValue(true)
+            .build()
+    );
     public final Setting<Boolean> autosave = sgGeneral.add(new BoolSetting.Builder()
             .name("AutoSave and CTRL+S shortcut")
             .description("For saving your progress incase of server shutdown.")
@@ -67,7 +73,7 @@ public class HandOfGod extends Module {
     private final Setting<Integer> cwidth = sgClick.add(new IntSetting.Builder()
             .name("ClickWidth")
             .description("The width of the click fill")
-            .defaultValue(10)
+            .defaultValue(17)
             .min(1)
             .sliderMax(30)
             .build());
@@ -75,14 +81,14 @@ public class HandOfGod extends Module {
     private final Setting<Integer> cheight = sgClick.add(new IntSetting.Builder()
             .name("ClickHeight")
             .description("The height of the click fill")
-            .defaultValue(10)
+            .defaultValue(11)
             .min(1)
             .sliderMax(30)
             .build());
     private final Setting<Integer> cdepth = sgClick.add(new IntSetting.Builder()
             .name("ClickDepth")
             .description("The depth of the click fill")
-            .defaultValue(10)
+            .defaultValue(17)
             .min(1)
             .sliderMax(30)
             .build());
@@ -128,7 +134,7 @@ public class HandOfGod extends Module {
     private final Setting<Integer> sweepradius = sgClick.add(new IntSetting.Builder()
             .name("SweepAwayRadius")
             .description("radius")
-            .defaultValue(45)
+            .defaultValue(90)
             .sliderRange(1, 90)
             .visible(() -> SwpAway.get())
             .build());
@@ -166,7 +172,7 @@ public class HandOfGod extends Module {
     public final Setting<Integer> pwidth = sgPcentered.add(new IntSetting.Builder()
             .name("PlayerWidth")
             .description("Width /fill'd around player")
-            .defaultValue(10)
+            .defaultValue(17)
             .min(1)
             .sliderMax(30)
             .visible(() -> rndplyr.get())
@@ -175,7 +181,7 @@ public class HandOfGod extends Module {
     public final Setting<Integer> pheight = sgPcentered.add(new IntSetting.Builder()
             .name("PlayerHeight")
             .description("Height /fill'd around player")
-            .defaultValue(10)
+            .defaultValue(11)
             .min(1)
             .sliderMax(30)
             .visible(() -> rndplyr.get())
@@ -184,7 +190,7 @@ public class HandOfGod extends Module {
     public final Setting<Integer> pdepth = sgPcentered.add(new IntSetting.Builder()
             .name("PlayerDepth")
             .description("Depth /fill'd around player")
-            .defaultValue(10)
+            .defaultValue(17)
             .min(1)
             .sliderMax(30)
             .visible(() -> rndplyr.get())
@@ -229,7 +235,7 @@ public class HandOfGod extends Module {
     private final Setting<Integer> radius = sgPcentered.add(new IntSetting.Builder()
             .name("radius")
             .description("radius")
-            .defaultValue(45)
+            .defaultValue(90)
             .sliderRange(1, 90)
             .visible(() -> voider.get())
             .build());
@@ -255,7 +261,7 @@ public class HandOfGod extends Module {
     private final Setting<Integer> roofradius = sgPcentered.add(new IntSetting.Builder()
             .name("radius")
             .description("radius")
-            .defaultValue(45)
+            .defaultValue(90)
             .sliderRange(1, 90)
             .visible(() -> roofer.get())
             .build());
@@ -291,7 +297,7 @@ public class HandOfGod extends Module {
     public final Setting<Integer> trolltickdelay = sgTroll.add(new IntSetting.Builder()
             .name("TickDelayAroundOtherPlayers")
             .description("Tick Delay for running /fill around other players.")
-            .defaultValue(2)
+            .defaultValue(0)
             .min(0)
             .sliderMax(100)
             .visible(() -> troll.get())
@@ -319,7 +325,7 @@ public class HandOfGod extends Module {
     public final Setting<Integer> trollwidth = sgTroll.add(new IntSetting.Builder()
             .name("OtherPlayerWidth")
             .description("Width /fill'd around player")
-            .defaultValue(10)
+            .defaultValue(17)
             .min(1)
             .sliderMax(30)
             .visible(() -> troll.get())
@@ -328,7 +334,7 @@ public class HandOfGod extends Module {
     public final Setting<Integer> trollheight = sgTroll.add(new IntSetting.Builder()
             .name("OtherPlayerHeight")
             .description("Height /fill'd around player")
-            .defaultValue(10)
+            .defaultValue(11)
             .min(1)
             .sliderMax(30)
             .visible(() -> troll.get())
@@ -337,7 +343,7 @@ public class HandOfGod extends Module {
     public final Setting<Integer> trolldepth = sgTroll.add(new IntSetting.Builder()
             .name("OtherPlayerDepth")
             .description("Depth /fill'd around player")
-            .defaultValue(10)
+            .defaultValue(17)
             .min(1)
             .sliderMax(30)
             .visible(() -> troll.get())
@@ -365,7 +371,7 @@ public class HandOfGod extends Module {
 
     @Override
     public void onActivate() {
-        if (!(mc.player.hasPermissionLevel(4)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+        if (notOP.get() && !(mc.player.hasPermissionLevel(4)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
             toggle();
             error("Must have OP");
         }

@@ -128,9 +128,8 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - Joining a server with HandOfGod or Voider already on causes the module to be turned off due to "Not being OP" even if you are an operator 
 
 ## Requirements:
-- If you are using Minecraft version **1.20.2**, then use the latest **MeteorClient Dev Build of v0.5.5**
-- If you are using Minecraft version **1.20.1**, then use **MeteorClient "Full Release" v0.5.4**
-- If you are using Minecraft version **1.19.4**, then use **MeteorClient "Full Release" v0.5.3** No longer available for download.
+- If you are using Minecraft version **1.20.4**, then use the latest **MeteorClient Dev Build of v0.5.6**
+- If you are using Minecraft version **1.20.2**, then use **MeteorClient "Full Release" v0.5.5**
 - Please try [ViaFabricPlus](https://github.com/FlorianMichael/ViaFabricPlus), which will let you connect to almost any version from a new version client.
 - Don't forget to try updating any other mods you are using if your game is crashing.
 
