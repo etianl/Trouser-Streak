@@ -75,7 +75,7 @@ public class BetterAutoSign extends Module {
 
     private final Setting<Boolean> autoGlow = sgExtra.add(new BoolSetting.Builder()
             .name("auto-glow")
-            .description("Dye signs that you place")
+            .description("Makes your signs glow")
             .defaultValue(false)
             .build()
     );
