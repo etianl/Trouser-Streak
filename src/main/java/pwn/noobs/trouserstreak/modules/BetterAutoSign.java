@@ -7,25 +7,36 @@
 
 package pwn.noobs.trouserstreak.modules;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.AbstractSignEditScreenAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.SignBlockEntity;
+import net.minecraft.block.entity.SignText;
 import net.minecraft.client.gui.screen.ingame.SignEditScreen;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSignC2SPacket;
+import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import pwn.noobs.trouserstreak.Trouser;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BetterAutoSign extends Module {
     final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -54,11 +65,11 @@ public class BetterAutoSign extends Module {
 
     private final Setting<String> lineFour = sgGeneral.add(new StringSetting.Builder()
             .name("line-four")
-            .description("What to put on the Fourth line of the sign.")
+            .description("What to put on the fourth line of the sign.")
             .defaultValue("wrong.")
             .build()
     );
-    
+
     private final Setting<Boolean> autoDye = sgExtra.add(new BoolSetting.Builder()
             .name("auto-dye")
             .description("Dye signs that you place")
@@ -69,6 +80,7 @@ public class BetterAutoSign extends Module {
     private final Setting<List<Item>> dyeColors = sgExtra.add(new ItemListSetting.Builder()
             .name("dye-colors")
             .description("What color dyes to dye the sign with.")
+            .visible(autoDye::get)
             .filter(this::filter)
             .build()
     );
@@ -80,10 +92,73 @@ public class BetterAutoSign extends Module {
             .build()
     );
 
+    // based on ChestAura from Meteor Rejects
+    private final Setting<Boolean> signAura = sgExtra.add(new BoolSetting.Builder()
+            .name("sign-aura")
+            .description("Automatically edits signs for you")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> signAuraRotate = sgExtra.add(new BoolSetting.Builder()
+            .name("sign-aura-rotate")
+            .description("Rotates to signs")
+            .defaultValue(true)
+            .visible(signAura::get)
+            .build()
+    );
+
+    private final Setting<Double> signAuraRange = sgExtra.add(new DoubleSetting.Builder()
+            .name("sign-aura-range")
+            .description("The interact range")
+            .defaultValue(4)
+            .min(0)
+            .visible(signAura::get)
+            .build()
+    );
+
+    private final Setting<Integer> signAuraDelay = sgExtra.add(new IntSetting.Builder()
+            .name("sign-aura-delay")
+            .description("Delay between editing signs, in ticks")
+            .defaultValue(5)
+            .sliderMax(20)
+            .visible(signAura::get)
+            .build()
+    );
+
+    private final ArrayList<BlockPos> openedSigns = new ArrayList<>();
+    private int timer = 0;
+
     public BetterAutoSign() {
         super(Trouser.Main, "Better-auto-sign", "Automatically writes signs and can dye them as well. Credits to MeteorTweaks.");
     }
 
+    @Override
+    public void onActivate() {
+        timer = 0;
+        openedSigns.clear();
+    }
+
+    @EventHandler
+    private void onTick(TickEvent.Pre event) {
+        timer--;
+        if(!signAura.get() || timer > 0) return;
+
+        for(BlockEntity block : Utils.blockEntities()) {
+            if(!(block instanceof SignBlockEntity) || mc.player.getEyePos().distanceTo(Vec3d.ofCenter(block.getPos())) >= signAuraRange.get()) continue;
+
+            BlockPos pos = block.getPos();
+            if(openedSigns.contains(pos)) continue;
+
+            Runnable click = () -> mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(pos.getX(), pos.getY(), pos.getZ()), Direction.UP, pos, false));
+            if(signAuraRotate.get()) Rotations.rotate(Rotations.getYaw(pos), Rotations.getPitch(pos), click);
+            else click.run();
+
+            openedSigns.add(pos);
+            timer = signAuraDelay.get();
+            break;
+        }
+    }
 
     @EventHandler
     private void onOpenScreen(OpenScreenEvent event) {
@@ -99,7 +174,7 @@ public class BetterAutoSign extends Module {
 
         event.cancel();
 
-       BlockHitResult thesign = new BlockHitResult (
+        BlockHitResult thesign = new BlockHitResult (
                 new Vec3d(sign.getPos().getX(), sign.getPos().getY(), sign.getPos().getZ()),
                 Direction.UP,
                 sign.getPos(),
