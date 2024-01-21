@@ -40,8 +40,8 @@ public class OPServerKillModule extends Module {
             .description("This is what kills server. Max value is best.")
             .defaultValue(999999999)
             .min(0)
-            .max(999999999)
-            .sliderRange(0, 999999999)
+                    .max(999999999)
+                    .sliderRange(0, 999999999)
             .build()
     );
     public OPServerKillModule() {
@@ -56,7 +56,7 @@ public class OPServerKillModule extends Module {
             toggle();
             error("Must have OP");
         }
-        ticks=0;
+            ticks=0;
     }
 
     @EventHandler
@@ -72,12 +72,20 @@ public class OPServerKillModule extends Module {
             if (ticks == 3*tickdelay.get()){ //kill server
                 ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
             }
+            if (ticks > 3*tickdelay.get()){ //kill server
+                toggle();
+                error("Server Killed.");
+            }
         } else if (!sendCommandFeedback.get() && logAdminCommands.get()){
             if (ticks == 1*tickdelay.get()){
                 ChatUtils.sendPlayerMsg("/gamerule logAdminCommands false");
             }
             if (ticks == 2*tickdelay.get()){
                 ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
+            }
+            if (ticks > 2*tickdelay.get()){ //kill server
+                toggle();
+                error("Server Killed.");
             }
         } else if (sendCommandFeedback.get() && !logAdminCommands.get()){
             if (ticks == 1*tickdelay.get()){
@@ -86,9 +94,17 @@ public class OPServerKillModule extends Module {
             if (ticks == 2*tickdelay.get()){
                 ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
             }
+            if (ticks > 2*tickdelay.get()){ //kill server
+                toggle();
+                error("Server Killed.");
+            }
         } else if (!sendCommandFeedback.get() && !logAdminCommands.get()){
             if (ticks == 1*tickdelay.get()){
                 ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
+            }
+            if (ticks > 1*tickdelay.get()){ //kill server
+                toggle();
+                error("Server Killed.");
             }
         }
     }
