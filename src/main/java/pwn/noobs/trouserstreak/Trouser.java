@@ -29,6 +29,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new Teleport());
                 Modules.get().add(new TPFly());
                 Modules.get().add(new HandOfGod());
+                Modules.get().add(new OPServerKillModule());
                 Modules.get().add(new ExplosionAura());
                 Modules.get().add(new ShulkerDupe());
                 Modules.get().add(new InvDupeModule());

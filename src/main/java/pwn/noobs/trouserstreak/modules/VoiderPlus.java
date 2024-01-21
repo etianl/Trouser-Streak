@@ -16,7 +16,7 @@ public class VoiderPlus extends Module {
     public final Setting<Boolean> notOP = sgGeneral.add(new BoolSetting.Builder()
             .name("Toggle Module if not OP")
             .description("Turn this off to prevent the bug of module always being turned off when you join server.")
-            .defaultValue(true)
+            .defaultValue(false)
             .build()
     );
     private final Setting<String> block = sgGeneral.add(new StringSetting.Builder()
