@@ -68,7 +68,7 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - .base rmv last will remove the last single base coordinate found. (Good for removing false positives)
 - There are buttons in the options menu to do the same things as the commands listed above.
 - Base location data will be stored in the "BaseChunks" folder, in your Minecraft folder.
-- **BetterAutoSign:** Automatically writes signs with the text you specify, and can also apply glow ink or dye. (Credits to Meteor-Tweaks)
+- **BetterAutoSign:** Automatically writes signs with the text you specify, and can also apply glow ink or dye. Includes a "Sign Aura" option which rewrites all the signs around to the text of your choosing. Credits to Meteor-Tweaks for BetterAutoSign, and to [stever9487](https://github.com/stever9487) for the Sign Aura based off of Meteor Rejects' Chest Aura
 - **BetterScaffold:** Give you more options for scaffolding, bigger range and others. (Credits to Meteor-Tweaks)
 - **BlockListMineCommand** Adds a custom #mine command to your message history containing all the blocks in the custom blocklist that are near you. Press T then up arrow, then ENTER key to execute the command. BETTER CHAT module is recommended for infinitely long commands. (Credits to etianl :D)
 - **Boom+:** Throws entities or spawns them on the targeted block when you click (Credits to Allah-Hack for the original) I just added more fun things you might want to throw as well as included the option for height based on player Y level.
@@ -101,6 +101,7 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - The **"IgnoreFlowBelow0"** will render as an oldchunk if liquid flow is only below Y zero, and will show as a newchunk if flow is above Y zero, or both above AND below Y zero.
 
 -------------------------------------------------------------------------------------
+- **OPServerKillModule:** Runs a set of operator commands to disable a server and cover up the tracks of the kill command. REQUIRES OP STATUS (Credits to etianl :D)
 - **RedstoneNuker:** It's just the regular Nuker module from Meteor client, customized for only breaking things that generate redstone signals. Also with included AutoTool. To keep you safer when placing lots of TNT. (Credits to Meteor Client for Nuker code, and AutoTool code inthere.)
 - **ShulkerDupe:** Duplicates the contents of a shulker when pressing "Dupe" or "Dupe All" in the shulker menu. Only works on Vanilla, Forge, and Fabric servers 1.19 and below. Use multiconnect or viafabric (Credits to Allah-Hack, I just brought back the buttons, and make it dupe slot1 as well.)
 - **SuperInstaMine:** This SuperInstaMine originated from the Meteor Rejects Instamine. I added an option called "Break Modes (Range)" which allows you to break more than one block at a time with SuperInstaMine. This option works best against easy-breaking blocks. The option adjusts the positioning and range of the block breaking. (Credits to Meteor Rejects for the original code.) **ORIGINAL INSTAMINE FROM REJECTS CAN SOMETIMES WORK BETTER THAN THIS ONE, download meteor rejects for that!**
