@@ -72,12 +72,20 @@ public class OPServerKillModule extends Module {
             if (ticks == 3*tickdelay.get()){ //kill server
                 ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
             }
+            if (ticks > 3*tickdelay.get()){ //kill server
+                toggle();
+                error("Server Killed.");
+            }
         } else if (!sendCommandFeedback.get() && logAdminCommands.get()){
             if (ticks == 1*tickdelay.get()){
                 ChatUtils.sendPlayerMsg("/gamerule logAdminCommands false");
             }
             if (ticks == 2*tickdelay.get()){
                 ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
+            }
+            if (ticks > 2*tickdelay.get()){ //kill server
+                toggle();
+                error("Server Killed.");
             }
         } else if (sendCommandFeedback.get() && !logAdminCommands.get()){
             if (ticks == 1*tickdelay.get()){
@@ -86,9 +94,17 @@ public class OPServerKillModule extends Module {
             if (ticks == 2*tickdelay.get()){
                 ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
             }
+            if (ticks > 2*tickdelay.get()){ //kill server
+                toggle();
+                error("Server Killed.");
+            }
         } else if (!sendCommandFeedback.get() && !logAdminCommands.get()){
             if (ticks == 1*tickdelay.get()){
                 ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
+            }
+            if (ticks > 1*tickdelay.get()){ //kill server
+                toggle();
+                error("Server Killed.");
             }
         }
     }
