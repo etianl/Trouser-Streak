@@ -101,6 +101,7 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - The **"IgnoreFlowBelow0"** will render as an oldchunk if liquid flow is only below Y zero, and will show as a newchunk if flow is above Y zero, or both above AND below Y zero.
 
 -------------------------------------------------------------------------------------
+- **OPplayerTPmodule:** Uses operator commands to teleport you to each player online one by one at the push of a button, or those players to you one by one. There is a button in the options for it to reset the current player to zero. Thank you to [ogmur](https://www.youtube.com/@Ogmur) for the module suggestion (Credits to etianl for writing :D). REQUIRES OP STATUS
 - **OPServerKillModule:** Runs a set of operator commands to disable a server and cover up the tracks of the kill command. REQUIRES OP STATUS (Credits to etianl :D)
 - **RedstoneNuker:** It's just the regular Nuker module from Meteor client, customized for only breaking things that generate redstone signals. Also with included AutoTool. To keep you safer when placing lots of TNT. (Credits to Meteor Client for Nuker code, and AutoTool code inthere.)
 - **ShulkerDupe:** Duplicates the contents of a shulker when pressing "Dupe" or "Dupe All" in the shulker menu. Only works on Vanilla, Forge, and Fabric servers 1.19 and below. Use multiconnect or viafabric (Credits to Allah-Hack, I just brought back the buttons, and make it dupe slot1 as well.)

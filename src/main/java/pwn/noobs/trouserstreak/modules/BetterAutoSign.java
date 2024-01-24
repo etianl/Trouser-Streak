@@ -17,7 +17,9 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.HangingSignBlockEntity;
 import net.minecraft.block.entity.SignBlockEntity;
+import net.minecraft.client.gui.screen.ingame.HangingSignEditScreen;
 import net.minecraft.client.gui.screen.ingame.SignEditScreen;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -34,33 +36,61 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BetterAutoSign extends Module {
-    final SettingGroup sgGeneral = settings.getDefaultGroup();
+    final SettingGroup sgSign = settings.createGroup("Normal Sign Text");
+    final SettingGroup sgHang = settings.createGroup("Hanging Sign Text");
     final SettingGroup sgExtra = settings.createGroup("Visible");
 
-    private final Setting<String> lineOne = sgGeneral.add(new StringSetting.Builder()
+    private final Setting<String> lineOne = sgSign.add(new StringSetting.Builder()
             .name("line-one")
             .description("What to put on the first line of the sign.")
             .defaultValue("Steve")
             .build()
     );
 
-    private final Setting<String> lineTwo = sgGeneral.add(new StringSetting.Builder()
+    private final Setting<String> lineTwo = sgSign.add(new StringSetting.Builder()
             .name("line-two")
             .description("What to put on the second line of the sign.")
             .defaultValue("did")
             .build()
     );
 
-    private final Setting<String> lineThree = sgGeneral.add(new StringSetting.Builder()
+    private final Setting<String> lineThree = sgSign.add(new StringSetting.Builder()
             .name("line-three")
             .description("What to put on the third line of the sign.")
             .defaultValue("nothing")
             .build()
     );
 
-    private final Setting<String> lineFour = sgGeneral.add(new StringSetting.Builder()
+    private final Setting<String> lineFour = sgSign.add(new StringSetting.Builder()
             .name("line-four")
             .description("What to put on the fourth line of the sign.")
+            .defaultValue("wrong.")
+            .build()
+    );
+    private final Setting<String> HlineOne = sgHang.add(new StringSetting.Builder()
+            .name("line-one")
+            .description("What to put on the first line of the hanging sign.")
+            .defaultValue("Steve")
+            .build()
+    );
+
+    private final Setting<String> HlineTwo = sgHang.add(new StringSetting.Builder()
+            .name("line-two")
+            .description("What to put on the second line of the hanging sign.")
+            .defaultValue("did")
+            .build()
+    );
+
+    private final Setting<String> HlineThree = sgHang.add(new StringSetting.Builder()
+            .name("line-three")
+            .description("What to put on the third line of the hanging sign.")
+            .defaultValue("nothing")
+            .build()
+    );
+
+    private final Setting<String> HlineFour = sgHang.add(new StringSetting.Builder()
+            .name("line-four")
+            .description("What to put on the fourth line of the hanging sign.")
             .defaultValue("wrong.")
             .build()
     );
@@ -108,6 +138,8 @@ public class BetterAutoSign extends Module {
             .description("The interact range")
             .defaultValue(4)
             .min(0)
+            .max(6)
+            .sliderRange(0,6)
             .visible(signAura::get)
             .build()
     );
@@ -157,15 +189,24 @@ public class BetterAutoSign extends Module {
 
     @EventHandler
     private void onOpenScreen(OpenScreenEvent event) {
-        if(!(event.screen instanceof SignEditScreen)) return;
+        if(!(event.screen instanceof SignEditScreen) && !(event.screen instanceof HangingSignEditScreen)) return;
 
         SignBlockEntity sign = ((AbstractSignEditScreenAccessor) event.screen).getSign();
-        mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(),true,
-                lineOne.get(),
-                lineTwo.get(),
-                lineThree.get(),
-                lineFour.get()
-        ));
+        if (mc.world.getBlockEntity(sign.getPos()) instanceof SignBlockEntity){
+            mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(),true,
+                    lineOne.get(),
+                    lineTwo.get(),
+                    lineThree.get(),
+                    lineFour.get()
+            ));
+        } else if (mc.world.getBlockEntity(sign.getPos()) instanceof HangingSignBlockEntity){
+            mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(),true,
+                    HlineOne.get(),
+                    HlineTwo.get(),
+                    HlineThree.get(),
+                    HlineFour.get()
+            ));
+        }
 
         event.cancel();
 
