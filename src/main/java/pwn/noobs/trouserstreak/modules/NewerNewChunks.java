@@ -39,6 +39,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /*
     Ported from: https://github.com/BleachDrinker420/BleachHack/blob/master/BleachHack-Fabric-1.16/src/main/java/bleach/hack/module/mods/NewChunks.java
@@ -204,6 +206,7 @@ public class NewerNewChunks extends Module {
 			.visible(() -> shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both)
 			.build()
 	);
+	private final Executor taskExecutor = Executors.newSingleThreadExecutor();
 	private int deletewarningTicks=666;
 	private int deletewarning=0;
 	private String serverip;
@@ -346,30 +349,30 @@ public class NewerNewChunks extends Module {
 		} else if (!load.get()){
 			loadingticks=0;
 		}
-			if (!Files.exists(Paths.get("NewChunks/"+serverip+"/"+world+"/OldChunkData.txt"))){
-				File file = new File("NewChunks/"+serverip+"/"+world+"/OldChunkData.txt");
-				try {
-					file.createNewFile();
-				} catch (IOException e) {}
-			}
-			if (!Files.exists(Paths.get("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt"))){
-				File file = new File("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt");
-				try {
-					file.createNewFile();
-				} catch (IOException e) {}
-			}
-			if (!Files.exists(Paths.get("NewChunks/"+serverip+"/"+world+"/FlowIsBelowY0ChunkData.txt"))){
-				File file = new File("NewChunks/"+serverip+"/"+world+"/FlowIsBelowY0ChunkData.txt");
-				try {
-					file.createNewFile();
-				} catch (IOException e) {}
-			}
-			if (!Files.exists(Paths.get("NewChunks/"+serverip+"/"+world+"/TickExploitChunkData.txt"))){
-				File file = new File("NewChunks/"+serverip+"/"+world+"/TickExploitChunkData.txt");
-				try {
-					file.createNewFile();
-				} catch (IOException e) {}
-			}
+		if (!Files.exists(Paths.get("NewChunks/"+serverip+"/"+world+"/OldChunkData.txt"))){
+			File file = new File("NewChunks/"+serverip+"/"+world+"/OldChunkData.txt");
+			try {
+				file.createNewFile();
+			} catch (IOException e) {}
+		}
+		if (!Files.exists(Paths.get("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt"))){
+			File file = new File("NewChunks/"+serverip+"/"+world+"/NewChunkData.txt");
+			try {
+				file.createNewFile();
+			} catch (IOException e) {}
+		}
+		if (!Files.exists(Paths.get("NewChunks/"+serverip+"/"+world+"/FlowIsBelowY0ChunkData.txt"))){
+			File file = new File("NewChunks/"+serverip+"/"+world+"/FlowIsBelowY0ChunkData.txt");
+			try {
+				file.createNewFile();
+			} catch (IOException e) {}
+		}
+		if (!Files.exists(Paths.get("NewChunks/"+serverip+"/"+world+"/TickExploitChunkData.txt"))){
+			File file = new File("NewChunks/"+serverip+"/"+world+"/TickExploitChunkData.txt");
+			try {
+				file.createNewFile();
+			} catch (IOException e) {}
+		}
 		if (chunkcounter=true){
 			chunkcounterticks++;
 			if (chunkcounterticks>=1){
@@ -452,7 +455,7 @@ public class NewerNewChunks extends Module {
 				olderoldChunks.clear();
 				tickexploitChunks.clear();
 			}
-				loadData();
+			loadData();
 		}
 	}
 	@EventHandler
@@ -471,11 +474,11 @@ public class NewerNewChunks extends Module {
 				for (ChunkPos c : olderoldChunks) {
 					if (c != null && mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
 						if (detectmode.get()== DetectMode.Advanced) {
-						render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), olderoldChunksSideColor.get(), olderoldChunksLineColor.get(), shapeMode.get(), event);
+							render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), olderoldChunksSideColor.get(), olderoldChunksLineColor.get(), shapeMode.get(), event);
 						} else if (detectmode.get()== DetectMode.Normal) {
-						render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), newChunksSideColor.get(), newChunksLineColor.get(), shapeMode.get(), event);
+							render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), newChunksSideColor.get(), newChunksLineColor.get(), shapeMode.get(), event);
 						} else if (detectmode.get()== DetectMode.IgnoreFlowBelow0AndTickExploit) {
-						render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
+							render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
 						}
 					}
 				}
@@ -486,13 +489,13 @@ public class NewerNewChunks extends Module {
 				for (ChunkPos c : tickexploitChunks) {
 					if (c != null && mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
 						if (detectmode.get()== DetectMode.Advanced && tickexploit.get()) {
-						render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), tickexploitChunksSideColor.get(), tickexploitChunksLineColor.get(), shapeMode.get(), event);
+							render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), tickexploitChunksSideColor.get(), tickexploitChunksLineColor.get(), shapeMode.get(), event);
 						} else if ((detectmode.get()== DetectMode.Normal) && tickexploit.get()) {
-						render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), newChunksSideColor.get(), newChunksLineColor.get(), shapeMode.get(), event);
+							render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), newChunksSideColor.get(), newChunksLineColor.get(), shapeMode.get(), event);
 						} else if ((detectmode.get()== DetectMode.IgnoreFlowBelow0AndTickExploit) && tickexploit.get()) {
-						render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
+							render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
 						} else if ((detectmode.get()== DetectMode.Advanced | detectmode.get()== DetectMode.Normal | detectmode.get()== DetectMode.IgnoreFlowBelow0AndTickExploit) && !tickexploit.get()) {
-						render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
+							render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
 						}
 					}
 				}
@@ -591,7 +594,7 @@ public class NewerNewChunks extends Module {
 			if (mc.world.getChunkManager().getChunk(packet.getChunkX(), packet.getChunkZ()) == null) {
 				WorldChunk chunk = new WorldChunk(mc.world, oldpos);
 				try {
-					chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), new NbtCompound(), packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ()));
+					taskExecutor.execute(() -> chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), new NbtCompound(), packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ())));
 				} catch (ArrayIndexOutOfBoundsException e) {
 					return;
 				}
@@ -620,15 +623,15 @@ public class NewerNewChunks extends Module {
 			for (String line : allLines) {
 				String s = line;
 				if (s !=null){
-				String[] array = s.split(", ");
-				if (array.length==2) {
-					int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]", ""));
-					int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]", ""));
-					oldpos = new ChunkPos(X, Z);
-					if (!oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !olderoldChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
-						oldChunks.add(oldpos);
+					String[] array = s.split(", ");
+					if (array.length==2) {
+						int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]", ""));
+						int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]", ""));
+						oldpos = new ChunkPos(X, Z);
+						if (!oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !olderoldChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
+							oldChunks.add(oldpos);
+						}
 					}
-				}
 				}
 			}
 		} catch (IOException e) {
@@ -640,15 +643,15 @@ public class NewerNewChunks extends Module {
 			for (String line : allLines) {
 				String s = line;
 				if (s !=null){
-				String[] array = s.split(", ");
-				if (array.length==2) {
-					int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]", ""));
-					int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]", ""));
-					chunkPos = new ChunkPos(X, Z);
-					if (!tickexploitChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)) {
-						newChunks.add(chunkPos);
+					String[] array = s.split(", ");
+					if (array.length==2) {
+						int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]", ""));
+						int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]", ""));
+						chunkPos = new ChunkPos(X, Z);
+						if (!tickexploitChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)) {
+							newChunks.add(chunkPos);
+						}
 					}
-				}
 				}
 			}
 		} catch (IOException e) {
@@ -660,15 +663,15 @@ public class NewerNewChunks extends Module {
 			for (String line : allLines) {
 				String s = line;
 				if (s !=null){
-				String[] array = s.split(", ");
-				if (array.length==2) {
-					int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]", ""));
-					int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]", ""));
-					chunkPos = new ChunkPos(X, Z);
-					if (!tickexploitChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)) {
-						olderoldChunks.add(chunkPos);
+					String[] array = s.split(", ");
+					if (array.length==2) {
+						int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]", ""));
+						int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]", ""));
+						chunkPos = new ChunkPos(X, Z);
+						if (!tickexploitChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)) {
+							olderoldChunks.add(chunkPos);
+						}
 					}
-				}
 				}
 			}
 		} catch (IOException e) {
@@ -680,15 +683,15 @@ public class NewerNewChunks extends Module {
 			for (String line : allLines) {
 				String s = line;
 				if (s !=null){
-				String[] array = s.split(", ");
-				if (array.length==2) {
-					int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]", ""));
-					int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]", ""));
-					chunkPos = new ChunkPos(X, Z);
-					if (!tickexploitChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)) {
-						tickexploitChunks.add(chunkPos);
+					String[] array = s.split(", ");
+					if (array.length==2) {
+						int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]", ""));
+						int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]", ""));
+						chunkPos = new ChunkPos(X, Z);
+						if (!tickexploitChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)) {
+							tickexploitChunks.add(chunkPos);
+						}
 					}
-				}
 				}
 			}
 		} catch (IOException e) {

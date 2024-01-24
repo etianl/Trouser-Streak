@@ -1,7 +1,7 @@
 //Note from Saturn5Vfive:
 //the exploit used here is not mine!
 //I don't completely know where it originated, but I'm pretty sure it's 2b2t.
-
+//note from etianl: I skidded this from Saturn5Vfive to get it into trouser-streak
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -14,8 +14,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import pwn.noobs.trouserstreak.Trouser;
 
 public class InstantKill extends Module {
@@ -26,7 +24,6 @@ public class InstantKill extends Module {
 			.defaultValue(false)
 			.build()
 	);
-	public static final Logger LOGGER = LogManager.getLogger("instantkill");
 
 	public static final MinecraftClient mc = MinecraftClient.getInstance();
 

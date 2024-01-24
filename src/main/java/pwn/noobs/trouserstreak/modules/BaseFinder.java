@@ -44,6 +44,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /*
     This BaseFinder was made from the newchunks code,
@@ -363,6 +365,8 @@ public class BaseFinder extends Module {
             .visible(() -> trcr.get())
             .build()
     );
+    private final Executor taskExecutor = Executors.newSingleThreadExecutor();
+
     private int basefoundspamTicks=0;
     private boolean basefound=false;
     private int deletewarningTicks=666;
@@ -648,8 +652,8 @@ public class BaseFinder extends Module {
             if (mc.world.getChunkManager().getChunk(packet.getChunkX(), packet.getChunkZ()) == null) {
                 WorldChunk chunk = new WorldChunk(mc.world, basepos);
                 try {
-                    chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), new NbtCompound(), packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ()));
-                } catch (ArrayIndexOutOfBoundsException e) {
+                        taskExecutor.execute(() -> chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), new NbtCompound(), packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ())));
+                    } catch (ArrayIndexOutOfBoundsException e) {
                     return;
                 }
 
