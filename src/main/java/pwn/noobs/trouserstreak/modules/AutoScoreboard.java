@@ -1,9 +1,11 @@
 package pwn.noobs.trouserstreak.modules;
 
-import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.utils.StarscriptTextBoxRenderer;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.StringListSetting;
+import meteordevelopment.meteorclient.settings.StringSetting;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
@@ -13,7 +15,6 @@ import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class AutoScoreboard extends Module {
     private final SettingGroup sgTitle = settings.createGroup("Title Options");
@@ -60,9 +61,17 @@ public class AutoScoreboard extends Module {
         super(Trouser.Main, "auto-scoreboard", "Automatically create a scoreboard using Starscript. Requires operator access.");
     }
 
+    @Override
+    public void onActivate() {
+        assert mc.player != null;
+        if(!mc.player.hasPermissionLevel(2)) {
+            toggle();
+            error("No permission!");
+        }
+    }
+
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if(!Objects.requireNonNull(mc.player).hasPermissionLevel(2)) return;
         String scoreboardName = RandomStringUtils.randomAlphabetic(10).toLowerCase();
         ChatUtils.sendPlayerMsg("/scoreboard objectives add " + scoreboardName + " dummy {\"text\":\"" + MeteorStarscript.run(MeteorStarscript.compile(title.get())) + "\",\"color\":\"" + titleColor.get() + "\"}");
         ChatUtils.sendPlayerMsg("/scoreboard objectives setdisplay sidebar " + scoreboardName);
