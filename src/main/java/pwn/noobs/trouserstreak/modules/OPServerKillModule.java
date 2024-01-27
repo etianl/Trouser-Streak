@@ -40,12 +40,12 @@ public class OPServerKillModule extends Module {
             .build()
     );
     private final Setting<Integer> killvalue = sgGeneral.add(new IntSetting.Builder()
-            .name("randomTickSpeed-(kill-value)")
+            .name("randomTickSpeed-(Kill-value)")
             .description("This is what kills the server. Max value recommended.")
             .defaultValue(2147483647)
             .min(0)
-                    .max(2147483647)
-                    .sliderRange(0, 2147483647)
+            .max(2147483647)
+            .sliderRange(0, 2147483647)
             .build()
     );
 
