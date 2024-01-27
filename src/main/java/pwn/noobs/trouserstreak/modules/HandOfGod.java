@@ -371,9 +371,9 @@ public class HandOfGod extends Module {
 
     @Override
     public void onActivate() {
-        if (notOP.get() && !(mc.player.hasPermissionLevel(4)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+        if (notOP.get() && !(mc.player.hasPermissionLevel(2)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
             toggle();
-            error("Must have OP");
+            error("Must have permission level 2 or higher");
         }
         roofticks=0;
         if (roofer.get()){
@@ -464,10 +464,10 @@ public class HandOfGod extends Module {
                 asaveticks=0;
             }
         }
-            if (auto.get() && mc.options.attackKey.isPressed() && mc.currentScreen == null) {
-                if (aticks<=atickdelay.get()){
-                    aticks++;
-                } else if (aticks>atickdelay.get()){
+        if (auto.get() && mc.options.attackKey.isPressed() && mc.currentScreen == null) {
+            if (aticks<=atickdelay.get()){
+                aticks++;
+            } else if (aticks>atickdelay.get()){
                 HitResult hr = mc.cameraEntity.raycast(900, 0, fluids.get());
                 Vec3d god = hr.getPos();
                 BlockPos pos = BlockPos.ofFloored(god);
@@ -487,48 +487,48 @@ public class HandOfGod extends Module {
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                     mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
                 }
-                    String fullString = block.get().toString();
-                    String[] parts = fullString.split(":");
-                    String block = parts[1];
-                    String blockName = block.replace("}", "");
-                    String repfullString = blocktoreplace.get().toString();
-                    String[] repparts = repfullString.split(":");
-                    String repblock = repparts[1];
-                    String repblockName = repblock.replace("}", "");
-                    switch (mc.player.getHorizontalFacing()){
-                        case NORTH, SOUTH -> {
-                            int x1 = Math.round(pos.getX()) + cwidth.get();
-                            int y1 = Math.round(pos.getY()) + cheight.get();
-                            int z1 = Math.round(pos.getZ()) + cdepth.get();
-                            int x2 = Math.round(pos.getX()) - cwidth.get();
-                            int y2 = Math.round(pos.getY()) - cheight.get();
-                            int z2 = Math.round(pos.getZ()) - cdepth.get();
-                            if (!replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName);
-                            else if (replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName + " replace " + repblockName);
-                        }
-                        case EAST, WEST -> {
-                            int x1 = Math.round(pos.getX()) + cdepth.get();
-                            int y1 = Math.round(pos.getY()) + cheight.get();
-                            int z1 = Math.round(pos.getZ()) + cwidth.get();
-                            int x2 = Math.round(pos.getX()) - cdepth.get();
-                            int y2 = Math.round(pos.getY()) - cheight.get();
-                            int z2 = Math.round(pos.getZ()) - cwidth.get();
-                            if (!replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName);
-                            else if (replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName + " replace " + repblockName);
-                        }
+                String fullString = block.get().toString();
+                String[] parts = fullString.split(":");
+                String block = parts[1];
+                String blockName = block.replace("}", "");
+                String repfullString = blocktoreplace.get().toString();
+                String[] repparts = repfullString.split(":");
+                String repblock = repparts[1];
+                String repblockName = repblock.replace("}", "");
+                switch (mc.player.getHorizontalFacing()){
+                    case NORTH, SOUTH -> {
+                        int x1 = Math.round(pos.getX()) + cwidth.get();
+                        int y1 = Math.round(pos.getY()) + cheight.get();
+                        int z1 = Math.round(pos.getZ()) + cdepth.get();
+                        int x2 = Math.round(pos.getX()) - cwidth.get();
+                        int y2 = Math.round(pos.getY()) - cheight.get();
+                        int z2 = Math.round(pos.getZ()) - cdepth.get();
+                        if (!replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName);
+                        else if (replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName + " replace " + repblockName);
                     }
-                    aticks=0;
+                    case EAST, WEST -> {
+                        int x1 = Math.round(pos.getX()) + cdepth.get();
+                        int y1 = Math.round(pos.getY()) + cheight.get();
+                        int z1 = Math.round(pos.getZ()) + cwidth.get();
+                        int x2 = Math.round(pos.getX()) - cdepth.get();
+                        int y2 = Math.round(pos.getY()) - cheight.get();
+                        int z2 = Math.round(pos.getZ()) - cwidth.get();
+                        if (!replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName);
+                        else if (replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName + " replace " + repblockName);
+                    }
                 }
+                aticks=0;
             }
-        if (SwpAway.get()){
-        if (mc.options.useKey.isPressed()){
-            sweep=true;
-        }else if (mc.options.useKey.isPressed()==false) sweep=false;
-        if (sweep==false){
-        sX=mc.player.getBlockX();
-        sY=mc.player.getBlockY();
-        sZ=mc.player.getBlockZ();
         }
+        if (SwpAway.get()){
+            if (mc.options.useKey.isPressed()){
+                sweep=true;
+            }else if (mc.options.useKey.isPressed()==false) sweep=false;
+            if (sweep==false){
+                sX=mc.player.getBlockX();
+                sY=mc.player.getBlockY();
+                sZ=mc.player.getBlockZ();
+            }
             if (sweep==true){
                 String sfullString = sweepblock.get().toString();
                 String[] sparts = sfullString.split(":");
@@ -559,32 +559,10 @@ public class HandOfGod extends Module {
                 swpr++;
             } else swpr=0;
         }
-            if (rndplyr.get()){
-                if (ticks<=tickdelay.get()){
-                    ticks++;
-                } else if (ticks>tickdelay.get()){
-                    String pfullString = pblock.get().toString();
-                    String[] pparts = pfullString.split(":");
-                    String pblock = pparts[1];
-                    String pBlockName = pblock.replace("}", "");
-                    String prepfullString = pblocktoreplace.get().toString();
-                    String[] prepparts = prepfullString.split(":");
-                    String prepblock = prepparts[1];
-                    String pRepblockName = prepblock.replace("}", "");
-                    switch (mc.player.getHorizontalFacing()){
-                        case NORTH, SOUTH -> {
-                            if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill ~"+pwidth.get()+" ~"+pheight.get()+" ~"+pdepth.get()+" ~-"+pwidth.get()+" ~-"+pheight.get()+" ~-"+pdepth.get()+" air");
-                            else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill ~"+pwidth.get()+" ~"+pheight.get()+" ~"+pdepth.get()+" ~-"+pwidth.get()+" ~-"+pheight.get()+" ~-"+pdepth.get()+" "+pBlockName+" replace "+pRepblockName);
-                        }
-                        case EAST, WEST -> {
-                            if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill ~"+pdepth.get()+" ~"+pheight.get()+" ~"+pwidth.get()+" ~-"+pdepth.get()+" ~-"+pheight.get()+" ~-"+pwidth.get()+" air");
-                            else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill ~"+pdepth.get()+" ~"+pheight.get()+" ~"+pwidth.get()+" ~-"+pdepth.get()+" ~-"+pheight.get()+" ~-"+pwidth.get()+" "+pBlockName+" replace "+pRepblockName);
-                        }
-                    }
-                    ticks=0;
-                }
-            }
-            if (voider.get()){
+        if (rndplyr.get()){
+            if (ticks<=tickdelay.get()){
+                ticks++;
+            } else if (ticks>tickdelay.get()){
                 String pfullString = pblock.get().toString();
                 String[] pparts = pfullString.split(":");
                 String pblock = pparts[1];
@@ -593,165 +571,187 @@ public class HandOfGod extends Module {
                 String[] prepparts = prepfullString.split(":");
                 String prepblock = prepparts[1];
                 String pRepblockName = prepblock.replace("}", "");
-                    if (i>= mc.player.getBlockPos().getY()-vrange.get()){
-                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + i +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + i +" "+ (pZ + radius.get()) +" air");
-                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + i +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + i +" "+ (pZ + radius.get()) +" "+pBlockName+" replace "+pRepblockName);
-                        i--;
-                    }else if (i<= mc.player.getBlockPos().getY()-vrange.get()){
-                        i=pY+vrange.get();
+                switch (mc.player.getHorizontalFacing()){
+                    case NORTH, SOUTH -> {
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill ~"+pwidth.get()+" ~"+pheight.get()+" ~"+pdepth.get()+" ~-"+pwidth.get()+" ~-"+pheight.get()+" ~-"+pdepth.get()+" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill ~"+pwidth.get()+" ~"+pheight.get()+" ~"+pdepth.get()+" ~-"+pwidth.get()+" ~-"+pheight.get()+" ~-"+pdepth.get()+" "+pBlockName+" replace "+pRepblockName);
                     }
-
-
+                    case EAST, WEST -> {
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill ~"+pdepth.get()+" ~"+pheight.get()+" ~"+pwidth.get()+" ~-"+pdepth.get()+" ~-"+pheight.get()+" ~-"+pwidth.get()+" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill ~"+pdepth.get()+" ~"+pheight.get()+" ~"+pwidth.get()+" ~-"+pdepth.get()+" ~-"+pheight.get()+" ~-"+pwidth.get()+" "+pBlockName+" replace "+pRepblockName);
+                    }
+                }
+                ticks=0;
             }
-            if (mgcersr.get()){
-                if (Modules.get().isActive(Flight.class)){
-                    if (errticks<3){
+        }
+        if (voider.get()){
+            String pfullString = pblock.get().toString();
+            String[] pparts = pfullString.split(":");
+            String pblock = pparts[1];
+            String pBlockName = pblock.replace("}", "");
+            String prepfullString = pblocktoreplace.get().toString();
+            String[] prepparts = prepfullString.split(":");
+            String prepblock = prepparts[1];
+            String pRepblockName = prepblock.replace("}", "");
+            if (i>= mc.player.getBlockPos().getY()-vrange.get()){
+                if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + i +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + i +" "+ (pZ + radius.get()) +" air");
+                else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + i +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + i +" "+ (pZ + radius.get()) +" "+pBlockName+" replace "+pRepblockName);
+                i--;
+            }else if (i<= mc.player.getBlockPos().getY()-vrange.get()){
+                i=pY+vrange.get();
+            }
+
+
+        }
+        if (mgcersr.get()){
+            if (Modules.get().isActive(Flight.class)){
+                if (errticks<3){
                     errticks++;}
-                    if (errticks==2){
-                        error("Fly Slow. Set Flight speed to 0.1 or less. :D");
+                if (errticks==2){
+                    error("Fly Slow. Set Flight speed to 0.1 or less. :D");
+                }
+            }
+            String pfullString = pblock.get().toString();
+            String[] pparts = pfullString.split(":");
+            String pblock = pparts[1];
+            String pBlockName = pblock.replace("}", "");
+            String prepfullString = pblocktoreplace.get().toString();
+            String[] prepparts = prepfullString.split(":");
+            String prepblock = prepparts[1];
+            String pRepblockName = prepblock.replace("}", "");
+            if (mc.options.jumpKey.isPressed()){
+                if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY+mgcdist.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcdist.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY+mgcdist.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcdist.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
+            }
+            if (mc.options.sneakKey.isPressed()){
+                if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcdist.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + (pY-mgcdist.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcdist.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + (pY-mgcdist.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
+            }
+            if (mc.options.forwardKey.isPressed()){
+                switch (mc.player.getHorizontalFacing()){
+                    case NORTH -> {
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
+                    }
+                    case WEST -> {
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
+                    }
+                    case SOUTH -> {
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
+                    }
+                    case EAST -> {
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
                 }
-                String pfullString = pblock.get().toString();
-                String[] pparts = pfullString.split(":");
-                String pblock = pparts[1];
-                String pBlockName = pblock.replace("}", "");
-                String prepfullString = pblocktoreplace.get().toString();
-                String[] prepparts = prepfullString.split(":");
-                String prepblock = prepparts[1];
-                String pRepblockName = prepblock.replace("}", "");
-                    if (mc.options.jumpKey.isPressed()){
-                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY+mgcdist.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcdist.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY+mgcdist.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcdist.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
+            }
+            if (mc.options.backKey.isPressed()){
+                switch (mc.player.getHorizontalFacing()){
+                    case NORTH -> {
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
-                    if (mc.options.sneakKey.isPressed()){
-                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcdist.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + (pY-mgcdist.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcdist.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + (pY-mgcdist.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
+                    case WEST -> {
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
-                    if (mc.options.forwardKey.isPressed()){
-                    switch (mc.player.getHorizontalFacing()){
-                        case NORTH -> {
-                            if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
-                            else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
-                        }
-                        case WEST -> {
-                            if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                            else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
-                        }
-                        case SOUTH -> {
-                            if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
-                            else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
-                        }
-                        case EAST -> {
-                            if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                            else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
-                        }
+                    case SOUTH -> {
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
+                    case EAST -> {
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
-                        if (mc.options.backKey.isPressed()){
-                            switch (mc.player.getHorizontalFacing()){
-                                case NORTH -> {
-                                    if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
-                                    else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
-                                }
-                                case WEST -> {
-                                    if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                                    else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
-                                }
-                                case SOUTH -> {
-                                    if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
-                                    else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
-                                }
-                                case EAST -> {
-                                    if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                                    else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
-                                }
-                            }
-                        }
-                            if (mc.options.rightKey.isPressed()){
-                                switch (mc.player.getHorizontalFacing()){
-                                    case NORTH -> {
-                                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
-                                    }
-                                    case WEST -> {
-                                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
-                                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
-                                    }
-                                    case SOUTH -> {
-                                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
-                                    }
-                                    case EAST -> {
-                                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
-                                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
-                                    }
-                                }
-                            }
-                                if (mc.options.leftKey.isPressed()){
-                                    switch (mc.player.getHorizontalFacing()){
-                                        case NORTH -> {
-                                            if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                                            else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
-                                        }
-                                        case WEST -> {
-                                            if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
-                                            else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
-                                        }
-                                        case SOUTH -> {
-                                            if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                                            else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
-                                        }
-                                        case EAST -> {
-                                            if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
-                                            else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
-                                        }
-                                    }
+                }
+            }
+            if (mc.options.rightKey.isPressed()){
+                switch (mc.player.getHorizontalFacing()){
+                    case NORTH -> {
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
+                    case WEST -> {
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
+                    }
+                    case SOUTH -> {
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
+                    }
+                    case EAST -> {
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
+                    }
+                }
+            }
+            if (mc.options.leftKey.isPressed()){
+                switch (mc.player.getHorizontalFacing()){
+                    case NORTH -> {
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
+                    }
+                    case WEST -> {
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
+                    }
+                    case SOUTH -> {
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
+                    }
+                    case EAST -> {
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
+                    }
+                }
+            }
 
+        }
+        if (roofer.get()){
+            if (roofticks<=rooftickdelay.get()){
+                roofticks++;
+            } else if (roofticks>rooftickdelay.get()) {
+                String rfullString = roofblock.get().toString();
+                String[] rparts = rfullString.split(":");
+                String rblock = rparts[1];
+                String rblockName = rblock.replace("}", "");
+                ChatUtils.sendPlayerMsg("/fill " + (pX - roofradius.get()) + " " + roofheight.get() +" "+ (pZ - roofradius.get()) +" "+ (pX + roofradius.get()) + " " + roofheight.get() +" "+ (pZ + roofradius.get()) + " "+rblockName);
+                roofticks=0;
             }
-            if (roofer.get()){
-                if (roofticks<=rooftickdelay.get()){
-                    roofticks++;
-                } else if (roofticks>rooftickdelay.get()) {
-                    String rfullString = roofblock.get().toString();
-                    String[] rparts = rfullString.split(":");
-                    String rblock = rparts[1];
-                    String rblockName = rblock.replace("}", "");
-                    ChatUtils.sendPlayerMsg("/fill " + (pX - roofradius.get()) + " " + roofheight.get() +" "+ (pZ - roofradius.get()) +" "+ (pX + roofradius.get()) + " " + roofheight.get() +" "+ (pZ + roofradius.get()) + " "+rblockName);
-                    roofticks=0;
-                }
-            }
-            if (troll.get()) {
-                if (trollticks<=trolltickdelay.get()){
-                    trollticks++;
-                } else if (trollticks>trolltickdelay.get()){
+        }
+        if (troll.get()) {
+            if (trollticks<=trolltickdelay.get()){
+                trollticks++;
+            } else if (trollticks>trolltickdelay.get()){
                 for (Entity entity : mc.world.getEntities()) {
                     if (entity instanceof PlayerEntity && entity != mc.player){
-                    if (!trollfriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) {
-                        return;
-                    }
-                    String tfullString = trollblock.get().toString();
-                    String[] tparts = tfullString.split(":");
-                    String tblock = tparts[1];
-                    String tBlockName = tblock.replace("}", "");
-                    String trepfullString = trollblocktoreplace.get().toString();
-                    String[] trepparts = trepfullString.split(":");
-                    String trepblock = trepparts[1];
-                    String tRepblockName = trepblock.replace("}", "");
-                    switch (entity.getHorizontalFacing()){
-                        case NORTH, SOUTH -> {
-                            if (!trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trollwidth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trolldepth.get())+" "+(entity.getBlockPos().getX()-trollwidth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trolldepth.get())+" "+tBlockName);
-                            else if (trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trollwidth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trolldepth.get())+" "+(entity.getBlockPos().getX()-trollwidth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trolldepth.get())+" "+tBlockName+" replace "+tRepblockName);
+                        if (!trollfriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) {
+                            return;
                         }
-                        case EAST, WEST -> {
-                            if (!trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trolldepth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trollwidth.get())+" "+(entity.getBlockPos().getX()-trolldepth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trollwidth.get())+" "+tBlockName);
-                            else if (trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trolldepth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trollwidth.get())+" "+(entity.getBlockPos().getX()-trolldepth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trollwidth.get())+" "+tBlockName+" replace "+tRepblockName);
+                        String tfullString = trollblock.get().toString();
+                        String[] tparts = tfullString.split(":");
+                        String tblock = tparts[1];
+                        String tBlockName = tblock.replace("}", "");
+                        String trepfullString = trollblocktoreplace.get().toString();
+                        String[] trepparts = trepfullString.split(":");
+                        String trepblock = trepparts[1];
+                        String tRepblockName = trepblock.replace("}", "");
+                        switch (entity.getHorizontalFacing()){
+                            case NORTH, SOUTH -> {
+                                if (!trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trollwidth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trolldepth.get())+" "+(entity.getBlockPos().getX()-trollwidth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trolldepth.get())+" "+tBlockName);
+                                else if (trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trollwidth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trolldepth.get())+" "+(entity.getBlockPos().getX()-trollwidth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trolldepth.get())+" "+tBlockName+" replace "+tRepblockName);
+                            }
+                            case EAST, WEST -> {
+                                if (!trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trolldepth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trollwidth.get())+" "+(entity.getBlockPos().getX()-trolldepth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trollwidth.get())+" "+tBlockName);
+                                else if (trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trolldepth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trollwidth.get())+" "+(entity.getBlockPos().getX()-trolldepth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trollwidth.get())+" "+tBlockName+" replace "+tRepblockName);
+                            }
                         }
-                    }
                     }
                 }
                 trollticks=0;
-                }
             }
         }
     }
+}

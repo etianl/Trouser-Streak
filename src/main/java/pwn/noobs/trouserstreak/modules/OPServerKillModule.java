@@ -12,7 +12,12 @@ import pwn.noobs.trouserstreak.Trouser;
 
 public class OPServerKillModule extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
+    public final Setting<Boolean> dontBeStupid = sgGeneral.add(new BoolSetting.Builder()
+            .name("Restrict Singleplayer Use")
+            .description("Does not allow you to screw up your singleplayer worlds. Turn off for 'testing' purposes.")
+            .defaultValue(true)
+            .build()
+    );
     public final Setting<Boolean> notOP = sgGeneral.add(new BoolSetting.Builder()
             .name("Toggle Module if not OP")
             .description("Turn this off to prevent the bug of module always being turned off when you join server.")
@@ -55,9 +60,13 @@ public class OPServerKillModule extends Module {
 
     @Override
     public void onActivate() {
-        if (notOP.get() && !(mc.player.hasPermissionLevel(4)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+        if (dontBeStupid.get() && mc.getInstance().isInSingleplayer()) {
             toggle();
-            error("Must have OP");
+            error("Don't break your single player world, it sucks.");
+        }
+        if (notOP.get() && !(mc.player.hasPermissionLevel(2)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+            toggle();
+            error("Must have permission level 2 or higher");
         }
             ticks=0;
     }

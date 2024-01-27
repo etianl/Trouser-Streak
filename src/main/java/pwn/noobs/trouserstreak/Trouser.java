@@ -47,6 +47,8 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new BetterAutoSign());
                 Modules.get().add(new FlightAntikick());
                 Modules.get().add(new BlockListMineCommand());
+                Modules.get().add(new AutoCommand());
+                Modules.get().add(new AutoScoreboard());
                 Commands.add(new LavaTimeCalculator());
                 Commands.add(new CasterTimer());
                 Commands.add(new NewChunkCounter());

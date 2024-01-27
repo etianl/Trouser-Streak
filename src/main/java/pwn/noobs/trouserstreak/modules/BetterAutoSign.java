@@ -17,12 +17,13 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.HangingSignBlockEntity;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.gui.screen.ingame.HangingSignEditScreen;
 import net.minecraft.client.gui.screen.ingame.SignEditScreen;
+import net.minecraft.item.HangingSignItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.item.SignItem;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSignC2SPacket;
 import net.minecraft.util.Hand;
@@ -94,7 +95,12 @@ public class BetterAutoSign extends Module {
             .defaultValue("wrong.")
             .build()
     );
-
+    private final Setting<Boolean> bothside = sgExtra.add(new BoolSetting.Builder()
+            .name("both-sides")
+            .description("Write on the rear of the signs as well.")
+            .defaultValue(true)
+            .build()
+    );
     private final Setting<Boolean> autoDye = sgExtra.add(new BoolSetting.Builder()
             .name("auto-dye")
             .description("Dye signs that you place")
@@ -152,7 +158,9 @@ public class BetterAutoSign extends Module {
             .visible(signAura::get)
             .build()
     );
-
+    private boolean editrear = false;
+    private BlockPos signPos = new BlockPos(99999999,99999999,99999999);
+    private BlockPos prevsignPos = new BlockPos(99999999,99999999,99999999);
     private final ArrayList<BlockPos> openedSigns = new ArrayList<>();
     private int timer = 0;
 
@@ -164,10 +172,11 @@ public class BetterAutoSign extends Module {
     public void onActivate() {
         timer = 0;
         openedSigns.clear();
+        editrear=false;
     }
 
     @EventHandler
-    private void onTick(TickEvent.Pre event) {
+    private void onPreTick(TickEvent.Pre event) {
         timer--;
         if(!signAura.get() || timer > 0) return;
 
@@ -192,20 +201,28 @@ public class BetterAutoSign extends Module {
         if(!(event.screen instanceof SignEditScreen) && !(event.screen instanceof HangingSignEditScreen)) return;
 
         SignBlockEntity sign = ((AbstractSignEditScreenAccessor) event.screen).getSign();
-        if (mc.world.getBlockEntity(sign.getPos()) instanceof SignBlockEntity){
-            mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(),true,
-                    lineOne.get(),
-                    lineTwo.get(),
-                    lineThree.get(),
-                    lineFour.get()
-            ));
-        } else if (mc.world.getBlockEntity(sign.getPos()) instanceof HangingSignBlockEntity){
+        if (!(mc.world.getBlockState(sign.getPos()).getBlock().asItem() instanceof HangingSignItem) && mc.world.getBlockState(sign.getPos()).getBlock().asItem() instanceof SignItem){
+        mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(),true,
+                lineOne.get(),
+                lineTwo.get(),
+                lineThree.get(),
+                lineFour.get()
+        ));
+        if (bothside.get()){
+            editrear = true;
+            if (prevsignPos != sign.getPos())signPos = sign.getPos();
+        }
+        } else if (mc.world.getBlockState(sign.getPos()).getBlock().asItem() instanceof HangingSignItem){
             mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(),true,
                     HlineOne.get(),
                     HlineTwo.get(),
                     HlineThree.get(),
                     HlineFour.get()
             ));
+            if (bothside.get()){
+                editrear = true;
+                if (prevsignPos != sign.getPos())signPos = sign.getPos();
+            }
         }
 
         event.cancel();
@@ -256,7 +273,33 @@ public class BetterAutoSign extends Module {
             }
         }
     }
+    @EventHandler
+    private void onPostTick(TickEvent.Post event) {
+        if (!editrear || !bothside.get() || prevsignPos == signPos) return;
+        if (!(mc.world.getBlockState(signPos).getBlock().asItem() instanceof HangingSignItem) && mc.world.getBlockState(signPos).getBlock().asItem() instanceof SignItem){
+                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(signPos.getX(), signPos.getY(), signPos.getZ()), Direction.DOWN, signPos, false));
+                mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
+                        lineOne.get(),
+                        lineTwo.get(),
+                        lineThree.get(),
+                        lineFour.get()
+                ));
+            prevsignPos = signPos;
 
+            editrear=false;
+        } else if (mc.world.getBlockState(signPos).getBlock().asItem() instanceof HangingSignItem){
+                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(signPos.getX(), signPos.getY(), signPos.getZ()), Direction.DOWN, signPos, false));
+                mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
+                        HlineOne.get(),
+                        HlineTwo.get(),
+                        HlineThree.get(),
+                        HlineFour.get()
+                ));
+            prevsignPos = signPos;
+
+            editrear=false;
+        }
+    }
     private boolean filter(Item item) {
         return Items.WHITE_DYE.equals(item)
                 || Items.BLACK_DYE.equals(item)
