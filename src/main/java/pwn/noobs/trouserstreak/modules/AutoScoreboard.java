@@ -50,7 +50,7 @@ public class AutoScoreboard extends Module {
                     "Mountains Of Lava Inc.",
                     "youtube.com/@mountainsoflavainc.6913",
                     "Destroyed by {player}",
-                    "{date} {time}"
+                    "{date}"
             ))
             .renderer(StarscriptTextBoxRenderer.class)
             .build()
