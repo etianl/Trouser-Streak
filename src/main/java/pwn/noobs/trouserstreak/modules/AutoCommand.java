@@ -43,6 +43,15 @@ public class AutoCommand extends Module {
             .build()
     );
 
+    private final Setting<Integer> permissionLevel = sgGeneral.add(new IntSetting.Builder()
+            .name("permission-level")
+            .description("The permission level to check for before running commands, 3 should usually be enough")
+            .defaultValue(3)
+            .max(4)
+            .sliderMax(4)
+            .build()
+    );
+
     private final Setting<Boolean> disableOnFinish = sgGeneral.add(new BoolSetting.Builder()
             .name("disable-on-finish")
             .description("Disable the module when finished")
@@ -70,7 +79,7 @@ public class AutoCommand extends Module {
     private void onTick(TickEvent.Post event) {
         if(sent) return;
 
-        if(mc.player.hasPermissionLevel(4)) {
+        if(mc.player.hasPermissionLevel(permissionLevel.get())) {
             if(mode.get() == Mode.Manual) for(String command : commands.get()) ChatUtils.sendPlayerMsg(command);
             if(mode.get() == Mode.Macro) {
                 try {

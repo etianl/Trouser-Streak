@@ -44,9 +44,9 @@ public class OPplayerTPmodule extends Module {
 
     @Override
     public void onActivate() {
-        if (notOP.get() && !(mc.player.hasPermissionLevel(4)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+        if (notOP.get() && !(mc.player.hasPermissionLevel(2)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
             toggle();
-            error("Must have OP");
+            error("Must have permission level 2 or higher");
         }
         players = mc.world.getPlayers();
         if (currentplayer<players.size()) currentplayer++;

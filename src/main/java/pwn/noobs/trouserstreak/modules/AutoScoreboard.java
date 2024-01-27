@@ -83,7 +83,7 @@ public class AutoScoreboard extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (finished && disableOnFinish.get()) toggle();
-        if(finished || !Objects.requireNonNull(mc.player).hasPermissionLevel(4)) return;
+        if(finished || !Objects.requireNonNull(mc.player).hasPermissionLevel(2)) return;
         String scoreboardName = RandomStringUtils.randomAlphabetic(10).toLowerCase();
         ChatUtils.sendPlayerMsg("/scoreboard objectives add " + scoreboardName + " dummy {\"text\":\"" + MeteorStarscript.run(MeteorStarscript.compile(title.get())) + "\",\"color\":\"" + titleColor.get() + "\"}");
         ChatUtils.sendPlayerMsg("/scoreboard objectives setdisplay sidebar " + scoreboardName);
