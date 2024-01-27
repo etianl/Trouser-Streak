@@ -1,5 +1,6 @@
 package pwn.noobs.trouserstreak.modules;
 
+import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.utils.StarscriptTextBoxRenderer;
 import meteordevelopment.meteorclient.settings.*;
@@ -63,10 +64,20 @@ public class AutoScoreboard extends Module {
             .build()
     );
 
-    private boolean finished = false;
+    private boolean finished;
 
     public AutoScoreboard() {
         super(Trouser.Main, "auto-scoreboard", "Automatically create a scoreboard using Starscript. Requires operator access.");
+    }
+
+    @Override
+    public void onActivate() {
+        finished = false;
+    }
+
+    @EventHandler
+    private void onGameJoin(GameJoinedEvent event) {
+        finished = false;
     }
 
     @EventHandler
