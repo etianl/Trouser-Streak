@@ -63,7 +63,7 @@ public class AutoScoreboard extends Module {
             .build()
     );
 
-    private boolean finished;
+    private boolean finished = false;
 
     public AutoScoreboard() {
         super(Trouser.Main, "auto-scoreboard", "Automatically create a scoreboard using Starscript. Requires operator access.");
