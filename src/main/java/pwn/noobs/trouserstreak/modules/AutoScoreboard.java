@@ -60,9 +60,17 @@ public class AutoScoreboard extends Module {
         super(Trouser.Main, "auto-scoreboard", "Automatically create a scoreboard using Starscript. Requires operator access.");
     }
 
+    @Override
+    public void onActivate() {
+        assert mc.player != null;
+        if(!mc.player.hasPermissionLevel(2)) {
+            toggle();
+            error("No permission!");
+        }
+    }
+
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if(!Objects.requireNonNull(mc.player).hasPermissionLevel(2)) return;
         String scoreboardName = RandomStringUtils.randomAlphabetic(10).toLowerCase();
         ChatUtils.sendPlayerMsg("/scoreboard objectives add " + scoreboardName + " dummy {\"text\":\"" + MeteorStarscript.run(MeteorStarscript.compile(title.get())) + "\",\"color\":\"" + titleColor.get() + "\"}");
         ChatUtils.sendPlayerMsg("/scoreboard objectives setdisplay sidebar " + scoreboardName);
