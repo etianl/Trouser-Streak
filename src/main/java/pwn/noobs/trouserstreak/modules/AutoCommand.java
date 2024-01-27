@@ -41,7 +41,14 @@ public class AutoCommand extends Module {
             .visible(() -> mode.get() == Mode.Macro)
             .build()
     );
-
+    private final Setting<Integer> permissionLevel = sgGeneral.add(new IntSetting.Builder()
+            .name("permission-level")
+            .description("The permission level to check for before running commands, 3 should usually be enough")
+            .defaultValue(3)
+            .max(4)
+            .sliderMax(4)
+            .build()
+    );
     private final Setting<Boolean> disableOnFinish = sgGeneral.add(new BoolSetting.Builder()
             .name("disable-on-finish")
             .description("Disable the module when finished")
@@ -85,7 +92,7 @@ public class AutoCommand extends Module {
 
         if(sent && !auto.get()) return;
 
-        if(mc.player.hasPermissionLevel(4) && !auto.get()) {
+        if(mc.player.hasPermissionLevel(permissionLevel.get()) && !auto.get()) {
             if(mode.get() == Mode.Manual) for(String command : commands.get()) ChatUtils.sendPlayerMsg(command);
             if(mode.get() == Mode.Macro) {
                 try {
@@ -96,7 +103,7 @@ public class AutoCommand extends Module {
             }
             sent = true;
             if(disableOnFinish.get()) toggle();
-        } else if(mc.player.hasPermissionLevel(4) && auto.get()){
+        } else if(mc.player.hasPermissionLevel(permissionLevel.get()) && auto.get()){
             if (ticks<=atickdelay.get()){
                 ticks++;
             } else if (ticks>atickdelay.get()){
