@@ -371,9 +371,9 @@ public class HandOfGod extends Module {
 
     @Override
     public void onActivate() {
-        if (notOP.get() && !(mc.player.hasPermissionLevel(4)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+        if (notOP.get() && !(mc.player.hasPermissionLevel(2)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
             toggle();
-            error("Must have OP");
+            error("Must have permission level 2 or higher");
         }
         roofticks=0;
         if (roofer.get()){
