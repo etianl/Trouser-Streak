@@ -107,7 +107,7 @@ public class AutoCommand extends Module {
             if (ticks<=atickdelay.get()){
                 ticks++;
             } else if (ticks>atickdelay.get()){
-            if(mode.get() == Mode.Manual) for(String command : commands.get()) ChatUtils.sendPlayerMsg(command);
+                if(mode.get() == Mode.Manual) for(String command : commands.get()) ChatUtils.sendPlayerMsg(command);
                 if(mode.get() == Mode.Macro) {
                     try {
                         Macros.get().get(macroName.get()).onAction();

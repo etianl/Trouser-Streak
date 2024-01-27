@@ -24,6 +24,7 @@ In no particular order
 ## Features:
 - **Airstrike+:** Rains down whatever entities you desire. It used to only rain fireballs, and I also changed the positioning of the spawning. (Credits to Allah-Hack for the original) 
 - **AnHero:** Become An Hero! (A quick way back to spawn.) (Credits to etianl :D)
+- **AutoCommand:** Automates a list of commands you set in it's options at the push of a button! Credits to [aaaasdfghjkllll](https://github.com/aaaasdfghjkllll). I only added a full auto option because who doesn't love full auto?
 - **AutoDrop:** Drops the stack in your selected slot automatically, or you can choose a slot to dump. You can shift click your inventory items to dump your trash easily. (Credits to etianl :D)
 - **AutoLavaCaster** Simple timer based bot for lavacasting. Aim at the top of the block you want to cast on and activate the module. It places lava, then after an amount of time removes the lava, places the water after a specified delay, removes it after a specified delay, it will build the mountain upward, tower you up and repeat. Position yourself on a block above and diagonally, mostly perpendicular from the targeted block for best results. (Credits to etianl :D)
 - *AutoLavaCaster Notes:*
@@ -55,6 +56,7 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - ForwardKey Turns mountain up, Back Key turns mountain down.
 - JumpKey adjusts spacing of stairs according to the OnDemandSpacing value. 
 - Start building, then hold SneakKey and also hold Left or RightKey as well to build stairs diagonally. Release left or right key first to continue building in the direction you were prior. 
+- **AutoScoreboard:** Automates the creation of a custom scoreboard. Useful for advertising on griefed servers. Requires OP status. Credits to [aaaasdfghjkllll](https://github.com/aaaasdfghjkllll)
 - **AutoStaircase:** Builds stairs upward in the direction you are facing by running forward and jumping. (Credits to etianl for bringing it to life! As well as Credits to Frostburn for writing the original. <3) I just had to fix up some stuff for this one but Frostburn had the base code there. I believe this is the first publicly available automatic staircase builder in a Meteor addon, correct me if I'm wrong maybe I didn't have to learn some Java to do this.
 - **AutoVclipCommand** Automatically selects the nearest two block gap going either up or down to vclip into. (Credits to etianl, and credits to the original [AutoVclip](https://github.com/kittenvr/AutoVclip) for minecraft 1.19.2 which inspired me to make this one. :D)
 - **BaseFinder:** Automatically detects if a Base or Build could be in a chunk by checking every block in each chunk to see if there are "Un-natural" blocks within them. (Credits to etianl :D, and to Meteor-Rejects for some code from newchunks.)
