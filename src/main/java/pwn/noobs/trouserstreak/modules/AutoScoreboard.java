@@ -16,16 +16,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class AutoScoreboard extends Module {
-    private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgTitle = settings.createGroup("Title Options");
     private final SettingGroup sgContent = settings.createGroup("Content Options");
-
-    private final Setting<Boolean> disableOnFinish = sgGeneral.add(new BoolSetting.Builder()
-            .name("disable-on-finish")
-            .description("Disables the module when finished.")
-            .defaultValue(true)
-            .build()
-    );
 
     private final Setting<String> title = sgTitle.add(new StringSetting.Builder()
             .name("title")
@@ -64,26 +56,13 @@ public class AutoScoreboard extends Module {
             .build()
     );
 
-    private boolean finished;
-
     public AutoScoreboard() {
         super(Trouser.Main, "auto-scoreboard", "Automatically create a scoreboard using Starscript. Requires operator access.");
     }
 
-    @Override
-    public void onActivate() {
-        finished = false;
-    }
-
-    @EventHandler
-    private void onGameJoin(GameJoinedEvent event) {
-        finished = false;
-    }
-
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (finished && disableOnFinish.get()) toggle();
-        if(finished || !Objects.requireNonNull(mc.player).hasPermissionLevel(2)) return;
+        if(!Objects.requireNonNull(mc.player).hasPermissionLevel(2)) return;
         String scoreboardName = RandomStringUtils.randomAlphabetic(10).toLowerCase();
         ChatUtils.sendPlayerMsg("/scoreboard objectives add " + scoreboardName + " dummy {\"text\":\"" + MeteorStarscript.run(MeteorStarscript.compile(title.get())) + "\",\"color\":\"" + titleColor.get() + "\"}");
         ChatUtils.sendPlayerMsg("/scoreboard objectives setdisplay sidebar " + scoreboardName);
@@ -97,8 +76,7 @@ public class AutoScoreboard extends Module {
             ChatUtils.sendPlayerMsg("/scoreboard players set " + i + " " + scoreboardName + " " + i);
             i--;
         }
-        finished = true;
-        if(disableOnFinish.get()) toggle();
+        toggle();
         info("Created scoreboard.");
     }
 }
