@@ -14,7 +14,6 @@ import java.util.List;
 
 public class AutoCommand extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Where to get list of commands from")
@@ -43,22 +42,28 @@ public class AutoCommand extends Module {
             .build()
     );
 
-    private final Setting<Integer> permissionLevel = sgGeneral.add(new IntSetting.Builder()
-            .name("permission-level")
-            .description("The permission level to check for before running commands, 3 should usually be enough")
-            .defaultValue(3)
-            .max(4)
-            .sliderMax(4)
-            .build()
-    );
-
     private final Setting<Boolean> disableOnFinish = sgGeneral.add(new BoolSetting.Builder()
             .name("disable-on-finish")
             .description("Disable the module when finished")
             .defaultValue(false)
             .build()
     );
-
+    public final Setting<Boolean> auto = sgGeneral.add(new BoolSetting.Builder()
+            .name("FULLAUTO")
+            .description("FULL AUTO BABY!")
+            .defaultValue(false)
+            .build()
+    );
+    public final Setting<Integer> atickdelay = sgGeneral.add(new IntSetting.Builder()
+            .name("FULLAUTOTickDelay")
+            .description("Tick Delay for FULLAUTO option.")
+            .defaultValue(0)
+            .min(0)
+            .sliderMax(20)
+            .visible(() -> auto.get())
+            .build()
+    );
+    private int ticks = 0;
     private boolean sent;
 
     public AutoCommand() {
@@ -77,9 +82,10 @@ public class AutoCommand extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if(sent) return;
 
-        if(mc.player.hasPermissionLevel(permissionLevel.get())) {
+        if(sent && !auto.get()) return;
+
+        if(mc.player.hasPermissionLevel(4) && !auto.get()) {
             if(mode.get() == Mode.Manual) for(String command : commands.get()) ChatUtils.sendPlayerMsg(command);
             if(mode.get() == Mode.Macro) {
                 try {
@@ -90,6 +96,20 @@ public class AutoCommand extends Module {
             }
             sent = true;
             if(disableOnFinish.get()) toggle();
+        } else if(mc.player.hasPermissionLevel(4) && auto.get()){
+            if (ticks<=atickdelay.get()){
+                ticks++;
+            } else if (ticks>atickdelay.get()){
+            if(mode.get() == Mode.Manual) for(String command : commands.get()) ChatUtils.sendPlayerMsg(command);
+                if(mode.get() == Mode.Macro) {
+                    try {
+                        Macros.get().get(macroName.get()).onAction();
+                    } catch (NullPointerException ex) {
+                        error("Invalid macro! Is your macro name set correctly?");
+                    }
+                }
+                ticks=0;
+            }
         }
     }
 
