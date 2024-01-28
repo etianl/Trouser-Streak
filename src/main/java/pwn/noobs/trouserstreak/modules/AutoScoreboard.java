@@ -1,9 +1,11 @@
 package pwn.noobs.trouserstreak.modules;
 
-import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.utils.StarscriptTextBoxRenderer;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.StringListSetting;
+import meteordevelopment.meteorclient.settings.StringSetting;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
@@ -13,19 +15,10 @@ import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class AutoScoreboard extends Module {
-    private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgTitle = settings.createGroup("Title Options");
     private final SettingGroup sgContent = settings.createGroup("Content Options");
-
-    private final Setting<Boolean> disableOnFinish = sgGeneral.add(new BoolSetting.Builder()
-            .name("disable-on-finish")
-            .description("Disables the module when finished.")
-            .defaultValue(true)
-            .build()
-    );
 
     private final Setting<String> title = sgTitle.add(new StringSetting.Builder()
             .name("title")
@@ -64,26 +57,21 @@ public class AutoScoreboard extends Module {
             .build()
     );
 
-    private boolean finished;
-
     public AutoScoreboard() {
         super(Trouser.Main, "auto-scoreboard", "Automatically create a scoreboard using Starscript. Requires operator access.");
     }
 
     @Override
     public void onActivate() {
-        finished = false;
-    }
-
-    @EventHandler
-    private void onGameJoin(GameJoinedEvent event) {
-        finished = false;
+        assert mc.player != null;
+        if(!mc.player.hasPermissionLevel(2)) {
+            toggle();
+            error("No permission!");
+        }
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (finished && disableOnFinish.get()) toggle();
-        if(finished || !Objects.requireNonNull(mc.player).hasPermissionLevel(2)) return;
         String scoreboardName = RandomStringUtils.randomAlphabetic(10).toLowerCase();
         ChatUtils.sendPlayerMsg("/scoreboard objectives add " + scoreboardName + " dummy {\"text\":\"" + MeteorStarscript.run(MeteorStarscript.compile(title.get())) + "\",\"color\":\"" + titleColor.get() + "\"}");
         ChatUtils.sendPlayerMsg("/scoreboard objectives setdisplay sidebar " + scoreboardName);
@@ -97,8 +85,7 @@ public class AutoScoreboard extends Module {
             ChatUtils.sendPlayerMsg("/scoreboard players set " + i + " " + scoreboardName + " " + i);
             i--;
         }
-        finished = true;
-        if(disableOnFinish.get()) toggle();
+        toggle();
         info("Created scoreboard.");
     }
 }

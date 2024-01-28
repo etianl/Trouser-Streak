@@ -35,6 +35,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new ShulkerDupe());
                 Modules.get().add(new InvDupeModule());
                 Modules.get().add(new InstantKill());
+                Modules.get().add(new LavaAura());
                 Modules.get().add(new LecternCrash());
                 Modules.get().add(new AutoDrop());
                 Modules.get().add(new NbtEditor());
@@ -56,7 +57,7 @@ public class Trouser extends MeteorAddon {
                 Commands.add(new WorldInfoCommand());
                 Commands.add(new ViewNbtCommand());
                 Commands.add(new AutoVclipCommand());
-
+                Commands.add(new CrashCommand());
         }
 
         @Override
