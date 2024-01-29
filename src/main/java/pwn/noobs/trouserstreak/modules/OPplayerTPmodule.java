@@ -1,6 +1,5 @@
 package pwn.noobs.trouserstreak.modules;
 
-import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
@@ -8,14 +7,13 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.PlayerListEntry;
 import pwn.noobs.trouserstreak.Trouser;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 //credits to ogmur (https://www.youtube.com/@Ogmur) for the idea, etianl for writing and aaaasdfghjkllll for fixing
 public class OPplayerTPmodule extends Module {
@@ -32,10 +30,16 @@ public class OPplayerTPmodule extends Module {
             .defaultValue(false)
             .build()
     );
+    public final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
+            .name("ignore-friends")
+            .description("Doesn't teleport you to friends.")
+            .defaultValue(true)
+            .build()
+    );
     public WWidget getWidget(GuiTheme theme) {
         WTable table = theme.table();
         WButton deletedata = table.add(theme.button("RESET CURRENT PLAYER")).expandX().minWidth(100).widget();
-        deletedata.action = () -> i = 0;
+        deletedata.action = () -> currentplayer = 0;
         table.row();
         return table;
     }
@@ -43,7 +47,8 @@ public class OPplayerTPmodule extends Module {
         super(Trouser.Main, "OPplayerTPmodule", "**REQUIRES OP** Teleports you to each player on the server with a button press if keybound, or teleport people to you.");
     }
 
-    private int i = 0;
+    public static int currentplayer = 0;
+    private CopyOnWriteArrayList<PlayerListEntry> players;
 
     @Override
     public void onActivate() {
@@ -52,29 +57,22 @@ public class OPplayerTPmodule extends Module {
             error("Must have permission level 2 or higher");
             return;
         }
-        Collection<PlayerListEntry> playerListEntries = mc.getNetworkHandler().getPlayerList();
-        ArrayList<PlayerListEntry> playerArrayList = new ArrayList<>(playerListEntries);
-        if(playerArrayList.get(i).getProfile().getName().equals(mc.player.getName().getLiteralString())) i++;
-        if(i-1 >= playerArrayList.size()) i = 0;
-        if(playerArrayList.size() == 1) {
+        players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
+        for(PlayerListEntry player : players) {
+            if(player.getProfile().getName().equals(mc.player.getName().getLiteralString())) players.remove(player);
+            if(Friends.get().isFriend(player) && ignoreFriends.get()) players.remove(player);
+        }
+        if(currentplayer < players.size()) currentplayer++;
+        if(players.size() == 1) {
             error("No other players online.");
+            currentplayer = 0;
             toggle();
-            i = 0;
             return;
         }
-        if(tp2u.get()) ChatUtils.sendPlayerMsg("/tp " + playerArrayList.get(i).getProfile().getName() + " " + mc.player.getName().getLiteralString());
-        if (!tp2u.get()) ChatUtils.sendPlayerMsg("/tp " + mc.player.getName().getLiteralString() + " " + playerArrayList.get(i).getProfile().getName());
-        i++;
+        if(currentplayer >= players.size()) currentplayer = players.size();
+        if(tp2u.get()) ChatUtils.sendPlayerMsg("/tp " + players.get(currentplayer - 1).getProfile().getName() + " " + mc.player.getName().getLiteralString());
+        if(!tp2u.get()) ChatUtils.sendPlayerMsg("/tp " + mc.player.getName().getLiteralString() + " " + players.get(currentplayer - 1).getProfile().getName());
+        if(currentplayer >= players.size()) currentplayer = 0;
         toggle();
-    }
-
-    @EventHandler
-    private void onGameJoin(GameJoinedEvent event) {
-        i = 0;
-    }
-
-    @Override
-    public void onDeactivate() {
-        i = 0;
     }
 }
