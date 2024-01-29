@@ -63,7 +63,7 @@ public class OPplayerTPmodule extends Module {
             if(Friends.get().isFriend(player) && ignoreFriends.get()) players.remove(player);
         }
         if(currentplayer < players.size()) currentplayer++;
-        if(players.size() == 1) {
+        if(players.isEmpty()) {
             error("No other players online.");
             currentplayer = 0;
             toggle();
