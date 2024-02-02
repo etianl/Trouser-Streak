@@ -14,8 +14,8 @@ import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class AutoVaultclipCommand extends Command {
-    public AutoVaultclipCommand() {
+public class AutoVaultClipCommand extends Command {
+    public AutoVaultClipCommand() {
         super("autovaultclip", "Lets you clip through blocks vertically automatically, with vault clip bypass implemented");
     }
     @Override
