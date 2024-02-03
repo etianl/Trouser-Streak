@@ -16,7 +16,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class AutoVaultClipCommand extends Command {
     public AutoVaultClipCommand() {
-        super("autovaultclip", "Lets you clip through blocks vertically automatically, with vault clip bypass implemented");
+        super("autovaultclip", "Lets you clip through blocks vertically automatically, with vault clip bypass implemented. Paper only!");
     }
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
@@ -80,9 +80,8 @@ public class AutoVaultClipCommand extends Command {
 
 			for (int i = 199; i > 0; i--) {
 				BlockPos isopenair1 = (player.getBlockPos().add(0,i,0));
-				BlockPos isopenair2 = (player.getBlockPos().add(0,i-1,0));
-				BlockPos newopenair2 = isopenair2.up(2);
-				if (!mc.world.getBlockState(isopenair1).isReplaceable() && !mc.world.getBlockState(isopenair1).isOf(Blocks.POWDER_SNOW) && mc.world.getFluidState(isopenair1).isEmpty() && !mc.world.getBlockState(isopenair2).isReplaceable() && !mc.world.getBlockState(isopenair2).isOf(Blocks.POWDER_SNOW) && mc.world.getFluidState(isopenair2).isEmpty()) {
+				BlockPos newopenair2 = isopenair1.up(1);
+				if (!mc.world.getBlockState(isopenair1).isReplaceable() && !mc.world.getBlockState(isopenair1).isOf(Blocks.POWDER_SNOW) && mc.world.getFluidState(isopenair1).isEmpty()) {
 					int packetsRequired = 20;
 					if (player.hasVehicle()) {
                         Entity vehicle = player.getVehicle();
@@ -99,7 +98,7 @@ public class AutoVaultClipCommand extends Command {
                     return SINGLE_SUCCESS;
                 }
             }
-            error("No gap found to vclip into");
+            error("No blocks above you found!");
             return SINGLE_SUCCESS;
 		}));
 	}
