@@ -6,6 +6,7 @@ import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.PlayerListEntryArgumentType;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
+import net.minecraft.text.Text;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -20,6 +21,7 @@ public class CrashCommand extends Command {
         builder.then(argument("player", PlayerListEntryArgumentType.create()).executes(context -> {
             GameProfile profile = PlayerListEntryArgumentType.get(context).getProfile();
             if(mc.player.hasPermissionLevel(2)) ChatUtils.sendPlayerMsg("/execute at " + profile.getName() + " run particle ash ~ ~ ~ 1 1 1 1 2147483647 force " + profile.getName());
+            ChatUtils.sendMsg(Text.of("Crashing player: "+profile.getName()));
             return SINGLE_SUCCESS;
         }));
     }
