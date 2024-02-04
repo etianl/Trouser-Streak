@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -25,6 +26,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import pwn.noobs.trouserstreak.Trouser;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class HandOfGod extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -287,6 +292,13 @@ public class HandOfGod extends Module {
             .defaultValue(false)
             .build()
     );
+    public final Setting<Boolean> trollrenderdist = sgTroll.add(new BoolSetting.Builder()
+            .name("Only Render Distance")
+            .description("Run /fill on players only within render distance.")
+            .defaultValue(false)
+            .visible(() -> troll.get())
+            .build()
+    );
     public final Setting<Boolean> trollfriends = sgTroll.add(new BoolSetting.Builder()
             .name("/fill Friends")
             .description("Runs /fill around friends too")
@@ -352,7 +364,7 @@ public class HandOfGod extends Module {
     public HandOfGod() {
         super(Trouser.Main, "HandOfGod", "Modify the world and troll players with automated /fill commands. (Must have OP status)");
     }
-
+    private CopyOnWriteArrayList<PlayerListEntry> players;
     private int ticks=0;
     private int swpr=0;
     private boolean sweep=false;
@@ -725,27 +737,51 @@ public class HandOfGod extends Module {
             if (trollticks<=trolltickdelay.get()){
                 trollticks++;
             } else if (trollticks>trolltickdelay.get()){
-                for (Entity entity : mc.world.getEntities()) {
-                    if (entity instanceof PlayerEntity && entity != mc.player){
-                        if (!trollfriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) {
-                            return;
+                String tfullString = trollblock.get().toString();
+                String[] tparts = tfullString.split(":");
+                String tblock = tparts[1];
+                String tBlockName = tblock.replace("}", "");
+                String trepfullString = trollblocktoreplace.get().toString();
+                String[] trepparts = trepfullString.split(":");
+                String trepblock = trepparts[1];
+                String tRepblockName = trepblock.replace("}", "");
+                if (!trollrenderdist.get()) {
+                    //every player in server, default
+                    if (trollfriends.get()) {
+                        if (!trollreplace.get())
+                            ChatUtils.sendPlayerMsg("/execute at @a[name=!" + mc.player.getName().getLiteralString() + "] run fill " + "~" + trollwidth.get() + " " + "~" + trollheight.get() + " " + "~" + trolldepth.get() + " " + "~-" + trollwidth.get() + " " + "~-" + trollheight.get() + " " + "~-" + trolldepth.get() + " " + tBlockName);
+                        else if (trollreplace.get())
+                            ChatUtils.sendPlayerMsg("/execute at @a[name=!" + mc.player.getName().getLiteralString() + "] run fill " + "~" + trollwidth.get() + " " + "~" + trollheight.get() + " " + "~" + trolldepth.get() + " " + "~-" + trollwidth.get() + " " + "~-" + trollheight.get() + " " + "~-" + trolldepth.get() + " " + tBlockName + " replace " + tRepblockName);
+                    } else if (!trollfriends.get()) {
+                        players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
+                        List<String> friendNames = new ArrayList<>();
+                        friendNames.add("name=!" + mc.player.getName().getLiteralString());
+                        for (PlayerListEntry player : players) {
+                            if (Friends.get().isFriend(player) && !trollfriends.get())
+                                friendNames.add("name=!" + player.getProfile().getName());
                         }
-                        String tfullString = trollblock.get().toString();
-                        String[] tparts = tfullString.split(":");
-                        String tblock = tparts[1];
-                        String tBlockName = tblock.replace("}", "");
-                        String trepfullString = trollblocktoreplace.get().toString();
-                        String[] trepparts = trepfullString.split(":");
-                        String trepblock = trepparts[1];
-                        String tRepblockName = trepblock.replace("}", "");
-                        switch (entity.getHorizontalFacing()){
-                            case NORTH, SOUTH -> {
-                                if (!trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trollwidth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trolldepth.get())+" "+(entity.getBlockPos().getX()-trollwidth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trolldepth.get())+" "+tBlockName);
-                                else if (trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trollwidth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trolldepth.get())+" "+(entity.getBlockPos().getX()-trollwidth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trolldepth.get())+" "+tBlockName+" replace "+tRepblockName);
+                        String friendsString = String.join(",", friendNames);
+                        if (!trollreplace.get())
+                            ChatUtils.sendPlayerMsg("/execute at @a[" + friendsString + "] run fill " + "~" + trollwidth.get() + " " + "~" + trollheight.get() + " " + "~" + trolldepth.get() + " " + "~-" + trollwidth.get() + " " + "~-" + trollheight.get() + " " + "~-" + trolldepth.get() + " " + tBlockName);
+                        else if (trollreplace.get())
+                            ChatUtils.sendPlayerMsg("/execute at @a[" + friendsString + "] run fill " + "~" + trollwidth.get() + " " + "~" + trollheight.get() + " " + "~" + trolldepth.get() + " " + "~-" + trollwidth.get() + " " + "~-" + trollheight.get() + " " + "~-" + trolldepth.get() + " " + tBlockName + " replace " + tRepblockName);
+                    }
+                } else if (trollrenderdist.get()){
+                    //every player in render distance
+                    for (Entity entity : mc.world.getEntities()) {
+                        if (entity instanceof PlayerEntity && entity != mc.player){
+                            if (!trollfriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) {
+                                return;
                             }
-                            case EAST, WEST -> {
-                                if (!trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trolldepth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trollwidth.get())+" "+(entity.getBlockPos().getX()-trolldepth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trollwidth.get())+" "+tBlockName);
-                                else if (trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trolldepth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trollwidth.get())+" "+(entity.getBlockPos().getX()-trolldepth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trollwidth.get())+" "+tBlockName+" replace "+tRepblockName);
+                            switch (entity.getHorizontalFacing()){
+                                case NORTH, SOUTH -> {
+                                    if (!trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trollwidth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trolldepth.get())+" "+(entity.getBlockPos().getX()-trollwidth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trolldepth.get())+" "+tBlockName);
+                                    else if (trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trollwidth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trolldepth.get())+" "+(entity.getBlockPos().getX()-trollwidth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trolldepth.get())+" "+tBlockName+" replace "+tRepblockName);
+                                }
+                                case EAST, WEST -> {
+                                    if (!trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trolldepth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trollwidth.get())+" "+(entity.getBlockPos().getX()-trolldepth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trollwidth.get())+" "+tBlockName);
+                                    else if (trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trolldepth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trollwidth.get())+" "+(entity.getBlockPos().getX()-trolldepth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trollwidth.get())+" "+tBlockName+" replace "+tRepblockName);
+                                }
                             }
                         }
                     }

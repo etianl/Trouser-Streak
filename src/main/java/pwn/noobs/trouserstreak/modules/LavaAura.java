@@ -26,8 +26,8 @@ import net.minecraft.world.GameMode;
 import net.minecraft.world.RaycastContext;
 import pwn.noobs.trouserstreak.Trouser;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class LavaAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -68,7 +68,14 @@ public class LavaAura extends Module {
             .visible(() -> pickup.get())
             .build()
     );
-
+    public final Setting<Integer> maxtargets = sgGeneral.add(new IntSetting.Builder()
+            .name("Max Targets")
+            .description("Maximum targets to lava at a time")
+            .defaultValue(6)
+            .min(1)
+            .sliderMax(20)
+            .build()
+    );
     private final Setting<Boolean> lavaeverything = sgGeneral.add(new BoolSetting.Builder()
             .name("Lava-Everything")
             .description("Lava all the blocks. Creative mode recommended.")
@@ -93,7 +100,26 @@ public class LavaAura extends Module {
         if (pauseOnLag.get() && TickRate.INSTANCE.getTimeSinceLastTick() >= 1f) return;
         float originalYaw = mc.player.getYaw();
         float originalPitch = mc.player.getPitch();
+
+        // Convert the Iterable to a List and then stream it
+        List<Entity> targetedEntities = new ArrayList<>();
         for (Entity entity : this.mc.world.getEntities()) {
+            targetedEntities.add(entity);
+        }
+
+        // Sort entities based on distance to the player
+        List<Entity> sortedEntities = targetedEntities.stream()
+                .filter(entity -> entity instanceof LivingEntity && entity != mc.player
+                        && (entities.get().contains(entity.getType()) || (trollfriends.get() && entity instanceof PlayerEntity && !Friends.get().isFriend((PlayerEntity) entity))))
+                .sorted(Comparator.comparingDouble(entity -> mc.player.getPos().distanceTo(entity.getPos())))
+                .collect(Collectors.toList());
+
+        // Limit the number of targets based on the maxtargets setting
+        int targets = 0;
+        for (Entity entity : sortedEntities) {
+            if (targets >= maxtargets.get()) {
+                break;
+            }
             if (entity instanceof LivingEntity && entity != mc.player) {
                 if (!entities.get().contains(entity.getType()) || (!trollfriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity))) continue;
                 LivingEntity livingEntity = (LivingEntity) entity;
@@ -178,6 +204,7 @@ public class LavaAura extends Module {
                     }
                 }
             }
+            targets++;
         }
 
         if (lavaeverything.get()) {
@@ -226,9 +253,9 @@ public class LavaAura extends Module {
     private void pickUpLavaOnTick() {
         BlockPos playerPos = mc.player.getBlockPos();
 
-        for (int x = (int) -Math.round(range.get()); x <= range.get(); x++) {
-            for (int y = (int) -Math.round(range.get()); y <= range.get(); y++) {
-                for (int z = (int) -Math.round(range.get()); z <= range.get(); z++) {
+        for (int x = (int) -Math.round(range.get()+1); x <= range.get()+1; x++) {
+            for (int y = (int) -Math.round(range.get()+1); y <= range.get()+1; y++) {
+                for (int z = (int) -Math.round(range.get()+1); z <= range.get()+1; z++) {
                     BlockPos blockPos = playerPos.add(x, y, z);
                     BlockState blockState = mc.world.getBlockState(blockPos);
 
@@ -236,7 +263,7 @@ public class LavaAura extends Module {
                         // Perform a raycast to check for obstructions
                         BlockHitResult blockHitResult = mc.world.raycast(new RaycastContext(
                                 mc.player.getCameraPosVec(1.0f),
-                                new Vec3d(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5),
+                                new Vec3d(blockPos.getX(), blockPos.getY()+0.25, blockPos.getZ()),
                                 RaycastContext.ShapeType.COLLIDER,
                                 RaycastContext.FluidHandling.NONE,
                                 mc.player
@@ -261,5 +288,4 @@ public class LavaAura extends Module {
         mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
         mc.player.getInventory().selectedSlot = prevSlot;
     }
-
 }
