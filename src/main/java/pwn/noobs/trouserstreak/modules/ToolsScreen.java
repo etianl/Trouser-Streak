@@ -1,4 +1,4 @@
-package pwn.noobs.trouserstreak..modules;
+package pwn.noobs.trouserstreak.modules;
 
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
