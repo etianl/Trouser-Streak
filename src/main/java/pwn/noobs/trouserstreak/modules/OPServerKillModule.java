@@ -149,7 +149,13 @@ public class OPServerKillModule extends Module {
                         if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().getName());
                     }
                     String friendsString = String.join(",", friendNames);
-                    ChatUtils.sendPlayerMsg("/execute at @a[" + friendsString + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[" + friendsString + "]");
+                    String thecommand = "/execute at @a[" + friendsString + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[" + friendsString + "]";
+                    if (thecommand.length()<=256){
+                        ChatUtils.sendPlayerMsg(thecommand);
+                    }
+                    else {
+                        error("Crash all players command is too long, you have too many friends online.");
+                    }
                 }
             }
             if (ticks == 3*tickdelay.get()){
@@ -173,7 +179,13 @@ public class OPServerKillModule extends Module {
                         if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().getName());
                     }
                     String friendsString = String.join(",", friendNames);
-                    ChatUtils.sendPlayerMsg("/execute at @a[" + friendsString + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[" + friendsString + "]");
+                    String thecommand2 = "/execute at @a[" + friendsString + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[" + friendsString + "]";
+                    if (thecommand2.length()<=256){
+                        ChatUtils.sendPlayerMsg(thecommand2);
+                    }
+                    else {
+                        error("Crash all players command is too long, you have too many friends online.");
+                    }
                 }
             }
             if (ticks == 3*tickdelay.get()){
@@ -200,7 +212,13 @@ public class OPServerKillModule extends Module {
                         if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().getName());
                     }
                     String friendsString = String.join(",", friendNames);
-                    ChatUtils.sendPlayerMsg("/execute at @a[" + friendsString + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[" + friendsString + "]");
+                    String thecommand2 = "/execute at @a[" + friendsString + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[" + friendsString + "]";
+                    if (thecommand2.length()<=256){
+                        ChatUtils.sendPlayerMsg(thecommand2);
+                    }
+                    else {
+                        error("Crash all players command is too long, you have too many friends online.");
+                    }
                 }
             }
             if (ticks == 4*tickdelay.get()){ //kill server

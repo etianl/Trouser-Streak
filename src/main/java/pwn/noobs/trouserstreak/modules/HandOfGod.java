@@ -761,10 +761,24 @@ public class HandOfGod extends Module {
                                 friendNames.add("name=!" + player.getProfile().getName());
                         }
                         String friendsString = String.join(",", friendNames);
-                        if (!trollreplace.get())
-                            ChatUtils.sendPlayerMsg("/execute at @a[" + friendsString + "] run fill " + "~" + trollwidth.get() + " " + "~" + trollheight.get() + " " + "~" + trolldepth.get() + " " + "~-" + trollwidth.get() + " " + "~-" + trollheight.get() + " " + "~-" + trolldepth.get() + " " + tBlockName);
-                        else if (trollreplace.get())
-                            ChatUtils.sendPlayerMsg("/execute at @a[" + friendsString + "] run fill " + "~" + trollwidth.get() + " " + "~" + trollheight.get() + " " + "~" + trolldepth.get() + " " + "~-" + trollwidth.get() + " " + "~-" + trollheight.get() + " " + "~-" + trolldepth.get() + " " + tBlockName + " replace " + tRepblockName);
+                        if (!trollreplace.get()){
+                            String thecommand = "/execute at @a[" + friendsString + "] run fill " + "~" + trollwidth.get() + " " + "~" + trollheight.get() + " " + "~" + trolldepth.get() + " " + "~-" + trollwidth.get() + " " + "~-" + trollheight.get() + " " + "~-" + trolldepth.get() + " " + tBlockName;
+                            if (thecommand.length()<=256){
+                                ChatUtils.sendPlayerMsg(thecommand);
+                            }
+                            else {
+                                error("Fill Around Other Players Command is too long, you have too many friends online.");
+                            }
+                        }
+                        else if (trollreplace.get()){
+                            String thecommand2 = "/execute at @a[" + friendsString + "] run fill " + "~" + trollwidth.get() + " " + "~" + trollheight.get() + " " + "~" + trolldepth.get() + " " + "~-" + trollwidth.get() + " " + "~-" + trollheight.get() + " " + "~-" + trolldepth.get() + " " + tBlockName + " replace " + tRepblockName;
+                            if (thecommand2.length()<=256){
+                                ChatUtils.sendPlayerMsg(thecommand2);
+                            }
+                            else {
+                                error("Fill Around Other Players Command is too long, you have too many friends online.");
+                            }
+                        }
                     }
                 } else if (trollrenderdist.get()){
                     //every player in render distance

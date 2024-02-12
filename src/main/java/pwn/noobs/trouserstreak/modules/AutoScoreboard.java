@@ -73,13 +73,27 @@ public class AutoScoreboard extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         String scoreboardName = RandomStringUtils.randomAlphabetic(10).toLowerCase();
-        ChatUtils.sendPlayerMsg("/scoreboard objectives add " + scoreboardName + " dummy {\"text\":\"" + MeteorStarscript.run(MeteorStarscript.compile(title.get())) + "\",\"color\":\"" + titleColor.get() + "\"}");
+        String thecommand = "/scoreboard objectives add " + scoreboardName + " dummy {\"text\":\"" + MeteorStarscript.run(MeteorStarscript.compile(title.get())) + "\",\"color\":\"" + titleColor.get() + "\"}";
+        if (thecommand.length()<=256){
+            ChatUtils.sendPlayerMsg(thecommand);
+        }
+        else {
+            error("Title is too long, shorten it somehow");
+            toggle();
+        }
         ChatUtils.sendPlayerMsg("/scoreboard objectives setdisplay sidebar " + scoreboardName);
         int i = content.get().size();
         for(String string : content.get()) {
             String randomName = RandomStringUtils.randomAlphabetic(10).toLowerCase();
             ChatUtils.sendPlayerMsg("/team add " + randomName);
-            ChatUtils.sendPlayerMsg("/team modify " + randomName + " suffix {\"text\":\" " + MeteorStarscript.run(MeteorStarscript.compile(string)) + "\"}");
+            String thecommand2 = "/team modify " + randomName + " suffix {\"text\":\" " + MeteorStarscript.run(MeteorStarscript.compile(string)) + "\"}";
+            if (thecommand2.length()<=256){
+                ChatUtils.sendPlayerMsg(thecommand2);
+            }
+            else {
+                error("A content line is too long, shorten it somehow");
+                toggle();
+            }
             ChatUtils.sendPlayerMsg("/team modify " + randomName + " color " + contentColor);
             ChatUtils.sendPlayerMsg("/team join " + randomName + " " + i);
             ChatUtils.sendPlayerMsg("/scoreboard players set " + i + " " + scoreboardName + " " + i);
