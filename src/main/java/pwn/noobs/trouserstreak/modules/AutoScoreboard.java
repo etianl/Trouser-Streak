@@ -80,6 +80,7 @@ public class AutoScoreboard extends Module {
         else {
             error("Title is too long, shorten it somehow");
             toggle();
+            return;
         }
         ChatUtils.sendPlayerMsg("/scoreboard objectives setdisplay sidebar " + scoreboardName);
         int i = content.get().size();
@@ -93,6 +94,7 @@ public class AutoScoreboard extends Module {
             else {
                 error("A content line is too long, shorten it somehow");
                 toggle();
+                return;
             }
             ChatUtils.sendPlayerMsg("/team modify " + randomName + " color " + contentColor);
             ChatUtils.sendPlayerMsg("/team join " + randomName + " " + i);
