@@ -90,7 +90,7 @@ public class LavaAura extends Module {
     public final Setting<Integer> pickuptickdelay = sgLAVA.add(new IntSetting.Builder()
             .name("Lava Pickup Tick Delay")
             .description("Tick Delay for lava pickup")
-            .defaultValue(1)
+            .defaultValue(2)
             .min(0)
             .sliderMax(20)
             .visible(() -> pickup.get() && mode.get() == Mode.LAVA)
@@ -351,24 +351,27 @@ public class LavaAura extends Module {
         if (lavaeverything.get()) {
             BlockPos playerPos = mc.player.getBlockPos();
 
-            for (int x = (int) -Math.round(range.get()); x < range.get(); x++) {
-                for (int y = (int) -Math.round(range.get()); y < range.get(); y++) {
-                    for (int z = (int) -Math.round(range.get()); z < range.get(); z++) {
+            for (int x = (int) -Math.round(range.get()+1); x <= range.get()+1; x++) {
+                for (int y = (int) -Math.round(range.get()+1); y <= range.get()+1; y++) {
+                    for (int z = (int) -Math.round(range.get()+1); z <= range.get()+1; z++) {
+
                         BlockPos blockPos = playerPos.add(x, y, z);
+                        double distance = mc.player.getPos().distanceTo(blockPos.toCenterPos());
+                        if (distance <= range.get()) {
+                            if (mc.world.getBlockState(blockPos).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos).getBlock() != Blocks.LAVA) {
+                                // Check if the block has not had lava placed on it
+                                if (!lavaPlaced.contains(blockPos)) {
+                                    if (mode.get() == Mode.LAVA) {
+                                        mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
+                                        placeLava();
+                                    } else if (mode.get() == Mode.FIRE) {
+                                        if (!norotate.get())mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
+                                        placeFire(blockPos.up());
+                                    };
 
-                        if (mc.world.getBlockState(blockPos).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos).getBlock() != Blocks.LAVA) {
-                            // Check if the block has not had lava placed on it
-                            if (!lavaPlaced.contains(blockPos)) {
-                                if (mode.get() == Mode.LAVA) {
-                                    mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
-                                    placeLava();
-                                } else if (mode.get() == Mode.FIRE) {
-                                    if (!norotate.get())mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
-                                    placeFire(blockPos.up());
-                                };
-
-                                // Add the block to the set to indicate that lava has been placed on it
-                                lavaPlaced.add(blockPos);
+                                    // Add the block to the set to indicate that lava has been placed on it
+                                    lavaPlaced.add(blockPos);
+                                }
                             }
                         }
                     }
@@ -429,20 +432,22 @@ public class LavaAura extends Module {
                 for (int z = (int) -Math.round(range.get()+1); z <= range.get()+1; z++) {
                     BlockPos blockPos = playerPos.add(x, y, z);
                     BlockState blockState = mc.world.getBlockState(blockPos);
+                    double distance = mc.player.getPos().distanceTo(blockPos.toCenterPos());
+                    if (distance <= range.get()) {
+                        if (blockState.getBlock() == Blocks.LAVA) {
+                            // Perform a raycast to check for obstructions
+                            BlockHitResult blockHitResult = mc.world.raycast(new RaycastContext(
+                                    mc.player.getCameraPosVec(1.0f),
+                                    new Vec3d(blockPos.getX(), blockPos.getY()+0.25, blockPos.getZ()),
+                                    RaycastContext.ShapeType.COLLIDER,
+                                    RaycastContext.FluidHandling.NONE,
+                                    mc.player
+                            ));
 
-                    if (blockState.getBlock() == Blocks.LAVA) {
-                        // Perform a raycast to check for obstructions
-                        BlockHitResult blockHitResult = mc.world.raycast(new RaycastContext(
-                                mc.player.getCameraPosVec(1.0f),
-                                new Vec3d(blockPos.getX(), blockPos.getY()+0.25, blockPos.getZ()),
-                                RaycastContext.ShapeType.COLLIDER,
-                                RaycastContext.FluidHandling.NONE,
-                                mc.player
-                        ));
-
-                        if (blockHitResult.getType() == HitResult.Type.MISS) {
-                            mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(blockPos.getX(), blockPos.getY()+0.25, blockPos.getZ()));
-                            pickupLiquid();
+                            if (blockHitResult.getType() == HitResult.Type.MISS) {
+                                mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(blockPos.getX(), blockPos.getY()+0.25, blockPos.getZ()));
+                                pickupLiquid();
+                            }
                         }
                     }
                 }
@@ -457,25 +462,27 @@ public class LavaAura extends Module {
                 for (int z = (int) -Math.round(range.get()+1); z <= range.get()+1; z++) {
                     BlockPos blockPos = playerPos.add(x, y, z);
                     BlockState blockState = mc.world.getBlockState(blockPos);
+                    double distance = mc.player.getPos().distanceTo(blockPos.toCenterPos());
+                    if (distance <= range.get()) {
+                        if (blockState.getBlock() == Blocks.FIRE) {
+                            if (!ignorewalls.get()){
+                                // Perform a raycast to check for obstructions
+                                BlockHitResult blockHitResult = mc.world.raycast(new RaycastContext(
+                                        mc.player.getCameraPosVec(1.0f),
+                                        new Vec3d(blockPos.getX(), blockPos.getY()+0.25, blockPos.getZ()),
+                                        RaycastContext.ShapeType.COLLIDER,
+                                        RaycastContext.FluidHandling.NONE,
+                                        mc.player
+                                ));
 
-                    if (blockState.getBlock() == Blocks.FIRE) {
-                        if (!ignorewalls.get()){
-                            // Perform a raycast to check for obstructions
-                            BlockHitResult blockHitResult = mc.world.raycast(new RaycastContext(
-                                    mc.player.getCameraPosVec(1.0f),
-                                    new Vec3d(blockPos.getX(), blockPos.getY()+0.25, blockPos.getZ()),
-                                    RaycastContext.ShapeType.COLLIDER,
-                                    RaycastContext.FluidHandling.NONE,
-                                    mc.player
-                            ));
-
-                            if (blockHitResult.getType() == HitResult.Type.MISS) {
+                                if (blockHitResult.getType() == HitResult.Type.MISS) {
+                                    if (!norotate.get()) mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(blockPos.getX(), blockPos.getY()+0.25, blockPos.getZ()));
+                                    mc.interactionManager.attackBlock(blockPos, Direction.DOWN);
+                                }
+                            } else if (ignorewalls.get()){
                                 if (!norotate.get()) mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(blockPos.getX(), blockPos.getY()+0.25, blockPos.getZ()));
                                 mc.interactionManager.attackBlock(blockPos, Direction.DOWN);
                             }
-                        } else if (ignorewalls.get()){
-                            if (!norotate.get()) mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(blockPos.getX(), blockPos.getY()+0.25, blockPos.getZ()));
-                            mc.interactionManager.attackBlock(blockPos, Direction.DOWN);
                         }
                     }
                 }
