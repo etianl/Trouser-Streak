@@ -43,6 +43,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new RedstoneNuker());
                 Modules.get().add(new AirstrikePlus());
                 Modules.get().add(new BoomPlus());
+                Modules.get().add(new DDOS());
                 Modules.get().add(new VoiderPlus());
                 Modules.get().add(new BetterScaffold());
                 Modules.get().add(new BetterAutoSign());
