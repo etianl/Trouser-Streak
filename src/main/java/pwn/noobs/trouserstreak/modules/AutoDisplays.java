@@ -1,6 +1,8 @@
 
 package pwn.noobs.trouserstreak.modules;
 
+import meteordevelopment.meteorclient.events.game.GameLeftEvent;
+import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
@@ -10,6 +12,7 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.network.PlayerListEntry;
 import pwn.noobs.trouserstreak.Trouser;
 
@@ -21,6 +24,11 @@ public class AutoDisplays extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgBlock = settings.createGroup("Block Display Options");
     private final SettingGroup sgText = settings.createGroup("Text Display Options");
+    private final Setting<Boolean> disconnectdisable = sgGeneral.add(new BoolSetting.Builder()
+            .name("Disable on Disconnect")
+            .description("Disables module on disconnecting")
+            .defaultValue(false)
+            .build());
     public final Setting<Boolean> notOP = sgGeneral.add(new BoolSetting.Builder()
             .name("Toggle Module if not OP")
             .description("Turn this off to prevent the bug of module always being turned off when you join server.")
@@ -112,6 +120,16 @@ public class AutoDisplays extends Module {
     private CopyOnWriteArrayList<PlayerListEntry> players;
     private int tickTimer = 0;
     private int killTimer = 0;
+    @EventHandler
+    private void onScreenOpen(OpenScreenEvent event) {
+        if (disconnectdisable.get() && event.screen instanceof DisconnectedScreen) {
+            toggle();
+        }
+    }
+    @EventHandler
+    private void onGameLeft(GameLeftEvent event) {
+        if (disconnectdisable.get())toggle();
+    }
     @Override
     public void onActivate() {
         tickTimer = 0;
@@ -181,9 +199,9 @@ public class AutoDisplays extends Module {
                     }
                     String friendsString = String.join(",", friendNames);
                     String thecommand = "/execute at @a[" + friendsString + "] run summon minecraft:block_display ~" + (x - 0.5) + " ~" + y + " ~" + (z - 0.5) + " {block_state:{Name:\"minecraft:"+blockName+"\"},brightness:{sky:"+blockbrightness.get()+",block:"+blockbrightness.get()+"},Tags:[\"MOL\"]}";
-                    if (thecommand.length()<=256)ChatUtils.sendPlayerMsg(thecommand);
+                    if (thecommand.length()<=257)ChatUtils.sendPlayerMsg(thecommand);
                     else {
-                        error("Command too long, shorten it somehow");
+                        error("Command too long, too many friends are online.");
                         toggle();
                     }
                 }
@@ -204,14 +222,15 @@ public class AutoDisplays extends Module {
         String thecommand2 = "/execute at @a[" + friendsString + "] run summon text_display ~ ~1 ~"+distance.get()+" {brightness:{sky:"+textbrightness.get()+",block:"+textbrightness.get()+"},background:" + color + ",text:'\"" + text.get() + "\"',Tags:[\"MOL\"],Rotation:[180f, 0f]}";
         String thecommand3 = "/execute at @a[" + friendsString + "] run summon text_display ~"+distance.get()+" ~1 ~ {brightness:{sky:"+textbrightness.get()+",block:"+textbrightness.get()+"},background:" + color + ",text:'\"" + text.get() + "\"',Tags:[\"MOL\"],Rotation:[90f, 0f]}";
         String thecommand4 = "/execute at @a[" + friendsString + "] run summon text_display ~-"+distance.get()+" ~1 ~ {brightness:{sky:"+textbrightness.get()+",block:"+textbrightness.get()+"},background:" + color + ",text:'\"" + text.get() + "\"',Tags:[\"MOL\"],Rotation:[-90f, 0f]}";
-        if (thecommand1.length()<=256 && thecommand2.length()<=256 && thecommand3.length()<=256 && thecommand4.length()<=256){
+        if (thecommand1.length()<=257 && thecommand2.length()<=257 && thecommand3.length()<=257 && thecommand4.length()<=257){
             ChatUtils.sendPlayerMsg(thecommand1);
             ChatUtils.sendPlayerMsg(thecommand2);
             ChatUtils.sendPlayerMsg(thecommand3);
             ChatUtils.sendPlayerMsg(thecommand4);
         }
         else {
-            error("Command too long, shorten it somehow");
+            int characterstodelete = thecommand1.length()-259; //259 because of the difference in length of the commands
+            error("The command is too long. Shorten it by "+characterstodelete+" characters, or you may also have too many friends online.");
             toggle();
         }
     }

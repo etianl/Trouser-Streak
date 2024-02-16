@@ -74,11 +74,12 @@ public class AutoScoreboard extends Module {
     private void onTick(TickEvent.Post event) {
         String scoreboardName = RandomStringUtils.randomAlphabetic(10).toLowerCase();
         String thecommand = "/scoreboard objectives add " + scoreboardName + " dummy {\"text\":\"" + MeteorStarscript.run(MeteorStarscript.compile(title.get())) + "\",\"color\":\"" + titleColor.get() + "\"}";
-        if (thecommand.length()<=256){
+        if (thecommand.length()<=257){
             ChatUtils.sendPlayerMsg(thecommand);
         }
         else {
-            error("Title is too long, shorten it somehow");
+            int characterstodelete = thecommand.length()-257;
+            error("Title is too long. Shorten it by "+characterstodelete+" characters.");
             toggle();
             return;
         }
@@ -88,11 +89,12 @@ public class AutoScoreboard extends Module {
             String randomName = RandomStringUtils.randomAlphabetic(10).toLowerCase();
             ChatUtils.sendPlayerMsg("/team add " + randomName);
             String thecommand2 = "/team modify " + randomName + " suffix {\"text\":\" " + MeteorStarscript.run(MeteorStarscript.compile(string)) + "\"}";
-            if (thecommand2.length()<=256){
+            if (thecommand2.length()<=257){
                 ChatUtils.sendPlayerMsg(thecommand2);
             }
             else {
-                error("A content line is too long, shorten it somehow");
+                int characterstodelete = thecommand2.length()-257;
+                error("This content line is too long ("+MeteorStarscript.run(MeteorStarscript.compile(string))+"). Shorten it by "+characterstodelete+" characters.");
                 toggle();
                 return;
             }

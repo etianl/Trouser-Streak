@@ -94,11 +94,12 @@ public class AutoCommand extends Module {
 
         if(mc.player.hasPermissionLevel(permissionLevel.get()) && !auto.get()) {
             if(mode.get() == Mode.Manual) for(String command : commands.get()) {
-                if (command.length()<=256){
+                if (command.length()<=257){
                     ChatUtils.sendPlayerMsg(command);
                 }
                 else {
-                    error("This command too long, shorten it somehow ("+command+")");
+                    int characterstodelete = command.length()-257;
+                    error("This command is too long ("+command+"). Shorten it by "+characterstodelete+" characters.");
                 }
             }
             if(mode.get() == Mode.Macro) {
@@ -115,11 +116,12 @@ public class AutoCommand extends Module {
                 ticks++;
             } else if (ticks>atickdelay.get()){
                 if(mode.get() == Mode.Manual) for(String command : commands.get()) {
-                    if (command.length()<=256){
+                    if (command.length()<=257){
                         ChatUtils.sendPlayerMsg(command);
                     }
                     else {
-                        error("This command too long, shorten it somehow ("+command+")");
+                        int characterstodelete = command.length()-257;
+                        error("This command is too long ("+command+"). Shorten it by "+characterstodelete+" characters.");
                     }
                 }
                 if(mode.get() == Mode.Macro) {
