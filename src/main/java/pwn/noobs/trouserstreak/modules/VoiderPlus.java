@@ -13,6 +13,11 @@ import pwn.noobs.trouserstreak.Trouser;
 
 public class VoiderPlus extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final Setting<Boolean> disconnectdisable = sgGeneral.add(new BoolSetting.Builder()
+            .name("Disable on Disconnect")
+            .description("Disables module on disconnecting")
+            .defaultValue(false)
+            .build());
     public final Setting<Boolean> notOP = sgGeneral.add(new BoolSetting.Builder()
             .name("Toggle Module if not OP")
             .description("Turn this off to prevent the bug of module always being turned off when you join server.")
@@ -89,7 +94,7 @@ public class VoiderPlus extends Module {
     private int sZ;
     @EventHandler
     private void onScreenOpen(OpenScreenEvent event) {
-        if (event.screen instanceof DisconnectedScreen) {
+        if (disconnectdisable.get() && event.screen instanceof DisconnectedScreen) {
             toggle();
         }
         if (event.screen instanceof DeathScreen) {
@@ -98,7 +103,7 @@ public class VoiderPlus extends Module {
     }
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
-        toggle();
+        if (disconnectdisable.get())toggle();
     }
     @Override
     public void onActivate() {

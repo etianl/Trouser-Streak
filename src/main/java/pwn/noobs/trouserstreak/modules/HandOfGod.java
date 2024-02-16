@@ -763,7 +763,7 @@ public class HandOfGod extends Module {
                         String friendsString = String.join(",", friendNames);
                         if (!trollreplace.get()){
                             String thecommand = "/execute at @a[" + friendsString + "] run fill " + "~" + trollwidth.get() + " " + "~" + trollheight.get() + " " + "~" + trolldepth.get() + " " + "~-" + trollwidth.get() + " " + "~-" + trollheight.get() + " " + "~-" + trolldepth.get() + " " + tBlockName;
-                            if (thecommand.length()<=256){
+                            if (thecommand.length()<=257){
                                 ChatUtils.sendPlayerMsg(thecommand);
                             }
                             else {
@@ -772,7 +772,7 @@ public class HandOfGod extends Module {
                         }
                         else if (trollreplace.get()){
                             String thecommand2 = "/execute at @a[" + friendsString + "] run fill " + "~" + trollwidth.get() + " " + "~" + trollheight.get() + " " + "~" + trolldepth.get() + " " + "~-" + trollwidth.get() + " " + "~-" + trollheight.get() + " " + "~-" + trolldepth.get() + " " + tBlockName + " replace " + tRepblockName;
-                            if (thecommand2.length()<=256){
+                            if (thecommand2.length()<=257){
                                 ChatUtils.sendPlayerMsg(thecommand2);
                             }
                             else {

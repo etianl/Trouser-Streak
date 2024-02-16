@@ -242,32 +242,26 @@ public class AutoTitles extends Module {
 
         if (!notitlefrend.get()) {
             if (notitleself.get()){
-                if (messageLengthExceedsLimit("/title @a[name=!" + mc.player.getName().getLiteralString() + "] title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}")) {
-                    error("Title is too long, shorten it somehow");
+                if (messageLengthExceedsLimit("/title @a[name=!" + mc.player.getName().getLiteralString() + "] title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}", "Title")) {
                     toggle();
                     return;
                 }
                 ChatUtils.sendPlayerMsg("/title @a[name=!" + mc.player.getName().getLiteralString() + "] times " + fadein + " " + duration + " " + fadeout);
                 ChatUtils.sendPlayerMsg("/title @a[name=!" + mc.player.getName().getLiteralString() + "] title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}");
-                if (makesubtitle.get() && messageLengthExceedsLimit("/title @a[name=!" + mc.player.getName().getLiteralString() + "] subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}")) {
-                    error("Subtitle command is too long, shorten it somehow");
+                if (makesubtitle.get() && messageLengthExceedsLimit("/title @a[name=!" + mc.player.getName().getLiteralString() + "] subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}", "Subtitle")) {
                 } else if (makesubtitle.get())ChatUtils.sendPlayerMsg("/title @a[name=!" + mc.player.getName().getLiteralString() + "] subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}");
-                if (makeactionbar.get() && messageLengthExceedsLimit("/title @a[name=!" + mc.player.getName().getLiteralString() + "] actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}")) {
-                    error("Action bar command is too long, shorten it somehow");
+                if (makeactionbar.get() && messageLengthExceedsLimit("/title @a[name=!" + mc.player.getName().getLiteralString() + "] actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}", "Actionbar")) {
                 } else if (makeactionbar.get())ChatUtils.sendPlayerMsg("/title @a[name=!" + mc.player.getName().getLiteralString() + "] actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}");
             } else if (!notitleself.get()){
-                if (messageLengthExceedsLimit("/title @a title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}")) {
-                    error("Title is too long, shorten it somehow");
+                if (messageLengthExceedsLimit("/title @a title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}", "Title")) {
                     toggle();
                     return;
                 }
                 ChatUtils.sendPlayerMsg("/title @a times " + fadein + " " + duration + " " + fadeout);
                 ChatUtils.sendPlayerMsg("/title @a title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}");
-                if (makesubtitle.get() && messageLengthExceedsLimit("/title @a subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}")) {
-                    error("Subtitle command is too long, shorten it somehow");
+                if (makesubtitle.get() && messageLengthExceedsLimit("/title @a subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}", "Subtitle")) {
                 } else if (makesubtitle.get())ChatUtils.sendPlayerMsg("/title @a subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}");
-                if (makeactionbar.get() && messageLengthExceedsLimit("/title @a actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}")) {
-                    error("Action bar command is too long, shorten it somehow");
+                if (makeactionbar.get() && messageLengthExceedsLimit("/title @a actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}", "Actionbar")) {
                 } else if (makeactionbar.get())ChatUtils.sendPlayerMsg("/title @a actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}");
             }
         } else if (notitlefrend.get()) {
@@ -278,18 +272,18 @@ public class AutoTitles extends Module {
                 if(Friends.get().isFriend(player) && notitlefrend.get()) friendNames.add("name=!" + player.getProfile().getName());
             }
             String friendsString = String.join(",", friendNames);
-            if (messageLengthExceedsLimit("/title @a[" + friendsString + "] title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}")) {
-                error("Title is too long, shorten it somehow");
+            if (messageLengthExceedsLimit("/title @a[" + friendsString + "] title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}", "Title")) {
+                error("You may also have too many friends online.");
                 toggle();
                 return;
             }
             ChatUtils.sendPlayerMsg("/title @a[" + friendsString + "] times " + fadein + " " + duration + " " + fadeout);
             ChatUtils.sendPlayerMsg("/title @a[" + friendsString + "] title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}");
-            if (makesubtitle.get() && messageLengthExceedsLimit("/title @a[" + friendsString + "] subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}")) {
-                error("Subtitle command is too long, shorten it somehow");
+            if (makesubtitle.get() && messageLengthExceedsLimit("/title @a[" + friendsString + "] subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}", "Subtitle")) {
+                error("You may also have too many friends online.");
             } else if (makesubtitle.get())ChatUtils.sendPlayerMsg("/title @a[" + friendsString + "] subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}");
-            if (makeactionbar.get() && messageLengthExceedsLimit("/title @a[" + friendsString + "] actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}")) {
-                error("Action bar command is too long, shorten it somehow");
+            if (makeactionbar.get() && messageLengthExceedsLimit("/title @a[" + friendsString + "] actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}", "Actionbar")) {
+                error("You may also have too many friends online.");
             } else if (makeactionbar.get())ChatUtils.sendPlayerMsg("/title @a[" + friendsString + "] actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}");
         }
         toggle();
@@ -299,8 +293,14 @@ public class AutoTitles extends Module {
     public void onTick(TickEvent.Post event) {
         toggle();
     }
-    private boolean messageLengthExceedsLimit(String message) {
-        return message.length() > 256;
+    private boolean messageLengthExceedsLimit(String message, String messageType) {
+        int maxLength = 257;
+        if (message.length() > maxLength) {
+            int excessLength = message.length() - maxLength;
+            error("The " + messageType + " command is too long. Shorten it by " + excessLength + " characters.");
+            return true;
+        }
+        return false;
     }
     public enum fadeinModes {
         seconds, days
