@@ -50,6 +50,11 @@ public class AirstrikePlus extends Module {
             .defaultValue("wither")
             .visible(() -> mixer.get())
             .build());
+    private final Setting<Boolean> randomPrefix = sgGeneral.add(new BoolSetting.Builder()
+            .name("Random Prefix for Name")
+            .description("Makes Boss Stacker module not work.")
+            .defaultValue(false)
+            .build());
     private final Setting<String> nom = sgGeneral.add(new StringSetting.Builder()
             .name("Custom Name")
             .description("Name the Entity")
@@ -369,7 +374,7 @@ public class AirstrikePlus extends Module {
             .name("falling_block entity block")
             .description("What is created when specifying falling_block as the entity.")
             .defaultValue(Blocks.BEDROCK)
-            .visible(() -> airstrikeEveryone.get())
+            .visible(() -> airstrikeEveryone.get() && EblockstateSpecify.get())
             .build());
 
     public AirstrikePlus() {
@@ -383,9 +388,19 @@ public class AirstrikePlus extends Module {
     private String namecolour = nomcolor.get();
     private NbtList speedlist = new NbtList();
     private String entityName = entity.get().trim().replace(" ", "_");
+    private String customName = nom.get();
 
-
-
+    private String[] prefixes = {
+            "§k111 §r| ",
+            "§k222 §r| ",
+            "§k333 §r| ",
+            "§k444 §r| ",
+            "§k555 §r| ",
+            "§k666 §r| ",
+            "§k777 §r| ",
+            "§k888 §r| ",
+            "§k999 §r| "
+    };
     private Vec3d pickRandomPos() {
         double x = r.nextDouble(radius.get() * 2) - radius.get() + origin.x;
         double y = mc.player.getY()+height.get();
@@ -410,12 +425,19 @@ public class AirstrikePlus extends Module {
 
     @EventHandler
     public void onTick(TickEvent.Post event) {
+        if (randomPrefix.get()) {
+            String randomPrefix = prefixes[new Random().nextInt(prefixes.length)];
+            customName = randomPrefix + nom.get();
+            // Use modifiedName for further processing or assignment
+        } else {
+            customName = nom.get();
+        }
         if (mixer.get()) {
             mix++;
             if (mix == 1)entityName = entity.get().trim().replace(" ", "_");
             if (mix == 2) entityName = entity2.get().trim().replace(" ", "_");
             if (mix > 2)mix = 0;
-        }
+        } else entityName = entity.get().trim().replace(" ", "_");
         for (int griefs = 0; griefs < grief.get(); griefs++) {
             if (airstrikeEveryone.get()) executeCommandsToCreateEntities();
             else {
@@ -439,7 +461,7 @@ public class AirstrikePlus extends Module {
                 if (mc.player.getAbilities().creativeMode) {
                     if (i >= delay.get()) {
                         NbtCompound display = new NbtCompound();
-                        display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + namecolour + "\"}");
+                        display.putString("Name", "{\"text\":\"" + customName + "\",\"color\":\"" + namecolour + "\"}");
                         tag.put("display", display);
                         NbtCompound entityTag = new NbtCompound();
                         speedlist.add(NbtDouble.of(0));
@@ -472,7 +494,7 @@ public class AirstrikePlus extends Module {
                         entityTag.putInt("Fuse", fuse.get());
                         entityTag.putInt("Size", size.get());
                         if (customname.get()) entityTag.putBoolean("CustomNameVisible", customname.get());
-                        entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + namecolour + "\"}");
+                        entityTag.putString("CustomName", "{\"text\":\"" + customName + "\",\"color\":\"" + namecolour + "\"}");
                         tag.put("EntityTag", entityTag);
                         bomb.setNbt(tag);
                         mc.interactionManager.clickCreativeStack(bomb, 36 + mc.player.getInventory().selectedSlot);
@@ -498,7 +520,6 @@ public class AirstrikePlus extends Module {
         speedlist.add(NbtDouble.of(0));
         speedlist.add(NbtDouble.of(-speed.get()));
         speedlist.add(NbtDouble.of(0));
-        String customName = nom.get();
         String nameColor = namecolour;
         int healthPoints = Ehealth.get();
         int absorptionPoints = Eabsorption.get();
