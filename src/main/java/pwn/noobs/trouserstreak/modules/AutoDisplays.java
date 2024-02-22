@@ -35,6 +35,12 @@ public class AutoDisplays extends Module {
             .defaultValue(false)
             .build()
     );
+    public final Setting<Boolean> allAloneToggle = sgGeneral.add(new BoolSetting.Builder()
+            .name("Toggle Module if alone")
+            .description("Turn this on to prevent the module running if there is no one online.")
+            .defaultValue(true)
+            .build()
+    );
     private final Setting<Boolean> trollfriends = sgGeneral.add(new BoolSetting.Builder()
             .name("Spawn for Friends")
             .description("Whether or not to summon displays for friends.")
@@ -143,25 +149,29 @@ public class AutoDisplays extends Module {
     public void onDeactivate() {
         switch (displayMode.get()) {
             case BLOCK -> {
-                if (killEntities.get())ChatUtils.sendPlayerMsg("/kill @e[type=minecraft:block_display,tag=MOLcustomentityTag]");
+                if (killEntities.get())ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:block_display,tag=MOL] run kill @s");
             }
             case TEXT -> {
-                if (killEntities.get())ChatUtils.sendPlayerMsg("/kill @e[type=minecraft:text_display,tag=MOLcustomentityTag]");
+                if (killEntities.get())ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:text_display,tag=MOL] run kill @s");
             }
         }
     }
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
+        if (mc.getNetworkHandler().getPlayerList().toArray().length == 1 && allAloneToggle.get()){
+            toggle();
+            error("No other players online.");
+        }
         if (killTimer >= killDelay.get()) {
             killTimer = 0;
 
             switch (displayMode.get()) {
                 case BLOCK -> {
-                    if (killEntities.get())ChatUtils.sendPlayerMsg("/kill @e[type=minecraft:block_display,tag=MOL]");
+                    if (killEntities.get())ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:block_display,tag=MOL] run kill @s");
                 }
 
                 case TEXT -> {
-                    if (killEntities.get())ChatUtils.sendPlayerMsg("/kill @e[type=minecraft:text_display,tag=MOL]");
+                    if (killEntities.get())ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:text_display,tag=MOL] run kill @s");
                 }
             }
         } else {
