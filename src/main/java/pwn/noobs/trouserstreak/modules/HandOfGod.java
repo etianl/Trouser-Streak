@@ -1,5 +1,7 @@
 package pwn.noobs.trouserstreak.modules;
 
+import meteordevelopment.meteorclient.events.game.GameLeftEvent;
+import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -11,6 +13,7 @@ import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -36,7 +39,11 @@ public class HandOfGod extends Module {
     private final SettingGroup sgClick = settings.createGroup("Click Options");
     private final SettingGroup sgPcentered = settings.createGroup("Player-Centered Options");
     private final SettingGroup sgTroll = settings.createGroup("Troll Other Players!");
-
+    private final Setting<Boolean> disconnectdisable = sgGeneral.add(new BoolSetting.Builder()
+            .name("Disable on Disconnect")
+            .description("Disables module on disconnecting")
+            .defaultValue(false)
+            .build());
     public final Setting<Boolean> notOP = sgGeneral.add(new BoolSetting.Builder()
             .name("Toggle Module if not OP")
             .description("Turn this off to prevent the bug of module always being turned off when you join server.")
@@ -380,7 +387,16 @@ public class HandOfGod extends Module {
     private int sY;
     private int sZ;
     int i;
-
+    @EventHandler
+    private void onScreenOpen(OpenScreenEvent event) {
+        if (disconnectdisable.get() && event.screen instanceof DisconnectedScreen) {
+            toggle();
+        }
+    }
+    @EventHandler
+    private void onGameLeft(GameLeftEvent event) {
+        if (disconnectdisable.get())toggle();
+    }
     @Override
     public void onActivate() {
         if (notOP.get() && !(mc.player.hasPermissionLevel(2)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
