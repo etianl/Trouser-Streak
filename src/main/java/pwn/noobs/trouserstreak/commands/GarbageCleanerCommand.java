@@ -8,8 +8,8 @@ import net.minecraft.text.Text;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class RAMCleanerCommand extends Command {
-    public RAMCleanerCommand() {
+public class GarbageCleanerCommand extends Command {
+    public GarbageCleanerCommand() {
         super("cleanram", "Clears garbage from RAM."); // Courtesy of youtube.com/@ogmur
     }
 
@@ -24,4 +24,4 @@ public class RAMCleanerCommand extends Command {
             return SINGLE_SUCCESS;
         });
     }
-}   
+}
