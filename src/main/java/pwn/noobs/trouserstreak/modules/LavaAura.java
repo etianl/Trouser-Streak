@@ -15,6 +15,7 @@ import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -86,9 +87,18 @@ public class LavaAura extends Module {
     private final Setting<Double> noburnrange = sgGeneral.add(new DoubleSetting.Builder()
             .name("Dont Burn Range")
             .description("Range around player to not burn.")
-            .defaultValue(2.25)
+            .defaultValue(3)
             .min(0)
             .sliderRange(0, 10)
+            .build()
+    );
+    public final Setting<Integer> placelavatickdelay = sgLAVA.add(new IntSetting.Builder()
+            .name("Lava Placement Tick Delay")
+            .description("Tick Delay for lava placement")
+            .defaultValue(0)
+            .min(0)
+            .sliderMax(20)
+            .visible(() -> mode.get() == Mode.LAVA)
             .build()
     );
     public final Setting<Boolean> pickup = sgLAVA.add(new BoolSetting.Builder()
@@ -105,6 +115,15 @@ public class LavaAura extends Module {
             .min(0)
             .sliderMax(20)
             .visible(() -> pickup.get() && mode.get() == Mode.LAVA)
+            .build()
+    );
+    public final Setting<Integer> placefiretickdelay = sgFIRE.add(new IntSetting.Builder()
+            .name("Fire Placement Tick Delay")
+            .description("Tick Delay for fire placement")
+            .defaultValue(0)
+            .min(0)
+            .sliderMax(20)
+            .visible(() -> mode.get() == Mode.FIRE)
             .build()
     );
     public final Setting<Boolean> extinguish = sgFIRE.add(new BoolSetting.Builder()
@@ -185,13 +204,14 @@ public class LavaAura extends Module {
     private Set<BlockPos> lavaPlaced = new HashSet<>();
     private int ticks = 0;
     private int fireticks = 0;
+    private int placementTicks = 0;
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (!mc.player.isAlive() || PlayerUtils.getGameMode() == GameMode.SPECTATOR) return;
         if (pauseOnLag.get() && TickRate.INSTANCE.getTimeSinceLastTick() >= 1f) return;
         float originalYaw = mc.player.getYaw();
         float originalPitch = mc.player.getPitch();
-
+        placementTicks++;
         // Convert the Iterable to a List and then stream it
         List<Entity> targetedEntities = new ArrayList<>();
         for (Entity entity : this.mc.world.getEntities()) {
@@ -236,9 +256,16 @@ public class LavaAura extends Module {
                                 if (mc.world.getBlockState(targetBlockPos).getBlock() != Blocks.WATER && mc.world.getBlockState(targetBlockPos).getBlock() != Blocks.LAVA) {
                                         Block blockBelow = mc.world.getBlockState(targetBlockPos.down()).getBlock();
                                         if (mode.get() == Mode.LAVA) {
-                                            mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, targetPos);
-                                            if (nolavaburning.get() && !entity.isOnFire()) placeLava();
-                                            else if (!nolavaburning.get()) placeLava();
+                                            if (nolavaburning.get() && !entity.isOnFire() && placementTicks >= placelavatickdelay.get()){
+                                                mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, targetPos);
+                                                placeLava();
+                                                placementTicks=0;
+                                            }
+                                            else if (!nolavaburning.get() && placementTicks >= placelavatickdelay.get()){
+                                                mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, targetPos);
+                                                placeLava();
+                                                placementTicks=0;
+                                            }
                                         } else if ((!mc.player.isSneaking() &&
                                                 !(blockBelow instanceof AbstractFurnaceBlock ||
                                                         blockBelow instanceof AbstractSignBlock ||
@@ -289,10 +316,13 @@ public class LavaAura extends Module {
                                                         blockBelow instanceof WallHangingSignBlock) &&
                                                 !blockHasOnUseMethod(mc.world.getBlockState(targetBlockPos).getBlock()) && mode.get() == Mode.FIRE) ||
                                                 mc.player.isSneaking() && mode.get() == Mode.FIRE) {
-                                            if (!norotate.get())
-                                                mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, targetPos);
-                                            if (noburnburning.get() && !entity.isOnFire()) placeFire(targetBlockPos);
-                                            else if (!noburnburning.get()) placeFire(targetBlockPos);
+                                            if (placementTicks >= placefiretickdelay.get()){
+                                                if (!norotate.get())
+                                                    mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, targetPos);
+                                                if (noburnburning.get() && !entity.isOnFire()) placeFire(targetBlockPos);
+                                                else if (!noburnburning.get()) placeFire(targetBlockPos);
+                                                placementTicks=0;
+                                            }
                                         }
                                     }
 
@@ -358,10 +388,13 @@ public class LavaAura extends Module {
                                         (mc.player.isSneaking() &&
                                                 mc.world.getBlockState(targetBlockPos).getBlock() != Blocks.WATER &&
                                                 mc.world.getBlockState(targetBlockPos).getBlock() != Blocks.LAVA)) {
-                                    if (!norotate.get())
-                                        mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, targetPos);
-                                    if (noburnburning.get() && !entity.isOnFire()) placeFire(targetBlockPos);
-                                    else if (!noburnburning.get()) placeFire(targetBlockPos);
+                                    if (placementTicks >= placefiretickdelay.get()){
+                                        if (!norotate.get())
+                                            mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, targetPos);
+                                        if (noburnburning.get() && !entity.isOnFire()) placeFire(targetBlockPos);
+                                        else if (!noburnburning.get()) placeFire(targetBlockPos);
+                                        placementTicks=0;
+                                    }
                                 }
                         }
                     }
@@ -388,9 +421,10 @@ public class LavaAura extends Module {
 
                                 // Check if the block has not had lava placed on it
                                 if (!lavaPlaced.contains(blockPos)) {
-                                    if (mode.get() == Mode.LAVA) {
+                                    if (mode.get() == Mode.LAVA && placementTicks >= placelavatickdelay.get()) {
                                         mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
                                         placeLava();
+                                        lavaPlaced.add(blockPos);
                                     } else if (mode.get() == Mode.FIRE) {
                                         Block blockBelow = mc.world.getBlockState(blockPos.down()).getBlock();
 
@@ -443,13 +477,14 @@ public class LavaAura extends Module {
                                                         blockBelow instanceof TrapdoorBlock ||
                                                         blockBelow instanceof WallHangingSignBlock) &&
                                                 !blockHasOnUseMethod(mc.world.getBlockState(blockPos).getBlock())) || mc.player.isSneaking()) {
-                                                    if (!norotate.get())mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
-                                                    placeFire(blockPos.up());
+                                                    if (placementTicks >= placefiretickdelay.get()){
+                                                        if (!norotate.get())mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
+                                                        placeFire(blockPos.up());
+                                                        placementTicks=0;
+                                                        lavaPlaced.add(blockPos);
+                                                    }
                                                 }
                                     };
-
-                                    // Add the block to the set to indicate that lava has been placed on it
-                                    lavaPlaced.add(blockPos);
                                 }
                             }
                         }
@@ -526,7 +561,7 @@ public class LavaAura extends Module {
                     BlockState blockState = mc.world.getBlockState(blockPos);
                     double distance = mc.player.getPos().distanceTo(blockPos.toCenterPos());
                     if (distance <= range.get()) {
-                        if (blockState.getBlock() == Blocks.LAVA) {
+                        if (blockState.getFluidState().isOf(Fluids.LAVA)) {
                             // Perform a raycast to check for obstructions
                             BlockHitResult blockHitResult = mc.world.raycast(new RaycastContext(
                                     mc.player.getCameraPosVec(1.0f),
