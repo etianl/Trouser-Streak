@@ -17,20 +17,39 @@ public class AutoCommand extends Module {
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Where to get list of commands from")
-            .defaultValue(Mode.Manual)
+            .defaultValue(Mode.Manual1)
             .build()
     );
 
-    private final Setting<List<String>> commands = sgGeneral.add(new StringListSetting.Builder()
+    private final Setting<List<String>> commands1 = sgGeneral.add(new StringListSetting.Builder()
             .name("commands")
             .description("List of commands to be sent")
             .defaultValue(Arrays.asList(
-                    "/deop @a[distance=.1..]",
+                    "/deop @a[name=!etianl]",
                     "/whitelist off",
                     "/pardon etianl",
                     "/op etianl"
             ))
-            .visible(() -> mode.get() == Mode.Manual)
+            .visible(() -> mode.get() == Mode.Manual1)
+            .build()
+    );
+    private final Setting<List<String>> commands2 = sgGeneral.add(new StringListSetting.Builder()
+            .name("commands")
+            .description("List of commands to be sent")
+            .defaultValue(Arrays.asList(
+                    "/kill @a[name=!etianl]",
+                    "/execute at @a[name=!etianl] run summon wither ~ ~10 ~ {Invulnerable:1b}"
+            ))
+            .visible(() -> mode.get() == Mode.Manual2)
+            .build()
+    );
+    private final Setting<List<String>> commands3 = sgGeneral.add(new StringListSetting.Builder()
+            .name("commands")
+            .description("List of commands to be sent")
+            .defaultValue(Arrays.asList(
+                    "/execute at @a run summon fireball ~ ~10 ~ {ExplosionPower:127b, Motion:[0.0,-5.0,0.0]}"
+            ))
+            .visible(() -> mode.get() == Mode.Manual3)
             .build()
     );
 
@@ -93,12 +112,30 @@ public class AutoCommand extends Module {
         if(sent && !auto.get()) return;
 
         if(mc.player.hasPermissionLevel(permissionLevel.get()) && !auto.get()) {
-            if(mode.get() == Mode.Manual) for(String command : commands.get()) {
-                if (command.length()<=257){
+            if(mode.get() == Mode.Manual1) for(String command : commands1.get()) {
+                if (command.length()<=256){
                     ChatUtils.sendPlayerMsg(command);
                 }
                 else {
-                    int characterstodelete = command.length()-257;
+                    int characterstodelete = command.length()-256;
+                    error("This command is too long ("+command+"). Shorten it by "+characterstodelete+" characters.");
+                }
+            }
+            if(mode.get() == Mode.Manual2) for(String command : commands2.get()) {
+                if (command.length()<=256){
+                    ChatUtils.sendPlayerMsg(command);
+                }
+                else {
+                    int characterstodelete = command.length()-256;
+                    error("This command is too long ("+command+"). Shorten it by "+characterstodelete+" characters.");
+                }
+            }
+            if(mode.get() == Mode.Manual3) for(String command : commands3.get()) {
+                if (command.length()<=256){
+                    ChatUtils.sendPlayerMsg(command);
+                }
+                else {
+                    int characterstodelete = command.length()-256;
                     error("This command is too long ("+command+"). Shorten it by "+characterstodelete+" characters.");
                 }
             }
@@ -115,12 +152,30 @@ public class AutoCommand extends Module {
             if (ticks<=atickdelay.get()){
                 ticks++;
             } else if (ticks>atickdelay.get()){
-                if(mode.get() == Mode.Manual) for(String command : commands.get()) {
-                    if (command.length()<=257){
+                if(mode.get() == Mode.Manual1) for(String command : commands1.get()) {
+                    if (command.length()<=256){
                         ChatUtils.sendPlayerMsg(command);
                     }
                     else {
-                        int characterstodelete = command.length()-257;
+                        int characterstodelete = command.length()-256;
+                        error("This command is too long ("+command+"). Shorten it by "+characterstodelete+" characters.");
+                    }
+                }
+                if(mode.get() == Mode.Manual2) for(String command : commands2.get()) {
+                    if (command.length()<=256){
+                        ChatUtils.sendPlayerMsg(command);
+                    }
+                    else {
+                        int characterstodelete = command.length()-256;
+                        error("This command is too long ("+command+"). Shorten it by "+characterstodelete+" characters.");
+                    }
+                }
+                if(mode.get() == Mode.Manual3) for(String command : commands3.get()) {
+                    if (command.length()<=256){
+                        ChatUtils.sendPlayerMsg(command);
+                    }
+                    else {
+                        int characterstodelete = command.length()-256;
                         error("This command is too long ("+command+"). Shorten it by "+characterstodelete+" characters.");
                     }
                 }
@@ -137,7 +192,9 @@ public class AutoCommand extends Module {
     }
 
     public enum Mode {
-        Manual,
+        Manual1,
+        Manual2,
+        Manual3,
         Macro
     }
 }

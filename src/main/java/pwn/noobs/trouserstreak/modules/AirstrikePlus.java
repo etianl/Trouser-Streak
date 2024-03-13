@@ -570,9 +570,9 @@ public class AirstrikePlus extends Module {
         if (entity.get() == "dragon_fireball" || entity2.get() == "dragon_fireball" || entity.get() == "fireball" || entity.get() == "fireball" || entity.get() == "small_fireball" || entity2.get() == "small_fireball" || entity.get() == "wither_skull" || entity.get() == "wither_skull" || entity.get() == "wind_projectile" || entity.get() == "wind_projectile")command += "\"power\":" + speedlist.toString() + ",";
         else command += "\"Motion\":" + speedlist.toString() + "";
         command += "}";
-        if (command.length()<=257)ChatUtils.sendPlayerMsg(command);
+        if (command.length()<=256)ChatUtils.sendPlayerMsg(command);
         else {
-            int characterstodelete = command.length() - 257;
+            int characterstodelete = command.length() - 256;
             error("The command is too long (" + command + ").");
             error("Shorten it by " + characterstodelete + " characters.");
 
