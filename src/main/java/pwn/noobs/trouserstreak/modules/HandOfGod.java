@@ -387,6 +387,18 @@ public class HandOfGod extends Module {
     private int sY;
     private int sZ;
     int i;
+    public int adjustYValue(int yValue) {
+        int bottomY = mc.world.getBottomY();
+        int topY = mc.world.getTopY();
+
+        if (yValue < bottomY) {
+            return bottomY;
+        } else if (yValue > topY) {
+            return topY;
+        } else {
+            return yValue;
+        }
+    }
     @EventHandler
     private void onScreenOpen(OpenScreenEvent event) {
         if (disconnectdisable.get() && event.screen instanceof DisconnectedScreen) {
@@ -411,7 +423,7 @@ public class HandOfGod extends Module {
             String[] rparts = rfullString.split(":");
             String rblock = rparts[1];
             String rblockName = rblock.replace("}", "");
-            ChatUtils.sendPlayerMsg("/fill " + (pX - roofradius.get()) + " " + roofheight.get() +" "+ (pZ - roofradius.get()) +" "+ (pX + roofradius.get()) + " " + roofheight.get() +" "+ (pZ + roofradius.get()) + " "+rblockName);
+            ChatUtils.sendPlayerMsg("/fill " + (pX - roofradius.get()) + " " + adjustYValue(roofheight.get()) +" "+ (pZ - roofradius.get()) +" "+ (pX + roofradius.get()) + " " + adjustYValue(roofheight.get()) +" "+ (pZ + roofradius.get()) + " "+rblockName);
         }
         aticks=0;
         ticks=0;
@@ -459,8 +471,8 @@ public class HandOfGod extends Module {
                     int x2 = Math.round(pos.getX()) - cwidth.get();
                     int y2 = Math.round(pos.getY()) - cheight.get();
                     int z2 = Math.round(pos.getZ()) - cdepth.get();
-                    if (!replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName);
-                    else if (replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName + " replace " + repblockName);
+                    if (!replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + adjustYValue(y1) + " " + z1 + " " + x2 + " " + adjustYValue(y2) + " " + z2 + " " + blockName);
+                    else if (replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + adjustYValue(y1) + " " + z1 + " " + x2 + " " + adjustYValue(y2) + " " + z2 + " " + blockName + " replace " + repblockName);
                 }
                 case EAST, WEST -> {
                     int x1 = Math.round(pos.getX()) + cdepth.get();
@@ -469,8 +481,8 @@ public class HandOfGod extends Module {
                     int x2 = Math.round(pos.getX()) - cdepth.get();
                     int y2 = Math.round(pos.getY()) - cheight.get();
                     int z2 = Math.round(pos.getZ()) - cwidth.get();
-                    if (!replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName);
-                    else if (replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName + " replace " + repblockName);
+                    if (!replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + adjustYValue(y1) + " " + z1 + " " + x2 + " " + adjustYValue(y2) + " " + z2 + " " + blockName);
+                    else if (replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + adjustYValue(y1) + " " + z1 + " " + x2 + " " + adjustYValue(y2) + " " + z2 + " " + blockName + " replace " + repblockName);
                 }
             }
         }
@@ -531,8 +543,8 @@ public class HandOfGod extends Module {
                         int x2 = Math.round(pos.getX()) - cwidth.get();
                         int y2 = Math.round(pos.getY()) - cheight.get();
                         int z2 = Math.round(pos.getZ()) - cdepth.get();
-                        if (!replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName);
-                        else if (replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName + " replace " + repblockName);
+                        if (!replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + adjustYValue(y1) + " " + z1 + " " + x2 + " " + adjustYValue(y2) + " " + z2 + " " + blockName);
+                        else if (replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + adjustYValue(y1) + " " + z1 + " " + x2 + " " + adjustYValue(y2) + " " + z2 + " " + blockName + " replace " + repblockName);
                     }
                     case EAST, WEST -> {
                         int x1 = Math.round(pos.getX()) + cdepth.get();
@@ -541,8 +553,8 @@ public class HandOfGod extends Module {
                         int x2 = Math.round(pos.getX()) - cdepth.get();
                         int y2 = Math.round(pos.getY()) - cheight.get();
                         int z2 = Math.round(pos.getZ()) - cwidth.get();
-                        if (!replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName);
-                        else if (replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + y1 + " " + z1 + " " + x2 + " " + y2 + " " + z2 + " " + blockName + " replace " + repblockName);
+                        if (!replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + adjustYValue(y1) + " " + z1 + " " + x2 + " " + adjustYValue(y2) + " " + z2 + " " + blockName);
+                        else if (replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + adjustYValue(y1) + " " + z1 + " " + x2 + " " + adjustYValue(y2) + " " + z2 + " " + blockName + " replace " + repblockName);
                     }
                 }
                 aticks=0;
@@ -568,20 +580,20 @@ public class HandOfGod extends Module {
                 String repblockName = repblock.replace("}", "");
                 switch (mc.player.getHorizontalFacing()){
                     case NORTH -> {
-                        if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX - sweepradius.get()) + " " + (sY-sweepradius.get()) + " "+ (sZ - (sweepstart.get()+swpr)) +" "+ (sX + sweepradius.get()) + " " + (sY +sweepradius.get()) +" "+ (sZ - (sweepstart.get()+swpr)) + " " + sblockName);
-                        else if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX - sweepradius.get()) + " " + (sY-sweepradius.get()) + " "+ (sZ - (sweepstart.get()+swpr)) +" "+ (sX + sweepradius.get()) + " " + (sY +sweepradius.get()) +" "+ (sZ - (sweepstart.get()+swpr)) + " " + sblockName + " replace " + repblockName);
+                        if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX - sweepradius.get()) + " " + adjustYValue((sY-sweepradius.get())) + " "+ (sZ - (sweepstart.get()+swpr)) +" "+ (sX + sweepradius.get()) + " " + adjustYValue((sY +sweepradius.get())) +" "+ (sZ - (sweepstart.get()+swpr)) + " " + sblockName);
+                        else if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX - sweepradius.get()) + " " + adjustYValue((sY-sweepradius.get())) + " "+ (sZ - (sweepstart.get()+swpr)) +" "+ (sX + sweepradius.get()) + " " + adjustYValue((sY +sweepradius.get())) +" "+ (sZ - (sweepstart.get()+swpr)) + " " + sblockName + " replace " + repblockName);
                     }
                     case WEST -> {
-                        if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX - (sweepstart.get()+swpr)) + " " + (sY-sweepradius.get()) + " "+ (sZ - sweepradius.get()) +" "+ (sX - (sweepstart.get()+swpr)) + " " + (sY+sweepradius.get()) +" "+ (sZ + sweepradius.get()) + " " + sblockName);
-                        else if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX - (sweepstart.get()+swpr)) + " " + (sY-sweepradius.get()) + " "+ (sZ - sweepradius.get()) +" "+ (sX - (sweepstart.get()+swpr)) + " " + (sY+sweepradius.get()) +" "+ (sZ + sweepradius.get()) + " " + sblockName + " replace " + repblockName);
+                        if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX - (sweepstart.get()+swpr)) + " " + adjustYValue((sY-sweepradius.get())) + " "+ (sZ - sweepradius.get()) +" "+ (sX - (sweepstart.get()+swpr)) + " " + adjustYValue((sY +sweepradius.get())) +" "+ (sZ + sweepradius.get()) + " " + sblockName);
+                        else if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX - (sweepstart.get()+swpr)) + " " + adjustYValue((sY-sweepradius.get())) + " "+ (sZ - sweepradius.get()) +" "+ (sX - (sweepstart.get()+swpr)) + " " + adjustYValue((sY +sweepradius.get())) +" "+ (sZ + sweepradius.get()) + " " + sblockName + " replace " + repblockName);
                     }
                     case SOUTH -> {
-                        if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX - sweepradius.get()) + " " + (sY-sweepradius.get()) + " "+ (sZ + (sweepstart.get()+swpr)) +" "+ (sX + sweepradius.get()) + " " + (sY+sweepradius.get()) +" "+ (sZ + (sweepstart.get()+swpr)) + " " + sblockName);
-                        else if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX - sweepradius.get()) + " " + (sY-sweepradius.get()) + " "+ (sZ + (sweepstart.get()+swpr)) +" "+ (sX + sweepradius.get()) + " " + (sY+sweepradius.get()) +" "+ (sZ + (sweepstart.get()+swpr)) + " " + sblockName + " replace " + repblockName);
+                        if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX - sweepradius.get()) + " " + adjustYValue((sY-sweepradius.get())) + " "+ (sZ + (sweepstart.get()+swpr)) +" "+ (sX + sweepradius.get()) + " " + adjustYValue((sY +sweepradius.get())) +" "+ (sZ + (sweepstart.get()+swpr)) + " " + sblockName);
+                        else if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX - sweepradius.get()) + " " + adjustYValue((sY-sweepradius.get())) + " "+ (sZ + (sweepstart.get()+swpr)) +" "+ (sX + sweepradius.get()) + " " + adjustYValue((sY +sweepradius.get())) +" "+ (sZ + (sweepstart.get()+swpr)) + " " + sblockName + " replace " + repblockName);
                     }
                     case EAST -> {
-                        if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX  + (sweepstart.get()+swpr)) + " " + (sY-sweepradius.get()) + " "+ (sZ - sweepradius.get()) +" "+ (sX + (sweepstart.get()+swpr)) + " " + (sY+sweepradius.get()) +" "+ (sZ + sweepradius.get()) + " " + sblockName);
-                        else if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX  + (sweepstart.get()+swpr)) + " " + (sY-sweepradius.get()) + " "+ (sZ - sweepradius.get()) +" "+ (sX + (sweepstart.get()+swpr)) + " " + (sY+sweepradius.get()) +" "+ (sZ + sweepradius.get()) + " " + sblockName + " replace " + repblockName);
+                        if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX  + (sweepstart.get()+swpr)) + " " + adjustYValue((sY-sweepradius.get())) + " "+ (sZ - sweepradius.get()) +" "+ (sX + (sweepstart.get()+swpr)) + " " + adjustYValue((sY +sweepradius.get())) +" "+ (sZ + sweepradius.get()) + " " + sblockName);
+                        else if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX  + (sweepstart.get()+swpr)) + " " + adjustYValue((sY-sweepradius.get())) + " "+ (sZ - sweepradius.get()) +" "+ (sX + (sweepstart.get()+swpr)) + " " + adjustYValue((sY +sweepradius.get())) +" "+ (sZ + sweepradius.get()) + " " + sblockName + " replace " + repblockName);
                     }
                 }
                 swpr++;
@@ -601,12 +613,12 @@ public class HandOfGod extends Module {
                 String pRepblockName = prepblock.replace("}", "");
                 switch (mc.player.getHorizontalFacing()){
                     case NORTH, SOUTH -> {
-                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill ~"+pwidth.get()+" ~"+pheight.get()+" ~"+pdepth.get()+" ~-"+pwidth.get()+" ~-"+pheight.get()+" ~-"+pdepth.get()+" air");
-                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill ~"+pwidth.get()+" ~"+pheight.get()+" ~"+pdepth.get()+" ~-"+pwidth.get()+" ~-"+pheight.get()+" ~-"+pdepth.get()+" "+pBlockName+" replace "+pRepblockName);
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill "+(pX+pwidth.get())+" "+adjustYValue((pY+pheight.get()))+" "+(pZ+pdepth.get())+" "+(pX-pwidth.get())+" "+adjustYValue((pY-pheight.get()))+" "+(pZ-pdepth.get())+" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill "+(pX+pwidth.get())+" "+adjustYValue((pY+pheight.get()))+" "+(pZ+pdepth.get())+" "+(pX-pwidth.get())+" "+adjustYValue((pY-pheight.get()))+" "+(pZ-pdepth.get())+" "+pBlockName+" replace "+pRepblockName);
                     }
                     case EAST, WEST -> {
-                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill ~"+pdepth.get()+" ~"+pheight.get()+" ~"+pwidth.get()+" ~-"+pdepth.get()+" ~-"+pheight.get()+" ~-"+pwidth.get()+" air");
-                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill ~"+pdepth.get()+" ~"+pheight.get()+" ~"+pwidth.get()+" ~-"+pdepth.get()+" ~-"+pheight.get()+" ~-"+pwidth.get()+" "+pBlockName+" replace "+pRepblockName);
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill "+(pX+pdepth.get())+" "+adjustYValue((pY+pheight.get()))+" "+(pZ+pwidth.get())+" "+(pX-pdepth.get())+" "+adjustYValue((pY-pheight.get()))+" "+(pZ-pwidth.get())+" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill "+(pX+pdepth.get())+" "+adjustYValue((pY+pheight.get()))+" "+(pZ+pwidth.get())+" "+(pX-pdepth.get())+" "+adjustYValue((pY-pheight.get()))+" "+(pZ-pwidth.get())+" "+pBlockName+" replace "+pRepblockName);
                     }
                 }
                 ticks=0;
@@ -622,8 +634,8 @@ public class HandOfGod extends Module {
             String prepblock = prepparts[1];
             String pRepblockName = prepblock.replace("}", "");
             if (i>= mc.player.getBlockPos().getY()-vrange.get()){
-                if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + i +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + i +" "+ (pZ + radius.get()) +" air");
-                else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + i +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + i +" "+ (pZ + radius.get()) +" "+pBlockName+" replace "+pRepblockName);
+                if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + adjustYValue(i) +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + adjustYValue(i) +" "+ (pZ + radius.get()) +" air");
+                else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + adjustYValue(i) +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + adjustYValue(i) +" "+ (pZ + radius.get()) +" "+pBlockName+" replace "+pRepblockName);
                 i--;
             }else if (i<= mc.player.getBlockPos().getY()-vrange.get()){
                 i=pY+vrange.get();
@@ -648,90 +660,90 @@ public class HandOfGod extends Module {
             String prepblock = prepparts[1];
             String pRepblockName = prepblock.replace("}", "");
             if (mc.options.jumpKey.isPressed()){
-                if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY+mgcdist.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcdist.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY+mgcdist.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcdist.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
+                if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY+mgcdist.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcdist.get())) +" "+ (pZ + mgcradius.get()) +" air");
+                else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY+mgcdist.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcdist.get())) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
             }
             if (mc.options.sneakKey.isPressed()){
-                if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcdist.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + (pY-mgcdist.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcdist.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + (pY-mgcdist.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
+                if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcdist.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY-mgcdist.get())) +" "+ (pZ + mgcradius.get()) +" air");
+                else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcdist.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY-mgcdist.get())) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
             }
             if (mc.options.forwardKey.isPressed()){
                 switch (mc.player.getHorizontalFacing()){
                     case NORTH -> {
-                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
-                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ - mgcdist.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ - mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
                     case WEST -> {
-                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcradius.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
                     case SOUTH -> {
-                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
-                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcdist.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
                     case EAST -> {
-                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcradius.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
                 }
             }
             if (mc.options.backKey.isPressed()){
                 switch (mc.player.getHorizontalFacing()){
                     case NORTH -> {
-                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
-                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcdist.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
                     case WEST -> {
-                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcradius.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
                     case SOUTH -> {
-                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
-                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ - mgcdist.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ - mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
                     case EAST -> {
-                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcradius.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
                 }
             }
             if (mc.options.rightKey.isPressed()){
                 switch (mc.player.getHorizontalFacing()){
                     case NORTH -> {
-                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcradius.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
                     case WEST -> {
-                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
-                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ - mgcdist.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ - mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
                     case SOUTH -> {
-                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcradius.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
                     case EAST -> {
-                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
-                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcdist.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
                 }
             }
             if (mc.options.leftKey.isPressed()){
                 switch (mc.player.getHorizontalFacing()){
                     case NORTH -> {
-                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcradius.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
                     case WEST -> {
-                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" air");
-                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcdist.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
                     case SOUTH -> {
-                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" air");
-                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcradius.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
                     case EAST -> {
-                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" air");
-                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + (pY-mgcradius.get()) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + (pY+mgcradius.get()) +" "+ (pZ - mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
+                        if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ - mgcdist.get()) +" air");
+                        else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ - mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
                     }
                 }
             }
@@ -745,7 +757,7 @@ public class HandOfGod extends Module {
                 String[] rparts = rfullString.split(":");
                 String rblock = rparts[1];
                 String rblockName = rblock.replace("}", "");
-                ChatUtils.sendPlayerMsg("/fill " + (pX - roofradius.get()) + " " + roofheight.get() +" "+ (pZ - roofradius.get()) +" "+ (pX + roofradius.get()) + " " + roofheight.get() +" "+ (pZ + roofradius.get()) + " "+rblockName);
+                ChatUtils.sendPlayerMsg("/fill " + (pX - roofradius.get()) + " " + adjustYValue(roofheight.get()) +" "+ (pZ - roofradius.get()) +" "+ (pX + roofradius.get()) + " " + adjustYValue(roofheight.get()) +" "+ (pZ + roofradius.get()) + " "+rblockName);
                 roofticks=0;
             }
         }
@@ -779,7 +791,7 @@ public class HandOfGod extends Module {
                         String friendsString = String.join(",", friendNames);
                         if (!trollreplace.get()){
                             String thecommand = "/execute at @a[" + friendsString + "] run fill " + "~" + trollwidth.get() + " " + "~" + trollheight.get() + " " + "~" + trolldepth.get() + " " + "~-" + trollwidth.get() + " " + "~-" + trollheight.get() + " " + "~-" + trolldepth.get() + " " + tBlockName;
-                            if (thecommand.length()<=257){
+                            if (thecommand.length()<=256){
                                 ChatUtils.sendPlayerMsg(thecommand);
                             }
                             else {
@@ -788,7 +800,7 @@ public class HandOfGod extends Module {
                         }
                         else if (trollreplace.get()){
                             String thecommand2 = "/execute at @a[" + friendsString + "] run fill " + "~" + trollwidth.get() + " " + "~" + trollheight.get() + " " + "~" + trolldepth.get() + " " + "~-" + trollwidth.get() + " " + "~-" + trollheight.get() + " " + "~-" + trolldepth.get() + " " + tBlockName + " replace " + tRepblockName;
-                            if (thecommand2.length()<=257){
+                            if (thecommand2.length()<=256){
                                 ChatUtils.sendPlayerMsg(thecommand2);
                             }
                             else {
@@ -805,12 +817,12 @@ public class HandOfGod extends Module {
                             }
                             switch (entity.getHorizontalFacing()){
                                 case NORTH, SOUTH -> {
-                                    if (!trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trollwidth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trolldepth.get())+" "+(entity.getBlockPos().getX()-trollwidth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trolldepth.get())+" "+tBlockName);
-                                    else if (trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trollwidth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trolldepth.get())+" "+(entity.getBlockPos().getX()-trollwidth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trolldepth.get())+" "+tBlockName+" replace "+tRepblockName);
+                                    if (!trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trollwidth.get())+" "+adjustYValue((entity.getBlockPos().getY()+trollheight.get()))+" "+(entity.getBlockPos().getZ()+trolldepth.get())+" "+(entity.getBlockPos().getX()-trollwidth.get())+" "+adjustYValue((entity.getBlockPos().getY()-trollheight.get()))+" "+(entity.getBlockPos().getZ()-trolldepth.get())+" "+tBlockName);
+                                    else if (trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trollwidth.get())+" "+adjustYValue((entity.getBlockPos().getY()+trollheight.get()))+" "+(entity.getBlockPos().getZ()+trolldepth.get())+" "+(entity.getBlockPos().getX()-trollwidth.get())+" "+adjustYValue((entity.getBlockPos().getY()-trollheight.get()))+" "+(entity.getBlockPos().getZ()-trolldepth.get())+" "+tBlockName+" replace "+tRepblockName);
                                 }
                                 case EAST, WEST -> {
-                                    if (!trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trolldepth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trollwidth.get())+" "+(entity.getBlockPos().getX()-trolldepth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trollwidth.get())+" "+tBlockName);
-                                    else if (trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trolldepth.get())+" "+(entity.getBlockPos().getY()+trollheight.get())+" "+(entity.getBlockPos().getZ()+trollwidth.get())+" "+(entity.getBlockPos().getX()-trolldepth.get())+" "+(entity.getBlockPos().getY()-trollheight.get())+" "+(entity.getBlockPos().getZ()-trollwidth.get())+" "+tBlockName+" replace "+tRepblockName);
+                                    if (!trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trolldepth.get())+" "+adjustYValue((entity.getBlockPos().getY()+trollheight.get()))+" "+(entity.getBlockPos().getZ()+trollwidth.get())+" "+(entity.getBlockPos().getX()-trolldepth.get())+" "+adjustYValue((entity.getBlockPos().getY()-trollheight.get()))+" "+(entity.getBlockPos().getZ()-trollwidth.get())+" "+tBlockName);
+                                    else if (trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trolldepth.get())+" "+adjustYValue((entity.getBlockPos().getY()+trollheight.get()))+" "+(entity.getBlockPos().getZ()+trollwidth.get())+" "+(entity.getBlockPos().getX()-trolldepth.get())+" "+adjustYValue((entity.getBlockPos().getY()-trollheight.get()))+" "+(entity.getBlockPos().getZ()-trollwidth.get())+" "+tBlockName+" replace "+tRepblockName);
                                 }
                             }
                         }
