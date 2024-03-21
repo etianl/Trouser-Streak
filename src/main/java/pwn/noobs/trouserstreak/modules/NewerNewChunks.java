@@ -15,6 +15,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
@@ -218,6 +219,8 @@ public class NewerNewChunks extends Module {
 	private ChunkPos chunkPos;
 	private ChunkPos oldpos;
 	private boolean isNewGeneration;
+	private boolean foundAnyOre;
+
 	private final Set<ChunkPos> newChunks = Collections.synchronizedSet(new HashSet<>());
 	private final Set<ChunkPos> oldChunks = Collections.synchronizedSet(new HashSet<>());
 	private final Set<ChunkPos> olderoldChunks = Collections.synchronizedSet(new HashSet<>());
@@ -604,6 +607,7 @@ public class NewerNewChunks extends Module {
 					return;
 				}
 				isNewGeneration = false;
+				foundAnyOre = false;
 				for (int x = 0; x < 16; x++) {
 					for (int y = mc.world.getBottomY(); y < mc.world.getTopY(); y++) {
 						for (int z = 0; z < 16; z++) {
@@ -615,11 +619,12 @@ public class NewerNewChunks extends Module {
 								}
 								return;
 							}
-							if (y<256 && y>=0 && (chunk.getBlockState(new BlockPos(x, y, z)).getBlock() == Blocks.COPPER_ORE || chunk.getBlockState(new BlockPos(x, y, z)).getBlock() == Blocks.DEEPSLATE_COPPER_ORE) && mc.world.getRegistryKey().getValue().toString().toLowerCase().contains("overworld")) isNewGeneration = true;
+							if (!foundAnyOre && isOreBlock(chunk.getBlockState(new BlockPos(x, y, z)).getBlock()) && mc.world.getRegistryKey().getValue().toString().toLowerCase().contains("overworld")) foundAnyOre = true;
+							if (!isNewGeneration && y<256 && y>=0 && (chunk.getBlockState(new BlockPos(x, y, z)).getBlock() == Blocks.COPPER_ORE || chunk.getBlockState(new BlockPos(x, y, z)).getBlock() == Blocks.DEEPSLATE_COPPER_ORE) && mc.world.getRegistryKey().getValue().toString().toLowerCase().contains("overworld")) isNewGeneration = true;
 						}
 					}
 				}
-				if (oldchunksdetector.get() && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !olderoldChunks.contains(oldpos) && !newChunks.contains(oldpos) && isNewGeneration == false) {
+				if (oldchunksdetector.get() && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !olderoldChunks.contains(oldpos) && !newChunks.contains(oldpos) && foundAnyOre == true && isNewGeneration == false && mc.world.getRegistryKey().getValue().toString().toLowerCase().contains("overworld")) {
 					oldChunks.add(oldpos);
 					if (save.get()){
 						saveOldChunkData();
@@ -627,6 +632,23 @@ public class NewerNewChunks extends Module {
 				}
 			}
 		}
+	}
+	private boolean isOreBlock(Block block) {
+		return block == Blocks.COAL_ORE
+				|| block == Blocks.COPPER_ORE
+				|| block == Blocks.DEEPSLATE_COPPER_ORE
+				|| block == Blocks.IRON_ORE
+				|| block == Blocks.DEEPSLATE_IRON_ORE
+				|| block == Blocks.GOLD_ORE
+				|| block == Blocks.DEEPSLATE_GOLD_ORE
+				|| block == Blocks.LAPIS_ORE
+				|| block == Blocks.DEEPSLATE_LAPIS_ORE
+				|| block == Blocks.DIAMOND_ORE
+				|| block == Blocks.DEEPSLATE_DIAMOND_ORE
+				|| block == Blocks.REDSTONE_ORE
+				|| block == Blocks.DEEPSLATE_REDSTONE_ORE
+				|| block == Blocks.EMERALD_ORE
+				|| block == Blocks.DEEPSLATE_EMERALD_ORE;
 	}
 	private void loadData() {
 		try {
