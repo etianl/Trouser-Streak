@@ -289,9 +289,9 @@ public class AutoMountain extends Module {
         lowblockY=-1;
         highblockY=-1;
         if (startPaused.get() == true){
-        pause = false;
-        if (autolavamountain.get()) ChatUtils.sendMsg(Text.of("Press UseKey (RightClick) to Build a Mountain! Please wait while the bot works."));
-        else ChatUtils.sendMsg(Text.of("Press UseKey (RightClick) to Build Stairs!"));
+            pause = false;
+            if (autolavamountain.get()) ChatUtils.sendMsg(Text.of("Press UseKey (RightClick) to Build a Mountain! Please wait while the bot works."));
+            else ChatUtils.sendMsg(Text.of("Press UseKey (RightClick) to Build Stairs!"));
         } else if (startPaused.get() == false){
             mc.player.setPos(mc.player.getX(),Math.ceil(mc.player.getY()),mc.player.getZ());
             wasfacing=mc.player.getHorizontalFacing();
@@ -311,7 +311,7 @@ public class AutoMountain extends Module {
         resetTimer = false;
         playerPos = mc.player.getBlockPos();
         renderplayerPos = mc.player.getBlockPos();
-        if (startPaused.get() || !(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof VerticallyAttachableBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FallingBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BambooBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FlowerPotBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LadderBlock || skippableBlox.get().contains(((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock())) return;
+        if (startPaused.get() || isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack())) return;
         BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
         if (mc.world.getBlockState(pos).isReplaceable()) {
             mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
@@ -328,8 +328,8 @@ public class AutoMountain extends Module {
             isthisfirstblock=false;
         }
         if (pause=true){
-        if (isthisfirstblock==false && mc.player.getY()<lowestblock.getY()) lowestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
-        if (isthisfirstblock==false && mc.player.getY()>highestblock.getY()+1) highestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
+            if (isthisfirstblock==false && mc.player.getY()<lowestblock.getY()) lowestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
+            if (isthisfirstblock==false && mc.player.getY()>highestblock.getY()+1) highestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
         }
         search=true;
         seekground();
@@ -338,12 +338,12 @@ public class AutoMountain extends Module {
         speed=0;
         resetTimer = true;
         Modules.get().get(Timer.class).setOverride(Timer.OFF);
-        if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof VerticallyAttachableBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FallingBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BambooBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FlowerPotBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LadderBlock || skippableBlox.get().contains(((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock())) return;
+        if (isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack())) return;
         if (pause==false){
-        BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
-        if (mc.world.getBlockState(pos).isReplaceable()) {
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-            mc.player.swingHand(Hand.MAIN_HAND);}
+            BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
+            if (mc.world.getBlockState(pos).isReplaceable()) {
+                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                mc.player.swingHand(Hand.MAIN_HAND);}
         }
     }
 
@@ -353,119 +353,119 @@ public class AutoMountain extends Module {
             if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
                 if ((mouseT.get() && mc.player.getPitch() <= 40) || (!mouseT.get() && prevPitch <= 40)){            //UP
                     if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {
-                            BlockPos pos1 = renderplayerPos.add(new Vec3i(0, +spcoffset.get(), -1));
-                            event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        BlockPos pos1 = renderplayerPos.add(new Vec3i(0, +spcoffset.get(), -1));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
                     if ((mouseT.get() && mc.player.getMovementDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {
-                            BlockPos pos1 = renderplayerPos.add(new Vec3i(0, +spcoffset.get(), 1));
-                            event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        BlockPos pos1 = renderplayerPos.add(new Vec3i(0, +spcoffset.get(), 1));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
                     if ((mouseT.get() && mc.player.getMovementDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {
-                            BlockPos pos1 = renderplayerPos.add(new Vec3i(1, +spcoffset.get(), 0));
-                            event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        BlockPos pos1 = renderplayerPos.add(new Vec3i(1, +spcoffset.get(), 0));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
                     if ((mouseT.get() && mc.player.getMovementDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {
-                            BlockPos pos1 = renderplayerPos.add(new Vec3i(-1, +spcoffset.get(), 0));
-                            event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        BlockPos pos1 = renderplayerPos.add(new Vec3i(-1, +spcoffset.get(), 0));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
                 }
                 else if ((mouseT.get() && mc.player.getPitch() > 40) || (!mouseT.get() && prevPitch > 40)){            //DOWN
                     if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {
-                            BlockPos pos1 = renderplayerPos.add(new Vec3i(0, -spcoffset.get()-2, -1));
-                            event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        BlockPos pos1 = renderplayerPos.add(new Vec3i(0, -spcoffset.get()-2, -1));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
                     if ((mouseT.get() && mc.player.getMovementDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {
-                            BlockPos pos1 = renderplayerPos.add(new Vec3i(0, -spcoffset.get()-2, 1));
-                            event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        BlockPos pos1 = renderplayerPos.add(new Vec3i(0, -spcoffset.get()-2, 1));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
                     if ((mouseT.get() && mc.player.getMovementDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {
-                            BlockPos pos1 = renderplayerPos.add(new Vec3i(1, -spcoffset.get()-2, 0));
-                            event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        BlockPos pos1 = renderplayerPos.add(new Vec3i(1, -spcoffset.get()-2, 0));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
                     if ((mouseT.get() && mc.player.getMovementDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {
-                            BlockPos pos1 = renderplayerPos.add(new Vec3i(-1, -spcoffset.get()-2, 0));
-                            event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        BlockPos pos1 = renderplayerPos.add(new Vec3i(-1, -spcoffset.get()-2, 0));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
                 }
             }
             else if (!mc.options.jumpKey.isPressed() || autolavamountain.get()) {
                 if (((mouseT.get() && mc.player.getPitch() <= 40) || autolavamountain.get()) || (!mouseT.get() && prevPitch <= 40 && !autolavamountain.get())) {            //UP
                     if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {
-                            BlockPos pos1 = renderplayerPos.add(new Vec3i(0, 0, -1));
-                            event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                            if (autolavamountain.get() && pause==false){
-                                BlockPos pos2 = renderplayerPos.add(new Vec3i(0, botlimit.get()-1, -botlimit.get()));
-                                BlockPos pos3 = renderplayerPos.add(new Vec3i(0, 1, -2));
-                                event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                                event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                            } else if (autolavamountain.get() && pause==true){
-                                BlockPos pos2 = lowestblock.add(new Vec3i(0, botlimit.get(), -botlimit.get()));
-                                BlockPos pos3 = renderplayerPos.add(new Vec3i(0, 1, -2));
-                                event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                                event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                            }
+                        BlockPos pos1 = renderplayerPos.add(new Vec3i(0, 0, -1));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        if (autolavamountain.get() && pause==false){
+                            BlockPos pos2 = renderplayerPos.add(new Vec3i(0, botlimit.get()-1, -botlimit.get()));
+                            BlockPos pos3 = renderplayerPos.add(new Vec3i(0, 1, -2));
+                            event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                            event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        } else if (autolavamountain.get() && pause==true){
+                            BlockPos pos2 = lowestblock.add(new Vec3i(0, botlimit.get(), -botlimit.get()));
+                            BlockPos pos3 = renderplayerPos.add(new Vec3i(0, 1, -2));
+                            event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                            event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        }
                     }
                     if ((mouseT.get() && mc.player.getMovementDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {
-                            BlockPos pos1 = renderplayerPos.add(new Vec3i(0, 0, 1));
-                            event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                            if (autolavamountain.get() && pause==false){
-                                BlockPos pos2 = renderplayerPos.add(new Vec3i(0, botlimit.get()-1, botlimit.get()));
-                                BlockPos pos3 = renderplayerPos.add(new Vec3i(0, 1, 2));
-                                event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                                event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                            } else if (autolavamountain.get() && pause==true){
-                                BlockPos pos2 = lowestblock.add(new Vec3i(0, botlimit.get(), botlimit.get()));
-                                BlockPos pos3 = renderplayerPos.add(new Vec3i(0, 1, 2));
-                                event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                                event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                            }
+                        BlockPos pos1 = renderplayerPos.add(new Vec3i(0, 0, 1));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        if (autolavamountain.get() && pause==false){
+                            BlockPos pos2 = renderplayerPos.add(new Vec3i(0, botlimit.get()-1, botlimit.get()));
+                            BlockPos pos3 = renderplayerPos.add(new Vec3i(0, 1, 2));
+                            event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                            event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        } else if (autolavamountain.get() && pause==true){
+                            BlockPos pos2 = lowestblock.add(new Vec3i(0, botlimit.get(), botlimit.get()));
+                            BlockPos pos3 = renderplayerPos.add(new Vec3i(0, 1, 2));
+                            event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                            event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        }
                     }
                     if ((mouseT.get() && mc.player.getMovementDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {
-                            BlockPos pos1 = renderplayerPos.add(new Vec3i(1, 0, 0));
-                            event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                            if (autolavamountain.get() && pause==false){
-                                BlockPos pos3 = renderplayerPos.add(new Vec3i(2, 1, 0));
-                                BlockPos pos2 = renderplayerPos.add(new Vec3i(botlimit.get(), botlimit.get()-1, 0));
-                                event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                                event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                            } else if (autolavamountain.get() && pause==true){
-                                BlockPos pos3 = renderplayerPos.add(new Vec3i(2, 1, 0));
-                                BlockPos pos2 = lowestblock.add(new Vec3i(botlimit.get(), botlimit.get(), 0));
-                                event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                                event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                            }
+                        BlockPos pos1 = renderplayerPos.add(new Vec3i(1, 0, 0));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        if (autolavamountain.get() && pause==false){
+                            BlockPos pos3 = renderplayerPos.add(new Vec3i(2, 1, 0));
+                            BlockPos pos2 = renderplayerPos.add(new Vec3i(botlimit.get(), botlimit.get()-1, 0));
+                            event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                            event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        } else if (autolavamountain.get() && pause==true){
+                            BlockPos pos3 = renderplayerPos.add(new Vec3i(2, 1, 0));
+                            BlockPos pos2 = lowestblock.add(new Vec3i(botlimit.get(), botlimit.get(), 0));
+                            event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                            event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        }
                     }
                     if ((mouseT.get() && mc.player.getMovementDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {
-                            BlockPos pos1 = renderplayerPos.add(new Vec3i(-1, 0, -0));
-                            event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                            if (autolavamountain.get() && pause==false){
-                                BlockPos pos3 = renderplayerPos.add(new Vec3i(-2, 1, 0));
-                                BlockPos pos2 = renderplayerPos.add(new Vec3i(-botlimit.get(), botlimit.get()-1, 0));
-                                event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                                event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                            } else if (autolavamountain.get() && pause==true){
-                                BlockPos pos3 = renderplayerPos.add(new Vec3i(-2, 1, 0));
-                                BlockPos pos2 = lowestblock.add(new Vec3i(-botlimit.get(), botlimit.get(), 0));
-                                event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                                event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                            }
+                        BlockPos pos1 = renderplayerPos.add(new Vec3i(-1, 0, -0));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        if (autolavamountain.get() && pause==false){
+                            BlockPos pos3 = renderplayerPos.add(new Vec3i(-2, 1, 0));
+                            BlockPos pos2 = renderplayerPos.add(new Vec3i(-botlimit.get(), botlimit.get()-1, 0));
+                            event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                            event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        } else if (autolavamountain.get() && pause==true){
+                            BlockPos pos3 = renderplayerPos.add(new Vec3i(-2, 1, 0));
+                            BlockPos pos2 = lowestblock.add(new Vec3i(-botlimit.get(), botlimit.get(), 0));
+                            event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                            event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        }
                     }
                 } else if ((mouseT.get() && mc.player.getPitch() > 40) || (!mouseT.get() && prevPitch > 40)) {            //DOWN
                     if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {
-                            BlockPos pos1 = renderplayerPos.add(new Vec3i(0, -2, -1));
-                            event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        BlockPos pos1 = renderplayerPos.add(new Vec3i(0, -2, -1));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
                     if ((mouseT.get() && mc.player.getMovementDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {
-                            BlockPos pos1 = renderplayerPos.add(new Vec3i(0, -2, 1));
-                            event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        BlockPos pos1 = renderplayerPos.add(new Vec3i(0, -2, 1));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
                     if ((mouseT.get() && mc.player.getMovementDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {
-                            BlockPos pos1 = renderplayerPos.add(new Vec3i(1, -2, 0));
-                            event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        BlockPos pos1 = renderplayerPos.add(new Vec3i(1, -2, 0));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
                     if ((mouseT.get() && mc.player.getMovementDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {
-                            BlockPos pos1 = renderplayerPos.add(new Vec3i(-1, -2, 0));
-                            event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                        BlockPos pos1 = renderplayerPos.add(new Vec3i(-1, -2, 0));
+                        event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
                 }
             }
@@ -488,7 +488,7 @@ public class AutoMountain extends Module {
             speed=0;
             resetTimer = true;
             Modules.get().get(Timer.class).setOverride(Timer.OFF);
-            if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof VerticallyAttachableBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FallingBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BambooBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FlowerPotBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LadderBlock || skippableBlox.get().contains(((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock())) return;
+            if (isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack())) return;
             if (isthisfirstblock==true){
                 highestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
                 lowestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
@@ -508,63 +508,63 @@ public class AutoMountain extends Module {
     private void onKeyEvent(KeyEvent event) {
         if (pause == false)return;
         if (!autolavamountain.get()){
-        if (mc.options.forwardKey.isPressed()){
-            if (mouseT.get())mc.player.setPitch(35);
-            if (!mouseT.get())prevPitch=35;
-        }
-        if (mc.options.backKey.isPressed()){
-            if (mouseT.get())mc.player.setPitch(75);
-            if (!mouseT.get())prevPitch=75;
-        }
-        if ((lagpause.get() && timeSinceLastTick >= lag.get()) || !(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof VerticallyAttachableBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FallingBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BambooBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FlowerPotBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LadderBlock || skippableBlox.get().contains(((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock()) ||  pause == false) return;
-        if (mc.options.leftKey.isPressed() && !mc.options.sneakKey.isPressed()){
-            if (mouseT.get())mc.player.setYaw(mc.player.getYaw()-90);
-            if (!mouseT.get()){
-                if (wasfacing==Direction.NORTH){
-                    wasfacing=Direction.WEST;
-                    return;
-                }
-                if (wasfacing==Direction.SOUTH){
-                    wasfacing=Direction.EAST;
-                    return;
-                }
-                if (wasfacing==Direction.WEST){
-                    wasfacing=Direction.SOUTH;
-                    return;
-                }
-                if (wasfacing==Direction.EAST){
-                    wasfacing=Direction.NORTH;
-                    return;
+            if (mc.options.forwardKey.isPressed()){
+                if (mouseT.get())mc.player.setPitch(35);
+                if (!mouseT.get())prevPitch=35;
+            }
+            if (mc.options.backKey.isPressed()){
+                if (mouseT.get())mc.player.setPitch(75);
+                if (!mouseT.get())prevPitch=75;
+            }
+            if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack()) ||  pause == false) return;
+            if (mc.options.leftKey.isPressed() && !mc.options.sneakKey.isPressed()){
+                if (mouseT.get())mc.player.setYaw(mc.player.getYaw()-90);
+                if (!mouseT.get()){
+                    if (wasfacing==Direction.NORTH){
+                        wasfacing=Direction.WEST;
+                        return;
+                    }
+                    if (wasfacing==Direction.SOUTH){
+                        wasfacing=Direction.EAST;
+                        return;
+                    }
+                    if (wasfacing==Direction.WEST){
+                        wasfacing=Direction.SOUTH;
+                        return;
+                    }
+                    if (wasfacing==Direction.EAST){
+                        wasfacing=Direction.NORTH;
+                        return;
+                    }
                 }
             }
-        }
-        if (mc.options.rightKey.isPressed() && !mc.options.sneakKey.isPressed()){
-            if (mouseT.get())mc.player.setYaw(mc.player.getYaw()+90);
-            if (!mouseT.get()){
-                if (wasfacing==Direction.NORTH){
-                    wasfacing=Direction.EAST;
-                    return;
-                }
-                if (wasfacing==Direction.SOUTH){
-                    wasfacing=Direction.WEST;
-                    return;
-                }
-                if (wasfacing==Direction.WEST){
-                    wasfacing=Direction.NORTH;
-                    return;
-                }
-                if (wasfacing==Direction.EAST){
-                    wasfacing=Direction.SOUTH;
-                    return;
+            if (mc.options.rightKey.isPressed() && !mc.options.sneakKey.isPressed()){
+                if (mouseT.get())mc.player.setYaw(mc.player.getYaw()+90);
+                if (!mouseT.get()){
+                    if (wasfacing==Direction.NORTH){
+                        wasfacing=Direction.EAST;
+                        return;
+                    }
+                    if (wasfacing==Direction.SOUTH){
+                        wasfacing=Direction.WEST;
+                        return;
+                    }
+                    if (wasfacing==Direction.WEST){
+                        wasfacing=Direction.NORTH;
+                        return;
+                    }
+                    if (wasfacing==Direction.EAST){
+                        wasfacing=Direction.SOUTH;
+                        return;
+                    }
                 }
             }
-        }
         }
     }
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
         if (event.packet instanceof PlayerMoveC2SPacket)
-        ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
+            ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
     }
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
@@ -614,23 +614,23 @@ public class AutoMountain extends Module {
         mc.player.setVelocity(0,0,0);
         PlayerUtils.centerPlayer();
         mc.player.setPos(mc.player.getX(),Math.round(mc.player.getY())+0.25,mc.player.getZ());
-            if (Modules.get().get(Flight.class).isActive()) {
-                Modules.get().get(Flight.class).toggle();
-            }
-            if (Modules.get().get(FlightAntikick.class).isActive()) {
-                Modules.get().get(FlightAntikick.class).toggle();
-            }
-            if (Modules.get().get(TPFly.class).isActive()) {
-                Modules.get().get(TPFly.class).toggle();
-            }
-            if (mc.world.getBlockState(mc.player.getBlockPos()).getBlock() == Blocks.AIR) {
-                resetTimer = false;
-                Modules.get().get(Timer.class).setOverride(StairTimer.get());
-            } else if (!resetTimer) {
-                resetTimer = true;
-                Modules.get().get(Timer.class).setOverride(Timer.OFF);
-            }
-        if ((lagpause.get() && timeSinceLastTick >= lag.get()) || !(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof VerticallyAttachableBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FallingBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BambooBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FlowerPotBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LadderBlock || skippableBlox.get().contains(((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock()) ||  pause == false || go==false) return;
+        if (Modules.get().get(Flight.class).isActive()) {
+            Modules.get().get(Flight.class).toggle();
+        }
+        if (Modules.get().get(FlightAntikick.class).isActive()) {
+            Modules.get().get(FlightAntikick.class).toggle();
+        }
+        if (Modules.get().get(TPFly.class).isActive()) {
+            Modules.get().get(TPFly.class).toggle();
+        }
+        if (mc.world.getBlockState(mc.player.getBlockPos()).getBlock() == Blocks.AIR) {
+            resetTimer = false;
+            Modules.get().get(Timer.class).setOverride(StairTimer.get());
+        } else if (!resetTimer) {
+            resetTimer = true;
+            Modules.get().get(Timer.class).setOverride(Timer.OFF);
+        }
+        if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack()) ||  pause == false || go==false) return;
         if (mc.options.sneakKey.isPressed() && mc.options.rightKey.isPressed() && delayLeft <= 0 && offLeft > 0 && !autolavamountain.get()){
             cookie++;
             if (cookie==munscher.get()){
@@ -744,163 +744,163 @@ public class AutoMountain extends Module {
             else if ((!lagpause.get() || timeSinceLastTick < lag.get()) && delayLeft <= 0 && offLeft > 0 && (mc.player.getY() <= limit.get() &&  mc.player.getY() >= downlimit.get() && !autolavamountain.get() || mc.player.getY() <= limit.get()-4 && mc.player.getY() <= lowestblock.getY()+botlimit.get()+1 && autolavamountain.get())) {
                 offLeft--;
                 if (mc.player == null || mc.world == null) {toggle(); return;}
-                if ((lagpause.get() && timeSinceLastTick >= lag.get()) || !(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof VerticallyAttachableBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FallingBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BambooBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FlowerPotBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LadderBlock || skippableBlox.get().contains(((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock()) ||  pause == false || go==false) return;
-                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {            //UP
-                        if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
-                            BlockPos un1 = playerPos.add(new Vec3i(0,spcoffset.get()+2,0));
-                            BlockPos un2 = playerPos.add(new Vec3i(0,spcoffset.get()+1,-1));
-                            BlockPos un3 = playerPos.add(new Vec3i(0,spcoffset.get()+2,-1));
-                            BlockPos un4 = playerPos.add(new Vec3i(0,spcoffset.get()+3,-1));
-                            BlockPos pos = playerPos.add(new Vec3i(0,spcoffset.get(),-1));
-                            if (mc.world.getBlockState(un1).isReplaceable() && mc.world.getBlockState(un2).isReplaceable() && mc.world.getBlockState(un3).isReplaceable() && mc.world.getBlockState(un4).isReplaceable() && mc.world.getFluidState(un1).isEmpty() && mc.world.getFluidState(un2).isEmpty() && mc.world.getFluidState(un3).isEmpty() && mc.world.getFluidState(un4).isEmpty() && !mc.world.getBlockState(un1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(un2)){
-                                if (mc.world.getBlockState(pos).isReplaceable()){
-                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                    mc.player.swingHand(Hand.MAIN_HAND);
-                                }
-                                mc.player.setPosition(mc.player.getX(),mc.player.getY()+1+spcoffset.get(),mc.player.getZ()-1);
-                            } else {
-                                if (InvertUpDir.get() && !autolavamountain.get()){
-                                    if (mouseT.get())mc.player.setPitch(75);
-                                    if (!mouseT.get())prevPitch=75;
-                                }
+                if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack()) ||  pause == false || go==false) return;
+                if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {            //UP
+                    if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
+                        BlockPos un1 = playerPos.add(new Vec3i(0,spcoffset.get()+2,0));
+                        BlockPos un2 = playerPos.add(new Vec3i(0,spcoffset.get()+1,-1));
+                        BlockPos un3 = playerPos.add(new Vec3i(0,spcoffset.get()+2,-1));
+                        BlockPos un4 = playerPos.add(new Vec3i(0,spcoffset.get()+3,-1));
+                        BlockPos pos = playerPos.add(new Vec3i(0,spcoffset.get(),-1));
+                        if (mc.world.getBlockState(un1).isReplaceable() && mc.world.getBlockState(un2).isReplaceable() && mc.world.getBlockState(un3).isReplaceable() && mc.world.getBlockState(un4).isReplaceable() && mc.world.getFluidState(un1).isEmpty() && mc.world.getFluidState(un2).isEmpty() && mc.world.getFluidState(un3).isEmpty() && mc.world.getFluidState(un4).isEmpty() && !mc.world.getBlockState(un1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(un2)){
+                            if (mc.world.getBlockState(pos).isReplaceable()){
+                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                mc.player.swingHand(Hand.MAIN_HAND);
                             }
+                            mc.player.setPosition(mc.player.getX(),mc.player.getY()+1+spcoffset.get(),mc.player.getZ()-1);
                         } else {
-                            BlockPos un1 = playerPos.add(new Vec3i(0,2,0));
-                            BlockPos un2 = playerPos.add(new Vec3i(0,1,-1));
-                            BlockPos un3 = playerPos.add(new Vec3i(0,2,-1));
-                            BlockPos un4 = playerPos.add(new Vec3i(0,3,-1));
-                            BlockPos pos = playerPos.add(new Vec3i(0,0,-1));
-                            if (mc.world.getBlockState(un1).isReplaceable() && mc.world.getBlockState(un2).isReplaceable() && mc.world.getBlockState(un3).isReplaceable() && mc.world.getBlockState(un4).isReplaceable() && mc.world.getFluidState(un1).isEmpty() && mc.world.getFluidState(un2).isEmpty() && mc.world.getFluidState(un3).isEmpty() && mc.world.getFluidState(un4).isEmpty() && !mc.world.getBlockState(un1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(un2)){
-                                if (mc.world.getBlockState(pos).isReplaceable()){
-                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                    mc.player.swingHand(Hand.MAIN_HAND);
-                                }
-                                mc.player.setPosition(mc.player.getX(),mc.player.getY()+1,mc.player.getZ()-1);
-                            } else {
-                                if (InvertUpDir.get() && !autolavamountain.get()){
-                                    if (mouseT.get())mc.player.setPitch(75);
-                                    if (!mouseT.get())prevPitch=75;
-                                }
+                            if (InvertUpDir.get() && !autolavamountain.get()){
+                                if (mouseT.get())mc.player.setPitch(75);
+                                if (!mouseT.get())prevPitch=75;
+                            }
+                        }
+                    } else {
+                        BlockPos un1 = playerPos.add(new Vec3i(0,2,0));
+                        BlockPos un2 = playerPos.add(new Vec3i(0,1,-1));
+                        BlockPos un3 = playerPos.add(new Vec3i(0,2,-1));
+                        BlockPos un4 = playerPos.add(new Vec3i(0,3,-1));
+                        BlockPos pos = playerPos.add(new Vec3i(0,0,-1));
+                        if (mc.world.getBlockState(un1).isReplaceable() && mc.world.getBlockState(un2).isReplaceable() && mc.world.getBlockState(un3).isReplaceable() && mc.world.getBlockState(un4).isReplaceable() && mc.world.getFluidState(un1).isEmpty() && mc.world.getFluidState(un2).isEmpty() && mc.world.getFluidState(un3).isEmpty() && mc.world.getFluidState(un4).isEmpty() && !mc.world.getBlockState(un1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(un2)){
+                            if (mc.world.getBlockState(pos).isReplaceable()){
+                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                mc.player.swingHand(Hand.MAIN_HAND);
+                            }
+                            mc.player.setPosition(mc.player.getX(),mc.player.getY()+1,mc.player.getZ()-1);
+                        } else {
+                            if (InvertUpDir.get() && !autolavamountain.get()){
+                                if (mouseT.get())mc.player.setPitch(75);
+                                if (!mouseT.get())prevPitch=75;
                             }
                         }
                     }
+                }
                 if ((mouseT.get() && mc.player.getMovementDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {            //UP
-                        if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
-                            BlockPos ue1 = playerPos.add(new Vec3i(0,spcoffset.get()+2,0));
-                            BlockPos ue2 = playerPos.add(new Vec3i(+1,spcoffset.get()+1,0));
-                            BlockPos ue3 = playerPos.add(new Vec3i(+1,spcoffset.get()+2,0));
-                            BlockPos ue4 = playerPos.add(new Vec3i(+1,spcoffset.get()+3,0));
-                            BlockPos pos = playerPos.add(new Vec3i(1,spcoffset.get(),0));
-                            if (mc.world.getBlockState(ue1).isReplaceable() && mc.world.getBlockState(ue2).isReplaceable() && mc.world.getBlockState(ue3).isReplaceable() && mc.world.getBlockState(ue4).isReplaceable() && mc.world.getFluidState(ue1).isEmpty() && mc.world.getFluidState(ue2).isEmpty() && mc.world.getFluidState(ue3).isEmpty() && mc.world.getFluidState(ue4).isEmpty() && !mc.world.getBlockState(ue1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(ue2)){
-                                if (mc.world.getBlockState(pos).isReplaceable()){
-                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                    mc.player.swingHand(Hand.MAIN_HAND);
-                                }
-                                mc.player.setPosition(mc.player.getX()+1,mc.player.getY()+1+spcoffset.get(),mc.player.getZ());
-                            } else {
-                                if (InvertUpDir.get() && !autolavamountain.get()){
-                                    if (mouseT.get())mc.player.setPitch(75);
-                                    if (!mouseT.get())prevPitch=75;
-                                }
+                    if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
+                        BlockPos ue1 = playerPos.add(new Vec3i(0,spcoffset.get()+2,0));
+                        BlockPos ue2 = playerPos.add(new Vec3i(+1,spcoffset.get()+1,0));
+                        BlockPos ue3 = playerPos.add(new Vec3i(+1,spcoffset.get()+2,0));
+                        BlockPos ue4 = playerPos.add(new Vec3i(+1,spcoffset.get()+3,0));
+                        BlockPos pos = playerPos.add(new Vec3i(1,spcoffset.get(),0));
+                        if (mc.world.getBlockState(ue1).isReplaceable() && mc.world.getBlockState(ue2).isReplaceable() && mc.world.getBlockState(ue3).isReplaceable() && mc.world.getBlockState(ue4).isReplaceable() && mc.world.getFluidState(ue1).isEmpty() && mc.world.getFluidState(ue2).isEmpty() && mc.world.getFluidState(ue3).isEmpty() && mc.world.getFluidState(ue4).isEmpty() && !mc.world.getBlockState(ue1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(ue2)){
+                            if (mc.world.getBlockState(pos).isReplaceable()){
+                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                mc.player.swingHand(Hand.MAIN_HAND);
                             }
+                            mc.player.setPosition(mc.player.getX()+1,mc.player.getY()+1+spcoffset.get(),mc.player.getZ());
                         } else {
-                            BlockPos ue1 = playerPos.add(new Vec3i(0,2,0));
-                            BlockPos ue2 = playerPos.add(new Vec3i(+1,1,0));
-                            BlockPos ue3 = playerPos.add(new Vec3i(+1,2,0));
-                            BlockPos ue4 = playerPos.add(new Vec3i(+1,3,0));
-                            BlockPos pos = playerPos.add(new Vec3i(1,0,0));
-                            if (mc.world.getBlockState(ue1).isReplaceable() && mc.world.getBlockState(ue2).isReplaceable() && mc.world.getBlockState(ue3).isReplaceable() && mc.world.getBlockState(ue4).isReplaceable() && mc.world.getFluidState(ue1).isEmpty() && mc.world.getFluidState(ue2).isEmpty() && mc.world.getFluidState(ue3).isEmpty() && mc.world.getFluidState(ue4).isEmpty() && !mc.world.getBlockState(ue1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(ue2)){
-                                if (mc.world.getBlockState(pos).isReplaceable()){
-                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                    mc.player.swingHand(Hand.MAIN_HAND);
-                                }
-                                mc.player.setPosition(mc.player.getX()+1,mc.player.getY()+1,mc.player.getZ());
-                            } else {
-                                if (InvertUpDir.get() && !autolavamountain.get()){
-                                    if (mouseT.get())mc.player.setPitch(75);
-                                    if (!mouseT.get())prevPitch=75;
-                                }
+                            if (InvertUpDir.get() && !autolavamountain.get()){
+                                if (mouseT.get())mc.player.setPitch(75);
+                                if (!mouseT.get())prevPitch=75;
+                            }
+                        }
+                    } else {
+                        BlockPos ue1 = playerPos.add(new Vec3i(0,2,0));
+                        BlockPos ue2 = playerPos.add(new Vec3i(+1,1,0));
+                        BlockPos ue3 = playerPos.add(new Vec3i(+1,2,0));
+                        BlockPos ue4 = playerPos.add(new Vec3i(+1,3,0));
+                        BlockPos pos = playerPos.add(new Vec3i(1,0,0));
+                        if (mc.world.getBlockState(ue1).isReplaceable() && mc.world.getBlockState(ue2).isReplaceable() && mc.world.getBlockState(ue3).isReplaceable() && mc.world.getBlockState(ue4).isReplaceable() && mc.world.getFluidState(ue1).isEmpty() && mc.world.getFluidState(ue2).isEmpty() && mc.world.getFluidState(ue3).isEmpty() && mc.world.getFluidState(ue4).isEmpty() && !mc.world.getBlockState(ue1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(ue2)){
+                            if (mc.world.getBlockState(pos).isReplaceable()){
+                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                mc.player.swingHand(Hand.MAIN_HAND);
+                            }
+                            mc.player.setPosition(mc.player.getX()+1,mc.player.getY()+1,mc.player.getZ());
+                        } else {
+                            if (InvertUpDir.get() && !autolavamountain.get()){
+                                if (mouseT.get())mc.player.setPitch(75);
+                                if (!mouseT.get())prevPitch=75;
                             }
                         }
                     }
+                }
                 if ((mouseT.get() && mc.player.getMovementDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {            //UP
-                        if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
-                            BlockPos us1 = playerPos.add(new Vec3i(0,spcoffset.get()+2,0));
-                            BlockPos us2 = playerPos.add(new Vec3i(0,spcoffset.get()+1,+1));
-                            BlockPos us3 = playerPos.add(new Vec3i(0,spcoffset.get()+2,+1));
-                            BlockPos us4 = playerPos.add(new Vec3i(0,spcoffset.get()+3,+1));
-                            BlockPos pos = playerPos.add(new Vec3i(0,spcoffset.get(),1));
-                            if (mc.world.getBlockState(us1).isReplaceable() && mc.world.getBlockState(us2).isReplaceable() && mc.world.getBlockState(us3).isReplaceable() && mc.world.getBlockState(us4).isReplaceable() && mc.world.getFluidState(us1).isEmpty() && mc.world.getFluidState(us2).isEmpty() && mc.world.getFluidState(us3).isEmpty() && mc.world.getFluidState(us4).isEmpty() && !mc.world.getBlockState(us1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(us2)){
-                                if (mc.world.getBlockState(pos).isReplaceable()){
-                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                    mc.player.swingHand(Hand.MAIN_HAND);
-                                }
-                                mc.player.setPosition(mc.player.getX(),mc.player.getY()+1+spcoffset.get(),mc.player.getZ()+1);
-                            } else {
-                                if (InvertUpDir.get() && !autolavamountain.get()){
-                                    if (mouseT.get())mc.player.setPitch(75);
-                                    if (!mouseT.get())prevPitch=75;
-                                }
+                    if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
+                        BlockPos us1 = playerPos.add(new Vec3i(0,spcoffset.get()+2,0));
+                        BlockPos us2 = playerPos.add(new Vec3i(0,spcoffset.get()+1,+1));
+                        BlockPos us3 = playerPos.add(new Vec3i(0,spcoffset.get()+2,+1));
+                        BlockPos us4 = playerPos.add(new Vec3i(0,spcoffset.get()+3,+1));
+                        BlockPos pos = playerPos.add(new Vec3i(0,spcoffset.get(),1));
+                        if (mc.world.getBlockState(us1).isReplaceable() && mc.world.getBlockState(us2).isReplaceable() && mc.world.getBlockState(us3).isReplaceable() && mc.world.getBlockState(us4).isReplaceable() && mc.world.getFluidState(us1).isEmpty() && mc.world.getFluidState(us2).isEmpty() && mc.world.getFluidState(us3).isEmpty() && mc.world.getFluidState(us4).isEmpty() && !mc.world.getBlockState(us1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(us2)){
+                            if (mc.world.getBlockState(pos).isReplaceable()){
+                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                mc.player.swingHand(Hand.MAIN_HAND);
                             }
+                            mc.player.setPosition(mc.player.getX(),mc.player.getY()+1+spcoffset.get(),mc.player.getZ()+1);
                         } else {
-                            BlockPos us1 = playerPos.add(new Vec3i(0,2,0));
-                            BlockPos us2 = playerPos.add(new Vec3i(0,1,+1));
-                            BlockPos us3 = playerPos.add(new Vec3i(0,2,+1));
-                            BlockPos us4 = playerPos.add(new Vec3i(0,3,+1));
-                            BlockPos pos = playerPos.add(new Vec3i(0,0,1));
-                            if (mc.world.getBlockState(us1).isReplaceable() && mc.world.getBlockState(us2).isReplaceable() && mc.world.getBlockState(us3).isReplaceable() && mc.world.getBlockState(us4).isReplaceable() && mc.world.getFluidState(us1).isEmpty() && mc.world.getFluidState(us2).isEmpty() && mc.world.getFluidState(us3).isEmpty() && mc.world.getFluidState(us4).isEmpty() && !mc.world.getBlockState(us1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(us2)){
-                                if (mc.world.getBlockState(pos).isReplaceable()){
-                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                    mc.player.swingHand(Hand.MAIN_HAND);
-                                }
-                                mc.player.setPosition(mc.player.getX(),mc.player.getY()+1,mc.player.getZ()+1);
-                            } else {
-                                if (InvertUpDir.get() && !autolavamountain.get()){
-                                    if (mouseT.get())mc.player.setPitch(75);
-                                    if (!mouseT.get())prevPitch=75;
-                                }
+                            if (InvertUpDir.get() && !autolavamountain.get()){
+                                if (mouseT.get())mc.player.setPitch(75);
+                                if (!mouseT.get())prevPitch=75;
+                            }
+                        }
+                    } else {
+                        BlockPos us1 = playerPos.add(new Vec3i(0,2,0));
+                        BlockPos us2 = playerPos.add(new Vec3i(0,1,+1));
+                        BlockPos us3 = playerPos.add(new Vec3i(0,2,+1));
+                        BlockPos us4 = playerPos.add(new Vec3i(0,3,+1));
+                        BlockPos pos = playerPos.add(new Vec3i(0,0,1));
+                        if (mc.world.getBlockState(us1).isReplaceable() && mc.world.getBlockState(us2).isReplaceable() && mc.world.getBlockState(us3).isReplaceable() && mc.world.getBlockState(us4).isReplaceable() && mc.world.getFluidState(us1).isEmpty() && mc.world.getFluidState(us2).isEmpty() && mc.world.getFluidState(us3).isEmpty() && mc.world.getFluidState(us4).isEmpty() && !mc.world.getBlockState(us1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(us2)){
+                            if (mc.world.getBlockState(pos).isReplaceable()){
+                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                mc.player.swingHand(Hand.MAIN_HAND);
+                            }
+                            mc.player.setPosition(mc.player.getX(),mc.player.getY()+1,mc.player.getZ()+1);
+                        } else {
+                            if (InvertUpDir.get() && !autolavamountain.get()){
+                                if (mouseT.get())mc.player.setPitch(75);
+                                if (!mouseT.get())prevPitch=75;
                             }
                         }
                     }
+                }
                 if ((mouseT.get() && mc.player.getMovementDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {            //UP
-                        if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
-                            BlockPos uw1 = playerPos.add(new Vec3i(0,spcoffset.get()+2,0));
-                            BlockPos uw2 = playerPos.add(new Vec3i(-1,spcoffset.get()+1,0));
-                            BlockPos uw3 = playerPos.add(new Vec3i(-1,spcoffset.get()+2,0));
-                            BlockPos uw4 = playerPos.add(new Vec3i(-1,spcoffset.get()+3,0));
-                            BlockPos pos = playerPos.add(new Vec3i(-1,spcoffset.get(),0));
-                            if (mc.world.getBlockState(uw1).isReplaceable() && mc.world.getBlockState(uw2).isReplaceable() && mc.world.getBlockState(uw3).isReplaceable() && mc.world.getBlockState(uw4).isReplaceable() && mc.world.getFluidState(uw1).isEmpty() && mc.world.getFluidState(uw2).isEmpty() && mc.world.getFluidState(uw3).isEmpty() && mc.world.getFluidState(uw4).isEmpty() && !mc.world.getBlockState(uw1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(uw2)){
-                                if (mc.world.getBlockState(pos).isReplaceable()){
-                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                    mc.player.swingHand(Hand.MAIN_HAND);
-                                }
-                                mc.player.setPosition(mc.player.getX()-1,mc.player.getY()+1+spcoffset.get(),mc.player.getZ());
-                            } else {
-                                if (InvertUpDir.get() && !autolavamountain.get()){
-                                    if (mouseT.get())mc.player.setPitch(75);
-                                    if (!mouseT.get())prevPitch=75;
-                                }
+                    if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
+                        BlockPos uw1 = playerPos.add(new Vec3i(0,spcoffset.get()+2,0));
+                        BlockPos uw2 = playerPos.add(new Vec3i(-1,spcoffset.get()+1,0));
+                        BlockPos uw3 = playerPos.add(new Vec3i(-1,spcoffset.get()+2,0));
+                        BlockPos uw4 = playerPos.add(new Vec3i(-1,spcoffset.get()+3,0));
+                        BlockPos pos = playerPos.add(new Vec3i(-1,spcoffset.get(),0));
+                        if (mc.world.getBlockState(uw1).isReplaceable() && mc.world.getBlockState(uw2).isReplaceable() && mc.world.getBlockState(uw3).isReplaceable() && mc.world.getBlockState(uw4).isReplaceable() && mc.world.getFluidState(uw1).isEmpty() && mc.world.getFluidState(uw2).isEmpty() && mc.world.getFluidState(uw3).isEmpty() && mc.world.getFluidState(uw4).isEmpty() && !mc.world.getBlockState(uw1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(uw2)){
+                            if (mc.world.getBlockState(pos).isReplaceable()){
+                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                mc.player.swingHand(Hand.MAIN_HAND);
                             }
-                            }else {
-                            BlockPos uw1 = playerPos.add(new Vec3i(0,2,0));
-                            BlockPos uw2 = playerPos.add(new Vec3i(-1,1,0));
-                            BlockPos uw3 = playerPos.add(new Vec3i(-1,2,0));
-                            BlockPos uw4 = playerPos.add(new Vec3i(-1,3,0));
-                            BlockPos pos = playerPos.add(new Vec3i(-1,0,0));
-                            if (mc.world.getBlockState(uw1).isReplaceable() && mc.world.getBlockState(uw2).isReplaceable() && mc.world.getBlockState(uw3).isReplaceable() && mc.world.getBlockState(uw4).isReplaceable() && mc.world.getFluidState(uw1).isEmpty() && mc.world.getFluidState(uw2).isEmpty() && mc.world.getFluidState(uw3).isEmpty() && mc.world.getFluidState(uw4).isEmpty() && !mc.world.getBlockState(uw1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(uw2)){
-                                if (mc.world.getBlockState(pos).isReplaceable()){
-                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                    mc.player.swingHand(Hand.MAIN_HAND);
-                                }
-                                mc.player.setPosition(mc.player.getX()-1,mc.player.getY()+1,mc.player.getZ());
-                            } else {
-                                if (InvertUpDir.get() && !autolavamountain.get()){
-                                    if (mouseT.get())mc.player.setPitch(75);
-                                    if (!mouseT.get())prevPitch=75;
-                                }
+                            mc.player.setPosition(mc.player.getX()-1,mc.player.getY()+1+spcoffset.get(),mc.player.getZ());
+                        } else {
+                            if (InvertUpDir.get() && !autolavamountain.get()){
+                                if (mouseT.get())mc.player.setPitch(75);
+                                if (!mouseT.get())prevPitch=75;
+                            }
+                        }
+                    }else {
+                        BlockPos uw1 = playerPos.add(new Vec3i(0,2,0));
+                        BlockPos uw2 = playerPos.add(new Vec3i(-1,1,0));
+                        BlockPos uw3 = playerPos.add(new Vec3i(-1,2,0));
+                        BlockPos uw4 = playerPos.add(new Vec3i(-1,3,0));
+                        BlockPos pos = playerPos.add(new Vec3i(-1,0,0));
+                        if (mc.world.getBlockState(uw1).isReplaceable() && mc.world.getBlockState(uw2).isReplaceable() && mc.world.getBlockState(uw3).isReplaceable() && mc.world.getBlockState(uw4).isReplaceable() && mc.world.getFluidState(uw1).isEmpty() && mc.world.getFluidState(uw2).isEmpty() && mc.world.getFluidState(uw3).isEmpty() && mc.world.getFluidState(uw4).isEmpty() && !mc.world.getBlockState(uw1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(uw2)){
+                            if (mc.world.getBlockState(pos).isReplaceable()){
+                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                mc.player.swingHand(Hand.MAIN_HAND);
+                            }
+                            mc.player.setPosition(mc.player.getX()-1,mc.player.getY()+1,mc.player.getZ());
+                        } else {
+                            if (InvertUpDir.get() && !autolavamountain.get()){
+                                if (mouseT.get())mc.player.setPitch(75);
+                                if (!mouseT.get())prevPitch=75;
                             }
                         }
                     }
+                }
                 if (mc.player.getY() >= limit.get()-1 && InvertUpDir.get() && !autolavamountain.get()){
                     if (mouseT.get())mc.player.setPitch(75);
                     if (!mouseT.get())prevPitch=75;
@@ -914,150 +914,150 @@ public class AutoMountain extends Module {
             else if ((!lagpause.get() || timeSinceLastTick < lag.get()) && delayLeft <= 0 && offLeft > 0 && mc.player.getY() <= limit.get() && mc.player.getY() >= downlimit.get()) {
                 offLeft--;
                 if (mc.player == null || mc.world == null) {toggle(); return;}
-                if ((lagpause.get() && timeSinceLastTick >= lag.get()) || !(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof VerticallyAttachableBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FallingBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BambooBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FlowerPotBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LadderBlock || skippableBlox.get().contains(((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock()) || pause == false || go==false) return;
+                if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack()) || pause == false || go==false) return;
                 if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {            //DOWN
-                        if (mc.options.jumpKey.isPressed()){
-                            BlockPos dn1 = playerPos.add(new Vec3i(0,-spcoffset.get()-1,-1));
-                            BlockPos dn2 = playerPos.add(new Vec3i(0,-spcoffset.get(),-1));
-                            BlockPos dn3 = playerPos.add(new Vec3i(0,-spcoffset.get()+1,-1));
-                            BlockPos pos = playerPos.add(new Vec3i(0,-spcoffset.get()-2,-1));
-                            if (mc.world.getBlockState(dn1).isReplaceable() && mc.world.getBlockState(dn2).isReplaceable() && mc.world.getBlockState(dn3).isReplaceable() && mc.world.getFluidState(dn1).isEmpty() && mc.world.getFluidState(dn2).isEmpty() && mc.world.getFluidState(dn3).isEmpty() && !mc.world.getBlockState(dn1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dn2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dn3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(dn2)) {
-                                if (mc.world.getBlockState(pos).isReplaceable()){
-                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                    mc.player.swingHand(Hand.MAIN_HAND);
-                                }
-                                mc.player.setPosition(mc.player.getX(),mc.player.getY()-1-spcoffset.get(),mc.player.getZ()-1);
-                            } else {if (InvertDownDir.get()) mc.player.setPitch(35);}
-                            } else {
-                            BlockPos dn1 = playerPos.add(new Vec3i(0,-1,-1));
-                            BlockPos dn2 = playerPos.add(new Vec3i(0,0,-1));
-                            BlockPos dn3 = playerPos.add(new Vec3i(0,1,-1));
-                            BlockPos pos = playerPos.add(new Vec3i(0,-2,-1));
-                            if (mc.world.getBlockState(dn1).isReplaceable() && mc.world.getBlockState(dn2).isReplaceable() && mc.world.getBlockState(dn3).isReplaceable() && mc.world.getFluidState(dn1).isEmpty() && mc.world.getFluidState(dn2).isEmpty() && mc.world.getFluidState(dn3).isEmpty() && !mc.world.getBlockState(dn1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dn2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dn3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(dn2)) {
-                                if (mc.world.getBlockState(pos).isReplaceable()){
-                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                    mc.player.swingHand(Hand.MAIN_HAND);
-                                }
-                                mc.player.setPosition(mc.player.getX(),mc.player.getY()-1,mc.player.getZ()-1);
-                            } else {
-                                if (InvertDownDir.get()){
-                                    if (mouseT.get())mc.player.setPitch(35);
-                                    if (!mouseT.get())prevPitch=35;
-                                }
+                    if (mc.options.jumpKey.isPressed()){
+                        BlockPos dn1 = playerPos.add(new Vec3i(0,-spcoffset.get()-1,-1));
+                        BlockPos dn2 = playerPos.add(new Vec3i(0,-spcoffset.get(),-1));
+                        BlockPos dn3 = playerPos.add(new Vec3i(0,-spcoffset.get()+1,-1));
+                        BlockPos pos = playerPos.add(new Vec3i(0,-spcoffset.get()-2,-1));
+                        if (mc.world.getBlockState(dn1).isReplaceable() && mc.world.getBlockState(dn2).isReplaceable() && mc.world.getBlockState(dn3).isReplaceable() && mc.world.getFluidState(dn1).isEmpty() && mc.world.getFluidState(dn2).isEmpty() && mc.world.getFluidState(dn3).isEmpty() && !mc.world.getBlockState(dn1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dn2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dn3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(dn2)) {
+                            if (mc.world.getBlockState(pos).isReplaceable()){
+                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                mc.player.swingHand(Hand.MAIN_HAND);
+                            }
+                            mc.player.setPosition(mc.player.getX(),mc.player.getY()-1-spcoffset.get(),mc.player.getZ()-1);
+                        } else {if (InvertDownDir.get()) mc.player.setPitch(35);}
+                    } else {
+                        BlockPos dn1 = playerPos.add(new Vec3i(0,-1,-1));
+                        BlockPos dn2 = playerPos.add(new Vec3i(0,0,-1));
+                        BlockPos dn3 = playerPos.add(new Vec3i(0,1,-1));
+                        BlockPos pos = playerPos.add(new Vec3i(0,-2,-1));
+                        if (mc.world.getBlockState(dn1).isReplaceable() && mc.world.getBlockState(dn2).isReplaceable() && mc.world.getBlockState(dn3).isReplaceable() && mc.world.getFluidState(dn1).isEmpty() && mc.world.getFluidState(dn2).isEmpty() && mc.world.getFluidState(dn3).isEmpty() && !mc.world.getBlockState(dn1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dn2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dn3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(dn2)) {
+                            if (mc.world.getBlockState(pos).isReplaceable()){
+                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                mc.player.swingHand(Hand.MAIN_HAND);
+                            }
+                            mc.player.setPosition(mc.player.getX(),mc.player.getY()-1,mc.player.getZ()-1);
+                        } else {
+                            if (InvertDownDir.get()){
+                                if (mouseT.get())mc.player.setPitch(35);
+                                if (!mouseT.get())prevPitch=35;
                             }
                         }
                     }
+                }
                 if ((mouseT.get() && mc.player.getMovementDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {            //DOWN
-                        if (mc.options.jumpKey.isPressed()){
-                            BlockPos de1 = playerPos.add(new Vec3i(1,-spcoffset.get()-1,0));
-                            BlockPos de2 = playerPos.add(new Vec3i(1,-spcoffset.get(),0));
-                            BlockPos de3 = playerPos.add(new Vec3i(1,-spcoffset.get()+1,0));
-                            BlockPos pos = playerPos.add(new Vec3i(1,-spcoffset.get()-2,0));
-                            if (mc.world.getBlockState(de1).isReplaceable() && mc.world.getBlockState(de2).isReplaceable() && mc.world.getBlockState(de3).isReplaceable() && mc.world.getFluidState(de1).isEmpty() && mc.world.getFluidState(de2).isEmpty() && mc.world.getFluidState(de3).isEmpty() && !mc.world.getBlockState(de1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(de2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(de3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(de2)) {
-                                if (mc.world.getBlockState(pos).isReplaceable()){
-                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                    mc.player.swingHand(Hand.MAIN_HAND);
-                                }
-                                mc.player.setPosition(mc.player.getX()+1,mc.player.getY()-1-spcoffset.get(),mc.player.getZ());
-                            } else {
-                                if (InvertDownDir.get()){
-                                    if (mouseT.get())mc.player.setPitch(35);
-                                    if (!mouseT.get())prevPitch=35;
-                                }
+                    if (mc.options.jumpKey.isPressed()){
+                        BlockPos de1 = playerPos.add(new Vec3i(1,-spcoffset.get()-1,0));
+                        BlockPos de2 = playerPos.add(new Vec3i(1,-spcoffset.get(),0));
+                        BlockPos de3 = playerPos.add(new Vec3i(1,-spcoffset.get()+1,0));
+                        BlockPos pos = playerPos.add(new Vec3i(1,-spcoffset.get()-2,0));
+                        if (mc.world.getBlockState(de1).isReplaceable() && mc.world.getBlockState(de2).isReplaceable() && mc.world.getBlockState(de3).isReplaceable() && mc.world.getFluidState(de1).isEmpty() && mc.world.getFluidState(de2).isEmpty() && mc.world.getFluidState(de3).isEmpty() && !mc.world.getBlockState(de1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(de2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(de3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(de2)) {
+                            if (mc.world.getBlockState(pos).isReplaceable()){
+                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                mc.player.swingHand(Hand.MAIN_HAND);
                             }
-                            } else {
-                            BlockPos de1 = playerPos.add(new Vec3i(1,-1,0));
-                            BlockPos de2 = playerPos.add(new Vec3i(1,0,0));
-                            BlockPos de3 = playerPos.add(new Vec3i(1,1,0));
-                            BlockPos pos = playerPos.add(new Vec3i(1,-2,0));
-                            if (mc.world.getBlockState(de1).isReplaceable() && mc.world.getBlockState(de2).isReplaceable() && mc.world.getBlockState(de3).isReplaceable() && mc.world.getFluidState(de1).isEmpty() && mc.world.getFluidState(de2).isEmpty() && mc.world.getFluidState(de3).isEmpty() && !mc.world.getBlockState(de1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(de2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(de3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(de2)) {
-                                if (mc.world.getBlockState(pos).isReplaceable()){
-                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                    mc.player.swingHand(Hand.MAIN_HAND);
-                                }
-                                mc.player.setPosition(mc.player.getX()+1,mc.player.getY()-1,mc.player.getZ());
-                            } else {
-                                if (InvertDownDir.get()){
-                                    if (mouseT.get())mc.player.setPitch(35);
-                                    if (!mouseT.get())prevPitch=35;
-                                }
+                            mc.player.setPosition(mc.player.getX()+1,mc.player.getY()-1-spcoffset.get(),mc.player.getZ());
+                        } else {
+                            if (InvertDownDir.get()){
+                                if (mouseT.get())mc.player.setPitch(35);
+                                if (!mouseT.get())prevPitch=35;
+                            }
+                        }
+                    } else {
+                        BlockPos de1 = playerPos.add(new Vec3i(1,-1,0));
+                        BlockPos de2 = playerPos.add(new Vec3i(1,0,0));
+                        BlockPos de3 = playerPos.add(new Vec3i(1,1,0));
+                        BlockPos pos = playerPos.add(new Vec3i(1,-2,0));
+                        if (mc.world.getBlockState(de1).isReplaceable() && mc.world.getBlockState(de2).isReplaceable() && mc.world.getBlockState(de3).isReplaceable() && mc.world.getFluidState(de1).isEmpty() && mc.world.getFluidState(de2).isEmpty() && mc.world.getFluidState(de3).isEmpty() && !mc.world.getBlockState(de1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(de2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(de3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(de2)) {
+                            if (mc.world.getBlockState(pos).isReplaceable()){
+                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                mc.player.swingHand(Hand.MAIN_HAND);
+                            }
+                            mc.player.setPosition(mc.player.getX()+1,mc.player.getY()-1,mc.player.getZ());
+                        } else {
+                            if (InvertDownDir.get()){
+                                if (mouseT.get())mc.player.setPitch(35);
+                                if (!mouseT.get())prevPitch=35;
                             }
                         }
                     }
+                }
                 if ((mouseT.get() && mc.player.getMovementDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {            //DOWN
-                        if (mc.options.jumpKey.isPressed()){
-                            BlockPos ds1 = playerPos.add(new Vec3i(0,-spcoffset.get()-1,1));
-                            BlockPos ds2 = playerPos.add(new Vec3i(0,-spcoffset.get(),1));
-                            BlockPos ds3 = playerPos.add(new Vec3i(0,-spcoffset.get()+1,1));
-                            BlockPos pos = playerPos.add(new Vec3i(0,-spcoffset.get()-2,1));
-                            if (mc.world.getBlockState(ds1).isReplaceable() && mc.world.getBlockState(ds2).isReplaceable() && mc.world.getBlockState(ds3).isReplaceable() && mc.world.getFluidState(ds1).isEmpty() && mc.world.getFluidState(ds2).isEmpty() && mc.world.getFluidState(ds3).isEmpty() && !mc.world.getBlockState(ds1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ds2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ds3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(ds2)) {
-                                if (mc.world.getBlockState(pos).isReplaceable()){
-                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                    mc.player.swingHand(Hand.MAIN_HAND);
-                                }
-                                mc.player.setPosition(mc.player.getX(),mc.player.getY()-1- spcoffset.get(),mc.player.getZ()+1);
-                            } else {
-                                if (InvertDownDir.get()){
-                                    if (mouseT.get())mc.player.setPitch(35);
-                                    if (!mouseT.get())prevPitch=35;
-                                }
+                    if (mc.options.jumpKey.isPressed()){
+                        BlockPos ds1 = playerPos.add(new Vec3i(0,-spcoffset.get()-1,1));
+                        BlockPos ds2 = playerPos.add(new Vec3i(0,-spcoffset.get(),1));
+                        BlockPos ds3 = playerPos.add(new Vec3i(0,-spcoffset.get()+1,1));
+                        BlockPos pos = playerPos.add(new Vec3i(0,-spcoffset.get()-2,1));
+                        if (mc.world.getBlockState(ds1).isReplaceable() && mc.world.getBlockState(ds2).isReplaceable() && mc.world.getBlockState(ds3).isReplaceable() && mc.world.getFluidState(ds1).isEmpty() && mc.world.getFluidState(ds2).isEmpty() && mc.world.getFluidState(ds3).isEmpty() && !mc.world.getBlockState(ds1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ds2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ds3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(ds2)) {
+                            if (mc.world.getBlockState(pos).isReplaceable()){
+                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                mc.player.swingHand(Hand.MAIN_HAND);
                             }
-                            } else {
-                            BlockPos ds1 = playerPos.add(new Vec3i(0,-1,1));
-                            BlockPos ds2 = playerPos.add(new Vec3i(0,0,1));
-                            BlockPos ds3 = playerPos.add(new Vec3i(0,1,1));
-                            BlockPos pos = playerPos.add(new Vec3i(0,-2,1));
-                            if (mc.world.getBlockState(ds1).isReplaceable() && mc.world.getBlockState(ds2).isReplaceable() && mc.world.getBlockState(ds3).isReplaceable() && mc.world.getFluidState(ds1).isEmpty() && mc.world.getFluidState(ds2).isEmpty() && mc.world.getFluidState(ds3).isEmpty() && !mc.world.getBlockState(ds1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ds2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ds3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(ds2)) {
-                                if (mc.world.getBlockState(pos).isReplaceable()){
-                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                    mc.player.swingHand(Hand.MAIN_HAND);
-                                }
-                                mc.player.setPosition(mc.player.getX(),mc.player.getY()-1,mc.player.getZ()+1);
-                            } else {
-                                if (InvertDownDir.get()){
-                                    if (mouseT.get())mc.player.setPitch(35);
-                                    if (!mouseT.get())prevPitch=35;
-                                }
+                            mc.player.setPosition(mc.player.getX(),mc.player.getY()-1- spcoffset.get(),mc.player.getZ()+1);
+                        } else {
+                            if (InvertDownDir.get()){
+                                if (mouseT.get())mc.player.setPitch(35);
+                                if (!mouseT.get())prevPitch=35;
+                            }
+                        }
+                    } else {
+                        BlockPos ds1 = playerPos.add(new Vec3i(0,-1,1));
+                        BlockPos ds2 = playerPos.add(new Vec3i(0,0,1));
+                        BlockPos ds3 = playerPos.add(new Vec3i(0,1,1));
+                        BlockPos pos = playerPos.add(new Vec3i(0,-2,1));
+                        if (mc.world.getBlockState(ds1).isReplaceable() && mc.world.getBlockState(ds2).isReplaceable() && mc.world.getBlockState(ds3).isReplaceable() && mc.world.getFluidState(ds1).isEmpty() && mc.world.getFluidState(ds2).isEmpty() && mc.world.getFluidState(ds3).isEmpty() && !mc.world.getBlockState(ds1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ds2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ds3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(ds2)) {
+                            if (mc.world.getBlockState(pos).isReplaceable()){
+                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                mc.player.swingHand(Hand.MAIN_HAND);
+                            }
+                            mc.player.setPosition(mc.player.getX(),mc.player.getY()-1,mc.player.getZ()+1);
+                        } else {
+                            if (InvertDownDir.get()){
+                                if (mouseT.get())mc.player.setPitch(35);
+                                if (!mouseT.get())prevPitch=35;
                             }
                         }
                     }
+                }
                 if ((mouseT.get() && mc.player.getMovementDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {            //DOWN
-                        if (mc.options.jumpKey.isPressed()){
-                            BlockPos dw1 = playerPos.add(new Vec3i(-1,-spcoffset.get()-1,0));
-                            BlockPos dw2 = playerPos.add(new Vec3i(-1,-spcoffset.get(),0));
-                            BlockPos dw3 = playerPos.add(new Vec3i(-1,-spcoffset.get()+1,0));
-                            BlockPos pos = playerPos.add(new Vec3i(-1,-spcoffset.get()-2,0));
-                            if (mc.world.getBlockState(dw1).isReplaceable() && mc.world.getBlockState(dw2).isReplaceable() && mc.world.getBlockState(dw3).isReplaceable() && mc.world.getFluidState(dw1).isEmpty() && mc.world.getFluidState(dw2).isEmpty() && mc.world.getFluidState(dw3).isEmpty() && !mc.world.getBlockState(dw1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dw2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dw3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(dw2)) {
-                                if (mc.world.getBlockState(pos).isReplaceable()){
-                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                    mc.player.swingHand(Hand.MAIN_HAND);
-                                }
-                                mc.player.setPosition(mc.player.getX()-1,mc.player.getY()-1-spcoffset.get(),mc.player.getZ());
-                            } else {
-                                if (InvertDownDir.get()){
-                                    if (mouseT.get())mc.player.setPitch(35);
-                                    if (!mouseT.get())prevPitch=35;
-                                }
+                    if (mc.options.jumpKey.isPressed()){
+                        BlockPos dw1 = playerPos.add(new Vec3i(-1,-spcoffset.get()-1,0));
+                        BlockPos dw2 = playerPos.add(new Vec3i(-1,-spcoffset.get(),0));
+                        BlockPos dw3 = playerPos.add(new Vec3i(-1,-spcoffset.get()+1,0));
+                        BlockPos pos = playerPos.add(new Vec3i(-1,-spcoffset.get()-2,0));
+                        if (mc.world.getBlockState(dw1).isReplaceable() && mc.world.getBlockState(dw2).isReplaceable() && mc.world.getBlockState(dw3).isReplaceable() && mc.world.getFluidState(dw1).isEmpty() && mc.world.getFluidState(dw2).isEmpty() && mc.world.getFluidState(dw3).isEmpty() && !mc.world.getBlockState(dw1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dw2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dw3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(dw2)) {
+                            if (mc.world.getBlockState(pos).isReplaceable()){
+                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                mc.player.swingHand(Hand.MAIN_HAND);
                             }
-                            }else {
-                            BlockPos dw1 = playerPos.add(new Vec3i(-1,-1,0));
-                            BlockPos dw2 = playerPos.add(new Vec3i(-1,0,0));
-                            BlockPos dw3 = playerPos.add(new Vec3i(-1,1,0));
-                            BlockPos pos = playerPos.add(new Vec3i(-1,-2,0));
-                            if (mc.world.getBlockState(dw1).isReplaceable() && mc.world.getBlockState(dw2).isReplaceable() && mc.world.getBlockState(dw3).isReplaceable() && mc.world.getFluidState(dw1).isEmpty() && mc.world.getFluidState(dw2).isEmpty() && mc.world.getFluidState(dw3).isEmpty() && !mc.world.getBlockState(dw1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dw2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dw3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(dw2)) {
-                                if (mc.world.getBlockState(pos).isReplaceable()){
-                                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                    mc.player.swingHand(Hand.MAIN_HAND);
-                                }
-                                mc.player.setPosition(mc.player.getX()-1,mc.player.getY()-1,mc.player.getZ());
-                            } else {
-                                if (InvertDownDir.get()){
-                                    if (mouseT.get())mc.player.setPitch(35);
-                                    if (!mouseT.get())prevPitch=35;
-                                }
+                            mc.player.setPosition(mc.player.getX()-1,mc.player.getY()-1-spcoffset.get(),mc.player.getZ());
+                        } else {
+                            if (InvertDownDir.get()){
+                                if (mouseT.get())mc.player.setPitch(35);
+                                if (!mouseT.get())prevPitch=35;
+                            }
+                        }
+                    }else {
+                        BlockPos dw1 = playerPos.add(new Vec3i(-1,-1,0));
+                        BlockPos dw2 = playerPos.add(new Vec3i(-1,0,0));
+                        BlockPos dw3 = playerPos.add(new Vec3i(-1,1,0));
+                        BlockPos pos = playerPos.add(new Vec3i(-1,-2,0));
+                        if (mc.world.getBlockState(dw1).isReplaceable() && mc.world.getBlockState(dw2).isReplaceable() && mc.world.getBlockState(dw3).isReplaceable() && mc.world.getFluidState(dw1).isEmpty() && mc.world.getFluidState(dw2).isEmpty() && mc.world.getFluidState(dw3).isEmpty() && !mc.world.getBlockState(dw1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dw2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dw3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(dw2)) {
+                            if (mc.world.getBlockState(pos).isReplaceable()){
+                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
+                                mc.player.swingHand(Hand.MAIN_HAND);
+                            }
+                            mc.player.setPosition(mc.player.getX()-1,mc.player.getY()-1,mc.player.getZ());
+                        } else {
+                            if (InvertDownDir.get()){
+                                if (mouseT.get())mc.player.setPitch(35);
+                                if (!mouseT.get())prevPitch=35;
                             }
                         }
                     }
+                }
                 if (mc.player.getY() <= downlimit.get()+1 && InvertDownDir.get()){
                     if (mouseT.get())mc.player.setPitch(35);
                     if (!mouseT.get())prevPitch=35;
@@ -1104,32 +1104,59 @@ public class AutoMountain extends Module {
         }
     }
     private void cascadingpileof() {
-        if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof VerticallyAttachableBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FallingBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BambooBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FlowerPotBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LadderBlock || skippableBlox.get().contains(((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock())){
-            mc.player.getInventory().selectedSlot = 0;
-            if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof VerticallyAttachableBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FallingBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BambooBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FlowerPotBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LadderBlock || skippableBlox.get().contains(((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock())){
-                mc.player.getInventory().selectedSlot = 1;
-                if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof VerticallyAttachableBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FallingBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BambooBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FlowerPotBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LadderBlock || skippableBlox.get().contains(((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock())){
-                    mc.player.getInventory().selectedSlot = 2;
-                    if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof VerticallyAttachableBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FallingBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BambooBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FlowerPotBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LadderBlock || skippableBlox.get().contains(((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock())){
-                        mc.player.getInventory().selectedSlot = 3;
-                        if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof VerticallyAttachableBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FallingBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BambooBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FlowerPotBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LadderBlock || skippableBlox.get().contains(((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock())){
-                            mc.player.getInventory().selectedSlot = 4;
-                            if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof VerticallyAttachableBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FallingBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BambooBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FlowerPotBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LadderBlock || skippableBlox.get().contains(((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock())){
-                                mc.player.getInventory().selectedSlot = 5;
-                                if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof VerticallyAttachableBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FallingBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BambooBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FlowerPotBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LadderBlock || skippableBlox.get().contains(((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock())){
-                                    mc.player.getInventory().selectedSlot = 6;
-                                    if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof VerticallyAttachableBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FallingBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BambooBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FlowerPotBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LadderBlock || skippableBlox.get().contains(((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock())){
-                                        mc.player.getInventory().selectedSlot = 7;
-                                        if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) || mc.player.getInventory().getMainHandStack().getItem() instanceof BedItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PowderSnowBucketItem || mc.player.getInventory().getMainHandStack().getItem() instanceof ScaffoldingItem || mc.player.getInventory().getMainHandStack().getItem() instanceof TallBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof VerticallyAttachableBlockItem || mc.player.getInventory().getMainHandStack().getItem() instanceof PlaceableOnWaterItem || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TorchBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRedstoneGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof RedstoneWireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FenceGateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FallingBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractRailBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AbstractSignBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BellBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CarpetBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ConduitBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CoralParentBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireHookBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PointedDripstoneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TripwireBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SnowBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof PressurePlateBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof WallMountedBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ShulkerBoxBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof AmethystClusterBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BuddingAmethystBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusFlowerBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof ChorusPlantBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LanternBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CandleBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof TntBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CakeBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CobwebBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SugarCaneBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof SporeBlossomBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof KelpBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof GlowLichenBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof CactusBlock || ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof BambooBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof FlowerPotBlock ||  ((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock() instanceof LadderBlock || skippableBlox.get().contains(((BlockItem) mc.player.getInventory().getMainHandStack().getItem()).getBlock())){
-                                            mc.player.getInventory().selectedSlot = 8;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        FindItemResult findResult = InvUtils.findInHotbar(block -> !isInvalidBlock(block));
+        if (!findResult.found()) {
+            return;
         }
+        mc.player.getInventory().selectedSlot = findResult.slot();
+    }
+
+    private boolean isInvalidBlock(ItemStack stack) {
+        return !(stack.getItem() instanceof BlockItem)
+                || stack.getItem() instanceof BedItem
+                || stack.getItem() instanceof PowderSnowBucketItem
+                || stack.getItem() instanceof ScaffoldingItem
+                || stack.getItem() instanceof TallBlockItem
+                || stack.getItem() instanceof VerticallyAttachableBlockItem
+                || stack.getItem() instanceof PlaceableOnWaterItem
+                || ((BlockItem) stack.getItem()).getBlock() instanceof PlantBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof TorchBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof AbstractRedstoneGateBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof RedstoneWireBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof FenceBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof WallBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof FenceGateBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof FallingBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof AbstractRailBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof AbstractSignBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof BellBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof CarpetBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof ConduitBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof CoralParentBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof TripwireHookBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof PointedDripstoneBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof TripwireBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof SnowBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof PressurePlateBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof WallMountedBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof ShulkerBoxBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof AmethystClusterBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof BuddingAmethystBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof ChorusFlowerBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof ChorusPlantBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof LanternBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof CandleBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof TntBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof CakeBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof CobwebBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof SugarCaneBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof SporeBlossomBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof KelpBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof GlowLichenBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof CactusBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof BambooBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof FlowerPotBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof LadderBlock
+                || skippableBlox.get().contains(((BlockItem) stack.getItem()).getBlock());
     }
 }
