@@ -26,18 +26,32 @@ import java.util.List;
 
 public class InstaSafetyBox extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final Setting<Modes> mode = sgGeneral.add(new EnumSetting.Builder<Modes>()
+            .name("mode")
+            .description("the shape of the safety box")
+            .defaultValue(Modes.Sphere)
+            .build());
     private final Setting<List<Block>> skippableBlox = sgGeneral.add(new BlockListSetting.Builder()
             .name("Blocks to not use")
             .description("Do not use these blocks for building.")
             .build()
     );
-    private final Setting<Double> reach = sgGeneral.add(new DoubleSetting.Builder()
-            .name("Range")
+    private final Setting<Double> spherereach = sgGeneral.add(new DoubleSetting.Builder()
+            .name("Sphere Range")
             .description("Your Range, in blocks.")
             .defaultValue(1)
-            .sliderRange(1,6)
+            .sliderRange(1,5)
             .min (1)
-            .max (6)
+            .visible(() -> mode.get() == Modes.Sphere)
+            .build()
+    );
+    private final Setting<Integer> boxreach = sgGeneral.add(new IntSetting.Builder()
+            .name("Box Range")
+            .description("Your Range, in blocks.")
+            .defaultValue(1)
+            .sliderRange(1,4)
+            .min (1)
+            .visible(() -> mode.get() == Modes.Box)
             .build()
     );
     private final Setting<Integer> blockpertick = sgGeneral.add(new IntSetting.Builder()
@@ -46,7 +60,6 @@ public class InstaSafetyBox extends Module {
             .defaultValue(4)
             .sliderRange(1,10)
             .min (1)
-            .max (5)
             .build()
     );
     private final Setting<Integer> tickdelay = sgGeneral.add(new IntSetting.Builder()
@@ -80,8 +93,22 @@ public class InstaSafetyBox extends Module {
             .defaultValue(true)
             .build()
     );
+    public final Setting<Boolean> center = sgGeneral.add(new BoolSetting.Builder()
+            .name("Center player")
+            .description("Centers the player or not.")
+            .defaultValue(true)
+            .build()
+    );
+    public final Setting<Boolean> sneaky = sgGeneral.add(new BoolSetting.Builder()
+            .name("Sneak on slabs")
+            .description("Makes the player shorter so you can safety box properly when standing on a slab.")
+            .defaultValue(true)
+            .build()
+    );
     private int ticks;
     private boolean playerneedstosneak = false;
+    private double reach = 0;
+
     public InstaSafetyBox() {
         super(Trouser.Main, "InstaSafetyBox", "Makes you safe by building box.");
     }
@@ -91,27 +118,37 @@ public class InstaSafetyBox extends Module {
     }
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        PlayerUtils.centerPlayer();
-        if (mc.player.isOnGround() && mc.player.getY() >= Math.floor(mc.player.getY()) + 0.2) {
+        if (mode.get()==Modes.Sphere) reach=spherereach.get();
+        else if (mode.get()==Modes.Box) reach=boxreach.get();
+        if (center.get()) PlayerUtils.centerPlayer();
+        if (sneaky.get() && mc.player.isOnGround() && mc.player.getY() >= Math.floor(mc.player.getY()) + 0.2) {
             mc.options.sneakKey.setPressed(true);
             playerneedstosneak = true;
         }
         if (ticks >= tickdelay.get()) {
             // Create a list of all the blocks within the specified range
             List<BlockPos> blocks = new ArrayList<>();
-            int bottomlimit = (int) (mc.player.getBlockY() - Math.round(Math.ceil(reach.get())));
 
-            for (int x = (int) (mc.player.getBlockX() - Math.round(Math.ceil(reach.get()))); x <= mc.player.getBlockX() + reach.get(); x++) {
-                for (int y = bottomlimit; y <= (mc.player.getBlockY()+1) + reach.get(); y++) {
-                    for (int z = (int) (mc.player.getBlockZ() - Math.round(Math.ceil(reach.get()))); z <= mc.player.getBlockZ() + reach.get(); z++) {
+            for (int x = (int) (mc.player.getBlockX() - Math.round(Math.ceil(reach))); x <= mc.player.getBlockX() + Math.round(Math.ceil(reach)); x++) {
+                for (int y = (int) (mc.player.getBlockY() - Math.round(Math.ceil(reach))); y <= (mc.player.getBlockY()+1) + Math.round(Math.ceil(reach)); y++) {
+                    for (int z = (int) (mc.player.getBlockZ() - Math.round(Math.ceil(reach))); z <= mc.player.getBlockZ() + Math.round(Math.ceil(reach)); z++) {
                         BlockPos blockPos = new BlockPos(x, y, z);
                         Vec3d playerPos1 = new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ()).toCenterPos();
                         Vec3d playerPos2 = new BlockPos(mc.player.getBlockX(), mc.player.getBlockY()+1, mc.player.getBlockZ()).toCenterPos();
                         double distance1 = playerPos1.distanceTo(blockPos.toCenterPos());
                         double distance2 = playerPos2.distanceTo(blockPos.toCenterPos());
-                        if (distance1 <= reach.get() || distance2 <= reach.get() ) {
-                            if (blockPos != new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ()) && blockPos != new BlockPos(mc.player.getBlockX(), mc.player.getBlockY()+1, mc.player.getBlockZ()) && mc.world.getBlockState(blockPos).getBlock().getDefaultState().isReplaceable()) {
-                                blocks.add(blockPos);
+                        switch (mode.get()) {
+                            case Sphere -> {
+                                if (distance1 <= reach || distance2 <= reach) {
+                                    if (!blocks.contains(blockPos) && blockPos != new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ()) && blockPos != new BlockPos(mc.player.getBlockX(), mc.player.getBlockY()+1, mc.player.getBlockZ()) && mc.world.getBlockState(blockPos).getBlock().getDefaultState().isReplaceable()) {
+                                        blocks.add(blockPos);
+                                    }
+                                }
+                            }
+                            case Box -> {
+                                if (!blocks.contains(blockPos) && blockPos != new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ()) && blockPos != new BlockPos(mc.player.getBlockX(), mc.player.getBlockY()+1, mc.player.getBlockZ()) && mc.world.getBlockState(blockPos).getBlock().getDefaultState().isReplaceable()) {
+                                    blocks.add(blockPos);
+                                }
                             }
                         }
                     }
@@ -229,5 +266,8 @@ public class InstaSafetyBox extends Module {
                 || ((BlockItem) stack.getItem()).getBlock() instanceof SlabBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof TrapdoorBlock
                 || skippableBlox.get().contains(((BlockItem) stack.getItem()).getBlock());
+    }
+    public enum Modes {
+        Sphere, Box
     }
 }
