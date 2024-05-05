@@ -4,6 +4,7 @@ import meteordevelopment.meteorclient.systems.config.Config;
 import net.minecraft.client.gui.screen.SplashTextRenderer;
 import net.minecraft.client.resource.SplashTextResourceSupplier;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -14,9 +15,11 @@ import java.util.Random;
 
 @Mixin(SplashTextResourceSupplier.class)
 public class TrouserSplashTextMixin {
+    @Unique
     private boolean override = true;
+    @Unique
     private final Random random = new Random();
-
+    @Unique
     private final List<String> TrouserSplashes = getTrouserSplashes();
 
     @Inject(method = "get", at = @At("HEAD"), cancellable = true)
@@ -27,8 +30,9 @@ public class TrouserSplashTextMixin {
         override = !override;
     }
 
+    @Unique
     private static List<String> getTrouserSplashes() {
-        return Arrays.asList(
+        return List.of(
                 "Sorry about the turts.",
                 "Sponsored by Mountains of Lava Inc!™",
                 "Mods tweaked, Trousers streaked.",
@@ -46,5 +50,4 @@ public class TrouserSplashTextMixin {
                 "Stop and take time to smell the explosions."
         );
     }
-
 }

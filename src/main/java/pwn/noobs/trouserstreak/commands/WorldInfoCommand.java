@@ -65,7 +65,7 @@ public class WorldInfoCommand extends Command {
                 ChatUtils.sendMsg(Text.of("This chunk is new generation! (post-1.17)"));
             }
             ChatUtils.sendMsg(Text.of("East World Border X: "+(int) mc.world.getWorldBorder().getBoundEast()+", West World Border X: "+(int) mc.world.getWorldBorder().getBoundWest()+", South World Border Z: "+(int) mc.world.getWorldBorder().getBoundSouth()+", North World Border Z: "+(int) mc.world.getWorldBorder().getBoundNorth()));
-            ChatUtils.sendMsg(Text.of("WorldSpawn Location: x"+mc.world.getLevelProperties().getSpawnX()+" y"+mc.world.getLevelProperties().getSpawnY()+" z"+mc.world.getLevelProperties().getSpawnZ()));
+            ChatUtils.sendMsg(Text.of("WorldSpawn Location: x"+mc.world.getLevelProperties().getSpawnPos().getX()+" y"+mc.world.getLevelProperties().getSpawnPos().getY()+" z"+mc.world.getLevelProperties().getSpawnPos().getZ()));
             ChatUtils.sendMsg(Text.of("Difficulty: "+mc.world.getDifficulty().toString()));
             ChatUtils.sendMsg(Text.of("Simulation Distance (chunks): "+mc.world.getSimulationDistance()));
             ChatUtils.sendMsg(Text.of("Day Count: "+Math.floor(mc.world.getTime()/24000)));
@@ -108,7 +108,7 @@ public class WorldInfoCommand extends Command {
                     ChatUtils.sendMsg(Text.of("This chunk is new generation! (post-1.17)"));
                 }
                 ChatUtils.sendMsg(Text.of("East World Border X: "+(int) mc.world.getWorldBorder().getBoundEast()+", West World Border X: "+(int) mc.world.getWorldBorder().getBoundWest()+", South World Border Z: "+(int) mc.world.getWorldBorder().getBoundSouth()+", North World Border Z: "+(int) mc.world.getWorldBorder().getBoundNorth()));
-                ChatUtils.sendMsg(Text.of("WorldSpawn Location: x"+mc.world.getLevelProperties().getSpawnX()+" y"+mc.world.getLevelProperties().getSpawnY()+" z"+mc.world.getLevelProperties().getSpawnZ()));
+                ChatUtils.sendMsg(Text.of("WorldSpawn Location: x"+mc.world.getLevelProperties().getSpawnPos().getX()+" y"+mc.world.getLevelProperties().getSpawnPos().getY()+" z"+mc.world.getLevelProperties().getSpawnPos().getZ()));
                 ChatUtils.sendMsg(Text.of("Difficulty: "+mc.world.getDifficulty().toString()));
                 ChatUtils.sendMsg(Text.of("Simulation Distance (chunks): "+mc.world.getSimulationDistance()));
                 ChatUtils.sendMsg(Text.of("Day Count: "+Math.floor(mc.world.getTime()/24000)));
@@ -141,7 +141,7 @@ public class WorldInfoCommand extends Command {
                     }
                     writer.write("East World Border X: "+(int) mc.world.getWorldBorder().getBoundEast()+", West World Border X: "+(int) mc.world.getWorldBorder().getBoundWest()+", South World Border Z: "+(int) mc.world.getWorldBorder().getBoundSouth()+", North World Border Z: "+(int) mc.world.getWorldBorder().getBoundNorth());
                     writer.write("\r\n");   // write new line
-                    writer.write("WorldSpawn Location: x"+mc.world.getLevelProperties().getSpawnX()+" y"+mc.world.getLevelProperties().getSpawnY()+" z"+mc.world.getLevelProperties().getSpawnZ());
+                    writer.write("WorldSpawn Location: x"+mc.world.getLevelProperties().getSpawnPos().getX()+" y"+mc.world.getLevelProperties().getSpawnPos().getY()+" z"+mc.world.getLevelProperties().getSpawnPos().getZ());
                     writer.write("\r\n");   // write new line
                     writer.write("Difficulty: "+mc.world.getDifficulty().toString());
                     writer.write("\r\n");   // write new line

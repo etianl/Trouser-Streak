@@ -22,22 +22,22 @@ public class ViewNbtCommand extends Command {
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(ctx -> {
             if (!mc.player.getMainHandStack().isEmpty()){
-                if (mc.player.getMainHandStack().getNbt() == null){
+                if (mc.player.getMainHandStack().getComponents() == null){
                     error("No NBT data for item.");
                     return SINGLE_SUCCESS;
                 }
-                ChatUtils.sendMsg(Text.of(mc.player.getMainHandStack().getNbt().toString()));
+                ChatUtils.sendMsg(Text.of(mc.player.getMainHandStack().getComponents().toString()));
             }
             else error("No item in main hand.");
             return SINGLE_SUCCESS;
         });
         builder.then(literal("save").executes(ctx -> {
             if (!mc.player.getMainHandStack().isEmpty()){
-                if (mc.player.getMainHandStack().getNbt() == null){
+                if (mc.player.getMainHandStack().getComponents() == null){
                     error("No NBT data for item.");
                     return SINGLE_SUCCESS;
                 }
-                ChatUtils.sendMsg(Text.of(mc.player.getMainHandStack().getNbt().toString()));
+                ChatUtils.sendMsg(Text.of(mc.player.getMainHandStack().getComponents().toString()));
             if (!Files.exists(Paths.get("SavedNBT/ViewedNBTData.txt"))){
                 File file = new File("SavedNBT/ViewedNBTData.txt");
                 try {
@@ -47,7 +47,7 @@ public class ViewNbtCommand extends Command {
             try {
                 new File("SavedNBT/").mkdirs();
                 FileWriter writer = new FileWriter("SavedNBT/ViewedNBTData.txt", true);
-                writer.write(String.valueOf(mc.player.getMainHandStack().getNbt().toString()));
+                writer.write(String.valueOf(mc.player.getMainHandStack().getComponents().toString()));
                 writer.write("\r\n");   // write new line
                 writer.close();
             } catch (IOException e) {

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "streak-addon",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "name": "TrouserStreak",
   "description": "Trouser-Streak is a compilation of modules, updated to the latest version and optimized for maximum grief. I did not make all of these.",
   "authors": [
@@ -24,7 +24,7 @@
     "meteor-client:color": "255,0,255"
   },
   "depends": {
-    "java": ">=17",
+    "java": ">=21",
     "minecraft": ">=${mc_version}",
     "meteor-client": "*"
   }

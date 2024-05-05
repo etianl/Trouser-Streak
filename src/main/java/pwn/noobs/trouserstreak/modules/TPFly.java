@@ -394,7 +394,7 @@ public class TPFly extends Module {
             if (hitResult.getType() == HitResult.Type.MISS || hitResult.getType() == HitResult.Type.BLOCK || hitResult.getType() == HitResult.Type.ENTITY) {
                 BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
 
-                if (mc.world.getBlockState(pos).onUse(mc.world, mc.player, Hand.MAIN_HAND, (BlockHitResult) hitResult) != ActionResult.PASS) return;
+                if (mc.world.getBlockState(pos).onUse(mc.world, mc.player, (BlockHitResult) hitResult) != ActionResult.PASS) return;
 
                 double playerX = mc.player.getX();
                 double playerY = mc.player.getY();
@@ -416,7 +416,7 @@ public class TPFly extends Module {
             if (hitResult.getType() == HitResult.Type.MISS || hitResult.getType() == HitResult.Type.BLOCK || hitResult.getType() == HitResult.Type.ENTITY) {
                 BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
 
-                if (mc.world.getBlockState(pos).onUse(mc.world, mc.player, Hand.MAIN_HAND, (BlockHitResult) hitResult) != ActionResult.PASS) return;
+                if (mc.world.getBlockState(pos).onUse(mc.world, mc.player, (BlockHitResult) hitResult) != ActionResult.PASS) return;
 
                 double playerX = mc.player.getX();
                 double playerY = mc.player.getY();
@@ -437,7 +437,7 @@ public class TPFly extends Module {
 
             if (hitResult.getType() == HitResult.Type.MISS || hitResult.getType() == HitResult.Type.BLOCK || hitResult.getType() == HitResult.Type.ENTITY) {
                 BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
-                if (mc.world.getBlockState(pos).onUse(mc.world, mc.player, Hand.MAIN_HAND, (BlockHitResult) hitResult) != ActionResult.PASS) return;
+                if (mc.world.getBlockState(pos).onUse(mc.world, mc.player, (BlockHitResult) hitResult) != ActionResult.PASS) return;
 
                 double playerX = mc.player.getX();
                 double playerY = mc.player.getY();
@@ -459,7 +459,7 @@ public class TPFly extends Module {
             if (hitResult.getType() == HitResult.Type.MISS || hitResult.getType() == HitResult.Type.BLOCK || hitResult.getType() == HitResult.Type.ENTITY) {
                 BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
 
-                if (mc.world.getBlockState(pos).onUse(mc.world, mc.player, Hand.MAIN_HAND, (BlockHitResult) hitResult) != ActionResult.PASS) return;
+                if (mc.world.getBlockState(pos).onUse(mc.world, mc.player, (BlockHitResult) hitResult) != ActionResult.PASS) return;
 
                 double playerX = mc.player.getX();
                 double playerY = mc.player.getY();

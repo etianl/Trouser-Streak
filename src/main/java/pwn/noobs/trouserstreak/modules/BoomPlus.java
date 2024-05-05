@@ -5,9 +5,14 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.component.ComponentChanges;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.*;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -170,6 +175,8 @@ public class BoomPlus extends Module {
         super(Trouser.Main, "boom+", "shoots something where you click");
     }
     private int aticks=0;
+    private String namecolour = nomcolor.get();
+    private String customName = nom.get();
 
     @EventHandler
     public void onTick(TickEvent.Post event) {
@@ -182,53 +189,17 @@ public class BoomPlus extends Module {
             if (aticks<=atickdelay.get()){
                 aticks++;
             } else if (aticks>atickdelay.get()) {
-                NbtList motion = new NbtList();
-                NbtCompound tag = new NbtCompound();
-                NbtList Pos = new NbtList();
-                HitResult hr = mc.cameraEntity.raycast(900, 0, true);
-                Vec3d owo = hr.getPos();
-                BlockPos pos = BlockPos.ofFloored(owo);
+                customName = nom.get();
+                namecolour = nomcolor.get();
                 ItemStack rst = mc.player.getMainHandStack();
-                Vec3d sex = mc.player.getRotationVector().multiply(speed.get());
                 BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
-                String entityName = entity.get().trim().replace(" ", "_");
                 ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
-                NbtCompound display = new NbtCompound();
-                display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
-                tag.put("display", display);
-                NbtCompound entityTag = new NbtCompound();
-                if (target.get()) {
-                    Pos.add(NbtDouble.of(pos.getX()));
-                    Pos.add(NbtDouble.of(pos.getY()));
-                    Pos.add(NbtDouble.of(pos.getZ()));
-                    entityTag.put("Pos", Pos);
-                } else {
-                    motion.add(NbtDouble.of(sex.x));
-                    motion.add(NbtDouble.of(sex.y));
-                    motion.add(NbtDouble.of(sex.z));
-                    entityTag.put("Motion", motion);
-                }
-                entityTag.putString("id", "minecraft:" + entityName);
-                entityTag.putInt("Health", health.get());
-                entityTag.putInt("AbsorptionAmount", absorption.get());
-                entityTag.putInt("Age", age.get());
-                entityTag.putInt("ExplosionPower", exppower.get());
-                entityTag.putInt("ExplosionRadius", exppower.get());
-                if (invincible.get())entityTag.putBoolean("Invulnerable", invincible.get());
-                if (silence.get())entityTag.putBoolean("Silent", silence.get());
-                if (glow.get())entityTag.putBoolean("Glowing", glow.get());
-                if (persist.get())entityTag.putBoolean("PersistenceRequired", persist.get());
-                if (nograv.get())entityTag.putBoolean("NoGravity", nograv.get());
-                if(noAI.get())entityTag.putBoolean("NoAI", noAI.get());
-                if(falsefire.get())entityTag.putBoolean("HasVisualFire", falsefire.get());
-                if(powah.get())entityTag.putBoolean("powered", powah.get());
-                if(ignite.get())entityTag.putBoolean("ignited", ignite.get());
-                entityTag.putInt("Fuse", fuse.get());
-                entityTag.putInt("Size", size.get());
-                if(customname.get())entityTag.putBoolean("CustomNameVisible", customname.get());
-                entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
-                tag.put("EntityTag", entityTag);
-                item.setNbt(tag);
+                var changes = ComponentChanges.builder()
+                        .add(DataComponentTypes.CUSTOM_NAME, Text.literal(customName).formatted(Formatting.valueOf(namecolour.toUpperCase())))
+                        .add(DataComponentTypes.ITEM_NAME, Text.literal(customName).formatted(Formatting.valueOf(namecolour.toUpperCase())))
+                        .add(DataComponentTypes.ENTITY_DATA, createEntityData())
+                        .build();
+                item.applyChanges(changes);
                 mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                 mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
@@ -240,56 +211,62 @@ public class BoomPlus extends Module {
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if (mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player.getAbilities().creativeMode) {
-            NbtList motion = new NbtList();
-            NbtCompound tag = new NbtCompound();
-            NbtList Pos = new NbtList();
-            HitResult hr = mc.cameraEntity.raycast(900, 0, true);
-            Vec3d owo = hr.getPos();
-            BlockPos pos = BlockPos.ofFloored(owo);
+            customName = nom.get();
+            namecolour = nomcolor.get();
             ItemStack rst = mc.player.getMainHandStack();
-            Vec3d sex = mc.player.getRotationVector().multiply(speed.get());
             BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
-            String entityName = entity.get().trim().replace(" ", "_");
             ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
-            NbtCompound display = new NbtCompound();
-            display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
-            tag.put("display", display);
-            NbtCompound entityTag = new NbtCompound();
-            if (target.get()) {
-                Pos.add(NbtDouble.of(pos.getX()));
-                Pos.add(NbtDouble.of(pos.getY()));
-                Pos.add(NbtDouble.of(pos.getZ()));
-                entityTag.put("Pos", Pos);
-            } else {
-                motion.add(NbtDouble.of(sex.x));
-                motion.add(NbtDouble.of(sex.y));
-                motion.add(NbtDouble.of(sex.z));
-                entityTag.put("Motion", motion);
-            }
-            entityTag.putString("id", "minecraft:" + entityName);
-            entityTag.putInt("Health", health.get());
-            entityTag.putInt("AbsorptionAmount", absorption.get());
-            entityTag.putInt("Age", age.get());
-            entityTag.putInt("ExplosionPower", exppower.get());
-            entityTag.putInt("ExplosionRadius", exppower.get());
-            if (invincible.get())entityTag.putBoolean("Invulnerable", invincible.get());
-            if (silence.get())entityTag.putBoolean("Silent", silence.get());
-            if (glow.get())entityTag.putBoolean("Glowing", glow.get());
-            if (persist.get())entityTag.putBoolean("PersistenceRequired", persist.get());
-            if (nograv.get())entityTag.putBoolean("NoGravity", nograv.get());
-            if(noAI.get())entityTag.putBoolean("NoAI", noAI.get());
-            if(falsefire.get())entityTag.putBoolean("HasVisualFire", falsefire.get());
-            if(powah.get())entityTag.putBoolean("powered", powah.get());
-            if(ignite.get())entityTag.putBoolean("ignited", ignite.get());
-            entityTag.putInt("Fuse", fuse.get());
-            entityTag.putInt("Size", size.get());
-            if(customname.get())entityTag.putBoolean("CustomNameVisible", customname.get());
-            entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
-            tag.put("EntityTag", entityTag);
-            item.setNbt(tag);
+            var changes = ComponentChanges.builder()
+                    .add(DataComponentTypes.CUSTOM_NAME, Text.literal(customName).formatted(Formatting.valueOf(namecolour.toUpperCase())))
+                    .add(DataComponentTypes.ITEM_NAME, Text.literal(customName).formatted(Formatting.valueOf(namecolour.toUpperCase())))
+                    .add(DataComponentTypes.ENTITY_DATA, createEntityData())
+                    .build();
+            item.applyChanges(changes);
             mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
             mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
             mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
         }
+    }
+    private NbtComponent createEntityData() {
+        NbtList motion = new NbtList();
+        NbtList Pos = new NbtList();
+        HitResult hr = mc.cameraEntity.raycast(900, 0, true);
+        Vec3d owo = hr.getPos();
+        BlockPos pos = BlockPos.ofFloored(owo);
+        Vec3d sex = mc.player.getRotationVector().multiply(speed.get());
+        String entityName = entity.get().trim().replace(" ", "_");
+
+        NbtCompound entityTag = new NbtCompound();
+        if (target.get()) {
+            Pos.add(NbtDouble.of(pos.getX()));
+            Pos.add(NbtDouble.of(pos.getY()));
+            Pos.add(NbtDouble.of(pos.getZ()));
+            entityTag.put("Pos", Pos);
+        } else {
+            motion.add(NbtDouble.of(sex.x));
+            motion.add(NbtDouble.of(sex.y));
+            motion.add(NbtDouble.of(sex.z));
+            entityTag.put("Motion", motion);
+        }
+        entityTag.putString("id", "minecraft:" + entityName);
+        entityTag.putInt("Health", health.get());
+        entityTag.putInt("AbsorptionAmount", absorption.get());
+        entityTag.putInt("Age", age.get());
+        entityTag.putInt("ExplosionPower", exppower.get());
+        entityTag.putInt("ExplosionRadius", exppower.get());
+        if (invincible.get())entityTag.putBoolean("Invulnerable", invincible.get());
+        if (silence.get())entityTag.putBoolean("Silent", silence.get());
+        if (glow.get())entityTag.putBoolean("Glowing", glow.get());
+        if (persist.get())entityTag.putBoolean("PersistenceRequired", persist.get());
+        if (nograv.get())entityTag.putBoolean("NoGravity", nograv.get());
+        if(noAI.get())entityTag.putBoolean("NoAI", noAI.get());
+        if(falsefire.get())entityTag.putBoolean("HasVisualFire", falsefire.get());
+        if(powah.get())entityTag.putBoolean("powered", powah.get());
+        if(ignite.get())entityTag.putBoolean("ignited", ignite.get());
+        entityTag.putInt("Fuse", fuse.get());
+        entityTag.putInt("Size", size.get());
+        if(customname.get())entityTag.putBoolean("CustomNameVisible", customname.get());
+        entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
+        return NbtComponent.of(entityTag);
     }
 }
