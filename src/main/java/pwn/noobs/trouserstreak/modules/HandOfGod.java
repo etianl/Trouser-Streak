@@ -39,6 +39,8 @@ public class HandOfGod extends Module {
     private final SettingGroup sgClick = settings.createGroup("Click Options");
     private final SettingGroup sgPcentered = settings.createGroup("Player-Centered Options");
     private final SettingGroup sgTroll = settings.createGroup("Troll Other Players!");
+    private final SettingGroup sgTerminate = settings.createGroup("Troll Non-Player Entities!");
+
     private final Setting<Boolean> disconnectdisable = sgGeneral.add(new BoolSetting.Builder()
             .name("Disable on Disconnect")
             .description("Disables module on disconnecting")
@@ -368,6 +370,74 @@ public class HandOfGod extends Module {
             .visible(() -> troll.get())
             .build()
     );
+    public final Setting<Boolean> terminate = sgTerminate.add(new BoolSetting.Builder()
+            .name("/fill Around All Non-Player Entities")
+            .description("Runs /fill on all entity locations in the world")
+            .defaultValue(false)
+            .build()
+    );
+    public final Setting<Boolean> terminaterenderdist = sgTerminate.add(new BoolSetting.Builder()
+            .name("Only Render Distance")
+            .description("Run /fill on entities only within render distance.")
+            .defaultValue(false)
+            .visible(() -> terminate.get())
+            .build()
+    );
+    public final Setting<Integer> terminatetickdelay = sgTerminate.add(new IntSetting.Builder()
+            .name("TickDelayAroundEntities")
+            .description("Tick Delay for running /fill around the entities.")
+            .defaultValue(0)
+            .min(0)
+            .sliderMax(100)
+            .visible(() -> terminate.get())
+            .build()
+    );
+    private final Setting<Block> terminateblock = sgTerminate.add(new BlockSetting.Builder()
+            .name("EntitiesBlock")
+            .description("What is created around the Entities (Default: Lava)")
+            .defaultValue(Blocks.LAVA)
+            .visible(() -> terminate.get())
+            .build());
+    public final Setting<Boolean> terminatereplace = sgTerminate.add(new BoolSetting.Builder()
+            .name("Replace Blocks")
+            .description("Replace certain blocks in the selection instead of all blocks")
+            .defaultValue(false)
+            .visible(() -> terminate.get())
+            .build()
+    );
+    private final Setting<Block> terminateblocktoreplace = sgTerminate.add(new BlockSetting.Builder()
+            .name("Block to Replace.")
+            .description("What is replaced around the entities.")
+            .defaultValue(Blocks.GRASS_BLOCK)
+            .visible(() -> terminate.get() && terminatereplace.get())
+            .build());
+    public final Setting<Integer> terminatewidth = sgTerminate.add(new IntSetting.Builder()
+            .name("EntityFillWidth")
+            .description("Width /fill'd around entities")
+            .defaultValue(2)
+            .min(1)
+            .sliderMax(30)
+            .visible(() -> terminate.get())
+            .build()
+    );
+    public final Setting<Integer> terminateheight = sgTerminate.add(new IntSetting.Builder()
+            .name("EntityFillHeight")
+            .description("Height /fill'd around entities")
+            .defaultValue(2)
+            .min(1)
+            .sliderMax(30)
+            .visible(() -> terminate.get())
+            .build()
+    );
+    public final Setting<Integer> terminatedepth = sgTerminate.add(new IntSetting.Builder()
+            .name("EntityFillDepth")
+            .description("Depth /fill'd around Entities")
+            .defaultValue(2)
+            .min(1)
+            .sliderMax(30)
+            .visible(() -> terminate.get())
+            .build()
+    );
     public HandOfGod() {
         super(Trouser.Main, "HandOfGod", "Modify the world and troll players with automated /fill commands. (Must have OP status)");
     }
@@ -380,6 +450,8 @@ public class HandOfGod extends Module {
     private int errticks=0;
     private int roofticks=0;
     private int trollticks=0;
+    private int terminateticks=0;
+
     private int pX;
     private int pY;
     private int pZ;
@@ -428,6 +500,7 @@ public class HandOfGod extends Module {
         aticks=0;
         ticks=0;
         trollticks=0;
+        terminateticks=0;
         if (voider.get()){
             i=mc.player.getBlockPos().getY();
         }
@@ -829,6 +902,44 @@ public class HandOfGod extends Module {
                     }
                 }
                 trollticks=0;
+            }
+        }
+        if (terminate.get()) {
+            if (terminateticks<=terminatetickdelay.get()){
+                terminateticks++;
+            } else if (terminateticks>terminatetickdelay.get()){
+                String tfullString = terminateblock.get().toString();
+                String[] tparts = tfullString.split(":");
+                String tblock = tparts[1];
+                String tBlockName = tblock.replace("}", "");
+                String trepfullString = terminateblocktoreplace.get().toString();
+                String[] trepparts = trepfullString.split(":");
+                String trepblock = trepparts[1];
+                String tRepblockName = trepblock.replace("}", "");
+                if (!terminaterenderdist.get()) {
+                    //every entity that is within render distance in server, default
+                        if (!terminatereplace.get())
+                            ChatUtils.sendPlayerMsg("/execute at @e[type=!player] run fill " + "~" + terminatewidth.get() + " " + "~" + terminateheight.get() + " " + "~" + terminatedepth.get() + " " + "~-" + terminatewidth.get() + " " + "~-" + terminateheight.get() + " " + "~-" + terminatedepth.get() + " " + tBlockName);
+                        else if (terminatereplace.get())
+                            ChatUtils.sendPlayerMsg("/execute at @e[type=!player] run fill " + "~" + terminatewidth.get() + " " + "~" + terminateheight.get() + " " + "~" + terminatedepth.get() + " " + "~-" + terminatewidth.get() + " " + "~-" + terminateheight.get() + " " + "~-" + terminatedepth.get() + " " + tBlockName + " replace " + tRepblockName);
+                } else if (terminaterenderdist.get()){
+                    //every entity in just your render distance
+                    for (Entity entity : mc.world.getEntities()) {
+                        if (!(entity instanceof PlayerEntity)){
+                            switch (entity.getHorizontalFacing()){
+                                case NORTH, SOUTH -> {
+                                    if (!terminatereplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+terminatewidth.get())+" "+adjustYValue((entity.getBlockPos().getY()+terminateheight.get()))+" "+(entity.getBlockPos().getZ()+terminatedepth.get())+" "+(entity.getBlockPos().getX()-terminatewidth.get())+" "+adjustYValue((entity.getBlockPos().getY()-terminateheight.get()))+" "+(entity.getBlockPos().getZ()-terminatedepth.get())+" "+tBlockName);
+                                    else if (terminatereplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+terminatewidth.get())+" "+adjustYValue((entity.getBlockPos().getY()+terminateheight.get()))+" "+(entity.getBlockPos().getZ()+terminatedepth.get())+" "+(entity.getBlockPos().getX()-terminatewidth.get())+" "+adjustYValue((entity.getBlockPos().getY()-terminateheight.get()))+" "+(entity.getBlockPos().getZ()-terminatedepth.get())+" "+tBlockName+" replace "+tRepblockName);
+                                }
+                                case EAST, WEST -> {
+                                    if (!terminatereplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+terminatedepth.get())+" "+adjustYValue((entity.getBlockPos().getY()+terminateheight.get()))+" "+(entity.getBlockPos().getZ()+terminatewidth.get())+" "+(entity.getBlockPos().getX()-terminatedepth.get())+" "+adjustYValue((entity.getBlockPos().getY()-terminateheight.get()))+" "+(entity.getBlockPos().getZ()-terminatewidth.get())+" "+tBlockName);
+                                    else if (terminatereplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+terminatedepth.get())+" "+adjustYValue((entity.getBlockPos().getY()+terminateheight.get()))+" "+(entity.getBlockPos().getZ()+terminatewidth.get())+" "+(entity.getBlockPos().getX()-terminatedepth.get())+" "+adjustYValue((entity.getBlockPos().getY()-terminateheight.get()))+" "+(entity.getBlockPos().getZ()-terminatewidth.get())+" "+tBlockName+" replace "+tRepblockName);
+                                }
+                            }
+                        }
+                    }
+                }
+                terminateticks=0;
             }
         }
     }
