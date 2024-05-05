@@ -29,17 +29,25 @@ public class NbtEditor extends Module {
             .description("the mode")
             .defaultValue(Modes.Entity)
             .build());
+    public final Setting<Boolean> copyStack = sgOptions.add(new BoolSetting.Builder()
+            .name("Copy Itemstack")
+            .description("Copies the item as well as NBT data.")
+            .defaultValue(false)
+            .visible(() -> mode.get() == Modes.Copy)
+            .build()
+    );
     private final Setting<String> nom = sgGeneral.add(new StringSetting.Builder()
             .name("Custom Name")
             .description("Name the Thing")
             .defaultValue("MOUNTAINSOFLAVAINC")
+            .visible(() -> mode.get() == Modes.Entity || mode.get() == Modes.Entity)
             .build());
     private final Setting<String> nomcolor = sgGeneral.add(new StringSetting.Builder()
             .name("Custom Name Color")
             .description("Color the Name")
             .defaultValue("red")
+            .visible(() -> mode.get() == Modes.Entity || mode.get() == Modes.Entity)
             .build());
-
     private final Setting<String> entity = sgOptions.add(new StringSetting.Builder()
             .name("Entity to Spawn")
             .description("What is created. Ex: fireball, villager, minecart, lightning_bolt, magma cube, area effect cloud")
@@ -403,8 +411,38 @@ public class NbtEditor extends Module {
                         }
                     }
                 }
+                case Copy -> {
+                    // Get the item stack from the main hand
+                    ItemStack mainHandStack = mc.player.getMainHandStack();
 
+                    // If the main hand is empty, use a new item stack
+                    if (mainHandStack.isEmpty()) {
+                        error("Put an item in your main hand.");
+                        return;
+                    }
 
+                    // Get the NBT data of the main hand item stack
+                    NbtCompound mainHandNbt = mainHandStack.getNbt();
+
+                    ItemStack offHandStack = mc.player.getOffHandStack();
+
+                    if (copyStack.get()){
+                        // Get the item stack from the offhand
+                        offHandStack = mainHandStack;
+                    }
+                    else if (!copyStack.get()){
+                        // If the offhand is empty, use a new item stack
+                        if (offHandStack.isEmpty()) {
+                            offHandStack = new ItemStack(Items.CARROT_ON_A_STICK);
+                        }
+                    }
+
+                    // Copy the NBT data from the main hand to the off-hand
+                    offHandStack.setNbt(mainHandNbt);
+
+                    // Apply the changes to the offhand item stack
+                    mc.interactionManager.clickCreativeStack(offHandStack, 45); // 45 is the offhand slot
+                }
             }
             ChatUtils.sendMsg(Text.of("Modified item created."));
             toggle();
@@ -415,7 +453,7 @@ public class NbtEditor extends Module {
     }
 
     public enum Modes {
-        Entity, Item, Potion
+        Entity, Item, Potion, Copy
     }
     public enum pModes {
         Normal, Splash, Lingering
