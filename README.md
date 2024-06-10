@@ -90,8 +90,8 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - **NbtEditor:** Requires Creative mode. Generates custom entities in the form of a custom spawn egg, generate items with custom enchantments (Only in Minecraft 1.20.4 and below), and potions with custom effects all based on the settings you configure. It can also copy the Nbt data from one item to another.  (Credits to etianl :D)
 - **NewerNewChunks:** NewChunks module with new newchunk estimation exploits, and the ability to save chunk data for later! Also with special options for tracing servers that have been updated from a version before the build limit updates, which throw false positives normally. (Credits to Meteor Rejects, and BleachHack from where it was ported, and etianl for updating :D.)
 - *NewerNewChunks Notes:*
-- The **TickExploit** option estimates possible newchunks based on block ticking packets. SOME OF THESE CHUNKS MAY BE OLD. Advanced Mode is needed to filter any false positives out. See Special Options notes for usage.
-- The **TickExploit** option can produce false positives if you are hanging around in the same location for a while. It's best to keep moving fast for it to work best.
+- The **BlockUpdateExploit** option estimates possible newchunks based on block update packets. SOME OF THESE CHUNKS MAY BE OLD. Advanced Mode is needed to filter any false positives out. See Special Options notes for usage.
+- The **BlockUpdateExploit** option can produce false positives if you are hanging around in the same location for a while. It's best to keep moving fast for it to work best.
 - NewerNewChunks stores your NewChunks data as text files seperately per server and per dimension in the NewChunks folder in your Minecraft folder.
 - Save and Load ChunkData options are for the stored files.
 - This enables you to chunk trace multiple different servers and dimensions without mixing NewChunks data.
@@ -102,9 +102,9 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 -------------------------------------------------------------------------------------
 - ***NewerNewChunks Special Options:***
 (These are to be used when the server has two distinct diamond layers, and two distinct lava pool layers underground at spawn.)
-- The **"AdvancedMode"** highlights chunks that have flow only below Y0 as well as chunks that have been detected with the TickExploit option. 
-- If there is nothing but FlowBelowY0 chunks and OldChunks as well as a few TickExploit chunks, then you are updating Old Chunks to the new build limits and those are OLDCHUNKS. If the FlowIsBelowY0 are mixed with NewChunks and Tick Exploit coloured chunks they are NEWCHUNKS.
-- When using Advanced mode if the Tick Exploit chunks appear infrequently and are combined with Old Chunks, then the chunks you are in are OLD. If there is alot of Tick Exploit chunks appearing and/or they are mixed with NewChunks then the chunks are NEW.
+- The **"AdvancedMode"** highlights chunks that have flow only below Y0 as well as chunks that have been detected with the BlockUpdateExploit option. 
+- If there is nothing but FlowBelowY0 chunks and OldChunks as well as a few BlockUpdateExploit chunks, then you are updating Old Chunks to the new build limits and those are OLDCHUNKS. If the FlowIsBelowY0 are mixed with NewChunks and BlockUpdateExploit coloured chunks they are NEWCHUNKS.
+- When using Advanced mode if the BlockUpdateExploit chunks appear infrequently and are combined with Old Chunks, then the chunks you are in are OLD. If there is alot of BlockUpdateExploit chunks appearing and/or they are mixed with NewChunks then the chunks are NEW.
 - AdvancedMode can be confusing, do not use if you can't interpret the chunk data.
 -------------------------------------------------------------------------------------
 - The **"IgnoreFlowBelow0"** will render as an oldchunk if liquid flow is only below Y zero, and will show as a newchunk if flow is above Y zero, or both above AND below Y zero.
@@ -114,6 +114,7 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - **OPServerKillModule:** Runs a set of operator commands to disable a server and cover up the tracks of the kill command. REQUIRES OP STATUS (Credits to etianl :D)
 - **RedstoneNuker:** It's just the regular Nuker module from Meteor client, customized for only breaking things that generate redstone signals. Also with included AutoTool. To keep you safer when placing lots of TNT. (Credits to Meteor Client for Nuker code, and AutoTool code inthere.)
 - **ShulkerDupe:** Duplicates the contents of a shulker when pressing "Dupe" or "Dupe All" in the shulker menu. Only works on Vanilla, Forge, and Fabric servers 1.19 and below. Use multiconnect or viafabric (Credits to Allah-Hack, I just brought back the buttons, and make it dupe slot1 as well.)
+- **StorageLooter:** Automatically steals stuff from storage containers according to itemlists and a list of values that are set for amounts of those items to take. It either automatically opens the containers within reach and steals the stuff automatically, or steals the stuff automatically when you manually open the container. (Credits to etianl :D)
 - **SuperInstaMine:** This SuperInstaMine originated from the Meteor Rejects Instamine. I added an option called "Break Modes (Range)" which allows you to break more than one block at a time with SuperInstaMine. This option works best against easy-breaking blocks. The option adjusts the positioning and range of the block breaking. (Credits to Meteor Rejects for the original code.) **ORIGINAL INSTAMINE FROM REJECTS CAN SOMETIMES WORK BETTER THAN THIS ONE, download meteor rejects for that!**
 - **Teleport:** Sets your position ontop of targeted block, within a possible reach of 64 blocks. Rarely can cause damage, be careful. ***EXPERIMENTAL*** (Credits to etianl :D)
 - **TPFly:** It is a purely setPos based flight. PointAndFly mode is based off the ClickTP and AirPlace code, credits to Meteor for that. ***EXPERIMENTAL, movement is a little weird lol.*** (Credits to etianl :D)

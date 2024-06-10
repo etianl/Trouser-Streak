@@ -9,7 +9,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -18,7 +17,7 @@ public class TrouserSplashTextMixin {
     @Unique
     private boolean override = true;
     @Unique
-    private final Random random = new Random();
+    private int currentIndex = 0;
     @Unique
     private final List<String> TrouserSplashes = getTrouserSplashes();
 
@@ -26,7 +25,10 @@ public class TrouserSplashTextMixin {
     private void onApply(CallbackInfoReturnable<SplashTextRenderer> cir) {
         if (Config.get() == null || !Config.get().titleScreenSplashes.get()) return;
 
-        if (override) cir.setReturnValue(new SplashTextRenderer(TrouserSplashes.get(random.nextInt(TrouserSplashes.size()))));
+        if (override) {
+            currentIndex = new Random().nextInt(TrouserSplashes.size());
+            cir.setReturnValue(new SplashTextRenderer(TrouserSplashes.get(currentIndex)));
+        }
         override = !override;
     }
 
