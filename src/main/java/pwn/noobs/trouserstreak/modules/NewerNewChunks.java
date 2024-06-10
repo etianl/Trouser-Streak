@@ -70,9 +70,9 @@ public class NewerNewChunks extends Module {
 			.defaultValue(DetectMode.Normal)
 			.build()
 	);
-	private final Setting<Boolean> tickexploit = sgGeneral.add(new BoolSetting.Builder()
-			.name("TickExploit")
-			.description("Estimates newchunks based on block ticking. THESE MAY POSSIBLY BE OLD. Advanced Mode needed to help determine false positives.")
+	private final Setting<Boolean> blockupdateexploit = sgGeneral.add(new BoolSetting.Builder()
+			.name("BlockUpdateExploit")
+			.description("Estimates newchunks based on block updates. THESE MAY POSSIBLY BE OLD. Advanced Mode needed to help determine false positives.")
 			.defaultValue(false)
 			.build()
 	);
@@ -170,7 +170,7 @@ public class NewerNewChunks extends Module {
 			.name("TickExploitChunks-side-color")
 			.description("MAY POSSIBLY BE OLD. Color of the chunks that have been triggered via block ticking packets")
 			.defaultValue(new SettingColor(0, 0, 255, 75))
-			.visible(() -> (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both) && detectmode.get()== DetectMode.Advanced && tickexploit.get())
+			.visible(() -> (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both) && detectmode.get()== DetectMode.Advanced && blockupdateexploit.get())
 			.build()
 	);
 
@@ -200,7 +200,7 @@ public class NewerNewChunks extends Module {
 			.name("TickExploitChunks-line-color")
 			.description("MAY POSSIBLY BE OLD. Color of the chunks that have been triggered via block ticking packets")
 			.defaultValue(new SettingColor(0, 0, 255, 170))
-			.visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both) && detectmode.get()== DetectMode.Advanced && tickexploit.get())
+			.visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both) && detectmode.get()== DetectMode.Advanced && blockupdateexploit.get())
 			.build()
 	);
 
@@ -342,7 +342,7 @@ public class NewerNewChunks extends Module {
 			error("Chunk Data deleted for this Dimension.");
 			deletewarning=0;
 		}
-		if (detectmode.get()== DetectMode.Normal && tickexploit.get()){
+		if (detectmode.get()== DetectMode.Normal && blockupdateexploit.get()){
 			if (errticks<6){
 				errticks++;}
 			if (errticks==5){
@@ -496,13 +496,13 @@ public class NewerNewChunks extends Module {
 			synchronized (tickexploitChunks) {
 				for (ChunkPos c : tickexploitChunks) {
 					if (c != null && mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
-						if (detectmode.get()== DetectMode.Advanced && tickexploit.get()) {
+						if (detectmode.get()== DetectMode.Advanced && blockupdateexploit.get()) {
 							render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), tickexploitChunksSideColor.get(), tickexploitChunksLineColor.get(), shapeMode.get(), event);
-						} else if ((detectmode.get()== DetectMode.Normal) && tickexploit.get()) {
+						} else if ((detectmode.get()== DetectMode.Normal) && blockupdateexploit.get()) {
 							render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), newChunksSideColor.get(), newChunksLineColor.get(), shapeMode.get(), event);
-						} else if ((detectmode.get()== DetectMode.IgnoreFlowBelow0AndTickExploit) && tickexploit.get()) {
+						} else if ((detectmode.get()== DetectMode.IgnoreFlowBelow0AndTickExploit) && blockupdateexploit.get()) {
 							render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
-						} else if ((detectmode.get()== DetectMode.Advanced | detectmode.get()== DetectMode.Normal | detectmode.get()== DetectMode.IgnoreFlowBelow0AndTickExploit) && !tickexploit.get()) {
+						} else if ((detectmode.get()== DetectMode.Advanced | detectmode.get()== DetectMode.Normal | detectmode.get()== DetectMode.IgnoreFlowBelow0AndTickExploit) && !blockupdateexploit.get()) {
 							render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
 						}
 					}
@@ -557,11 +557,10 @@ public class NewerNewChunks extends Module {
 		}
 		else if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && event.packet instanceof BlockUpdateS2CPacket) {
 			BlockUpdateS2CPacket packet = (BlockUpdateS2CPacket) event.packet;
-			if (tickexploit.get()){
+			chunkPos = new ChunkPos(packet.getPos());
+			if (blockupdateexploit.get()){
 				try {
-					//I cannot tell if the addition of "!packet.getState().hasRandomTicks() || packet.getState().hasRandomTicks())" below even does anything
-					//It might just work on BlockUpdate packet, in testing it's hard to tell what gives more "false positives"
-					if ((!packet.getState().hasRandomTicks() || packet.getState().hasRandomTicks()) && !tickexploitChunks.contains(chunkPos) && !oldChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !newChunks.contains(chunkPos)){
+					if (!tickexploitChunks.contains(chunkPos) && !oldChunks.contains(chunkPos) && !olderoldChunks.contains(chunkPos) && !newChunks.contains(chunkPos)){
 						tickexploitChunks.add(chunkPos);
 						if (save.get()){
 							saveTickExploitChunkData();
@@ -573,7 +572,6 @@ public class NewerNewChunks extends Module {
 				}
 			}
 			if (!packet.getState().getFluidState().isEmpty() && !packet.getState().getFluidState().isStill()) {
-				chunkPos = new ChunkPos(packet.getPos());
 				for (Direction dir: searchDirs) {
 					if (packet.getPos().offset(dir).getY()>0 && mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 						if (olderoldChunks.contains(chunkPos)) olderoldChunks.remove(chunkPos);

@@ -4,31 +4,37 @@ import meteordevelopment.meteorclient.systems.config.Config;
 import net.minecraft.client.gui.screen.SplashTextRenderer;
 import net.minecraft.client.resource.SplashTextResourceSupplier;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 @Mixin(SplashTextResourceSupplier.class)
 public class TrouserSplashTextMixin {
+    @Unique
     private boolean override = true;
-    private final Random random = new Random();
-
+    @Unique
+    private int currentIndex = 0;
+    @Unique
     private final List<String> TrouserSplashes = getTrouserSplashes();
 
     @Inject(method = "get", at = @At("HEAD"), cancellable = true)
     private void onApply(CallbackInfoReturnable<SplashTextRenderer> cir) {
         if (Config.get() == null || !Config.get().titleScreenSplashes.get()) return;
 
-        if (override) cir.setReturnValue(new SplashTextRenderer(TrouserSplashes.get(random.nextInt(TrouserSplashes.size()))));
+        if (override) {
+            currentIndex = new Random().nextInt(TrouserSplashes.size());
+            cir.setReturnValue(new SplashTextRenderer(TrouserSplashes.get(currentIndex)));
+        }
         override = !override;
     }
 
+    @Unique
     private static List<String> getTrouserSplashes() {
-        return Arrays.asList(
+        return List.of(
                 "Sorry about the turts.",
                 "Sponsored by Mountains of Lava Inc!™",
                 "Mods tweaked, Trousers streaked.",
@@ -46,5 +52,4 @@ public class TrouserSplashTextMixin {
                 "Stop and take time to smell the explosions."
         );
     }
-
 }

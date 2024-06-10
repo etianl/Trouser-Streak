@@ -17,13 +17,13 @@ public class Trouser extends MeteorAddon {
         @Override
         public void onInitialize() {
                 LOG.info("Initializing PantsMod!");
-
                 Modules.get().add(new AutoLavaCaster());
                 Modules.get().add(new AutoMountain());
                 Modules.get().add(new AutoStaircase());
                 Modules.get().add(new TrouserBuild());
                 Modules.get().add(new TrailMaker());
                 Modules.get().add(new NewerNewChunks());
+                Modules.get().add(new StorageLooter());
                 Modules.get().add(new SuperInstaMine());
                 Modules.get().add(new InstaMineNuker());
                 Modules.get().add(new InstaSafetyBox());
