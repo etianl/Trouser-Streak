@@ -17,6 +17,9 @@ import net.minecraft.item.*;
 import net.minecraft.item.trim.ArmorTrim;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 import net.minecraft.util.*;
@@ -242,13 +245,13 @@ public class NbtEditor extends Module {
             .sliderRange(0, 255)
             .visible(() -> mode.get() == Modes.Potion)
             .build());
-    //Item mode doesn't work
-    private final Setting<List<Enchantment>> enchants = sgOptions.add(new EnchantmentListSetting.Builder()
+    private final Setting<Set<RegistryKey<Enchantment>>> enchants = sgOptions.add(new EnchantmentListSetting.Builder()
             .name("Enchants")
             .description("List of enchantments.")
             .defaultValue(Enchantments.KNOCKBACK)
             .visible(() -> mode.get() == Modes.Item)
             .build());
+
     private final Setting<Integer> level = sgOptions.add(new IntSetting.Builder()
             .name("Enchantment Level")
             .description("Enchantment Level.")
@@ -284,8 +287,11 @@ public class NbtEditor extends Module {
                         item = new ItemStack(itemlist.get());
                     }
 
-                    for (Enchantment enchant : enchants.get()) {
-                        item.addEnchantment(enchant, level.get());
+                    Registry<Enchantment> enchantmentRegistry = mc.world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
+
+                    for (RegistryKey<Enchantment> enchantKey : enchants.get()) {
+                        RegistryEntry<Enchantment> enchantEntry = enchantmentRegistry.entryOf(enchantKey);
+                         item.addEnchantment(enchantEntry, level.get());
                     }
 
                     item.set(DataComponentTypes.CUSTOM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toUpperCase())));

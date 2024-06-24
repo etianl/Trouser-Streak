@@ -1,6 +1,7 @@
 //Made by etianl
 package pwn.noobs.trouserstreak.modules;
 
+import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.component.type.FoodComponents;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
@@ -11,11 +12,18 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.*;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
+import net.minecraft.component.type.ItemEnchantmentsComponent;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.vehicle.ChestMinecartEntity;
 import net.minecraft.item.*;
+import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.*;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
@@ -45,7 +53,7 @@ public class StorageLooter extends Module {
             .build());
     private final Setting<Boolean> swapStacks = sgGeneral.add(new BoolSetting.Builder()
             .name("Swap Lesser Stacks for Better Stacks")
-            .description("Applies to the Food, Block, And Wood item lists as well as equipment selected in the ")
+            .description("Applies to the Food, Block, And Wood item lists as well as equipment selected in the Items with limits list.")
             .defaultValue(true)
             .build());
     private final Setting<Boolean> moveOverlimitToContainer = sgGeneral.add(new BoolSetting.Builder()
@@ -53,10 +61,34 @@ public class StorageLooter extends Module {
             .description("If enabled, items over the set limits will be moved to the container if there are empty slots.")
             .defaultValue(true)
             .build());
+    private final Setting<Boolean> moveJunkToContainer = sgGeneral.add(new BoolSetting.Builder()
+            .name("Move Junk Items to Container")
+            .description("If enabled, items over the set limits will be moved to the container if there are empty slots.")
+            .defaultValue(true)
+            .build());
+    private final Setting<List<Item>> junkItemList = sgGeneral.add(new ItemListSetting.Builder()
+            .name("Junk Items")
+            .description("Select the items to get rid of.")
+            .defaultValue(Arrays.asList(
+                    Items.ROTTEN_FLESH, Items.POISONOUS_POTATO, Items.BONE, Items.SPIDER_EYE, Items.FERMENTED_SPIDER_EYE, Items.PHANTOM_MEMBRANE, Items.BREEZE_ROD, Items.NAUTILUS_SHELL, Items.STRING, Items.LILY_PAD, Items.BEETROOT, Items.BEETROOT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.WHEAT_SEEDS, Items.SUGAR,
+                    Items.SHORT_GRASS, Items.TALL_GRASS, Items.SEAGRASS, Items.SEA_PICKLE, Items.FERN, Items.DEAD_BUSH, Items.VINE, Items.BROWN_MUSHROOM, Items.RED_MUSHROOM, Items.WARPED_FUNGUS, Items.CRIMSON_FUNGUS, Items.NETHER_WART, Items.GHAST_TEAR,
+                    Items.BOWL, Items.FEATHER, Items.SUGAR_CANE, Items.CACTUS, Items.COCOA_BEANS, Items.RABBIT_HIDE, Items.RABBIT_FOOT, Items.GLOW_LICHEN, Items.SCULK_VEIN,
+                    Items.GLOW_ITEM_FRAME, Items.ITEM_FRAME, Items.PAINTING, Items.PAPER, Items.CLOCK, Items.COMPASS, Items.PUFFERFISH, Items.TROPICAL_FISH, Items.GLISTERING_MELON_SLICE, Items.MAGMA_CREAM,
+                    Items.LEAD, Items.SADDLE, Items.CARROT_ON_A_STICK, Items.WARPED_FUNGUS_ON_A_STICK, Items.FROGSPAWN, Items.TURTLE_EGG, Items.TURTLE_SCUTE, Items.SNIFFER_EGG, Items.ARMADILLO_SCUTE, Items.GOAT_HORN, Items.BOOK, Items.WRITABLE_BOOK, Items.WRITTEN_BOOK, Items.BRUSH
+            ))
+            .visible(() -> moveJunkToContainer.get())
+            .build()
+    );
+    private final Setting<Boolean> nonitemlistjunk = sgGeneral.add(new BoolSetting.Builder()
+            .name("Items not on a List are Junk")
+            .description("If enabled, items not listed in the item lists (excluding the junk list) are treated as junk items.")
+            .defaultValue(false)
+            .visible(() -> moveJunkToContainer.get())
+            .build());
     private final Setting<List<Item>> containerList = sgGeneral.add(new ItemListSetting.Builder()
             .name("Containers to loot from")
             .description("Select the containers to loot.")
-            .defaultValue(Arrays.asList(Items.CHEST, Items.TRAPPED_CHEST, Items.BARREL, Items.SHULKER_BOX, Items.HOPPER, Items.DISPENSER, Items.DROPPER, Items.FURNACE, Items.BLAST_FURNACE, Items.SMOKER, Items.BREWING_STAND, Items.CHEST_MINECART))
+            .defaultValue(Arrays.asList(Items.CHEST, Items.TRAPPED_CHEST, Items.BARREL, Items.SHULKER_BOX, Items.HOPPER, Items.DISPENSER, Items.DROPPER, Items.FURNACE, Items.BLAST_FURNACE, Items.SMOKER, Items.BREWING_STAND, Items.CRAFTER, Items.CHEST_MINECART))
             .filter(this::isValidContainer)
             .build());
     private final Setting<Integer> maxClicksPerTick = sgGeneral.add(new IntSetting.Builder()
@@ -108,6 +140,20 @@ public class StorageLooter extends Module {
             .min(1)
             .visible(() -> mode.get() == Modes.Box && autoloot.get())
             .build());
+    private final Setting<Boolean> swing = sgAutoLoot.add(new BoolSetting.Builder()
+            .name("Swing Hand")
+            .description("Do or Do Not swing hand when opening chests.")
+            .defaultValue(false)
+            .visible(() -> autoloot.get())
+            .build()
+    );
+    private final Setting<Boolean> rotate = sgAutoLoot.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Faces the containers being opened server side.")
+            .defaultValue(false)
+            .visible(() -> autoloot.get())
+            .build()
+    );
     private final Setting<Boolean> autosteal = sgAutoSteal.add(new BoolSetting.Builder()
             .name("Steal On Tick")
             .description("Steals the items on tick from already open containers.")
@@ -130,9 +176,7 @@ public class StorageLooter extends Module {
             .name("Items with limits to loot")
             .description("Select the items to loot.")
             .defaultValue(Arrays.asList(
-                    Items.BUCKET,
-                    Items.LAVA_BUCKET,
-                    Items.WATER_BUCKET,
+                    Items.BUCKET, Items.LAVA_BUCKET, Items.WATER_BUCKET,
                     Items.CRAFTING_TABLE,
                     Items.STICK,
                     Items.TNT,
@@ -182,25 +226,12 @@ public class StorageLooter extends Module {
             .name("Blocks to Loot")
             .description("Select the blocks to loot.")
             .defaultValue(Arrays.asList(
-                    // Stone blocks
                     Items.GRASS_BLOCK, Items.DIRT, Items.COARSE_DIRT, Items.BEDROCK, Items.BARRIER, Items.COBBLESTONE, Items.STONE, Items.ANDESITE, Items.POLISHED_ANDESITE, Items.GRANITE, Items.POLISHED_GRANITE, Items.DIORITE, Items.POLISHED_DIORITE, Items.SANDSTONE, Items.CHISELED_SANDSTONE, Items.CUT_SANDSTONE, Items.SMOOTH_SANDSTONE, Items.RED_SANDSTONE, Items.CHISELED_RED_SANDSTONE, Items.CUT_RED_SANDSTONE, Items.SMOOTH_RED_SANDSTONE, Items.STONE_BRICKS, Items.CRACKED_STONE_BRICKS, Items.CHISELED_STONE_BRICKS, Items.MOSSY_STONE_BRICKS, Items.SMOOTH_STONE, Items.TUFF, Items.CALCITE, Items.DRIPSTONE_BLOCK,
-
-                    // Brick blocks
                     Items.BRICKS, Items.NETHER_BRICKS, Items.CRACKED_NETHER_BRICKS, Items.CHISELED_NETHER_BRICKS, Items.RED_NETHER_BRICKS, Items.PRISMARINE, Items.PRISMARINE_BRICKS, Items.DARK_PRISMARINE, Items.PURPUR_BLOCK, Items.PURPUR_PILLAR, Items.END_STONE, Items.END_STONE_BRICKS, Items.BLACKSTONE, Items.POLISHED_BLACKSTONE, Items.POLISHED_BLACKSTONE_BRICKS, Items.CHISELED_POLISHED_BLACKSTONE, Items.CRACKED_POLISHED_BLACKSTONE_BRICKS, Items.GILDED_BLACKSTONE, Items.DEEPSLATE, Items.COBBLED_DEEPSLATE, Items.POLISHED_DEEPSLATE, Items.DEEPSLATE_BRICKS, Items.DEEPSLATE_TILES, Items.CHISELED_DEEPSLATE, Items.CRACKED_DEEPSLATE_BRICKS, Items.CRACKED_DEEPSLATE_TILES, Items.MUD_BRICKS,
-
-                    // Quartz blocks
                     Items.QUARTZ_BLOCK, Items.QUARTZ_PILLAR, Items.SMOOTH_QUARTZ, Items.CHISELED_QUARTZ_BLOCK,
-
-                    // Terracotta blocks
                     Items.TERRACOTTA, Items.WHITE_TERRACOTTA, Items.ORANGE_TERRACOTTA, Items.MAGENTA_TERRACOTTA, Items.LIGHT_BLUE_TERRACOTTA, Items.YELLOW_TERRACOTTA, Items.LIME_TERRACOTTA, Items.PINK_TERRACOTTA, Items.GRAY_TERRACOTTA, Items.LIGHT_GRAY_TERRACOTTA, Items.CYAN_TERRACOTTA, Items.PURPLE_TERRACOTTA, Items.BLUE_TERRACOTTA, Items.BROWN_TERRACOTTA, Items.GREEN_TERRACOTTA, Items.RED_TERRACOTTA, Items.BLACK_TERRACOTTA,
-
-                    // Concrete blocks
                     Items.WHITE_CONCRETE, Items.ORANGE_CONCRETE, Items.MAGENTA_CONCRETE, Items.LIGHT_BLUE_CONCRETE, Items.YELLOW_CONCRETE, Items.LIME_CONCRETE, Items.PINK_CONCRETE, Items.GRAY_CONCRETE, Items.LIGHT_GRAY_CONCRETE, Items.CYAN_CONCRETE, Items.PURPLE_CONCRETE, Items.BLUE_CONCRETE, Items.BROWN_CONCRETE, Items.GREEN_CONCRETE, Items.RED_CONCRETE, Items.BLACK_CONCRETE,
-
-                    // Glass blocks
                     Items.GLASS, Items.TINTED_GLASS, Items.WHITE_STAINED_GLASS, Items.ORANGE_STAINED_GLASS, Items.MAGENTA_STAINED_GLASS, Items.LIGHT_BLUE_STAINED_GLASS, Items.YELLOW_STAINED_GLASS, Items.LIME_STAINED_GLASS, Items.PINK_STAINED_GLASS, Items.GRAY_STAINED_GLASS, Items.LIGHT_GRAY_STAINED_GLASS, Items.CYAN_STAINED_GLASS, Items.PURPLE_STAINED_GLASS, Items.BLUE_STAINED_GLASS, Items.BROWN_STAINED_GLASS, Items.GREEN_STAINED_GLASS, Items.RED_STAINED_GLASS, Items.BLACK_STAINED_GLASS,
-
-                    // Miscellaneous blocks
                     Items.OBSIDIAN, Items.CRYING_OBSIDIAN, Items.GLOWSTONE, Items.SEA_LANTERN, Items.JACK_O_LANTERN, Items.HONEYCOMB_BLOCK, Items.BONE_BLOCK, Items.NETHERRACK, Items.BASALT, Items.POLISHED_BASALT, Items.SMOOTH_BASALT, Items.SOUL_SOIL, Items.AMETHYST_BLOCK, Items.COPPER_BLOCK, Items.EXPOSED_COPPER, Items.WEATHERED_COPPER, Items.OXIDIZED_COPPER, Items.CUT_COPPER, Items.EXPOSED_CUT_COPPER, Items.WEATHERED_CUT_COPPER, Items.OXIDIZED_CUT_COPPER, Items.WAXED_COPPER_BLOCK, Items.WAXED_EXPOSED_COPPER, Items.WAXED_WEATHERED_COPPER, Items.WAXED_OXIDIZED_COPPER, Items.WAXED_CUT_COPPER, Items.WAXED_EXPOSED_CUT_COPPER, Items.WAXED_WEATHERED_CUT_COPPER, Items.WAXED_OXIDIZED_CUT_COPPER, Items.MOSS_BLOCK, Items.PACKED_MUD, Items.SHROOMLIGHT
             ))
             .filter(this::isValidBlockItem)
@@ -279,8 +310,6 @@ public class StorageLooter extends Module {
             .min(0)
             .build()
     );
-    private int lastSwappedPlayerSlot = -666;
-    private int lastSwappedContainerSlot = -666;
     private final Set<BlockPos> processedChests = new HashSet<>();
     private final Set<Integer> openedEntities = new HashSet<>();
     private final Map<BlockPos, Integer> chestsToProcess = new HashMap<>();
@@ -288,9 +317,12 @@ public class StorageLooter extends Module {
     private boolean isChestOpen = false;
     private boolean inventoryFullErrorSent = false;
     private int totalClicksThisTick = 0;
+    private int maxClicks = 0;
     private int ticks;
     private int autoStealTicks;
     private double reach;
+    private float originalYaw;
+    private float originalPitch;
 
     public StorageLooter() {
         super(Trouser.Main, "Storage Looter", "Steals stuff from containers around you.");
@@ -299,54 +331,37 @@ public class StorageLooter extends Module {
     @EventHandler
     private void onScreenOpen(OpenScreenEvent event) {
         if (event.screen instanceof DisconnectedScreen) {
-            inventoryFullErrorSent = false;
-            ticks = 0;
-            autoStealTicks = 0;
-            processedChests.clear();
-            chestsToProcess.clear();
-            openedEntities.clear();
-            lastSwappedPlayerSlot = -666;
-            lastSwappedContainerSlot = -666;
+            resetValues();
             if (disconnectdisable.get()) toggle();
         }
     }
 
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
-        inventoryFullErrorSent = false;
-        ticks = 0;
-        autoStealTicks = 0;
-        processedChests.clear();
-        chestsToProcess.clear();
-        openedEntities.clear();
-        lastSwappedPlayerSlot = -666;
-        lastSwappedContainerSlot = -666;
+        resetValues();
         if (disconnectdisable.get()) toggle();
     }
 
     @Override
     public void onActivate() {
-        inventoryFullErrorSent = false;
-        ticks = 0;
-        autoStealTicks = 0;
-        processedChests.clear();
-        chestsToProcess.clear();
-        openedEntities.clear();
-        lastSwappedPlayerSlot = -666;
-        lastSwappedContainerSlot = -666;
+        resetValues();
     }
 
     @Override
     public void onDeactivate() {
+        resetValues();
+    }
+
+    private void resetValues() {
         inventoryFullErrorSent = false;
         ticks = 0;
         autoStealTicks = 0;
         processedChests.clear();
         chestsToProcess.clear();
         openedEntities.clear();
-        lastSwappedPlayerSlot = -666;
-        lastSwappedContainerSlot = -666;
+        isChestOpen = false;
     }
+
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
         if (event.packet instanceof PlayerInteractBlockC2SPacket) {
@@ -392,20 +407,22 @@ public class StorageLooter extends Module {
                         processContainerItems();
                         autoStealTicks = 0;
                     }
-                    for (Entity entity : mc.world.getEntities()) {
-                        if (entity.getBlockPos().equals(lastInteractedBlockPos) && entity instanceof ChestMinecartEntity && containerList.get().contains(Items.CHEST_MINECART)) {
-                            if (autoStealTicks == 0) {
-                                processContainerItems();
-                            }
-                            if (autoStealTicks<autoStealDelay.get()) {
-                                autoStealTicks++;
-                            }
-                            else if (autoStealTicks>=autoStealDelay.get()){
-                                processContainerItems();
-                                autoStealTicks = 0;
-                            }
-                            break;
+                }
+            }
+            for (Entity entity : mc.world.getEntities()) {
+                if (entity.getBlockPos().equals(lastInteractedBlockPos) && entity instanceof ChestMinecartEntity && containerList.get().contains(Items.CHEST_MINECART)) {
+                    if (mc.player.currentScreenHandler != null && isContainerScreen(mc.player.currentScreenHandler)) {
+                        if (autoStealTicks == 0) {
+                        processContainerItems();
                         }
+                        if (autoStealTicks<autoStealDelay.get()) {
+                            autoStealTicks++;
+                        }
+                        else if (autoStealTicks>=autoStealDelay.get()){
+                            processContainerItems();
+                            autoStealTicks = 0;
+                        }
+                        break;
                     }
                 }
             }
@@ -425,7 +442,7 @@ public class StorageLooter extends Module {
                             DoubleBlockProperties.Type chestType = ChestBlock.getDoubleBlockType(blockState);
                             if (chestType == DoubleBlockProperties.Type.SINGLE || chestType == DoubleBlockProperties.Type.FIRST) {
                                 openContainer(blockPos, block);
-                            }
+                            } else if (chestType == DoubleBlockProperties.Type.SECOND) processedChests.add(blockPos);
                         } else {
                             openContainer(blockPos, block);
                         }
@@ -433,8 +450,17 @@ public class StorageLooter extends Module {
                 }
 
                 for (Entity entity : mc.world.getEntities()) {
-                    if (entity instanceof ChestMinecartEntity && containerList.get().contains(Items.CHEST_MINECART)) {
+                    if (entity instanceof ChestMinecartEntity && containerList.get().contains(Items.CHEST_MINECART) && blocks.contains(entity.getBlockPos())) {
                         if (!openedEntities.contains(entity.getId()) && !processedChests.contains(entity.getBlockPos()) && !isChestOpen) {
+                            if (rotate.get()){
+                                originalYaw = mc.player.getYaw();
+                                originalPitch = mc.player.getPitch();
+                                mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(entity.getX(), entity.getY(), entity.getZ()));
+                            }
+                            if (swing.get()){
+                                mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+                                mc.player.swingHand(Hand.MAIN_HAND);
+                            }
                             mc.interactionManager.interactEntity(mc.player, entity, Hand.MAIN_HAND);
                             chestsToProcess.put(entity.getBlockPos(), opendelay.get());
                             processedChests.add(entity.getBlockPos());
@@ -482,11 +508,13 @@ public class StorageLooter extends Module {
                 || screenHandler instanceof AbstractFurnaceScreenHandler
                 || screenHandler instanceof BlastFurnaceScreenHandler
                 || screenHandler instanceof SmokerScreenHandler
-                || screenHandler instanceof BrewingStandScreenHandler;
+                || screenHandler instanceof BrewingStandScreenHandler
+                || screenHandler instanceof CrafterScreenHandler;
     }
 
     private void processContainerItems() {
         int playerInvStart = mc.player.currentScreenHandler.slots.size() - 36;
+        maxClicks = maxClicksPerTick.get();
 
         if (!itemList.get().isEmpty()) {
             processItemList(itemList.get(), playerInvStart);
@@ -503,47 +531,76 @@ public class StorageLooter extends Module {
         if (!foodItemList.get().isEmpty()) {
             processItemList(foodItemList.get(), playerInvStart);
         }
-
-        if (moveOverlimitToContainer.get()) {
-            moveExcessItemsToContainer(playerInvStart);
-        }
-
-        if (swapStacks.get()) {
+        if (swapStacks.get() && (mc.player.currentScreenHandler instanceof GenericContainerScreenHandler
+                || mc.player.currentScreenHandler instanceof ShulkerBoxScreenHandler
+                || mc.player.currentScreenHandler instanceof HopperScreenHandler
+                || mc.player.currentScreenHandler instanceof Generic3x3ContainerScreenHandler)) {
             swapSmallerStacksForBigger(playerInvStart);
+        }
+        if ((moveJunkToContainer.get() || moveOverlimitToContainer.get()) && (mc.player.currentScreenHandler instanceof GenericContainerScreenHandler
+                || mc.player.currentScreenHandler instanceof ShulkerBoxScreenHandler
+                || mc.player.currentScreenHandler instanceof HopperScreenHandler
+                || mc.player.currentScreenHandler instanceof Generic3x3ContainerScreenHandler)) {
+            moveExcessItemsToContainer(playerInvStart);
         }
 
         totalClicksThisTick = 0; // Reset the total clicks for the next tick
     }
-
     private void moveExcessItemsToContainer(int playerInvStart) {
         for (int i = playerInvStart; i < mc.player.currentScreenHandler.slots.size(); i++) {
             ItemStack playerStack = mc.player.currentScreenHandler.getSlot(i).getStack();
             if (!playerStack.isEmpty()) {
                 Item playerItem = playerStack.getItem();
-                int maxStackSize = playerItem.getMaxCount();
-                int maxCount = getMaxCount(playerItem);
-                List<Item> itemlist = getItemList(playerItem);
 
-                int currentCount = getItemCount(playerItem, itemlist);
-                if (itemList.get().contains(playerItem)) currentCount = getCurrentItemCount(playerItem);
-
-                // Round up the limit to the nearest full stack size
-                if (maxCount < maxStackSize) {
-                    maxCount = maxStackSize;
-                } else if (maxCount % maxStackSize != 0) {
-                    maxCount = (maxCount / maxStackSize + 1) * maxStackSize;
-                }
-
-                if (currentCount > maxCount) {
-                    int excessAmount = currentCount - maxCount;
+                // Check if the item is in the junk item list
+                if (moveJunkToContainer.get() && (junkItemList.get().contains(playerItem) || (nonitemlistjunk.get() && (!itemList.get().contains(playerItem) && !blockItemList.get().contains(playerItem)  && !woodItemList.get().contains(playerItem) && !foodItemList.get().contains(playerItem) && !miscItemList.get().contains(playerItem) && !isNonJunkVariant(playerStack, itemList.get()))))) {
+                    // Move the entire stack to the container
                     for (int j = 0; j < playerInvStart; j++) {
                         ItemStack containerStack = mc.player.currentScreenHandler.getSlot(j).getStack();
                         if (containerStack.isEmpty()) {
+                            if (totalClicksThisTick >= maxClicks) {
+                                return; // Stop moving items if the maximum clicks per tick is reached
+                            }
                             mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, i, 0, SlotActionType.QUICK_MOVE, mc.player);
                             totalClicksThisTick++;
-                            excessAmount -= playerStack.getCount();
-                            if (excessAmount <= 0) {
-                                break;
+                            break; // Exit the inner loop since the stack has been moved
+                        }
+                    }
+                }
+                if (moveOverlimitToContainer.get()) {
+                    int maxStackSize = playerItem.getMaxCount();
+                    int maxCount = getMaxCount(playerItem);
+                    List<Item> itemList = getItemList(playerItem);
+
+                    int currentCount = getItemCount(playerItem, itemList);
+                    if (itemList == this.itemList.get()) currentCount = getCurrentItemCount(playerItem);
+
+                    // Round up the limit to the nearest full stack size
+                    if (maxCount < maxStackSize) {
+                        maxCount = maxStackSize;
+                    } else if (maxCount % maxStackSize != 0) {
+                        maxCount = (maxCount / maxStackSize + 1) * maxStackSize;
+                    }
+
+                    if (currentCount > maxCount) {
+                        int excessAmount = currentCount - maxCount;
+                        for (int j = 0; j < playerInvStart; j++) {
+                            ItemStack containerStack = mc.player.currentScreenHandler.getSlot(j).getStack();
+                            if (containerStack.isEmpty()) {
+                                continue; // Skip empty container slots
+                            }
+
+                            Item containerItem = containerStack.getItem();
+                            if (isSameItemList(playerItem, containerItem)) {
+                                if (totalClicksThisTick >= maxClicks) {
+                                    return; // Stop moving items if the maximum clicks per tick is reached
+                                }
+                                mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, i, 0, SlotActionType.QUICK_MOVE, mc.player);
+                                totalClicksThisTick++;
+                                excessAmount -= playerStack.getCount();
+                                if (excessAmount <= 0) {
+                                    break;
+                                }
                             }
                         }
                     }
@@ -551,7 +608,33 @@ public class StorageLooter extends Module {
             }
         }
     }
+    private boolean isNonJunkVariant(ItemStack playerItem, List<Item> itemList) {
+        String itemName = playerItem.getItem().getTranslationKey().toLowerCase();
 
+        if (itemName.contains("shulker_box")) {
+            return itemList.stream().anyMatch(item -> item.getTranslationKey().contains("shulker_box"));
+        } else if (itemName.contains("_pickaxe")) {
+            return itemList.stream().anyMatch(item -> item == Items.DIAMOND_PICKAXE);
+        } else if (itemName.contains("_sword")) {
+            return itemList.stream().anyMatch(item -> item == Items.DIAMOND_SWORD);
+        } else if (itemName.contains("_shovel")) {
+            return itemList.stream().anyMatch(item -> item == Items.DIAMOND_SHOVEL);
+        } else if (itemName.contains("_axe")) {
+            return itemList.stream().anyMatch(item -> item == Items.DIAMOND_AXE);
+        } else if (itemName.contains("_hoe")) {
+            return itemList.stream().anyMatch(item -> item == Items.DIAMOND_HOE);
+        } else if (itemName.contains("_helmet")) {
+            return itemList.stream().anyMatch(item -> item == Items.DIAMOND_HELMET);
+        } else if (itemName.contains("_chestplate")) {
+            return itemList.stream().anyMatch(item -> item == Items.DIAMOND_CHESTPLATE);
+        } else if (itemName.contains("_leggings")) {
+            return itemList.stream().anyMatch(item -> item == Items.DIAMOND_LEGGINGS);
+        } else if (itemName.contains("_boots")) {
+            return itemList.stream().anyMatch(item -> item == Items.DIAMOND_BOOTS);
+        }
+
+        return false;
+    }
     private List<Item> getItemList(Item item) {
         if (itemList.get().contains(item)) {
             return itemList.get();
@@ -568,6 +651,7 @@ public class StorageLooter extends Module {
     }
 
     private void processItemList(List<Item> itemList, int playerInvStart) {
+        List<Integer> slotIndices = new ArrayList<>();
         for (int i = 0; i < mc.player.currentScreenHandler.slots.size(); i++) {
             Item item = mc.player.currentScreenHandler.getSlot(i).getStack().getItem();
             String itemName = item.toString().toLowerCase();
@@ -582,8 +666,19 @@ public class StorageLooter extends Module {
                     (itemName.contains("_leggings") && itemList.contains(Items.DIAMOND_LEGGINGS)) ||
                     (itemName.contains("_boots") && itemList.contains(Items.DIAMOND_BOOTS)) ||
                     itemList.contains(item)) && i < playerInvStart) {
-                moveItemsWithLimit(i, item, getMaxCount(item), itemList);
+                slotIndices.add(i);
             }
+        }
+
+        slotIndices.sort((a, b) -> {
+            ItemStack stackA = mc.player.currentScreenHandler.getSlot(a).getStack();
+            ItemStack stackB = mc.player.currentScreenHandler.getSlot(b).getStack();
+            return compareItems(stackA, stackB);
+        });
+
+        for (int slotIndex : slotIndices) {
+            Item item = mc.player.currentScreenHandler.getSlot(slotIndex).getStack().getItem();
+            moveItemsWithLimit(slotIndex, item, getMaxCount(item), itemList);
         }
     }
 
@@ -618,10 +713,19 @@ public class StorageLooter extends Module {
     }
 
     private boolean isValidContainerBlock(Block block) {
-        return block instanceof ChestBlock || block instanceof BarrelBlock || block instanceof ShulkerBoxBlock || block instanceof HopperBlock || block instanceof DispenserBlock || block instanceof DropperBlock || block instanceof FurnaceBlock || block instanceof BlastFurnaceBlock || block instanceof SmokerBlock || block instanceof BrewingStandBlock;
+        return block instanceof ChestBlock || block instanceof BarrelBlock || block instanceof ShulkerBoxBlock || block instanceof HopperBlock || block instanceof DispenserBlock || block instanceof DropperBlock || block instanceof FurnaceBlock || block instanceof BlastFurnaceBlock || block instanceof SmokerBlock || block instanceof BrewingStandBlock || block instanceof CrafterBlock;
     }
 
     private void openContainer(BlockPos blockPos, Block block) {
+        if (rotate.get()){
+            originalYaw = mc.player.getYaw();
+            originalPitch = mc.player.getPitch();
+            mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
+        }
+        if (swing.get()){
+            mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+            mc.player.swingHand(Hand.MAIN_HAND);
+        }
         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(blockPos.toCenterPos(), Direction.UP, blockPos, true));
         chestsToProcess.put(blockPos, opendelay.get());
         processedChests.add(blockPos);
@@ -632,9 +736,13 @@ public class StorageLooter extends Module {
         chestsToProcess.entrySet().removeIf(entry -> {
             int delay = entry.getValue();
             if (delay <= 0) {
-                if (mc.player.currentScreenHandler != null) {
+                if (mc.player.currentScreenHandler != null && isContainerScreen(mc.player.currentScreenHandler)) {
                     processContainerItems();
                     mc.player.closeHandledScreen();
+                    if (rotate.get()){
+                        mc.player.setYaw(originalYaw);
+                        mc.player.setPitch(originalPitch);
+                    }
                     isChestOpen = false;
                 }
                 return true;
@@ -646,21 +754,38 @@ public class StorageLooter extends Module {
     }
 
     private void swapSmallerStacksForBigger(int playerInvStart) {
+        List<Integer> containerSlotIndices = new ArrayList<>();
+        for (int i = 0; i < playerInvStart; i++) {
+            ItemStack containerStack = mc.player.currentScreenHandler.getSlot(i).getStack();
+            if (!containerStack.isEmpty()) {
+                containerSlotIndices.add(i);
+            }
+        }
+
+        containerSlotIndices.sort((a, b) -> {
+            ItemStack stackA = mc.player.currentScreenHandler.getSlot(a).getStack();
+            ItemStack stackB = mc.player.currentScreenHandler.getSlot(b).getStack();
+            return compareItems(stackA, stackB);
+        });
+
         for (int i = playerInvStart; i < mc.player.currentScreenHandler.slots.size(); i++) {
             ItemStack playerStack = mc.player.currentScreenHandler.getSlot(i).getStack();
             if (!playerStack.isEmpty()) {
                 Item playerItem = playerStack.getItem();
                 int playerStackSize = playerStack.getCount();
 
-                for (int j = 0; j < playerInvStart; j++) {
-                    ItemStack containerStack = mc.player.currentScreenHandler.getSlot(j).getStack();
-                    if (!containerStack.isEmpty()) {
-                        Item containerItem = containerStack.getItem();
-                        int containerStackSize = containerStack.getCount();
+                for (int containerSlotIndex : containerSlotIndices) {
+                    ItemStack containerStack = mc.player.currentScreenHandler.getSlot(containerSlotIndex).getStack();
+                    Item containerItem = containerStack.getItem();
+                    int containerStackSize = containerStack.getCount();
 
-                        if ((containerStackSize > playerStackSize && isSameItemList(playerItem, containerItem) && Math.round(((double)containerStackSize / containerStack.getItem().getMaxCount()) * 100) >= minLootableStackSize.get()) ||
-                                (isBetterItem(containerItem, playerItem) && isSameItemList(playerItem, containerItem))) {
-                            swapItems(i, j);
+                    if (isSameItemList(playerItem, containerItem)) {
+                        if (containerStackSize > playerStackSize && Math.round(((double) containerStackSize / containerStack.getItem().getMaxCount()) * 100) >= minLootableStackSize.get()) {
+                            swapItems(i, containerSlotIndex, playerInvStart);
+                            break; // Exit the inner loop since the swap has been performed
+                        } else if (compareItems(playerStack, containerStack) > 0) {
+                            swapItems(i, containerSlotIndex, playerInvStart);
+                            break; // Exit the inner loop since the swap has been performed
                         }
                     }
                 }
@@ -668,20 +793,70 @@ public class StorageLooter extends Module {
         }
     }
 
-    private boolean isBetterItem(Item item1, Item item2) {
-        List<Item> itemQualityOrder = Arrays.asList(
-                Items.WOODEN_SWORD, Items.STONE_SWORD, Items.IRON_SWORD, Items.DIAMOND_SWORD, Items.NETHERITE_SWORD,
-                Items.WOODEN_PICKAXE, Items.STONE_PICKAXE, Items.IRON_PICKAXE, Items.DIAMOND_PICKAXE, Items.NETHERITE_PICKAXE,
-                Items.WOODEN_SHOVEL, Items.STONE_SHOVEL, Items.IRON_SHOVEL, Items.DIAMOND_SHOVEL, Items.NETHERITE_SHOVEL,
-                Items.WOODEN_AXE, Items.STONE_AXE, Items.IRON_AXE, Items.DIAMOND_AXE, Items.NETHERITE_AXE,
-                Items.WOODEN_HOE, Items.STONE_HOE, Items.IRON_HOE, Items.DIAMOND_HOE, Items.NETHERITE_HOE,
-                Items.LEATHER_HELMET, Items.GOLDEN_HELMET, Items.CHAINMAIL_HELMET, Items.IRON_HELMET, Items.DIAMOND_HELMET, Items.NETHERITE_HELMET,
-                Items.LEATHER_CHESTPLATE, Items.GOLDEN_CHESTPLATE, Items.CHAINMAIL_CHESTPLATE, Items.IRON_CHESTPLATE, Items.DIAMOND_CHESTPLATE, Items.NETHERITE_CHESTPLATE,
-                Items.LEATHER_LEGGINGS, Items.GOLDEN_LEGGINGS, Items.CHAINMAIL_LEGGINGS, Items.IRON_LEGGINGS, Items.DIAMOND_LEGGINGS, Items.NETHERITE_LEGGINGS,
-                Items.LEATHER_BOOTS, Items.GOLDEN_BOOTS, Items.CHAINMAIL_BOOTS, Items.IRON_BOOTS, Items.DIAMOND_BOOTS, Items.NETHERITE_BOOTS
-        );
+    private int compareItems(ItemStack stack1, ItemStack stack2) {
+        int score1 = getItemScore(stack1);
+        int score2 = getItemScore(stack2);
 
-        return itemQualityOrder.indexOf(item1) > itemQualityOrder.indexOf(item2);
+        return Integer.compare(score2, score1); // Reverse the order to sort in descending order
+    }
+
+    private int getItemScore(ItemStack stack) {
+        String itemName = stack.getItem().getTranslationKey().toLowerCase();
+        int score = 0;
+
+        if (itemName.contains("wooden") || itemName.contains("golden")) {
+            score = 188;
+        } else if (itemName.contains("stone") || itemName.contains("leather")) {
+            score = 422;
+        } else if (itemName.contains("iron") || itemName.contains("chainmail")) {
+            score = 575;
+        } else if (itemName.contains("diamond")) {
+            score = 651;
+        } else if (itemName.contains("netherite")) {
+            score = 700;
+        }
+
+        //durability score
+        int durabilityscore = 0;
+        int maxDurability = stack.getMaxDamage();
+        int currentDurability = maxDurability - stack.getDamage();
+        durabilityscore = (int) ((double) currentDurability / maxDurability * 100);
+        score += durabilityscore;
+
+        //enchantments score
+        ItemEnchantmentsComponent enchantments = stack.getEnchantments();
+        int enchantmentscore = 0;
+        Registry<Enchantment> enchantmentRegistry = mc.world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
+        if (stack.getItem() instanceof ArmorItem) {
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.PROTECTION)) * 10;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.BLAST_PROTECTION)) * 10;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.FIRE_PROTECTION)) * 10;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.PROJECTILE_PROTECTION)) * 10;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.UNBREAKING)) * 9;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.MENDING)) * 8;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.THORNS)) * 5;
+        } else if (stack.getItem() instanceof SwordItem) {
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.SMITE)) * 10;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.SHARPNESS)) * 10;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.BANE_OF_ARTHROPODS)) * 9;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.FIRE_ASPECT)) * 9;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.UNBREAKING)) * 9;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.MENDING)) * 8;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.LOOTING)) * 5;
+        } else if (stack.getItem() instanceof ToolItem) {
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.EFFICIENCY)) * 10;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.UNBREAKING)) * 9;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.MENDING)) * 8;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.SILK_TOUCH)) * 6;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.FORTUNE)) * 5;
+        }
+        score += enchantmentscore;
+
+        return score;
+    }
+
+    private int getEnchantmentLevel(ItemEnchantmentsComponent enchantments, RegistryEntry<Enchantment> enchantment) {
+        return enchantments.getLevel(enchantment);
     }
 
     private boolean isSameItemList(Item item1, Item item2) {
@@ -699,38 +874,31 @@ public class StorageLooter extends Module {
                 (item1.toString().toLowerCase().contains("_boots") && item2.toString().toLowerCase().contains("_boots"));
     }
 
-    private void swapItems(int playerSlotIndex, int containerSlotIndex) {
-        if (mc.player.currentScreenHandler != null) {
-            // Check if we're trying to swap the same slots back and forth
-            if (lastSwappedPlayerSlot != -666 && lastSwappedContainerSlot != -666 &&
-                    lastSwappedPlayerSlot == playerSlotIndex &&
-                    lastSwappedContainerSlot == containerSlotIndex) {
-                return; // Don't swap the same slots back and forth
-            }
-
-            int maxClicks = maxClicksPerTick.get();
-
+    private void swapItems(int playerSlotIndex, int containerSlotIndex, int playerInvStart) {
+        if (mc.player.currentScreenHandler != null && isContainerScreen(mc.player.currentScreenHandler)) {
             // Perform the swap if we have enough clicks left
             if (totalClicksThisTick + 3 <= maxClicks) {
-                mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, playerSlotIndex, 0, SlotActionType.QUICK_MOVE, mc.player);
-                totalClicksThisTick++;
+                // Move the entire stack to the container
+                for (int j = 0; j < playerInvStart; j++) {
+                    ItemStack containerStack = mc.player.currentScreenHandler.getSlot(j).getStack();
+                    if (containerStack.isEmpty()) {
+                        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, playerSlotIndex, 0, SlotActionType.QUICK_MOVE, mc.player);
+                        totalClicksThisTick++;
 
-                mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, containerSlotIndex, 0, SlotActionType.PICKUP, mc.player);
-                totalClicksThisTick++;
+                        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, containerSlotIndex, 0, SlotActionType.PICKUP, mc.player);
+                        totalClicksThisTick++;
 
-                mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, playerSlotIndex, 0, SlotActionType.PICKUP, mc.player);
-                totalClicksThisTick++;
-
-                lastSwappedPlayerSlot = playerSlotIndex;
-                lastSwappedContainerSlot = containerSlotIndex;
+                        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, playerSlotIndex, 0, SlotActionType.PICKUP, mc.player);
+                        totalClicksThisTick++;
+                        break; // Exit the inner loop since the stack has been moved
+                    }
+                }
             }
         }
     }
 
     private void moveItems(int slotIndex, int amountToMove) {
-        int maxClicks = maxClicksPerTick.get();
-
-        if (mc.player.currentScreenHandler != null && slotIndex >= 0 && slotIndex < mc.player.currentScreenHandler.slots.size()) {
+        if (mc.player.currentScreenHandler != null && isContainerScreen(mc.player.currentScreenHandler) && slotIndex >= 0 && slotIndex < mc.player.currentScreenHandler.slots.size()) {
             ItemStack sourceStack = mc.player.currentScreenHandler.getSlot(slotIndex).getStack();
             if (!sourceStack.isEmpty() && Math.round(((double)sourceStack.getCount() / sourceStack.getItem().getMaxCount()) * 100) >= minLootableStackSize.get()) {
                 amountToMove = Math.min(amountToMove, sourceStack.getCount());
@@ -917,6 +1085,7 @@ public class StorageLooter extends Module {
                 || item == Items.BLAST_FURNACE
                 || item == Items.SMOKER
                 || item == Items.BREWING_STAND
+                || item == Items.CRAFTER
                 || item == Items.CHEST_MINECART;
     }
 

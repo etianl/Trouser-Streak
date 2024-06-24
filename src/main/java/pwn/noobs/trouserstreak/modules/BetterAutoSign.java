@@ -41,32 +41,68 @@ public class BetterAutoSign extends Module {
     final SettingGroup sgSign = settings.createGroup("Normal Sign Text");
     final SettingGroup sgHang = settings.createGroup("Hanging Sign Text");
     final SettingGroup sgExtra = settings.createGroup("Visible");
-
+    private final Setting<Boolean> bothside = sgExtra.add(new BoolSetting.Builder()
+            .name("both-sides")
+            .description("Write on the rear of the signs as well.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Boolean> differentText = sgExtra.add(new BoolSetting.Builder()
+            .name("Different Text On Rear")
+            .description("Writes different text on the rear of the sign.")
+            .defaultValue(false)
+            .build()
+    );
     private final Setting<String> lineOne = sgSign.add(new StringSetting.Builder()
             .name("line-one")
             .description("What to put on the first line of the sign.")
             .defaultValue("Steve")
             .build()
     );
-
     private final Setting<String> lineTwo = sgSign.add(new StringSetting.Builder()
             .name("line-two")
             .description("What to put on the second line of the sign.")
             .defaultValue("did")
             .build()
     );
-
     private final Setting<String> lineThree = sgSign.add(new StringSetting.Builder()
             .name("line-three")
             .description("What to put on the third line of the sign.")
             .defaultValue("nothing")
             .build()
     );
-
     private final Setting<String> lineFour = sgSign.add(new StringSetting.Builder()
             .name("line-four")
             .description("What to put on the fourth line of the sign.")
             .defaultValue("wrong.")
+            .build()
+    );
+    private final Setting<String> lineOnedif = sgSign.add(new StringSetting.Builder()
+            .name("rear-line-one")
+            .description("What to put on the first line of the sign.")
+            .defaultValue("WATCH")
+            .visible(differentText::get)
+            .build()
+    );
+    private final Setting<String> lineTwodif = sgSign.add(new StringSetting.Builder()
+            .name("rear-line-two")
+            .description("What to put on the second line of the sign.")
+            .defaultValue("MOUNTAINS")
+            .visible(differentText::get)
+            .build()
+    );
+    private final Setting<String> lineThreedif = sgSign.add(new StringSetting.Builder()
+            .name("rear-line-three")
+            .description("What to put on the third line of the sign.")
+            .defaultValue("OF LAVA INC")
+            .visible(differentText::get)
+            .build()
+    );
+    private final Setting<String> lineFourdif = sgSign.add(new StringSetting.Builder()
+            .name("rear-line-four")
+            .description("What to put on the fourth line of the sign.")
+            .defaultValue("ON YOUTUBE")
+            .visible(differentText::get)
             .build()
     );
     private final Setting<String> HlineOne = sgHang.add(new StringSetting.Builder()
@@ -75,31 +111,50 @@ public class BetterAutoSign extends Module {
             .defaultValue("Steve")
             .build()
     );
-
     private final Setting<String> HlineTwo = sgHang.add(new StringSetting.Builder()
             .name("line-two")
             .description("What to put on the second line of the hanging sign.")
             .defaultValue("did")
             .build()
     );
-
     private final Setting<String> HlineThree = sgHang.add(new StringSetting.Builder()
             .name("line-three")
             .description("What to put on the third line of the hanging sign.")
             .defaultValue("nothing")
             .build()
     );
-
     private final Setting<String> HlineFour = sgHang.add(new StringSetting.Builder()
             .name("line-four")
             .description("What to put on the fourth line of the hanging sign.")
             .defaultValue("wrong.")
             .build()
     );
-    private final Setting<Boolean> bothside = sgExtra.add(new BoolSetting.Builder()
-            .name("both-sides")
-            .description("Write on the rear of the signs as well.")
-            .defaultValue(true)
+    private final Setting<String> HlineOnedif = sgHang.add(new StringSetting.Builder()
+            .name("rear-line-one")
+            .description("What to put on the first line of the hanging sign.")
+            .defaultValue("WATCH")
+            .visible(differentText::get)
+            .build()
+    );
+    private final Setting<String> HlineTwodif = sgHang.add(new StringSetting.Builder()
+            .name("rear-line-two")
+            .description("What to put on the second line of the hanging sign.")
+            .defaultValue("MOUNTAINS")
+            .visible(differentText::get)
+            .build()
+    );
+    private final Setting<String> HlineThreedif = sgHang.add(new StringSetting.Builder()
+            .name("rear-line-three")
+            .description("What to put on the third line of the hanging sign.")
+            .defaultValue("OF LAVA INC")
+            .visible(differentText::get)
+            .build()
+    );
+    private final Setting<String> HlineFourdif = sgHang.add(new StringSetting.Builder()
+            .name("rear-line-four")
+            .description("What to put on the fourth line of the hanging sign.")
+            .defaultValue("ON YOUTUBE")
+            .visible(differentText::get)
             .build()
     );
     private final Setting<Boolean> autoDye = sgExtra.add(new BoolSetting.Builder()
@@ -108,7 +163,6 @@ public class BetterAutoSign extends Module {
             .defaultValue(false)
             .build()
     );
-
     private final Setting<List<Item>> dyeColors = sgExtra.add(new ItemListSetting.Builder()
             .name("dye-colors")
             .description("What color dyes to dye the sign with.")
@@ -116,14 +170,12 @@ public class BetterAutoSign extends Module {
             .filter(this::filter)
             .build()
     );
-
     private final Setting<Boolean> autoGlow = sgExtra.add(new BoolSetting.Builder()
             .name("auto-glow")
             .description("Makes your signs glow")
             .defaultValue(false)
             .build()
     );
-
     // based on ChestAura from Meteor Rejects
     private final Setting<Boolean> signAura = sgExtra.add(new BoolSetting.Builder()
             .name("sign-aura")
@@ -131,7 +183,6 @@ public class BetterAutoSign extends Module {
             .defaultValue(false)
             .build()
     );
-
     private final Setting<Boolean> signAuraRotate = sgExtra.add(new BoolSetting.Builder()
             .name("sign-aura-rotate")
             .description("Rotates to signs")
@@ -139,7 +190,6 @@ public class BetterAutoSign extends Module {
             .visible(signAura::get)
             .build()
     );
-
     private final Setting<Double> signAuraRange = sgExtra.add(new DoubleSetting.Builder()
             .name("sign-aura-range")
             .description("The interact range")
@@ -150,7 +200,6 @@ public class BetterAutoSign extends Module {
             .visible(signAura::get)
             .build()
     );
-
     private final Setting<Integer> signAuraDelay = sgExtra.add(new IntSetting.Builder()
             .name("sign-aura-delay")
             .description("Delay between editing signs, in ticks")
@@ -285,12 +334,20 @@ public class BetterAutoSign extends Module {
         if (!editrear || !bothside.get() || prevsignPos == signPos) return;
         if (!(mc.world.getBlockState(signPos).getBlock().asItem() instanceof HangingSignItem) && mc.world.getBlockState(signPos).getBlock().asItem() instanceof SignItem){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(signPos.getX(), signPos.getY(), signPos.getZ()), Direction.DOWN, signPos, false));
-                mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
+                if (differentText.get())
+                    mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
+                        lineOnedif.get(),
+                        lineTwodif.get(),
+                        lineThreedif.get(),
+                        lineFourdif.get()
+                    ));
+                else
+                    mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
                         lineOne.get(),
                         lineTwo.get(),
                         lineThree.get(),
                         lineFour.get()
-                ));
+                    ));
             prevsignPos = signPos;
 
             editrear=false;
@@ -304,12 +361,20 @@ public class BetterAutoSign extends Module {
                 Direction direction = Direction.fromHorizontal(rotation);
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(signPos.getX(), signPos.getY(), signPos.getZ()), direction, signPos, false));
             }
-            mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
-                    HlineOne.get(),
-                    HlineTwo.get(),
-                    HlineThree.get(),
-                    HlineFour.get()
-            ));
+            if (differentText.get())
+                mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
+                        HlineOnedif.get(),
+                        HlineTwodif.get(),
+                        HlineThreedif.get(),
+                        HlineFourdif.get()
+                ));
+            else
+                mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
+                        HlineOne.get(),
+                        HlineTwo.get(),
+                        HlineThree.get(),
+                        HlineFour.get()
+                ));
             prevsignPos = signPos;
             editrear=false;
         }
