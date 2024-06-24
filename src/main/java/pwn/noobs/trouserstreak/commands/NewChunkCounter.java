@@ -30,28 +30,20 @@ public class NewChunkCounter extends Command {
             ChatUtils.sendMsg(Text.of(chunks+"  OldChunk locations have been saved by NewerNewChunks in this dimension."));
             return SINGLE_SUCCESS;
         }));
-        builder.then(literal("FlowBelowY0Chunks").executes(ctx -> {
-            n.chunkcounterticks=0;
-            n.chunkcounter=true;
-            int chunks = n.olderoldchunksfound;
-            ChatUtils.sendMsg(Text.of(chunks+"  FlowBelowY0Chunk locations have been saved by NewerNewChunks in this dimension."));
-            return SINGLE_SUCCESS;
-        }));
-        builder.then(literal("LightingExploitChunks").executes(ctx -> {
+        builder.then(literal("BlockExploitChunks").executes(ctx -> {
             n.chunkcounterticks=0;
             n.chunkcounter=true;
             int chunks = n.tickexploitchunksfound;
-            ChatUtils.sendMsg(Text.of(chunks+"  Lighting/TickExploitChunk locations have been saved by NewerNewChunks in this dimension."));
+            ChatUtils.sendMsg(Text.of(chunks+"  BlockExploitChunk locations have been saved by NewerNewChunks in this dimension."));
             return SINGLE_SUCCESS;
         }));
         builder.executes(ctx -> {
             n.chunkcounterticks=0;
             n.chunkcounter=true;
             int chunks1 = n.newchunksfound;
-            int chunks2 = n.olderoldchunksfound;
-            int chunks4 = n.tickexploitchunksfound;
-            int chunks3 = n.oldchunksfound;
-            ChatUtils.sendMsg(Text.of("New: "+chunks1+" | FlowBelowY=0: "+chunks2+" | TickExploitChunk: "+chunks4+" | Old: "+chunks3+" | Chunk locations have been saved by NewerNewChunks in this dimension."));
+            int chunks3 = n.tickexploitchunksfound;
+            int chunks2 = n.oldchunksfound;
+            ChatUtils.sendMsg(Text.of("New: "+chunks1+" | BlockExploitChunk: "+chunks3+" | Old: "+chunks2+" | Chunk locations have been saved by NewerNewChunks in this dimension."));
             return SINGLE_SUCCESS;
         });
     }

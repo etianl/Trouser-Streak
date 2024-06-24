@@ -41,9 +41,21 @@ public class InstaMineNuker extends Module {
             .defaultValue(false)
             .build()
     );
+    private final Setting<listModes> listmode = sgGeneral.add(new EnumSetting.Builder<listModes>()
+            .name("List Mode")
+            .description("Whether to break or not break the block list.")
+            .defaultValue(listModes.blacklist)
+            .build());
     private final Setting<List<Block>> skippableBlox = sgGeneral.add(new BlockListSetting.Builder()
             .name("Blocks to Skip")
             .description("Skips instamining this block.")
+            .visible(() -> listmode.get()== listModes.blacklist)
+            .build()
+    );
+    private final Setting<List<Block>> nonskippableBlox = sgGeneral.add(new BlockListSetting.Builder()
+            .name("Blocks to Break")
+            .description("Only instamine these blocks.")
+            .visible(() -> listmode.get()== listModes.whitelist)
             .build()
     );
     private final Setting<Double> spherereach = sgGeneral.add(new DoubleSetting.Builder()
@@ -67,7 +79,7 @@ public class InstaMineNuker extends Module {
     private final Setting<Boolean> nobelowfeet = sgGeneral.add(new BoolSetting.Builder()
             .name("Don't break below feet")
             .description("Don't target blocks below feet")
-            .defaultValue(false)
+            .defaultValue(true)
             .build()
     );
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
@@ -189,7 +201,7 @@ public class InstaMineNuker extends Module {
                 if (count >= maxBlocksPerTick.get()) break;
                 // Get the block at the current coordinates
                 if (onlyInstamineable.get()){
-                    if (!skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()) && rotate.get() && BlockUtils.canBreak(blockPos) && BlockUtils.canInstaBreak(blockPos)){
+                    if (((listmode.get()== listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get()== listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && rotate.get() && BlockUtils.canBreak(blockPos) && BlockUtils.canInstaBreak(blockPos)){
                         renderBlocks.add(renderBlockPool.get().set(blockPos));
                         if (direction != null) {
                             Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction)));
@@ -199,7 +211,7 @@ public class InstaMineNuker extends Module {
                             }
                         }
                     }
-                    else if (!skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()) && !rotate.get() && BlockUtils.canBreak(blockPos) && BlockUtils.canInstaBreak(blockPos)){
+                    else if (((listmode.get()== listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get()== listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && !rotate.get() && BlockUtils.canBreak(blockPos) && BlockUtils.canInstaBreak(blockPos)){
                         renderBlocks.add(renderBlockPool.get().set(blockPos));
                         mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                         if (swing.get()){
@@ -207,18 +219,18 @@ public class InstaMineNuker extends Module {
                             mc.player.swingHand(Hand.MAIN_HAND);
                         }
                     }
-                    if (!skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()) && rotate.get() && BlockUtils.canBreak(blockPos) && BlockUtils.canInstaBreak(blockPos)){
+                    if (((listmode.get()== listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get()== listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && rotate.get() && BlockUtils.canBreak(blockPos) && BlockUtils.canInstaBreak(blockPos)){
                         if (direction != null) {
                             Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
                             count++;
                         }
                     }
-                    else if (!skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()) && !rotate.get() && BlockUtils.canBreak(blockPos) && BlockUtils.canInstaBreak(blockPos)){
+                    else if (((listmode.get()== listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get()== listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && !rotate.get() && BlockUtils.canBreak(blockPos) && BlockUtils.canInstaBreak(blockPos)){
                         mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
                         count++;
                     }
                 } else if (!onlyInstamineable.get()) {
-                    if (!skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()) && rotate.get() && BlockUtils.canBreak(blockPos)){
+                    if (((listmode.get()== listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get()== listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && rotate.get() && BlockUtils.canBreak(blockPos)){
                         renderBlocks.add(renderBlockPool.get().set(blockPos));
                         if (direction != null) {
                             Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction)));
@@ -228,7 +240,7 @@ public class InstaMineNuker extends Module {
                             }
                         }
                     }
-                    else if (!skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()) && !rotate.get() && BlockUtils.canBreak(blockPos)){
+                    else if (((listmode.get()== listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get()== listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && !rotate.get() && BlockUtils.canBreak(blockPos)){
                         renderBlocks.add(renderBlockPool.get().set(blockPos));
                         mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                         if (swing.get()){
@@ -236,18 +248,16 @@ public class InstaMineNuker extends Module {
                             mc.player.swingHand(Hand.MAIN_HAND);
                         }
                     }
-                    if (!skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()) && rotate.get() && BlockUtils.canBreak(blockPos)){
+                    if (((listmode.get()== listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get()== listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && rotate.get() && BlockUtils.canBreak(blockPos)){
                         if (direction != null) {
                             Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
                             count++;
                         }
                     }
-                    else if (!skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()) && !rotate.get() && BlockUtils.canBreak(blockPos)){
+                    else if (((listmode.get()== listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get()== listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && !rotate.get() && BlockUtils.canBreak(blockPos)){
                         mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
                         count++;
                     }
-
-
                 }
             }
             ticks=0;
@@ -286,5 +296,8 @@ public class InstaMineNuker extends Module {
 
     public enum Modes {
         Sphere, Box
+    }
+    public enum listModes {
+        whitelist, blacklist
     }
 }

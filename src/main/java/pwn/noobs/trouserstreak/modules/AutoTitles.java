@@ -1,7 +1,7 @@
 //Credits to ogmur (youtube.com/@ogmur) for figuring out these commands, credits to etianl for writing a module for it
 //    /title @a times 5s 9999d 9999d
 //    /title @a title {"text":"Mojang Loss Prevention Inc", "bold":true, "italic":true, "color":"red"}
-//    /title @a subtitle {"text":"discord.gg/vXSpKgU2ms", "bold":true, "italic":true, "color":"green"}
+//    /title @a subtitle {"text":"discord.gg/copenheimer", "bold":true, "italic":true, "color":"green"}
 //    /title @a actionbar {"text":"youtube.com/@ogmur", "bold":true, "italic":true, "color":"green"}
 
 package pwn.noobs.trouserstreak.modules;
