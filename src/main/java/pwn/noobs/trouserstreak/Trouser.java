@@ -29,7 +29,6 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new BaseFinder());
                 Modules.get().add(new StorageLooter());
                 Modules.get().add(new LavaAura());
-                Modules.get().add(new InstantKill());
                 Modules.get().add(new SuperInstaMine());
                 Modules.get().add(new InstaMineNuker());
                 Modules.get().add(new BetterScaffold());
@@ -55,6 +54,7 @@ public class Trouser extends MeteorAddon {
                 //Modules.get().add(new -----> Exploits for old versions! <-----());
                 Modules.get().add(new ShulkerDupe());
                 Modules.get().add(new InvDupeModule());
+                Modules.get().add(new InstantKill());
                 Modules.get().add(new LecternCrash());
 
                 //Modules.get().add(new -----> And much more <-----());
