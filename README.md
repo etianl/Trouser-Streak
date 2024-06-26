@@ -87,6 +87,7 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - **InstaSafetyBox:** Places a box around you for safety using the hardest blocks available in your hotbar. Also with adjustable range for thic box. (Credits to etianl :D)
 - **LavaAura:** Automatically places and picks up lava buckets at an entity's position on a tick delay, or sets the entity on fire using flint and steel or fire charges. Also has the option of placing lavabuckets or fire on every block face which may be useful in creative mode. (Credits to etianl :D)
 - **LecternCrash:** Crash 1.18.X vanilla servers and possibly below. (Credits to Coderx-Gamer)
+- **MaceKill:** Exploits Mace mechanics to make the Mace super OP everytime you swing it instead of just when you drop from a height. (Credits to etianl :D)
 - **NbtEditor:** Requires Creative mode. Generates custom entities in the form of a custom spawn egg, generate items with custom enchantments (Only in Minecraft 1.20.4 and below), and potions with custom effects all based on the settings you configure. It can also copy the Nbt data from one item to another.  (Credits to etianl :D)
 - **NewerNewChunks:** NewChunks module with new newchunk estimation exploits, and the ability to save chunk data for later! Also with special options for tracing servers that have been updated from a version before the build limit updates, which throw false positives normally. (Credits to Meteor Rejects, and BleachHack from where it was ported, and etianl for updating :D.)
 
