@@ -5,6 +5,8 @@ import meteordevelopment.meteorclient.mixininterface.IPlayerInteractEntityC2SPac
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
@@ -36,7 +38,7 @@ public class MaceKill extends Module {
                 getTypeMethod.setAccessible(true);
                 Enum<?> interactType = (Enum<?>) getTypeMethod.invoke(packet);
 
-                if (interactType.name().equals("ATTACK") && mc.player.getInventory().getMainHandStack().getItem() == Items.MACE) {
+                if (interactType.name().equals("ATTACK") && mc.player.getInventory().getMainHandStack().getItem() == Items.MACE && packet.getEntity() instanceof LivingEntity) {
                     double blocks = fallHeight.get();
                     int packetsRequired = (int) Math.ceil(Math.abs(blocks / 10));
 
