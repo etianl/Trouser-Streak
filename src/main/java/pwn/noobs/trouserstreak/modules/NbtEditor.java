@@ -45,13 +45,13 @@ public class NbtEditor extends Module {
             .name("Custom Name")
             .description("Name the Thing")
             .defaultValue("MOUNTAINSOFLAVAINC")
-            .visible(() -> mode.get() == Modes.Entity || mode.get() == Modes.Entity)
+            .visible(() -> mode.get() == Modes.Entity || mode.get() == Modes.Item || mode.get() == Modes.Potion)
             .build());
     private final Setting<String> nomcolor = sgGeneral.add(new StringSetting.Builder()
             .name("Custom Name Color")
             .description("Color the Name")
             .defaultValue("red")
-            .visible(() -> mode.get() == Modes.Entity || mode.get() == Modes.Entity)
+            .visible(() -> mode.get() == Modes.Entity || mode.get() == Modes.Item || mode.get() == Modes.Potion)
             .build());
     private final Setting<String> entity = sgOptions.add(new StringSetting.Builder()
             .name("Entity to Spawn")
