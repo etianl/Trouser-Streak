@@ -16,6 +16,6 @@
     "ShulkerBoxScreenMixin",
     "PlayerEntityMixin",
     "TrouserSplashTextMixin",
-    "HandshakeC2SMixin"
+    "TrouserHandshakeC2SMixin"
   ]
 }
