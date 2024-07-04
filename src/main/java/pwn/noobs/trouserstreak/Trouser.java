@@ -36,6 +36,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new RedstoneNuker());
 
                 //Modules.get().add(new -----> Overpowered OP mode modules! <-----());
+                Modules.get().add(new BungeeSpoofer());
                 Modules.get().add(new HandOfGod());
                 Modules.get().add(new VoiderPlus());
                 Modules.get().add(new OPServerKillModule());
