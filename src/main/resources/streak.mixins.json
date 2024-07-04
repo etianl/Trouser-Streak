@@ -15,6 +15,7 @@
     "accessor.ClientConnectionAccessor",
     "ShulkerBoxScreenMixin",
     "PlayerEntityMixin",
-    "TrouserSplashTextMixin"
+    "TrouserSplashTextMixin",
+    "HandshakeC2SMixin"
   ]
 }

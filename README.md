@@ -7,6 +7,7 @@
 
 ## Credits to the people I skidded from:
 In no particular order
+- [DAMcraft (ServerSeeker)](https://github.com/DAMcraft/MeteorServerSeeker)
 - [Meteor Client](https://github.com/meteordevelopment/meteor-client)
 - [Allah-Hack](https://github.com/TaxEvasiqn/allah-hack)
 - [Meteor-Rejects](https://github.com/AntiCope/meteor-rejects)
@@ -76,6 +77,7 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - **BetterScaffold:** Give you more options for scaffolding, bigger range and others. (Credits to Meteor-Tweaks)
 - **BlockListMineCommand** Adds a custom #mine command to your message history containing all the blocks in the custom blocklist that are near you. Press T then up arrow, then ENTER key to execute the command. BETTER CHAT module is recommended for infinitely long commands. (Credits to etianl :D)
 - **Boom+:** Throws entities or spawns them on the targeted block when you click (Credits to Allah-Hack for the original) I just added more fun things you might want to throw as well as included the option for height based on player Y level.
+- **BungeeSpoofer:** Allows you to join servers with an exposed bungeecord backend. (Credits to DAMcraft of ServerSeeker!)
 - **CrashCommand:** Crashes other players out using a nasty particle effect. Requires OP status. Credits to [aaaasdfghjkllll](https://github.com/aaaasdfghjkllll)
 - **ExplosionAura:** Spawns creepers at your position as you move that explode instantly. Like a bigger, more laggy Nuker module for creative mode. The use of the module Velocity is recommended to avoid being thrown around. (Credits to etianl :D)
 - **FlightAntikick:** Moves you down on a tick-based timer. Added in to substitute the lack of a "Normal" mode antikick for velocity flight in MeteorClient (not a great antikick it's just something). Bind it to the same key as Flight. (Credits to etianl :D)
@@ -89,12 +91,10 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - **LecternCrash:** Crash 1.18.X vanilla servers and possibly below. (Credits to Coderx-Gamer)
 - **MaceKill:** Exploits Mace mechanics to make the Mace super OP everytime you swing it instead of just when you drop from a height. (Credits to etianl :D)
 - **NbtEditor:** Requires Creative mode. Generates custom entities in the form of a custom spawn egg, generate items with custom enchantments (Only in Minecraft 1.20.4 and below), and potions with custom effects all based on the settings you configure. It can also copy the Nbt data from one item to another.  (Credits to etianl :D)
-- **NewerNewChunks:** NewChunks module with new newchunk estimation exploits, and the ability to save chunk data for later! Also with special options for tracing servers that have been updated from a version before the build limit updates, which throw false positives normally. (Credits to Meteor Rejects, and BleachHack from where it was ported, and etianl for updating :D.)
+- **NewerNewChunks:** NewChunks module with new newchunk estimation exploits, and the ability to save chunk data for later! Comes with several new homebrewed newchunks methods made by yours truly. (Credits to Meteor Rejects, and BleachHack from where it was ported, and etianl for updating :D.)
 
 -------------------------------------------------------------------------------------
-- *NewerNewChunks Notes:*
-- The **BlockUpdateExploit** option estimates possible newchunks based on block update packets. SOME OF THESE CHUNKS MAY BE OLD. Advanced Mode is needed to filter any false positives out. See Special Options notes for usage.
-- The **BlockUpdateExploit** option can produce false positives if you are hanging around in the same location for a while. It's best to keep moving fast for it to work best.
+***NewerNewChunks Notes:***
 - NewerNewChunks stores your NewChunks data as text files seperately per server and per dimension in the TrouserStreak/NewChunks folder in your Minecraft folder. This enables you to chunk trace multiple different servers and dimensions without mixing NewChunks data.
 - If the game crashes, chunk data is saved! No loss in tracing progress.
 - Save and Load ChunkData options are for the stored files.
@@ -102,11 +102,24 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - The .newchunkcount command can tell you how many chunks have been saved in data in the dimension you are in.
 - You can even send chunk data to your friends! Just copy the TrouserStreak/NewChunks folder and send it.
 
--------------------------------------------------------------------------------------
-- ***NewerNewChunks Special Options:***
-(These are to be used when the .world command returns "This chunk is pre 1.17 generation!" when run at spawn.)
-- The **"AdvancedMode"** will render BlockExploit chunks as their own color instead of a newchunk (Normal mode rendering).
-- When using Advanced mode if the BlockUpdateExploit chunks appear infrequently and are combined with Old Chunks, then the chunks you are in are OLD. If there is alot of BlockUpdateExploit chunks appearing and/or they are mixed with NewChunks then the chunks are NEW.
+***l33t new 3xpl0its:***
+- NewerNewChunks can detect newchunks based on byte sizes of the sections of chunks. Or you can use the old methods which use liquid flow and block updates.
+- The **ByteExploit** option enabled by default detects newchunks based on the byte sizes of the chunk sections that are mostly likely entirely air (in the overworld/nether it's above 304, and in the end we check all sections).
+- The **ByteExploit** does not work in Minecraft servers where their version is less than 1.18. For those servers, disable **ByteExploit** and enable Liquid flow and BlockExploit.
+- The **ByteExploit** does not work in flat worlds.
+- In the End dimension the larger islands give false positives as being old. There are enough actual new chunks detected this isn't an issue though.
+- Chunks appear to be defined as new until the person who generated them has unrendered them.
+- In the nether the chunks that stay loaded due to the spawn chunk region always show up as new for some reason.
+- A few chunks will show up as new through the old chunks and are false positives when using **ByteExploit**. These aren't much of an issue though normally.
+
+*These next things are to be used if **ByteExploit** doesn't work for you:*
+- the **Pre 1.17 OldChunk Detector** detects chunks in the overworld that do not contain copper ore above a certain Y level. This should be used when the .world command returns "This chunk is pre 1.17 generation!" when run at spawn.)
+- The **LiquidExploit** option estimates possible newchunks based on liquid being just starting to flow for the first time. 
+- The **BlockUpdateExploit** option estimates possible newchunks based on block update packets. SOME OF THESE CHUNKS MAY BE OLD. Advanced Mode is needed to filter any false positives out. See Special Options notes for usage.
+- The **BlockUpdateExploit** option can produce false positives if you are hanging around in the same location for a while. It's best to keep moving for it to work best.
+*Modes:*
+- The **"BlockExploitMode"** will render BlockExploit chunks as their own color instead of a newchunk (Normal mode rendering).
+- When using BlockExploitMode mode if the BlockUpdateExploit chunks appear infrequently and are combined with Old Chunks, then the chunks you are in are OLD. If there is alot of BlockUpdateExploit chunks appearing and/or they are mixed with NewChunks then the chunks are NEW.
 - The **"IgnoreBlockExploit"** will render BlockExploit chunks as an oldchunk instead of a newchunk.
 
 -------------------------------------------------------------------------------------

@@ -56,7 +56,7 @@ public class MaceKill extends Module {
                 if (interactType.name().equals("ATTACK") && mc.player.getInventory().getMainHandStack().getItem() == Items.MACE && packet.getEntity() instanceof LivingEntity) {
                     LivingEntity targetEntity = (LivingEntity) packet.getEntity();
 
-                    if (packetDisable.get() && targetEntity.isBlocking() && targetEntity.blockedByShield(targetEntity.getRecentDamageSource())) return;
+                    if (packetDisable.get() && ((targetEntity.isBlocking() && targetEntity.blockedByShield(targetEntity.getRecentDamageSource())) || targetEntity.isInvulnerable() || targetEntity.isInCreativeMode())) return;
                     previouspos = mc.player.getPos();
                     int blocks = getMaxHeightAbovePlayer();
 
