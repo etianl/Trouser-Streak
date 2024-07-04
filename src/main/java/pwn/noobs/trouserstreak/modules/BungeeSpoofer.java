@@ -18,6 +18,6 @@ public class BungeeSpoofer extends Module {
     );
 
     public BungeeSpoofer() {
-        super(Trouser.Main, "BungeeSpoof", "Allows you to join servers with an exposed bungeecord backend. ONLY ENABLE THIS IF YOU ACTUALLY WANT TO JOIN A BUNGEESPOOFABLE SERVER!");
+        super(Trouser.Main, "BungeeSpoofer", "Allows you to join servers with an exposed bungeecord backend. ONLY ENABLE THIS IF YOU ACTUALLY WANT TO JOIN A BUNGEESPOOFABLE SERVER!");
     }
 }
