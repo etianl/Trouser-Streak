@@ -652,29 +652,10 @@ public class NewerNewChunks extends Module {
 							// Indirect palette
 							int biomePaletteLength = buf.readVarInt();
 							//System.out.println("Biome palette length: " + biomePaletteLength);
-							for (int i = 0; i < biomePaletteLength; i++) {
-								if (buf.readableBytes() < 1) {
-									//System.out.println("Incomplete biome palette data");
-									return;
-								}
-								int biomePaletteEntry = buf.readVarInt();
-								if (i == 0 && biomePaletteEntry != 0) isNewChunk = true;
-								//System.out.println("Biome palette entry " + i + ": " + biomePaletteEntry);
-							}
 
-							// Skip biome data array
-							if (buf.readableBytes() >= 4) { // Ensure we can read the VarInt
-								int biomeDataArrayLength = buf.readVarInt();
-								int biomeBytesToSkip = biomeDataArrayLength * 8; // Each entry is a long (8 bytes)
-								if (buf.readableBytes() >= biomeBytesToSkip) {
-									buf.skipBytes(biomeBytesToSkip);
-								} else {
-									//System.out.println("Not enough data for biome array, skipping remaining: " + buf.readableBytes());
-									buf.skipBytes(buf.readableBytes());
-								}
-							} else {
-								//System.out.println("Not enough data for biome array length");
-							}
+							int biomePaletteEntry = buf.readVarInt();
+							if (biomePaletteEntry != 0) isNewChunk = true;
+							//System.out.println("Biome palette entry " + i + ": " + biomePaletteEntry);
 						} else {
 							//System.out.println("Invalid biome bits per entry: " + biomeBitsPerEntry);
 							return;
@@ -692,11 +673,9 @@ public class NewerNewChunks extends Module {
 							// Indirect palette
 							int blockPaletteLength = buf.readVarInt();
 							//System.out.println("Block palette length: " + blockPaletteLength);
-							for (int i = 0; i < blockPaletteLength; i++) {
-								int blockPaletteEntry = buf.readVarInt();
-								if (i == 0 && blockPaletteEntry == 0) isNewChunk = true;
-								//System.out.println("Block palette entry " + i + ": " + blockPaletteEntry);
-							}
+							int blockPaletteEntry = buf.readVarInt();
+							if (blockPaletteEntry == 0) isNewChunk = true;
+							//System.out.println("Block palette entry " + i + ": " + blockPaletteEntry);
 						}
 					}
 
