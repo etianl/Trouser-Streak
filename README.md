@@ -95,6 +95,7 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 
 -------------------------------------------------------------------------------------
 ***NewerNewChunks Notes:***
+- NEAR 100% accurate chunk detection in all dimensions!
 - NewerNewChunks stores your NewChunks data as text files seperately per server and per dimension in the TrouserStreak/NewChunks folder in your Minecraft folder. This enables you to chunk trace multiple different servers and dimensions without mixing NewChunks data.
 - If the game crashes, chunk data is saved! No loss in tracing progress.
 - Save and Load ChunkData options are for the stored files.
@@ -103,14 +104,13 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - You can even send chunk data to your friends! Just copy the TrouserStreak/NewChunks folder and send it.
 
 ***l33t new 3xpl0its:***
-- NewerNewChunks can detect newchunks based on byte sizes of the sections of chunks. Or you can use the old methods which use liquid flow and block updates.
-- The **ByteExploit** option enabled by default detects newchunks based on the byte sizes of the chunk sections that are mostly likely entirely air (in the overworld/nether it's above 304, and in the end we check all sections).
+- NewerNewChunks detects new chunks by scanning the order of chunk section palettes, and also by checking the capacity of the writer index of chunks. Or you can use the old methods which use liquid flow and block updates.
+- The **ByteExploit** option enabled by default detects new chunks by scanning the order of chunk section palettes, and also by checking the capacity of the writer index of chunks.
 - The **ByteExploit** does not work in Minecraft servers where their version is less than 1.18. For those servers, disable **ByteExploit** and enable Liquid flow and BlockExploit.
-- The **ByteExploit** does not work in flat worlds.
-- In the End dimension the larger islands give false positives as being old. There are enough actual new chunks detected this isn't an issue though.
+- The **ByteExploit** does not work in flat worlds that are entirely void.
+- In the End dimension there are very rare false old chunks in the newchunks (not enough to notice mostly).
 - Chunks appear to be defined as new until the person who generated them has unrendered them.
 - In the nether the chunks that stay loaded due to the spawn chunk region always show up as new for some reason.
-- A few chunks will show up as new through the old chunks and are false positives when using **ByteExploit**. These aren't much of an issue though normally.
 
 *These next things are to be used if **ByteExploit** doesn't work for you:*
 - the **Pre 1.17 OldChunk Detector** detects chunks in the overworld that do not contain copper ore above a certain Y level. This should be used when the .world command returns "This chunk is pre 1.17 generation!" when run at spawn.)

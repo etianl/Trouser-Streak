@@ -41,7 +41,7 @@ import java.util.concurrent.Executors;
 
 /*
     Ported from: https://github.com/BleachDrinker420/BleachHack/blob/master/BleachHack-Fabric-1.16/src/main/java/bleach/hack/module/mods/NewChunks.java
-    updated by etianll :D
+    updated by etianl :D
 */
 public class NewerNewChunks extends Module {
 	public enum DetectMode {
@@ -69,7 +69,7 @@ public class NewerNewChunks extends Module {
 	);
 	private final Setting<Boolean> byteexploit = sgGeneral.add(new BoolSetting.Builder()
 			.name("ByteExploit")
-			.description("Detects newchunks based on byte sizes of the chunk sections.")
+			.description("Detects new chunks by scanning the order of chunk section palettes, and also by checking the capacity of the writer index of chunks.")
 			.defaultValue(true)
 			.build()
 	);
@@ -151,8 +151,7 @@ public class NewerNewChunks extends Module {
 			.name("render-height")
 			.description("The height at which new chunks will be rendered")
 			.defaultValue(0)
-			.min(-64)
-			.sliderRange(-64,319)
+			.sliderRange(-112,319)
 			.build()
 	);
 
@@ -231,8 +230,73 @@ public class NewerNewChunks extends Module {
 	public static int newchunksfound=0;
 	public static int oldchunksfound=0;
 	public static int tickexploitchunksfound=0;
+	private final Set<Integer> newChunkWidxValues = new HashSet<>(Arrays.asList(
+			288, 6444, 4392, 2340, 8496, 11280, 11276, 11290, 10562,
+			11282, 11270, 11278, 11274, 10548, 10556, 10576, 11272, 11286,
+			11292, 13340, 8504, 11284, 10580, 10578,
+			11298, 8512, 11266, 11288, 11294, 13332, 9240, 10584, 8516,
+			10564, 11980, 13334, 8510, 10574, 10590, 8524, 9232, 9246,
+			10554, 10568, 13338, 11262, 11268, 13336, 8502, 10570, 11302,
+			8520, 10586, 10588, 11258, 8508, 9236,
+			10566, 10560, 10582, 11296, 11976, 10592, 11264, 13330, 8514,
+			10558, 10572, 10598, 13326, 8526, 8528, 10600, 11300, 11982,
+			8538, 9222, 11992, 11984, 8518, 10594, 13328, 8506, 13342, 9226, 9926,
+			13348, 13350, 8530, 8536, 9224, 9230, 9234, 12630, 13318,
+			13322, 13324, 8532, 8540, 9244, 9928, 9938, 10552, 11304,
+			11978, 12632, 13346, 8534, 9214, 9218, 9228, 9238, 9940,
+			8522, 11986, 11260, 13344, 9242, 11988, 10596, 13320, 6458,
+			9256, 11994, 12636, 13314, 8546, 9934, 10612, 11306, 11308,
+			11974, 11990, 11996, 13352, 13354, 9220, 9930, 12620, 12628, 8498, 9216, 12626, 13316, 13358,
+			13360, 6446, 8542, 8548, 9210, 9248, 9250, 9946, 10604,
+			11998, 12624, 12640, 12648, 14702, 15384, 15414,
+			8544, 11970, 6450, 11256, 12612, 6454, 9212, 9932, 11320,
+			4400, 6452, 6460, 6462, 9252, 12000, 12002, 15422, 6448,
+			6470, 9936, 10550, 10602, 11271, 12614, 12618, 14082, 15388,
+			6456, 6476, 7174, 9920, 9924, 10549, 10620, 11299, 12004,
+			12608, 12622, 12634, 12642, 14036, 14040, 15402, 15410, 15412,
+			15418, 15434, 15990, 16142, 16746, 16750, 16774, 16786, 16846,
+			17440, 17442, 17476, 17488, 17500, 18178, 18182, 19542, 19560,
+			19626, 20264, 20970, 20972, 21700, 22188, 22328, 23068, 2342,
+			2346, 4398, 4420, 4436, 5132, 5138, 6466, 6472, 6490, 6492,
+			7180, 7184, 7192, 7876, 7890, 8500, 8550, 9208, 9258, 9916,
+			9942, 9944, 13356, 9922, 15420, 6474, 9948, 9964, 11972, 12604, 16100,
+			18230, 14050, 15396, 14722, 6468, 9950, 14056, 16110, 6464,
+			7158, 9260, 9918, 12006, 12638, 14038, 14052, 14692, 15428,
+			15438, 17492, 19606, 2344, 6478, 6480, 6484, 6488, 7170,
+			7190, 9254, 9912, 9956, 10547, 10565, 11277, 11283, 11293,
+			11295, 11303, 11310, 11312, 11326, 11966, 11968, 11989, 12010,
+			12016, 12020, 12610, 12644, 12646, 12660, 12694, 13312, 13335,
+			14044, 14688, 14708, 14730, 15390, 15430, 16118, 16146, 16748,
+			17450, 17512, 18196, 18222, 18228, 18832, 18908, 18916, 18938,
+			20276, 20980, 21664, 23016, 2350, 25114, 4402, 4408, 5120,
+			5122, 5152, 6459, 6504, 7154, 7156, 7160, 7162, 7196, 8495,
+			8521, 8552, 9200, 9206, 9262, 9276, 9960, 9962, 9970,
+			12616, 15406, 7176, 12008, 13310, 17470, 18924, 9952, 11316,
+			11962, 12652, 13366, 14032, 14064, 14706, 16134, 16842, 17472,
+			17480, 18172, 18904, 20236, 20254, 2358, 6482, 7182, 7870,
+			8497, 8572, 10603, 10622, 11254, 11275, 11279, 11281, 12012,
+			12606, 12650, 12658, 12674, 13337, 13378, 14034, 14042, 14062,
+			14092, 14690, 14700, 14716, 14720, 14776, 14800, 14806, 15392,
+			15404, 15408, 15416, 15432, 15972, 16104, 16106, 16108, 16126,
+			16128, 16144, 16722, 16738, 16766, 16818, 16828, 16848, 17452,
+			17456, 17464, 17468, 17486, 17490, 17504, 17514, 18200, 18202,
+			18204, 18206, 18866, 18878, 18900, 18918, 18922, 19480, 19512,
+			19524, 19540, 19548, 19570, 19600, 19616, 20244, 20266, 20278,
+			20952, 20962, 20966, 21546, 21582, 21724, 21726, 22244, 22950,
+			23054, 24498, 25122, 4394, 4410, 5130, 5140, 6445, 6486, 6494,
+			6496, 7164, 7166, 7168, 7172, 7178, 7186, 7194, 7200, 7894,
+			8556, 8558, 8566, 9264, 9910, 16124, 11252, 11301, 15398, 2352, 7188, 11273, 11291, 11870,
+			12024, 12670, 12712, 13308, 13364, 13370, 13944, 14024, 14076,
+			14078, 14086, 14106, 14676, 14714, 14732, 14782, 15370, 15378,
+			15400, 15436, 16162, 16752, 16756, 16758, 16768, 16854, 17422,
+			17438, 17482, 17508, 17524, 17526, 18174, 18812, 18882, 18910,
+			18928, 19528, 19536, 19556, 19580, 20116, 20262, 20272, 21604,
+			2354, 2360, 23748, 24374, 25080, 4406, 4422, 4432, 4434, 5126,
+			5134, 7204, 9204, 9914
+	));
+
 	public NewerNewChunks() {
-		super(Trouser.Main,"NewerNewChunks", "Detects new chunks by using the byte sizes of chunk sections. Can also check liquid flow, and block ticking packets.");
+		super(Trouser.Main,"NewerNewChunks", "Detects new chunks by scanning the order of chunk section palettes, and also by checking the capacity of the writer index of chunks. Can also check liquid flow, and block ticking packets.");
 	}
 	@Override
 	public void onActivate() {
@@ -542,50 +606,101 @@ public class NewerNewChunks extends Module {
 				PacketByteBuf buf = packet.getChunkData().getSectionsDataBuf();
 				int widx = buf.writerIndex();
 				if ((mc.world.getRegistryKey() == World.OVERWORLD || mc.world.getRegistryKey() == World.NETHER || mc.world.getRegistryKey() == World.END) && byteexploit.get()) {
-					int initialReaderIndex = buf.readerIndex();
-					int TOTAL_SECTIONS = 24;
-					final int SECTION_HEIGHT = 16;
-					int LOWEST_Y = -64;
-					int TARGET_Y = 304;
+					boolean isNewChunk = false;
+
 					if (mc.world.getRegistryKey() == World.END){
-						TOTAL_SECTIONS = 16;
-						LOWEST_Y = 0;
-						TARGET_Y = 0;
-					}
-					final int TARGET_SECTION = (TARGET_Y - LOWEST_Y) / SECTION_HEIGHT;
+						//if (!newChunkWidxValues.contains(widx)) System.out.println("widx: " + widx);
 
-					int upperSectionsSize = 0;
-					boolean errorOccurred = false;
+						if (newChunkWidxValues.contains(widx)) isNewChunk = true;
 
-					try {
-						buf.skipBytes(24);
+						if (buf.readableBytes() < 1) return; // Ensure we have at least 3 bytes (short + byte)
 
-						for (int i = 0; i < TOTAL_SECTIONS; i++) {
-							if (buf.readableBytes() < 1) {
-								break; // Not enough data left, exit the loop
-							}
-							int sectionSize = readSafeVarInt(buf);
-							if (sectionSize == -1) {
-								break; // VarInt reading failed, exit the loop
+						buf.readShort(); // Skip block count
+
+						// Block palette
+						int blockBitsPerEntry = buf.readUnsignedByte();
+						if (blockBitsPerEntry >= 4 && blockBitsPerEntry <= 8) {
+							// Indirect palette
+							int blockPaletteLength = buf.readVarInt();
+							//System.out.println("Block palette length: " + blockPaletteLength);
+							for (int i = 0; i < blockPaletteLength; i++) {
+								int blockPaletteEntry = buf.readVarInt();
+								//System.out.println("Block palette entry " + i + ": " + blockPaletteEntry);
 							}
 
-							if (i >= TARGET_SECTION) {
-								upperSectionsSize += sectionSize;
+							// Skip block data array
+							int blockDataArrayLength = buf.readVarInt();
+							int bytesToSkip = blockDataArrayLength * 8; // Each entry is a long (8 bytes)
+							if (buf.readableBytes() >= bytesToSkip) {
+								buf.skipBytes(bytesToSkip);
+							} else {
+								//System.out.println("Not enough data for block array, skipping remaining: " + buf.readableBytes());
+								buf.skipBytes(buf.readableBytes());
+								return; // Exit early as we don't have biome data
 							}
-
-							if (buf.readableBytes() < sectionSize) {
-								break; // Not enough data left, exit the loop
-							}
-							buf.skipBytes(sectionSize);
 						}
-					} catch (Exception e) {
-						errorOccurred = true;
-						//System.out.println("Error occurred: " + e.getMessage());
-					} finally {
-						buf.readerIndex(initialReaderIndex); // Reset the reader index
+
+						// Check if we have enough data for biome information
+						if (buf.readableBytes() < 1) {
+							//System.out.println("No biome data available");
+							return;
+						}
+
+						// Biome palette
+						int biomeBitsPerEntry = buf.readUnsignedByte();
+						if (biomeBitsPerEntry >= 0 && biomeBitsPerEntry <= 3) {
+							// Indirect palette
+							int biomePaletteLength = buf.readVarInt();
+							//System.out.println("Biome palette length: " + biomePaletteLength);
+							for (int i = 0; i < biomePaletteLength; i++) {
+								if (buf.readableBytes() < 1) {
+									//System.out.println("Incomplete biome palette data");
+									return;
+								}
+								int biomePaletteEntry = buf.readVarInt();
+								if (i == 0 && biomePaletteEntry != 0) isNewChunk = true;
+								//System.out.println("Biome palette entry " + i + ": " + biomePaletteEntry);
+							}
+
+							// Skip biome data array
+							if (buf.readableBytes() >= 4) { // Ensure we can read the VarInt
+								int biomeDataArrayLength = buf.readVarInt();
+								int biomeBytesToSkip = biomeDataArrayLength * 8; // Each entry is a long (8 bytes)
+								if (buf.readableBytes() >= biomeBytesToSkip) {
+									buf.skipBytes(biomeBytesToSkip);
+								} else {
+									//System.out.println("Not enough data for biome array, skipping remaining: " + buf.readableBytes());
+									buf.skipBytes(buf.readableBytes());
+								}
+							} else {
+								//System.out.println("Not enough data for biome array length");
+							}
+						} else {
+							//System.out.println("Invalid biome bits per entry: " + biomeBitsPerEntry);
+							return;
+						}
+
+					} else {
+						if (buf.readableBytes() < 1) return; // Ensure we have at least 3 bytes (short + byte)
+
+
+						buf.readShort(); // Skip block count
+
+						// Block palette
+						int blockBitsPerEntry = buf.readUnsignedByte();
+						if (blockBitsPerEntry >= 4 && blockBitsPerEntry <= 8) {
+							// Indirect palette
+							int blockPaletteLength = buf.readVarInt();
+							//System.out.println("Block palette length: " + blockPaletteLength);
+							for (int i = 0; i < blockPaletteLength; i++) {
+								int blockPaletteEntry = buf.readVarInt();
+								if (i == 0 && blockPaletteEntry == 0) isNewChunk = true;
+								//System.out.println("Block palette entry " + i + ": " + blockPaletteEntry);
+							}
+						}
 					}
-					//System.out.println(upperSectionsSize);
-					if (!errorOccurred && ((((widx >=128 && widx <288) || (upperSectionsSize != 57 && upperSectionsSize != 3)) && mc.world.getRegistryKey() == World.END) || (upperSectionsSize == 0 && mc.world.getRegistryKey() == World.NETHER) || (upperSectionsSize < 34 && mc.world.getRegistryKey() == World.OVERWORLD))) {
+
+					if (isNewChunk == false) {
 						try {
 							if (!tickexploitChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
 								oldChunks.add(oldpos);
@@ -595,8 +710,8 @@ public class NewerNewChunks extends Module {
 							}
 						} catch (Exception e) {
 							e.printStackTrace();
-						}
-					} else if (!errorOccurred && (((widx == 288 || upperSectionsSize == 57 || upperSectionsSize == 3) && mc.world.getRegistryKey() == World.END) || (upperSectionsSize > 0 && mc.world.getRegistryKey() == World.NETHER) || (upperSectionsSize >= 34 && mc.world.getRegistryKey() == World.OVERWORLD))) {
+						}//>0 works for flat overworld
+					} else if (isNewChunk == true) {
 						try {
 							if (!tickexploitChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
 								newChunks.add(oldpos);
@@ -640,28 +755,6 @@ public class NewerNewChunks extends Module {
 				}
 			}
 		}
-	}
-	private int readSafeVarInt(PacketByteBuf buf) {
-		int value = 0;
-		int position = 0;
-		byte currentByte;
-
-		for (int i = 0; i < 5; i++) {  // Read at most 5 bytes
-			if (!buf.isReadable()) {
-				return -1; // Buffer exhausted
-			}
-			currentByte = buf.readByte();
-			value |= (currentByte & 0x7F) << position;
-
-			if ((currentByte & 0x80) == 0) {
-				return value; // VarInt complete
-			}
-
-			position += 7;
-		}
-
-		// If we've read 5 bytes and still haven't seen the end, return the current value
-		return value;
 	}
 
 	private boolean isOreBlock(Block block) {
