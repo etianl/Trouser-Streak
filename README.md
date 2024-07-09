@@ -108,9 +108,9 @@ This will return the lowest block placed with AutoMountain until AutoLavacast is
 - The **ByteExploit** option enabled by default detects new chunks by scanning the order of chunk section palettes, and also by checking the capacity of the writer index of chunks.
 - The **ByteExploit** does not work in Minecraft servers where their version is less than 1.18. For those servers, disable **ByteExploit** and enable Liquid flow and BlockExploit.
 - The **ByteExploit** does not work in flat worlds that are entirely void.
-- In the End dimension there are very rare false old chunks in the newchunks (not enough to notice mostly).
+- In the End and Overworld dimension there are very rare false old chunks in the newchunks (not enough to notice mostly).
 - Chunks appear to be defined as new until the person who generated them has unrendered them.
-- In the nether the chunks that stay loaded due to the spawn chunk region always show up as new for some reason.
+- The chunks that stay loaded due to the spawn chunk region always show up as new for some reason.
 
 *These next things are to be used if **ByteExploit** doesn't work for you:*
 - the **Pre 1.17 OldChunk Detector** detects chunks in the overworld that do not contain copper ore above a certain Y level. This should be used when the .world command returns "This chunk is pre 1.17 generation!" when run at spawn.)
