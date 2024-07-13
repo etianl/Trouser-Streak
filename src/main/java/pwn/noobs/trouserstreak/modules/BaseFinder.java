@@ -153,7 +153,7 @@ public class BaseFinder extends Module {
     private final Setting<List<Block>> Blawcks6 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #6 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
-            .defaultValue(Blocks.REDSTONE_TORCH, Blocks.REDSTONE_WALL_TORCH, Blocks.FURNACE, Blocks.OAK_BUTTON)
+            .defaultValue(Blocks.REDSTONE_TORCH, Blocks.REDSTONE_WALL_TORCH, Blocks.FURNACE)
             .filter(this::filterBlocks)
             .build()
     );
