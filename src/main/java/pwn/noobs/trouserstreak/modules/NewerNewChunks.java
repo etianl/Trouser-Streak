@@ -55,28 +55,29 @@ public class NewerNewChunks extends Module {
 		IgnoreBlockExploit,
 		BlockExploitMode
 	}
-	private final SettingGroup specialGroup = settings.createGroup("Disable Pre 1.17 Chunk Detector if server version <1.17");
+	private final SettingGroup specialGroup = settings.createGroup("Disable ByteExploit if server version <1.18");
+	private final SettingGroup specialGroup2 = settings.createGroup("Disable Pre 1.17 Chunk Detector if server version <1.17");
 	private final SettingGroup sgGeneral = settings.getDefaultGroup();
 	private final SettingGroup sgCdata = settings.createGroup("Saved Chunk Data");
 	private final SettingGroup sgcacheCdata = settings.createGroup("Cached Chunk Data");
 	private final SettingGroup sgRender = settings.createGroup("Render");
 
-	private final Setting<Boolean> oldchunksdetector = specialGroup.add(new BoolSetting.Builder()
+	private final Setting<Boolean> byteexploit = specialGroup.add(new BoolSetting.Builder()
+			.name("ByteExploit")
+			.description("Detects new chunks by scanning the order of chunk section palettes, and also by checking the capacity of the writer index of chunks.")
+			.defaultValue(true)
+			.build()
+	);
+	private final Setting<Boolean> oldchunksdetector = specialGroup2.add(new BoolSetting.Builder()
 			.name("Pre 1.17 OldChunk Detector")
 			.description("Marks chunks as old if they have no copper above Y 0 and are in the overworld. For detecting oldchunks in servers updated from old version.")
-			.defaultValue(false)
+			.defaultValue(true)
 			.build()
 	);
 	public final Setting<DetectMode> detectmode = sgGeneral.add(new EnumSetting.Builder<DetectMode>()
 			.name("Chunk Detection Mode")
 			.description("Anything other than normal is for old servers where build limits are being increased due to updates.")
 			.defaultValue(DetectMode.Normal)
-			.build()
-	);
-	private final Setting<Boolean> byteexploit = sgGeneral.add(new BoolSetting.Builder()
-			.name("ByteExploit")
-			.description("Detects new chunks by scanning the order of chunk section palettes, and also by checking the capacity of the writer index of chunks.")
-			.defaultValue(true)
 			.build()
 	);
 	private final Setting<Boolean> liquidexploit = sgGeneral.add(new BoolSetting.Builder()
@@ -609,9 +610,32 @@ public class NewerNewChunks extends Module {
 				} catch (ArrayIndexOutOfBoundsException e) {
 					return;
 				}
-				PacketByteBuf buf = packet.getChunkData().getSectionsDataBuf();
-				int widx = buf.writerIndex();
+
+				isNewGeneration = false;
+				foundAnyOre = false;
+				if (oldchunksdetector.get()) {
+					for (int x = 0; x < 16; x++) {
+						for (int y = mc.world.getBottomY(); y < mc.world.getTopY(); y++) {
+							for (int z = 0; z < 16; z++) {
+								if (!foundAnyOre && isOreBlock(chunk.getBlockState(new BlockPos(x, y, z)).getBlock()) && mc.world.getRegistryKey() == World.OVERWORLD) foundAnyOre = true;
+								if (!isNewGeneration && y<256 && y>=0 && (chunk.getBlockState(new BlockPos(x, y, z)).getBlock() == Blocks.COPPER_ORE || chunk.getBlockState(new BlockPos(x, y, z)).getBlock() == Blocks.DEEPSLATE_COPPER_ORE) && mc.world.getRegistryKey().getValue().toString().toLowerCase().contains("overworld")) {
+									isNewGeneration = true;
+									break;
+								}
+							}
+						}
+					}
+				}
+				if (oldchunksdetector.get() && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos) && foundAnyOre == true && isNewGeneration == false && mc.world.getRegistryKey().getValue().toString().toLowerCase().contains("overworld")) {
+					oldChunks.add(oldpos);
+					if (save.get()){
+						saveOldChunkData(oldpos);
+					}
+				}
+
 				if ((mc.world.getRegistryKey() == World.OVERWORLD || mc.world.getRegistryKey() == World.NETHER || mc.world.getRegistryKey() == World.END) && byteexploit.get()) {
+					PacketByteBuf buf = packet.getChunkData().getSectionsDataBuf();
+					int widx = buf.writerIndex();
 					boolean isNewChunk = false;
 					if (mc.world.getRegistryKey() == World.END){
 						//if (!newChunkWidxValues.contains(widx)) System.out.println("widx: " + widx);
@@ -643,7 +667,7 @@ public class NewerNewChunks extends Module {
 								buf.skipBytes(buf.readableBytes());
 								return; // Exit early as we don't have biome data
 							}
-						}
+						} else return;
 
 						// Check if we have enough data for biome information
 						if (buf.readableBytes() < 1) {
@@ -711,7 +735,7 @@ public class NewerNewChunks extends Module {
 							int blockPaletteEntry = buf.readVarInt();
 							if (blockPaletteEntry == 0) isNewChunk = true;
 							//System.out.println("Block palette entry " + i + ": " + blockPaletteEntry);
-						}
+						} else return;
 						if (isNewChunk==false) { //If the chunk isn't immediately new, then process it further to really determine if it's new
 							if (bufferCopy.readableBytes() < 3) return;
 							int loops = 0;
@@ -848,32 +872,20 @@ public class NewerNewChunks extends Module {
 					}
 				}
 
-				isNewGeneration = false;
-				foundAnyOre = false;
-				if (liquidexploit.get() || oldchunksdetector.get()) {
+				if (liquidexploit.get()) {
 					for (int x = 0; x < 16; x++) {
 						for (int y = mc.world.getBottomY(); y < mc.world.getTopY(); y++) {
 							for (int z = 0; z < 16; z++) {
-								if (liquidexploit.get()) {
-									FluidState fluid = chunk.getFluidState(x, y, z);
-									if (!oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos) && !fluid.isEmpty() && !fluid.isStill()) {
-										oldChunks.add(oldpos);
-										if (save.get()){
-											saveOldChunkData(oldpos);
-										}
-										return;
+								FluidState fluid = chunk.getFluidState(x, y, z);
+								if (!oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos) && !fluid.isEmpty() && !fluid.isStill()) {
+									oldChunks.add(oldpos);
+									if (save.get()){
+										saveOldChunkData(oldpos);
 									}
+									return;
 								}
-								if (!foundAnyOre && isOreBlock(chunk.getBlockState(new BlockPos(x, y, z)).getBlock()) && mc.world.getRegistryKey().getValue().toString().toLowerCase().contains("overworld")) foundAnyOre = true;
-								if (!isNewGeneration && y<256 && y>=0 && (chunk.getBlockState(new BlockPos(x, y, z)).getBlock() == Blocks.COPPER_ORE || chunk.getBlockState(new BlockPos(x, y, z)).getBlock() == Blocks.DEEPSLATE_COPPER_ORE) && mc.world.getRegistryKey().getValue().toString().toLowerCase().contains("overworld")) isNewGeneration = true;
 							}
 						}
-					}
-				}
-				if (oldchunksdetector.get() && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos) && foundAnyOre == true && isNewGeneration == false && mc.world.getRegistryKey().getValue().toString().toLowerCase().contains("overworld")) {
-					oldChunks.add(oldpos);
-					if (save.get()){
-						saveOldChunkData(oldpos);
 					}
 				}
 			}
