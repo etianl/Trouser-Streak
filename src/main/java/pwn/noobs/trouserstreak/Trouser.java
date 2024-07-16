@@ -17,7 +17,7 @@ public class Trouser extends MeteorAddon {
         @Override
         public void onInitialize() {
                 LOG.info("Initializing PantsMod!");
-                //Modules.get().add(new !!!!!Featuring powerful Griefing Utilities and Home of the Original PaletteExploit for NewChunks!!!!!());
+                //Modules.get().add(new !!!!!Featuring powerful Griefing Tools and Home of the Original PaletteExploit for NewChunks!!!!!());
                 //Modules.get().add(new -----> Automated Lavacasting Features! Make Lava Mountains fast and easily! <-----());
                 Modules.get().add(new AutoMountain());
                 Modules.get().add(new AutoLavaCaster());
