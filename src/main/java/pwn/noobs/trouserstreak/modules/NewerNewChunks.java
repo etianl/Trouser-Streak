@@ -26,13 +26,11 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.AcknowledgeChunksC2SPacket;
 import net.minecraft.network.packet.s2c.play.*;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.world.chunk.PalettedContainer;
 import net.minecraft.world.chunk.WorldChunk;
 import pwn.noobs.trouserstreak.Trouser;
 
@@ -55,16 +53,16 @@ public class NewerNewChunks extends Module {
 		IgnoreBlockExploit,
 		BlockExploitMode
 	}
-	private final SettingGroup specialGroup = settings.createGroup("Disable ByteExploit if server version <1.18");
+	private final SettingGroup specialGroup = settings.createGroup("Disable PaletteExploit if server version <1.18");
 	private final SettingGroup specialGroup2 = settings.createGroup("Disable Pre 1.17 Chunk Detector if server version <1.17");
 	private final SettingGroup sgGeneral = settings.getDefaultGroup();
 	private final SettingGroup sgCdata = settings.createGroup("Saved Chunk Data");
 	private final SettingGroup sgcacheCdata = settings.createGroup("Cached Chunk Data");
 	private final SettingGroup sgRender = settings.createGroup("Render");
 
-	private final Setting<Boolean> byteexploit = specialGroup.add(new BoolSetting.Builder()
-			.name("ByteExploit")
-			.description("Detects new chunks by scanning the order of chunk section palettes, and also by checking the capacity of the writer index of chunks.")
+	private final Setting<Boolean> PaletteExploit = specialGroup.add(new BoolSetting.Builder()
+			.name("PaletteExploit")
+			.description("Detects new chunks by scanning the order of chunk section palettes.")
 			.defaultValue(true)
 			.build()
 	);
@@ -237,70 +235,6 @@ public class NewerNewChunks extends Module {
 	public static int newchunksfound=0;
 	public static int oldchunksfound=0;
 	public static int tickexploitchunksfound=0;
-	private final Set<Integer> newChunkWidxValues = new HashSet<>(Arrays.asList(
-			288, 6444, 4392, 2340, 8496, 11280, 11276, 11290, 10562,
-			11282, 11270, 11278, 11274, 10548, 10556, 10576, 11272, 11286,
-			11292, 13340, 8504, 11284, 10580, 10578,
-			11298, 8512, 11266, 11288, 11294, 13332, 9240, 10584, 8516,
-			10564, 11980, 13334, 8510, 10574, 10590, 8524, 9232, 9246,
-			10554, 10568, 13338, 11262, 11268, 13336, 8502, 10570, 11302,
-			8520, 10586, 10588, 11258, 8508, 9236,
-			10566, 10560, 10582, 11296, 11976, 10592, 11264, 13330, 8514,
-			10558, 10572, 10598, 13326, 8526, 8528, 10600, 11300, 11982,
-			8538, 9222, 11992, 11984, 8518, 10594, 13328, 8506, 13342, 9226, 9926,
-			13348, 13350, 8530, 8536, 9224, 9230, 9234, 12630, 13318,
-			13322, 13324, 8532, 8540, 9244, 9928, 9938, 10552, 11304,
-			11978, 12632, 13346, 8534, 9214, 9218, 9228, 9238, 9940,
-			8522, 11986, 11260, 13344, 9242, 11988, 10596, 13320, 6458,
-			9256, 11994, 12636, 13314, 8546, 9934, 10612, 11306, 11308,
-			11974, 11990, 11996, 13352, 13354, 9220, 9930, 12620, 12628, 8498, 9216, 12626, 13316, 13358,
-			13360, 6446, 8542, 8548, 9210, 9248, 9250, 9946, 10604,
-			11998, 12624, 12640, 12648, 14702, 15384, 15414,
-			8544, 11970, 6450, 11256, 12612, 6454, 9212, 9932, 11320,
-			4400, 6452, 6460, 6462, 9252, 12000, 12002, 15422, 6448,
-			6470, 9936, 10550, 10602, 11271, 12614, 12618, 14082, 15388,
-			6456, 6476, 7174, 9920, 9924, 10549, 10620, 11299, 12004,
-			12608, 12622, 12634, 12642, 14036, 14040, 15402, 15410, 15412,
-			15418, 15434, 15990, 16142, 16746, 16750, 16774, 16786, 16846,
-			17440, 17442, 17476, 17488, 17500, 18178, 18182, 19542, 19560,
-			19626, 20264, 20970, 20972, 21700, 22188, 22328, 23068, 2342,
-			2346, 4398, 4420, 4436, 5132, 5138, 6466, 6472, 6490, 6492,
-			7180, 7184, 7192, 7876, 7890, 8500, 8550, 9208, 9258, 9916,
-			9942, 9944, 13356, 9922, 15420, 6474, 9948, 9964, 11972, 12604, 16100,
-			18230, 14050, 15396, 14722, 6468, 9950, 14056, 16110, 6464,
-			7158, 9260, 9918, 12006, 12638, 14038, 14052, 14692, 15428,
-			15438, 17492, 19606, 2344, 6478, 6480, 6484, 6488, 7170,
-			7190, 9254, 9912, 9956, 10547, 10565, 11277, 11283, 11293,
-			11295, 11303, 11310, 11312, 11326, 11966, 11968, 11989, 12010,
-			12016, 12020, 12610, 12644, 12646, 12660, 12694, 13312, 13335,
-			14044, 14688, 14708, 14730, 15390, 15430, 16118, 16146, 16748,
-			17450, 17512, 18196, 18222, 18228, 18832, 18908, 18916, 18938,
-			20276, 20980, 21664, 23016, 2350, 25114, 4402, 4408, 5120,
-			5122, 5152, 6459, 6504, 7154, 7156, 7160, 7162, 7196, 8495,
-			8521, 8552, 9200, 9206, 9262, 9276, 9960, 9962, 9970,
-			12616, 15406, 7176, 12008, 13310, 17470, 18924, 9952, 11316,
-			11962, 12652, 13366, 14032, 14064, 14706, 16134, 16842, 17472,
-			17480, 18172, 18904, 20236, 20254, 2358, 6482, 7182, 7870,
-			8497, 8572, 10603, 10622, 11254, 11275, 11279, 11281, 12012,
-			12606, 12650, 12658, 12674, 13337, 13378, 14034, 14042, 14062,
-			14092, 14690, 14700, 14716, 14720, 14776, 14800, 14806, 15392,
-			15404, 15408, 15416, 15432, 15972, 16104, 16106, 16108, 16126,
-			16128, 16144, 16722, 16738, 16766, 16818, 16828, 16848, 17452,
-			17456, 17464, 17468, 17486, 17490, 17504, 17514, 18200, 18202,
-			18204, 18206, 18866, 18878, 18900, 18918, 18922, 19480, 19512,
-			19524, 19540, 19548, 19570, 19600, 19616, 20244, 20266, 20278,
-			20952, 20962, 20966, 21546, 21582, 21724, 21726, 22244, 22950,
-			23054, 24498, 25122, 4394, 4410, 5130, 5140, 6445, 6486, 6494,
-			6496, 7164, 7166, 7168, 7172, 7178, 7186, 7194, 7200, 7894,
-			8556, 8558, 8566, 9264, 9910, 16124, 11252, 11301, 15398, 2352, 7188, 11273, 11291, 11870,
-			12024, 12670, 12712, 13308, 13364, 13370, 13944, 14024, 14076,
-			14078, 14086, 14106, 14676, 14714, 14732, 14782, 15370, 15378,
-			15400, 15436, 16162, 16752, 16756, 16758, 16768, 16854, 17422,
-			17438, 17482, 17508, 17524, 17526, 18174, 18812, 18882, 18910,
-			18928, 19528, 19536, 19556, 19580, 20116, 20262, 20272, 21604,
-			2354, 2360, 23748, 24374, 25080, 4406, 4422, 4432, 4434, 5126,
-			5134, 7204, 9204, 9914
-	));
 
 	public NewerNewChunks() {
 		super(Trouser.Main,"NewerNewChunks", "Detects new chunks by scanning the order of chunk section palettes, and also by checking the capacity of the writer index of chunks. Can also check liquid flow, and block ticking packets.");
@@ -606,14 +540,14 @@ public class NewerNewChunks extends Module {
 			if (mc.world.getChunkManager().getChunk(packet.getChunkX(), packet.getChunkZ()) == null) {
 				WorldChunk chunk = new WorldChunk(mc.world, oldpos);
 				try {
-					taskExecutor.execute(() -> chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), new NbtCompound(), packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ())));
+					chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), new NbtCompound(), packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ()));
 				} catch (ArrayIndexOutOfBoundsException e) {
 					return;
 				}
 
 				isNewGeneration = false;
 				foundAnyOre = false;
-				if (oldchunksdetector.get()) {
+				if (oldchunksdetector.get() && mc.world.getRegistryKey() == World.OVERWORLD) {
 					for (int x = 0; x < 16; x++) {
 						for (int y = mc.world.getBottomY(); y < mc.world.getTopY(); y++) {
 							for (int z = 0; z < 16; z++) {
@@ -633,22 +567,27 @@ public class NewerNewChunks extends Module {
 					}
 				}
 
-				if ((mc.world.getRegistryKey() == World.OVERWORLD || mc.world.getRegistryKey() == World.NETHER || mc.world.getRegistryKey() == World.END) && byteexploit.get()) {
+				if ((mc.world.getRegistryKey() == World.OVERWORLD || mc.world.getRegistryKey() == World.NETHER || mc.world.getRegistryKey() == World.END) && PaletteExploit.get()) {
 					PacketByteBuf buf = packet.getChunkData().getSectionsDataBuf();
-					int widx = buf.writerIndex();
 					boolean isNewChunk = false;
-					if (mc.world.getRegistryKey() == World.END){
-						//if (!newChunkWidxValues.contains(widx)) System.out.println("widx: " + widx);
+					if (mc.world.getRegistryKey() == World.END) {
+						// Chunk Section structure
+						if (buf.readableBytes() < 2) return; // Ensure we have at least 2 bytes for block count
 
-						if (newChunkWidxValues.contains(widx)) isNewChunk = true;
+						short blockCount = buf.readShort();
+						//System.out.println("Block count: " + blockCount);
 
-						if (buf.readableBytes() < 1) return; // Ensure we have at least 3 bytes (short + byte)
-
-						buf.readShort(); // Skip block count
-
-						// Block palette
+						// Block states Paletted Container
+						if (buf.readableBytes() < 1) return;
 						int blockBitsPerEntry = buf.readUnsignedByte();
-						if (blockBitsPerEntry >= 4 && blockBitsPerEntry <= 8) {
+						//System.out.println("Block Bits Per Entry: " + blockBitsPerEntry);
+
+						if (blockBitsPerEntry == 0) {
+							// Single valued palette
+							int singleBlockValue = buf.readVarInt();
+							//System.out.println("Single Block Value: " + singleBlockValue);
+							buf.readVarInt(); // Data Array Length (should be 0)
+						} else if (blockBitsPerEntry >= 4 && blockBitsPerEntry <= 8) {
 							// Indirect palette
 							int blockPaletteLength = buf.readVarInt();
 							//System.out.println("Block palette length: " + blockPaletteLength);
@@ -657,58 +596,90 @@ public class NewerNewChunks extends Module {
 								//System.out.println("Block palette entry " + i + ": " + blockPaletteEntry);
 							}
 
-							// Skip block data array
+							// Data Array
 							int blockDataArrayLength = buf.readVarInt();
-							int bytesToSkip = blockDataArrayLength * 8; // Each entry is a long (8 bytes)
-							if (buf.readableBytes() >= bytesToSkip) {
-								buf.skipBytes(bytesToSkip);
+							//System.out.println("Block Data Array Length: " + blockDataArrayLength);
+							if (buf.readableBytes() >= blockDataArrayLength * 8) {
+								for (int i = 0; i < blockDataArrayLength; i++) {
+									long dataEntry = buf.readLong();
+									// Process dataEntry if needed
+								}
 							} else {
-								//System.out.println("Not enough data for block array, skipping remaining: " + buf.readableBytes());
-								buf.skipBytes(buf.readableBytes());
-								return; // Exit early as we don't have biome data
+								//System.out.println("Not enough data for block array");
+								return;
 							}
-						} else return;
-
-						// Check if we have enough data for biome information
-						if (buf.readableBytes() < 1) {
-							System.out.println("No biome data available");
+						} else if (blockBitsPerEntry == 15) {
+							// Direct palette (no palette sent)
+							int blockDataArrayLength = buf.readVarInt();
+							//System.out.println("Block Data Array Length: " + blockDataArrayLength);
+							if (buf.readableBytes() >= blockDataArrayLength * 8) {
+								for (int i = 0; i < blockDataArrayLength; i++) {
+									long dataEntry = buf.readLong();
+									// Process dataEntry if needed
+								}
+							} else {
+								//System.out.println("Not enough data for block array");
+								return;
+							}
+						} else {
+							//System.out.println("Invalid block bits per entry: " + blockBitsPerEntry);
 							return;
 						}
 
-						// Biome palette
+						// Biomes Paletted Container
+						if (buf.readableBytes() < 1) {
+							//System.out.println("No biome data available");
+							return;
+						}
+
 						int biomeBitsPerEntry = buf.readUnsignedByte();
-						if (biomeBitsPerEntry >= 0 && biomeBitsPerEntry <= 3) {
+						//System.out.println("Biome Bits Per Entry: " + biomeBitsPerEntry);
+
+						if (biomeBitsPerEntry == 0) {
+							// Single valued palette
+							int singleBiomeValue = buf.readVarInt();
+							//System.out.println("Single Biome Value: " + singleBiomeValue);
+							if (singleBiomeValue == 39) isNewChunk = true;
+							buf.readVarInt(); // Data Array Length (should be 0)
+						} else if (biomeBitsPerEntry >= 1 && biomeBitsPerEntry <= 3) {
 							// Indirect palette
 							int biomePaletteLength = buf.readVarInt();
 							//System.out.println("Biome palette length: " + biomePaletteLength);
 							for (int i = 0; i < biomePaletteLength; i++) {
-								if (buf.readableBytes() < 1) {
-									//System.out.println("Incomplete biome palette data");
-									return;
-								}
 								int biomePaletteEntry = buf.readVarInt();
-								if (i == 0 && biomePaletteEntry != 0) isNewChunk = true;
 								//System.out.println("Biome palette entry " + i + ": " + biomePaletteEntry);
+								if (i == 0 && biomePaletteEntry == 39) isNewChunk = true;
 							}
 
-							// Skip biome data array
-							if (buf.readableBytes() >= 4) { // Ensure we can read the VarInt
-								int biomeDataArrayLength = buf.readVarInt();
-								int biomeBytesToSkip = biomeDataArrayLength * 8; // Each entry is a long (8 bytes)
-								if (buf.readableBytes() >= biomeBytesToSkip) {
-									buf.skipBytes(biomeBytesToSkip);
-								} else {
-									//System.out.println("Not enough data for biome array, skipping remaining: " + buf.readableBytes());
-									buf.skipBytes(buf.readableBytes());
+							// Data Array
+							int biomeDataArrayLength = buf.readVarInt();
+							//System.out.println("Biome Data Array Length: " + biomeDataArrayLength);
+							if (buf.readableBytes() >= biomeDataArrayLength * 8) {
+								for (int i = 0; i < biomeDataArrayLength; i++) {
+									long dataEntry = buf.readLong();
+									// Process dataEntry if needed
 								}
 							} else {
-								//System.out.println("Not enough data for biome array length");
+								//System.out.println("Not enough data for biome array");
+								return;
+							}
+						} else if (biomeBitsPerEntry == 6) {
+							// Direct palette (no palette sent)
+							int biomeDataArrayLength = buf.readVarInt();
+							//System.out.println("Biome Data Array Length: " + biomeDataArrayLength);
+							if (buf.readableBytes() >= biomeDataArrayLength * 8) {
+								for (int i = 0; i < biomeDataArrayLength; i++) {
+									long dataEntry = buf.readLong();
+									// Process dataEntry if needed
+								}
+							} else {
+								//System.out.println("Not enough data for biome array");
+								return;
 							}
 						} else {
 							//System.out.println("Invalid biome bits per entry: " + biomeBitsPerEntry);
 							return;
 						}
-
 					} else if (mc.world.getRegistryKey() == World.NETHER) {
 						if (buf.readableBytes() < 3) return; // Ensure we have at least 3 bytes (short + byte)
 
@@ -735,64 +706,101 @@ public class NewerNewChunks extends Module {
 							int blockPaletteEntry = buf.readVarInt();
 							if (blockPaletteEntry == 0) isNewChunk = true;
 							//System.out.println("Block palette entry " + i + ": " + blockPaletteEntry);
-						} else return;
-						if (isNewChunk==false) { //If the chunk isn't immediately new, then process it further to really determine if it's new
-							if (bufferCopy.readableBytes() < 3) return;
+						}
+						if (!isNewChunk) { // If the chunk isn't immediately new, then process it further to really determine if it's new
+							if (bufferCopy.readableBytes() < 2) return; // Ensure we have at least 2 bytes for block count
+
 							int loops = 0;
 							int newChunkQuantifier = 0;
+
 							try {
-								while (bufferCopy.readableBytes() > 0) {
-									bufferCopy.readShort();
+								while (bufferCopy.readableBytes() > 0 && loops<8) {
+									// Chunk Section structure
+									short blockCount = bufferCopy.readShort();
+									//System.out.println("Block count: " + blockCount);
+
+									// Block states Paletted Container
+									if (bufferCopy.readableBytes() < 1) break;
 									int blockBitsPerEntry2 = bufferCopy.readUnsignedByte();
+									//System.out.println("Block Bits Per Entry: " + blockBitsPerEntry2);
+
 									if (blockBitsPerEntry2 == 0) {
-										int blockPaletteEntry = bufferCopy.readVarInt();
-										//BlockState blockState = Block.STATE_IDS.get(blockPaletteEntry);
-										//System.out.println(chunk.getPos()+ " || Single Block palette entry: " + blockPaletteEntry + " (" + blockState + ")");
-									}
-									else if (blockBitsPerEntry2 >= 4 && blockBitsPerEntry2 <= 8) {
+										// Single valued palette
+										int singleBlockValue = bufferCopy.readVarInt();
+										//System.out.println("Single Block Value: " + singleBlockValue);
+										bufferCopy.readVarInt(); // Data Array Length (should be 0)
+									} else if (blockBitsPerEntry2 >= 4 && blockBitsPerEntry2 <= 8) {
+										ChunkSection section = chunk.getSectionArray()[loops];
+										PalettedContainer<BlockState> palettedContainer = section.getBlockStateContainer();
+										Set<BlockState> bstates = new HashSet<>();
+										for (int x = 0; x < 16; x++){
+											for (int y = 0; y < 16; y++){
+												for (int z = 0; z < 16; z++){
+													bstates.add(palettedContainer.get(x, y, z));
+												}
+											}
+										}
+										// Indirect palette
 										int blockPaletteLength = bufferCopy.readVarInt();
 										//System.out.println("Block palette length: " + blockPaletteLength);
+										//System.out.println("bstates.size() "+bstates.size());
+										//System.out.println("blockPaletteLength"+blockPaletteLength);
 										int isNewSection = 0;
+										if (bstates.size()<blockPaletteLength) {
+											isNewSection = 2;
+											//System.out.println("smaller bstates size!!!!!!!");
+										}
 										for (int i = 0; i < blockPaletteLength; i++) {
 											int blockPaletteEntry = bufferCopy.readVarInt();
+											//System.out.println("Block palette entry " + i + ": " + blockPaletteEntry);
 											if (i == 0 && blockPaletteEntry == 0) isNewSection++;
 											if (i == 1 && (blockPaletteEntry == 80 || blockPaletteEntry == 1 || blockPaletteEntry == 9 || blockPaletteEntry == 5781)) isNewSection++;
 											if (i == 2 && (blockPaletteEntry == 5781 || blockPaletteEntry == 10 || blockPaletteEntry == 22318)) isNewSection++;
-											//BlockState blockState = Block.STATE_IDS.get(blockPaletteEntry);
-											//System.out.println(chunk.getPos()+ " || Block palette entry " + i + ": " + blockPaletteEntry + " (" + blockState + ")");
 										}
-										if (isNewSection>=2)newChunkQuantifier++;
-										loops++;
+										if (isNewSection >= 2) newChunkQuantifier++;
 
+										// Data Array
 										int blockDataArrayLength = bufferCopy.readVarInt();
-										int bytesToSkip = blockDataArrayLength * 8;
-										if (bufferCopy.readableBytes() >= bytesToSkip) {
-											bufferCopy.skipBytes(bytesToSkip);
+										//System.out.println("Block Data Array Length: " + blockDataArrayLength);
+										if (bufferCopy.readableBytes() >= blockDataArrayLength * 8) {
+											bufferCopy.skipBytes(blockDataArrayLength * 8);
 										} else {
 											//System.out.println("Not enough data for block array, skipping remaining: " + bufferCopy.readableBytes());
 											bufferCopy.skipBytes(bufferCopy.readableBytes());
 											break;
 										}
+									} else if (blockBitsPerEntry2 == 15) {
+										// Direct palette (no palette sent)
+										int blockDataArrayLength = bufferCopy.readVarInt();
+										//System.out.println("Block Data Array Length (Direct): " + blockDataArrayLength);
+										if (bufferCopy.readableBytes() >= blockDataArrayLength * 8) {
+											bufferCopy.skipBytes(blockDataArrayLength * 8);
+										} else {
+											//System.out.println("Not enough data for block array, skipping remaining: " + bufferCopy.readableBytes());
+											bufferCopy.skipBytes(bufferCopy.readableBytes());
+											break;
+										}
+									} else {
+										//System.out.println("Invalid block bits per entry: " + blockBitsPerEntry2);
+										break;
 									}
 
+									// Biomes Paletted Container
 									if (bufferCopy.readableBytes() < 1) {
 										//System.out.println("No biome data available");
 										break;
 									}
 
 									int biomeBitsPerEntry = bufferCopy.readUnsignedByte();
+									//System.out.println("Biome Bits Per Entry: " + biomeBitsPerEntry);
+
 									if (biomeBitsPerEntry == 0) {
-										int biomePaletteEntry = bufferCopy.readVarInt();
-										/*Registry<Biome> biomeRegistry = mc.world.getRegistryManager().get(RegistryKeys.BIOME);
-										Biome biome = biomeRegistry.get(biomePaletteEntry);
-										if (biome != null) {
-											Identifier biomeId = biomeRegistry.getId(biome);
-											//System.out.println(chunk.getPos() + " || Single Biome: " + biomeId + biomePaletteEntry);
-										} else {
-											//System.out.println(chunk.getPos() + " || Unknown Biome palette entry: " + biomePaletteEntry);
-										}*/
-									}
-									else if (biomeBitsPerEntry >= 1 && biomeBitsPerEntry <= 3) {
+										// Single valued palette
+										int singleBiomeValue = bufferCopy.readVarInt();
+										//System.out.println("Single Biome Value: " + singleBiomeValue);
+										bufferCopy.readVarInt(); // Data Array Length (should be 0)
+									} else if (biomeBitsPerEntry >= 1 && biomeBitsPerEntry <= 3) {
+										// Indirect palette
 										int biomePaletteLength = bufferCopy.readVarInt();
 										//System.out.println("Biome palette length: " + biomePaletteLength);
 										for (int i = 0; i < biomePaletteLength; i++) {
@@ -801,47 +809,62 @@ public class NewerNewChunks extends Module {
 												break;
 											}
 											int biomePaletteEntry = bufferCopy.readVarInt();
-											/*Registry<Biome> biomeRegistry = mc.world.getRegistryManager().get(RegistryKeys.BIOME);
-											Biome biome = biomeRegistry.get(biomePaletteEntry);
-											if (biome != null) {
-												Identifier biomeId = biomeRegistry.getId(biome);
-												//System.out.println(chunk.getPos()+ " || Biome palette entry " + i + ": " + biomeId + biomePaletteEntry);
-											} else {
-												//System.out.println(chunk.getPos() + " || Unknown Biome palette entry: " + biomePaletteEntry);
-											}*/
+											//System.out.println("Biome palette entry " + i + ": " + biomePaletteEntry);
 										}
 
+										// Data Array
 										if (bufferCopy.readableBytes() >= 1) {
 											int biomeDataArrayLength = bufferCopy.readVarInt();
-											int biomeBytesToSkip = biomeDataArrayLength * 8;
-											if (bufferCopy.readableBytes() >= biomeBytesToSkip) {
-												bufferCopy.skipBytes(biomeBytesToSkip);
+											//System.out.println("Biome Data Array Length: " + biomeDataArrayLength);
+											if (bufferCopy.readableBytes() >= biomeDataArrayLength * 8) {
+												bufferCopy.skipBytes(biomeDataArrayLength * 8);
 											} else {
 												//System.out.println("Not enough data for biome array, skipping remaining: " + bufferCopy.readableBytes());
 												bufferCopy.skipBytes(bufferCopy.readableBytes());
+												break;
 											}
 										} else {
 											//System.out.println("Not enough data for biome array length");
+											break;
+										}
+									} else if (biomeBitsPerEntry == 6) {
+										// Direct palette (no palette sent)
+										int biomeDataArrayLength = bufferCopy.readVarInt();
+										//System.out.println("Biome Data Array Length (Direct): " + biomeDataArrayLength);
+										if (bufferCopy.readableBytes() >= biomeDataArrayLength * 8) {
+											bufferCopy.skipBytes(biomeDataArrayLength * 8);
+										} else {
+											//System.out.println("Not enough data for biome array, skipping remaining: " + bufferCopy.readableBytes());
+											bufferCopy.skipBytes(bufferCopy.readableBytes());
+											break;
 										}
 									} else {
 										//System.out.println("Invalid biome bits per entry: " + biomeBitsPerEntry);
 										break;
 									}
 
+
+									loops++;
+
 								}
+
 								//System.out.println("newChunkQuantifier: " + newChunkQuantifier + ", loops: " + loops);
-								double percentage = ((newChunkQuantifier/((double)loops-1))*100);
-								//System.out.println("Percentage: " + percentage);
-								if (percentage >=40) {
-									isNewChunk = true;
+								if (loops > 0) {
+									double percentage = ((double) newChunkQuantifier / loops) * 100;
+									//System.out.println("Percentage: " + percentage);
+									if (percentage >= 45) {
+										isNewChunk = true;
+									}
 								}
-							} catch (Exception e){
-								//e.printStackTrace();
+							} catch (Exception e) {
+								e.printStackTrace();
 								//System.out.println("newChunkQuantifier: " + newChunkQuantifier + ", loops: " + loops);
-								double percentage = ((newChunkQuantifier/((double)loops-1))*100);
-								//System.out.println("Percentage: " + percentage);
-								if (percentage >=40) {
-									isNewChunk = true;
+								if (loops > 0) {
+									double percentage = ((double) newChunkQuantifier / loops) * 100;
+									//System.out.println("Percentage: " + percentage);
+									if (percentage >= 45) {
+										isNewChunk = true;
+									}
 								}
 							}
 						}
