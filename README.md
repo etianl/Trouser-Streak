@@ -108,6 +108,7 @@ In no particular order
 ***l33t new 3xpl0its:***
 - NewerNewChunks detects new chunks by scanning the order of chunk section palettes, and also by checking the capacity of the writer index of chunks. Or you can use the old methods which use liquid flow and block updates.
 - The **PaletteExploit** option enabled by default detects new chunks by scanning the order of chunk section palettes.
+- The **PaletteExploit** highlights chunks that are being updated from an old version of minecraft as their own color.
 - The **PaletteExploit** does not work in Minecraft servers where their version is less than 1.18. For those servers, disable **ByteExploit** and enable Liquid flow and BlockExploit.
 - The **PaletteExploit** does not work in flat worlds that are entirely void.
 - In the Overworld dimension there are very rare false old chunks in the newchunks (not enough to notice mostly).
@@ -115,7 +116,7 @@ In no particular order
 - The chunks that stay loaded due to the spawn chunk region always show up as new for some reason.
 
 *These next things are to be used if **PaletteExploit** doesn't work for you:*
-- the **Pre 1.17 OldChunk Detector** detects chunks in the overworld that do not contain copper ore above a certain Y level. This should be used when the .world command returns "This chunk is pre 1.17 generation!" when run at spawn.)
+- the **Pre 1.17 OldChunk Detector** detects chunks in the overworld that do not contain copper ore above a certain Y level. This should be used when the .world command returns "This chunk is pre 1.17 generation!" when run at spawn and only if the server is version 1.17.x.
 - The **LiquidExploit** option estimates possible newchunks based on liquid being just starting to flow for the first time.
 - The **BlockUpdateExploit** option estimates possible newchunks based on block update packets. SOME OF THESE CHUNKS MAY BE OLD. Advanced Mode is needed to filter any false positives out. See Special Options notes for usage.
 - The **BlockUpdateExploit** option can produce false positives if you are hanging around in the same location for a while. It's best to keep moving for it to work best.
