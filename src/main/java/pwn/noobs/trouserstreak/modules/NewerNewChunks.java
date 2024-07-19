@@ -618,7 +618,7 @@ public class NewerNewChunks extends Module {
 						}
 					}
 				}
-				if (!olderOldChunks.contains(oldpos) && oldchunksdetector.get() && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos) && foundAnyOre == true && isNewGeneration == false && mc.world.getRegistryKey().getValue().toString().toLowerCase().contains("overworld")) {
+				if (!olderOldChunks.contains(oldpos) && oldchunksdetector.get() && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos) && foundAnyOre && isNewGeneration && mc.world.getRegistryKey().getValue().toString().toLowerCase().contains("overworld")) {
 					olderOldChunks.add(oldpos);
 					if (save.get()){
 						saveOlderOldChunkData(oldpos);
@@ -741,20 +741,7 @@ public class NewerNewChunks extends Module {
 							//System.out.println("Invalid biome bits per entry: " + biomeBitsPerEntry);
 							return;
 						}
-					} else if (mc.world.getRegistryKey() == World.NETHER) {
-						if (buf.readableBytes() < 3) return; // Ensure we have at least 3 bytes (short + byte)
-
-						buf.readShort();
-						int blockBitsPerEntry = buf.readUnsignedByte();
-
-						if (blockBitsPerEntry >= 4 && blockBitsPerEntry <= 8) {
-							int blockPaletteLength = buf.readVarInt();
-							//System.out.println("Block palette length: " + blockPaletteLength);
-							int blockPaletteEntry = buf.readVarInt();
-							if (blockPaletteEntry == 0) isNewChunk = true;
-							//System.out.println("Block palette entry: " + blockPaletteEntry);
-						}
-					} else if (mc.world.getRegistryKey() == World.OVERWORLD) {
+					} else if (mc.world.getRegistryKey() == World.OVERWORLD || mc.world.getRegistryKey() == World.NETHER) {
 						PacketByteBuf bufferCopy = new PacketByteBuf(Unpooled.copiedBuffer(buf.nioBuffer())); //copy the packetByteBuf for later use
 						if (buf.readableBytes() < 3) return; // Ensure we have at least 3 bytes (short + byte)
 
@@ -772,6 +759,7 @@ public class NewerNewChunks extends Module {
 
 						int loops = 0;
 						int newChunkQuantifier = 0;
+						int oldChunkQuantifier = 0;
 
 						try {
 							while (bufferCopy.readableBytes() > 0 && loops<8) {
@@ -807,6 +795,7 @@ public class NewerNewChunks extends Module {
 									//System.out.println("Section: " + loops + " | bstates.size() "+bstates.size());
 									//System.out.println("Section: " + loops + " | blockPaletteLength"+blockPaletteLength);
 									int isNewSection = 0;
+									int isOlderOldSection = 0;
 									int bstatesSize = bstates.size();
 									if (bstatesSize<=1) bstatesSize = blockPaletteLength;
 									if (bstatesSize<blockPaletteLength) {
@@ -818,10 +807,10 @@ public class NewerNewChunks extends Module {
 										int blockPaletteEntry = bufferCopy.readVarInt();
 										//BlockState blockState = Block.STATE_IDS.get(blockPaletteEntry);
 										//System.out.println("Section: " + loops + " | Block palette entry " + i + ": " + blockPaletteEntry + " | Blockstate: " + blockState);
-										if (i == 0 && blockPaletteEntry == 0) isNewSection++;
-										if (i == 1 && (blockPaletteEntry == 80 || blockPaletteEntry == 1 || blockPaletteEntry == 9 || blockPaletteEntry == 5781)) isNewSection++;
-										if (i == 2 && (blockPaletteEntry == 5781 || blockPaletteEntry == 10 || blockPaletteEntry == 22318)) isNewSection++;
-										if (loops == 4 && blockPaletteEntry == 79) {
+										if (i == 0 && blockPaletteEntry == 0 && mc.world.getRegistryKey() == World.OVERWORLD) isNewSection++;
+										if (i == 1 && (blockPaletteEntry == 80 || blockPaletteEntry == 1 || blockPaletteEntry == 9 || blockPaletteEntry == 5781) && mc.world.getRegistryKey() == World.OVERWORLD) isNewSection++;
+										if (i == 2 && (blockPaletteEntry == 5781 || blockPaletteEntry == 10 || blockPaletteEntry == 22318) && mc.world.getRegistryKey() == World.OVERWORLD) isNewSection++;
+										if (loops == 4 && blockPaletteEntry == 79 && mc.world.getRegistryKey() == World.OVERWORLD) {
 											//System.out.println("CHUNK IS BEING UPDATED!!!!!!");
 											if (!olderOldChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
 												olderOldChunks.add(oldpos);
@@ -831,7 +820,9 @@ public class NewerNewChunks extends Module {
 												return;
 											}
 										}
+										if (blockPaletteEntry == 0 && mc.world.getRegistryKey() == World.NETHER) isOlderOldSection++;
 									}
+									if (isOlderOldSection>=2) oldChunkQuantifier++;
 									if (isNewSection >= 2) newChunkQuantifier++;
 
 									// Data Array
@@ -927,10 +918,26 @@ public class NewerNewChunks extends Module {
 
 							//System.out.println("newChunkQuantifier: " + newChunkQuantifier + ", loops: " + loops);
 							if (loops > 0) {
-								double percentage = ((double) newChunkQuantifier / loops) * 100;
-								//System.out.println("Percentage: " + percentage);
-								if (percentage >= 65) {
-									isNewChunk = true;
+								if (mc.world.getRegistryKey() == World.NETHER){
+									double oldpercentage = ((double) oldChunkQuantifier / loops) * 100;
+									//System.out.println("Percentage: " + percentage);
+									if (oldpercentage >= 25) {
+										isNewChunk = false;
+										if (!olderOldChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
+											olderOldChunks.add(oldpos);
+											if (save.get()){
+												saveOlderOldChunkData(oldpos);
+											}
+											return;
+										}
+									}
+								}
+								if (mc.world.getRegistryKey() == World.OVERWORLD){
+									double percentage = ((double) newChunkQuantifier / loops) * 100;
+									//System.out.println("Percentage: " + percentage);
+									if (percentage >= 65) {
+										isNewChunk = true;
+									}
 								}
 							}
 						} catch (Exception e) {
@@ -946,7 +953,7 @@ public class NewerNewChunks extends Module {
 						}
 					}
 					if (firstchunkappearsnew) isNewChunk = true;
-					if (isNewChunk == false) {
+					if (isNewChunk) {
 						try {
 							if (!olderOldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
 								oldChunks.add(oldpos);
@@ -958,7 +965,7 @@ public class NewerNewChunks extends Module {
 						} catch (Exception e) {
 							//e.printStackTrace();
 						}
-					} else if (isNewChunk == true) {
+					} else if (isNewChunk) {
 						try {
 							if (!olderOldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
 								newChunks.add(oldpos);
