@@ -618,7 +618,7 @@ public class NewerNewChunks extends Module {
 						}
 					}
 				}
-				if (!olderOldChunks.contains(oldpos) && oldchunksdetector.get() && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos) && foundAnyOre && isNewGeneration && mc.world.getRegistryKey().getValue().toString().toLowerCase().contains("overworld")) {
+				if (!olderOldChunks.contains(oldpos) && oldchunksdetector.get() && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos) && foundAnyOre && !isNewGeneration && mc.world.getRegistryKey().getValue().toString().toLowerCase().contains("overworld")) {
 					olderOldChunks.add(oldpos);
 					if (save.get()){
 						saveOlderOldChunkData(oldpos);
@@ -863,8 +863,8 @@ public class NewerNewChunks extends Module {
 								if (biomeBitsPerEntry == 0) {
 									// Single valued palette
 									int singleBiomeValue = bufferCopy.readVarInt();
-									//Registry<Biome> biomeRegistry = mc.world.getRegistryManager().get(RegistryKeys.BIOME);
-									//Biome biome = biomeRegistry.get(singleBiomeValue);
+									Registry<Biome> biomeRegistry = mc.world.getRegistryManager().get(RegistryKeys.BIOME);
+									Biome biome = biomeRegistry.get(singleBiomeValue);
 									//System.out.println("Section: " + loops + " | Single Biome Value: " + singleBiomeValue + " | Biome: " + biome.toString());
 									bufferCopy.readVarInt(); // Data Array Length (should be 0)
 								} else if (biomeBitsPerEntry >= 1 && biomeBitsPerEntry <= 3) {
@@ -877,8 +877,8 @@ public class NewerNewChunks extends Module {
 											break;
 										}
 										int biomePaletteEntry = bufferCopy.readVarInt();
-										//Registry<Biome> biomeRegistry = mc.world.getRegistryManager().get(RegistryKeys.BIOME);
-										//Biome biome = biomeRegistry.get(biomePaletteEntry);
+										Registry<Biome> biomeRegistry = mc.world.getRegistryManager().get(RegistryKeys.BIOME);
+										Biome biome = biomeRegistry.get(biomePaletteEntry);
 										//System.out.println("Section: " + loops + " | Biome palette entry " + i + ": " + biomePaletteEntry + " | Biome: " + biome.toString());
 									}
 
@@ -920,7 +920,7 @@ public class NewerNewChunks extends Module {
 							if (loops > 0) {
 								if (mc.world.getRegistryKey() == World.NETHER){
 									double oldpercentage = ((double) oldChunkQuantifier / loops) * 100;
-									//System.out.println("Percentage: " + percentage);
+									//System.out.println("Percentage: " + oldpercentage);
 									if (oldpercentage >= 25) {
 										isNewChunk = false;
 										if (!olderOldChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
@@ -942,8 +942,21 @@ public class NewerNewChunks extends Module {
 							}
 						} catch (Exception e) {
 							e.printStackTrace();
-							//System.out.println("newChunkQuantifier: " + newChunkQuantifier + ", loops: " + loops);
-							if (loops > 0) {
+							if (mc.world.getRegistryKey() == World.NETHER){
+								double oldpercentage = ((double) oldChunkQuantifier / loops) * 100;
+								//System.out.println("Percentage: " + percentage);
+								if (oldpercentage >= 25) {
+									isNewChunk = false;
+									if (!olderOldChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
+										olderOldChunks.add(oldpos);
+										if (save.get()){
+											saveOlderOldChunkData(oldpos);
+										}
+										return;
+									}
+								}
+							}
+							if (mc.world.getRegistryKey() == World.OVERWORLD){
 								double percentage = ((double) newChunkQuantifier / loops) * 100;
 								//System.out.println("Percentage: " + percentage);
 								if (percentage >= 65) {
@@ -953,7 +966,7 @@ public class NewerNewChunks extends Module {
 						}
 					}
 					if (firstchunkappearsnew) isNewChunk = true;
-					if (isNewChunk) {
+					if (!isNewChunk) {
 						try {
 							if (!olderOldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
 								oldChunks.add(oldpos);
