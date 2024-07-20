@@ -630,299 +630,77 @@ public class NewerNewChunks extends Module {
 					PacketByteBuf buf = packet.getChunkData().getSectionsDataBuf();
 					boolean isNewChunk = false;
 					boolean firstchunkappearsnew = false;
+					PacketByteBuf bufferCopy = new PacketByteBuf(Unpooled.copiedBuffer(buf.nioBuffer())); //copy the packetByteBuf for later use
+					if (buf.readableBytes() < 3) return; // Ensure we have at least 3 bytes (short + byte)
 
-					if (mc.world.getRegistryKey() == World.END) {
-						// Chunk Section structure
-						if (buf.readableBytes() < 2) return; // Ensure we have at least 2 bytes for block count
+					buf.readShort();
 
-						short blockCount = buf.readShort();
-						//System.out.println("Block count: " + blockCount);
+					int blockBitsPerEntry = buf.readUnsignedByte();
+					if (blockBitsPerEntry >= 4 && blockBitsPerEntry <= 8) {
+						int blockPaletteLength = buf.readVarInt();
+						//System.out.println("Block palette length: " + blockPaletteLength);
+						int blockPaletteEntry = buf.readVarInt();
+						if (blockPaletteEntry == 0 && mc.world.getRegistryKey() != World.END) firstchunkappearsnew = true;
+						//BlockState blockState = Block.STATE_IDS.get(blockPaletteEntry);
+						//System.out.println("Block palette entry: " + blockState);
+					}
+					if (bufferCopy.readableBytes() < 2) return; // Ensure we have at least 2 bytes for block count
 
-						// Block states Paletted Container
-						if (buf.readableBytes() < 1) return;
-						int blockBitsPerEntry = buf.readUnsignedByte();
-						//System.out.println("Block Bits Per Entry: " + blockBitsPerEntry);
+					int loops = 0;
+					int newChunkQuantifier = 0;
+					int oldChunkQuantifier = 0;
 
-						if (blockBitsPerEntry == 0) {
-							// Single valued palette
-							int singleBlockValue = buf.readVarInt();
-							//System.out.println("Single Block Value: " + singleBlockValue);
-							buf.readVarInt(); // Data Array Length (should be 0)
-						} else if (blockBitsPerEntry >= 4 && blockBitsPerEntry <= 8) {
-							// Indirect palette
-							int blockPaletteLength = buf.readVarInt();
-							//System.out.println("Block palette length: " + blockPaletteLength);
-							for (int i = 0; i < blockPaletteLength; i++) {
-								int blockPaletteEntry = buf.readVarInt();
-								//System.out.println("Block palette entry " + i + ": " + blockPaletteEntry);
-							}
+					try {
+						while (bufferCopy.readableBytes() > 0 && loops<8) {
+							// Chunk Section structure
+							short blockCount = bufferCopy.readShort();
+							//System.out.println("Section: " + loops + " | Block count: " + blockCount);
 
-							// Data Array
-							int blockDataArrayLength = buf.readVarInt();
-							//System.out.println("Block Data Array Length: " + blockDataArrayLength);
-							if (buf.readableBytes() >= blockDataArrayLength * 8) {
-								for (int i = 0; i < blockDataArrayLength; i++) {
-									long dataEntry = buf.readLong();
-									// Process dataEntry if needed
-								}
-							} else {
-								//System.out.println("Not enough data for block array");
-								return;
-							}
-						} else if (blockBitsPerEntry == 15) {
-							// Direct palette (no palette sent)
-							int blockDataArrayLength = buf.readVarInt();
-							//System.out.println("Block Data Array Length: " + blockDataArrayLength);
-							if (buf.readableBytes() >= blockDataArrayLength * 8) {
-								for (int i = 0; i < blockDataArrayLength; i++) {
-									long dataEntry = buf.readLong();
-									// Process dataEntry if needed
-								}
-							} else {
-								//System.out.println("Not enough data for block array");
-								return;
-							}
-						} else {
-							//System.out.println("Invalid block bits per entry: " + blockBitsPerEntry);
-							return;
-						}
+							// Block states Paletted Container
+							if (bufferCopy.readableBytes() < 1) break;
+							int blockBitsPerEntry2 = bufferCopy.readUnsignedByte();
+							//System.out.println("Section: " + loops + " | Block Bits Per Entry: " + blockBitsPerEntry2);
 
-						// Biomes Paletted Container
-						if (buf.readableBytes() < 1) {
-							//System.out.println("No biome data available");
-							return;
-						}
-
-						int biomeBitsPerEntry = buf.readUnsignedByte();
-						//System.out.println("Biome Bits Per Entry: " + biomeBitsPerEntry);
-
-						if (biomeBitsPerEntry == 0) {
-							// Single valued palette
-							int singleBiomeValue = buf.readVarInt();
-							//System.out.println("Single Biome Value: " + singleBiomeValue);
-							if (singleBiomeValue == 39) isNewChunk = true;
-							buf.readVarInt(); // Data Array Length (should be 0)
-						} else if (biomeBitsPerEntry >= 1 && biomeBitsPerEntry <= 3) {
-							// Indirect palette
-							int biomePaletteLength = buf.readVarInt();
-							//System.out.println("Biome palette length: " + biomePaletteLength);
-							for (int i = 0; i < biomePaletteLength; i++) {
-								int biomePaletteEntry = buf.readVarInt();
-								//System.out.println("Biome palette entry " + i + ": " + biomePaletteEntry);
-								if (i == 0 && biomePaletteEntry == 39) isNewChunk = true;
-							}
-
-							// Data Array
-							int biomeDataArrayLength = buf.readVarInt();
-							//System.out.println("Biome Data Array Length: " + biomeDataArrayLength);
-							if (buf.readableBytes() >= biomeDataArrayLength * 8) {
-								for (int i = 0; i < biomeDataArrayLength; i++) {
-									long dataEntry = buf.readLong();
-									// Process dataEntry if needed
-								}
-							} else {
-								//System.out.println("Not enough data for biome array");
-								return;
-							}
-						} else if (biomeBitsPerEntry == 6) {
-							// Direct palette (no palette sent)
-							int biomeDataArrayLength = buf.readVarInt();
-							//System.out.println("Biome Data Array Length: " + biomeDataArrayLength);
-							if (buf.readableBytes() >= biomeDataArrayLength * 8) {
-								for (int i = 0; i < biomeDataArrayLength; i++) {
-									long dataEntry = buf.readLong();
-									// Process dataEntry if needed
-								}
-							} else {
-								//System.out.println("Not enough data for biome array");
-								return;
-							}
-						} else {
-							//System.out.println("Invalid biome bits per entry: " + biomeBitsPerEntry);
-							return;
-						}
-					} else if (mc.world.getRegistryKey() == World.OVERWORLD || mc.world.getRegistryKey() == World.NETHER) {
-						PacketByteBuf bufferCopy = new PacketByteBuf(Unpooled.copiedBuffer(buf.nioBuffer())); //copy the packetByteBuf for later use
-						if (buf.readableBytes() < 3) return; // Ensure we have at least 3 bytes (short + byte)
-
-						buf.readShort();
-
-						int blockBitsPerEntry = buf.readUnsignedByte();
-						if (blockBitsPerEntry >= 4 && blockBitsPerEntry <= 8) {
-							int blockPaletteLength = buf.readVarInt();
-							//System.out.println("Block palette length: " + blockPaletteLength);
-							int blockPaletteEntry = buf.readVarInt();
-							if (blockPaletteEntry == 0) firstchunkappearsnew = true;
-							//System.out.println("Block palette entry " + i + ": " + blockPaletteEntry);
-						}
-						if (bufferCopy.readableBytes() < 2) return; // Ensure we have at least 2 bytes for block count
-
-						int loops = 0;
-						int newChunkQuantifier = 0;
-						int oldChunkQuantifier = 0;
-
-						try {
-							while (bufferCopy.readableBytes() > 0 && loops<8) {
-								// Chunk Section structure
-								short blockCount = bufferCopy.readShort();
-								//System.out.println("Section: " + loops + " | Block count: " + blockCount);
-
-								// Block states Paletted Container
-								if (bufferCopy.readableBytes() < 1) break;
-								int blockBitsPerEntry2 = bufferCopy.readUnsignedByte();
-								//System.out.println("Section: " + loops + " | Block Bits Per Entry: " + blockBitsPerEntry2);
-
-								if (blockBitsPerEntry2 == 0) {
-									// Single valued palette
-									int singleBlockValue = bufferCopy.readVarInt();
-									//BlockState blockState = Block.STATE_IDS.get(singleBlockValue);
-									//System.out.println("Section: " + loops + " | Single Block Value: " + singleBlockValue + " | Blockstate: " + blockState);
-									bufferCopy.readVarInt(); // Data Array Length (should be 0)
-								} else if (blockBitsPerEntry2 >= 4 && blockBitsPerEntry2 <= 8) {
-									ChunkSection section = chunk.getSectionArray()[loops];
-									PalettedContainer<BlockState> palettedContainer = section.getBlockStateContainer();
-									Set<BlockState> bstates = new HashSet<>();
-									for (int x = 0; x < 16; x++){
-										for (int y = 0; y < 16; y++){
-											for (int z = 0; z < 16; z++){
-												bstates.add(palettedContainer.get(x, y, z));
-											}
+							if (blockBitsPerEntry2 == 0) {
+								// Single valued palette
+								int singleBlockValue = bufferCopy.readVarInt();
+								//BlockState blockState = Block.STATE_IDS.get(singleBlockValue);
+								//System.out.println("Section: " + loops + " | Single Block Value: " + singleBlockValue + " | Blockstate: " + blockState);
+								bufferCopy.readVarInt(); // Data Array Length (should be 0)
+							} else if (blockBitsPerEntry2 >= 4 && blockBitsPerEntry2 <= 8) {
+								ChunkSection section = chunk.getSectionArray()[loops];
+								PalettedContainer<BlockState> palettedContainer = section.getBlockStateContainer();
+								Set<BlockState> bstates = new HashSet<>();
+								for (int x = 0; x < 16; x++){
+									for (int y = 0; y < 16; y++){
+										for (int z = 0; z < 16; z++){
+											bstates.add(palettedContainer.get(x, y, z));
 										}
 									}
-									// Indirect palette
-									int blockPaletteLength = bufferCopy.readVarInt();
-									//System.out.println("Section: " + loops + " | Block palette length: " + blockPaletteLength);
-									//System.out.println("Section: " + loops + " | bstates.size() "+bstates.size());
-									//System.out.println("Section: " + loops + " | blockPaletteLength"+blockPaletteLength);
-									int isNewSection = 0;
-									int isOlderOldSection = 0;
-									int bstatesSize = bstates.size();
-									if (bstatesSize<=1) bstatesSize = blockPaletteLength;
-									if (bstatesSize<blockPaletteLength) {
-										isNewSection = 2;
-										//System.out.println("Section: " + loops + " | smaller bstates size!!!!!!!");
-										newChunkQuantifier++; //double the weight of this
-									}
-									for (int i = 0; i < blockPaletteLength; i++) {
-										int blockPaletteEntry = bufferCopy.readVarInt();
-										//BlockState blockState = Block.STATE_IDS.get(blockPaletteEntry);
-										//System.out.println("Section: " + loops + " | Block palette entry " + i + ": " + blockPaletteEntry + " | Blockstate: " + blockState);
-										if (i == 0 && blockPaletteEntry == 0 && mc.world.getRegistryKey() == World.OVERWORLD) isNewSection++;
-										if (i == 1 && (blockPaletteEntry == 80 || blockPaletteEntry == 1 || blockPaletteEntry == 9 || blockPaletteEntry == 5781) && mc.world.getRegistryKey() == World.OVERWORLD) isNewSection++;
-										if (i == 2 && (blockPaletteEntry == 5781 || blockPaletteEntry == 10 || blockPaletteEntry == 22318) && mc.world.getRegistryKey() == World.OVERWORLD) isNewSection++;
-										if (loops == 4 && blockPaletteEntry == 79 && mc.world.getRegistryKey() == World.OVERWORLD) {
-											//System.out.println("CHUNK IS BEING UPDATED!!!!!!");
-											if (!olderOldChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
-												olderOldChunks.add(oldpos);
-												if (save.get()){
-													saveOlderOldChunkData(oldpos);
-												}
-												return;
-											}
-										}
-										if (blockPaletteEntry == 0 && mc.world.getRegistryKey() == World.NETHER) isOlderOldSection++;
-									}
-									if (isOlderOldSection>=2) oldChunkQuantifier++;
-									if (isNewSection >= 2) newChunkQuantifier++;
-
-									// Data Array
-									int blockDataArrayLength = bufferCopy.readVarInt();
-									//System.out.println("Section: " + loops + " | Block Data Array Length: " + blockDataArrayLength);
-									if (bufferCopy.readableBytes() >= blockDataArrayLength * 8) {
-										bufferCopy.skipBytes(blockDataArrayLength * 8);
-									} else {
-										//System.out.println("Section: " + loops + " | Not enough data for block array, skipping remaining: " + bufferCopy.readableBytes());
-										bufferCopy.skipBytes(bufferCopy.readableBytes());
-										break;
-									}
-								} else if (blockBitsPerEntry2 == 15) {
-									// Direct palette (no palette sent)
-									int blockDataArrayLength = bufferCopy.readVarInt();
-									//System.out.println("Section: " + loops + " | Block Data Array Length (Direct): " + blockDataArrayLength);
-									if (bufferCopy.readableBytes() >= blockDataArrayLength * 8) {
-										bufferCopy.skipBytes(blockDataArrayLength * 8);
-									} else {
-										//System.out.println("Section: " + loops + " | Not enough data for block array, skipping remaining: " + bufferCopy.readableBytes());
-										bufferCopy.skipBytes(bufferCopy.readableBytes());
-										break;
-									}
-								} else {
-									//System.out.println("Section: " + loops + " | Invalid block bits per entry: " + blockBitsPerEntry2);
-									break;
 								}
-
-								// Biomes Paletted Container
-								if (bufferCopy.readableBytes() < 1) {
-									//System.out.println("Section: " + loops + " | No biome data available");
-									break;
+								// Indirect palette
+								int blockPaletteLength = bufferCopy.readVarInt();
+								//System.out.println("Section: " + loops + " | Block palette length: " + blockPaletteLength);
+								//System.out.println("Section: " + loops + " | bstates.size() "+bstates.size());
+								//System.out.println("Section: " + loops + " | blockPaletteLength"+blockPaletteLength);
+								int isNewSection = 0;
+								int isOlderOldSection = 0;
+								int bstatesSize = bstates.size();
+								if (bstatesSize<=1) bstatesSize = blockPaletteLength;
+								if (bstatesSize<blockPaletteLength) {
+									isNewSection = 2;
+									//System.out.println("Section: " + loops + " | smaller bstates size!!!!!!!");
+									newChunkQuantifier++; //double the weight of this
 								}
-
-								int biomeBitsPerEntry = bufferCopy.readUnsignedByte();
-								//System.out.println("Section: " + loops + " | Biome Bits Per Entry: " + biomeBitsPerEntry);
-
-								if (biomeBitsPerEntry == 0) {
-									// Single valued palette
-									int singleBiomeValue = bufferCopy.readVarInt();
-									Registry<Biome> biomeRegistry = mc.world.getRegistryManager().get(RegistryKeys.BIOME);
-									Biome biome = biomeRegistry.get(singleBiomeValue);
-									//System.out.println("Section: " + loops + " | Single Biome Value: " + singleBiomeValue + " | Biome: " + biome.toString());
-									bufferCopy.readVarInt(); // Data Array Length (should be 0)
-								} else if (biomeBitsPerEntry >= 1 && biomeBitsPerEntry <= 3) {
-									// Indirect palette
-									int biomePaletteLength = bufferCopy.readVarInt();
-									//System.out.println("Section: " + loops + " | Biome palette length: " + biomePaletteLength);
-									for (int i = 0; i < biomePaletteLength; i++) {
-										if (bufferCopy.readableBytes() < 1) {
-											//System.out.println("Section: " + loops + " | Incomplete biome palette data");
-											break;
-										}
-										int biomePaletteEntry = bufferCopy.readVarInt();
-										Registry<Biome> biomeRegistry = mc.world.getRegistryManager().get(RegistryKeys.BIOME);
-										Biome biome = biomeRegistry.get(biomePaletteEntry);
-										//System.out.println("Section: " + loops + " | Biome palette entry " + i + ": " + biomePaletteEntry + " | Biome: " + biome.toString());
-									}
-
-									// Data Array
-									if (bufferCopy.readableBytes() >= 1) {
-										int biomeDataArrayLength = bufferCopy.readVarInt();
-										//System.out.println("Section: " + loops + " | Biome Data Array Length: " + biomeDataArrayLength);
-										if (bufferCopy.readableBytes() >= biomeDataArrayLength * 8) {
-											bufferCopy.skipBytes(biomeDataArrayLength * 8);
-										} else {
-											//System.out.println("Section: " + loops + " | Not enough data for biome array, skipping remaining: " + bufferCopy.readableBytes());
-											bufferCopy.skipBytes(bufferCopy.readableBytes());
-											break;
-										}
-									} else {
-										//System.out.println("Section: " + loops + " | Not enough data for biome array length");
-										break;
-									}
-								} else if (biomeBitsPerEntry == 6) {
-									// Direct palette (no palette sent)
-									int biomeDataArrayLength = bufferCopy.readVarInt();
-									//System.out.println("Section: " + loops + " | Biome Data Array Length (Direct): " + biomeDataArrayLength);
-									if (bufferCopy.readableBytes() >= biomeDataArrayLength * 8) {
-										bufferCopy.skipBytes(biomeDataArrayLength * 8);
-									} else {
-										//System.out.println("Section: " + loops + " | Not enough data for biome array, skipping remaining: " + bufferCopy.readableBytes());
-										bufferCopy.skipBytes(bufferCopy.readableBytes());
-										break;
-									}
-								} else {
-									//System.out.println("Section: " + loops + " | Invalid biome bits per entry: " + biomeBitsPerEntry);
-									break;
-								}
-
-								loops++;
-							}
-
-							//System.out.println("newChunkQuantifier: " + newChunkQuantifier + ", loops: " + loops);
-							if (loops > 0) {
-								if (mc.world.getRegistryKey() == World.NETHER){
-									double oldpercentage = ((double) oldChunkQuantifier / loops) * 100;
-									//System.out.println("Percentage: " + oldpercentage);
-									if (oldpercentage >= 25) {
-										isNewChunk = false;
+								for (int i = 0; i < blockPaletteLength; i++) {
+									int blockPaletteEntry = bufferCopy.readVarInt();
+									//BlockState blockState = Block.STATE_IDS.get(blockPaletteEntry);
+									//System.out.println("Section: " + loops + " | Block palette entry " + i + ": " + blockPaletteEntry + " | Blockstate: " + blockState);
+									if (i == 0 && blockPaletteEntry == 0 && mc.world.getRegistryKey() == World.OVERWORLD) isNewSection++;
+									if (i == 1 && (blockPaletteEntry == 80 || blockPaletteEntry == 1 || blockPaletteEntry == 9 || blockPaletteEntry == 5781) && mc.world.getRegistryKey() == World.OVERWORLD) isNewSection++;
+									if (i == 2 && (blockPaletteEntry == 5781 || blockPaletteEntry == 10 || blockPaletteEntry == 22318) && mc.world.getRegistryKey() == World.OVERWORLD) isNewSection++;
+									if (loops == 4 && blockPaletteEntry == 79 && mc.world.getRegistryKey() == World.OVERWORLD) {
+										//System.out.println("CHUNK IS BEING UPDATED!!!!!!");
 										if (!olderOldChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
 											olderOldChunks.add(oldpos);
 											if (save.get()){
@@ -931,20 +709,109 @@ public class NewerNewChunks extends Module {
 											return;
 										}
 									}
+									if (blockPaletteEntry == 0 && mc.world.getRegistryKey() == World.NETHER | mc.world.getRegistryKey() == World.END) isOlderOldSection++;
 								}
-								if (mc.world.getRegistryKey() == World.OVERWORLD){
-									double percentage = ((double) newChunkQuantifier / loops) * 100;
-									//System.out.println("Percentage: " + percentage);
-									if (percentage >= 65) {
-										isNewChunk = true;
-									}
+								if (isOlderOldSection>=2) oldChunkQuantifier++;
+								if (isNewSection >= 2) newChunkQuantifier++;
+
+								// Data Array
+								int blockDataArrayLength = bufferCopy.readVarInt();
+								//System.out.println("Section: " + loops + " | Block Data Array Length: " + blockDataArrayLength);
+								if (bufferCopy.readableBytes() >= blockDataArrayLength * 8) {
+									bufferCopy.skipBytes(blockDataArrayLength * 8);
+								} else {
+									//System.out.println("Section: " + loops + " | Not enough data for block array, skipping remaining: " + bufferCopy.readableBytes());
+									bufferCopy.skipBytes(bufferCopy.readableBytes());
+									break;
 								}
+							} else if (blockBitsPerEntry2 == 15) {
+								// Direct palette (no palette sent)
+								int blockDataArrayLength = bufferCopy.readVarInt();
+								//System.out.println("Section: " + loops + " | Block Data Array Length (Direct): " + blockDataArrayLength);
+								if (bufferCopy.readableBytes() >= blockDataArrayLength * 8) {
+									bufferCopy.skipBytes(blockDataArrayLength * 8);
+								} else {
+									//System.out.println("Section: " + loops + " | Not enough data for block array, skipping remaining: " + bufferCopy.readableBytes());
+									bufferCopy.skipBytes(bufferCopy.readableBytes());
+									break;
+								}
+							} else {
+								//System.out.println("Section: " + loops + " | Invalid block bits per entry: " + blockBitsPerEntry2);
+								break;
 							}
-						} catch (Exception e) {
-							e.printStackTrace();
-							if (mc.world.getRegistryKey() == World.NETHER){
+
+							// Biomes Paletted Container
+							if (bufferCopy.readableBytes() < 1) {
+								//System.out.println("Section: " + loops + " | No biome data available");
+								break;
+							}
+
+							int biomeBitsPerEntry = bufferCopy.readUnsignedByte();
+							//System.out.println("Section: " + loops + " | Biome Bits Per Entry: " + biomeBitsPerEntry);
+
+							if (biomeBitsPerEntry == 0) {
+								// Single valued palette
+								int singleBiomeValue = bufferCopy.readVarInt();
+								//Registry<Biome> biomeRegistry = mc.world.getRegistryManager().get(RegistryKeys.BIOME);
+								//Biome biome = biomeRegistry.get(singleBiomeValue);
+								//System.out.println("Section: " + loops + " | Single Biome Value: " + singleBiomeValue + " | Biome: " + biome.toString());
+								if (singleBiomeValue == 39 && mc.world.getRegistryKey() == World.END) isNewChunk = true;
+								bufferCopy.readVarInt(); // Data Array Length (should be 0)
+							} else if (biomeBitsPerEntry >= 1 && biomeBitsPerEntry <= 3) {
+								// Indirect palette
+								int biomePaletteLength = bufferCopy.readVarInt();
+								//System.out.println("Section: " + loops + " | Biome palette length: " + biomePaletteLength);
+								for (int i = 0; i < biomePaletteLength; i++) {
+									if (bufferCopy.readableBytes() < 1) {
+										//System.out.println("Section: " + loops + " | Incomplete biome palette data");
+										break;
+									}
+									int biomePaletteEntry = bufferCopy.readVarInt();
+									//Registry<Biome> biomeRegistry = mc.world.getRegistryManager().get(RegistryKeys.BIOME);
+									//Biome biome = biomeRegistry.get(biomePaletteEntry);
+									//System.out.println("Section: " + loops + " | Biome palette entry " + i + ": " + biomePaletteEntry + " | Biome: " + biome.toString());
+									if (i == 0 && biomePaletteEntry == 39 && mc.world.getRegistryKey() == World.END) isNewChunk = true;
+								}
+
+								// Data Array
+								if (bufferCopy.readableBytes() >= 1) {
+									int biomeDataArrayLength = bufferCopy.readVarInt();
+									//System.out.println("Section: " + loops + " | Biome Data Array Length: " + biomeDataArrayLength);
+									if (bufferCopy.readableBytes() >= biomeDataArrayLength * 8) {
+										bufferCopy.skipBytes(biomeDataArrayLength * 8);
+									} else {
+										//System.out.println("Section: " + loops + " | Not enough data for biome array, skipping remaining: " + bufferCopy.readableBytes());
+										bufferCopy.skipBytes(bufferCopy.readableBytes());
+										break;
+									}
+								} else {
+									//System.out.println("Section: " + loops + " | Not enough data for biome array length");
+									break;
+								}
+							} else if (biomeBitsPerEntry == 6) {
+								// Direct palette (no palette sent)
+								int biomeDataArrayLength = bufferCopy.readVarInt();
+								//System.out.println("Section: " + loops + " | Biome Data Array Length (Direct): " + biomeDataArrayLength);
+								if (bufferCopy.readableBytes() >= biomeDataArrayLength * 8) {
+									bufferCopy.skipBytes(biomeDataArrayLength * 8);
+								} else {
+									//System.out.println("Section: " + loops + " | Not enough data for biome array, skipping remaining: " + bufferCopy.readableBytes());
+									bufferCopy.skipBytes(bufferCopy.readableBytes());
+									break;
+								}
+							} else {
+								//System.out.println("Section: " + loops + " | Invalid biome bits per entry: " + biomeBitsPerEntry);
+								break;
+							}
+
+							loops++;
+						}
+
+						//System.out.println("newChunkQuantifier: " + newChunkQuantifier + ", loops: " + loops);
+						if (loops > 0) {
+							if (mc.world.getRegistryKey() == World.NETHER || mc.world.getRegistryKey() == World.END){
 								double oldpercentage = ((double) oldChunkQuantifier / loops) * 100;
-								//System.out.println("Percentage: " + percentage);
+								//System.out.println("Percentage: " + oldpercentage);
 								if (oldpercentage >= 25) {
 									isNewChunk = false;
 									if (!olderOldChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
@@ -964,7 +831,31 @@ public class NewerNewChunks extends Module {
 								}
 							}
 						}
+					} catch (Exception e) {
+						e.printStackTrace();
+						if (mc.world.getRegistryKey() == World.NETHER || mc.world.getRegistryKey() == World.END){
+							double oldpercentage = ((double) oldChunkQuantifier / loops) * 100;
+							//System.out.println("Percentage: " + oldpercentage);
+							if (oldpercentage >= 25) {
+								isNewChunk = false;
+								if (!olderOldChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
+									olderOldChunks.add(oldpos);
+									if (save.get()){
+										saveOlderOldChunkData(oldpos);
+									}
+									return;
+								}
+							}
+						}
+						if (mc.world.getRegistryKey() == World.OVERWORLD){
+							double percentage = ((double) newChunkQuantifier / loops) * 100;
+							//System.out.println("Percentage: " + percentage);
+							if (percentage >= 65) {
+								isNewChunk = true;
+							}
+						}
 					}
+
 					if (firstchunkappearsnew) isNewChunk = true;
 					if (!isNewChunk) {
 						try {
