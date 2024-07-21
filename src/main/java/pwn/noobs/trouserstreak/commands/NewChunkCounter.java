@@ -30,11 +30,18 @@ public class NewChunkCounter extends Command {
             ChatUtils.sendMsg(Text.of(chunks+"  OldChunk locations have been saved by NewerNewChunks in this dimension."));
             return SINGLE_SUCCESS;
         }));
-        builder.then(literal("OldVersionChunks").executes(ctx -> {
+        builder.then(literal("BeingUpdatedChunks").executes(ctx -> {
             n.chunkcounterticks=0;
             n.chunkcounter=true;
-            int chunks = n.olderoldchunksfound;
-            ChatUtils.sendMsg(Text.of(chunks+"  OldVersionChunk locations have been saved by NewerNewChunks in this dimension."));
+            int chunks = n.beingUpdatedOldChunksfound;
+            ChatUtils.sendMsg(Text.of(chunks+"  BeingUpdatedChunks locations have been saved by NewerNewChunks in this dimension."));
+            return SINGLE_SUCCESS;
+        }));
+        builder.then(literal("OldGenerationChunks").executes(ctx -> {
+            n.chunkcounterticks=0;
+            n.chunkcounter=true;
+            int chunks = n.OldGenerationOldChunksfound;
+            ChatUtils.sendMsg(Text.of(chunks+"  OldGenerationChunks locations have been saved by NewerNewChunks in this dimension."));
             return SINGLE_SUCCESS;
         }));
         builder.then(literal("BlockExploitChunks").executes(ctx -> {
@@ -50,8 +57,9 @@ public class NewChunkCounter extends Command {
             int chunks1 = n.newchunksfound;
             int chunks3 = n.tickexploitchunksfound;
             int chunks2 = n.oldchunksfound;
-            int chunks4 = n.olderoldchunksfound;
-            ChatUtils.sendMsg(Text.of("New: "+chunks1+" | BlockExploitChunk: "+chunks3+" | Old: "+chunks2+" | OldVersion: "+chunks4+" | Chunk locations have been saved by NewerNewChunks in this dimension."));
+            int chunks4 = n.beingUpdatedOldChunksfound;
+            int chunks5 = n.OldGenerationOldChunksfound;
+            ChatUtils.sendMsg(Text.of("New: "+chunks1+" | BlockExploitChunk: "+chunks3+" | Old: "+chunks2+" | BeingUpdatedChunks: "+chunks4+" |  OldGenerationChunks: "+chunks5+" | Chunk locations have been saved by NewerNewChunks in this dimension."));
             return SINGLE_SUCCESS;
         });
     }
