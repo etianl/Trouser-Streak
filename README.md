@@ -122,6 +122,12 @@ In no particular order
 - the **Pre 1.13 End OldChunk Detector** marks chunks as generated in an old version if they have the biome of minecraft:the_end.
 - With the **Pre 1.13 End OldChunk Detector**  chunks that are old in the End just around the central end island are always marked as old because that biome is minecraft:the_end.
 
+**Default Color Descriptions:**\
+**Red:** New chunk, never loaded before.\
+**Green:** Old chunk, only loaded in 1.18 or after.\
+**Yellow-Green:** Old Generation chunk, only loaded in 1.17 or before for OVERWORLD, 1.13 or before in END, or 1.15 or before in NETHER (defined by static means, the state does not change).\
+**Orange-Yellow:** Old chunk (1.17 or before) being currently updated to 1.18 or after (defined by dynamic means, the state does change if someone visits and leaves).\
+
 **More Detection Methods:**
 - The **LiquidExploit** option estimates possible newchunks based on liquid being just starting to flow for the first time.
 - The **BlockUpdateExploit** option estimates possible newchunks based on block update packets. SOME OF THESE CHUNKS MAY BE OLD. Advanced Mode is needed to filter any false positives out. See Special Options notes for usage.
