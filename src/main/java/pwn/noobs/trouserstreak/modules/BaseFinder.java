@@ -100,7 +100,7 @@ public class BaseFinder extends Module {
             .description("If bedrock higher than this many blocks above minimum build limit, flag chunk as possible build.")
             .min(0)
             .sliderRange(0, 384)
-            .defaultValue(4)
+            .defaultValue(5)
             .visible(() -> bedrockfind.get())
             .build());
     private final Setting<Boolean> spawner = sgDetectors.add(new BoolSetting.Builder()
