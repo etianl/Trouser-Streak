@@ -46,6 +46,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /*
@@ -263,7 +264,7 @@ public class NewerNewChunks extends Module {
 			.visible(() -> shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both)
 			.build()
 	);
-	private final Executor taskExecutor = Executors.newSingleThreadExecutor();
+	private final ExecutorService taskExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 	private int deletewarningTicks=666;
 	private int deletewarning=0;
 	private String serverip;
@@ -387,24 +388,28 @@ public class NewerNewChunks extends Module {
 		if (autoreload.get()) {
 			clearChunkData();
 		}
-		world= mc.world.getRegistryKey().getValue().toString().replace(':', '_');
-		if (mc.isInSingleplayer()){
-			String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("/|\\\\");
-			serverip=array[array.length-2];
-		} else {
-			serverip = mc.getCurrentServerEntry().address.replace(':', '_');
+		if (save.get() || load.get()) {
+			world= mc.world.getRegistryKey().getValue().toString().replace(':', '_');
+			if (mc.isInSingleplayer()){
+				String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("/|\\\\");
+				serverip=array[array.length-2];
+			} else {
+				serverip = mc.getCurrentServerEntry().address.replace(':', '_');
+			}
 		}
 		if (save.get()){
 			new File("TrouserStreak/NewChunks/"+serverip+"/"+world).mkdirs();
 		}
-		for (String fileName : FILE_NAMES) {
-			String fullPath = "TrouserStreak/NewChunks/" + serverip + "/" + world + "/" + fileName;
-			if (!Files.exists(Paths.get(fullPath))) {
-				File file = new File(fullPath);
-				try {
-					file.createNewFile();
-				} catch (IOException e) {
-					//e.printStackTrace();
+		if (save.get() || load.get()) {
+			for (String fileName : FILE_NAMES) {
+				String fullPath = "TrouserStreak/NewChunks/" + serverip + "/" + world + "/" + fileName;
+				if (!Files.exists(Paths.get(fullPath))) {
+					File file = new File(fullPath);
+					try {
+						file.createNewFile();
+					} catch (IOException e) {
+						//e.printStackTrace();
+					}
 				}
 			}
 		}
@@ -490,7 +495,7 @@ public class NewerNewChunks extends Module {
 			loadingticks=0;
 		}
 
-		if (chunkcounter=true){
+		if (chunkcounter=true){ //this only runs when the NewChunkCounter command is used
 			chunkcounterticks++;
 			if (chunkcounterticks>=1){
 				resetCounterValues();
@@ -821,42 +826,31 @@ public class NewerNewChunks extends Module {
 					}
 				}
 
-				if ((mc.world.getRegistryKey() == World.OVERWORLD || mc.world.getRegistryKey() == World.NETHER || mc.world.getRegistryKey() == World.END) && PaletteExploit.get()) {
-					boolean firstchunkappearsnew = false;
-					PacketByteBuf bufferCopy = new PacketByteBuf(Unpooled.copiedBuffer(buf.nioBuffer())); //copy the packetByteBuf for later use
+				if (PaletteExploit.get()) {
 					if (buf.readableBytes() < 3) return; // Ensure we have at least 3 bytes (short + byte)
 
-					buf.readShort();
-
-					int blockBitsPerEntry = buf.readUnsignedByte();
-					if (blockBitsPerEntry >= 4 && blockBitsPerEntry <= 8) {
-						int blockPaletteLength = buf.readVarInt();
-						int blockPaletteEntry = buf.readVarInt();
-						if (blockPaletteEntry == 0 && mc.world.getRegistryKey() != World.END) firstchunkappearsnew = true;
-					}
-					if (bufferCopy.readableBytes() < 2) return; // Ensure we have at least 2 bytes for block count
-
+					boolean firstchunkappearsnew = false;
 					int loops = 0;
 					int newChunkQuantifier = 0;
 					int oldChunkQuantifier = 0;
 
 					try {
-						while (bufferCopy.readableBytes() > 0 && loops<8) {
+						while (buf.readableBytes() > 0 && loops<8) {
 							// Chunk Section structure
-							short blockCount = bufferCopy.readShort();
+							short blockCount = buf.readShort();
 							//System.out.println("Section: " + loops + " | Block count: " + blockCount);
 
 							// Block states Paletted Container
-							if (bufferCopy.readableBytes() < 1) break;
-							int blockBitsPerEntry2 = bufferCopy.readUnsignedByte();
+							if (buf.readableBytes() < 1) break;
+							int blockBitsPerEntry2 = buf.readUnsignedByte();
 							//System.out.println("Section: " + loops + " | Block Bits Per Entry: " + blockBitsPerEntry2);
 
 							if (blockBitsPerEntry2 == 0) {
 								// Single valued palette
-								int singleBlockValue = bufferCopy.readVarInt();
+								int singleBlockValue = buf.readVarInt();
 								//BlockState blockState = Block.STATE_IDS.get(singleBlockValue);
 								//System.out.println("Section: " + loops + " | Single Block Value: " + singleBlockValue + " | Blockstate: " + blockState);
-								bufferCopy.readVarInt(); // Data Array Length (should be 0)
+								buf.readVarInt(); // Data Array Length (should be 0)
 							} else if (blockBitsPerEntry2 >= 4 && blockBitsPerEntry2 <= 8) {
 								ChunkSection section = chunk.getSectionArray()[loops];
 								PalettedContainer<BlockState> palettedContainer = section.getBlockStateContainer();
@@ -869,7 +863,7 @@ public class NewerNewChunks extends Module {
 									}
 								}
 								// Indirect palette
-								int blockPaletteLength = bufferCopy.readVarInt();
+								int blockPaletteLength = buf.readVarInt();
 								//System.out.println("Section: " + loops + " | Block palette length: " + blockPaletteLength);
 								//System.out.println("Section: " + loops + " | bstates.size() "+bstates.size());
 								//System.out.println("Section: " + loops + " | blockPaletteLength"+blockPaletteLength);
@@ -883,13 +877,14 @@ public class NewerNewChunks extends Module {
 									newChunkQuantifier++; //double the weight of this
 								}
 								for (int i = 0; i < blockPaletteLength; i++) {
-									int blockPaletteEntry = bufferCopy.readVarInt();
+									int blockPaletteEntry = buf.readVarInt();
 									//BlockState blockState = Block.STATE_IDS.get(blockPaletteEntry);
 									//System.out.println("Section: " + loops + " | Block palette entry " + i + ": " + blockPaletteEntry + " | Blockstate: " + blockState);
-									if (i == 0 && blockPaletteEntry == 0 && mc.world.getRegistryKey() == World.OVERWORLD) isNewSection++;
-									if (i == 1 && (blockPaletteEntry == 80 || blockPaletteEntry == 1 || blockPaletteEntry == 9 || blockPaletteEntry == 5781) && mc.world.getRegistryKey() == World.OVERWORLD) isNewSection++;
-									if (i == 2 && (blockPaletteEntry == 5781 || blockPaletteEntry == 10 || blockPaletteEntry == 22318) && mc.world.getRegistryKey() == World.OVERWORLD) isNewSection++;
-									if (loops == 4 && blockPaletteEntry == 79 && mc.world.getRegistryKey() == World.OVERWORLD) {
+									if (i == 0 && loops == 0 && blockPaletteEntry == 0 && mc.world.getRegistryKey() != World.END) firstchunkappearsnew = true;
+									if (i == 0 && blockPaletteEntry == 0 && mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END) isNewSection++;
+									if (i == 1 && (blockPaletteEntry == 80 || blockPaletteEntry == 1 || blockPaletteEntry == 9 || blockPaletteEntry == 5781) && mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END) isNewSection++;
+									if (i == 2 && (blockPaletteEntry == 5781 || blockPaletteEntry == 10 || blockPaletteEntry == 22318) && mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END) isNewSection++;
+									if (loops == 4 && blockPaletteEntry == 79 && mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END) {
 										//System.out.println("CHUNK IS BEING UPDATED!!!!!!");
 										if (!chunkIsBeingUpdated && beingUpdatedDetector.get()) chunkIsBeingUpdated = true;
 									}
@@ -899,24 +894,24 @@ public class NewerNewChunks extends Module {
 								if (isNewSection >= 2) newChunkQuantifier++;
 
 								// Data Array
-								int blockDataArrayLength = bufferCopy.readVarInt();
+								int blockDataArrayLength = buf.readVarInt();
 								//System.out.println("Section: " + loops + " | Block Data Array Length: " + blockDataArrayLength);
-								if (bufferCopy.readableBytes() >= blockDataArrayLength * 8) {
-									bufferCopy.skipBytes(blockDataArrayLength * 8);
+								if (buf.readableBytes() >= blockDataArrayLength * 8) {
+									buf.skipBytes(blockDataArrayLength * 8);
 								} else {
-									//System.out.println("Section: " + loops + " | Not enough data for block array, skipping remaining: " + bufferCopy.readableBytes());
-									bufferCopy.skipBytes(bufferCopy.readableBytes());
+									//System.out.println("Section: " + loops + " | Not enough data for block array, skipping remaining: " + buf.readableBytes());
+									buf.skipBytes(buf.readableBytes());
 									break;
 								}
 							} else if (blockBitsPerEntry2 == 15) {
 								// Direct palette (no palette sent)
-								int blockDataArrayLength = bufferCopy.readVarInt();
+								int blockDataArrayLength = buf.readVarInt();
 								//System.out.println("Section: " + loops + " | Block Data Array Length (Direct): " + blockDataArrayLength);
-								if (bufferCopy.readableBytes() >= blockDataArrayLength * 8) {
-									bufferCopy.skipBytes(blockDataArrayLength * 8);
+								if (buf.readableBytes() >= blockDataArrayLength * 8) {
+									buf.skipBytes(blockDataArrayLength * 8);
 								} else {
-									//System.out.println("Section: " + loops + " | Not enough data for block array, skipping remaining: " + bufferCopy.readableBytes());
-									bufferCopy.skipBytes(bufferCopy.readableBytes());
+									//System.out.println("Section: " + loops + " | Not enough data for block array, skipping remaining: " + buf.readableBytes());
+									buf.skipBytes(buf.readableBytes());
 									break;
 								}
 							} else {
@@ -925,33 +920,33 @@ public class NewerNewChunks extends Module {
 							}
 
 							// Biomes Paletted Container
-							if (bufferCopy.readableBytes() < 1) {
+							if (buf.readableBytes() < 1) {
 								//System.out.println("Section: " + loops + " | No biome data available");
 								break;
 							}
 
-							int biomeBitsPerEntry = bufferCopy.readUnsignedByte();
+							int biomeBitsPerEntry = buf.readUnsignedByte();
 							//System.out.println("Section: " + loops + " | Biome Bits Per Entry: " + biomeBitsPerEntry);
 
 							if (biomeBitsPerEntry == 0) {
 								// Single valued palette
-								int singleBiomeValue = bufferCopy.readVarInt();
+								int singleBiomeValue = buf.readVarInt();
 								//Registry<Biome> biomeRegistry = mc.world.getRegistryManager().get(RegistryKeys.BIOME);
 								//Biome biome = biomeRegistry.get(singleBiomeValue);
 								//Identifier biomeId = biomeRegistry.getId(biome);
 								//System.out.println("Section: " + loops + " | Single Biome Value: " + singleBiomeValue + " | Biome: " + biomeId.toString());
 								if (singleBiomeValue == 39 && mc.world.getRegistryKey() == World.END) isNewChunk = true;
-								bufferCopy.readVarInt(); // Data Array Length (should be 0)
+								buf.readVarInt(); // Data Array Length (should be 0)
 							} else if (biomeBitsPerEntry >= 1 && biomeBitsPerEntry <= 3) {
 								// Indirect palette
-								int biomePaletteLength = bufferCopy.readVarInt();
+								int biomePaletteLength = buf.readVarInt();
 								//System.out.println("Section: " + loops + " | Biome palette length: " + biomePaletteLength);
 								for (int i = 0; i < biomePaletteLength; i++) {
-									if (bufferCopy.readableBytes() < 1) {
+									if (buf.readableBytes() < 1) {
 										//System.out.println("Section: " + loops + " | Incomplete biome palette data");
 										break;
 									}
-									int biomePaletteEntry = bufferCopy.readVarInt();
+									int biomePaletteEntry = buf.readVarInt();
 									//Registry<Biome> biomeRegistry = mc.world.getRegistryManager().get(RegistryKeys.BIOME);
 									//Biome biome = biomeRegistry.get(biomePaletteEntry);
 									//Identifier biomeId = biomeRegistry.getId(biome);
@@ -961,14 +956,14 @@ public class NewerNewChunks extends Module {
 								}
 
 								// Data Array
-								if (bufferCopy.readableBytes() >= 1) {
-									int biomeDataArrayLength = bufferCopy.readVarInt();
+								if (buf.readableBytes() >= 1) {
+									int biomeDataArrayLength = buf.readVarInt();
 									//System.out.println("Section: " + loops + " | Biome Data Array Length: " + biomeDataArrayLength);
-									if (bufferCopy.readableBytes() >= biomeDataArrayLength * 8) {
-										bufferCopy.skipBytes(biomeDataArrayLength * 8);
+									if (buf.readableBytes() >= biomeDataArrayLength * 8) {
+										buf.skipBytes(biomeDataArrayLength * 8);
 									} else {
-										//System.out.println("Section: " + loops + " | Not enough data for biome array, skipping remaining: " + bufferCopy.readableBytes());
-										bufferCopy.skipBytes(bufferCopy.readableBytes());
+										//System.out.println("Section: " + loops + " | Not enough data for biome array, skipping remaining: " + buf.readableBytes());
+										buf.skipBytes(buf.readableBytes());
 										break;
 									}
 								} else {
@@ -977,13 +972,13 @@ public class NewerNewChunks extends Module {
 								}
 							} else if (biomeBitsPerEntry == 6) {
 								// Direct palette (no palette sent)
-								int biomeDataArrayLength = bufferCopy.readVarInt();
+								int biomeDataArrayLength = buf.readVarInt();
 								//System.out.println("Section: " + loops + " | Biome Data Array Length (Direct): " + biomeDataArrayLength);
-								if (bufferCopy.readableBytes() >= biomeDataArrayLength * 8) {
-									bufferCopy.skipBytes(biomeDataArrayLength * 8);
+								if (buf.readableBytes() >= biomeDataArrayLength * 8) {
+									buf.skipBytes(biomeDataArrayLength * 8);
 								} else {
-									//System.out.println("Section: " + loops + " | Not enough data for biome array, skipping remaining: " + bufferCopy.readableBytes());
-									bufferCopy.skipBytes(bufferCopy.readableBytes());
+									//System.out.println("Section: " + loops + " | Not enough data for biome array, skipping remaining: " + buf.readableBytes());
+									buf.skipBytes(buf.readableBytes());
 									break;
 								}
 							} else {
@@ -1001,7 +996,7 @@ public class NewerNewChunks extends Module {
 								//System.out.println("Percentage: " + oldpercentage);
 								if (oldpercentage >= 25) chunkIsBeingUpdated = true;
 							}
-							if (mc.world.getRegistryKey() == World.OVERWORLD){
+							else if (mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END){
 								double percentage = ((double) newChunkQuantifier / loops) * 100;
 								//System.out.println("Percentage: " + percentage);
 								if (percentage >= 65) isNewChunk = true;
@@ -1014,7 +1009,7 @@ public class NewerNewChunks extends Module {
 							//System.out.println("Percentage: " + oldpercentage);
 							if (oldpercentage >= 25) chunkIsBeingUpdated = true;
 						}
-						if (mc.world.getRegistryKey() == World.OVERWORLD){
+						else if (mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END){
 							double percentage = ((double) newChunkQuantifier / loops) * 100;
 							//System.out.println("Percentage: " + percentage);
 							if (percentage >= 65) isNewChunk = true;
