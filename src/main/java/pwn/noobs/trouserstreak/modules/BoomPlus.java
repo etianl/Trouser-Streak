@@ -5,6 +5,8 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.component.ComponentChanges;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
@@ -141,6 +143,11 @@ public class BoomPlus extends Module {
             .min(0)
             .sliderRange(0, 100)
             .build());
+    private final Setting<Block> blockstate = sgOptions.add(new BlockSetting.Builder()
+            .name("falling_block entity block")
+            .description("What is created when specifying falling_block as the entity.")
+            .defaultValue(Blocks.BEDROCK)
+            .build());
     public final Setting<Boolean> target = sgGeneral.add(new BoolSetting.Builder()
             .name("OnTarget")
             .description("spawns on target")
@@ -228,6 +235,10 @@ public class BoomPlus extends Module {
         }
     }
     private NbtComponent createEntityData() {
+        String fullString = blockstate.get().toString();
+        String[] parts = fullString.split(":");
+        String block = parts[1];
+        String blockName = block.replace("}", "");
         NbtList motion = new NbtList();
         NbtList Pos = new NbtList();
         HitResult hr = mc.cameraEntity.raycast(900, 0, true);
@@ -254,6 +265,9 @@ public class BoomPlus extends Module {
         entityTag.putInt("Age", age.get());
         entityTag.putInt("ExplosionPower", exppower.get());
         entityTag.putInt("ExplosionRadius", exppower.get());
+        NbtCompound blockState = new NbtCompound();
+        blockState.putString("Name", "minecraft:" + blockName);
+        entityTag.put("BlockState", blockState);
         if (invincible.get())entityTag.putBoolean("Invulnerable", invincible.get());
         if (silence.get())entityTag.putBoolean("Silent", silence.get());
         if (glow.get())entityTag.putBoolean("Glowing", glow.get());

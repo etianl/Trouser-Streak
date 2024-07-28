@@ -41,7 +41,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 /*
@@ -259,7 +259,7 @@ public class NewerNewChunks extends Module {
 			.visible(() -> shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both)
 			.build()
 	);
-	private final ExecutorService taskExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+	private final Executor taskExecutor = Executors.newSingleThreadExecutor();
 	private int deletewarningTicks=666;
 	private int deletewarning=0;
 	private String serverip;
@@ -304,7 +304,9 @@ public class NewerNewChunks extends Module {
 	static {
 		NEW_OVERWORLD_BLOCKS.add(Blocks.DEEPSLATE);
 		NEW_OVERWORLD_BLOCKS.add(Blocks.AMETHYST_BLOCK);
+		NEW_OVERWORLD_BLOCKS.add(Blocks.BUDDING_AMETHYST);
 		NEW_OVERWORLD_BLOCKS.add(Blocks.AZALEA);
+		NEW_OVERWORLD_BLOCKS.add(Blocks.FLOWERING_AZALEA);
 		NEW_OVERWORLD_BLOCKS.add(Blocks.BIG_DRIPLEAF);
 		NEW_OVERWORLD_BLOCKS.add(Blocks.BIG_DRIPLEAF_STEM);
 		NEW_OVERWORLD_BLOCKS.add(Blocks.SMALL_DRIPLEAF);
@@ -325,6 +327,7 @@ public class NewerNewChunks extends Module {
 		NEW_OVERWORLD_BLOCKS.add(Blocks.RAW_IRON_BLOCK);
 		NEW_OVERWORLD_BLOCKS.add(Blocks.DRIPSTONE_BLOCK);
 		NEW_OVERWORLD_BLOCKS.add(Blocks.MOSS_BLOCK);
+		NEW_OVERWORLD_BLOCKS.add(Blocks.MOSS_CARPET);
 		NEW_OVERWORLD_BLOCKS.add(Blocks.POINTED_DRIPSTONE);
 		NEW_OVERWORLD_BLOCKS.add(Blocks.SMOOTH_BASALT);
 		NEW_OVERWORLD_BLOCKS.add(Blocks.TUFF);
@@ -333,6 +336,7 @@ public class NewerNewChunks extends Module {
 		NEW_OVERWORLD_BLOCKS.add(Blocks.ROOTED_DIRT);
 		NEW_OVERWORLD_BLOCKS.add(Blocks.AZALEA_LEAVES);
 		NEW_OVERWORLD_BLOCKS.add(Blocks.FLOWERING_AZALEA_LEAVES);
+		NEW_OVERWORLD_BLOCKS.add(Blocks.POWDER_SNOW);
 	}
 	private static final Set<Block> NEW_NETHER_BLOCKS = new HashSet<>();
 	static {
@@ -352,6 +356,10 @@ public class NewerNewChunks extends Module {
 		NEW_NETHER_BLOCKS.add(Blocks.WEEPING_VINES);
 		NEW_NETHER_BLOCKS.add(Blocks.BONE_BLOCK);
 		NEW_NETHER_BLOCKS.add(Blocks.CHAIN);
+		NEW_NETHER_BLOCKS.add(Blocks.OBSIDIAN);
+		NEW_NETHER_BLOCKS.add(Blocks.CRYING_OBSIDIAN);
+		NEW_NETHER_BLOCKS.add(Blocks.SOUL_SOIL);
+		NEW_NETHER_BLOCKS.add(Blocks.SOUL_FIRE);
 	}
 	Set<String> FILE_NAMES = new HashSet<>(Set.of(
 			"OldChunkData.txt",
@@ -636,8 +644,7 @@ public class NewerNewChunks extends Module {
 	}
 
 	private void render(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
-		event.renderer.box(
-				box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, lines, shapeMode, 0);
+		event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, lines, shapeMode, 0);
 	}
 
 	@EventHandler
@@ -714,7 +721,7 @@ public class NewerNewChunks extends Module {
 
 				if (overworldOldChunksDetector.get() && mc.world.getRegistryKey() == World.OVERWORLD) {
 					for (int x = 0; x < 16; x++) {
-						for (int y = mc.world.getBottomY(); y < 260; y++) {
+						for (int y = mc.world.getBottomY()+3; y < 260; y++) {
 							for (int z = 0; z < 16; z++) {
 								if (!foundAnyOre && ORE_BLOCKS.contains(chunk.getBlockState(new BlockPos(x, y, z)).getBlock())) foundAnyOre = true; //prevent false flags in flat world
 								if (y > 5 && !isNewOverworldGeneration && NEW_OVERWORLD_BLOCKS.contains(chunk.getBlockState(new BlockPos(x, y, z)).getBlock())) {
@@ -728,7 +735,7 @@ public class NewerNewChunks extends Module {
 				}
 				if (netherOldChunksDetector.get() && mc.world.getRegistryKey() == World.NETHER) {
 					for (int x = 0; x < 16; x++) {
-						for (int y = mc.world.getBottomY(); y < 128; y++) {
+						for (int y = mc.world.getBottomY()+3; y < 128; y++) {
 							for (int z = 0; z < 16; z++) {
 								if (!isNewNetherGeneration && NEW_NETHER_BLOCKS.contains(chunk.getBlockState(new BlockPos(x, y, z)).getBlock()) && mc.world.getRegistryKey() == World.NETHER) {
 									isNewNetherGeneration = true;
@@ -745,7 +752,7 @@ public class NewerNewChunks extends Module {
 				}
 				if (endOldChunksDetector.get() && mc.world.getRegistryKey() == World.END) {
 					PacketByteBuf bufferCopy = new PacketByteBuf(Unpooled.copiedBuffer(buf.nioBuffer())); //copy the packetByteBuf for later use
-					if (bufferCopy.readableBytes() < 2) return;
+					if (bufferCopy.readableBytes() < 3) return;
 
 					try {
 							short blockCount = bufferCopy.readShort();
@@ -786,27 +793,17 @@ public class NewerNewChunks extends Module {
 
 							if (biomeBitsPerEntry == 0) {
 								int singleBiomeValue = bufferCopy.readVarInt();
-								//Registry<Biome> biomeRegistry = mc.world.getRegistryManager().get(RegistryKeys.BIOME);
-								//Biome biome = biomeRegistry.get(singleBiomeValue);
-								//Identifier biomeId = biomeRegistry.getId(biome);
-								//System.out.println("Single Biome Value: " + singleBiomeValue + " | Biome: " + biomeId.toString());
 								if (singleBiomeValue == 55) {
 									isOldGeneration = true;
 								}
 								bufferCopy.readVarInt(); // Data Array Length (should be 0)
 							} else if (biomeBitsPerEntry >= 1 && biomeBitsPerEntry <= 3) {
 								int biomePaletteLength = bufferCopy.readVarInt();
-								//System.out.println("Biome palette length: " + biomePaletteLength);
 								for (int i = 0; i < biomePaletteLength; i++) {
 									if (bufferCopy.readableBytes() < 1) {
-										//System.out.println("Incomplete biome palette data");
 										break;
 									}
 									int biomePaletteEntry = bufferCopy.readVarInt();
-									//Registry<Biome> biomeRegistry = mc.world.getRegistryManager().get(RegistryKeys.BIOME);
-									//Biome biome = biomeRegistry.get(biomePaletteEntry);
-									//Identifier biomeId = biomeRegistry.getId(biome);
-									//System.out.println("Biome palette entry " + i + ": " + biomePaletteEntry + " | Biome: " + biomeId.toString());
 									if (biomePaletteEntry == 55) {
 										isOldGeneration = true;
 										break;
