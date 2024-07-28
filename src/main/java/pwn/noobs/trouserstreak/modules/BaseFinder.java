@@ -44,7 +44,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 /*
@@ -106,6 +106,11 @@ public class BaseFinder extends Module {
     private final Setting<Boolean> spawner = sgDetectors.add(new BoolSetting.Builder()
             .name("Unnatural Spawner Finder")
             .description("If a spawner doesn't have the proper natural companion blocks with it in the chunk, flag as possible build.")
+            .defaultValue(true)
+            .build());
+    private final Setting<Boolean> roofDetector = sgDetectors.add(new BoolSetting.Builder()
+            .name("Nether Roof Build Finder")
+            .description("If anything but mushrooms on the nether roof, flag as possible build.")
             .defaultValue(true)
             .build());
     private final Setting<Integer> bsefndtickdelay = sgGeneral.add(new IntSetting.Builder()
@@ -431,7 +436,7 @@ public class BaseFinder extends Module {
             .visible(() -> trcr.get())
             .build()
     );
-    private final ExecutorService taskExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    private final Executor taskExecutor = Executors.newSingleThreadExecutor();
     private int basefoundspamTicks=0;
     private boolean basefound=false;
     private int deletewarningTicks=666;
@@ -688,7 +693,7 @@ public class BaseFinder extends Module {
                                 for (int z = 0; z < 16; z++) {
                                     BlockState blerks = chunk.getBlockState(new BlockPos(x, y, z));
                                     blockposi=new BlockPos(x, y, z);
-                                    if (!(blerks.getBlock()==Blocks.AIR)){
+                                    if (blerks.getBlock()!=Blocks.AIR){
                                         if (skybuildfind.get() && y>skybuildint.get()) {
                                             if (!baseChunks.contains(basepos)){
                                                 baseChunks.add(basepos);
@@ -710,6 +715,19 @@ public class BaseFinder extends Module {
                                                 }
                                                 if (basefoundspamTicks==0){
                                                     ChatUtils.sendMsg(Text.of("(Unnatural Bedrock)Possible build located near X"+basepos.getCenterX()+", Y"+y+", Z"+basepos.getCenterZ()));
+                                                    LastBaseFound= new ChunkPos(basepos.x, basepos.z);
+                                                    basefound=true;
+                                                }
+                                            }
+                                        }
+                                        if (roofDetector.get() && blerks.getBlock()!=Blocks.AIR && blerks.getBlock()!=Blocks.RED_MUSHROOM && blerks.getBlock()!=Blocks.BROWN_MUSHROOM && y>=128 && mc.world.getRegistryKey() == World.NETHER){
+                                            if (!baseChunks.contains(basepos)){
+                                                baseChunks.add(basepos);
+                                                if (save.get()) {
+                                                    saveBaseChunkData();
+                                                }
+                                                if (basefoundspamTicks==0){
+                                                    ChatUtils.sendMsg(Text.of("(Nether Roof)Possible build located near X"+basepos.getCenterX()+", Y"+y+", Z"+basepos.getCenterZ()));
                                                     LastBaseFound= new ChunkPos(basepos.x, basepos.z);
                                                     basefound=true;
                                                 }
