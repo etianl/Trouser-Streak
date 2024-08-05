@@ -1,12 +1,14 @@
+[![Github All Releases](https://img.shields.io/github/downloads/etianl/Trouser-Streak/total.svg)]()
+
 <div align="center">
-  <h1>Trouser-Streak</h1>
-  <p><strong>Official Griefing Utilities of <a href="https://www.youtube.com/@mountainsoflavainc.6913">Mountains of Lava Inc.</a></strong></p>        <p>Trouser-Streak is a compilation of modules, updated to the latest version and optimized for maximum grief. I did not make all of these.</p>
-	        <p>I frequently release updates, please check back here often! :)</p>
+  <h1><strong>Trouser-Streak</strong></h1>
+  <p><strong>Official Griefing Utilities of <a href="https://www.youtube.com/@mountainsoflavainc.6913">Mountains of Lava Inc.</a></strong></p>
+  <p><strong>Trouser-Streak</strong> is a compilation of modules for <strong><a href="https://meteorclient.com/">Meteor Client</a></strong>. <strong><em>Updated to the latest version and optimized for maximum grief!</em></strong></p>
+  <p>I frequently release updates, please check back here often :)</p>
   <img src="src/main/resources/assets/icon/icon.png" alt="Trouser-Streak Logo" width="28%"/>
-</div>  
+</div>
 
-Total Downloads: [![Github All Releases](https://img.shields.io/github/downloads/etianl/Trouser-Streak/total.svg)]()
-
+***A few of these modules were not made by me!***
 ## Credits to the people I skidded from:
 In no particular order
 - [DAMcraft (ServerSeeker)](https://github.com/DAMcraft/MeteorServerSeeker)

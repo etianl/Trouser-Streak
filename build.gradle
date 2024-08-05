@@ -15,6 +15,10 @@ repositories {
     maven { url "https://maven.meteordev.org/snapshots" }
 }
 
+loom {
+    accessWidenerPath = file("src/main/resources/streak-addon.accesswidener")
+}
+
 dependencies {
     // Fabric
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
