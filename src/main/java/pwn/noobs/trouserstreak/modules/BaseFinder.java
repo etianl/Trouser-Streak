@@ -44,7 +44,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /*
@@ -64,18 +64,18 @@ public class BaseFinder extends Module {
 
     // general
     private final Setting<Integer> minY = sgGeneral.add(new IntSetting.Builder()
-            .name("Detection Y Minimum")
-            .description("Scans blocks from this Y value and up.")
-            .min(-64)
-            .sliderRange(-64,319)
-            .defaultValue(-64)
+            .name("Detection Y Minimum OffSet")
+            .description("Scans blocks above or at this this many blocks from minimum build limit.")
+            .min(0)
+            .sliderRange(0,319)
+            .defaultValue(0)
             .build());
     private final Setting<Integer> maxY = sgGeneral.add(new IntSetting.Builder()
-            .name("Detection Y Maximum")
-            .description("Scans blocks below or at this Y value.")
-            .min(-64)
-            .sliderRange(-64,319)
-            .defaultValue(319)
+            .name("Detection Y Maximum OffSet")
+            .description("Scans blocks below or at this this many blocks from maximum build limit.")
+            .min(0)
+            .sliderRange(0,319)
+            .defaultValue(0)
             .build());
     private final Setting<Boolean> skybuildfind = sgDetectors.add(new BoolSetting.Builder()
             .name("Sky Build Finder")
@@ -437,7 +437,7 @@ public class BaseFinder extends Module {
             .visible(() -> trcr.get())
             .build()
     );
-    private final Executor taskExecutor = Executors.newSingleThreadExecutor();
+    private static final ExecutorService taskExecutor = Executors.newCachedThreadPool();
     private int basefoundspamTicks=0;
     private boolean basefound=false;
     private int deletewarningTicks=666;
@@ -456,7 +456,7 @@ public class BaseFinder extends Module {
     private int found6 = 0;
     private boolean checkingchunk7=false;
     private int found7 = 0;
-    public ChunkPos LastBaseFound = new ChunkPos(2000000000, 2000000000);
+    private ChunkPos LastBaseFound = new ChunkPos(2000000000, 2000000000);
     private int closestbaseX=2000000000;
     private int closestbaseZ=2000000000;
     private double basedistance=2000000000;
@@ -688,9 +688,11 @@ public class BaseFinder extends Module {
                 }
 
                 if (Blawcks1.get().size()>0 || Blawcks2.get().size()>0 || Blawcks3.get().size()>0 || Blawcks4.get().size()>0 || Blawcks5.get().size()>0 || Blawcks6.get().size()>0 || Blawcks7.get().size()>0){
+                    int Ymin = mc.world.getBottomY()+minY.get();
+                    int Ymax = mc.world.getTopY()-maxY.get();
                     try {
                         for (int x = 0; x < 16; x++) {
-                            for (int y = minY.get()-1; y < maxY.get()+1; y++) {
+                            for (int y = Ymin; y < Ymax; y++) {
                                 for (int z = 0; z < 16; z++) {
                                     BlockState blerks = chunk.getBlockState(new BlockPos(x, y, z));
                                     blockposi=new BlockPos(x, y, z);
