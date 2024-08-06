@@ -708,7 +708,7 @@ public class BaseFinder extends Module {
                                 for (int y = 0; y < 16; y++) {
                                     for (int z = 0; z < 16; z++) {
                                         int currentY = Y + y;
-                                        if (currentY < Ymin || currentY > Ymax) continue;
+                                        if (currentY <= Ymin || currentY >= Ymax) continue;
                                         blockposi=new BlockPos(x, currentY, z);
                                         BlockState blerks = section.getBlockState(x,y,z);
                                         if (blerks.getBlock()!=Blocks.AIR){
