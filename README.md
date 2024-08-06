@@ -3,7 +3,8 @@
 <div align="center">
   <h1><strong>Trouser-Streak</strong></h1>
   <p><strong>Official Griefing Utilities of <a href="https://www.youtube.com/@mountainsoflavainc.6913">Mountains of Lava Inc.</a></strong></p>
-  <p><strong>Trouser-Streak</strong> is a compilation of modules for <strong><a href="https://meteorclient.com/">Meteor Client</a></strong>. <strong><em>Updated to the latest version and optimized for maximum grief!</em></strong></p>
+  <p><strong>Trouser-Streak</strong> is a compilation of modules for <strong><a href="https://meteorclient.com/">Meteor Client</a></strong>.</p> 
+  <p><strong><em>Updated to the latest version and optimized for maximum grief!</em></strong></p>
   <p>I frequently release updates, please check back here often :)</p>
   <img src="src/main/resources/assets/icon/icon.png" alt="Trouser-Streak Logo" width="28%"/>
 </div>
