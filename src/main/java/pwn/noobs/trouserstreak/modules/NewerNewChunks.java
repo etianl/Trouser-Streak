@@ -31,10 +31,7 @@ import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeKeys;
-import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.chunk.Palette;
-import net.minecraft.world.chunk.PalettedContainer;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.world.chunk.*;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.io.File;
@@ -585,6 +582,7 @@ public class NewerNewChunks extends Module {
 			}
 			loadData();
 		}
+		if (!save.get() && !load.get())removeChunksOutsideRenderDistance();
 	}
 	@EventHandler
 	private void onRender(Render3DEvent event) {
@@ -649,8 +647,8 @@ public class NewerNewChunks extends Module {
 
 	@EventHandler
 	private void onReadPacket(PacketEvent.Receive event) {
-		if (event.packet instanceof AcknowledgeChunksC2SPacket)return;
-		if (event.packet instanceof ChunkDeltaUpdateS2CPacket && liquidexploit.get()) {
+		if (event.packet instanceof AcknowledgeChunksC2SPacket)return; //for some reason this packet keeps getting cast to other packets
+		if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && event.packet instanceof ChunkDeltaUpdateS2CPacket && liquidexploit.get()) {
 			ChunkDeltaUpdateS2CPacket packet = (ChunkDeltaUpdateS2CPacket) event.packet;
 
 			packet.visitUpdates((pos, state) -> {
@@ -701,25 +699,19 @@ public class NewerNewChunks extends Module {
 				}
 			}
 		}
-		else if (!(event.packet instanceof PlayerMoveC2SPacket) && event.packet instanceof ChunkDataS2CPacket && mc.world != null) {
+		else if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && !(event.packet instanceof PlayerMoveC2SPacket) && event.packet instanceof ChunkDataS2CPacket && mc.world != null) {
 			ChunkDataS2CPacket packet = (ChunkDataS2CPacket) event.packet;
 			ChunkPos oldpos = new ChunkPos(packet.getChunkX(), packet.getChunkZ());
 
 			if (mc.world.getChunkManager().getChunk(packet.getChunkX(), packet.getChunkZ()) == null) {
 				WorldChunk chunk = new WorldChunk(mc.world, oldpos);
-
 				try {
-					Future<?> future = taskExecutor.submit(() -> {
-						chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), new NbtCompound(), packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ()));
-					});
-					try {
-						future.get(); // This will block until the task is complete
-					} catch (InterruptedException | ExecutionException e) {
-						e.printStackTrace();
-					}
-				} catch (ArrayIndexOutOfBoundsException e) {
-					e.printStackTrace();
-				}
+					CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+						chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), new NbtCompound(),
+								packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ()));
+					}, taskExecutor);
+					future.join();
+				} catch (CompletionException e) {}
 
 				boolean isNewChunk = false;
 				boolean isOldGeneration = false;
@@ -785,79 +777,94 @@ public class NewerNewChunks extends Module {
 							if (section != null) {
 								//System.out.println("Processing Chunk Section: " + i);
 
-								var blockStatesContainer = section.getBlockStateContainer();
-								Set<BlockState> bstates = new HashSet<>();
-								for (int x = 0; x < 16; x++){
-									for (int y = 0; y < 16; y++){
-										for (int z = 0; z < 16; z++){
-											bstates.add(blockStatesContainer.get(x, y, z));
+								int isNewSection = 0;
+								int isBeingUpdatedSection = 0;
+
+								if (!section.isEmpty()) {
+									var blockStatesContainer = section.getBlockStateContainer();
+									Palette<BlockState> blockStatePalette = blockStatesContainer.data.palette();
+									int blockPaletteLength = blockStatePalette.getSize();
+
+									//System.out.println("Block Palette Length for Section " + i + ": " + blockPaletteLength);
+									if (blockStatePalette instanceof BiMapPalette<BlockState>){
+										Set<BlockState> bstates = new HashSet<>();
+										for (int x = 0; x < 16; x++) {
+											for (int y = 0; y < 16; y++) {
+												for (int z = 0; z < 16; z++) {
+													bstates.add(blockStatesContainer.get(x, y, z));
+												}
+											}
+										}
+										//System.out.println("Unique BlockStates in Section " + i + ": " + bstates.size());
+										int bstatesSize = bstates.size();
+										if (bstatesSize <= 1) bstatesSize = blockPaletteLength;
+										if (bstatesSize < blockPaletteLength) {
+											isNewSection = 2;
+											//System.out.println("Section: " + loops + " | smaller bstates size!!!!!!!");
+											newChunkQuantifier++; //double the weight of this
+										}
+									}
+
+									for (int i2 = 0; i2 < blockPaletteLength; i2++) {
+										BlockState blockPaletteEntry = blockStatePalette.get(i2);
+										//System.out.println("Section " + i + ", Palette Entry " + i2 + ": " + blockPaletteEntry.getBlock());
+
+										if (i2 == 0 && loops == 0 && blockPaletteEntry.getBlock() == Blocks.AIR && mc.world.getRegistryKey() != World.END)
+											firstchunkappearsnew = true;
+										if (i2 == 0 && blockPaletteEntry.getBlock() == Blocks.AIR && mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END)
+											isNewSection++;
+										if (i2 == 1 && (blockPaletteEntry.getBlock() == Blocks.WATER || blockPaletteEntry.getBlock() == Blocks.STONE || blockPaletteEntry.getBlock() == Blocks.GRASS_BLOCK || blockPaletteEntry.getBlock() == Blocks.SNOW_BLOCK) && mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END)
+											isNewSection++;
+										if (i2 == 2 && (blockPaletteEntry.getBlock() == Blocks.SNOW_BLOCK || blockPaletteEntry.getBlock() == Blocks.DIRT || blockPaletteEntry.getBlock() == Blocks.POWDER_SNOW) && mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END)
+											isNewSection++;
+										if (loops == 4 && blockPaletteEntry.getBlock() == Blocks.BEDROCK && mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END) {
+											if (!chunkIsBeingUpdated && beingUpdatedDetector.get())
+												chunkIsBeingUpdated = true;
+										}
+										if (blockPaletteEntry.getBlock() == Blocks.AIR && (mc.world.getRegistryKey() == World.NETHER || mc.world.getRegistryKey() == World.END))
+											isBeingUpdatedSection++;
+									}
+									if (isBeingUpdatedSection >= 2) oldChunkQuantifier++;
+									if (isNewSection >= 2) newChunkQuantifier++;
+									//System.out.println("Section " + i + " - isNewSection: " + isNewSection + ", isBeingUpdatedSection: " + isBeingUpdatedSection);
+								}
+								if (mc.world.getRegistryKey() == World.END) {
+									var biomesContainer = section.getBiomeContainer();
+									if (biomesContainer instanceof PalettedContainer<RegistryEntry<Biome>> biomesPaletteContainer) {
+										Palette<RegistryEntry<Biome>> biomePalette = biomesPaletteContainer.data.palette();
+										//System.out.println("Biome Palette Size for Section " + i + ": " + biomePalette.getSize());
+										for (int i3 = 0; i3 < biomePalette.getSize(); i3++) {
+											//System.out.println("Section: " + i + " Biome Palette entry :" + i3 + " Biome: " + biomePalette.get(i3).getKey().get());
+											if (i3 == 0 && biomePalette.get(i3).getKey().get() == BiomeKeys.PLAINS) isNewChunk = true;
+											if (!isNewChunk && i3 == 0 && biomePalette.get(i3).getKey().get() != BiomeKeys.THE_END) isNewChunk = false;
 										}
 									}
 								}
-								//System.out.println("Unique BlockStates in Section " + i + ": " + bstates.size());
-
-								Palette<BlockState> blockStatePalette = blockStatesContainer.data.palette();
-								int blockPaletteLength = blockStatePalette.getSize();
-								//System.out.println("Block Palette Length for Section " + i + ": " + blockPaletteLength);
-
-								int isNewSection = 0;
-								int isBeingUpdatedSection = 0;
-								int bstatesSize = bstates.size();
-								if (bstatesSize<=1) bstatesSize = blockPaletteLength;
-								if (bstatesSize<blockPaletteLength) {
-									isNewSection = 2;
-									//System.out.println("Section: " + loops + " | smaller bstates size!!!!!!!");
-									newChunkQuantifier++; //double the weight of this
-								}
-								for (int i2 = 0; i2 < blockPaletteLength; i2++) {
-									BlockState blockPaletteEntry = blockStatePalette.get(i2);
-									//System.out.println("Section " + i + ", Palette Entry " + i2 + ": " + blockPaletteEntry.getBlock());
-
-									if (i2 == 0 && loops == 0 && blockPaletteEntry.getBlock() == Blocks.AIR && mc.world.getRegistryKey() != World.END) firstchunkappearsnew = true;
-									if (i2 == 0 && blockPaletteEntry.getBlock() == Blocks.AIR && mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END) isNewSection++;
-									if (i2 == 1 && (blockPaletteEntry.getBlock() == Blocks.WATER || blockPaletteEntry.getBlock() == Blocks.STONE || blockPaletteEntry.getBlock() == Blocks.GRASS_BLOCK || blockPaletteEntry.getBlock() == Blocks.SNOW_BLOCK) && mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END) isNewSection++;
-									if (i2 == 2 && (blockPaletteEntry.getBlock() == Blocks.SNOW_BLOCK || blockPaletteEntry.getBlock() == Blocks.DIRT || blockPaletteEntry.getBlock() == Blocks.POWDER_SNOW) && mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END) isNewSection++;
-									if (loops == 4 && blockPaletteEntry.getBlock() == Blocks.BEDROCK && mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END) {
-										if (!chunkIsBeingUpdated && beingUpdatedDetector.get()) chunkIsBeingUpdated = true;
-									}
-									if (blockPaletteEntry.getBlock() == Blocks.AIR && (mc.world.getRegistryKey() == World.NETHER || mc.world.getRegistryKey() == World.END)) isBeingUpdatedSection++;
-								}
-								if (isBeingUpdatedSection>=2) oldChunkQuantifier++;
-								if (isNewSection >= 2) newChunkQuantifier++;
-
-								//System.out.println("Section " + i + " - isNewSection: " + isNewSection + ", isBeingUpdatedSection: " + isBeingUpdatedSection);
-
-								var biomesContainer = section.getBiomeContainer();
-								if (biomesContainer instanceof PalettedContainer<RegistryEntry<Biome>> biomesPaletteContainer) {
-									Palette<RegistryEntry<Biome>> biomePalette = biomesPaletteContainer.data.palette();
-									//System.out.println("Biome Palette Size for Section " + i + ": " + biomePalette.getSize());
-									for (int i3 = 0; i3 < biomePalette.getSize(); i3++) {
-										//System.out.println("Section: " + i + " Biome Palette entry :" + i3 + " Biome: " + biomePalette.get(i3).getKey().get());
-										if (i3 == 0 && biomePalette.get(i3).getKey().get() == BiomeKeys.PLAINS && mc.world.getRegistryKey() == World.END) isNewChunk = true;
-										if (!isNewChunk && i3 == 0 && biomePalette.get(i3).getKey().get() != BiomeKeys.THE_END && mc.world.getRegistryKey() == World.END) isNewChunk = false;
-									}
-								}
+								loops++;
 							}
-							loops++;
 						}
 
 						if (loops > 0) {
 							if (beingUpdatedDetector.get() && (mc.world.getRegistryKey() == World.NETHER || mc.world.getRegistryKey() == World.END)){
 								double oldpercentage = ((double) oldChunkQuantifier / loops) * 100;
+								//System.out.println("Being updated Percentage: " + oldpercentage);
 								if (oldpercentage >= 25) chunkIsBeingUpdated = true;
 							}
 							else if (mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END){
 								double percentage = ((double) newChunkQuantifier / loops) * 100;
+								//System.out.println("Percentage: " + percentage);
 								if (percentage >= 65) isNewChunk = true;
 							}
 						}
 					} catch (Exception e) {
 						if (beingUpdatedDetector.get() && (mc.world.getRegistryKey() == World.NETHER || mc.world.getRegistryKey() == World.END)){
 							double oldpercentage = ((double) oldChunkQuantifier / loops) * 100;
+							//System.out.println("Being updated Percentage: " + oldpercentage);
 							if (oldpercentage >= 25) chunkIsBeingUpdated = true;
 						}
 						else if (mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END){
 							double percentage = ((double) newChunkQuantifier / loops) * 100;
+							//System.out.println("Percentage: " + percentage);
 							if (percentage >= 65) isNewChunk = true;
 						}
 					}
@@ -970,5 +977,18 @@ public class NewerNewChunks extends Module {
 			writer.close();
 		} catch (IOException e) {
 		}
+	}
+	private void removeChunksOutsideRenderDistance() {
+		BlockPos cameraPos = mc.getCameraEntity().getBlockPos();
+		double renderDistanceBlocks = renderDistance.get() * 16;
+
+		removeChunksOutsideRenderDistance(newChunks, cameraPos, renderDistanceBlocks);
+		removeChunksOutsideRenderDistance(oldChunks, cameraPos, renderDistanceBlocks);
+		removeChunksOutsideRenderDistance(beingUpdatedOldChunks, cameraPos, renderDistanceBlocks);
+		removeChunksOutsideRenderDistance(OldGenerationOldChunks, cameraPos, renderDistanceBlocks);
+		removeChunksOutsideRenderDistance(tickexploitChunks, cameraPos, renderDistanceBlocks);
+	}
+	private void removeChunksOutsideRenderDistance(Set<ChunkPos> chunkSet, BlockPos cameraPos, double renderDistanceBlocks) {
+		chunkSet.removeIf(chunkPos -> !cameraPos.isWithinDistance(chunkPos.getStartPos(), renderDistanceBlocks));
 	}
 }
