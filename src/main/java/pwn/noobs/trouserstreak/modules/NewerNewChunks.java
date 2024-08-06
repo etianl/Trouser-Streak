@@ -840,7 +840,7 @@ public class NewerNewChunks extends Module {
 										}
 									}
 								}
-								loops++;
+								if (!section.isEmpty())loops++;
 							}
 						}
 
@@ -852,7 +852,7 @@ public class NewerNewChunks extends Module {
 							}
 							else if (mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END){
 								double percentage = ((double) newChunkQuantifier / loops) * 100;
-								//System.out.println("Percentage: " + percentage);
+								System.out.println("Percentage: " + percentage);
 								if (percentage >= 65) isNewChunk = true;
 							}
 						}
@@ -864,7 +864,7 @@ public class NewerNewChunks extends Module {
 						}
 						else if (mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END){
 							double percentage = ((double) newChunkQuantifier / loops) * 100;
-							//System.out.println("Percentage: " + percentage);
+							System.out.println("Percentage: " + percentage);
 							if (percentage >= 65) isNewChunk = true;
 						}
 					}
