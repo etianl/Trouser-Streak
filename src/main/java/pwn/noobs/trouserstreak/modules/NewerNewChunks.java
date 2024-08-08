@@ -34,11 +34,12 @@ import net.minecraft.world.biome.BiomeKeys;
 import net.minecraft.world.chunk.*;
 import pwn.noobs.trouserstreak.Trouser;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -119,6 +120,13 @@ public class NewerNewChunks extends Module {
 			.defaultValue(true)
 			.build()
 	);
+	private final Setting<Boolean> removerenderdist = sgcacheCdata.add(new BoolSetting.Builder()
+			.name("RemoveOutsideRenderDistance")
+			.description("Removes the cached chunks when they leave the defined render distance.")
+			.defaultValue(false)
+			.build()
+	);
+
 	private final Setting<Boolean> save = sgCdata.add(new BoolSetting.Builder()
 			.name("SaveChunkData")
 			.description("Saves the cached chunks to a file.")
@@ -359,12 +367,12 @@ public class NewerNewChunks extends Module {
 		NEW_NETHER_BLOCKS.add(Blocks.SOUL_SOIL);
 		NEW_NETHER_BLOCKS.add(Blocks.SOUL_FIRE);
 	}
-	Set<String> FILE_NAMES = new HashSet<>(Set.of(
-			"OldChunkData.txt",
-			"BeingUpdatedChunkData.txt",
-			"OldGenerationChunkData.txt",
-			"NewChunkData.txt",
-			"BlockExploitChunkData.txt"
+	Set<Path> FILE_PATHS = new HashSet<>(Set.of(
+			Paths.get("OldChunkData.txt"),
+			Paths.get("BeingUpdatedChunkData.txt"),
+			Paths.get("OldGenerationChunkData.txt"),
+			Paths.get("NewChunkData.txt"),
+			Paths.get("BlockExploitChunkData.txt")
 	));
 	public NewerNewChunks() {
 		super(Trouser.Main,"NewerNewChunks", "Detects new chunks by scanning the order of chunk section palettes. Can also check liquid flow, and block ticking packets.");
@@ -399,18 +407,24 @@ public class NewerNewChunks extends Module {
 			}
 		}
 		if (save.get()){
-			new File("TrouserStreak/NewChunks/"+serverip+"/"+world).mkdirs();
+			try {
+				Files.createDirectories(Paths.get("TrouserStreak", "NewChunks", serverip, world));
+			} catch (IOException e) {
+				//e.printStackTrace();
+			}
 		}
 		if (save.get() || load.get()) {
-			for (String fileName : FILE_NAMES) {
-				String fullPath = "TrouserStreak/NewChunks/" + serverip + "/" + world + "/" + fileName;
-				if (!Files.exists(Paths.get(fullPath))) {
-					File file = new File(fullPath);
-					try {
-						file.createNewFile();
-					} catch (IOException e) {
-						//e.printStackTrace();
+			Path baseDir = Paths.get("TrouserStreak", "NewChunks", serverip, world);
+
+			for (Path fileName : FILE_PATHS) {
+				Path fullPath = baseDir.resolve(fileName);
+				try {
+					Files.createDirectories(fullPath.getParent());
+					if (Files.notExists(fullPath)) {
+						Files.createFile(fullPath);
 					}
+				} catch (IOException e) {
+					//e.printStackTrace();
 				}
 			}
 		}
@@ -471,11 +485,15 @@ public class NewerNewChunks extends Module {
 				serverip = mc.getCurrentServerEntry().address.replace(':', '_');
 			}
 			clearChunkData();
-			new File("TrouserStreak/NewChunks/"+serverip+"/"+world+"/NewChunkData.txt").delete();
-			new File("TrouserStreak/NewChunks/"+serverip+"/"+world+"/OldChunkData.txt").delete();
-			new File("TrouserStreak/NewChunks/"+serverip+"/"+world+"/BeingUpdatedChunkData.txt").delete();
-			new File("TrouserStreak/NewChunks/"+serverip+"/"+world+"/OldGenerationChunkData.txt").delete();
-			new File("TrouserStreak/NewChunks/"+serverip+"/"+world+"/BlockExploitChunkData.txt").delete();
+			try {
+				Files.deleteIfExists(Paths.get("TrouserStreak", "NewChunks", serverip, world, "NewChunkData.txt"));
+				Files.deleteIfExists(Paths.get("TrouserStreak", "NewChunks", serverip, world, "OldChunkData.txt"));
+				Files.deleteIfExists(Paths.get("TrouserStreak", "NewChunks", serverip, world, "BeingUpdatedChunkData.txt"));
+				Files.deleteIfExists(Paths.get("TrouserStreak", "NewChunks", serverip, world, "OldGenerationChunkData.txt"));
+				Files.deleteIfExists(Paths.get("TrouserStreak", "NewChunks", serverip, world, "BlockExploitChunkData.txt"));
+			} catch (IOException e) {
+				//e.printStackTrace();
+			}
 			error("Chunk Data deleted for this Dimension.");
 			deletewarning=0;
 		}
@@ -487,9 +505,9 @@ public class NewerNewChunks extends Module {
 			}
 		} else errticks=0;
 		if (load.get()){
-			loadingticks++;
-			if (loadingticks<2){
+			if (loadingticks<1){
 				loadData();
+				loadingticks++;
 			}
 		} else if (!load.get()){
 			loadingticks=0;
@@ -562,19 +580,21 @@ public class NewerNewChunks extends Module {
 			}
 		}
 		//autoreload when entering different dimensions
-		if (reloadworld<6){
+		if (load.get() && reloadworld<6){
 			reloadworld++;
 		}
-		if (reloadworld==5){
-			for (String fileName : FILE_NAMES) {
-				String fullPath = "TrouserStreak/NewChunks/" + serverip + "/" + world + "/" + fileName;
-				if (!Files.exists(Paths.get(fullPath))) {
-					File file = new File(fullPath);
-					try {
-						file.createNewFile();
-					} catch (IOException e) {
-						//e.printStackTrace();
+		if (load.get() && reloadworld==5){
+			Path baseDir = Paths.get("TrouserStreak", "NewChunks", serverip, world);
+
+			for (Path fileName : FILE_PATHS) {
+				Path fullPath = baseDir.resolve(fileName);
+				try {
+					Files.createDirectories(fullPath.getParent());
+					if (Files.notExists(fullPath)) {
+						Files.createFile(fullPath);
 					}
+				} catch (IOException e) {
+					//e.printStackTrace();
 				}
 			}
 			if (worldleaveremove.get()){
@@ -582,7 +602,7 @@ public class NewerNewChunks extends Module {
 			}
 			loadData();
 		}
-		if (!save.get() && !load.get())removeChunksOutsideRenderDistance();
+		if (removerenderdist.get())removeChunksOutsideRenderDistance();
 	}
 	@EventHandler
 	private void onRender(Render3DEvent event) {
@@ -660,7 +680,7 @@ public class NewerNewChunks extends Module {
 								if (tickexploitChunks.contains(chunkPos)) tickexploitChunks.remove(chunkPos);
 								newChunks.add(chunkPos);
 								if (save.get()){
-									saveData("/NewChunkData.txt", chunkPos);
+									saveData(Paths.get("NewChunkData.txt"), chunkPos);
 								}
 								return;
 							}
@@ -677,9 +697,8 @@ public class NewerNewChunks extends Module {
 					if (!OldGenerationOldChunks.contains(chunkPos) && !beingUpdatedOldChunks.contains(chunkPos) && !tickexploitChunks.contains(chunkPos) && !oldChunks.contains(chunkPos) && !newChunks.contains(chunkPos)){
 						tickexploitChunks.add(chunkPos);
 						if (save.get()){
-							saveData("/BlockExploitChunkData.txt", chunkPos);
+							saveData(Paths.get("BlockExploitChunkData.txt"), chunkPos);
 						}
-						return;
 					}
 				}
 				catch (Exception e){}
@@ -691,7 +710,7 @@ public class NewerNewChunks extends Module {
 							if (tickexploitChunks.contains(chunkPos)) tickexploitChunks.remove(chunkPos);
 							newChunks.add(chunkPos);
 							if (save.get()){
-								saveData("/NewChunkData.txt", chunkPos);
+								saveData(Paths.get("NewChunkData.txt"), chunkPos);
 							}
 							return;
 						}
@@ -719,15 +738,21 @@ public class NewerNewChunks extends Module {
 				boolean foundAnyOre = false;
 				boolean isNewOverworldGeneration = false;
 				boolean isNewNetherGeneration = false;
+				ChunkSection[] sections = chunk.getSectionArray();
 
 				if (overworldOldChunksDetector.get() && mc.world.getRegistryKey() == World.OVERWORLD) {
-					for (int x = 0; x < 16; x++) {
-						for (int y = mc.world.getBottomY()+3; y < 260; y++) {
-							for (int z = 0; z < 16; z++) {
-								if (!foundAnyOre && ORE_BLOCKS.contains(chunk.getBlockState(new BlockPos(x, y, z)).getBlock())) foundAnyOre = true; //prevent false flags in flat world
-								if (y > 5 && !isNewOverworldGeneration && NEW_OVERWORLD_BLOCKS.contains(chunk.getBlockState(new BlockPos(x, y, z)).getBlock())) {
-									isNewOverworldGeneration = true;
-									break;
+					for (int i = 0; i < 17; i++) {
+						ChunkSection section = sections[i];
+						if (section != null && !section.isEmpty()) {
+							for (int x = 0; x < 16; x++) {
+								for (int y = 0; y < 16; y++) {
+									for (int z = 0; z < 16; z++) {
+										if (!foundAnyOre && ORE_BLOCKS.contains(section.getBlockState(x, y, z).getBlock())) foundAnyOre = true; //prevent false flags in flat world
+										if (!isNewOverworldGeneration && NEW_OVERWORLD_BLOCKS.contains(section.getBlockState(x, y, z).getBlock())) {
+											isNewOverworldGeneration = true;
+											break;
+										}
+									}
 								}
 							}
 						}
@@ -736,12 +761,17 @@ public class NewerNewChunks extends Module {
 				}
 
 				if (netherOldChunksDetector.get() && mc.world.getRegistryKey() == World.NETHER) {
-					for (int x = 0; x < 16; x++) {
-						for (int y = mc.world.getBottomY()+3; y < 128; y++) {
-							for (int z = 0; z < 16; z++) {
-								if (!isNewNetherGeneration && NEW_NETHER_BLOCKS.contains(chunk.getBlockState(new BlockPos(x, y, z)).getBlock()) && mc.world.getRegistryKey() == World.NETHER) {
-									isNewNetherGeneration = true;
-									break;
+					for (int i = 0; i < 8; i++) {
+						ChunkSection section = sections[i];
+						if (section != null && !section.isEmpty()) {
+							for (int x = 0; x < 16; x++) {
+								for (int y = 0; y < 16; y++) {
+									for (int z = 0; z < 16; z++) {
+										if (!isNewNetherGeneration && NEW_NETHER_BLOCKS.contains(section.getBlockState(x, y, z).getBlock())) {
+											isNewNetherGeneration = true;
+											break;
+										}
+									}
 								}
 							}
 						}
@@ -769,7 +799,6 @@ public class NewerNewChunks extends Module {
 					int loops = 0;
 					int newChunkQuantifier = 0;
 					int oldChunkQuantifier = 0;
-					ChunkSection[] sections = chunk.getSectionArray();
 
 					try {
 						for (int i = 0; i < 8; i++) {
@@ -852,7 +881,7 @@ public class NewerNewChunks extends Module {
 							}
 							else if (mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END){
 								double percentage = ((double) newChunkQuantifier / loops) * 100;
-								System.out.println("Percentage: " + percentage);
+								//System.out.println("Percentage: " + percentage);
 								if (percentage >= 65) isNewChunk = true;
 							}
 						}
@@ -864,7 +893,7 @@ public class NewerNewChunks extends Module {
 						}
 						else if (mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END){
 							double percentage = ((double) newChunkQuantifier / loops) * 100;
-							System.out.println("Percentage: " + percentage);
+							//System.out.println("Percentage: " + percentage);
 							if (percentage >= 65) isNewChunk = true;
 						}
 					}
@@ -876,7 +905,7 @@ public class NewerNewChunks extends Module {
 							if (!OldGenerationOldChunks.contains(oldpos) && !beingUpdatedOldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
 								newChunks.add(oldpos);
 								if (save.get()) {
-									saveData("/NewChunkData.txt", oldpos);
+									saveData(Paths.get("NewChunkData.txt"), oldpos);
 								}
 								return;
 							}
@@ -888,8 +917,9 @@ public class NewerNewChunks extends Module {
 							if (!OldGenerationOldChunks.contains(oldpos) && !beingUpdatedOldChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
 								OldGenerationOldChunks.add(oldpos);
 								if (save.get()){
-									saveData("/OldGenerationChunkData.txt", oldpos);
+									saveData(Paths.get("OldGenerationChunkData.txt"), oldpos);
 								}
+								return;
 							}
 						} catch (Exception e) {
 						}
@@ -899,8 +929,9 @@ public class NewerNewChunks extends Module {
 							if (!OldGenerationOldChunks.contains(oldpos) && !beingUpdatedOldChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
 								beingUpdatedOldChunks.add(oldpos);
 								if (save.get()){
-									saveData("/BeingUpdatedChunkData.txt", oldpos);
+									saveData(Paths.get("BeingUpdatedChunkData.txt"), oldpos);
 								}
+								return;
 							}
 						} catch (Exception e) {
 						}
@@ -910,7 +941,7 @@ public class NewerNewChunks extends Module {
 							if (!OldGenerationOldChunks.contains(oldpos) && !beingUpdatedOldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
 								oldChunks.add(oldpos);
 								if (save.get()) {
-									saveData("/OldChunkData.txt", oldpos);
+									saveData(Paths.get("OldChunkData.txt"), oldpos);
 								}
 								return;
 							}
@@ -927,7 +958,7 @@ public class NewerNewChunks extends Module {
 									if (!OldGenerationOldChunks.contains(oldpos) && !beingUpdatedOldChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos) && !fluid.isEmpty() && !fluid.isStill()) {
 										oldChunks.add(oldpos);
 										if (save.get()){
-											saveData("/OldChunkData.txt", oldpos);
+											saveData(Paths.get("OldChunkData.txt"), oldpos);
 										}
 										return;
 									}
@@ -941,21 +972,21 @@ public class NewerNewChunks extends Module {
 		}
 	}
 	private void loadData() {
-		loadChunkData("/BlockExploitChunkData.txt", tickexploitChunks);
-		loadChunkData("/OldChunkData.txt", oldChunks);
-		loadChunkData("/NewChunkData.txt", newChunks);
-		loadChunkData("/BeingUpdatedChunkData.txt", beingUpdatedOldChunks);
-		loadChunkData("/OldGenerationChunkData.txt", OldGenerationOldChunks);
+		loadChunkData(Paths.get("BlockExploitChunkData.txt"), tickexploitChunks);
+		loadChunkData(Paths.get("OldChunkData.txt"), oldChunks);
+		loadChunkData(Paths.get("NewChunkData.txt"), newChunks);
+		loadChunkData(Paths.get("BeingUpdatedChunkData.txt"), beingUpdatedOldChunks);
+		loadChunkData(Paths.get("OldGenerationChunkData.txt"), OldGenerationOldChunks);
 	}
-	private void loadChunkData(String savedDataLocation, Set<ChunkPos> chunkSet) {
+	private void loadChunkData(Path savedDataLocation, Set<ChunkPos> chunkSet) {
 		try {
-			List<String> allLines = Files.readAllLines(Paths.get("TrouserStreak/NewChunks/"+serverip+"/"+world+savedDataLocation));
+			Path filePath = Paths.get("TrouserStreak/NewChunks", serverip, world).resolve(savedDataLocation);
+			List<String> allLines = Files.readAllLines(filePath);
 
 			for (String line : allLines) {
-				String s = line;
-				if (s !=null){
-					String[] array = s.split(", ");
-					if (array.length==2) {
+				if (line != null && !line.isEmpty()) {
+					String[] array = line.split(", ");
+					if (array.length == 2) {
 						int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]", ""));
 						int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]", ""));
 						ChunkPos chunkPos = new ChunkPos(X, Z);
@@ -966,16 +997,22 @@ public class NewerNewChunks extends Module {
 				}
 			}
 		} catch (IOException e) {
+			//e.printStackTrace();
 		}
 	}
-	private void saveData(String savedDataLocation, ChunkPos chunkpos) {
+	private void saveData(Path savedDataLocation, ChunkPos chunkpos) {
 		try {
-			new File("TrouserStreak/NewChunks/"+serverip+"/"+world).mkdirs();
-			FileWriter writer = new FileWriter("TrouserStreak/NewChunks/"+serverip+"/"+world+savedDataLocation, true);
-			writer.write(String.valueOf(chunkpos));
-			writer.write("\r\n");
-			writer.close();
+			Path dirPath = Paths.get("TrouserStreak", "NewChunks", serverip, world);
+			Files.createDirectories(dirPath);
+
+			Path filePath = dirPath.resolve(savedDataLocation);
+			String data = chunkpos.toString() + System.lineSeparator();
+
+			Files.write(filePath, data.getBytes(StandardCharsets.UTF_8),
+					StandardOpenOption.CREATE,
+					StandardOpenOption.APPEND);
 		} catch (IOException e) {
+			//e.printStackTrace();
 		}
 	}
 	private void removeChunksOutsideRenderDistance() {

@@ -101,7 +101,7 @@ public class ExplosionAura extends Module {
                 BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
                 ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
                 var changes = ComponentChanges.builder()
-                        .add(DataComponentTypes.ENTITY_DATA, createEntityData2())
+                        .add(DataComponentTypes.ENTITY_DATA, createEntityData(true))
                         .build();
                 Creeper.applyChanges(changes);
 
@@ -123,7 +123,7 @@ public class ExplosionAura extends Module {
                         BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
                         ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
                         var changes = ComponentChanges.builder()
-                                .add(DataComponentTypes.ENTITY_DATA, createEntityData2())
+                                .add(DataComponentTypes.ENTITY_DATA, createEntityData(true))
                                 .build();
                         Creeper.applyChanges(changes);
 
@@ -142,7 +142,7 @@ public class ExplosionAura extends Module {
                     BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getPos()), false);
                     ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
                     var changes = ComponentChanges.builder()
-                            .add(DataComponentTypes.ENTITY_DATA, createEntityData())
+                            .add(DataComponentTypes.ENTITY_DATA, createEntityData(false))
                             .build();
                     Creeper.applyChanges(changes);
 
@@ -157,34 +157,23 @@ public class ExplosionAura extends Module {
             toggle();
         }
     }
-    private NbtComponent createEntityData() {
+    private NbtComponent createEntityData(boolean click) {
         NbtCompound entityTag = new NbtCompound();
-        entityTag.putInt("ignited", (1));
-        entityTag.putInt("Invulnerable", (1));
-        entityTag.putInt("Fuse", (0));
-        entityTag.putInt("NoGravity", (1));
-        entityTag.putInt("ExplosionRadius", cpower.get());
-        return NbtComponent.of(entityTag);
-    }
-    private NbtComponent createEntityData2() {
-        HitResult hr = mc.cameraEntity.raycast(600, 0, true);
-        Vec3d owo = hr.getPos();
-        BlockPos pos = BlockPos.ofFloored(owo);
-        NbtCompound entityTag = new NbtCompound();
-        NbtList Pos = new NbtList();
-        Pos.add(NbtDouble.of(pos.getX()));
-        Pos.add(NbtDouble.of(pos.getY()));
-        Pos.add(NbtDouble.of(pos.getZ()));
-        entityTag.put("Pos", Pos);
-        entityTag.putInt("ignited", (1));
-        entityTag.putInt("Invulnerable", (1));
-        entityTag.putInt("Fuse", (0));
-        entityTag.putInt("NoGravity", (1));
-        entityTag.putInt("ExplosionRadius", cpower.get());
-        entityTag.putInt("ignited", (1));
-        entityTag.putInt("Invulnerable", (1));
-        entityTag.putInt("Fuse", (0));
-        entityTag.putInt("NoGravity", (1));
+        entityTag.putString("id", "minecraft:creeper");
+        if (click) {
+            HitResult hr = mc.cameraEntity.raycast(600, 0, true);
+            Vec3d owo = hr.getPos();
+            BlockPos pos = BlockPos.ofFloored(owo);
+            NbtList Pos = new NbtList();
+            Pos.add(NbtDouble.of(pos.getX()));
+            Pos.add(NbtDouble.of(pos.getY()));
+            Pos.add(NbtDouble.of(pos.getZ()));
+            entityTag.put("Pos", Pos);
+        }
+        entityTag.putBoolean("ignited", true);
+        entityTag.putBoolean("Invulnerable", true);
+        entityTag.putInt("Fuse", 0);
+        entityTag.putBoolean("NoGravity", true);
         entityTag.putInt("ExplosionRadius", cpower.get());
         return NbtComponent.of(entityTag);
     }
