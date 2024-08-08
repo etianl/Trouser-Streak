@@ -36,11 +36,12 @@ import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.WorldChunk;
 import pwn.noobs.trouserstreak.Trouser;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -49,6 +50,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 /*
     This BaseFinder was made from the newchunks code,
@@ -261,6 +263,12 @@ public class BaseFinder extends Module {
             .defaultValue(true)
             .build()
     );
+    private final Setting<Boolean> removerenderdist = sgcacheCdata.add(new BoolSetting.Builder()
+            .name("RemoveOutsideRenderDistance")
+            .description("Removes the cached chunks when they leave the defined render distance.")
+            .defaultValue(true)
+            .build()
+    );
     private final Setting<Boolean> save = sgCdata.add(new BoolSetting.Builder()
             .name("SaveBaseData")
             .description("Saves the cached bases to a file.")
@@ -307,14 +315,20 @@ public class BaseFinder extends Module {
                 if (!baseChunks.contains(new ChunkPos(mc.player.getChunkPos().x, mc.player.getChunkPos().z))){
                     baseChunks.add(new ChunkPos(mc.player.getChunkPos().x, mc.player.getChunkPos().z));
                     try {
-                        new File("TrouserStreak/BaseChunks/"+serverip+"/"+world).mkdirs();
-                        FileWriter writer = new FileWriter("TrouserStreak/BaseChunks/"+serverip+"/"+world+"/BaseChunkData.txt", true);
-                        writer.write(String.valueOf(new ChunkPos(mc.player.getChunkPos().x, mc.player.getChunkPos().z)));
-                        writer.write("\r\n");   // write new line
-                        writer.close();
+                        Path dirPath = Paths.get("TrouserStreak", "BaseChunks", serverip, world);
+                        Files.createDirectories(dirPath);
+
+                        Path filePath = dirPath.resolve("BaseChunkData.txt");
+                        ChunkPos chunkPos = new ChunkPos(mc.player.getChunkPos().x, mc.player.getChunkPos().z);
+                        String data = chunkPos + System.lineSeparator();
+
+                        Files.write(filePath, data.getBytes(StandardCharsets.UTF_8),
+                                StandardOpenOption.CREATE,
+                                StandardOpenOption.APPEND);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        //e.printStackTrace();
                     }
+
                 }
                 ChatUtils.sendMsg(Text.of("Base near X"+mc.player.getChunkPos().getCenterX()+", Z"+mc.player.getChunkPos().getCenterZ()+" added to the BaseFinder."));
             }
@@ -327,18 +341,20 @@ public class BaseFinder extends Module {
             } else {
                 if (baseChunks.contains(new ChunkPos(mc.player.getChunkPos().x, mc.player.getChunkPos().z))){
                     baseChunks.remove(new ChunkPos(mc.player.getChunkPos().x, mc.player.getChunkPos().z));
-                    new File("TrouserStreak/BaseChunks/"+serverip+"/"+world+"/BaseChunkData.txt").delete();
-                    for (int rb = 0; rb < baseChunks.stream().toList().size(); rb++){
-                        try {
-                            new File("TrouserStreak/BaseChunks/"+serverip+"/"+world).mkdirs();
-                            FileWriter writer = new FileWriter("TrouserStreak/BaseChunks/"+serverip+"/"+world+"/BaseChunkData.txt", true);
-                            writer.write(String.valueOf(baseChunks.stream().toList().get(rb)));
-                            writer.write("\r\n");   // write new line
-                            writer.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                    try {
+                        Path dirPath = Paths.get("TrouserStreak", "BaseChunks", serverip, world);
+                        Files.createDirectories(dirPath);
+                        Path filePath = dirPath.resolve("BaseChunkData.txt");
+                        Files.deleteIfExists(filePath);
+                        List<String> chunkDataLines = baseChunks.stream()
+                                .map(Object::toString)
+                                .collect(Collectors.toList());
+                        Files.write(filePath, chunkDataLines, StandardCharsets.UTF_8,
+                                StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+                    } catch (IOException e) {
+                        //e.printStackTrace();
                     }
+
                 }
                 ChatUtils.sendMsg(Text.of("Base near X"+mc.player.getChunkPos().getCenterX()+", Z"+mc.player.getChunkPos().getCenterZ()+" removed from the BaseFinder."));
             }
@@ -353,17 +369,19 @@ public class BaseFinder extends Module {
             } else {
                 if (baseChunks.contains(new ChunkPos(LastBaseFound.x, LastBaseFound.z))){
                     baseChunks.remove(new ChunkPos(LastBaseFound.x, LastBaseFound.z));
-                    new File("TrouserStreak/BaseChunks/"+serverip+"/"+world+"/BaseChunkData.txt").delete();
-                    for (int rb = 0; rb < baseChunks.stream().toList().size(); rb++){
-                        try {
-                            new File("TrouserStreak/BaseChunks/"+serverip+"/"+world).mkdirs();
-                            FileWriter writer = new FileWriter("TrouserStreak/BaseChunks/"+serverip+"/"+world+"/BaseChunkData.txt", true);
-                            writer.write(String.valueOf(baseChunks.stream().toList().get(rb)));
-                            writer.write("\r\n");   // write new line
-                            writer.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                    try {
+                        Path dirPath = Paths.get("TrouserStreak", "BaseChunks", serverip, world);
+                        Files.createDirectories(dirPath);
+                        Path filePath = dirPath.resolve("BaseChunkData.txt");
+                        Files.deleteIfExists(filePath);
+                        List<String> chunkDataLines = baseChunks.stream()
+                                .map(Object::toString)
+                                .collect(Collectors.toList());
+                        Files.write(filePath, chunkDataLines, StandardCharsets.UTF_8,
+                                StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+
+                    } catch (IOException e) {
+                        //e.printStackTrace();
                     }
                 }
                 ChatUtils.sendMsg(Text.of("Base near X"+LastBaseFound.getCenterX()+", Z"+LastBaseFound.getCenterZ()+" removed from the BaseFinder."));
@@ -387,7 +405,7 @@ public class BaseFinder extends Module {
     public final Setting<Integer> renderDistance = sgRender.add(new IntSetting.Builder()
             .name("Render-Distance(Chunks)")
             .description("How many chunks from the character to render the detected chunks with bases.")
-            .defaultValue(512)
+            .defaultValue(128)
             .min(6)
             .sliderRange(6,1024)
             .build()
@@ -507,7 +525,11 @@ public class BaseFinder extends Module {
                 serverip = mc.getCurrentServerEntry().address.replace(':', '_');}
             world= mc.world.getRegistryKey().getValue().toString().replace(':', '_');
             if (save.get()){
-                new File("TrouserStreak/BaseChunks/"+serverip+"/"+world).mkdirs();
+                try {
+                    Files.createDirectories(Paths.get("TrouserStreak", "BaseChunks", serverip, world));
+                } catch (IOException e) {
+                    //e.printStackTrace();
+                }
             }
             if (load.get()){
                 loadData();
@@ -565,7 +587,11 @@ public class BaseFinder extends Module {
         else deletewarning=0;
         if (deletewarning>=2){
             baseChunks.clear();
-            new File("TrouserStreak/BaseChunks/"+serverip+"/"+world+"/BaseChunkData.txt").delete();
+            try {
+                Files.deleteIfExists(Paths.get("TrouserStreak", "BaseChunks", serverip, world, "BaseChunkData.txt"));
+            } catch (IOException e) {
+                //e.printStackTrace();
+            }
             closestbaseX=2000000000;
             closestbaseZ=2000000000;
             basedistance=2000000000;
@@ -574,9 +600,9 @@ public class BaseFinder extends Module {
             deletewarning=0;
         }
         if (load.get()){
-            loadingticks++;
-            if (loadingticks<2){
+            if (loadingticks<1){
                 loadData();
+                loadingticks++;
             }
         } else if (!load.get()){
             loadingticks=0;
@@ -594,7 +620,7 @@ public class BaseFinder extends Module {
                 basedistance = 2000000000;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
 
         if (findnearestbaseticks==1) {
@@ -637,7 +663,7 @@ public class BaseFinder extends Module {
             }
             loadData();
         }
-        if (!save.get() && !load.get())removeChunksOutsideRenderDistance();
+        if (removerenderdist.get())removeChunksOutsideRenderDistance();
     }
     @EventHandler
     private void onRender(Render3DEvent event) {
@@ -994,7 +1020,7 @@ public class BaseFinder extends Module {
                         }
                     }
                     catch (Exception e){
-                        e.printStackTrace();
+                        //e.printStackTrace();
                     }
                 }
                 if (spawnerfound==true && spawnernaturalblocks==false){
@@ -1031,20 +1057,23 @@ public class BaseFinder extends Module {
                 baseChunks.add(basepos);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
     private void saveBaseChunkData() {
+        Path dirPath = Paths.get("TrouserStreak", "BaseChunks", serverip, world);
+        Path filePath = dirPath.resolve("BaseChunkData.txt");
         try {
-            new File("TrouserStreak/BaseChunks/"+serverip+"/"+world).mkdirs();
-            FileWriter writer = new FileWriter("TrouserStreak/BaseChunks/"+serverip+"/"+world+"/BaseChunkData.txt", true);
-            writer.write(String.valueOf(basepos));
-            writer.write("\r\n");   // write new line
-            writer.close();
+            Files.createDirectories(dirPath);
+            String data = basepos.toString() + System.lineSeparator();
+            Files.write(filePath, data.getBytes(StandardCharsets.UTF_8),
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.APPEND);
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
+
     private boolean filterBlocks(Block block) {
         return isNaturalLagCausingBlock(block);
     }
