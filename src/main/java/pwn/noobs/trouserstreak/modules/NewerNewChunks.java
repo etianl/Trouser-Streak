@@ -464,7 +464,6 @@ public class NewerNewChunks extends Module {
 			resetCounterValues();
 			reloadworld=0;
 			worldchange=true;
-			justenabledsavedata=0;
 		}
 	}
 	@EventHandler
@@ -482,36 +481,6 @@ public class NewerNewChunks extends Module {
 			resetCounterValues();
 			reloadworld=0;
 			worldchange=true;
-		}
-		if (save.get() && justenabledsavedata<=2){
-			justenabledsavedata++;
-			if (justenabledsavedata == 1){
-				synchronized (newChunks) {
-					for (ChunkPos chunk : newChunks){
-						saveData(Paths.get("NewChunkData.txt"), chunk);
-					}
-				}
-				synchronized (oldChunks) {
-					for (ChunkPos chunk : oldChunks){
-						saveData(Paths.get("OldChunkData.txt"), chunk);
-					}
-				}
-				synchronized (beingUpdatedOldChunks) {
-					for (ChunkPos chunk : beingUpdatedOldChunks){
-						saveData(Paths.get("BeingUpdatedChunkData.txt"), chunk);
-					}
-				}
-				synchronized (OldGenerationOldChunks) {
-					for (ChunkPos chunk : OldGenerationOldChunks){
-						saveData(Paths.get("OldGenerationChunkData.txt"), chunk);
-					}
-				}
-				synchronized (tickexploitChunks) {
-					for (ChunkPos chunk : tickexploitChunks){
-						saveData(Paths.get("BlockExploitChunkData.txt"), chunk);
-					}
-				}
-			}
 		}
 		if (deletewarningTicks<=100) deletewarningTicks++;
 		else deletewarning=0;
@@ -618,15 +587,45 @@ public class NewerNewChunks extends Module {
 			}
 		}
 		//autoreload when entering different dimensions
-		if (load.get() && reloadworld<6 && worldchange == true){
+		if (load.get() && reloadworld<5 && worldchange == true){
 			reloadworld++;
 		}
-		if (load.get() && reloadworld==5 && worldchange == true){
+		if (load.get() && reloadworld>=5 && worldchange == true){
 			if (worldleaveremove.get()){
 				clearChunkData();
 			}
 			loadData();
 			worldchange=false;
+		}
+		if (save.get() && justenabledsavedata<=2){
+			justenabledsavedata++;
+			if (justenabledsavedata == 1){
+				synchronized (newChunks) {
+					for (ChunkPos chunk : newChunks){
+						saveData(Paths.get("NewChunkData.txt"), chunk);
+					}
+				}
+				synchronized (oldChunks) {
+					for (ChunkPos chunk : oldChunks){
+						saveData(Paths.get("OldChunkData.txt"), chunk);
+					}
+				}
+				synchronized (beingUpdatedOldChunks) {
+					for (ChunkPos chunk : beingUpdatedOldChunks){
+						saveData(Paths.get("BeingUpdatedChunkData.txt"), chunk);
+					}
+				}
+				synchronized (OldGenerationOldChunks) {
+					for (ChunkPos chunk : OldGenerationOldChunks){
+						saveData(Paths.get("OldGenerationChunkData.txt"), chunk);
+					}
+				}
+				synchronized (tickexploitChunks) {
+					for (ChunkPos chunk : tickexploitChunks){
+						saveData(Paths.get("BlockExploitChunkData.txt"), chunk);
+					}
+				}
+			}
 		}
 		if (removerenderdist.get())removeChunksOutsideRenderDistance();
 	}
