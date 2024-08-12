@@ -571,7 +571,6 @@ public class BaseFinder extends Module {
         if (event.screen instanceof DownloadingTerrainScreen) {
             reloadworld=0;
             worldchange=true;
-            justenabledsavedata = 0;
         }
     }
     @EventHandler
@@ -591,16 +590,6 @@ public class BaseFinder extends Module {
         if (mc.player.getHealth()==0) {
             reloadworld=0;
             worldchange=true;
-        }
-        if (save.get() && justenabledsavedata<=2){
-            justenabledsavedata++;
-            if (justenabledsavedata == 1){
-                synchronized (baseChunks) {
-                    for (ChunkPos chunk : baseChunks){
-                        saveBaseChunkData(chunk);
-                    }
-                }
-            }
         }
         if (basefound==true && basefoundspamTicks< bsefndtickdelay.get())basefoundspamTicks++;
         else if (basefoundspamTicks>= bsefndtickdelay.get()){
@@ -678,15 +667,25 @@ public class BaseFinder extends Module {
             }
         }
         //autoreload when entering different dimensions
-        if (load.get() && reloadworld<6 && worldchange == true){
+        if (load.get() && reloadworld<5 && worldchange == true){
             reloadworld++;
         }
-        if (load.get() && reloadworld==5 && worldchange == true){
+        if (load.get() && reloadworld>=5 && worldchange == true){
             if (worldleaveremove.get()){
                 baseChunks.clear();
             }
             loadData();
             worldchange=false;
+        }
+        if (save.get() && justenabledsavedata<=2){
+            justenabledsavedata++;
+            if (justenabledsavedata == 1){
+                synchronized (baseChunks) {
+                    for (ChunkPos chunk : baseChunks){
+                        saveBaseChunkData(chunk);
+                    }
+                }
+            }
         }
         if (removerenderdist.get())removeChunksOutsideRenderDistance();
     }
