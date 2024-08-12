@@ -157,7 +157,7 @@ public class BaseFinder extends Module {
                     Blocks.LAVA_CAULDRON, Blocks.POWDER_SNOW_CAULDRON, Blocks.ACTIVATOR_RAIL, Blocks.BEACON, Blocks.BEEHIVE, Blocks.REPEATING_COMMAND_BLOCK, Blocks.COMMAND_BLOCK, Blocks.CHAIN_COMMAND_BLOCK, Blocks.EMERALD_BLOCK, Blocks.IRON_BLOCK, Blocks.NETHERITE_BLOCK, Blocks.RAW_GOLD_BLOCK, Blocks.CONDUIT, Blocks.DAYLIGHT_DETECTOR, Blocks.DETECTOR_RAIL, Blocks.DRIED_KELP_BLOCK, Blocks.DROPPER, Blocks.ENCHANTING_TABLE,
                     Blocks.PIGLIN_HEAD, Blocks.PIGLIN_WALL_HEAD, Blocks.CREEPER_HEAD, Blocks.CREEPER_WALL_HEAD, Blocks.DRAGON_WALL_HEAD, Blocks.DRAGON_HEAD, Blocks.PLAYER_HEAD, Blocks.PLAYER_WALL_HEAD, Blocks.ZOMBIE_HEAD, Blocks.ZOMBIE_WALL_HEAD, Blocks.SKELETON_WALL_SKULL, Blocks.WITHER_SKELETON_SKULL, Blocks.WITHER_SKELETON_WALL_SKULL, Blocks.HEAVY_CORE,
                     Blocks.HONEY_BLOCK, Blocks.HONEYCOMB_BLOCK, Blocks.HOPPER, Blocks.JUKEBOX, Blocks.LIGHTNING_ROD, Blocks.LODESTONE, Blocks.OBSERVER, Blocks.POWERED_RAIL, Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE, Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE, Blocks.BIRCH_PRESSURE_PLATE, Blocks.JUNGLE_PRESSURE_PLATE, Blocks.DARK_OAK_PRESSURE_PLATE, Blocks.MANGROVE_PRESSURE_PLATE, Blocks.CRIMSON_PRESSURE_PLATE, Blocks.WARPED_PRESSURE_PLATE, Blocks.RESPAWN_ANCHOR, Blocks.CALIBRATED_SCULK_SENSOR, Blocks.SNIFFER_EGG
-                    )
+            )
             .filter(this::filterBlocks)
             .build()
     );
@@ -393,9 +393,9 @@ public class BaseFinder extends Module {
         WButton deletedata = table.add(theme.button("**DELETE ALL BASE DATA**")).expandX().minWidth(100).widget();
         deletedata.action = () -> {
             if (!(mc.world==null) && mc.world.isChunkLoaded(mc.player.getChunkPos().x,mc.player.getChunkPos().z)){
-            if (deletewarning==0) error("PRESS AGAIN WITHIN 5s TO DELETE ALL BASE DATA FOR THIS DIMENSION.");
-            deletewarningTicks=0;
-            deletewarning++;
+                if (deletewarning==0) error("PRESS AGAIN WITHIN 5s TO DELETE ALL BASE DATA FOR THIS DIMENSION.");
+                deletewarningTicks=0;
+                deletewarning++;
             }
         };
         table.row();
@@ -497,6 +497,8 @@ public class BaseFinder extends Module {
     private int autoreloadticks=0;
     private int loadingticks=0;
     private int reloadworld=0;
+    private boolean worldchange=false;
+    private int justenabledsavedata=0;
     private int findnearestbaseticks=0;
     private boolean spawnernaturalblocks=false;
     private boolean spawnerfound=false;
@@ -539,6 +541,8 @@ public class BaseFinder extends Module {
         autoreloadticks=0;
         loadingticks=0;
         reloadworld=0;
+        worldchange=false;
+        justenabledsavedata = 0;
     }
 
     @Override
@@ -547,6 +551,8 @@ public class BaseFinder extends Module {
         autoreloadticks=0;
         loadingticks=0;
         reloadworld=0;
+        worldchange=false;
+        justenabledsavedata = 0;
         if (remove.get()|autoreload.get()) {
             baseChunks.clear();
             closestbaseX=2000000000;
@@ -565,6 +571,8 @@ public class BaseFinder extends Module {
         }
         if (event.screen instanceof DownloadingTerrainScreen) {
             reloadworld=0;
+            worldchange=true;
+            justenabledsavedata = 0;
         }
     }
     @EventHandler
@@ -579,6 +587,22 @@ public class BaseFinder extends Module {
     }
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
+        world= mc.world.getRegistryKey().getValue().toString().replace(':', '_');
+
+        if (mc.player.getHealth()==0) {
+            reloadworld=0;
+            worldchange=true;
+        }
+        if (save.get() && justenabledsavedata<=2){
+            justenabledsavedata++;
+            if (justenabledsavedata == 1){
+                synchronized (baseChunks) {
+                    for (ChunkPos chunk : baseChunks){
+                        saveBaseChunkData(chunk);
+                    }
+                }
+            }
+        }
         if (basefound==true && basefoundspamTicks< bsefndtickdelay.get())basefoundspamTicks++;
         else if (basefoundspamTicks>= bsefndtickdelay.get()){
             basefound=false;
@@ -587,18 +611,18 @@ public class BaseFinder extends Module {
         if (deletewarningTicks<=100) deletewarningTicks++;
         else deletewarning=0;
         if (deletewarning>=2){
-                baseChunks.clear();
-                try {
-                    Files.deleteIfExists(Paths.get("TrouserStreak", "BaseChunks", serverip, world, "BaseChunkData.txt"));
-                } catch (IOException e) {
-                    //e.printStackTrace();
-                }
-                closestbaseX=2000000000;
-                closestbaseZ=2000000000;
-                basedistance=2000000000;
+            baseChunks.clear();
+            try {
+                Files.deleteIfExists(Paths.get("TrouserStreak", "BaseChunks", serverip, world, "BaseChunkData.txt"));
+            } catch (IOException e) {
+                //e.printStackTrace();
+            }
+            closestbaseX=2000000000;
+            closestbaseZ=2000000000;
+            basedistance=2000000000;
             LastBaseFound= new ChunkPos(2000000000, 2000000000);
             error("Base Data deleted for this Dimension.");
-                deletewarning=0;
+            deletewarning=0;
         }
         if (load.get()){
             if (loadingticks<1){
@@ -655,14 +679,15 @@ public class BaseFinder extends Module {
             }
         }
         //autoreload when entering different dimensions
-        if (reloadworld<10){
+        if (load.get() && reloadworld<6 && worldchange == true){
             reloadworld++;
         }
-        if (reloadworld==3){
+        if (load.get() && reloadworld==5 && worldchange == true){
             if (worldleaveremove.get()){
                 baseChunks.clear();
             }
             loadData();
+            worldchange=false;
         }
         if (removerenderdist.get())removeChunksOutsideRenderDistance();
     }
@@ -670,13 +695,13 @@ public class BaseFinder extends Module {
     private void onRender(Render3DEvent event) {
         if (baseChunksLineColor.get().a > 5 || baseChunksSideColor.get().a > 5){
             if (!nearesttrcr.get()){
-            synchronized (baseChunks) {
-                for (ChunkPos c : baseChunks) {
-                    if (mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
-                        render(new Box(new Vec3d(c.getStartPos().getX()+7, c.getStartPos().getY()+renderHeightYbottom.get(), c.getStartPos().getZ()+7), new Vec3d(c.getStartPos().getX()+8, c.getStartPos().getY()+renderHeightY.get(), c.getStartPos().getZ()+8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
+                synchronized (baseChunks) {
+                    for (ChunkPos c : baseChunks) {
+                        if (mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
+                            render(new Box(new Vec3d(c.getStartPos().getX()+7, c.getStartPos().getY()+renderHeightYbottom.get(), c.getStartPos().getZ()+7), new Vec3d(c.getStartPos().getX()+8, c.getStartPos().getY()+renderHeightY.get(), c.getStartPos().getZ()+8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
+                        }
                     }
                 }
-            }
             } else if (nearesttrcr.get()){
                 synchronized (baseChunks) {
                     for (ChunkPos c : baseChunks) {
@@ -693,7 +718,7 @@ public class BaseFinder extends Module {
     private void render(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
         if (trcr.get() && Math.abs(box.minX-RenderUtils.center.x)<=trcrdist.get()*16 && Math.abs(box.minZ-RenderUtils.center.z)<=trcrdist.get()*16)
             if (!nearesttrcr.get())
-            event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
+                event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
         event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
     }
     private void render2(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
@@ -742,7 +767,7 @@ public class BaseFinder extends Module {
                                                 if (!baseChunks.contains(basepos)){
                                                     baseChunks.add(basepos);
                                                     if (save.get()) {
-                                                        saveBaseChunkData();
+                                                        saveBaseChunkData(basepos);
                                                     }
                                                     if (basefoundspamTicks==0){
                                                         ChatUtils.sendMsg(Text.of("(Skybuild)Possible build located near X"+basepos.getCenterX()+", Y"+currentY+", Z"+basepos.getCenterZ()));
@@ -755,7 +780,7 @@ public class BaseFinder extends Module {
                                                 if (!baseChunks.contains(basepos)){
                                                     baseChunks.add(basepos);
                                                     if (save.get()) {
-                                                        saveBaseChunkData();
+                                                        saveBaseChunkData(basepos);
                                                     }
                                                     if (basefoundspamTicks==0){
                                                         ChatUtils.sendMsg(Text.of("(Unnatural Bedrock)Possible build located near X"+basepos.getCenterX()+", Y"+currentY+", Z"+basepos.getCenterZ()));
@@ -768,7 +793,7 @@ public class BaseFinder extends Module {
                                                 if (!baseChunks.contains(basepos)){
                                                     baseChunks.add(basepos);
                                                     if (save.get()) {
-                                                        saveBaseChunkData();
+                                                        saveBaseChunkData(basepos);
                                                     }
                                                     if (basefoundspamTicks==0){
                                                         ChatUtils.sendMsg(Text.of("(Nether Roof)Possible build located near X"+basepos.getCenterX()+", Y"+currentY+", Z"+basepos.getCenterZ()));
@@ -858,7 +883,7 @@ public class BaseFinder extends Module {
                                 if (!baseChunks.contains(basepos)){
                                     baseChunks.add(basepos);
                                     if (save.get()) {
-                                        saveBaseChunkData();
+                                        saveBaseChunkData(basepos);
                                     }
                                     if (basefoundspamTicks== 0) {
                                         ChatUtils.sendMsg(Text.of("(List1)Possible build located near X" + basepos.getCenterX() + ", Y" + blockpositions1.stream().toList().get(0).getY() + ", Z" + basepos.getCenterZ() + " (" + lastblockfound1 + ")"));
@@ -882,7 +907,7 @@ public class BaseFinder extends Module {
                                 if (!baseChunks.contains(basepos)){
                                     baseChunks.add(basepos);
                                     if (save.get()) {
-                                        saveBaseChunkData();
+                                        saveBaseChunkData(basepos);
                                     }
                                     if (basefoundspamTicks== 0) {
                                         ChatUtils.sendMsg(Text.of("(List2)Possible build located near X" + basepos.getCenterX() + ", Y" + blockpositions2.stream().toList().get(0).getY() + ", Z" + basepos.getCenterZ() + " (" + lastblockfound2 + ")"));
@@ -906,7 +931,7 @@ public class BaseFinder extends Module {
                                 if (!baseChunks.contains(basepos)){
                                     baseChunks.add(basepos);
                                     if (save.get()) {
-                                        saveBaseChunkData();
+                                        saveBaseChunkData(basepos);
                                     }
                                     if (basefoundspamTicks== 0) {
                                         ChatUtils.sendMsg(Text.of("(List3)Possible build located near X" + basepos.getCenterX() + ", Y" + blockpositions3.stream().toList().get(0).getY() + ", Z" + basepos.getCenterZ() + " (" + lastblockfound3 + ")"));
@@ -930,7 +955,7 @@ public class BaseFinder extends Module {
                                 if (!baseChunks.contains(basepos)){
                                     baseChunks.add(basepos);
                                     if (save.get()) {
-                                        saveBaseChunkData();
+                                        saveBaseChunkData(basepos);
                                     }
                                     if (basefoundspamTicks== 0) {
                                         ChatUtils.sendMsg(Text.of("(List4)Possible build located near X" + basepos.getCenterX() + ", Y" + blockpositions4.stream().toList().get(0).getY() + ", Z" + basepos.getCenterZ() + " (" + lastblockfound4 + ")"));
@@ -954,7 +979,7 @@ public class BaseFinder extends Module {
                                 if (!baseChunks.contains(basepos)){
                                     baseChunks.add(basepos);
                                     if (save.get()) {
-                                        saveBaseChunkData();
+                                        saveBaseChunkData(basepos);
                                     }
                                     if (basefoundspamTicks== 0) {
                                         ChatUtils.sendMsg(Text.of("(List5)Possible build located near X"+basepos.getCenterX()+", Y"+blockpositions5.stream().toList().get(0).getY()+", Z"+basepos.getCenterZ()+" ("+lastblockfound5+")"));
@@ -978,7 +1003,7 @@ public class BaseFinder extends Module {
                                 if (!baseChunks.contains(basepos)){
                                     baseChunks.add(basepos);
                                     if (save.get()) {
-                                        saveBaseChunkData();
+                                        saveBaseChunkData(basepos);
                                     }
                                     if (basefoundspamTicks== 0) {
                                         ChatUtils.sendMsg(Text.of("(List6)Possible build located near X"+basepos.getCenterX()+", Y"+blockpositions6.stream().toList().get(0).getY()+", Z"+basepos.getCenterZ()+" ("+lastblockfound6+")"));
@@ -1002,7 +1027,7 @@ public class BaseFinder extends Module {
                                 if (!baseChunks.contains(basepos)){
                                     baseChunks.add(basepos);
                                     if (save.get()) {
-                                        saveBaseChunkData();
+                                        saveBaseChunkData(basepos);
                                     }
                                     if (basefoundspamTicks== 0) {
                                         ChatUtils.sendMsg(Text.of("(List7)Possible build located near X"+basepos.getCenterX()+", Y"+blockpositions7.stream().toList().get(0).getY()+", Z"+basepos.getCenterZ()+" ("+lastblockfound7+")"));
@@ -1028,7 +1053,7 @@ public class BaseFinder extends Module {
                     if (!baseChunks.contains(basepos)){
                         baseChunks.add(basepos);
                         if (save.get()) {
-                            saveBaseChunkData();
+                            saveBaseChunkData(basepos);
                         }
                         if (basefoundspamTicks== 0) {
                             ChatUtils.sendMsg(Text.of("Possible modified spawner located near X"+basepos.getCenterX()+", Y"+spawnerY+", Z"+basepos.getCenterZ()));
@@ -1061,7 +1086,7 @@ public class BaseFinder extends Module {
             //e.printStackTrace();
         }
     }
-    private void saveBaseChunkData() {
+    private void saveBaseChunkData(ChunkPos basepos) {
         Path dirPath = Paths.get("TrouserStreak", "BaseChunks", serverip, world);
         Path filePath = dirPath.resolve("BaseChunkData.txt");
         try {

@@ -280,6 +280,8 @@ public class NewerNewChunks extends Module {
 	private int autoreloadticks=0;
 	private int loadingticks=0;
 	private int reloadworld=0;
+	private boolean worldchange=false;
+	private int justenabledsavedata=0;
 	public int chunkcounterticks=0;
 	public static boolean chunkcounter;
 	public static int newchunksfound=0;
@@ -434,6 +436,8 @@ public class NewerNewChunks extends Module {
 		autoreloadticks=0;
 		loadingticks=0;
 		reloadworld=0;
+		worldchange=false;
+		justenabledsavedata=0;
 	}
 	@Override
 	public void onDeactivate() {
@@ -441,6 +445,8 @@ public class NewerNewChunks extends Module {
 		autoreloadticks=0;
 		loadingticks=0;
 		reloadworld=0;
+		worldchange=false;
+		justenabledsavedata=0;
 		if (remove.get()|autoreload.get()) {
 			clearChunkData();
 		}
@@ -457,6 +463,8 @@ public class NewerNewChunks extends Module {
 		if (event.screen instanceof DownloadingTerrainScreen) {
 			resetCounterValues();
 			reloadworld=0;
+			worldchange=true;
+			justenabledsavedata=0;
 		}
 	}
 	@EventHandler
@@ -473,8 +481,38 @@ public class NewerNewChunks extends Module {
 		if (mc.player.getHealth()==0) {
 			resetCounterValues();
 			reloadworld=0;
+			worldchange=true;
 		}
-
+		if (save.get() && justenabledsavedata<=2){
+			justenabledsavedata++;
+			if (justenabledsavedata == 1){
+				synchronized (newChunks) {
+					for (ChunkPos chunk : newChunks){
+						saveData(Paths.get("NewChunkData.txt"), chunk);
+					}
+				}
+				synchronized (oldChunks) {
+					for (ChunkPos chunk : oldChunks){
+						saveData(Paths.get("OldChunkData.txt"), chunk);
+					}
+				}
+				synchronized (beingUpdatedOldChunks) {
+					for (ChunkPos chunk : beingUpdatedOldChunks){
+						saveData(Paths.get("BeingUpdatedChunkData.txt"), chunk);
+					}
+				}
+				synchronized (OldGenerationOldChunks) {
+					for (ChunkPos chunk : OldGenerationOldChunks){
+						saveData(Paths.get("OldGenerationChunkData.txt"), chunk);
+					}
+				}
+				synchronized (tickexploitChunks) {
+					for (ChunkPos chunk : tickexploitChunks){
+						saveData(Paths.get("BlockExploitChunkData.txt"), chunk);
+					}
+				}
+			}
+		}
 		if (deletewarningTicks<=100) deletewarningTicks++;
 		else deletewarning=0;
 		if (deletewarning>=2){
@@ -580,27 +618,15 @@ public class NewerNewChunks extends Module {
 			}
 		}
 		//autoreload when entering different dimensions
-		if (load.get() && reloadworld<6){
+		if (load.get() && reloadworld<6 && worldchange == true){
 			reloadworld++;
 		}
-		if (load.get() && reloadworld==5){
-			Path baseDir = Paths.get("TrouserStreak", "NewChunks", serverip, world);
-
-			for (Path fileName : FILE_PATHS) {
-				Path fullPath = baseDir.resolve(fileName);
-				try {
-					Files.createDirectories(fullPath.getParent());
-					if (Files.notExists(fullPath)) {
-						Files.createFile(fullPath);
-					}
-				} catch (IOException e) {
-					//e.printStackTrace();
-				}
-			}
+		if (load.get() && reloadworld==5 && worldchange == true){
 			if (worldleaveremove.get()){
 				clearChunkData();
 			}
 			loadData();
+			worldchange=false;
 		}
 		if (removerenderdist.get())removeChunksOutsideRenderDistance();
 	}
