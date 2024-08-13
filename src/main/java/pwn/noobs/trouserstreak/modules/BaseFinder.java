@@ -496,7 +496,6 @@ public class BaseFinder extends Module {
     private static int isBaseFinderModuleOn=0;
     private int autoreloadticks=0;
     private int loadingticks=0;
-    private int reloadworld=0;
     private boolean worldchange=false;
     private int justenabledsavedata=0;
     private int findnearestbaseticks=0;
@@ -540,7 +539,6 @@ public class BaseFinder extends Module {
         }
         autoreloadticks=0;
         loadingticks=0;
-        reloadworld=0;
         worldchange=false;
         justenabledsavedata = 0;
     }
@@ -550,7 +548,6 @@ public class BaseFinder extends Module {
         isBaseFinderModuleOn=0;
         autoreloadticks=0;
         loadingticks=0;
-        reloadworld=0;
         worldchange=false;
         justenabledsavedata = 0;
         if (remove.get()|autoreload.get()) {
@@ -570,7 +567,6 @@ public class BaseFinder extends Module {
             }
         }
         if (event.screen instanceof DownloadingTerrainScreen) {
-            reloadworld=0;
             worldchange=true;
         }
     }
@@ -589,7 +585,6 @@ public class BaseFinder extends Module {
         world= mc.world.getRegistryKey().getValue().toString().replace(':', '_');
 
         if (mc.player.getHealth()==0) {
-            reloadworld=0;
             worldchange=true;
         }
         if (basefound==true && basefoundspamTicks< bsefndtickdelay.get())basefoundspamTicks++;
@@ -668,10 +663,7 @@ public class BaseFinder extends Module {
             }
         }
         //autoreload when entering different dimensions
-        if (load.get() && reloadworld<5 && worldchange == true){
-            reloadworld++;
-        }
-        if (load.get() && reloadworld>=5 && worldchange == true){
+        if (load.get() && worldchange == true){
             if (worldleaveremove.get()){
                 baseChunks.clear();
             }
