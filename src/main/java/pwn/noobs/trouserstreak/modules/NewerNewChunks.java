@@ -279,7 +279,6 @@ public class NewerNewChunks extends Module {
 	private int errticks=0;
 	private int autoreloadticks=0;
 	private int loadingticks=0;
-	private int reloadworld=0;
 	private boolean worldchange=false;
 	private int justenabledsavedata=0;
 	public int chunkcounterticks=0;
@@ -435,7 +434,6 @@ public class NewerNewChunks extends Module {
 		}
 		autoreloadticks=0;
 		loadingticks=0;
-		reloadworld=0;
 		worldchange=false;
 		justenabledsavedata=0;
 	}
@@ -444,7 +442,6 @@ public class NewerNewChunks extends Module {
 		chunkcounterticks=0;
 		autoreloadticks=0;
 		loadingticks=0;
-		reloadworld=0;
 		worldchange=false;
 		justenabledsavedata=0;
 		if (remove.get()|autoreload.get()) {
@@ -462,7 +459,6 @@ public class NewerNewChunks extends Module {
 		}
 		if (event.screen instanceof DownloadingTerrainScreen) {
 			resetCounterValues();
-			reloadworld=0;
 			worldchange=true;
 		}
 	}
@@ -479,7 +475,6 @@ public class NewerNewChunks extends Module {
 
 		if (mc.player.getHealth()==0) {
 			resetCounterValues();
-			reloadworld=0;
 			worldchange=true;
 		}
 		if (deletewarningTicks<=100) deletewarningTicks++;
@@ -587,10 +582,7 @@ public class NewerNewChunks extends Module {
 			}
 		}
 		//autoreload when entering different dimensions
-		if (load.get() && reloadworld<5 && worldchange == true){
-			reloadworld++;
-		}
-		if (load.get() && reloadworld>=5 && worldchange == true){
+		if (load.get() && worldchange == true){
 			if (worldleaveremove.get()){
 				clearChunkData();
 			}
@@ -824,10 +816,8 @@ public class NewerNewChunks extends Module {
 					int loops = 0;
 					int newChunkQuantifier = 0;
 					int oldChunkQuantifier = 0;
-
 					try {
-						for (int i = 0; i < 8; i++) {
-							ChunkSection section = sections[i];
+						for (ChunkSection section : sections) {
 							if (section != null) {
 								//System.out.println("Processing Chunk Section: " + i);
 
@@ -855,7 +845,6 @@ public class NewerNewChunks extends Module {
 										if (bstatesSize < blockPaletteLength) {
 											isNewSection = 2;
 											//System.out.println("Section: " + loops + " | smaller bstates size!!!!!!!");
-											newChunkQuantifier++; //double the weight of this
 										}
 									}
 
@@ -907,7 +896,7 @@ public class NewerNewChunks extends Module {
 							else if (mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END){
 								double percentage = ((double) newChunkQuantifier / loops) * 100;
 								//System.out.println("Percentage: " + percentage);
-								if (percentage >= 65) isNewChunk = true;
+								if (percentage >= 51) isNewChunk = true;
 							}
 						}
 					} catch (Exception e) {
@@ -919,7 +908,7 @@ public class NewerNewChunks extends Module {
 						else if (mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END){
 							double percentage = ((double) newChunkQuantifier / loops) * 100;
 							//System.out.println("Percentage: " + percentage);
-							if (percentage >= 65) isNewChunk = true;
+							if (percentage >= 51) isNewChunk = true;
 						}
 					}
 
