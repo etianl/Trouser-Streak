@@ -597,9 +597,9 @@ public class NewerNewChunks extends Module {
 						saveData(Paths.get("NewChunkData.txt"), chunk);
 					}
 				}
-				synchronized (oldChunks) {
-					for (ChunkPos chunk : oldChunks){
-						saveData(Paths.get("OldChunkData.txt"), chunk);
+				synchronized (OldGenerationOldChunks) {
+					for (ChunkPos chunk : OldGenerationOldChunks){
+						saveData(Paths.get("OldGenerationChunkData.txt"), chunk);
 					}
 				}
 				synchronized (beingUpdatedOldChunks) {
@@ -607,9 +607,9 @@ public class NewerNewChunks extends Module {
 						saveData(Paths.get("BeingUpdatedChunkData.txt"), chunk);
 					}
 				}
-				synchronized (OldGenerationOldChunks) {
-					for (ChunkPos chunk : OldGenerationOldChunks){
-						saveData(Paths.get("OldGenerationChunkData.txt"), chunk);
+				synchronized (oldChunks) {
+					for (ChunkPos chunk : oldChunks){
+						saveData(Paths.get("OldChunkData.txt"), chunk);
 					}
 				}
 				synchronized (tickexploitChunks) {
@@ -760,7 +760,7 @@ public class NewerNewChunks extends Module {
 				if (overworldOldChunksDetector.get() && mc.world.getRegistryKey() == World.OVERWORLD) {
 					for (int i = 0; i < 17; i++) {
 						ChunkSection section = sections[i];
-						if (section != null && !section.isEmpty()) {
+						if (section != null && !section.isEmpty() && i > 4) {
 							for (int x = 0; x < 16; x++) {
 								for (int y = 0; y < 16; y++) {
 									for (int z = 0; z < 16; z++) {
