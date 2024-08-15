@@ -498,6 +498,7 @@ public class BaseFinder extends Module {
     private int loadingticks=0;
     private boolean worldchange=false;
     private int justenabledsavedata=0;
+    private boolean saveDataWasOn = false;
     private int findnearestbaseticks=0;
     private boolean spawnernaturalblocks=false;
     private boolean spawnerfound=false;
@@ -515,6 +516,8 @@ public class BaseFinder extends Module {
     @Override
     public void onActivate() {
         isBaseFinderModuleOn=1;
+        if (save.get())saveDataWasOn = true;
+        else if (!save.get())saveDataWasOn = false;
         if (autoreload.get()) {
             baseChunks.clear();
         }
@@ -670,7 +673,8 @@ public class BaseFinder extends Module {
             loadData();
             worldchange=false;
         }
-        if (save.get() && justenabledsavedata<=2){
+        if (!save.get())saveDataWasOn = false;
+        if (save.get() && justenabledsavedata<=2 && saveDataWasOn == false){
             justenabledsavedata++;
             if (justenabledsavedata == 1){
                 synchronized (baseChunks) {
