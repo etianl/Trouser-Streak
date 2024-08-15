@@ -281,6 +281,7 @@ public class NewerNewChunks extends Module {
 	private int loadingticks=0;
 	private boolean worldchange=false;
 	private int justenabledsavedata=0;
+	private boolean saveDataWasOn = false;
 	public int chunkcounterticks=0;
 	public static boolean chunkcounter;
 	public static int newchunksfound=0;
@@ -395,6 +396,8 @@ public class NewerNewChunks extends Module {
 	}
 	@Override
 	public void onActivate() {
+		if (save.get())saveDataWasOn = true;
+		else if (!save.get())saveDataWasOn = false;
 		if (autoreload.get()) {
 			clearChunkData();
 		}
@@ -589,7 +592,8 @@ public class NewerNewChunks extends Module {
 			loadData();
 			worldchange=false;
 		}
-		if (save.get() && justenabledsavedata<=2){
+		if (!save.get())saveDataWasOn = false;
+		if (save.get() && justenabledsavedata<=2 && saveDataWasOn == false){
 			justenabledsavedata++;
 			if (justenabledsavedata == 1){
 				synchronized (newChunks) {
