@@ -172,7 +172,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
     private final Queue<Chunk> chunkQueue = new LinkedList<>();
 
     public HoleAndTunnelAndStairsESP() {
-        super(Trouser.Main, "Hole/Tunnel/Stairs-Finder", "Finds and highlights holes and/or tunnels.");
+        super(Trouser.Main, "Hole/Tunnel/StairsESP", "Finds and highlights holes and tunnels and stairs.");
     }
 
     @Override
