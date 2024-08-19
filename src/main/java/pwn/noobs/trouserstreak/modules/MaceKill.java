@@ -7,7 +7,6 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
@@ -18,11 +17,12 @@ import pwn.noobs.trouserstreak.Trouser;
 import java.lang.reflect.Method;
 
 public class MaceKill extends Module {
-    private final SettingGroup specialGroup = settings.createGroup("Values higher than 10 only work on Paper/Spigot");
+    private final SettingGroup specialGroup2 = settings.createGroup("Disable \"Smash Attack\" in the Criticals module to make this module work.");
+    private final SettingGroup specialGroup = settings.createGroup("Values higher than 22 only work on Paper/Spigot");
     private final Setting<Integer> fallHeight = specialGroup.add(new IntSetting.Builder()
             .name("Mace Power (Fall height)")
             .description("Simulates a fall from this distance")
-            .defaultValue(10)
+            .defaultValue(22)
             .sliderRange(1, 170)
             .min(1)
             .build());
@@ -65,9 +65,30 @@ public class MaceKill extends Module {
                     if (packetsRequired > 20) {
                         packetsRequired = 1;
                     }
-                    BlockPos isopenair1 = (mc.player.getBlockPos().add(0,blocks,0));
-                    BlockPos isopenair2 = (mc.player.getBlockPos().add(0,blocks+1,0));
-                    if (isSafeBlock(isopenair1) && isSafeBlock(isopenair2)){
+                    BlockPos isopenair1 = (mc.player.getBlockPos().add(0, blocks, 0));
+                    BlockPos isopenair2 = (mc.player.getBlockPos().add(0, blocks + 1, 0));
+                    if (isSafeBlock(isopenair1) && isSafeBlock(isopenair2)) {
+                        if (fallHeight.get() <= 22) {
+                            if (mc.player.hasVehicle()) {
+                                for (int i = 0; i < 4; i++) {
+                                    mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(mc.player.getVehicle()));
+                                }
+                                double maxHeight = Math.min(mc.player.getVehicle().getY() + 22, mc.player.getVehicle().getY() + blocks);
+                                mc.player.getVehicle().setPosition(mc.player.getVehicle().getX(), maxHeight + blocks, mc.player.getVehicle().getZ());
+                                mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(mc.player.getVehicle()));
+                                mc.player.getVehicle().setPosition(previouspos);
+                                mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(mc.player.getVehicle()));
+                            } else {
+                                for (int i = 0; i < 4; i++) {
+                                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY(), mc.player.getZ(), true));
+                                }
+                                double maxHeight = Math.min(mc.player.getY() + 22, mc.player.getY() + blocks);
+                                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), maxHeight, mc.player.getZ(), false));
+                                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(previouspos.getX(), previouspos.getY(), previouspos.getZ(), false));
+                            }
+                            return;
+                        }
+
                         if (mc.player.hasVehicle()) {
                             for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
                                 mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(mc.player.getVehicle()));
@@ -120,5 +141,4 @@ public class MaceKill extends Module {
                 && mc.world.getFluidState(pos).isEmpty()
                 && !mc.world.getBlockState(pos).isOf(Blocks.POWDER_SNOW);
     }
-
 }
