@@ -30,7 +30,9 @@ import java.util.*;
 
 public class HoleAndTunnelAndStairsESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgParams = settings.createGroup("Parameters");
+    private final SettingGroup sgHParams = settings.createGroup("Hole Parameters");
+    private final SettingGroup sgTParams = settings.createGroup("Tunnel Parameters");
+    private final SettingGroup sgSParams = settings.createGroup("Stairs Parameters");
     private final SettingGroup sgRender = settings.createGroup("Rendering");
     private final Setting<DetectionMode> detectionMode = sgGeneral.add(new EnumSetting.Builder<DetectionMode>()
             .name("Detection Mode")
@@ -41,7 +43,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
     private final Setting<Integer> maxChunks = sgGeneral.add(new IntSetting.Builder()
             .name("Chunks to process/tick")
             .description("Amount of Chunks to process per tick")
-            .defaultValue(20)
+            .defaultValue(10)
             .min(1)
             .sliderRange(1, 100)
             .build()
@@ -52,7 +54,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
             .defaultValue(false)
             .build()
     );
-    private final Setting<Integer> minY = sgParams.add(new IntSetting.Builder()
+    private final Setting<Integer> minY = sgGeneral.add(new IntSetting.Builder()
             .name("Detection Y Minimum OffSet")
             .description("Scans blocks above or at this this many blocks from minimum build limit.")
             .min(0)
@@ -60,7 +62,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
             .defaultValue(0)
             .build()
     );
-    private final Setting<Integer> maxY = sgParams.add(new IntSetting.Builder()
+    private final Setting<Integer> maxY = sgGeneral.add(new IntSetting.Builder()
             .name("Detection Y Maximum OffSet")
             .description("Scans blocks below or at this this many blocks from maximum build limit.")
             .min(0)
@@ -68,7 +70,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
             .defaultValue(0)
             .build()
     );
-    private final Setting<Integer> minHoleDepth = sgParams.add(new IntSetting.Builder()
+    private final Setting<Integer> minHoleDepth = sgHParams.add(new IntSetting.Builder()
             .name("Min Hole Depth")
             .description("Minimum depth for a hole to be detected")
             .defaultValue(4)
@@ -76,7 +78,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
             .sliderMax(20)
             .build()
     );
-    private final Setting<Integer> minTunnelLength = sgParams.add(new IntSetting.Builder()
+    private final Setting<Integer> minTunnelLength = sgTParams.add(new IntSetting.Builder()
             .name("Min Tunnel Length")
             .description("Minimum length for a tunnel to be detected")
             .defaultValue(3)
@@ -84,7 +86,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
             .sliderMax(20)
             .build()
     );
-    private final Setting<Integer> minTunnelHeight = sgParams.add(new IntSetting.Builder()
+    private final Setting<Integer> minTunnelHeight = sgTParams.add(new IntSetting.Builder()
             .name("Min Tunnel Height")
             .description("Minimum height of the tunnels to be detected")
             .defaultValue(2)
@@ -92,7 +94,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
             .sliderMax(10)
             .build()
     );
-    private final Setting<Integer> maxTunnelHeight = sgParams.add(new IntSetting.Builder()
+    private final Setting<Integer> maxTunnelHeight = sgTParams.add(new IntSetting.Builder()
             .name("Max Tunnel Height")
             .description("Maximum height of the tunnels to be detected")
             .defaultValue(3)
@@ -100,7 +102,31 @@ public class HoleAndTunnelAndStairsESP extends Module {
             .sliderMax(10)
             .build()
     );
-    private final Setting<Integer> minStaircaseLength = sgParams.add(new IntSetting.Builder()
+    private final Setting<Boolean> diagonals = sgTParams.add(new BoolSetting.Builder()
+            .name("Detect Diagonal Tunnels.")
+            .description("Detects diagonal tunnels when tunnels are selected to be detected.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Integer> minDiagonalLength = sgTParams.add(new IntSetting.Builder()
+            .name("Min Diagonal Tunnel Length")
+            .description("Minimum length for diagonal tunnels to be detected")
+            .defaultValue(3)
+            .min(1)
+            .sliderMax(20)
+            .visible(() -> diagonals.get())
+            .build()
+    );
+    private final Setting<Integer> maxDiagonalWidth = sgTParams.add(new IntSetting.Builder()
+            .name("Max Diagonal Tunnel Width")
+            .description("Maximum width for diagonal tunnels to be detected")
+            .defaultValue(3)
+            .min(1)
+            .sliderMax(10)
+            .visible(() -> diagonals.get())
+            .build()
+    );
+    private final Setting<Integer> minStaircaseLength = sgSParams.add(new IntSetting.Builder()
             .name("Min Staircase Length")
             .description("Minimum length for a staircase to be detected")
             .defaultValue(3)
@@ -108,7 +134,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
             .sliderMax(20)
             .build()
     );
-    private final Setting<Integer> minStaircaseHeight = sgParams.add(new IntSetting.Builder()
+    private final Setting<Integer> minStaircaseHeight = sgSParams.add(new IntSetting.Builder()
             .name("Min Staircase Height")
             .description("Minimum height of the staircase to be detected")
             .defaultValue(3)
@@ -116,7 +142,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
             .sliderMax(10)
             .build()
     );
-    private final Setting<Integer> maxStaircaseHeight = sgParams.add(new IntSetting.Builder()
+    private final Setting<Integer> maxStaircaseHeight = sgSParams.add(new IntSetting.Builder()
             .name("Max Staircase Height")
             .description("Maximum height of the staircase to be detected")
             .defaultValue(5)
@@ -240,11 +266,13 @@ public class HoleAndTunnelAndStairsESP extends Module {
                                     case ALL:
                                         checkHole(pos, holes);
                                         checkTunnel(chunk, pos, tunnels);
+                                        if (diagonals.get()) checkDiagonalTunnel(chunk, pos, tunnels);
                                         checkStaircase(chunk, pos, staircases);
                                         break;
                                     case HOLES_AND_TUNNELS:
                                         checkHole(pos, holes);
                                         checkTunnel(chunk, pos, tunnels);
+                                        if (diagonals.get()) checkDiagonalTunnel(chunk, pos, tunnels);
                                         break;
                                     case HOLES_AND_STAIRCASES:
                                         checkHole(pos, holes);
@@ -252,6 +280,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
                                         break;
                                     case TUNNELS_AND_STAIRCASES:
                                         checkTunnel(chunk, pos, tunnels);
+                                        if (diagonals.get()) checkDiagonalTunnel(chunk, pos, tunnels);
                                         checkStaircase(chunk, pos, staircases);
                                         break;
                                     case HOLES:
@@ -259,6 +288,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
                                         break;
                                     case TUNNELS:
                                         checkTunnel(chunk, pos, tunnels);
+                                        if (diagonals.get()) checkDiagonalTunnel(chunk, pos, tunnels);
                                         break;
                                     case STAIRCASES:
                                         checkStaircase(chunk, pos, staircases);
@@ -276,67 +306,6 @@ public class HoleAndTunnelAndStairsESP extends Module {
         tChunk.tunnels = tunnels;
         tChunk.staircases = staircases;
     }
-    private void checkTunnel(Chunk chunk, BlockPos pos, Set<Box> tunnels) {
-        for (Direction dir : DIRECTIONS) {
-            BlockPos.Mutable currentPos = pos.mutableCopy();
-
-            int maxHeight = 0;
-            while (isTunnelSection(currentPos, dir)) {
-                currentPos.move(dir);
-                maxHeight = Math.max(maxHeight, getTunnelHeight(currentPos));
-
-                if (!chunk.getPos().equals(mc.world.getChunk(currentPos).getPos())) {
-                    break;
-                }
-            }
-
-            int length = switch (dir.getAxis()) {
-                case X -> Math.abs(currentPos.getX() - pos.getX());
-                case Z -> Math.abs(currentPos.getZ() - pos.getZ());
-                default -> 0;
-            };
-
-            if (length >= minTunnelLength.get() && maxHeight >= minTunnelHeight.get() && maxHeight <= maxTunnelHeight.get()) {
-                currentPos.move(dir.getOpposite());
-
-                Box tunnelBox = new Box(
-                        Math.min(pos.getX(), currentPos.getX()),
-                        pos.getY(),
-                        Math.min(pos.getZ(), currentPos.getZ()),
-                        Math.max(pos.getX(), currentPos.getX()) + 1,
-                        pos.getY() + maxHeight,
-                        Math.max(pos.getZ(), currentPos.getZ()) + 1
-                );
-                if (tunnels.stream().noneMatch(existingTunnel -> existingTunnel.intersects(tunnelBox))) {
-                    tunnels.add(tunnelBox);
-                }
-            }
-        }
-    }
-
-    private int getTunnelHeight(BlockPos pos) {
-        int height = 0;
-        while (isPassableBlock(pos.up(height)) && height < maxTunnelHeight.get()) {
-            height++;
-        }
-        return height;
-    }
-
-    private boolean isTunnelSection(BlockPos pos, Direction dir) {
-        int height = getTunnelHeight(pos);
-        if (height < minTunnelHeight.get() || height > maxTunnelHeight.get()) return false;
-        if (isPassableBlock(pos.down()) || isPassableBlock(pos.up(height))) return false;
-        Direction[] perpDirs = dir.getAxis() == Direction.Axis.X ? new Direction[]{Direction.NORTH, Direction.SOUTH} : new Direction[]{Direction.EAST, Direction.WEST};
-        for (Direction perpDir : perpDirs) {
-            for (int i = 0; i < height; i++) {
-                if (isPassableBlock(pos.up(i).offset(perpDir))) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
     private void checkHole(BlockPos pos, Set<Box> holes) {
         if (isValidHoleSection(pos)) {
             BlockPos.Mutable currentPos = pos.mutableCopy();
@@ -356,6 +325,120 @@ public class HoleAndTunnelAndStairsESP extends Module {
     }
     private boolean isValidHoleSection(BlockPos pos) {
         return isPassableBlock(pos) && !isPassableBlock(pos.north()) && !isPassableBlock(pos.south()) && !isPassableBlock(pos.east()) && !isPassableBlock(pos.west());
+    }
+    private void checkTunnel(Chunk chunk, BlockPos pos, Set<Box> tunnels) {
+        for (Direction dir : DIRECTIONS) {
+            BlockPos.Mutable currentPos = pos.mutableCopy();
+            int stepCount = 0;
+            BlockPos startPos = null;
+            BlockPos endPos = null;
+            int maxHeight = 0;
+
+            while (isTunnelSection(currentPos, dir)) {
+                maxHeight = Math.max(maxHeight, getTunnelHeight(currentPos));
+
+                if (startPos == null) {
+                    startPos = currentPos.toImmutable();
+                }
+
+                endPos = currentPos.toImmutable();
+
+                currentPos.move(dir);
+                stepCount++;
+
+                if (!chunk.getPos().equals(mc.world.getChunk(currentPos).getPos())) {
+                    break;
+                }
+            }
+
+            if (stepCount >= minTunnelLength.get() && maxHeight >= minTunnelHeight.get() && maxHeight <= maxTunnelHeight.get()) {
+                Box tunnelBox = new Box(
+                        Math.min(startPos.getX(), endPos.getX()),
+                        startPos.getY(),
+                        Math.min(startPos.getZ(), endPos.getZ()),
+                        Math.max(startPos.getX(), endPos.getX()) + 1,
+                        startPos.getY() + maxHeight,
+                        Math.max(startPos.getZ(), endPos.getZ()) + 1
+                );
+
+                if (tunnels.stream().noneMatch(existingTunnel -> existingTunnel.intersects(tunnelBox))) {
+                    tunnels.add(tunnelBox);
+                }
+            }
+        }
+    }
+    private boolean isTunnelSection(BlockPos pos, Direction dir) {
+        int height = getTunnelHeight(pos);
+        if (height < minTunnelHeight.get() || height > maxTunnelHeight.get()) return false;
+        if (isPassableBlock(pos.down()) || isPassableBlock(pos.up(height))) return false;
+        Direction[] perpDirs = dir.getAxis() == Direction.Axis.X ? new Direction[]{Direction.NORTH, Direction.SOUTH} : new Direction[]{Direction.EAST, Direction.WEST};
+        for (Direction perpDir : perpDirs) {
+            for (int i = 0; i < height; i++) {
+                if (isPassableBlock(pos.up(i).offset(perpDir))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    private void checkDiagonalTunnel(Chunk chunk, BlockPos pos, Set<Box> diagonals) {
+        for (Direction dir : DIRECTIONS) {
+            BlockPos.Mutable currentPos = pos.mutableCopy();
+            int stepCount = 0;
+            List<Box> potentialBoxes = new ArrayList<>();
+
+            while (isDiagonalTunnelSection(currentPos, dir)) {
+                int height = getTunnelHeight(currentPos);
+                Box stairsBox = new Box(
+                        currentPos.getX(),
+                        currentPos.getY(),
+                        currentPos.getZ(),
+                        currentPos.getX() + 1,
+                        currentPos.getY() + height,
+                        currentPos.getZ() + 1
+                );
+                potentialBoxes.add(stairsBox);
+
+                currentPos.move(dir);
+                if (dir.getAxis() == Direction.Axis.X) {
+                    currentPos.move(Direction.NORTH); // Move along Z
+                } else {
+                    currentPos.move(Direction.EAST); // Move along X
+                }
+                stepCount++;
+
+                if (!chunk.getPos().equals(mc.world.getChunk(currentPos).getPos())) {
+                    break;
+                }
+            }
+
+            if (stepCount >= minDiagonalLength.get()) {
+                diagonals.addAll(potentialBoxes);
+            }
+        }
+    }
+    private boolean isDiagonalTunnelSection(BlockPos pos, Direction dir) {
+        int height = getTunnelHeight(pos);
+        if (height < minTunnelHeight.get() || height > maxTunnelHeight.get()) return false;
+        if (isPassableBlock(pos.down()) || isPassableBlock(pos.up(height))) return false;
+
+        boolean waspassableblockfound = false;
+        for (int i = 0; i < height; i++) {
+            if (isPassableBlock(pos.up(i).offset(Direction.EAST))) waspassableblockfound = true;
+        }
+        for (int i = 0; i < height; i++) {
+            if (isPassableBlock(pos.up(i).offset(Direction.WEST, maxDiagonalWidth.get()))) waspassableblockfound = true;
+        }
+        if (waspassableblockfound) return false;
+
+        return true; // If all checks pass, return true
+    }
+    private int getTunnelHeight(BlockPos pos) {
+        int height = 0;
+        while (isPassableBlock(pos.up(height)) && height < maxTunnelHeight.get()) {
+            height++;
+        }
+        return height;
     }
     private void checkStaircase(Chunk chunk, BlockPos pos, Set<Box> staircases) {
         for (Direction dir : DIRECTIONS) {
@@ -389,7 +472,6 @@ public class HoleAndTunnelAndStairsESP extends Module {
             }
         }
     }
-
     private int getStaircaseHeight(BlockPos pos) {
         int height = 0;
         while (isPassableBlock(pos.up(height)) && height < maxStaircaseHeight.get()) {
@@ -397,7 +479,6 @@ public class HoleAndTunnelAndStairsESP extends Module {
         }
         return height;
     }
-
     private boolean isStaircaseSection(BlockPos pos, Direction dir) {
         int height = getStaircaseHeight(pos);
         if (height < minStaircaseHeight.get() || height > maxStaircaseHeight.get()) return false;
@@ -412,7 +493,6 @@ public class HoleAndTunnelAndStairsESP extends Module {
         }
         return true;
     }
-
     private boolean isPassableBlock(BlockPos pos) {
         BlockState state = mc.world.getBlockState(pos);
         if (airBlocks.get()) {
