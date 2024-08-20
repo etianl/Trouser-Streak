@@ -664,20 +664,21 @@ public class BaseFinder extends Module {
             basefoundspamTicks = 0;
         }
         if (deletewarningTicks <= 100) deletewarningTicks++;
-        else deletewarning = 0;
-        if (deletewarning >= 2) {
+        if (deletewarning>=2){
+            if (mc.isInSingleplayer()){
+                String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("/|\\\\");
+                serverip=array[array.length-2];
+            } else {
+                serverip = mc.getCurrentServerEntry().address.replace(':', '_');
+            }
             baseChunks.clear();
             try {
                 Files.deleteIfExists(Paths.get("TrouserStreak", "BaseChunks", serverip, world, "BaseChunkData.txt"));
             } catch (IOException e) {
                 //e.printStackTrace();
             }
-            closestbaseX = 2000000000;
-            closestbaseZ = 2000000000;
-            basedistance = 2000000000;
-            LastBaseFound = new ChunkPos(2000000000, 2000000000);
-            error("Base Data deleted for this Dimension.");
-            deletewarning = 0;
+            error("Chunk Data deleted for this Dimension.");
+            deletewarning=0;
         }
         if (load.get()) {
             if (loadingticks < 1) {
