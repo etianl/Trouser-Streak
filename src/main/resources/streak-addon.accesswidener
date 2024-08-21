@@ -1,0 +1,5 @@
+accessWidener v2 named
+
+accessible class net/minecraft/world/chunk/PalettedContainer$Data
+accessible field net/minecraft/world/chunk/PalettedContainer data Lnet/minecraft/world/chunk/PalettedContainer$Data;
+accessible method net/minecraft/world/chunk/PalettedContainer$Data palette ()Lnet/minecraft/world/chunk/Palette;

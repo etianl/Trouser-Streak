@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "streak-addon",
-  "version": "0.9.5",
+  "version": "1.2.3",
   "name": "TrouserStreak",
   "description": "Trouser-Streak is a compilation of modules, updated to the latest version and optimized for maximum grief. I did not make all of these.",
   "authors": [
@@ -17,6 +17,7 @@
       "pwn.noobs.trouserstreak.Trouser"
     ]
   },
+  "accessWidener": "streak-addon.accesswidener",
   "mixins": [
     "streak.mixins.json"
   ],

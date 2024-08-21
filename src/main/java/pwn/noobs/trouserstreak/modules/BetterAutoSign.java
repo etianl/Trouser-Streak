@@ -40,7 +40,9 @@ import java.util.List;
 public class BetterAutoSign extends Module {
     final SettingGroup sgSign = settings.createGroup("Normal Sign Text");
     final SettingGroup sgHang = settings.createGroup("Hanging Sign Text");
+    final SettingGroup sgSignAura = settings.createGroup("Sign Aura");
     final SettingGroup sgExtra = settings.createGroup("Visible");
+
     private final Setting<Boolean> bothside = sgExtra.add(new BoolSetting.Builder()
             .name("both-sides")
             .description("Write on the rear of the signs as well.")
@@ -157,6 +159,38 @@ public class BetterAutoSign extends Module {
             .visible(differentText::get)
             .build()
     );
+    // based on ChestAura from Meteor Rejects
+    private final Setting<Boolean> signAura = sgSignAura.add(new BoolSetting.Builder()
+            .name("sign-aura")
+            .description("Automatically edits signs for you")
+            .defaultValue(false)
+            .build()
+    );
+    private final Setting<Boolean> signAuraRotate = sgSignAura.add(new BoolSetting.Builder()
+            .name("sign-aura-rotate")
+            .description("Rotates to signs")
+            .defaultValue(true)
+            .visible(signAura::get)
+            .build()
+    );
+    private final Setting<Double> signAuraRange = sgSignAura.add(new DoubleSetting.Builder()
+            .name("sign-aura-range")
+            .description("The interact range")
+            .defaultValue(4)
+            .min(0)
+            .max(6)
+            .sliderRange(0,6)
+            .visible(signAura::get)
+            .build()
+    );
+    private final Setting<Integer> signAuraDelay = sgSignAura.add(new IntSetting.Builder()
+            .name("sign-aura-delay")
+            .description("Delay between editing signs, in ticks")
+            .defaultValue(5)
+            .sliderMax(20)
+            .visible(signAura::get)
+            .build()
+    );
     private final Setting<Boolean> autoDye = sgExtra.add(new BoolSetting.Builder()
             .name("auto-dye")
             .description("Dye signs that you place")
@@ -176,38 +210,7 @@ public class BetterAutoSign extends Module {
             .defaultValue(false)
             .build()
     );
-    // based on ChestAura from Meteor Rejects
-    private final Setting<Boolean> signAura = sgExtra.add(new BoolSetting.Builder()
-            .name("sign-aura")
-            .description("Automatically edits signs for you")
-            .defaultValue(false)
-            .build()
-    );
-    private final Setting<Boolean> signAuraRotate = sgExtra.add(new BoolSetting.Builder()
-            .name("sign-aura-rotate")
-            .description("Rotates to signs")
-            .defaultValue(true)
-            .visible(signAura::get)
-            .build()
-    );
-    private final Setting<Double> signAuraRange = sgExtra.add(new DoubleSetting.Builder()
-            .name("sign-aura-range")
-            .description("The interact range")
-            .defaultValue(4)
-            .min(0)
-            .max(6)
-            .sliderRange(0,6)
-            .visible(signAura::get)
-            .build()
-    );
-    private final Setting<Integer> signAuraDelay = sgExtra.add(new IntSetting.Builder()
-            .name("sign-aura-delay")
-            .description("Delay between editing signs, in ticks")
-            .defaultValue(5)
-            .sliderMax(20)
-            .visible(signAura::get)
-            .build()
-    );
+
     private boolean editrear = false;
     private BlockPos signPos = new BlockPos(99999999,99999999,99999999);
     private BlockPos prevsignPos = new BlockPos(99999999,99999999,99999999);
@@ -258,16 +261,16 @@ public class BetterAutoSign extends Module {
 
         SignBlockEntity sign = ((AbstractSignEditScreenAccessor) event.screen).getSign();
         if (!(mc.world.getBlockState(sign.getPos()).getBlock().asItem() instanceof HangingSignItem) && mc.world.getBlockState(sign.getPos()).getBlock().asItem() instanceof SignItem){
-            mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(),true,
-                    lineOne.get(),
-                    lineTwo.get(),
-                    lineThree.get(),
-                    lineFour.get()
-            ));
-            if (bothside.get()){
-                editrear = true;
-                if (prevsignPos != sign.getPos())signPos = sign.getPos();
-            }
+        mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(),true,
+                lineOne.get(),
+                lineTwo.get(),
+                lineThree.get(),
+                lineFour.get()
+        ));
+        if (bothside.get()){
+            editrear = true;
+            if (prevsignPos != sign.getPos())signPos = sign.getPos();
+        }
         } else if (mc.world.getBlockState(sign.getPos()).getBlock().asItem() instanceof HangingSignItem){
             mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(),true,
                     HlineOne.get(),
@@ -333,21 +336,21 @@ public class BetterAutoSign extends Module {
     private void onPostTick(TickEvent.Post event) {
         if (!editrear || !bothside.get() || prevsignPos == signPos) return;
         if (!(mc.world.getBlockState(signPos).getBlock().asItem() instanceof HangingSignItem) && mc.world.getBlockState(signPos).getBlock().asItem() instanceof SignItem){
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(signPos.getX(), signPos.getY(), signPos.getZ()), Direction.DOWN, signPos, false));
-            if (differentText.get())
-                mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
+                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(signPos.getX(), signPos.getY(), signPos.getZ()), Direction.DOWN, signPos, false));
+                if (differentText.get())
+                    mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
                         lineOnedif.get(),
                         lineTwodif.get(),
                         lineThreedif.get(),
                         lineFourdif.get()
-                ));
-            else
-                mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
+                    ));
+                else
+                    mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
                         lineOne.get(),
                         lineTwo.get(),
                         lineThree.get(),
                         lineFour.get()
-                ));
+                    ));
             prevsignPos = signPos;
 
             editrear=false;

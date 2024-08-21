@@ -5,6 +5,8 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.*;
@@ -136,6 +138,11 @@ public class BoomPlus extends Module {
             .min(0)
             .sliderRange(0, 100)
             .build());
+    private final Setting<Block> blockstate = sgOptions.add(new BlockSetting.Builder()
+            .name("falling_block entity block")
+            .description("What is created when specifying falling_block as the entity.")
+            .defaultValue(Blocks.BEDROCK)
+            .build());
     public final Setting<Boolean> target = sgGeneral.add(new BoolSetting.Builder()
             .name("OnTarget")
             .description("spawns on target")
@@ -170,6 +177,8 @@ public class BoomPlus extends Module {
         super(Trouser.Main, "boom+", "shoots something where you click");
     }
     private int aticks=0;
+    private String namecolour = nomcolor.get();
+    private String customName = nom.get();
 
     @EventHandler
     public void onTick(TickEvent.Post event) {
@@ -182,20 +191,25 @@ public class BoomPlus extends Module {
             if (aticks<=atickdelay.get()){
                 aticks++;
             } else if (aticks>atickdelay.get()) {
-                NbtList motion = new NbtList();
                 NbtCompound tag = new NbtCompound();
-                NbtList Pos = new NbtList();
-                HitResult hr = mc.cameraEntity.raycast(900, 0, true);
-                Vec3d owo = hr.getPos();
-                BlockPos pos = BlockPos.ofFloored(owo);
                 ItemStack rst = mc.player.getMainHandStack();
-                Vec3d sex = mc.player.getRotationVector().multiply(speed.get());
                 BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
-                String entityName = entity.get().trim().replace(" ", "_");
                 ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
                 NbtCompound display = new NbtCompound();
                 display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
                 tag.put("display", display);
+                String fullString = blockstate.get().toString();
+                String[] parts = fullString.split(":");
+                String block = parts[1];
+                String blockName = block.replace("}", "");
+                NbtList motion = new NbtList();
+                NbtList Pos = new NbtList();
+                HitResult hr = mc.cameraEntity.raycast(900, 0, true);
+                Vec3d owo = hr.getPos();
+                BlockPos pos = BlockPos.ofFloored(owo);
+                Vec3d sex = mc.player.getRotationVector().multiply(speed.get());
+                String entityName = entity.get().trim().replace(" ", "_");
+
                 NbtCompound entityTag = new NbtCompound();
                 if (target.get()) {
                     Pos.add(NbtDouble.of(pos.getX()));
@@ -214,6 +228,9 @@ public class BoomPlus extends Module {
                 entityTag.putInt("Age", age.get());
                 entityTag.putInt("ExplosionPower", exppower.get());
                 entityTag.putInt("ExplosionRadius", exppower.get());
+                NbtCompound blockState = new NbtCompound();
+                blockState.putString("Name", "minecraft:" + blockName);
+                entityTag.put("BlockState", blockState);
                 if (invincible.get())entityTag.putBoolean("Invulnerable", invincible.get());
                 if (silence.get())entityTag.putBoolean("Silent", silence.get());
                 if (glow.get())entityTag.putBoolean("Glowing", glow.get());
@@ -240,20 +257,25 @@ public class BoomPlus extends Module {
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if (mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player.getAbilities().creativeMode) {
-            NbtList motion = new NbtList();
             NbtCompound tag = new NbtCompound();
-            NbtList Pos = new NbtList();
-            HitResult hr = mc.cameraEntity.raycast(900, 0, true);
-            Vec3d owo = hr.getPos();
-            BlockPos pos = BlockPos.ofFloored(owo);
             ItemStack rst = mc.player.getMainHandStack();
-            Vec3d sex = mc.player.getRotationVector().multiply(speed.get());
             BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
-            String entityName = entity.get().trim().replace(" ", "_");
             ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
             NbtCompound display = new NbtCompound();
             display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
             tag.put("display", display);
+            String fullString = blockstate.get().toString();
+            String[] parts = fullString.split(":");
+            String block = parts[1];
+            String blockName = block.replace("}", "");
+            NbtList motion = new NbtList();
+            NbtList Pos = new NbtList();
+            HitResult hr = mc.cameraEntity.raycast(900, 0, true);
+            Vec3d owo = hr.getPos();
+            BlockPos pos = BlockPos.ofFloored(owo);
+            Vec3d sex = mc.player.getRotationVector().multiply(speed.get());
+            String entityName = entity.get().trim().replace(" ", "_");
+
             NbtCompound entityTag = new NbtCompound();
             if (target.get()) {
                 Pos.add(NbtDouble.of(pos.getX()));
@@ -272,6 +294,9 @@ public class BoomPlus extends Module {
             entityTag.putInt("Age", age.get());
             entityTag.putInt("ExplosionPower", exppower.get());
             entityTag.putInt("ExplosionRadius", exppower.get());
+            NbtCompound blockState = new NbtCompound();
+            blockState.putString("Name", "minecraft:" + blockName);
+            entityTag.put("BlockState", blockState);
             if (invincible.get())entityTag.putBoolean("Invulnerable", invincible.get());
             if (silence.get())entityTag.putBoolean("Silent", silence.get());
             if (glow.get())entityTag.putBoolean("Glowing", glow.get());
@@ -292,4 +317,5 @@ public class BoomPlus extends Module {
             mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
         }
     }
+
 }

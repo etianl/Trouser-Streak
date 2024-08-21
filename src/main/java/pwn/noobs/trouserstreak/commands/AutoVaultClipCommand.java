@@ -80,7 +80,7 @@ public class AutoVaultClipCommand extends Command {
             for (int i = 199; i > 0; i--) {
                 BlockPos isopenair1 = (player.getBlockPos().add(0,i,0));
                 BlockPos newopenair2 = isopenair1.up(1);
-                if (!mc.world.getBlockState(isopenair1).isReplaceable() && !mc.world.getBlockState(isopenair1).isOf(Blocks.POWDER_SNOW) && mc.world.getFluidState(isopenair1).isEmpty()) {
+                if (!mc.world.getBlockState(isopenair1).isReplaceable() || mc.world.getBlockState(isopenair1).isOf(Blocks.POWDER_SNOW) || !mc.world.getFluidState(isopenair1).isEmpty()) {
                     int packetsRequired = 20;
                     if (player.hasVehicle()) {
                         Entity vehicle = player.getVehicle();

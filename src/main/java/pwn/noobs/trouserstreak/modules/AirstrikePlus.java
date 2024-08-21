@@ -15,6 +15,8 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtDouble;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -28,7 +30,7 @@ public class AirstrikePlus extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgeveryone = settings.createGroup("AIRSTRIKE EVERYONE Command Options");
     private final SettingGroup sgnormal = settings.createGroup("NORMAL Spawn Egg Options");
-    
+
     private final Setting<Boolean> disconnectdisable = sgGeneral.add(new BoolSetting.Builder()
             .name("Disable on Disconnect")
             .description("Disables module on disconnecting")
@@ -441,10 +443,6 @@ public class AirstrikePlus extends Module {
         for (int griefs = 0; griefs < grief.get(); griefs++) {
             if (airstrikeEveryone.get()) executeCommandsToCreateEntities();
             else {
-                String fullString = blockstate.get().toString();
-                String[] parts = fullString.split(":");
-                String block = parts[1];
-                String blockName = block.replace("}", "");
                 if (randomnomcolor.get()) {
                     String[] colorCodes = {"black", "dark_blue", "dark_green", "dark_aqua", "dark_red", "dark_purple", "gold", "gray", "dark_gray", "blue", "green", "aqua", "red", "light_purple", "yellow", "white"};
                     Random random = new Random();
@@ -454,26 +452,33 @@ public class AirstrikePlus extends Module {
                 ItemStack bomb = new ItemStack(Items.SALMON_SPAWN_EGG);
                 ItemStack bfr = mc.player.getMainHandStack();
                 BlockHitResult bhr = new BlockHitResult(mc.player.getPos().add(0, 1, 0), Direction.UP, new BlockPos(mc.player.getBlockPos().add(0, 1, 0)), false);
-                Vec3d cpos = pickRandomPos();
-                NbtCompound tag = new NbtCompound();
-                NbtList pos = new NbtList();
                 i++;
                 if (mc.player.getAbilities().creativeMode) {
                     if (i >= delay.get()) {
+                        NbtCompound tag = new NbtCompound();
                         NbtCompound display = new NbtCompound();
                         display.putString("Name", "{\"text\":\"" + customName + "\",\"color\":\"" + namecolour + "\"}");
                         tag.put("display", display);
+                        String fullString = blockstate.get().toString();
+                        String[] parts = fullString.split(":");
+                        String block = parts[1];
+                        String blockName = block.replace("}", "");
                         NbtCompound entityTag = new NbtCompound();
+                        NbtList pos = new NbtList();
+                        NbtList speedlist = new NbtList();
+                        Vec3d cpos = pickRandomPos();
+
                         speedlist.add(NbtDouble.of(0));
                         speedlist.add(NbtDouble.of(-speed.get()));
                         speedlist.add(NbtDouble.of(0));
                         pos.add(NbtDouble.of(cpos.x));
                         pos.add(NbtDouble.of(mc.player.getY() + height.get()));
                         pos.add(NbtDouble.of(cpos.z));
+
+                        entityTag.putString("id", "minecraft:" + entityName);
                         entityTag.put("power", speedlist);
                         entityTag.put("Motion", speedlist);
                         entityTag.put("Pos", pos);
-                        entityTag.putString("id", "minecraft:" + entityName);
                         entityTag.putInt("Health", health.get());
                         entityTag.putInt("AbsorptionAmount", absorption.get());
                         entityTag.putInt("Age", age.get());
@@ -482,6 +487,7 @@ public class AirstrikePlus extends Module {
                         NbtCompound blockState = new NbtCompound();
                         blockState.putString("Name", "minecraft:" + blockName);
                         entityTag.put("BlockState", blockState);
+
                         if (invincible.get()) entityTag.putBoolean("Invulnerable", invincible.get());
                         if (silence.get()) entityTag.putBoolean("Silent", silence.get());
                         if (glow.get()) entityTag.putBoolean("Glowing", glow.get());
@@ -509,6 +515,7 @@ public class AirstrikePlus extends Module {
             }
         }
     }
+
     private void executeCommandsToCreateEntities() {
         speedlist = new NbtList();
         if (randomnomcolor.get()){
