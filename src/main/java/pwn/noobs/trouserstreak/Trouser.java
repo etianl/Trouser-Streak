@@ -28,6 +28,7 @@ public class Trouser extends MeteorAddon {
 
                 //Modules.get().add(new -----> Find and Grief noobs! <-----());
                 Modules.get().add(new NewerNewChunks());
+                Modules.get().add(new OnlinePlayerActivityDetector());
                 Modules.get().add(new BaseFinder());
                 Modules.get().add(new HoleAndTunnelAndStairsESP());
                 Modules.get().add(new TrouserBlockESP());
@@ -63,6 +64,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new LecternCrash());
 
                 //Modules.get().add(new -----> And much more <-----());
+                Modules.get().add(new BookAndQuillDupe());
                 Modules.get().add(new BetterAutoSign());
                 Modules.get().add(new Teleport());
                 Modules.get().add(new TPFly());

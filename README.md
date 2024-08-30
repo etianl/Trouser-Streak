@@ -19,6 +19,7 @@ In no particular order
 - [Frostburn Client](https://github.com/evaan/FrostBurn)
 - [Banana](https://github.com/Bennooo/banana-for-everyone) Credits for checkbox array from AutoBuild, and the idea for TrouserBuild
 - [1.17 Crafting Dupe](https://github.com/B2H990/NUMA-117-Crafting-Dupe/)
+- [Book And Quill Dupe](https://github.com/Thorioum)
 - [InstantKillBow](https://github.com/Saturn5Vfive/InstantKillBow)
 - [LecternCrash](https://github.com/Coderx-Gamer/lectern-crash)
 - [etianl](https://github.com/etianl/)
@@ -80,7 +81,8 @@ In no particular order
 - Base location data will be stored in the "BaseChunks" folder, in your Minecraft folder.
 - **BetterAutoSign:** Automatically writes signs with the text you specify, and can also apply glow ink or dye. Includes a "Sign Aura" option which rewrites all the signs around to the text of your choosing. Credits to Meteor-Tweaks for BetterAutoSign, and to [stever9487](https://github.com/stever9487) for the Sign Aura based off of Meteor Rejects' Chest Aura
 - **BetterScaffold:** Give you more options for scaffolding, bigger range and others. (Credits to Meteor-Tweaks)
-- **BlockListMineCommand** Adds a custom #mine command to your message history containing all the blocks in the custom blocklist that are near you. Press T then up arrow, then ENTER key to execute the command. BETTER CHAT module is recommended for infinitely long commands. (Credits to etianl :D)
+- **BlockListMineCommand:** Adds a custom #mine command to your message history containing all the blocks in the custom blocklist that are near you. Press T then up arrow, then ENTER key to execute the command. BETTER CHAT module is recommended for infinitely long commands. (Credits to etianl :D)
+- **Book And Quill Dupe:** Overflows data in a book's title to cause dupes and chunk bans. Credits to [Thorioum](https://github.com/Thorioum)!
 - **Boom+:** Throws entities or spawns them on the targeted block when you click (Credits to Allah-Hack for the original) I just added more fun things you might want to throw as well as included the option for height based on player Y level.
 - **BungeeSpoofer:** Allows you to join servers with an exposed bungeecord backend. (Credits to DAMcraft of ServerSeeker!)
 - **CrashCommand:** Crashes other players out using a nasty particle effect. Requires OP status. Credits to [aaaasdfghjkllll](https://github.com/aaaasdfghjkllll)
@@ -142,6 +144,7 @@ In no particular order
 - The **"IgnoreBlockExploit"** will render BlockExploit chunks as an oldchunk instead of a newchunk.
 
 -------------------------------------------------------------------------------------
+- **OnlinePlayerActivityDetector:** Detects if an online player is nearby if there are blocks missing from a BlockState palette and your render distances are overlapping. It can detect players that are outside of render distance. (Credits to etianl :D)
 - **OPplayerTPmodule:** Uses operator commands to teleport you to each player online one by one at the push of a button, or those players to you one by one. There is a button in the options for it to reset the current player to zero. Thank you to [ogmur](https://www.youtube.com/@Ogmur) for the module suggestion (Credits to etianl for writing :D). REQUIRES OP STATUS
 - **OPServerKillModule:** Runs a set of operator commands to disable a server and cover up the tracks of the kill command. REQUIRES OP STATUS (Credits to etianl :D)
 - **RedstoneNuker:** It's just the regular Nuker module from Meteor client, customized for only breaking things that generate redstone signals. Also with included AutoTool. To keep you safer when placing lots of TNT. (Credits to Meteor Client for Nuker code, and AutoTool code inthere.)
