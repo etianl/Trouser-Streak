@@ -30,6 +30,7 @@ import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.decoration.GlowItemFrameEntity;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.passive.*;
+import net.minecraft.entity.projectile.thrown.EnderPearlEntity;
 import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.entity.vehicle.ChestBoatEntity;
 import net.minecraft.item.Item;
@@ -102,6 +103,16 @@ public class BaseFinder extends Module {
             .description("Finds signs that have text on them because they are not natural.")
             .defaultValue(true)
             .build());
+    private final Setting<Boolean> portalFinder = sgDetectors.add(new BoolSetting.Builder()
+            .name("Open Portal Finder")
+            .description("Finds End/Nether portals that are open because they are usually not natural.")
+            .defaultValue(true)
+            .build());
+    private final Setting<Boolean> bubblesFinder = sgDetectors.add(new BoolSetting.Builder()
+            .name("Bubble Column Finder")
+            .description("Finds bubble column blocks made by soul sand because they are not natural.")
+            .defaultValue(true)
+            .build());
     private final Setting<Boolean> skybuildfind = sgDetectors.add(new BoolSetting.Builder()
             .name("Sky Build Finder")
             .description("If Blocks higher than terrain can naturally generate, flag chunk as possible build.")
@@ -148,6 +159,11 @@ public class BaseFinder extends Module {
     private final Setting<Boolean> frameFinder = sgEDetectors.add(new BoolSetting.Builder()
             .name("Item Frame Finder")
             .description("Finds item frames that do not contain an elytra because they are not natural.")
+            .defaultValue(true)
+            .build());
+    private final Setting<Boolean> pearlFinder = sgEDetectors.add(new BoolSetting.Builder()
+            .name("Ender Pearl Finder")
+            .description("Finds ender pearls entities because they are not natural.")
             .defaultValue(true)
             .build());
     private final Setting<Boolean> nameFinder = sgEDetectors.add(new BoolSetting.Builder()
@@ -204,7 +220,7 @@ public class BaseFinder extends Module {
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
             .defaultValue(
                     Blocks.BLACK_BED, Blocks.BROWN_BED, Blocks.GRAY_BED, Blocks.LIGHT_BLUE_BED, Blocks.LIGHT_GRAY_BED, Blocks.MAGENTA_BED, Blocks.PINK_BED,
-                    Blocks.SPRUCE_SAPLING, Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING, Blocks.JUNGLE_SAPLING, Blocks.CHERRY_SAPLING, Blocks.BAMBOO_SAPLING, Blocks.MELON_STEM, Blocks.ATTACHED_MELON_STEM, Blocks.PUMPKIN_STEM, Blocks.ATTACHED_PUMPKIN_STEM,
+                    Blocks.SPRUCE_SAPLING, Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING, Blocks.JUNGLE_SAPLING, Blocks.CHERRY_SAPLING, Blocks.BAMBOO_SAPLING, Blocks.PUMPKIN_STEM, Blocks.ATTACHED_PUMPKIN_STEM,
                     Blocks.CHERRY_BUTTON, Blocks.CHERRY_DOOR, Blocks.CHERRY_FENCE, Blocks.CHERRY_FENCE_GATE, Blocks.CHERRY_PLANKS, Blocks.CHERRY_PRESSURE_PLATE, Blocks.CHERRY_STAIRS, Blocks.CHERRY_WOOD, Blocks.CHERRY_TRAPDOOR, Blocks.CHERRY_SLAB,
                     Blocks.MANGROVE_PLANKS, Blocks.MANGROVE_BUTTON, Blocks.MANGROVE_DOOR, Blocks.MANGROVE_FENCE, Blocks.MANGROVE_FENCE_GATE, Blocks.MANGROVE_STAIRS, Blocks.MANGROVE_SLAB, Blocks.MANGROVE_TRAPDOOR,
                     Blocks.BIRCH_DOOR, Blocks.BIRCH_FENCE_GATE, Blocks.BIRCH_BUTTON, Blocks.OAK_BUTTON, Blocks.ACACIA_BUTTON, Blocks.DARK_OAK_BUTTON, Blocks.POLISHED_BLACKSTONE_BUTTON, Blocks.SPRUCE_BUTTON,
@@ -756,7 +772,7 @@ public class BaseFinder extends Module {
         if (removerenderdist.get()) removeChunksOutsideRenderDistance();
 
         if (entityScanTicks < entityScanDelay.get()) entityScanTicks++;
-        if (entityScanTicks >= entityScanDelay.get() && (frameFinder.get() || villagerFinder.get() || nameFinder.get() || boatFinder.get() || entityClusterFinder.get())) {
+        if (entityScanTicks >= entityScanDelay.get() && (pearlFinder.get() || frameFinder.get() || villagerFinder.get() || nameFinder.get() || boatFinder.get() || entityClusterFinder.get())) {
             if (mc.world == null) return;
 
             int renderDistance = mc.options.getViewDistance().getValue();
@@ -785,6 +801,16 @@ public class BaseFinder extends Module {
                                             LastBaseFound = new ChunkPos(chunk.getPos().x, chunk.getPos().z);
                                             basefound = true;
                                         }
+                                    }
+                                } else if (entity instanceof EnderPearlEntity && pearlFinder.get()) {
+                                    baseChunks.add(chunk.getPos());
+                                    if (save.get()) {
+                                        saveBaseChunkData(chunk.getPos());
+                                    }
+                                    if (basefoundspamTicks == 0) {
+                                        ChatUtils.sendMsg(Text.of("Ender Pearl located near X" + entity.getPos().getX() + ", Y" + entity.getPos().getY() + ", Z" + entity.getPos().getZ()));
+                                        LastBaseFound = new ChunkPos(chunk.getPos().x, chunk.getPos().z);
+                                        basefound = true;
                                     }
                                 } else if (entity instanceof VillagerEntity && villagerFinder.get()) {
                                     if (((VillagerEntity) entity).getVillagerData().getLevel() > 1) {
@@ -894,7 +920,7 @@ public class BaseFinder extends Module {
                     future.join();
                 } catch (CompletionException e) {}
 
-                if (roofDetector.get() || bedrockfind.get() || skybuildfind.get() || Blawcks1.get().size()>0 || Blawcks2.get().size()>0 || Blawcks3.get().size()>0 || Blawcks4.get().size()>0 || Blawcks5.get().size()>0 || Blawcks6.get().size()>0 || Blawcks7.get().size()>0){
+                if (bubblesFinder.get() || spawner.get() || signFinder.get() || portalFinder.get() || roofDetector.get() || bedrockfind.get() || skybuildfind.get() || Blawcks1.get().size()>0 || Blawcks2.get().size()>0 || Blawcks3.get().size()>0 || Blawcks4.get().size()>0 || Blawcks5.get().size()>0 || Blawcks6.get().size()>0 || Blawcks7.get().size()>0){
                     int Ymin = mc.world.getBottomY()+minY.get();
                     int Ymax = mc.world.getTopY()-maxY.get();
                     try {
@@ -919,160 +945,184 @@ public class BaseFinder extends Module {
                                         if (currentY <= Ymin || currentY >= Ymax) continue;
                                         blockposi=new BlockPos(x, currentY, z);
                                         BlockState blerks = section.getBlockState(x,y,z);
-                                        if (blerks.getBlock()!=Blocks.AIR){
-                                            if (signFinder.get() && blerks.getBlock() instanceof SignBlock || blerks.getBlock() instanceof HangingSignBlock) {
-                                                for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
-                                                    Boolean signtextfound = false;
-                                                    if (blockEntity instanceof SignBlockEntity){
-                                                        SignText signText = ((SignBlockEntity) blockEntity).getFrontText();
-                                                        SignText signText2 = ((SignBlockEntity) blockEntity).getBackText();
-                                                        Text[] lines = signText.getMessages(false);
-                                                        Text[] lines2 = signText2.getMessages(false);
-                                                        int i = 0;
-                                                        for (Text line : lines) {
-                                                            if (line.getLiteralString().length() != 0 && (line.getString() != "<----" && i == 1) && (line.getString() != "---->" && i == 2)){ //handling for arrows is for igloos
-                                                                signtextfound = true;
-                                                                if (signtextfound == true) break;
+                                        if (blerks.getBlock()!=Blocks.AIR && blerks.getBlock()!=Blocks.STONE){
+                                            if (!(blerks.getBlock()==Blocks.DEEPSLATE) && !(blerks.getBlock()==Blocks.DIRT) && !(blerks.getBlock()==Blocks.GRASS_BLOCK) && !(blerks.getBlock()==Blocks.WATER) && !(blerks.getBlock()==Blocks.SAND) && !(blerks.getBlock()==Blocks.GRAVEL)  && !(blerks.getBlock()==Blocks.BEDROCK)&& !(blerks.getBlock()==Blocks.NETHERRACK) && !(blerks.getBlock()==Blocks.LAVA)){
+                                                if (signFinder.get() && blerks.getBlock() instanceof SignBlock || blerks.getBlock() instanceof HangingSignBlock) {
+                                                    for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
+                                                        Boolean signtextfound = false;
+                                                        if (blockEntity instanceof SignBlockEntity){
+                                                            SignText signText = ((SignBlockEntity) blockEntity).getFrontText();
+                                                            SignText signText2 = ((SignBlockEntity) blockEntity).getBackText();
+                                                            Text[] lines = signText.getMessages(false);
+                                                            Text[] lines2 = signText2.getMessages(false);
+                                                            int i = 0;
+                                                            for (Text line : lines) {
+                                                                if (line.getLiteralString().length() != 0 && (line.getString() != "<----" && i == 1) && (line.getString() != "---->" && i == 2)){ //handling for arrows is for igloos
+                                                                    signtextfound = true;
+                                                                    if (signtextfound == true) break;
+                                                                }
+                                                                i++;
                                                             }
-                                                            i++;
-                                                        }
-                                                        for (Text line2 : lines2) {
-                                                            if (signtextfound == true) break;
-                                                            if (line2.getLiteralString().length() != 0){
-                                                                signtextfound = true;
+                                                            for (Text line2 : lines2) {
                                                                 if (signtextfound == true) break;
+                                                                if (line2.getLiteralString().length() != 0){
+                                                                    signtextfound = true;
+                                                                    if (signtextfound == true) break;
+                                                                }
+                                                            }
+                                                        } else if (blockEntity instanceof HangingSignBlockEntity) {
+                                                            SignText signText = ((HangingSignBlockEntity) blockEntity).getFrontText();
+                                                            SignText signText2 = ((HangingSignBlockEntity) blockEntity).getBackText();
+                                                            Text[] lines = signText.getMessages(false);
+                                                            Text[] lines2 = signText2.getMessages(false);
+                                                            for (Text line : lines) {
+                                                                if (line.getLiteralString().length() != 0){ //handling for arrows is for igloos
+                                                                    signtextfound = true;
+                                                                    if (signtextfound == true) break;
+                                                                }
+                                                            }
+                                                            for (Text line2 : lines2) {
+                                                                if (signtextfound == true) break;
+                                                                if (line2.getLiteralString().length() != 0){
+                                                                    signtextfound = true;
+                                                                    if (signtextfound == true) break;
+                                                                }
                                                             }
                                                         }
-                                                    } else if (blockEntity instanceof HangingSignBlockEntity) {
-                                                        SignText signText = ((HangingSignBlockEntity) blockEntity).getFrontText();
-                                                        SignText signText2 = ((HangingSignBlockEntity) blockEntity).getBackText();
-                                                        Text[] lines = signText.getMessages(false);
-                                                        Text[] lines2 = signText2.getMessages(false);
-                                                        for (Text line : lines) {
-                                                            if (line.getLiteralString().length() != 0){ //handling for arrows is for igloos
-                                                                signtextfound = true;
-                                                                if (signtextfound == true) break;
+                                                        if (signtextfound == true && !baseChunks.contains(basepos)){
+                                                            baseChunks.add(basepos);
+                                                            if (save.get()) {
+                                                                saveBaseChunkData(basepos);
                                                             }
-                                                        }
-                                                        for (Text line2 : lines2) {
-                                                            if (signtextfound == true) break;
-                                                            if (line2.getLiteralString().length() != 0){
-                                                                signtextfound = true;
-                                                                if (signtextfound == true) break;
+                                                            if (basefoundspamTicks==0){
+                                                                ChatUtils.sendMsg(Text.of("Written Sign located near X"+blockEntity.getPos().getX()+", Y"+blockEntity.getPos().getY()+", Z"+blockEntity.getPos().getZ()));
+                                                                LastBaseFound= new ChunkPos(basepos.x, basepos.z);
+                                                                basefound=true;
                                                             }
                                                         }
                                                     }
-                                                    if (signtextfound == true && !baseChunks.contains(basepos)){
+                                                }
+                                                if (skybuildfind.get() && currentY>skybuildint.get()) {
+                                                    if (!baseChunks.contains(basepos)){
                                                         baseChunks.add(basepos);
                                                         if (save.get()) {
                                                             saveBaseChunkData(basepos);
                                                         }
                                                         if (basefoundspamTicks==0){
-                                                            ChatUtils.sendMsg(Text.of("Written Sign located near X"+blockEntity.getPos().getX()+", Y"+blockEntity.getPos().getY()+", Z"+blockEntity.getPos().getZ()));
+                                                            ChatUtils.sendMsg(Text.of("(Skybuild)Possible build located near X"+basepos.getCenterX()+", Y"+currentY+", Z"+basepos.getCenterZ()));
                                                             LastBaseFound= new ChunkPos(basepos.x, basepos.z);
                                                             basefound=true;
                                                         }
                                                     }
                                                 }
-                                            }
-                                            if (skybuildfind.get() && currentY>skybuildint.get()) {
-                                                if (!baseChunks.contains(basepos)){
-                                                    baseChunks.add(basepos);
-                                                    if (save.get()) {
-                                                        saveBaseChunkData(basepos);
-                                                    }
-                                                    if (basefoundspamTicks==0){
-                                                        ChatUtils.sendMsg(Text.of("(Skybuild)Possible build located near X"+basepos.getCenterX()+", Y"+currentY+", Z"+basepos.getCenterZ()));
-                                                        LastBaseFound= new ChunkPos(basepos.x, basepos.z);
-                                                        basefound=true;
+                                                if (bubblesFinder.get() && blerks.getBlock() instanceof BubbleColumnBlock && blerks.get(BubbleColumnBlock.DRAG) == false) {
+                                                    if (!baseChunks.contains(basepos)){
+                                                        baseChunks.add(basepos);
+                                                        if (save.get()) {
+                                                            saveBaseChunkData(basepos);
+                                                        }
+                                                        if (basefoundspamTicks==0){
+                                                            ChatUtils.sendMsg(Text.of("(Bubble Column)Possible build located near X"+basepos.getCenterX()+", Y"+currentY+", Z"+basepos.getCenterZ()));
+                                                            LastBaseFound= new ChunkPos(basepos.x, basepos.z);
+                                                            basefound=true;
+                                                        }
                                                     }
                                                 }
-                                            }
-                                            if (bedrockfind.get() && blerks.getBlock()==Blocks.BEDROCK && ((currentY>mc.world.getBottomY()+bedrockint.get() && mc.world.getRegistryKey() == World.OVERWORLD) || (currentY>mc.world.getBottomY()+bedrockint.get() && (currentY < 123 || currentY > 127) && mc.world.getRegistryKey() == World.NETHER))) {
-                                                if (!baseChunks.contains(basepos)){
-                                                    baseChunks.add(basepos);
-                                                    if (save.get()) {
-                                                        saveBaseChunkData(basepos);
-                                                    }
-                                                    if (basefoundspamTicks==0){
-                                                        ChatUtils.sendMsg(Text.of("(Unnatural Bedrock)Possible build located near X"+basepos.getCenterX()+", Y"+currentY+", Z"+basepos.getCenterZ()));
-                                                        LastBaseFound= new ChunkPos(basepos.x, basepos.z);
-                                                        basefound=true;
+                                                if (portalFinder.get() && (blerks.getBlock()==Blocks.NETHER_PORTAL || blerks.getBlock()==Blocks.END_PORTAL)) {
+                                                    if (!baseChunks.contains(basepos)){
+                                                        baseChunks.add(basepos);
+                                                        if (save.get()) {
+                                                            saveBaseChunkData(basepos);
+                                                        }
+                                                        if (basefoundspamTicks==0){
+                                                            ChatUtils.sendMsg(Text.of("(Open Portal)Possible build located near X"+basepos.getCenterX()+", Y"+currentY+", Z"+basepos.getCenterZ()));
+                                                            LastBaseFound= new ChunkPos(basepos.x, basepos.z);
+                                                            basefound=true;
+                                                        }
                                                     }
                                                 }
-                                            }
-                                            if (roofDetector.get() && blerks.getBlock()!=Blocks.AIR && blerks.getBlock()!=Blocks.RED_MUSHROOM && blerks.getBlock()!=Blocks.BROWN_MUSHROOM && currentY>=128 && mc.world.getRegistryKey() == World.NETHER){
-                                                if (!baseChunks.contains(basepos)){
-                                                    baseChunks.add(basepos);
-                                                    if (save.get()) {
-                                                        saveBaseChunkData(basepos);
-                                                    }
-                                                    if (basefoundspamTicks==0){
-                                                        ChatUtils.sendMsg(Text.of("(Nether Roof)Possible build located near X"+basepos.getCenterX()+", Y"+currentY+", Z"+basepos.getCenterZ()));
-                                                        LastBaseFound= new ChunkPos(basepos.x, basepos.z);
-                                                        basefound=true;
+                                                if (bedrockfind.get() && blerks.getBlock()==Blocks.BEDROCK && ((currentY>mc.world.getBottomY()+bedrockint.get() && mc.world.getRegistryKey() == World.OVERWORLD) || (currentY>mc.world.getBottomY()+bedrockint.get() && (currentY < 123 || currentY > 127) && mc.world.getRegistryKey() == World.NETHER))) {
+                                                    if (!baseChunks.contains(basepos)){
+                                                        baseChunks.add(basepos);
+                                                        if (save.get()) {
+                                                            saveBaseChunkData(basepos);
+                                                        }
+                                                        if (basefoundspamTicks==0){
+                                                            ChatUtils.sendMsg(Text.of("(Unnatural Bedrock)Possible build located near X"+basepos.getCenterX()+", Y"+currentY+", Z"+basepos.getCenterZ()));
+                                                            LastBaseFound= new ChunkPos(basepos.x, basepos.z);
+                                                            basefound=true;
+                                                        }
                                                     }
                                                 }
-                                            }
-                                            if (!(blerks.getBlock()==Blocks.STONE)){
-                                                if (!(blerks.getBlock()==Blocks.DEEPSLATE) && !(blerks.getBlock()==Blocks.DIRT) && !(blerks.getBlock()==Blocks.GRASS_BLOCK) && !(blerks.getBlock()==Blocks.WATER) && !(blerks.getBlock()==Blocks.SAND) && !(blerks.getBlock()==Blocks.GRAVEL)  && !(blerks.getBlock()==Blocks.BEDROCK)&& !(blerks.getBlock()==Blocks.NETHERRACK) && !(blerks.getBlock()==Blocks.LAVA)){
-                                                    if (spawner.get()){
-                                                        if (blerks.getBlock()==Blocks.SPAWNER){
-                                                            spawnerY=currentY;
-                                                            spawnerfound=true;
+                                                if (roofDetector.get() && blerks.getBlock()!=Blocks.RED_MUSHROOM && blerks.getBlock()!=Blocks.BROWN_MUSHROOM && currentY>=128 && mc.world.getRegistryKey() == World.NETHER){
+                                                    if (!baseChunks.contains(basepos)){
+                                                        baseChunks.add(basepos);
+                                                        if (save.get()) {
+                                                            saveBaseChunkData(basepos);
                                                         }
-                                                        //dungeon MOSSY_COBBLESTONE, mineshaft COBWEB, fortress NETHER_BRICK_FENCE, stronghold STONE_BRICK_STAIRS, bastion CHAIN
-                                                        if (mc.world.getRegistryKey() == World.OVERWORLD && (blerks.getBlock()==Blocks.MOSSY_COBBLESTONE || blerks.getBlock()==Blocks.COBWEB || blerks.getBlock()==Blocks.STONE_BRICK_STAIRS || blerks.getBlock()==Blocks.BUDDING_AMETHYST))spawnernaturalblocks=true;
-                                                        else if (mc.world.getRegistryKey() == World.NETHER && (blerks.getBlock()==Blocks.NETHER_BRICK_FENCE || blerks.getBlock()==Blocks.CHAIN))spawnernaturalblocks=true;
-                                                    }
-                                                    if (Blawcks1.get().size()>0){
-                                                        if (Blawcks1.get().contains(blerks.getBlock())) {
-                                                            blockpositions1.add(blockposi);
-                                                            found1= blockpositions1.size();
-                                                            lastblockfound1=blerks.getBlock().toString();
+                                                        if (basefoundspamTicks==0){
+                                                            ChatUtils.sendMsg(Text.of("(Nether Roof)Possible build located near X"+basepos.getCenterX()+", Y"+currentY+", Z"+basepos.getCenterZ()));
+                                                            LastBaseFound= new ChunkPos(basepos.x, basepos.z);
+                                                            basefound=true;
                                                         }
                                                     }
-                                                    if (Blawcks2.get().size()>0){
-                                                        if (Blawcks2.get().contains(blerks.getBlock())) {
-                                                            blockpositions2.add(blockposi);
-                                                            found2= blockpositions2.size();
-                                                            lastblockfound2=blerks.getBlock().toString();
-                                                        }
+                                                }
+                                                if (spawner.get()){
+                                                    if (blerks.getBlock()==Blocks.SPAWNER){
+                                                        spawnerY=currentY;
+                                                        spawnerfound=true;
                                                     }
-                                                    if (Blawcks3.get().size()>0){
-                                                        if (Blawcks3.get().contains(blerks.getBlock())) {
-                                                            blockpositions3.add(blockposi);
-                                                            found3= blockpositions3.size();
-                                                            lastblockfound3=blerks.getBlock().toString();
-                                                        }
+                                                    //dungeon MOSSY_COBBLESTONE, mineshaft COBWEB, fortress NETHER_BRICK_FENCE, stronghold STONE_BRICK_STAIRS, bastion CHAIN
+                                                    if (mc.world.getRegistryKey() == World.OVERWORLD && (blerks.getBlock()==Blocks.MOSSY_COBBLESTONE || blerks.getBlock()==Blocks.COBWEB || blerks.getBlock()==Blocks.STONE_BRICK_STAIRS || blerks.getBlock()==Blocks.BUDDING_AMETHYST))spawnernaturalblocks=true;
+                                                    else if (mc.world.getRegistryKey() == World.NETHER && (blerks.getBlock()==Blocks.NETHER_BRICK_FENCE || blerks.getBlock()==Blocks.CHAIN))spawnernaturalblocks=true;
+                                                }
+                                                if (Blawcks1.get().size()>0){
+                                                    if (Blawcks1.get().contains(blerks.getBlock())) {
+                                                        blockpositions1.add(blockposi);
+                                                        found1= blockpositions1.size();
+                                                        lastblockfound1=blerks.getBlock().toString();
                                                     }
-                                                    if (Blawcks4.get().size()>0){
-                                                        if (Blawcks4.get().contains(blerks.getBlock())) {
-                                                            blockpositions4.add(blockposi);
-                                                            found4= blockpositions4.size();
-                                                            lastblockfound4=blerks.getBlock().toString();
-                                                        }
+                                                }
+                                                if (Blawcks2.get().size()>0){
+                                                    if (Blawcks2.get().contains(blerks.getBlock())) {
+                                                        blockpositions2.add(blockposi);
+                                                        found2= blockpositions2.size();
+                                                        lastblockfound2=blerks.getBlock().toString();
                                                     }
-                                                    if (Blawcks5.get().size()>0){
-                                                        if (Blawcks5.get().contains(blerks.getBlock())) {
-                                                            blockpositions5.add(blockposi);
-                                                            found5= blockpositions5.size();
-                                                            lastblockfound5=blerks.getBlock().toString();
-                                                        }
+                                                }
+                                                if (Blawcks3.get().size()>0){
+                                                    if (Blawcks3.get().contains(blerks.getBlock())) {
+                                                        blockpositions3.add(blockposi);
+                                                        found3= blockpositions3.size();
+                                                        lastblockfound3=blerks.getBlock().toString();
                                                     }
-                                                    if (Blawcks6.get().size()>0){
-                                                        if (Blawcks6.get().contains(blerks.getBlock())) {
-                                                            blockpositions6.add(blockposi);
-                                                            found6= blockpositions6.size();
-                                                            lastblockfound6=blerks.getBlock().toString();
-                                                        }
+                                                }
+                                                if (Blawcks4.get().size()>0){
+                                                    if (Blawcks4.get().contains(blerks.getBlock())) {
+                                                        blockpositions4.add(blockposi);
+                                                        found4= blockpositions4.size();
+                                                        lastblockfound4=blerks.getBlock().toString();
                                                     }
-                                                    if (Blawcks7.get().size()>0){
-                                                        if (Blawcks7.get().contains(blerks.getBlock())) {
-                                                            blockpositions7.add(blockposi);
-                                                            found7= blockpositions7.size();
-                                                            lastblockfound7=blerks.getBlock().toString();
-                                                        }
+                                                }
+                                                if (Blawcks5.get().size()>0){
+                                                    if (Blawcks5.get().contains(blerks.getBlock())) {
+                                                        blockpositions5.add(blockposi);
+                                                        found5= blockpositions5.size();
+                                                        lastblockfound5=blerks.getBlock().toString();
+                                                    }
+                                                }
+                                                if (Blawcks6.get().size()>0){
+                                                    if (Blawcks6.get().contains(blerks.getBlock())) {
+                                                        blockpositions6.add(blockposi);
+                                                        found6= blockpositions6.size();
+                                                        lastblockfound6=blerks.getBlock().toString();
+                                                    }
+                                                }
+                                                if (Blawcks7.get().size()>0){
+                                                    if (Blawcks7.get().contains(blerks.getBlock())) {
+                                                        blockpositions7.add(blockposi);
+                                                        found7= blockpositions7.size();
+                                                        lastblockfound7=blerks.getBlock().toString();
                                                     }
                                                 }
                                             }

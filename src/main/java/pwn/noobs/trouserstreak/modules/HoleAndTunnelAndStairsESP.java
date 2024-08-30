@@ -27,6 +27,7 @@ import net.minecraft.world.chunk.ChunkSection;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class HoleAndTunnelAndStairsESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -205,6 +206,9 @@ public class HoleAndTunnelAndStairsESP extends Module {
     private static final Direction[] DIRECTIONS = { Direction.EAST, Direction.WEST, Direction.NORTH, Direction.SOUTH };
     private final Long2ObjectMap<TChunk> chunks = new Long2ObjectOpenHashMap<>();
     private final Queue<Chunk> chunkQueue = new LinkedList<>();
+    private final Set<Box> holes = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Set<Box> tunnels = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Set<Box> staircases = Collections.newSetFromMap(new ConcurrentHashMap<>());
     public HoleAndTunnelAndStairsESP() {
         super(Trouser.Main, "Hole/Tunnel/StairsESP", "Finds and highlights holes and tunnels and stairs.");
     }
@@ -213,6 +217,9 @@ public class HoleAndTunnelAndStairsESP extends Module {
     public void onDeactivate() {
         chunks.clear();
         chunkQueue.clear();
+        holes.clear();
+        tunnels.clear();
+        staircases.clear();
     }
     @EventHandler
     private void onTick(TickEvent.Post event) {
@@ -234,8 +241,54 @@ public class HoleAndTunnelAndStairsESP extends Module {
     }
     @EventHandler
     private void onRender3D(Render3DEvent event) {
-        synchronized (chunks) {
-            for (TChunk chunk : chunks.values()) chunk.render(event.renderer);
+        switch (detectionMode.get()) {
+            case ALL:
+                renderHoles(event.renderer);
+                renderTunnels(event.renderer);
+                renderStaircases(event.renderer);
+                break;
+            case HOLES_AND_TUNNELS:
+                renderHoles(event.renderer);
+                renderTunnels(event.renderer);
+                break;
+            case HOLES_AND_STAIRCASES:
+                renderHoles(event.renderer);
+                renderStaircases(event.renderer);
+                break;
+            case TUNNELS_AND_STAIRCASES:
+                renderTunnels(event.renderer);
+                renderStaircases(event.renderer);
+                break;
+            case HOLES:
+                renderHoles(event.renderer);
+                break;
+            case TUNNELS:
+                renderTunnels(event.renderer);
+                break;
+            case STAIRCASES:
+                renderStaircases(event.renderer);
+                break;
+        }
+    }
+    private void renderHoles(Renderer3D renderer) {
+        if (holes != null) {
+            for (Box box : holes) {
+                renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, holeSideColor.get(), holeLineColor.get(), shapeMode.get(), 0);
+            }
+        }
+    }
+    private void renderTunnels(Renderer3D renderer) {
+        if (tunnels != null) {
+            for (Box box : tunnels) {
+                renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, tunnelSideColor.get(), tunnelLineColor.get(), shapeMode.get(), 0);
+            }
+        }
+    }
+    private void renderStaircases(Renderer3D renderer) {
+        if (staircases != null) {
+            for (Box box : staircases) {
+                renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, staircaseSideColor.get(), staircaseLineColor.get(), shapeMode.get(), 0);
+            }
         }
     }
     private void processChunkQueue() {
@@ -254,9 +307,6 @@ public class HoleAndTunnelAndStairsESP extends Module {
         }
     }
     private void searchChunk(Chunk chunk, TChunk tChunk) {
-        Set<Box> holes = new HashSet<>();
-        Set<Box> tunnels = new HashSet<>();
-        Set<Box> staircases = new HashSet<>();
         var sections = chunk.getSectionArray();
         int Ymin = mc.world.getBottomY() + minY.get();
         int Ymax = mc.world.getTopY() - maxY.get();
@@ -273,33 +323,33 @@ public class HoleAndTunnelAndStairsESP extends Module {
                                 switch (detectionMode.get()) {
                                     case ALL:
                                         checkHole(pos, holes);
-                                        checkTunnel(chunk, pos, tunnels);
-                                        if (diagonals.get()) checkDiagonalTunnel(chunk, pos, tunnels);
-                                        checkStaircase(chunk, pos, staircases);
+                                        checkTunnel(pos);
+                                        if (diagonals.get()) checkDiagonalTunnel(pos);
+                                        checkStaircase(pos);
                                         break;
                                     case HOLES_AND_TUNNELS:
                                         checkHole(pos, holes);
-                                        checkTunnel(chunk, pos, tunnels);
-                                        if (diagonals.get()) checkDiagonalTunnel(chunk, pos, tunnels);
+                                        checkTunnel(pos);
+                                        if (diagonals.get()) checkDiagonalTunnel(pos);
                                         break;
                                     case HOLES_AND_STAIRCASES:
                                         checkHole(pos, holes);
-                                        checkStaircase(chunk, pos, staircases);
+                                        checkStaircase(pos);
                                         break;
                                     case TUNNELS_AND_STAIRCASES:
-                                        checkTunnel(chunk, pos, tunnels);
-                                        if (diagonals.get()) checkDiagonalTunnel(chunk, pos, tunnels);
-                                        checkStaircase(chunk, pos, staircases);
+                                        checkTunnel(pos);
+                                        if (diagonals.get()) checkDiagonalTunnel(pos);
+                                        checkStaircase(pos);
                                         break;
                                     case HOLES:
                                         checkHole(pos, holes);
                                         break;
                                     case TUNNELS:
-                                        checkTunnel(chunk, pos, tunnels);
-                                        if (diagonals.get()) checkDiagonalTunnel(chunk, pos, tunnels);
+                                        checkTunnel(pos);
+                                        if (diagonals.get()) checkDiagonalTunnel(pos);
                                         break;
                                     case STAIRCASES:
-                                        checkStaircase(chunk, pos, staircases);
+                                        checkStaircase(pos);
                                         break;
                                 }
                             }
@@ -309,9 +359,6 @@ public class HoleAndTunnelAndStairsESP extends Module {
             }
             Y += 16;
         }
-        tChunk.holes = holes;
-        tChunk.tunnels = tunnels;
-        tChunk.staircases = staircases;
     }
     private void checkHole(BlockPos pos, Set<Box> holes) {
         if (isValidHoleSection(pos)) {
@@ -333,23 +380,18 @@ public class HoleAndTunnelAndStairsESP extends Module {
     private boolean isValidHoleSection(BlockPos pos) {
         return isPassableBlock(pos) && !isPassableBlock(pos.north()) && !isPassableBlock(pos.south()) && !isPassableBlock(pos.east()) && !isPassableBlock(pos.west());
     }
-    private void checkTunnel(Chunk chunk, BlockPos pos, Set<Box> tunnels) {
+    private void checkTunnel(BlockPos pos) {
         for (Direction dir : DIRECTIONS) {
             BlockPos.Mutable currentPos = pos.mutableCopy();
             int stepCount = 0;
             BlockPos startPos = null;
             BlockPos endPos = null;
             int maxHeight = 0;
-
+            if (startPos == null && isTunnelSection(currentPos, dir)) {
+                startPos = currentPos.toImmutable();
+            }
             while (isTunnelSection(currentPos, dir)) {
-                if (!chunk.getPos().equals(mc.world.getChunk(currentPos).getPos())) {
-                    break;
-                }
                 maxHeight = Math.max(maxHeight, getTunnelHeight(currentPos));
-
-                if (startPos == null) {
-                    startPos = currentPos.toImmutable();
-                }
 
                 endPos = currentPos.toImmutable();
 
@@ -387,7 +429,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
         }
         return true;
     }
-    private void checkDiagonalTunnel(Chunk chunk, BlockPos pos, Set<Box> diagonals) {
+    private void checkDiagonalTunnel(BlockPos pos) {
         for (Direction dir : DIRECTIONS) {
             for (int i = minDiagonalWidth.get()-1; i < maxDiagonalWidth.get(); i++) {
                 BlockPos.Mutable currentPos = pos.mutableCopy();
@@ -398,9 +440,6 @@ public class HoleAndTunnelAndStairsESP extends Module {
                 boolean turnRight = true;
 
                 while (isDiagonalTunnelSection(currentPos, checkingDir)) {
-                    if (!chunk.getPos().equals(mc.world.getChunk(currentPos).getPos())) {
-                        break;
-                    }
                     int height = getTunnelHeight(currentPos);
                     Box tunnelBox = new Box(
                             currentPos.getX(),
@@ -428,8 +467,8 @@ public class HoleAndTunnelAndStairsESP extends Module {
 
                 if (stepCount/minDiagonalWidth.get() >= minDiagonalLength.get()) {
                     potentialBoxes.forEach(potentialBox -> {
-                        if (!diagonals.contains(potentialBox) && diagonals.stream().noneMatch(existingDiagonal -> existingDiagonal.intersects(potentialBox))) {
-                            diagonals.add(potentialBox);
+                        if (!tunnels.contains(potentialBox) && tunnels.stream().noneMatch(existingDiagonal -> existingDiagonal.intersects(potentialBox))) {
+                            tunnels.add(potentialBox);
                         }
                     });
                 }
@@ -458,16 +497,13 @@ public class HoleAndTunnelAndStairsESP extends Module {
         }
         return height;
     }
-    private void checkStaircase(Chunk chunk, BlockPos pos, Set<Box> staircases) {
+    private void checkStaircase(BlockPos pos) {
         for (Direction dir : DIRECTIONS) {
             BlockPos.Mutable currentPos = pos.mutableCopy();
             int stepCount = 0;
             List<Box> potentialStaircaseBoxes = new ArrayList<>();
 
             while (isStaircaseSection(currentPos, dir)) {
-                if (!chunk.getPos().equals(mc.world.getChunk(currentPos).getPos())) {
-                    break;
-                }
                 int height = getStaircaseHeight(currentPos);
                 Box stairsBox = new Box(
                         currentPos.getX(),
@@ -535,66 +571,12 @@ public class HoleAndTunnelAndStairsESP extends Module {
 
     private class TChunk {
         private final int x, z;
-        public Set<Box> holes;
-        public Set<Box> tunnels;
-        public Set<Box> staircases;
         public boolean marked;
 
         public TChunk(int x, int z) {
             this.x = x;
             this.z = z;
             this.marked = true;
-        }
-        public void render(Renderer3D renderer) {
-            switch (detectionMode.get()) {
-                case ALL:
-                    renderHoles(renderer);
-                    renderTunnels(renderer);
-                    renderStaircases(renderer);
-                    break;
-                case HOLES_AND_TUNNELS:
-                    renderHoles(renderer);
-                    renderTunnels(renderer);
-                    break;
-                case HOLES_AND_STAIRCASES:
-                    renderHoles(renderer);
-                    renderStaircases(renderer);
-                    break;
-                case TUNNELS_AND_STAIRCASES:
-                    renderTunnels(renderer);
-                    renderStaircases(renderer);
-                    break;
-                case HOLES:
-                    renderHoles(renderer);
-                    break;
-                case TUNNELS:
-                    renderTunnels(renderer);
-                    break;
-                case STAIRCASES:
-                    renderStaircases(renderer);
-                    break;
-            }
-        }
-        private void renderHoles(Renderer3D renderer) {
-            if (holes != null) {
-                for (Box box : holes) {
-                    renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, holeSideColor.get(), holeLineColor.get(), shapeMode.get(), 0);
-                }
-            }
-        }
-        private void renderTunnels(Renderer3D renderer) {
-            if (tunnels != null) {
-                for (Box box : tunnels) {
-                    renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, tunnelSideColor.get(), tunnelLineColor.get(), shapeMode.get(), 0);
-                }
-            }
-        }
-        private void renderStaircases(Renderer3D renderer) {
-            if (staircases != null) {
-                for (Box box : staircases) {
-                    renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, staircaseSideColor.get(), staircaseLineColor.get(), shapeMode.get(), 0);
-                }
-            }
         }
         public long getKey() {
             return ChunkPos.toLong(x, z);
