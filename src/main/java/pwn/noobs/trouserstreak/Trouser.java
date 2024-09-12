@@ -35,6 +35,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new StorageLooter());
                 Modules.get().add(new LavaAura());
                 Modules.get().add(new MaceKill());
+                Modules.get().add(new BoatExploit());
                 Modules.get().add(new SuperInstaMine());
                 Modules.get().add(new InstaMineNuker());
                 Modules.get().add(new BetterScaffold());
