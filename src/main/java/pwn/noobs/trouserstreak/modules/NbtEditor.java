@@ -3,8 +3,6 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.minecraft.block.entity.BeehiveBlockEntity;
-import net.minecraft.block.entity.Sherds;
 import net.minecraft.component.*;
 import net.minecraft.component.type.*;
 import net.minecraft.enchantment.Enchantment;
@@ -12,9 +10,7 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.inventory.ContainerLock;
 import net.minecraft.item.*;
-import net.minecraft.item.trim.ArmorTrim;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -62,7 +58,6 @@ public class NbtEditor extends Module {
             .defaultValue("wither")
             .visible(() -> mode.get() == Modes.Entity)
             .build());
-    //Item mode doesn't work
     private final Setting<Item> itemlist = sgOptions.add(new ItemSetting.Builder()
             .name("Item to create.")
             .description("Pick one. If you aren't already holding an item this is what you get.")
@@ -291,7 +286,7 @@ public class NbtEditor extends Module {
 
                     for (RegistryKey<Enchantment> enchantKey : enchants.get()) {
                         RegistryEntry<Enchantment> enchantEntry = enchantmentRegistry.entryOf(enchantKey);
-                         item.addEnchantment(enchantEntry, level.get());
+                        item.addEnchantment(enchantEntry, level.get());
                     }
 
                     item.set(DataComponentTypes.CUSTOM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toUpperCase())));
@@ -344,25 +339,20 @@ public class NbtEditor extends Module {
                     }
                 }
                 case Copy -> {
-                    // Get the item stack from the main hand
                     ItemStack mainHandStack = mc.player.getMainHandStack();
 
-                    // If the main hand is empty, use a new item stack
                     if (mainHandStack.isEmpty()) {
                         error("Put an item in your main hand.");
                         return;
                     }
 
-                    // Get the components from the main hand item stack
                     ComponentMap mainHandComponents = mainHandStack.getComponents();
                     ItemStack offHandStack = mc.player.getOffHandStack();
 
                     if (copyStack.get()){
-                        // Get the item stack from the offhand
                         offHandStack = mainHandStack;
                     }
                     else if (!copyStack.get()){
-                        // If the offhand is empty, use a new item stack
                         if (offHandStack.isEmpty()) {
                             offHandStack = new ItemStack(Items.CARROT_ON_A_STICK);
                         }
@@ -418,8 +408,7 @@ public class NbtEditor extends Module {
         return NbtComponent.of(entityTag);
     }
     public enum Modes {
-        //Entity, Potion, Copy
-        Entity, Item, Potion, Copy       //Item mode doesn't work
+        Entity, Item, Potion, Copy
     }
     public enum pModes {
         Normal, Splash, Lingering

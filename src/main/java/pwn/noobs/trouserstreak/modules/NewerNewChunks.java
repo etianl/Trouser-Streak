@@ -308,6 +308,18 @@ public class NewerNewChunks extends Module {
 		ORE_BLOCKS.add(Blocks.EMERALD_ORE);
 		ORE_BLOCKS.add(Blocks.DEEPSLATE_EMERALD_ORE);
 	}
+	private static final Set<Block> DEEPSLATE_BLOCKS = new HashSet<>();
+	static {
+		DEEPSLATE_BLOCKS.add(Blocks.DEEPSLATE);
+		DEEPSLATE_BLOCKS.add(Blocks.DEEPSLATE_COPPER_ORE);
+		DEEPSLATE_BLOCKS.add(Blocks.DEEPSLATE_IRON_ORE);
+		DEEPSLATE_BLOCKS.add(Blocks.DEEPSLATE_COAL_ORE);
+		DEEPSLATE_BLOCKS.add(Blocks.DEEPSLATE_REDSTONE_ORE);
+		DEEPSLATE_BLOCKS.add(Blocks.DEEPSLATE_EMERALD_ORE);
+		DEEPSLATE_BLOCKS.add(Blocks.DEEPSLATE_GOLD_ORE);
+		DEEPSLATE_BLOCKS.add(Blocks.DEEPSLATE_LAPIS_ORE);
+		DEEPSLATE_BLOCKS.add(Blocks.DEEPSLATE_DIAMOND_ORE);
+	}
 	private static final Set<Block> NEW_OVERWORLD_BLOCKS = new HashSet<>();
 	static {
 		NEW_OVERWORLD_BLOCKS.add(Blocks.DEEPSLATE);
@@ -476,10 +488,6 @@ public class NewerNewChunks extends Module {
 	private void onPreTick(TickEvent.Pre event) {
 		world= mc.world.getRegistryKey().getValue().toString().replace(':', '_');
 
-		if (mc.player.getHealth()==0) {
-			resetCounterValues();
-			worldchange=true;
-		}
 		if (deletewarningTicks<=100) deletewarningTicks++;
 		else deletewarning=0;
 		if (deletewarning>=2){
@@ -761,15 +769,15 @@ public class NewerNewChunks extends Module {
 				boolean isNewNetherGeneration = false;
 				ChunkSection[] sections = chunk.getSectionArray();
 
-				if (overworldOldChunksDetector.get() && mc.world.getRegistryKey() == World.OVERWORLD) {
+				if (overworldOldChunksDetector.get() && mc.world.getRegistryKey() == World.OVERWORLD && chunk.getStatus().isAtLeast(ChunkStatus.FULL) && !chunk.isEmpty()) {
 					for (int i = 0; i < 17; i++) {
 						ChunkSection section = sections[i];
-						if (section != null && !section.isEmpty() && i > 4) {
+						if (section != null && !section.isEmpty()) {
 							for (int x = 0; x < 16; x++) {
 								for (int y = 0; y < 16; y++) {
 									for (int z = 0; z < 16; z++) {
 										if (!foundAnyOre && ORE_BLOCKS.contains(section.getBlockState(x, y, z).getBlock())) foundAnyOre = true; //prevent false flags in flat world
-										if (!isNewOverworldGeneration && NEW_OVERWORLD_BLOCKS.contains(section.getBlockState(x, y, z).getBlock())) {
+										if (((y >= 5 && i == 4) || i > 4) && !isNewOverworldGeneration && (NEW_OVERWORLD_BLOCKS.contains(section.getBlockState(x, y, z).getBlock()) || DEEPSLATE_BLOCKS.contains(section.getBlockState(x, y, z).getBlock()))) {
 											isNewOverworldGeneration = true;
 											break;
 										}
@@ -781,7 +789,7 @@ public class NewerNewChunks extends Module {
 					if (foundAnyOre && !isOldGeneration && !isNewOverworldGeneration) isOldGeneration = true;
 				}
 
-				if (netherOldChunksDetector.get() && mc.world.getRegistryKey() == World.NETHER) {
+				if (netherOldChunksDetector.get() && mc.world.getRegistryKey() == World.NETHER && chunk.getStatus().isAtLeast(ChunkStatus.FULL) && !chunk.isEmpty()) {
 					for (int i = 0; i < 8; i++) {
 						ChunkSection section = sections[i];
 						if (section != null && !section.isEmpty()) {
@@ -800,7 +808,7 @@ public class NewerNewChunks extends Module {
 					if (!isOldGeneration && !isNewNetherGeneration) isOldGeneration = true;
 				}
 
-				if (endOldChunksDetector.get() && mc.world.getRegistryKey() == World.END) {
+				if (endOldChunksDetector.get() && mc.world.getRegistryKey() == World.END && chunk.getStatus().isAtLeast(ChunkStatus.FULL) && !chunk.isEmpty()) {
 					ChunkSection section = chunk.getSection(0);
 					var biomesContainer = section.getBiomeContainer();
 					if (biomesContainer instanceof PalettedContainer<RegistryEntry<Biome>> biomesPaletteContainer) {
