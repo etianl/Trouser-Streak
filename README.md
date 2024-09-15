@@ -82,6 +82,7 @@ In no particular order
 - **BetterAutoSign:** Automatically writes signs with the text you specify, and can also apply glow ink or dye. Includes a "Sign Aura" option which rewrites all the signs around to the text of your choosing. Credits to Meteor-Tweaks for BetterAutoSign, and to [stever9487](https://github.com/stever9487) for the Sign Aura based off of Meteor Rejects' Chest Aura
 - **BetterScaffold:** Give you more options for scaffolding, bigger range and others. (Credits to Meteor-Tweaks)
 - **BlockListMineCommand:** Adds a custom #mine command to your message history containing all the blocks in the custom blocklist that are near you. Press T then up arrow, then ENTER key to execute the command. BETTER CHAT module is recommended for infinitely long commands. (Credits to etianl :D)
+- **BoatKill:** Kills all players in a boat using funny packets. Is patched in Minecraft 1.21.2. Credits to [filepile](https://github.com/not-filepile) for writing this!
 - **Book And Quill Dupe:** Overflows data in a book's title to cause dupes and chunk bans. Credits to [Thorioum](https://github.com/Thorioum)!
 - **Boom+:** Throws entities or spawns them on the targeted block when you click (Credits to Allah-Hack for the original) I just added more fun things you might want to throw as well as included the option for height based on player Y level.
 - **BungeeSpoofer:** Allows you to join servers with an exposed bungeecord backend. (Credits to DAMcraft of ServerSeeker!)
