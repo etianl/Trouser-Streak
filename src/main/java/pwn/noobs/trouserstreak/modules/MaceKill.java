@@ -2,6 +2,7 @@ package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.mixininterface.IPlayerInteractEntityC2SPacket;
+import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
@@ -80,11 +81,15 @@ public class MaceKill extends Module {
                                 mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(mc.player.getVehicle()));
                             } else {
                                 for (int i = 0; i < 4; i++) {
-                                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY(), mc.player.getZ(), true));
+                                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
                                 }
                                 double maxHeight = Math.min(mc.player.getY() + 22, mc.player.getY() + blocks);
-                                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), maxHeight, mc.player.getZ(), false));
-                                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(previouspos.getX(), previouspos.getY(), previouspos.getZ(), false));
+                                PlayerMoveC2SPacket movepacket = new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), maxHeight, mc.player.getZ(), false);
+                                PlayerMoveC2SPacket homepacket = new PlayerMoveC2SPacket.PositionAndOnGround(previouspos.getX(), previouspos.getY(), previouspos.getZ(), false);
+                                ((IPlayerMoveC2SPacket) homepacket).setTag(1337);
+                                ((IPlayerMoveC2SPacket) movepacket).setTag(1337);
+                                mc.player.networkHandler.sendPacket(movepacket);
+                                mc.player.networkHandler.sendPacket(homepacket);
                             }
                             return;
                         }
@@ -100,6 +105,9 @@ public class MaceKill extends Module {
                                 mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
                             }
                             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ(), false));
+                            PlayerMoveC2SPacket movepacket = new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ(), false);
+                            ((IPlayerMoveC2SPacket) movepacket).setTag(1337);
+                            mc.player.networkHandler.sendPacket(movepacket);
                         }
 
                         // Move back to original position
@@ -110,9 +118,11 @@ public class MaceKill extends Module {
                             mc.player.getVehicle().setPosition(previouspos);
                             mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(mc.player.getVehicle()));
                         } else {
-                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(previouspos.getX(), previouspos.getY(), previouspos.getZ(), false));
+                            PlayerMoveC2SPacket homepacket = new PlayerMoveC2SPacket.PositionAndOnGround(previouspos.getX(), previouspos.getY(), previouspos.getZ(), false);
+                            ((IPlayerMoveC2SPacket) homepacket).setTag(1337);
+                            mc.player.networkHandler.sendPacket(homepacket);
                             // Do it again to be sure it happens
-                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(previouspos.getX(), previouspos.getY(), previouspos.getZ(), false));
+                            mc.player.networkHandler.sendPacket(homepacket);
                         }
                     }
                 }

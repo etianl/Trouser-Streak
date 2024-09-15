@@ -220,7 +220,7 @@ public class BaseFinder extends Module {
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
             .defaultValue(
                     Blocks.BLACK_BED, Blocks.BROWN_BED, Blocks.GRAY_BED, Blocks.LIGHT_BLUE_BED, Blocks.LIGHT_GRAY_BED, Blocks.MAGENTA_BED, Blocks.PINK_BED,
-                    Blocks.SPRUCE_SAPLING, Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING, Blocks.JUNGLE_SAPLING, Blocks.CHERRY_SAPLING, Blocks.BAMBOO_SAPLING, Blocks.PUMPKIN_STEM, Blocks.ATTACHED_PUMPKIN_STEM,
+                    Blocks.SPRUCE_SAPLING, Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING, Blocks.JUNGLE_SAPLING, Blocks.CHERRY_SAPLING, Blocks.BAMBOO_SAPLING,
                     Blocks.CHERRY_BUTTON, Blocks.CHERRY_DOOR, Blocks.CHERRY_FENCE, Blocks.CHERRY_FENCE_GATE, Blocks.CHERRY_PLANKS, Blocks.CHERRY_PRESSURE_PLATE, Blocks.CHERRY_STAIRS, Blocks.CHERRY_WOOD, Blocks.CHERRY_TRAPDOOR, Blocks.CHERRY_SLAB,
                     Blocks.MANGROVE_PLANKS, Blocks.MANGROVE_BUTTON, Blocks.MANGROVE_DOOR, Blocks.MANGROVE_FENCE, Blocks.MANGROVE_FENCE_GATE, Blocks.MANGROVE_STAIRS, Blocks.MANGROVE_SLAB, Blocks.MANGROVE_TRAPDOOR,
                     Blocks.BIRCH_DOOR, Blocks.BIRCH_FENCE_GATE, Blocks.BIRCH_BUTTON, Blocks.OAK_BUTTON, Blocks.ACACIA_BUTTON, Blocks.DARK_OAK_BUTTON, Blocks.POLISHED_BLACKSTONE_BUTTON, Blocks.SPRUCE_BUTTON,
@@ -597,13 +597,20 @@ public class BaseFinder extends Module {
     public BaseFinder() {
         super(Trouser.Main,"BaseFinder", "Estimates if a build or base may be in the chunk based on the blocks it contains.");
     }
+    private void clearChunkData() {
+        baseChunks.clear();
+        closestbaseX=2000000000;
+        closestbaseZ=2000000000;
+        basedistance=2000000000;
+        LastBaseFound= new ChunkPos(2000000000, 2000000000);
+    }
     @Override
     public void onActivate() {
         isBaseFinderModuleOn=1;
         if (save.get())saveDataWasOn = true;
         else if (!save.get())saveDataWasOn = false;
         if (autoreload.get()) {
-            baseChunks.clear();
+            clearChunkData();
         }
         if (save.get() || load.get()) {
             if (mc.isInSingleplayer()==true){
@@ -638,11 +645,7 @@ public class BaseFinder extends Module {
         worldchange=false;
         justenabledsavedata = 0;
         if (remove.get()|autoreload.get()) {
-            baseChunks.clear();
-            closestbaseX=2000000000;
-            closestbaseZ=2000000000;
-            basedistance=2000000000;
-            LastBaseFound= new ChunkPos(2000000000, 2000000000);
+            clearChunkData();
         }
         super.onDeactivate();
     }
@@ -650,7 +653,7 @@ public class BaseFinder extends Module {
     private void onScreenOpen(OpenScreenEvent event) {
         if (event.screen instanceof DisconnectedScreen) {
             if (worldleaveremove.get()) {
-                baseChunks.clear();
+                clearChunkData();
             }
         }
         if (event.screen instanceof DownloadingTerrainScreen) {
@@ -660,11 +663,7 @@ public class BaseFinder extends Module {
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
         if (worldleaveremove.get()) {
-            baseChunks.clear();
-            closestbaseX=2000000000;
-            closestbaseZ=2000000000;
-            basedistance=2000000000;
-            LastBaseFound= new ChunkPos(2000000000, 2000000000);
+            clearChunkData();
         }
     }
     @EventHandler
@@ -687,7 +686,7 @@ public class BaseFinder extends Module {
             } else {
                 serverip = mc.getCurrentServerEntry().address.replace(':', '_');
             }
-            baseChunks.clear();
+            clearChunkData();
             try {
                 Files.deleteIfExists(Paths.get("TrouserStreak", "BaseChunks", serverip, world, "BaseChunkData.txt"));
             } catch (IOException e) {
@@ -742,7 +741,7 @@ public class BaseFinder extends Module {
         if (autoreload.get()) {
             autoreloadticks++;
             if (autoreloadticks == removedelay.get() * 20) {
-                baseChunks.clear();
+                clearChunkData();
                 if (load.get()) {
                     loadData();
                 }
@@ -753,7 +752,7 @@ public class BaseFinder extends Module {
         //autoreload when entering different dimensions
         if (load.get() && worldchange == true) {
             if (worldleaveremove.get()) {
-                baseChunks.clear();
+                clearChunkData();
             }
             loadData();
             worldchange = false;

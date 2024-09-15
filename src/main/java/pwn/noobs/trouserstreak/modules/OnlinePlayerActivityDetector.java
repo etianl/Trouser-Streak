@@ -52,7 +52,7 @@ public class OnlinePlayerActivityDetector extends Module {
                     Blocks.RAW_IRON_BLOCK, Blocks.BUDDING_AMETHYST, Blocks.SMALL_AMETHYST_BUD, Blocks.MEDIUM_AMETHYST_BUD, Blocks.LARGE_AMETHYST_BUD,
                     Blocks.WAXED_WEATHERED_COPPER_BULB, Blocks.WAXED_OXIDIZED_COPPER_BULB, Blocks.WAXED_COPPER_BLOCK,
                     Blocks.COBWEB, Blocks.OAK_FENCE, Blocks.DARK_OAK_FENCE, Blocks.RAIL, Blocks.SCULK_VEIN, Blocks.SCULK_SENSOR,
-                    Blocks.ACACIA_LEAVES, Blocks.BIRCH_LEAVES, Blocks.OAK_LEAVES, Blocks.SPRUCE_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.CHERRY_LEAVES, Blocks.JUNGLE_LEAVES,
+                    Blocks.ACACIA_LEAVES, Blocks.BIRCH_LEAVES, Blocks.OAK_LEAVES, Blocks.SPRUCE_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.CHERRY_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.CACTUS,
                     Blocks.CAVE_VINES, Blocks.SUGAR_CANE, Blocks.TALL_GRASS, Blocks.SHORT_GRASS, Blocks.SEAGRASS, Blocks.TALL_SEAGRASS, Blocks.VINE, Blocks.FERN, Blocks.LARGE_FERN, Blocks.KELP,
                     Blocks.MOSS_BLOCK, Blocks.BIG_DRIPLEAF, Blocks.BIG_DRIPLEAF_STEM, Blocks.GLOW_LICHEN,
                     Blocks.BROWN_MUSHROOM, Blocks.RED_MUSHROOM, Blocks.FIRE, Blocks.CAVE_AIR, Blocks.BARRIER, Blocks.AIR, Blocks.WATER, Blocks.LAVA, Blocks.BUBBLE_COLUMN

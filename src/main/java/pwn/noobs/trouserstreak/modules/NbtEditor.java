@@ -59,7 +59,6 @@ public class NbtEditor extends Module {
             .defaultValue("wither")
             .visible(() -> mode.get() == Modes.Entity)
             .build());
-    //Item mode doesn't work
     private final Setting<Item> itemlist = sgOptions.add(new ItemSetting.Builder()
             .name("Item to create.")
             .description("Pick one. If you aren't already holding an item this is what you get.")
@@ -242,7 +241,6 @@ public class NbtEditor extends Module {
             .sliderRange(0, 255)
             .visible(() -> mode.get() == Modes.Potion)
             .build());
-    //Item mode doesn't work
     private final Setting<List<Enchantment>> enchants = sgOptions.add(new EnchantmentListSetting.Builder()
             .name("Enchants")
             .description("List of enchantments.")
@@ -338,25 +336,20 @@ public class NbtEditor extends Module {
                     }
                 }
                 case Copy -> {
-                    // Get the item stack from the main hand
                     ItemStack mainHandStack = mc.player.getMainHandStack();
 
-                    // If the main hand is empty, use a new item stack
                     if (mainHandStack.isEmpty()) {
                         error("Put an item in your main hand.");
                         return;
                     }
 
-                    // Get the components from the main hand item stack
                     ComponentMap mainHandComponents = mainHandStack.getComponents();
                     ItemStack offHandStack = mc.player.getOffHandStack();
 
                     if (copyStack.get()){
-                        // Get the item stack from the offhand
                         offHandStack = mainHandStack;
                     }
                     else if (!copyStack.get()){
-                        // If the offhand is empty, use a new item stack
                         if (offHandStack.isEmpty()) {
                             offHandStack = new ItemStack(Items.CARROT_ON_A_STICK);
                         }
@@ -412,8 +405,7 @@ public class NbtEditor extends Module {
         return NbtComponent.of(entityTag);
     }
     public enum Modes {
-        //Entity, Potion, Copy
-        Entity, Item, Potion, Copy       //Item mode doesn't work
+        Entity, Item, Potion, Copy
     }
     public enum pModes {
         Normal, Splash, Lingering
