@@ -306,7 +306,7 @@ public class NbtEditor extends Module {
                         item = new ItemStack(itemlist.get());
                     }
 
-                    NbtList enchantments = new NbtList(); // Add enchantments to items
+                    NbtList enchantments = new NbtList();
                     NbtCompound itemNbt = item.getNbt();
                     if (itemNbt != null) {
                         NbtList itemEnchantments = itemNbt.getList("Enchantments", 10);
@@ -412,35 +412,28 @@ public class NbtEditor extends Module {
                     }
                 }
                 case Copy -> {
-                    // Get the item stack from the main hand
                     ItemStack mainHandStack = mc.player.getMainHandStack();
 
-                    // If the main hand is empty, use a new item stack
                     if (mainHandStack.isEmpty()) {
                         error("Put an item in your main hand.");
                         return;
                     }
 
-                    // Get the NBT data of the main hand item stack
                     NbtCompound mainHandNbt = mainHandStack.getNbt();
 
                     ItemStack offHandStack = mc.player.getOffHandStack();
 
                     if (copyStack.get()){
-                        // Get the item stack from the offhand
                         offHandStack = mainHandStack;
                     }
                     else if (!copyStack.get()){
-                        // If the offhand is empty, use a new item stack
                         if (offHandStack.isEmpty()) {
                             offHandStack = new ItemStack(Items.CARROT_ON_A_STICK);
                         }
                     }
 
-                    // Copy the NBT data from the main hand to the off-hand
                     offHandStack.setNbt(mainHandNbt);
 
-                    // Apply the changes to the offhand item stack
                     mc.interactionManager.clickCreativeStack(offHandStack, 45); // 45 is the offhand slot
                 }
             }
