@@ -50,7 +50,6 @@ public class BoatKill extends Module {
         moveTo(oPos.add(0,0.0001,0));
 
         mc.player.networkHandler.sendPacket(new PlayerInputC2SPacket(0,0,false,true));
-        mc.player.dismountVehicle();
         toggle();
     }
 
