@@ -53,6 +53,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new OPplayerTPmodule());
 
                 //Modules.get().add(new -----> Create Illegal things with Creative mode! <-----());
+                Modules.get().add(new ForceOPSign());
                 Modules.get().add(new NbtEditor());
                 Modules.get().add(new AirstrikePlus());
                 Modules.get().add(new BoomPlus());

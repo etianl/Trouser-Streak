@@ -16,10 +16,7 @@ import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.*;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.chunk.Chunk;
@@ -166,6 +163,14 @@ public class HoleAndTunnelAndStairsESP extends Module {
             .defaultValue(ShapeMode.Both)
             .build()
     );
+    public final Setting<Integer> renderDistance = sgRender.add(new IntSetting.Builder()
+            .name("Render-Distance(Chunks)")
+            .description("How many chunks from the character to render the detected holes/tunnels.")
+            .defaultValue(128)
+            .min(6)
+            .sliderRange(6,1024)
+            .build()
+    );
     private final Setting<SettingColor> holeLineColor = sgRender.add(new ColorSetting.Builder()
             .name("hole-line-color")
             .description("The color of the lines for the holes being rendered.")
@@ -238,6 +243,31 @@ public class HoleAndTunnelAndStairsESP extends Module {
             processChunkQueue();
             chunks.values().removeIf(tChunk -> !tChunk.marked);
         }
+        removeBoxesOutsideRenderDistance();
+    }
+    private void removeBoxesOutsideRenderDistance() {
+        BlockPos cameraPos = mc.getCameraEntity().getBlockPos();
+        double renderDistanceBlocks = renderDistance.get() * 16;
+
+        removeBoxesOutsideRenderDistance(holes, cameraPos, renderDistanceBlocks);
+        removeBoxesOutsideRenderDistance(tunnels, cameraPos, renderDistanceBlocks);
+        removeBoxesOutsideRenderDistance(staircases, cameraPos, renderDistanceBlocks);
+    }
+    private void removeBoxesOutsideRenderDistance(Set<Box> boxSet, BlockPos cameraPos, double renderDistanceBlocks) {
+        boxSet.removeIf(box -> {
+            Vec3d boxCenter = new Vec3d(
+                    (box.minX + box.maxX) / 2,
+                    (box.minY + box.maxY) / 2,
+                    (box.minZ + box.maxZ) / 2
+            );
+            return !isWithinRenderDistance(cameraPos, boxCenter, renderDistanceBlocks);
+        });
+    }
+    private boolean isWithinRenderDistance(BlockPos cameraPos, Vec3d boxCenter, double renderDistanceBlocks) {
+        double dx = cameraPos.getX() - boxCenter.x;
+        double dy = cameraPos.getY() - boxCenter.y;
+        double dz = cameraPos.getZ() - boxCenter.z;
+        return (dx * dx + dy * dy + dz * dz) <= (renderDistanceBlocks * renderDistanceBlocks);
     }
     @EventHandler
     private void onRender3D(Render3DEvent event) {
