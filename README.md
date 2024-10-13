@@ -5,7 +5,7 @@
   <p><strong>Official Griefing Utilities of <a href="https://www.youtube.com/@mountainsoflavainc.6913">Mountains of Lava Inc.</a></strong></p>
   <p><strong>Trouser-Streak</strong> is a compilation of modules for <strong><a href="https://meteorclient.com/">Meteor Client</a></strong>.</p> 
   <p><strong><em>Updated to the latest version and optimized for maximum grief!</em></strong></p>
-  <p>I frequently release updates, please check back here often :)</p>
+    <p><strong>Discord server for updates and help: <a href="https://discord.gg/Az3G3p4ZCj">https://discord.gg/Az3G3p4ZCj</a></strong></p>
   <img src="src/main/resources/assets/icon/icon.png" alt="Trouser-Streak Logo" width="28%"/>
 </div>
 
@@ -89,6 +89,7 @@ In no particular order
 - **CrashCommand:** Crashes other players out using a nasty particle effect. Requires OP status. Credits to [aaaasdfghjkllll](https://github.com/aaaasdfghjkllll)
 - **ExplosionAura:** Spawns creepers at your position as you move that explode instantly. Like a bigger, more laggy Nuker module for creative mode. The use of the module Velocity is recommended to avoid being thrown around. (Credits to etianl :D)
 - **FlightAntikick:** Moves you down on a tick-based timer. Added in to substitute the lack of a "Normal" mode antikick for velocity flight in MeteorClient (not a great antikick it's just something). Bind it to the same key as Flight. (Credits to etianl :D)
+- **ForceOPSign:** Create malicious signs in creative mode that can execute commands when clicked. Requires creative mode for you to make them, and requires you to give it to an operator and have them place and click it while they are also in creative mode. The signs placed appear blank and commands executed may not appear in the server chat response for commands. There is a preset option for destroying the server in one click. Credits to CrushedPixel for their first implementation of a ForceOP sign module https://www.youtube.com/watch?v=KofDNaPZWfg, and to etianl for writing this implementation.
 - **GarbageCleanerCommand:** Accessable by typing ".cleanram". It cleans the RAM of useless junk and may be very handy for improving performance after chunk tracing for a while and can be used to clear other lag. (credits to [ogmur](https://www.youtube.com/@Ogmur) for writing this)
 - **HandOfGod:** Runs the "/fill" command on the world around you or around everyone else in different ways as you move around, and as you click. Destroy and modify the world with ease! Operator status required. (Credits to etianl :D)
 - **Hole/Tunnel/StairsESP:** Detects 1x1 holes going straight down, horizontal tunnels of any height, and staircase tunnels. It by default ignores passable blocks such as torches or water but there is an option to have it only detect Air for holes and tunnels. (Thank you to Meteor Client for some code from TunnelESP, and credits to etianl for this version of it)
