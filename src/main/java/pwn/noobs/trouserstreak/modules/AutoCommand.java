@@ -10,7 +10,9 @@ import meteordevelopment.orbit.EventHandler;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class AutoCommand extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -20,7 +22,20 @@ public class AutoCommand extends Module {
             .defaultValue(Mode.Manual1)
             .build()
     );
-
+    public final Setting<Boolean> auto = sgGeneral.add(new BoolSetting.Builder()
+            .name("Loop Commands")
+            .description("Loops the commands executed.")
+            .defaultValue(false)
+            .build()
+    );
+    private final Setting<Integer> commandDelay = sgGeneral.add(new IntSetting.Builder()
+            .name("command-delay")
+            .description("Tick delay between each command")
+            .defaultValue(1)
+            .min(0)
+            .sliderMax(100)
+            .build()
+    );
     private final Setting<List<String>> commands1 = sgGeneral.add(new StringListSetting.Builder()
             .name("commands")
             .description("List of commands to be sent")
@@ -74,23 +89,10 @@ public class AutoCommand extends Module {
             .defaultValue(false)
             .build()
     );
-    public final Setting<Boolean> auto = sgGeneral.add(new BoolSetting.Builder()
-            .name("FULLAUTO")
-            .description("FULL AUTO BABY!")
-            .defaultValue(false)
-            .build()
-    );
-    public final Setting<Integer> atickdelay = sgGeneral.add(new IntSetting.Builder()
-            .name("FULLAUTOTickDelay")
-            .description("Tick Delay for FULLAUTO option.")
-            .defaultValue(0)
-            .min(0)
-            .sliderMax(20)
-            .visible(() -> auto.get())
-            .build()
-    );
-    private int ticks = 0;
-    private boolean sent;
+
+    private int tickCounter = 0;
+    private boolean sent = false;
+    private Queue<String> commandQueue = new LinkedList<>();
 
     public AutoCommand() {
         super(Trouser.Main, "auto-command", "Automatically runs commands when player has/gets operator access");
@@ -99,94 +101,100 @@ public class AutoCommand extends Module {
     @Override
     public void onActivate() {
         sent = false;
+        commandQueue = new LinkedList<>();
     }
-
     @EventHandler
     private void onGameJoin(GameJoinedEvent event) {
         sent = false;
+        commandQueue = new LinkedList<>();
     }
-
     @EventHandler
     private void onTick(TickEvent.Post event) {
+        if (!mc.player.hasPermissionLevel(permissionLevel.get())) return;
 
-        if(sent && !auto.get()) return;
+        if (commandQueue.isEmpty()) {
+            if (sent && !auto.get()) {
+                if (disableOnFinish.get()) toggle();
+                return;
+            }
 
-        if(mc.player.hasPermissionLevel(permissionLevel.get()) && !auto.get()) {
-            if(mode.get() == Mode.Manual1) for(String command : commands1.get()) {
-                if (command.length()<=256){
-                    ChatUtils.sendPlayerMsg(command);
-                }
-                else {
-                    int characterstodelete = command.length()-256;
-                    error("This command is too long ("+command+"). Shorten it by "+characterstodelete+" characters.");
-                }
-            }
-            if(mode.get() == Mode.Manual2) for(String command : commands2.get()) {
-                if (command.length()<=256){
-                    ChatUtils.sendPlayerMsg(command);
-                }
-                else {
-                    int characterstodelete = command.length()-256;
-                    error("This command is too long ("+command+"). Shorten it by "+characterstodelete+" characters.");
-                }
-            }
-            if(mode.get() == Mode.Manual3) for(String command : commands3.get()) {
-                if (command.length()<=256){
-                    ChatUtils.sendPlayerMsg(command);
-                }
-                else {
-                    int characterstodelete = command.length()-256;
-                    error("This command is too long ("+command+"). Shorten it by "+characterstodelete+" characters.");
-                }
-            }
-            if(mode.get() == Mode.Macro) {
-                try {
-                    Macros.get().get(macroName.get()).onAction();
-                } catch (NullPointerException ex) {
-                    error("Invalid macro! Is your macro name set correctly?");
-                }
-            }
+            if (commandDelay.get() != 0) RunCommands();
+            else ZeroTickRunCommands();
             sent = true;
-            if(disableOnFinish.get()) toggle();
-        } else if(mc.player.hasPermissionLevel(permissionLevel.get()) && auto.get()){
-            if (ticks<=atickdelay.get()){
-                ticks++;
-            } else if (ticks>atickdelay.get()){
-                if(mode.get() == Mode.Manual1) for(String command : commands1.get()) {
-                    if (command.length()<=256){
-                        ChatUtils.sendPlayerMsg(command);
-                    }
-                    else {
-                        int characterstodelete = command.length()-256;
-                        error("This command is too long ("+command+"). Shorten it by "+characterstodelete+" characters.");
-                    }
-                }
-                if(mode.get() == Mode.Manual2) for(String command : commands2.get()) {
-                    if (command.length()<=256){
-                        ChatUtils.sendPlayerMsg(command);
-                    }
-                    else {
-                        int characterstodelete = command.length()-256;
-                        error("This command is too long ("+command+"). Shorten it by "+characterstodelete+" characters.");
-                    }
-                }
-                if(mode.get() == Mode.Manual3) for(String command : commands3.get()) {
-                    if (command.length()<=256){
-                        ChatUtils.sendPlayerMsg(command);
-                    }
-                    else {
-                        int characterstodelete = command.length()-256;
-                        error("This command is too long ("+command+"). Shorten it by "+characterstodelete+" characters.");
-                    }
-                }
-                if(mode.get() == Mode.Macro) {
+        } else {
+            tickCounter++;
+            if (tickCounter >= commandDelay.get()) {
+                String command = commandQueue.poll();
+                if (command.equals("EXECUTE_MACRO")) {
                     try {
                         Macros.get().get(macroName.get()).onAction();
                     } catch (NullPointerException ex) {
                         error("Invalid macro! Is your macro name set correctly?");
                     }
+                } else {
+                    ChatUtils.sendPlayerMsg(command);
                 }
-                ticks=0;
+                tickCounter = 0;
+            }
+        }
+
+        if (auto.get() && commandQueue.isEmpty()) {
+            sent = false;
+        }
+    }
+    private void ZeroTickRunCommands() {
+        if(mode.get() == Mode.Manual1) for(String command : commands1.get()) {
+            if (command.length()<=256){
+                ChatUtils.sendPlayerMsg(command);
+            }
+            else {
+                int characterstodelete = command.length()-256;
+                error("This command is too long ("+command+"). Shorten it by "+characterstodelete+" characters.");
+            }
+        }
+        if(mode.get() == Mode.Manual2) for(String command : commands2.get()) {
+            if (command.length()<=256){
+                ChatUtils.sendPlayerMsg(command);
+            }
+            else {
+                int characterstodelete = command.length()-256;
+                error("This command is too long ("+command+"). Shorten it by "+characterstodelete+" characters.");
+            }
+        }
+        if(mode.get() == Mode.Manual3) for(String command : commands3.get()) {
+            if (command.length()<=256){
+                ChatUtils.sendPlayerMsg(command);
+            }
+            else {
+                int characterstodelete = command.length()-256;
+                error("This command is too long ("+command+"). Shorten it by "+characterstodelete+" characters.");
+            }
+        }
+        if(mode.get() == Mode.Macro) {
+            try {
+                Macros.get().get(macroName.get()).onAction();
+            } catch (NullPointerException ex) {
+                error("Invalid macro! Is your macro name set correctly?");
+            }
+        }
+    }
+    private void RunCommands() {
+        if (mode.get() == Mode.Macro) {
+            commandQueue.add("EXECUTE_MACRO");
+        } else {
+            List<String> commandList;
+            if (mode.get() == Mode.Manual1) commandList = commands1.get();
+            else if (mode.get() == Mode.Manual2) commandList = commands2.get();
+            else if (mode.get() == Mode.Manual3) commandList = commands3.get();
+            else return;
+
+            for (String command : commandList) {
+                if (command.length() <= 256) {
+                    commandQueue.add(command);
+                } else {
+                    int charactersToDelete = command.length() - 256;
+                    error("This command is too long (" + command + "). Shorten it by " + charactersToDelete + " characters.");
+                }
             }
         }
     }

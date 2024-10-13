@@ -105,6 +105,7 @@ public class WorldInfoCommand extends Command {
             ChatUtils.sendMsg(Text.of("East World Border X: "+(int) mc.world.getWorldBorder().getBoundEast()+", West World Border X: "+(int) mc.world.getWorldBorder().getBoundWest()+", South World Border Z: "+(int) mc.world.getWorldBorder().getBoundSouth()+", North World Border Z: "+(int) mc.world.getWorldBorder().getBoundNorth()));
             ChatUtils.sendMsg(Text.of("WorldSpawn Location: x"+mc.world.getLevelProperties().getSpawnX()+" y"+mc.world.getLevelProperties().getSpawnY()+" z"+mc.world.getLevelProperties().getSpawnZ()));
             ChatUtils.sendMsg(Text.of("Difficulty: "+mc.world.getDifficulty().toString()));
+            ChatUtils.sendMsg(Text.of("Permission Level: "+mc.player.getPermissionLevel()));
             ChatUtils.sendMsg(Text.of("Simulation Distance (chunks): "+mc.world.getSimulationDistance()));
             ChatUtils.sendMsg(Text.of("Day Count: "+Math.floor(mc.world.getTime()/24000)));
             ChatUtils.sendMsg(Text.of("DO_DAYLIGHT_CYCLE: "+mc.world.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE)));
@@ -148,6 +149,7 @@ public class WorldInfoCommand extends Command {
                 ChatUtils.sendMsg(Text.of("East World Border X: "+(int) mc.world.getWorldBorder().getBoundEast()+", West World Border X: "+(int) mc.world.getWorldBorder().getBoundWest()+", South World Border Z: "+(int) mc.world.getWorldBorder().getBoundSouth()+", North World Border Z: "+(int) mc.world.getWorldBorder().getBoundNorth()));
                 ChatUtils.sendMsg(Text.of("WorldSpawn Location: x"+mc.world.getLevelProperties().getSpawnX()+" y"+mc.world.getLevelProperties().getSpawnY()+" z"+mc.world.getLevelProperties().getSpawnZ()));
                 ChatUtils.sendMsg(Text.of("Difficulty: "+mc.world.getDifficulty().toString()));
+                ChatUtils.sendMsg(Text.of("Permission Level: "+mc.player.getPermissionLevel()));
                 ChatUtils.sendMsg(Text.of("Simulation Distance (chunks): "+mc.world.getSimulationDistance()));
                 ChatUtils.sendMsg(Text.of("Day Count: "+Math.floor(mc.world.getTime()/24000)));
                 ChatUtils.sendMsg(Text.of("DO_DAYLIGHT_CYCLE: "+mc.world.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE)));
@@ -182,6 +184,8 @@ public class WorldInfoCommand extends Command {
                     writer.write("WorldSpawn Location: x"+mc.world.getLevelProperties().getSpawnX()+" y"+mc.world.getLevelProperties().getSpawnY()+" z"+mc.world.getLevelProperties().getSpawnZ());
                     writer.write("\r\n");   // write new line
                     writer.write("Difficulty: "+mc.world.getDifficulty().toString());
+                    writer.write("\r\n");   // write new line
+                    writer.write("Permission Level: "+mc.player.getPermissionLevel());
                     writer.write("\r\n");   // write new line
                     writer.write("Simulation Distance (chunks): "+mc.world.getSimulationDistance());
                     writer.write("\r\n");   // write new line
