@@ -36,11 +36,12 @@ public class BoomPlus extends Module {
             .name("Custom Name")
             .description("Name the Entity")
             .defaultValue("MOUNTAINSOFLAVAINC").build());
-    private final Setting<String> nomcolor = sgGeneral.add(new StringSetting.Builder()
+    private final Setting<ColorModes> nomcolor = sgGeneral.add(new EnumSetting.Builder<ColorModes>()
             .name("Custom Name Color")
             .description("Color the Name")
-            .defaultValue("red")
+            .defaultValue(ColorModes.red)
             .build());
+    public enum ColorModes { aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green, dark_purple, dark_red, gold, gray, green, italic, light_purple, red, white, yellow }
     public final Setting<Boolean> customname = sgOptions.add(new BoolSetting.Builder()
             .name("CustomNameVisible")
             .description("CustomNameVisible or not.")
@@ -182,7 +183,7 @@ public class BoomPlus extends Module {
         super(Trouser.Main, "boom+", "shoots something where you click");
     }
     private int aticks=0;
-    private String namecolour = nomcolor.get();
+    private String namecolour = nomcolor.get().toString();
     private String customName = nom.get();
 
     @EventHandler
@@ -197,7 +198,7 @@ public class BoomPlus extends Module {
                 aticks++;
             } else if (aticks>atickdelay.get()) {
                 customName = nom.get();
-                namecolour = nomcolor.get();
+                namecolour = nomcolor.get().toString();
                 ItemStack rst = mc.player.getMainHandStack();
                 BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
                 ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
@@ -219,7 +220,7 @@ public class BoomPlus extends Module {
     private void onMouseButton(MouseButtonEvent event) {
         if (mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player.getAbilities().creativeMode) {
             customName = nom.get();
-            namecolour = nomcolor.get();
+            namecolour = nomcolor.get().toString();
             ItemStack rst = mc.player.getMainHandStack();
             BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
             ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
@@ -280,7 +281,7 @@ public class BoomPlus extends Module {
         entityTag.putInt("Fuse", fuse.get());
         entityTag.putInt("Size", size.get());
         if(customname.get())entityTag.putBoolean("CustomNameVisible", customname.get());
-        entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
+        entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
         return NbtComponent.of(entityTag);
     }
 }

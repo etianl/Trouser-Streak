@@ -9,6 +9,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Items;
+import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
 import net.minecraft.util.math.BlockPos;
@@ -46,15 +47,9 @@ public class MaceKill extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (event.packet instanceof IPlayerInteractEntityC2SPacket) {
-            IPlayerInteractEntityC2SPacket packet = (IPlayerInteractEntityC2SPacket) event.packet;
+        if (mc.player.getInventory().getMainHandStack().getItem() == Items.MACE && event.packet instanceof IPlayerInteractEntityC2SPacket packet && packet.getType() == PlayerInteractEntityC2SPacket.InteractType.ATTACK) {
             try {
-                Class<?> packetClass = packet.getClass();
-                Method getTypeMethod = packetClass.getDeclaredMethod("getType");
-                getTypeMethod.setAccessible(true);
-                Enum<?> interactType = (Enum<?>) getTypeMethod.invoke(packet);
-
-                if (interactType.name().equals("ATTACK") && mc.player.getInventory().getMainHandStack().getItem() == Items.MACE && packet.getEntity() instanceof LivingEntity) {
+                if (packet.getEntity() instanceof LivingEntity) {
                     LivingEntity targetEntity = (LivingEntity) packet.getEntity();
 
                     if (packetDisable.get() && ((targetEntity.isBlocking() && targetEntity.blockedByShield(targetEntity.getRecentDamageSource())) || targetEntity.isInvulnerable() || targetEntity.isInCreativeMode())) return;
