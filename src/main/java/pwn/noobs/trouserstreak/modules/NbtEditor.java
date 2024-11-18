@@ -42,12 +42,12 @@ public class NbtEditor extends Module {
             .defaultValue("MOUNTAINSOFLAVAINC")
             .visible(() -> mode.get() == Modes.Entity || mode.get() == Modes.Item || mode.get() == Modes.Potion)
             .build());
-    private final Setting<String> nomcolor = sgGeneral.add(new StringSetting.Builder()
+    private final Setting<BoomPlus.ColorModes> nomcolor = sgGeneral.add(new EnumSetting.Builder<BoomPlus.ColorModes>()
             .name("Custom Name Color")
             .description("Color the Name")
-            .defaultValue("red")
-            .visible(() -> mode.get() == Modes.Entity || mode.get() == Modes.Item || mode.get() == Modes.Potion)
+            .defaultValue(BoomPlus.ColorModes.red)
             .build());
+    public enum ColorModes { aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green, dark_purple, dark_red, gold, gray, green, italic, light_purple, red, white, yellow }
     private final Setting<String> entity = sgOptions.add(new StringSetting.Builder()
             .name("Entity to Spawn")
             .description("What is created. Ex: fireball, villager, minecart, lightning_bolt, magma cube, area effect cloud")
@@ -265,7 +265,7 @@ public class NbtEditor extends Module {
                     NbtCompound tag = new NbtCompound();
                     ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
                     NbtCompound display = new NbtCompound();
-                    display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
+                    display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
                     tag.put("display", display);
                     NbtCompound entityTag = new NbtCompound();
                     entityTag.putString("id", "minecraft:" + entityName);
@@ -286,7 +286,7 @@ public class NbtEditor extends Module {
                     entityTag.putInt("Fuse", fuse.get());
                     entityTag.putInt("Size", size.get());
                     if(customname.get())entityTag.putBoolean("CustomNameVisible", customname.get());
-                    entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
+                    entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
                     entityTag.putInt("Radius", cloudradius.get());
                     entityTag.putInt("Duration", cloudduration.get());
                     entityTag.putString("Particle", particle.get());
@@ -325,7 +325,7 @@ public class NbtEditor extends Module {
                     }
                     tag.put("Enchantments", enchantments);
                     NbtCompound display = new NbtCompound();
-                    display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
+                    display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
                     tag.put("display", display);
                     if (itemNbt != null) {
                         for (String key : itemNbt.getKeys()) {
@@ -356,7 +356,7 @@ public class NbtEditor extends Module {
                         }
                         PotionUtil.setCustomPotionEffects(item, effectInstances);
                         NbtCompound display = new NbtCompound();
-                        display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
+                        display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
                         item.getOrCreateNbt().put("display", display);
                         mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
                     }
@@ -373,7 +373,7 @@ public class NbtEditor extends Module {
                             }
                             PotionUtil.setCustomPotionEffects(item, effectInstances);
                             NbtCompound display = new NbtCompound();
-                            display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
+                            display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
                             item.getOrCreateNbt().put("display", display);
                             mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
                         }
@@ -389,7 +389,7 @@ public class NbtEditor extends Module {
                             }
                             PotionUtil.setCustomPotionEffects(item, effectInstances);
                             NbtCompound display = new NbtCompound();
-                            display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
+                            display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
                             item.getOrCreateNbt().put("display", display);
                             mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
                         }
@@ -405,7 +405,7 @@ public class NbtEditor extends Module {
                             }
                             PotionUtil.setCustomPotionEffects(item, effectInstances);
                             NbtCompound display = new NbtCompound();
-                            display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
+                            display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
                             item.getOrCreateNbt().put("display", display);
                             mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
                         }

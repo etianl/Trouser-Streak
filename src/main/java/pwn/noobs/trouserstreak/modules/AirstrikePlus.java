@@ -62,11 +62,12 @@ public class AirstrikePlus extends Module {
             .description("Name the Entity")
             .defaultValue("MOUNTAINSOFLAVAINC")
             .build());
-    private final Setting<String> nomcolor = sgGeneral.add(new StringSetting.Builder()
+    private final Setting<BoomPlus.ColorModes> nomcolor = sgGeneral.add(new EnumSetting.Builder<BoomPlus.ColorModes>()
             .name("Custom Name Color")
             .description("Color the Name")
-            .defaultValue("red")
+            .defaultValue(BoomPlus.ColorModes.red)
             .build());
+    public enum ColorModes { aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green, dark_purple, dark_red, gold, gray, green, italic, light_purple, red, white, yellow }
     public final Setting<Boolean> randomnomcolor = sgGeneral.add(new BoolSetting.Builder()
             .name("Rainbow Name Colors")
             .description("Name Colors are randomly selected.")
@@ -387,7 +388,7 @@ public class AirstrikePlus extends Module {
     Vec3d origin = null;
     int i = 0;
     private int mix=0;
-    private String namecolour = nomcolor.get();
+    private String namecolour = nomcolor.get().toString();
     private NbtList speedlist = new NbtList();
     private String entityName = entity.get().trim().replace(" ", "_");
     private String customName = nom.get();
@@ -448,7 +449,7 @@ public class AirstrikePlus extends Module {
                     Random random = new Random();
                     int index = random.nextInt(colorCodes.length);
                     namecolour = colorCodes[index];
-                } else namecolour = nomcolor.get();
+                } else namecolour = nomcolor.get().toString();
                 ItemStack bomb = new ItemStack(Items.SALMON_SPAWN_EGG);
                 ItemStack bfr = mc.player.getMainHandStack();
                 BlockHitResult bhr = new BlockHitResult(mc.player.getPos().add(0, 1, 0), Direction.UP, new BlockPos(mc.player.getBlockPos().add(0, 1, 0)), false);
@@ -523,7 +524,7 @@ public class AirstrikePlus extends Module {
             Random random = new Random();
             int index = random.nextInt(colorCodes.length);
             namecolour = colorCodes[index];
-        } else namecolour = nomcolor.get();
+        } else namecolour = nomcolor.get().toString();
         speedlist.add(NbtDouble.of(0));
         speedlist.add(NbtDouble.of(-speed.get()));
         speedlist.add(NbtDouble.of(0));
