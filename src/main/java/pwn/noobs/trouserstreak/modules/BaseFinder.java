@@ -780,7 +780,7 @@ public class BaseFinder extends Module {
                     if (chunk != null && chunk.getStatus().isAtLeast(ChunkStatus.FULL)) {
                         Box chunkBox = new Box(
                                 chunk.getPos().getStartX(), mc.world.getBottomY(), chunk.getPos().getStartZ(),
-                                chunk.getPos().getEndX() + 1, mc.world.getTopY(), chunk.getPos().getEndZ() + 1
+                                chunk.getPos().getEndX() + 1, mc.world.getTopYInclusive(), chunk.getPos().getEndZ() + 1
                         );
                         if (!baseChunks.contains(chunk.getPos())) {
                             AtomicInteger animalsFound = new AtomicInteger();
@@ -919,7 +919,7 @@ public class BaseFinder extends Module {
 
                 if (bubblesFinder.get() || spawner.get() || signFinder.get() || portalFinder.get() || roofDetector.get() || bedrockfind.get() || skybuildfind.get() || Blawcks1.get().size()>0 || Blawcks2.get().size()>0 || Blawcks3.get().size()>0 || Blawcks4.get().size()>0 || Blawcks5.get().size()>0 || Blawcks6.get().size()>0 || Blawcks7.get().size()>0){
                     int Ymin = mc.world.getBottomY()+minY.get();
-                    int Ymax = mc.world.getTopY()-maxY.get();
+                    int Ymax = mc.world.getTopYInclusive()-maxY.get();
                     try {
                         Set<BlockPos> blockpositions1 = Collections.synchronizedSet(new HashSet<>());
                         Set<BlockPos> blockpositions2 = Collections.synchronizedSet(new HashSet<>());

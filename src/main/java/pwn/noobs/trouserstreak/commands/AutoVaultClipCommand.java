@@ -39,7 +39,7 @@ public class AutoVaultClipCommand extends Command {
                         vehicle.setPosition(vehicle.getX(), isopenair1.getY(), vehicle.getZ());
                     }
                     for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
-                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
+                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true, mc.player.horizontalCollision));
                     }
                     player.setPosition(player.getX(), isopenair1.getY(), player.getZ());
                     return SINGLE_SUCCESS;
@@ -64,7 +64,7 @@ public class AutoVaultClipCommand extends Command {
                         vehicle.setPosition(vehicle.getX(), isopenair2.getY(), vehicle.getZ());
                     }
                     for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
-                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
+                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true, mc.player.horizontalCollision));
                     }
                     player.setPosition(player.getX(), isopenair2.getY(), player.getZ());
                     return SINGLE_SUCCESS;
@@ -91,7 +91,7 @@ public class AutoVaultClipCommand extends Command {
                         vehicle.setPosition(vehicle.getX(), newopenair2.getY(), vehicle.getZ());
                     }
                     for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
-                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
+                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true, mc.player.horizontalCollision));
                     }
                     player.setPosition(player.getX(), newopenair2.getY(), player.getZ());
                     return SINGLE_SUCCESS;

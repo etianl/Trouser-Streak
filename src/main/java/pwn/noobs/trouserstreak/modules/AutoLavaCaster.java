@@ -1045,7 +1045,10 @@ public class AutoLavaCaster extends Module {
                 || ((BlockItem) stack.getItem()).getBlock() instanceof BellBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof CarpetBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof ConduitBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof CoralParentBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof CoralFanBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof CoralWallFanBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof DeadCoralFanBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof DeadCoralWallFanBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof TripwireHookBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof PointedDripstoneBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof TripwireBlock

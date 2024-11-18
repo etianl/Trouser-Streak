@@ -85,7 +85,7 @@ public class WorldInfoCommand extends Command {
             boolean foundAnyOre = false;
             boolean isNewGeneration = false;
             for (int x = 0; x < 16; x++) {
-                for (int y = mc.world.getBottomY(); y < mc.world.getTopY(); y++) {
+                for (int y = mc.world.getBottomY(); y < mc.world.getTopYInclusive(); y++) {
                     for (int z = 0; z < 16; z++) {
                         if (!foundAnyOre && isOreBlock(chunk.getBlockState(new BlockPos(x, y, z)).getBlock()) && mc.world.getRegistryKey() == World.OVERWORLD) {
                             foundAnyOre = true;
@@ -108,7 +108,6 @@ public class WorldInfoCommand extends Command {
             ChatUtils.sendMsg(Text.of("Permission Level: "+mc.player.getPermissionLevel()));
             ChatUtils.sendMsg(Text.of("Simulation Distance (chunks): "+mc.world.getSimulationDistance()));
             ChatUtils.sendMsg(Text.of("Day Count: "+Math.floor(mc.world.getTime()/24000)));
-            ChatUtils.sendMsg(Text.of("DO_DAYLIGHT_CYCLE: "+mc.world.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE)));
             ChatUtils.sendMsg(Text.of("KnownPlayers (Names with a period are bedrock players): "+getKnownPlayers));
             return SINGLE_SUCCESS;
         });
@@ -129,7 +128,7 @@ public class WorldInfoCommand extends Command {
                 boolean foundAnyOre = false;
                 boolean isNewGeneration = false;
                 for (int x = 0; x < 16; x++) {
-                    for (int y = mc.world.getBottomY(); y < mc.world.getTopY(); y++) {
+                    for (int y = mc.world.getBottomY(); y < mc.world.getTopYInclusive(); y++) {
                         for (int z = 0; z < 16; z++) {
                             if (!foundAnyOre && isOreBlock(chunk.getBlockState(new BlockPos(x, y, z)).getBlock()) && mc.world.getRegistryKey().getValue().toString().toLowerCase().contains("overworld")) {
                                 foundAnyOre = true;
@@ -152,7 +151,6 @@ public class WorldInfoCommand extends Command {
                 ChatUtils.sendMsg(Text.of("Permission Level: "+mc.player.getPermissionLevel()));
                 ChatUtils.sendMsg(Text.of("Simulation Distance (chunks): "+mc.world.getSimulationDistance()));
                 ChatUtils.sendMsg(Text.of("Day Count: "+Math.floor(mc.world.getTime()/24000)));
-                ChatUtils.sendMsg(Text.of("DO_DAYLIGHT_CYCLE: "+mc.world.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE)));
                 ChatUtils.sendMsg(Text.of("KnownPlayers (Names with a period are bedrock players): "+getKnownPlayers));
 
                 String serverip;
@@ -190,8 +188,6 @@ public class WorldInfoCommand extends Command {
                     writer.write("Simulation Distance (chunks): "+mc.world.getSimulationDistance());
                     writer.write("\r\n");   // write new line
                     writer.write("Day Count: "+Math.floor(mc.world.getTime()/24000));
-                    writer.write("\r\n");   // write new line
-                    writer.write("DO_DAYLIGHT_CYCLE: "+mc.world.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE));
                     writer.write("\r\n");   // write new line
                     writer.write("KnownPlayers (Names with a period are bedrock players): "+getKnownPlayers);
                     writer.write("\r\n");   // write new line

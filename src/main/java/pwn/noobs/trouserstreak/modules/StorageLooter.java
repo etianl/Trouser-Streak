@@ -826,29 +826,29 @@ public class StorageLooter extends Module {
         //enchantments score
         ItemEnchantmentsComponent enchantments = stack.getEnchantments();
         int enchantmentscore = 0;
-        Registry<Enchantment> enchantmentRegistry = mc.world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
+        Registry<Enchantment> enchantmentRegistry = mc.world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
         if (stack.getItem() instanceof ArmorItem) {
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.PROTECTION)) * 10;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.BLAST_PROTECTION)) * 10;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.FIRE_PROTECTION)) * 10;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.PROJECTILE_PROTECTION)) * 10;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.UNBREAKING)) * 9;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.MENDING)) * 8;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.THORNS)) * 5;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.PROTECTION)) * 10;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.BLAST_PROTECTION)) * 10;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.FIRE_PROTECTION)) * 10;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.PROJECTILE_PROTECTION)) * 10;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.UNBREAKING)) * 9;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.MENDING)) * 8;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.THORNS)) * 5;
         } else if (stack.getItem() instanceof SwordItem) {
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.SMITE)) * 10;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.SHARPNESS)) * 10;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.BANE_OF_ARTHROPODS)) * 9;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.FIRE_ASPECT)) * 9;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.UNBREAKING)) * 9;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.MENDING)) * 8;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.LOOTING)) * 5;
-        } else if (stack.getItem() instanceof ToolItem) {
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.EFFICIENCY)) * 10;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.UNBREAKING)) * 9;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.MENDING)) * 8;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.SILK_TOUCH)) * 6;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.FORTUNE)) * 5;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.SMITE)) * 10;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.SHARPNESS)) * 10;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.BANE_OF_ARTHROPODS)) * 9;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.FIRE_ASPECT)) * 9;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.UNBREAKING)) * 9;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.MENDING)) * 8;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.LOOTING)) * 5;
+        } else if (stack.getItem() instanceof MiningToolItem) {
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.EFFICIENCY)) * 10;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.UNBREAKING)) * 9;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.MENDING)) * 8;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.SILK_TOUCH)) * 6;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.FORTUNE)) * 5;
         }
         score += enchantmentscore;
 
@@ -1139,7 +1139,7 @@ public class StorageLooter extends Module {
                 Items.DIAMOND_BOOTS
         );
 
-        if (item instanceof ToolItem || item instanceof ArmorItem) {
+        if (item instanceof MiningToolItem || item instanceof ArmorItem) {
             return diamondItems.contains(item);
         }
 

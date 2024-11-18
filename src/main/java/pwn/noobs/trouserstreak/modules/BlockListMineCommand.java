@@ -92,7 +92,7 @@ public class BlockListMineCommand extends Module {
         for (int x = 0; x < 16; x++) {
             for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
                 for (int z = 0; z < 16; z++) {
-                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopY()) {
+                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopYInclusive()) {
                         BlockState blockState = playerchunk.getBlockState(new BlockPos(x, y, z));
                         if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
                             if (!addedBlocks.contains(blockState)){
@@ -109,7 +109,7 @@ public class BlockListMineCommand extends Module {
         for (int x = 0; x < 16; x++) {
             for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
                 for (int z = 0; z < 16; z++) {
-                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopY()) {
+                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopYInclusive()) {
                         BlockState blockState = playerchunk2.getBlockState(new BlockPos(x, y, z));
                         if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
                             if (!addedBlocks.contains(blockState)){
@@ -126,7 +126,7 @@ public class BlockListMineCommand extends Module {
         for (int x = 0; x < 16; x++) {
             for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
                 for (int z = 0; z < 16; z++) {
-                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopY()) {
+                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopYInclusive()) {
                         BlockState blockState = playerchunk3.getBlockState(new BlockPos(x, y, z));
                         if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
                             if (!addedBlocks.contains(blockState)){
@@ -143,7 +143,7 @@ public class BlockListMineCommand extends Module {
         for (int x = 0; x < 16; x++) {
             for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
                 for (int z = 0; z < 16; z++) {
-                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopY()) {
+                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopYInclusive()) {
                         BlockState blockState = playerchunk4.getBlockState(new BlockPos(x, y, z));
                         if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
                             if (!addedBlocks.contains(blockState)){
@@ -160,7 +160,7 @@ public class BlockListMineCommand extends Module {
         for (int x = 0; x < 16; x++) {
             for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
                 for (int z = 0; z < 16; z++) {
-                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopY()) {
+                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopYInclusive()) {
                         BlockState blockState = playerchunk5.getBlockState(new BlockPos(x, y, z));
                         if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
                             if (!addedBlocks.contains(blockState)){
@@ -177,7 +177,7 @@ public class BlockListMineCommand extends Module {
         for (int x = 0; x < 16; x++) {
             for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
                 for (int z = 0; z < 16; z++) {
-                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopY()) {
+                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopYInclusive()) {
                         BlockState blockState = playerchunk6.getBlockState(new BlockPos(x, y, z));
                         if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
                             if (!addedBlocks.contains(blockState)){
@@ -194,7 +194,7 @@ public class BlockListMineCommand extends Module {
         for (int x = 0; x < 16; x++) {
             for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
                 for (int z = 0; z < 16; z++) {
-                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopY()) {
+                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopYInclusive()) {
                         BlockState blockState = playerchunk7.getBlockState(new BlockPos(x, y, z));
                         if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
                             if (!addedBlocks.contains(blockState)){
@@ -211,7 +211,7 @@ public class BlockListMineCommand extends Module {
         for (int x = 0; x < 16; x++) {
             for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
                 for (int z = 0; z < 16; z++) {
-                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopY()) {
+                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopYInclusive()) {
                         BlockState blockState = playerchunk8.getBlockState(new BlockPos(x, y, z));
                         if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
                             if (!addedBlocks.contains(blockState)){
@@ -228,7 +228,7 @@ public class BlockListMineCommand extends Module {
         for (int x = 0; x < 16; x++) {
             for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
                 for (int z = 0; z < 16; z++) {
-                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopY()) {
+                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopYInclusive()) {
                         BlockState blockState = playerchunk9.getBlockState(new BlockPos(x, y, z));
                         if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
                             if (!addedBlocks.contains(blockState)){

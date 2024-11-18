@@ -41,7 +41,7 @@ public class AutoDrop extends Module {
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (tool.get() == true && (mc.player.getMainHandStack().getItem() instanceof BucketItem || mc.player.getMainHandStack().getItem() instanceof FlintAndSteelItem || mc.player.getMainHandStack().getItem() instanceof ToolItem || mc.player.getMainHandStack().getItem() instanceof ShearsItem))return;
+        if (tool.get() == true && (mc.player.getMainHandStack().getItem() instanceof BucketItem || mc.player.getMainHandStack().getItem() instanceof FlintAndSteelItem || mc.player.getMainHandStack().getItem() instanceof MiningToolItem || mc.player.getMainHandStack().getItem() instanceof ShearsItem))return;
         if (dropthisslot.get() && !mc.player.getInventory().getStack(dropslot.get()-1).isEmpty()){
                     previousslot=mc.player.getInventory().selectedSlot;
                     mc.player.getInventory().selectedSlot = dropslot.get()-1;

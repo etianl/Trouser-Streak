@@ -46,12 +46,12 @@ public class NbtEditor extends Module {
             .defaultValue("MOUNTAINSOFLAVAINC")
             .visible(() -> mode.get() == Modes.Entity || mode.get() == Modes.Item || mode.get() == Modes.Potion)
             .build());
-    private final Setting<String> nomcolor = sgGeneral.add(new StringSetting.Builder()
+    private final Setting<BoomPlus.ColorModes> nomcolor = sgGeneral.add(new EnumSetting.Builder<BoomPlus.ColorModes>()
             .name("Custom Name Color")
             .description("Color the Name")
-            .defaultValue("red")
-            .visible(() -> mode.get() == Modes.Entity || mode.get() == Modes.Item || mode.get() == Modes.Potion)
+            .defaultValue(BoomPlus.ColorModes.red)
             .build());
+    public enum ColorModes { aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green, dark_purple, dark_red, gold, gray, green, italic, light_purple, red, white, yellow }
     private final Setting<String> entity = sgOptions.add(new StringSetting.Builder()
             .name("Entity to Spawn")
             .description("What is created. Ex: fireball, villager, minecart, lightning_bolt, magma cube, area effect cloud")
@@ -266,8 +266,8 @@ public class NbtEditor extends Module {
                 case Entity -> {
                     ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
                     var changes = ComponentChanges.builder()
-                            .add(DataComponentTypes.CUSTOM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toUpperCase())))
-                            .add(DataComponentTypes.ITEM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toUpperCase())))
+                            .add(DataComponentTypes.CUSTOM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())))
+                            .add(DataComponentTypes.ITEM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())))
                             .add(DataComponentTypes.ENTITY_DATA, createEntityData())
                             .build();
                     item.applyChanges(changes);
@@ -282,14 +282,14 @@ public class NbtEditor extends Module {
                         item = new ItemStack(itemlist.get());
                     }
 
-                    Registry<Enchantment> enchantmentRegistry = mc.world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
+                    Registry<Enchantment> enchantmentRegistry = mc.world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
 
                     for (RegistryKey<Enchantment> enchantKey : enchants.get()) {
-                        RegistryEntry<Enchantment> enchantEntry = enchantmentRegistry.entryOf(enchantKey);
+                        RegistryEntry<Enchantment> enchantEntry = enchantmentRegistry.getOrThrow(enchantKey);
                          item.addEnchantment(enchantEntry, level.get());
                     }
 
-                    item.set(DataComponentTypes.CUSTOM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toUpperCase())));
+                    item.set(DataComponentTypes.CUSTOM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())));
 
                     mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
                 }
@@ -302,8 +302,8 @@ public class NbtEditor extends Module {
                         else if (mc.player.getMainHandStack().getItem() != Items.POTION && potionmode.get() == pModes.Normal) item =  new ItemStack(Items.POTION);
                         else item = mc.player.getMainHandStack().copy();
                         var changes = ComponentChanges.builder()
-                                .add(DataComponentTypes.ITEM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toUpperCase())))
-                                .add(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.empty(), pileOfStatusEffects()))
+                                .add(DataComponentTypes.ITEM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())))
+                                .add(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.empty(), pileOfStatusEffects(), Optional.ofNullable(nom.get())))
                                 .build();
                         item.applyChanges(changes);
                         mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
@@ -312,8 +312,8 @@ public class NbtEditor extends Module {
                         case Normal -> {
                             item =  new ItemStack(Items.POTION);
                             var changes = ComponentChanges.builder()
-                                    .add(DataComponentTypes.ITEM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toUpperCase())))
-                                    .add(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.empty(), pileOfStatusEffects()))
+                                    .add(DataComponentTypes.ITEM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())))
+                                    .add(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.empty(), pileOfStatusEffects(), Optional.ofNullable(nom.get())))
                                     .build();
                             item.applyChanges(changes);
                             mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
@@ -321,8 +321,8 @@ public class NbtEditor extends Module {
                         case Splash -> {
                             item =  new ItemStack(Items.SPLASH_POTION);
                             var changes = ComponentChanges.builder()
-                                    .add(DataComponentTypes.ITEM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toUpperCase())))
-                                    .add(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.empty(), pileOfStatusEffects()))
+                                    .add(DataComponentTypes.ITEM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())))
+                                    .add(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.empty(), pileOfStatusEffects(), Optional.ofNullable(nom.get())))
                                     .build();
                             item.applyChanges(changes);
                             mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
@@ -330,8 +330,8 @@ public class NbtEditor extends Module {
                         case Lingering -> {
                             item =  new ItemStack(Items.LINGERING_POTION);
                             var changes = ComponentChanges.builder()
-                                    .add(DataComponentTypes.ITEM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toUpperCase())))
-                                    .add(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.empty(), pileOfStatusEffects()))
+                                    .add(DataComponentTypes.ITEM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())))
+                                    .add(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.empty(), pileOfStatusEffects(), Optional.ofNullable(nom.get())))
                                     .build();
                             item.applyChanges(changes);
                             mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);

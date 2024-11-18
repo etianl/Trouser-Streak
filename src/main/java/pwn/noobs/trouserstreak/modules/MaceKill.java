@@ -9,6 +9,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Items;
+import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
 import net.minecraft.util.math.BlockPos;
@@ -46,16 +47,10 @@ public class MaceKill extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (event.packet instanceof IPlayerInteractEntityC2SPacket) {
-            IPlayerInteractEntityC2SPacket packet = (IPlayerInteractEntityC2SPacket) event.packet;
+        if (mc.player.getInventory().getMainHandStack().getItem() == Items.MACE && event.packet instanceof IPlayerInteractEntityC2SPacket packet && packet.meteor$getType() == PlayerInteractEntityC2SPacket.InteractType.ATTACK) {
             try {
-                Class<?> packetClass = packet.getClass();
-                Method getTypeMethod = packetClass.getDeclaredMethod("getType");
-                getTypeMethod.setAccessible(true);
-                Enum<?> interactType = (Enum<?>) getTypeMethod.invoke(packet);
-
-                if (interactType.name().equals("ATTACK") && mc.player.getInventory().getMainHandStack().getItem() == Items.MACE && packet.getEntity() instanceof LivingEntity) {
-                    LivingEntity targetEntity = (LivingEntity) packet.getEntity();
+                if (packet.meteor$getEntity() instanceof LivingEntity) {
+                    LivingEntity targetEntity = (LivingEntity) packet.meteor$getEntity();
 
                     if (packetDisable.get() && ((targetEntity.isBlocking() && targetEntity.blockedByShield(targetEntity.getRecentDamageSource())) || targetEntity.isInvulnerable() || targetEntity.isInCreativeMode())) return;
                     previouspos = mc.player.getPos();
@@ -81,13 +76,13 @@ public class MaceKill extends Module {
                                 mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(mc.player.getVehicle()));
                             } else {
                                 for (int i = 0; i < 4; i++) {
-                                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
+                                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false, mc.player.horizontalCollision));
                                 }
                                 double maxHeight = Math.min(mc.player.getY() + 22, mc.player.getY() + blocks);
-                                PlayerMoveC2SPacket movepacket = new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), maxHeight, mc.player.getZ(), false);
-                                PlayerMoveC2SPacket homepacket = new PlayerMoveC2SPacket.PositionAndOnGround(previouspos.getX(), previouspos.getY(), previouspos.getZ(), false);
-                                ((IPlayerMoveC2SPacket) homepacket).setTag(1337);
-                                ((IPlayerMoveC2SPacket) movepacket).setTag(1337);
+                                PlayerMoveC2SPacket movepacket = new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), maxHeight, mc.player.getZ(), false, mc.player.horizontalCollision);
+                                PlayerMoveC2SPacket homepacket = new PlayerMoveC2SPacket.PositionAndOnGround(previouspos.getX(), previouspos.getY(), previouspos.getZ(), false, mc.player.horizontalCollision);
+                                ((IPlayerMoveC2SPacket) homepacket).meteor$setTag(1337);
+                                ((IPlayerMoveC2SPacket) movepacket).meteor$setTag(1337);
                                 mc.player.networkHandler.sendPacket(movepacket);
                                 mc.player.networkHandler.sendPacket(homepacket);
                             }
@@ -102,11 +97,11 @@ public class MaceKill extends Module {
                             mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(mc.player.getVehicle()));
                         } else {
                             for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
-                                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
+                                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false, mc.player.horizontalCollision));
                             }
-                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ(), false));
-                            PlayerMoveC2SPacket movepacket = new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ(), false);
-                            ((IPlayerMoveC2SPacket) movepacket).setTag(1337);
+                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ(), false, mc.player.horizontalCollision));
+                            PlayerMoveC2SPacket movepacket = new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ(), false, mc.player.horizontalCollision);
+                            ((IPlayerMoveC2SPacket) movepacket).meteor$setTag(1337);
                             mc.player.networkHandler.sendPacket(movepacket);
                         }
 
@@ -118,8 +113,8 @@ public class MaceKill extends Module {
                             mc.player.getVehicle().setPosition(previouspos);
                             mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(mc.player.getVehicle()));
                         } else {
-                            PlayerMoveC2SPacket homepacket = new PlayerMoveC2SPacket.PositionAndOnGround(previouspos.getX(), previouspos.getY(), previouspos.getZ(), false);
-                            ((IPlayerMoveC2SPacket) homepacket).setTag(1337);
+                            PlayerMoveC2SPacket homepacket = new PlayerMoveC2SPacket.PositionAndOnGround(previouspos.getX(), previouspos.getY(), previouspos.getZ(), false, mc.player.horizontalCollision);
+                            ((IPlayerMoveC2SPacket) homepacket).meteor$setTag(1337);
                             mc.player.networkHandler.sendPacket(homepacket);
                             // Do it again to be sure it happens
                             mc.player.networkHandler.sendPacket(homepacket);

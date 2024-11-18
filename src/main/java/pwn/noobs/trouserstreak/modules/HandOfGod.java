@@ -464,7 +464,7 @@ public class HandOfGod extends Module {
     int i;
     public int adjustYValue(int yValue) {
         int bottomY = mc.world.getBottomY();
-        int topY = mc.world.getTopY();
+        int topY = mc.world.getTopYInclusive();
 
         if (yValue < bottomY) {
             return bottomY;
