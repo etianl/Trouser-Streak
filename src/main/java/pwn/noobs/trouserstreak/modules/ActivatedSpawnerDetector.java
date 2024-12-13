@@ -32,6 +32,12 @@ public class ActivatedSpawnerDetector extends Module {
             .defaultValue(true)
             .build()
     );
+    private final Setting<Boolean> displaycoords = sgGeneral.add(new BoolSetting.Builder()
+            .name("DisplayCoords")
+            .description("Displays coords of triggered spawners in chat.")
+            .defaultValue(true)
+            .build()
+    );
     public final Setting<Integer> renderDistance = sgRender.add(new IntSetting.Builder()
             .name("Render-Distance(Chunks)")
             .description("How many chunks from the character to render the detected chunks.")
@@ -116,7 +122,8 @@ public class ActivatedSpawnerDetector extends Module {
                         MobSpawnerBlockEntity spawner = (MobSpawnerBlockEntity) blockEntity;
                         BlockPos pos = spawner.getPos();
                         if (!spawnerPositions.contains(pos) && spawner.getLogic().spawnDelay != 20) {
-                            ChatUtils.sendMsg(Text.of("Detected Triggered Spawner! Block Position: " + pos));
+                            if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Triggered Spawner! Block Position: " + pos));
+                            else ChatUtils.sendMsg(Text.of("Detected Triggered Spawner!");
                             if (extramessage.get()) error("There may be stashed items in the storage near the spawners!");
                             spawnerPositions.add(pos);
                         }
