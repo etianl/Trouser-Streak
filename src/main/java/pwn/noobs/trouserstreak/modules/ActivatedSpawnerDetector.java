@@ -17,6 +17,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import net.minecraft.world.chunk.WorldChunk;
 import pwn.noobs.trouserstreak.Trouser;
 
@@ -29,6 +30,12 @@ public class ActivatedSpawnerDetector extends Module {
     private final Setting<Boolean> extramessage = sgGeneral.add(new BoolSetting.Builder()
             .name("Extra Warning Message")
             .description("Toggle the message reminding you about stashes.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Boolean> displaycoords = sgGeneral.add(new BoolSetting.Builder()
+            .name("DisplayCoords")
+            .description("Displays coords of activated spawners in chat.")
             .defaultValue(true)
             .build()
     );
@@ -48,14 +55,14 @@ public class ActivatedSpawnerDetector extends Module {
     );
     private final Setting<SettingColor> spawnerSideColor = sgRender.add(new ColorSetting.Builder()
             .name("spawner-side-color")
-            .description("Color of the triggered spawner.")
+            .description("Color of the activated spawner.")
             .defaultValue(new SettingColor(251, 5, 5, 70))
             .visible(() -> (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both))
             .build()
     );
     private final Setting<SettingColor> spawnerLineColor = sgRender.add(new ColorSetting.Builder()
             .name("spawner-line-color")
-            .description("Color of the triggered spawner.")
+            .description("Color of the activated spawner.")
             .defaultValue(new SettingColor(251, 5, 5, 235))
             .visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both))
             .build()
@@ -116,7 +123,9 @@ public class ActivatedSpawnerDetector extends Module {
                         MobSpawnerBlockEntity spawner = (MobSpawnerBlockEntity) blockEntity;
                         BlockPos pos = spawner.getPos();
                         if (!spawnerPositions.contains(pos) && spawner.getLogic().spawnDelay != 20) {
-                            ChatUtils.sendMsg(Text.of("Detected Triggered Spawner! Block Position: " + pos));
+                            if (mc.world.getRegistryKey() == World.NETHER && spawner.getLogic().spawnDelay == 0) return;
+                            if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Triggered Spawner! Block Position: " + pos));
+                            else ChatUtils.sendMsg(Text.of("Detected Triggered Spawner!"));
                             if (extramessage.get()) error("There may be stashed items in the storage near the spawners!");
                             spawnerPositions.add(pos);
                         }
