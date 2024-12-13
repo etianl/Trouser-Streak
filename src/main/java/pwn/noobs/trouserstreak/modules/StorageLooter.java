@@ -321,7 +321,7 @@ public class StorageLooter extends Module {
     private float originalPitch;
 
     public StorageLooter() {
-        super(Trouser.Main, "Storage Looter", "Steals stuff from containers around you.");
+        super(Trouser.Main, "Storage-Looter", "Steals stuff from containers around you.");
     }
 
     @EventHandler

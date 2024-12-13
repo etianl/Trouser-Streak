@@ -204,8 +204,8 @@ public class BaseFinder extends Module {
     private final Setting<Integer> animalsFoundThreshold = sgEDetectors.add(new IntSetting.Builder()
             .name("Entity Cluster Threshold")
             .description("Once this many entities are found in a chunk trigger it as being a base.")
-            .min(0)
-            .sliderRange(0,100)
+            .min(1)
+            .sliderRange(1,100)
             .defaultValue(12)
             .build());
     private final Setting<Integer> bsefndtickdelay = sgGeneral.add(new IntSetting.Builder()
@@ -843,7 +843,7 @@ public class BaseFinder extends Module {
                                         LastBaseFound = new ChunkPos(chunk.getPos().x, chunk.getPos().z);
                                         basefound = true;
                                     }
-                                } else if (entitieslist.get().contains(entity) && entityClusterFinder.get()) {
+                                } else if (entitieslist.get().contains(entity.getType()) && entityClusterFinder.get()) {
                                     animalsFound.getAndIncrement();
                                 }
                             });
