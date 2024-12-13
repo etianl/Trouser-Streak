@@ -29,6 +29,7 @@ In no particular order
  </p>
 
 ## Features:
+- **ActivatedSpawnerDetector** Detects if a player was ever near a spawner block. The intended use for this module would be on anarchy servers where people try to hide their items within chests in dungeons and mineshafts. (Credits to etianl :D)
 - **Airstrike+:** Rains down whatever entities you desire. It used to only rain fireballs, and I also changed the positioning of the spawning. (Credits to Allah-Hack for the original)
 - **AnHero:** Become An Hero! (A quick way back to spawn.) (Credits to etianl :D)
 - **AutoCommand:** Automates a list of commands you set in it's options at the push of a button! Credits to [aaaasdfghjkllll](https://github.com/aaaasdfghjkllll). I only added a full auto option because who doesn't love full auto?
