@@ -39,7 +39,7 @@ public class BookAndQuillDupe extends Module {
             .build()
     );
     public BookAndQuillDupe() {
-        super(Trouser.Main, "Book And Quill Dupe", "Overflows data in a book's title to cause dupes and chunk bans. Credits to Thorioum!");
+        super(Trouser.Main, "Book-And-Quill-Dupe", "Overflows data in a book's title to cause dupes and chunk bans. Credits to Thorioum!");
     }
     @EventHandler
     private void onScreenOpen(OpenScreenEvent event) {
