@@ -65,7 +65,7 @@ public class ActivatedSpawnerDetector extends Module {
     );
     private final Setting<Boolean> removerenderdist = sgRender.add(new BoolSetting.Builder()
             .name("RemoveOutsideRenderDistance")
-            .description("Removes the cached chunks when they leave the defined render distance.")
+            .description("Removes the cached block positions when they leave the defined render distance.")
             .defaultValue(true)
             .build()
     );
