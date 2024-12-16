@@ -34,6 +34,13 @@ public class ActivatedSpawnerDetector extends Module {
             .defaultValue(true)
             .build()
     );
+    private final Setting<Boolean> lessSpam = sgGeneral.add(new BoolSetting.Builder()
+            .name("Extra Warning Less Spam")
+            .description("Do not display the message reminding you about stashes if NO chests within 14 blocks of spawner.")
+            .defaultValue(true)
+            .visible(() -> extramessage.get())
+            .build()
+    );
     private final Setting<Boolean> displaycoords = sgGeneral.add(new BoolSetting.Builder()
             .name("DisplayCoords")
             .description("Displays coords of activated spawners in chat.")
@@ -159,7 +166,6 @@ public class ActivatedSpawnerDetector extends Module {
                             if (mc.world.getRegistryKey() == World.NETHER && spawner.getLogic().spawnDelay == 0) return;
                             if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated Spawner! Block Position: " + pos));
                             else ChatUtils.sendMsg(Text.of("Detected Activated Spawner!"));
-                            if (extramessage.get()) error("There may be stashed items in the storage near the spawners!");
                             spawnerPositions.add(pos);
                             if (deactivatedSpawner.get()){
                                 boolean lightsFound = false;
@@ -177,6 +183,20 @@ public class ActivatedSpawnerDetector extends Module {
                                 }
                                 if (lightsFound == true) ChatUtils.sendMsg(Text.of("The Spawner has torches or other light blocks!"));
                             }
+                            boolean chestfound = false;
+                            for (int x = -14; x < 15; x++) {
+                                for (int y = -14; y < 15; y++) {
+                                    for (int z = -14; z < 15; z++) {
+                                        BlockPos bpos = new BlockPos(pos.getX()+x,pos.getY()+y,pos.getZ()+z);
+                                        if (mc.world.getBlockState(bpos).getBlock() == Blocks.CHEST){
+                                            chestfound = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            if (lessSpam.get() && chestfound && extramessage.get()) error("There may be stashed items in the storage near the spawners!");
+                            else if (!lessSpam.get() && extramessage.get()) error("There may be stashed items in the storage near the spawners!");
                         }
                     }
                 }
