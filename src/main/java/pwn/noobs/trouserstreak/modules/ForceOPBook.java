@@ -20,7 +20,7 @@ public class ForceOPBook extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSpecial = settings.createGroup("!!!You need to use WrittenBook mode on MC servers with versions less than 1.21.2!!!");
     private final Setting<bookModes> bmode = sgSpecial.add(new EnumSetting.Builder<bookModes>()
-            .name("Command Mode")
+            .name("Book Mode")
             .description("the mode")
             .defaultValue(bookModes.WritableBook)
             .build());
