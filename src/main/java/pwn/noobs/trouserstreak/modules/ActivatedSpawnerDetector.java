@@ -36,7 +36,7 @@ public class ActivatedSpawnerDetector extends Module {
     );
     private final Setting<Boolean> lessSpam = sgGeneral.add(new BoolSetting.Builder()
             .name("Extra Warning Less Spam")
-            .description("Do not display the message reminding you about stashes if NO chests within 14 blocks of spawner.")
+            .description("Do not display the message reminding you about stashes if NO chests within 16 blocks of spawner.")
             .defaultValue(true)
             .visible(() -> extramessage.get())
             .build()
@@ -184,9 +184,9 @@ public class ActivatedSpawnerDetector extends Module {
                                 if (lightsFound == true) ChatUtils.sendMsg(Text.of("The Spawner has torches or other light blocks!"));
                             }
                             boolean chestfound = false;
-                            for (int x = -14; x < 15; x++) {
-                                for (int y = -14; y < 15; y++) {
-                                    for (int z = -14; z < 15; z++) {
+                            for (int x = -16; x < 17; x++) {
+                                for (int y = -16; y < 17; y++) {
+                                    for (int z = -16; z < 17; z++) {
                                         BlockPos bpos = new BlockPos(pos.getX()+x,pos.getY()+y,pos.getZ()+z);
                                         if (mc.world.getBlockState(bpos).getBlock() == Blocks.CHEST){
                                             chestfound = true;
@@ -216,7 +216,7 @@ public class ActivatedSpawnerDetector extends Module {
                         int endX = pos.getX();
                         int endY = pos.getY();
                         int endZ = pos.getZ();
-                        if (rangerendering.get())render(new Box(new Vec3d(startX+15, startY+15, startZ+15), new Vec3d(endX-14, endY-14, endZ-14)), rangeSideColor.get(), rangeLineColor.get(), shapeMode.get(), event);
+                        if (rangerendering.get())render(new Box(new Vec3d(startX+17, startY+17, startZ+17), new Vec3d(endX-16, endY-16, endZ-16)), rangeSideColor.get(), rangeLineColor.get(), shapeMode.get(), event);
                         if (deactivatedSpawnerPositions.contains(pos)) render(new Box(new Vec3d(startX+1, startY+1, startZ+1), new Vec3d(endX, endY, endZ)), despawnerSideColor.get(), despawnerLineColor.get(), shapeMode.get(), event);
                         else render(new Box(new Vec3d(startX+1, startY+1, startZ+1), new Vec3d(endX, endY, endZ)), spawnerSideColor.get(), spawnerLineColor.get(), shapeMode.get(), event);
                     }
