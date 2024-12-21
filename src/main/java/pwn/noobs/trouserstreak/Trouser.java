@@ -28,8 +28,10 @@ public class Trouser extends MeteorAddon {
 
                 //Modules.get().add(new -----> Find and Grief noobs! <-----());
                 Modules.get().add(new NewerNewChunks());
-                Modules.get().add(new OnlinePlayerActivityDetector());
                 Modules.get().add(new BaseFinder());
+                Modules.get().add(new ActivatedSpawnerDetector());
+                Modules.get().add(new PotESP());
+                Modules.get().add(new OnlinePlayerActivityDetector());
                 Modules.get().add(new HoleAndTunnelAndStairsESP());
                 Modules.get().add(new TrouserBlockESP());
                 Modules.get().add(new StorageLooter());
@@ -54,6 +56,7 @@ public class Trouser extends MeteorAddon {
 
                 //Modules.get().add(new -----> Create Illegal things with Creative mode! <-----());
                 Modules.get().add(new ForceOPSign());
+                Modules.get().add(new ForceOPBook());
                 Modules.get().add(new NbtEditor());
                 Modules.get().add(new AirstrikePlus());
                 Modules.get().add(new BoomPlus());

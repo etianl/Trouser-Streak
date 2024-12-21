@@ -7,3 +7,5 @@ accessible method net/minecraft/client/network/ClientPlayerEntity getPermissionL
 accessible class net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractType
 accessible class net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractAtHandler
 accessible class net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractTypeHandler
+accessible field net/minecraft/block/spawner/MobSpawnerLogic spawnDelay I
+accessible field net/minecraft/block/entity/DecoratedPotBlockEntity stack Lnet/minecraft/item/ItemStack;
