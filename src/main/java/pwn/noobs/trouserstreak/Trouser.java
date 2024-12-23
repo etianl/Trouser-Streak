@@ -41,6 +41,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new InstaMineNuker());
                 Modules.get().add(new BetterScaffold());
                 Modules.get().add(new RedstoneNuker());
+                Modules.get().add(new SnitchDetector());
 
                 //Modules.get().add(new -----> Overpowered OP mode modules! <-----());
                 Modules.get().add(new BungeeSpoofer());
