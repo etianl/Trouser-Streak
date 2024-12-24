@@ -16,7 +16,9 @@ import net.minecraft.client.network.PlayerListEntry;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class AutoTitles extends Module {
@@ -42,6 +44,21 @@ public class AutoTitles extends Module {
             .name("dont-title-friends")
             .description("Don't set a title for friend.")
             .defaultValue(true)
+            .build()
+    );
+    private final Setting<Boolean> useDelay = sgGeneral.add(new BoolSetting.Builder()
+            .name("Use Command Delay")
+            .description("Adds delay between commands to prevent kicks")
+            .defaultValue(false)
+            .build()
+    );
+    private final Setting<Integer> commandDelay = sgGeneral.add(new IntSetting.Builder()
+            .name("Command Delay")
+            .description("Ticks between each command")
+            .defaultValue(2)
+            .min(1)
+            .sliderMax(20)
+            .visible(() -> useDelay.get())
             .build()
     );
     private final Setting<String> title = sgTitle.add(new StringSetting.Builder()
@@ -219,6 +236,8 @@ public class AutoTitles extends Module {
     private String fadein;
     private String duration;
     private String fadeout;
+    private int tickCounter = 0;
+    private Queue<String> commandQueue = new LinkedList<>();
 
 
     @Override
@@ -246,23 +265,55 @@ public class AutoTitles extends Module {
                     toggle();
                     return;
                 }
-                ChatUtils.sendPlayerMsg("/title @a[name=!" + mc.player.getName().getLiteralString() + "] times " + fadein + " " + duration + " " + fadeout);
-                ChatUtils.sendPlayerMsg("/title @a[name=!" + mc.player.getName().getLiteralString() + "] title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}");
-                if (makesubtitle.get() && messageLengthExceedsLimit("/title @a[name=!" + mc.player.getName().getLiteralString() + "] subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}", "Subtitle")) {
-                } else if (makesubtitle.get())ChatUtils.sendPlayerMsg("/title @a[name=!" + mc.player.getName().getLiteralString() + "] subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}");
-                if (makeactionbar.get() && messageLengthExceedsLimit("/title @a[name=!" + mc.player.getName().getLiteralString() + "] actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}", "Actionbar")) {
-                } else if (makeactionbar.get())ChatUtils.sendPlayerMsg("/title @a[name=!" + mc.player.getName().getLiteralString() + "] actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}");
+                String command1 = "/title @a[name=!" + mc.player.getName().getLiteralString() + "] times " + fadein + " " + duration + " " + fadeout;
+                String command2 = "/title @a[name=!" + mc.player.getName().getLiteralString() + "] title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}";
+
+                if (useDelay.get()) {
+                    commandQueue.add(command1);
+                    commandQueue.add(command2);
+                } else {
+                    ChatUtils.sendPlayerMsg(command1);
+                    ChatUtils.sendPlayerMsg(command2);
+                }
+
+                if (makesubtitle.get() && !messageLengthExceedsLimit("/title @a[name=!" + mc.player.getName().getLiteralString() + "] subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}", "Subtitle")) {
+                    String command3 = "/title @a[name=!" + mc.player.getName().getLiteralString() + "] subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}";
+                    if (useDelay.get()) commandQueue.add(command3);
+                    else ChatUtils.sendPlayerMsg(command3);
+                }
+
+                if (makeactionbar.get() && !messageLengthExceedsLimit("/title @a[name=!" + mc.player.getName().getLiteralString() + "] actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}", "Actionbar")) {
+                    String command4 = "/title @a[name=!" + mc.player.getName().getLiteralString() + "] actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}";
+                    if (useDelay.get()) commandQueue.add(command4);
+                    else ChatUtils.sendPlayerMsg(command4);
+                }
             } else if (!notitleself.get()){
                 if (messageLengthExceedsLimit("/title @a title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}", "Title")) {
                     toggle();
                     return;
                 }
-                ChatUtils.sendPlayerMsg("/title @a times " + fadein + " " + duration + " " + fadeout);
-                ChatUtils.sendPlayerMsg("/title @a title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}");
-                if (makesubtitle.get() && messageLengthExceedsLimit("/title @a subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}", "Subtitle")) {
-                } else if (makesubtitle.get())ChatUtils.sendPlayerMsg("/title @a subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}");
-                if (makeactionbar.get() && messageLengthExceedsLimit("/title @a actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}", "Actionbar")) {
-                } else if (makeactionbar.get())ChatUtils.sendPlayerMsg("/title @a actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}");
+                String command1 = "/title @a times " + fadein + " " + duration + " " + fadeout;
+                String command2 = "/title @a title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}";
+
+                if (useDelay.get()) {
+                    commandQueue.add(command1);
+                    commandQueue.add(command2);
+                } else {
+                    ChatUtils.sendPlayerMsg(command1);
+                    ChatUtils.sendPlayerMsg(command2);
+                }
+
+                if (makesubtitle.get() && !messageLengthExceedsLimit("/title @a subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}", "Subtitle")) {
+                    String command3 = "/title @a subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}";
+                    if (useDelay.get()) commandQueue.add(command3);
+                    else ChatUtils.sendPlayerMsg(command3);
+                }
+
+                if (makeactionbar.get() && !messageLengthExceedsLimit("/title @a actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}", "Actionbar")) {
+                    String command4 = "/title @a actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}";
+                    if (useDelay.get()) commandQueue.add(command4);
+                    else ChatUtils.sendPlayerMsg(command4);
+                }
             }
         } else if (notitlefrend.get()) {
             players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
@@ -277,21 +328,49 @@ public class AutoTitles extends Module {
                 toggle();
                 return;
             }
-            ChatUtils.sendPlayerMsg("/title @a[" + friendsString + "] times " + fadein + " " + duration + " " + fadeout);
-            ChatUtils.sendPlayerMsg("/title @a[" + friendsString + "] title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}");
-            if (makesubtitle.get() && messageLengthExceedsLimit("/title @a[" + friendsString + "] subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}", "Subtitle")) {
-                error("You may also have too many friends online.");
-            } else if (makesubtitle.get())ChatUtils.sendPlayerMsg("/title @a[" + friendsString + "] subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}");
-            if (makeactionbar.get() && messageLengthExceedsLimit("/title @a[" + friendsString + "] actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}", "Actionbar")) {
-                error("You may also have too many friends online.");
-            } else if (makeactionbar.get())ChatUtils.sendPlayerMsg("/title @a[" + friendsString + "] actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}");
+            String command1 = "/title @a[" + friendsString + "] times " + fadein + " " + duration + " " + fadeout;
+            String command2 = "/title @a[" + friendsString + "] title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}";
+
+            if (useDelay.get()) {
+                commandQueue.add(command1);
+                commandQueue.add(command2);
+            } else {
+                ChatUtils.sendPlayerMsg(command1);
+                ChatUtils.sendPlayerMsg(command2);
+            }
+
+            if (makesubtitle.get() && !messageLengthExceedsLimit("/title @a[" + friendsString + "] subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}", "Subtitle")) {
+                String command3 = "/title @a[" + friendsString + "] subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}";
+                if (useDelay.get()) commandQueue.add(command3);
+                else ChatUtils.sendPlayerMsg(command3);
+            }
+
+            if (makeactionbar.get() && !messageLengthExceedsLimit("/title @a[" + friendsString + "] actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}", "Actionbar")) {
+                String command4 = "/title @a[" + friendsString + "] actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}";
+                if (useDelay.get()) commandQueue.add(command4);
+                else ChatUtils.sendPlayerMsg(command4);
+            }
         }
-        toggle();
+        if (!useDelay.get()) toggle();
     }
 
     @EventHandler
     public void onTick(TickEvent.Post event) {
-        toggle();
+        if (!useDelay.get()) {
+            toggle();
+            return;
+        }
+
+        if (!commandQueue.isEmpty()) {
+            if (tickCounter >= commandDelay.get()) {
+                ChatUtils.sendPlayerMsg(commandQueue.poll());
+                tickCounter = 0;
+            } else {
+                tickCounter++;
+            }
+        } else {
+            toggle();
+        }
     }
     private boolean messageLengthExceedsLimit(String message, String messageType) {
         int maxLength = 257;
