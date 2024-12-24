@@ -178,7 +178,7 @@ public class BaseFinder extends Module {
             .build());
     private final Setting<Boolean> boatFinder = sgEDetectors.add(new BoolSetting.Builder()
             .name("Boat Finder")
-            .description("Finds villagers with a level greater than 1 because they are not natural.")
+            .description("Finds boats because they are not natural.")
             .defaultValue(true)
             .build());
     private final Setting<Boolean> entityClusterFinder = sgEDetectors.add(new BoolSetting.Builder()
