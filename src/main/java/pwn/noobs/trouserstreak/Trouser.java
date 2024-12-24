@@ -52,6 +52,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new AutoScoreboard());
                 Modules.get().add(new AutoTitles());
                 Modules.get().add(new AutoDisplays());
+                Modules.get().add(new AutoNames());
                 Modules.get().add(new OPplayerTPmodule());
 
                 //Modules.get().add(new -----> Create Illegal things with Creative mode! <-----());
