@@ -7,6 +7,8 @@ import meteordevelopment.meteorclient.systems.macros.Macros;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.meteorclient.gui.utils.StarscriptTextBoxRenderer;
+import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.Arrays;
@@ -38,32 +40,35 @@ public class AutoCommand extends Module {
     );
     private final Setting<List<String>> commands1 = sgGeneral.add(new StringListSetting.Builder()
             .name("commands")
-            .description("List of commands to be sent")
+            .description("List of commands to be sent. Supports Starscript.")
             .defaultValue(Arrays.asList(
-                    "/deop @a[name=!etianl]",
+                    "/deop @a[name=!{player}]",
                     "/whitelist off",
-                    "/pardon etianl",
-                    "/op etianl"
+                    "/pardon {player}",
+                    "/op {player}"
             ))
+            .renderer(StarscriptTextBoxRenderer.class)
             .visible(() -> mode.get() == Mode.Manual1)
             .build()
     );
     private final Setting<List<String>> commands2 = sgGeneral.add(new StringListSetting.Builder()
             .name("commands")
-            .description("List of commands to be sent")
+            .description("List of commands to be sent. Supports Starscript.")
             .defaultValue(Arrays.asList(
-                    "/kill @a[name=!etianl]",
-                    "/execute at @a[name=!etianl] run summon wither ~ ~10 ~ {Invulnerable:1b}"
+                    "/kill @a[name=!{player}]",
+                    "/execute at @a[name=!{player}] run summon wither ~ ~10 ~ {Invulnerable:1b}"
             ))
+            .renderer(StarscriptTextBoxRenderer.class)
             .visible(() -> mode.get() == Mode.Manual2)
             .build()
     );
     private final Setting<List<String>> commands3 = sgGeneral.add(new StringListSetting.Builder()
             .name("commands")
-            .description("List of commands to be sent")
+            .description("List of commands to be sent. Supports Starscript.")
             .defaultValue(Arrays.asList(
                     "/execute at @a run summon fireball ~ ~10 ~ {ExplosionPower:127b, Motion:[0.0,-5.0,0.0]}"
             ))
+            .renderer(StarscriptTextBoxRenderer.class)
             .visible(() -> mode.get() == Mode.Manual3)
             .build()
     );
@@ -103,11 +108,13 @@ public class AutoCommand extends Module {
         sent = false;
         commandQueue = new LinkedList<>();
     }
+
     @EventHandler
     private void onGameJoin(GameJoinedEvent event) {
         sent = false;
         commandQueue = new LinkedList<>();
     }
+
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (!mc.player.hasPermissionLevel(permissionLevel.get())) return;
@@ -132,7 +139,8 @@ public class AutoCommand extends Module {
                         error("Invalid macro! Is your macro name set correctly?");
                     }
                 } else {
-                    ChatUtils.sendPlayerMsg(command);
+                    String processedCommand = MeteorStarscript.run(MeteorStarscript.compile(command));
+                    ChatUtils.sendPlayerMsg(processedCommand);
                 }
                 tickCounter = 0;
             }
@@ -142,32 +150,36 @@ public class AutoCommand extends Module {
             sent = false;
         }
     }
+
     private void ZeroTickRunCommands() {
         if(mode.get() == Mode.Manual1) for(String command : commands1.get()) {
-            if (command.length()<=256){
-                ChatUtils.sendPlayerMsg(command);
+            String processedCommand = MeteorStarscript.run(MeteorStarscript.compile(command));
+            if (processedCommand.length()<=256){
+                ChatUtils.sendPlayerMsg(processedCommand);
             }
             else {
-                int characterstodelete = command.length()-256;
-                error("This command is too long ("+command+"). Shorten it by "+characterstodelete+" characters.");
+                int characterstodelete = processedCommand.length()-256;
+                error("This command is too long ("+processedCommand+"). Shorten it by "+characterstodelete+" characters.");
             }
         }
         if(mode.get() == Mode.Manual2) for(String command : commands2.get()) {
-            if (command.length()<=256){
-                ChatUtils.sendPlayerMsg(command);
+            String processedCommand = MeteorStarscript.run(MeteorStarscript.compile(command));
+            if (processedCommand.length()<=256){
+                ChatUtils.sendPlayerMsg(processedCommand);
             }
             else {
-                int characterstodelete = command.length()-256;
-                error("This command is too long ("+command+"). Shorten it by "+characterstodelete+" characters.");
+                int characterstodelete = processedCommand.length()-256;
+                error("This command is too long ("+processedCommand+"). Shorten it by "+characterstodelete+" characters.");
             }
         }
         if(mode.get() == Mode.Manual3) for(String command : commands3.get()) {
-            if (command.length()<=256){
-                ChatUtils.sendPlayerMsg(command);
+            String processedCommand = MeteorStarscript.run(MeteorStarscript.compile(command));
+            if (processedCommand.length()<=256){
+                ChatUtils.sendPlayerMsg(processedCommand);
             }
             else {
-                int characterstodelete = command.length()-256;
-                error("This command is too long ("+command+"). Shorten it by "+characterstodelete+" characters.");
+                int characterstodelete = processedCommand.length()-256;
+                error("This command is too long ("+processedCommand+"). Shorten it by "+characterstodelete+" characters.");
             }
         }
         if(mode.get() == Mode.Macro) {
@@ -178,6 +190,7 @@ public class AutoCommand extends Module {
             }
         }
     }
+
     private void RunCommands() {
         if (mode.get() == Mode.Macro) {
             commandQueue.add("EXECUTE_MACRO");
@@ -189,11 +202,12 @@ public class AutoCommand extends Module {
             else return;
 
             for (String command : commandList) {
-                if (command.length() <= 256) {
+                String processedCommand = MeteorStarscript.run(MeteorStarscript.compile(command));
+                if (processedCommand.length() <= 256) {
                     commandQueue.add(command);
                 } else {
-                    int charactersToDelete = command.length() - 256;
-                    error("This command is too long (" + command + "). Shorten it by " + charactersToDelete + " characters.");
+                    int charactersToDelete = processedCommand.length() - 256;
+                    error("This command is too long (" + processedCommand + "). Shorten it by " + charactersToDelete + " characters.");
                 }
             }
         }
