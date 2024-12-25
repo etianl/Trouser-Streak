@@ -44,6 +44,12 @@ public class ActivatedSpawnerDetector extends Module {
             .visible(() -> extramessage.get())
             .build()
     );
+    private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+            .name("Storage Blocks")
+            .description("Storage Blocks the module checks for when considering displaying messages and renders.")
+            .defaultValue(Blocks.CHEST, Blocks.BARREL, Blocks.HOPPER, Blocks.DISPENSER)
+            .build()
+    );
     private final Setting<Boolean> displaycoords = sgGeneral.add(new BoolSetting.Builder()
             .name("DisplayCoords")
             .description("Displays coords of activated spawners in chat.")
@@ -275,7 +281,7 @@ public class ActivatedSpawnerDetector extends Module {
                                 for (int y = -16; y < 17; y++) {
                                     for (int z = -16; z < 17; z++) {
                                         BlockPos bpos = new BlockPos(pos.getX()+x, pos.getY()+y, pos.getZ()+z);
-                                        if (mc.world.getBlockState(bpos).getBlock() == Blocks.CHEST) {
+                                        if (blocks.get().contains(mc.world.getBlockState(bpos).getBlock())) {
                                             chestfound = true;
                                             break;
                                         }
@@ -311,7 +317,7 @@ public class ActivatedSpawnerDetector extends Module {
                                 for (int y = -14; y < 15; y++) {
                                     for (int z = -14; z < 15; z++) {
                                         BlockPos bpos = new BlockPos(tPos.getX()+x, tPos.getY()+y, tPos.getZ()+z);
-                                        if (mc.world.getBlockState(bpos).getBlock() == Blocks.CHEST) {
+                                        if (blocks.get().contains(mc.world.getBlockState(bpos).getBlock())) {
                                             chestfound = true;
                                             break;
                                         }
