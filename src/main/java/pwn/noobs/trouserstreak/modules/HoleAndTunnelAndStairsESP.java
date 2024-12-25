@@ -246,28 +246,17 @@ public class HoleAndTunnelAndStairsESP extends Module {
         removeBoxesOutsideRenderDistance();
     }
     private void removeBoxesOutsideRenderDistance() {
-        BlockPos cameraPos = mc.getCameraEntity().getBlockPos();
         double renderDistanceBlocks = renderDistance.get() * 16;
 
-        removeBoxesOutsideRenderDistance(holes, cameraPos, renderDistanceBlocks);
-        removeBoxesOutsideRenderDistance(tunnels, cameraPos, renderDistanceBlocks);
-        removeBoxesOutsideRenderDistance(staircases, cameraPos, renderDistanceBlocks);
+        removeBoxesOutsideRenderDistance(holes, renderDistanceBlocks);
+        removeBoxesOutsideRenderDistance(tunnels, renderDistanceBlocks);
+        removeBoxesOutsideRenderDistance(staircases, renderDistanceBlocks);
     }
-    private void removeBoxesOutsideRenderDistance(Set<Box> boxSet, BlockPos cameraPos, double renderDistanceBlocks) {
-        boxSet.removeIf(box -> {
-            Vec3d boxCenter = new Vec3d(
-                    (box.minX + box.maxX) / 2,
-                    (box.minY + box.maxY) / 2,
-                    (box.minZ + box.maxZ) / 2
-            );
-            return !isWithinRenderDistance(cameraPos, boxCenter, renderDistanceBlocks);
+    private void removeBoxesOutsideRenderDistance(Set<Box> chunkSet, double renderDistanceBlocks) {
+        chunkSet.removeIf(box -> {
+            BlockPos playerPos = new BlockPos(mc.player.getBlockX(), Math.round((float)box.getCenter().getY()), mc.player.getBlockZ());
+            return !playerPos.isWithinDistance(new BlockPos(Math.round((float)box.getCenter().getX()), Math.round((float)box.getCenter().getY()), Math.round((float)box.getCenter().getZ())), renderDistanceBlocks);
         });
-    }
-    private boolean isWithinRenderDistance(BlockPos cameraPos, Vec3d boxCenter, double renderDistanceBlocks) {
-        double dx = cameraPos.getX() - boxCenter.x;
-        double dy = cameraPos.getY() - boxCenter.y;
-        double dz = cameraPos.getZ() - boxCenter.z;
-        return (dx * dx + dy * dy + dz * dz) <= (renderDistanceBlocks * renderDistanceBlocks);
     }
     @EventHandler
     private void onRender3D(Render3DEvent event) {

@@ -8,4 +8,5 @@ accessible class net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPa
 accessible class net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractAtHandler
 accessible class net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractTypeHandler
 accessible field net/minecraft/block/spawner/MobSpawnerLogic spawnDelay I
+accessible field net/minecraft/block/spawner/MobSpawnerLogic spawnEntry Lnet/minecraft/block/spawner/MobSpawnerEntry;
 accessible field net/minecraft/block/entity/DecoratedPotBlockEntity stack Lnet/minecraft/item/ItemStack;

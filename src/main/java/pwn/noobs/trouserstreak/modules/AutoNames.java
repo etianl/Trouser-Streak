@@ -1,3 +1,4 @@
+//Credits to DedicateDev for making a pr for this! https://github.com/DedicateDev https://github.com/etianl/Trouser-Streak/pull/65
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -23,21 +24,21 @@ public class AutoNames extends Module {
     private final Setting<Presets> presetMode = sgGeneral.add(new EnumSetting.Builder<Presets>()
             .name("Preset Mode")
             .description("Quick presets for name modifications")
-            .defaultValue(Presets.CUSTOM)
+            .defaultValue(Presets.MOUNTAINS_OF_LAVA)
             .build()
     );
 
     private final Setting<Boolean> targetSelf = sgGeneral.add(new BoolSetting.Builder()
             .name("target-self")
             .description("Apply changes to your own name")
-            .defaultValue(false)
+            .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> trollfriends = sgGeneral.add(new BoolSetting.Builder()
             .name("apply-to-friends")
             .description("Whether or not to apply team formatting to friends")
-            .defaultValue(false)
+            .defaultValue(true)
             .build()
     );
 
@@ -199,7 +200,7 @@ public class AutoNames extends Module {
 
     private String getPresetPrefix() {
         return switch (presetMode.get()) {
-            case MOUNTAINS_OF_LAVA -> "[Trolled] ";
+            case MOUNTAINS_OF_LAVA -> "[Admin] ";
             case YT_MOUNTAINS -> "[Youtube] ";
             case DEDICATE -> "[Dedicated] ";
             case CUSTOM -> prefix.get() + " ";
@@ -208,7 +209,7 @@ public class AutoNames extends Module {
 
     private String getPresetSuffix() {
         return switch (presetMode.get()) {
-            case MOUNTAINS_OF_LAVA -> " | Mountains of Lava";
+            case MOUNTAINS_OF_LAVA -> " | Mountains of Lava Inc.";
             case YT_MOUNTAINS -> " | www.youtube.com/@mountainsoflavainc.6913";
             case DEDICATE -> " | Griefing";
             case CUSTOM -> " " + suffix.get();

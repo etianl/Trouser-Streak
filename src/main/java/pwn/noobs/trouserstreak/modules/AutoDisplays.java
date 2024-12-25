@@ -81,7 +81,7 @@ public class AutoDisplays extends Module {
     private final Setting<Integer> killDelay = sgGeneral.add(new IntSetting.Builder()
             .name("Kill Delay")
             .description("Delay in ticks before removing existing entities.")
-            .defaultValue(6)
+            .defaultValue(20)
             .min(0)
             .sliderMax(100)
             .build());
