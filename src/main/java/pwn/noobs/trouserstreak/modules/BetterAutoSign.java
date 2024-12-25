@@ -15,6 +15,8 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
+import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
+import meteordevelopment.meteorclient.gui.utils.StarscriptTextBoxRenderer;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
@@ -59,30 +61,35 @@ public class BetterAutoSign extends Module {
             .name("line-one")
             .description("What to put on the first line of the sign.")
             .defaultValue("Steve")
+            .renderer(StarscriptTextBoxRenderer.class)
             .build()
     );
     private final Setting<String> lineTwo = sgSign.add(new StringSetting.Builder()
             .name("line-two")
             .description("What to put on the second line of the sign.")
             .defaultValue("did")
+            .renderer(StarscriptTextBoxRenderer.class)
             .build()
     );
     private final Setting<String> lineThree = sgSign.add(new StringSetting.Builder()
             .name("line-three")
             .description("What to put on the third line of the sign.")
             .defaultValue("nothing")
+            .renderer(StarscriptTextBoxRenderer.class)
             .build()
     );
     private final Setting<String> lineFour = sgSign.add(new StringSetting.Builder()
             .name("line-four")
             .description("What to put on the fourth line of the sign.")
             .defaultValue("wrong.")
+            .renderer(StarscriptTextBoxRenderer.class)
             .build()
     );
     private final Setting<String> lineOnedif = sgSign.add(new StringSetting.Builder()
             .name("rear-line-one")
             .description("What to put on the first line of the sign.")
             .defaultValue("WATCH")
+            .renderer(StarscriptTextBoxRenderer.class)
             .visible(differentText::get)
             .build()
     );
@@ -90,6 +97,7 @@ public class BetterAutoSign extends Module {
             .name("rear-line-two")
             .description("What to put on the second line of the sign.")
             .defaultValue("MOUNTAINS")
+            .renderer(StarscriptTextBoxRenderer.class)
             .visible(differentText::get)
             .build()
     );
@@ -97,6 +105,7 @@ public class BetterAutoSign extends Module {
             .name("rear-line-three")
             .description("What to put on the third line of the sign.")
             .defaultValue("OF LAVA INC")
+            .renderer(StarscriptTextBoxRenderer.class)
             .visible(differentText::get)
             .build()
     );
@@ -104,6 +113,7 @@ public class BetterAutoSign extends Module {
             .name("rear-line-four")
             .description("What to put on the fourth line of the sign.")
             .defaultValue("ON YOUTUBE")
+            .renderer(StarscriptTextBoxRenderer.class)
             .visible(differentText::get)
             .build()
     );
@@ -111,30 +121,35 @@ public class BetterAutoSign extends Module {
             .name("line-one")
             .description("What to put on the first line of the hanging sign.")
             .defaultValue("Steve")
+            .renderer(StarscriptTextBoxRenderer.class)
             .build()
     );
     private final Setting<String> HlineTwo = sgHang.add(new StringSetting.Builder()
             .name("line-two")
             .description("What to put on the second line of the hanging sign.")
             .defaultValue("did")
+            .renderer(StarscriptTextBoxRenderer.class)
             .build()
     );
     private final Setting<String> HlineThree = sgHang.add(new StringSetting.Builder()
             .name("line-three")
             .description("What to put on the third line of the hanging sign.")
             .defaultValue("nothing")
+            .renderer(StarscriptTextBoxRenderer.class)
             .build()
     );
     private final Setting<String> HlineFour = sgHang.add(new StringSetting.Builder()
             .name("line-four")
             .description("What to put on the fourth line of the hanging sign.")
             .defaultValue("wrong.")
+            .renderer(StarscriptTextBoxRenderer.class)
             .build()
     );
     private final Setting<String> HlineOnedif = sgHang.add(new StringSetting.Builder()
             .name("rear-line-one")
             .description("What to put on the first line of the hanging sign.")
             .defaultValue("WATCH")
+            .renderer(StarscriptTextBoxRenderer.class)
             .visible(differentText::get)
             .build()
     );
@@ -142,6 +157,7 @@ public class BetterAutoSign extends Module {
             .name("rear-line-two")
             .description("What to put on the second line of the hanging sign.")
             .defaultValue("MOUNTAINS")
+            .renderer(StarscriptTextBoxRenderer.class)
             .visible(differentText::get)
             .build()
     );
@@ -149,6 +165,7 @@ public class BetterAutoSign extends Module {
             .name("rear-line-three")
             .description("What to put on the third line of the hanging sign.")
             .defaultValue("OF LAVA INC")
+            .renderer(StarscriptTextBoxRenderer.class)
             .visible(differentText::get)
             .build()
     );
@@ -156,6 +173,7 @@ public class BetterAutoSign extends Module {
             .name("rear-line-four")
             .description("What to put on the fourth line of the hanging sign.")
             .defaultValue("ON YOUTUBE")
+            .renderer(StarscriptTextBoxRenderer.class)
             .visible(differentText::get)
             .build()
     );
