@@ -41,6 +41,11 @@ public class PotESP extends Module {
             .visible(()->potMessage.get())
             .build()
     );
+    private final Setting<List<Item>> junkItemList = sgGeneral.add(new ItemListSetting.Builder()
+            .name("Junk Items")
+            .description("Select the items to no look for. Decorated pots containing these items will not be highlighted.")
+            .build()
+    );
     public final Setting<Integer> renderDistance = sgRender.add(new IntSetting.Builder()
             .name("Render-Distance(Chunks)")
             .description("How many chunks from the character to render the detected chunks.")
@@ -83,6 +88,7 @@ public class PotESP extends Module {
         naturalPot.add(Items.STRING);
         naturalPot.add(Items.EMERALD);
         naturalPot.add(Items.EMERALD_BLOCK);
+        naturalPot.add(Items.RAW_IRON_BLOCK);
         naturalPot.add(Items.IRON_INGOT);
         naturalPot.add(Items.TRIAL_KEY);
         naturalPot.add(Items.DIAMOND);
@@ -117,7 +123,7 @@ public class PotESP extends Module {
                         Item potItem = pot.stack.getItem();
 
                         BlockPos potLocation = pot.getPos();
-                        if (!potLocations.contains(potLocation) && !naturalPot.contains(potItem)) {
+                        if (!potLocations.contains(potLocation) && !naturalPot.contains(potItem) && !junkItemList.get().contains(potItem)) {
                             if (potMessage.get()) {
                                 if (displaycoords.get())
                                     ChatUtils.sendMsg(Text.of("Found a dank pot! It contains: " + potItem + " Location: " + potLocation));
