@@ -193,7 +193,8 @@ public class OnlinePlayerActivityDetector extends Module {
         if (playerChunksLineColor.get().a > 5 || playerChunksSideColor.get().a > 5) {
             synchronized (playerActivityPositions) {
                 for (BlockPos pos : playerActivityPositions) {
-                    if (pos != null && mc.getCameraEntity().getBlockPos().isWithinDistance(pos, renderDistance.get() * 16)) {
+                    BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
+                    if (pos != null && playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
                         int startX = pos.getX() - 8;
                         int startY = pos.getY() - 8;
                         int startZ = pos.getZ() - 8;
@@ -228,7 +229,7 @@ public class OnlinePlayerActivityDetector extends Module {
                     }, taskExecutor);
                     future.join();
                 } catch (CompletionException e) {}
-                
+
                 ChunkSection[] sections = chunk.getSectionArray();
 
                 try {
@@ -323,12 +324,14 @@ public class OnlinePlayerActivityDetector extends Module {
         }
     }
     private void removeChunksOutsideRenderDistance() {
-        BlockPos cameraPos = mc.getCameraEntity().getBlockPos();
         double renderDistanceBlocks = renderDistance.get() * 16;
 
-        removeChunksOutsideRenderDistance(playerActivityPositions, cameraPos, renderDistanceBlocks);
+        removeChunksOutsideRenderDistance(playerActivityPositions, renderDistanceBlocks);
     }
-    private void removeChunksOutsideRenderDistance(Set<BlockPos> chunkSet, BlockPos cameraPos, double renderDistanceBlocks) {
-        chunkSet.removeIf(chunkPos -> !cameraPos.isWithinDistance(chunkPos, renderDistanceBlocks));
+    private void removeChunksOutsideRenderDistance(Set<BlockPos> chunkSet, double renderDistanceBlocks) {
+        chunkSet.removeIf(blockPos -> {
+            BlockPos playerPos = new BlockPos(mc.player.getBlockX(), blockPos.getY(), mc.player.getBlockZ());
+            return !playerPos.isWithinDistance(blockPos, renderDistanceBlocks);
+        });
     }
 }

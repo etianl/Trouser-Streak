@@ -17,7 +17,9 @@ import net.minecraft.client.network.PlayerListEntry;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class AutoDisplays extends Module {
@@ -56,6 +58,19 @@ public class AutoDisplays extends Module {
             .description("Whether to remove existing entities before creating new ones. Reduces lag.")
             .defaultValue(true)
             .build());
+    private final Setting<Boolean> useDelay = sgGeneral.add(new BoolSetting.Builder()
+            .name("Use Command Delay")
+            .description("Adds delay between commands to prevent kicks")
+            .defaultValue(false)
+            .build());
+    private final Setting<Integer> commandDelay = sgGeneral.add(new IntSetting.Builder()
+            .name("Command Delay")
+            .description("Ticks between each command")
+            .defaultValue(2)
+            .min(1)
+            .sliderMax(20)
+            .visible(() -> useDelay.get())
+            .build());
     private final Setting<Integer> tickDelay = sgGeneral.add(new IntSetting.Builder()
             .name("Tick Delay")
             .description("Delay in ticks before creating block and text displays.")
@@ -66,7 +81,7 @@ public class AutoDisplays extends Module {
     private final Setting<Integer> killDelay = sgGeneral.add(new IntSetting.Builder()
             .name("Kill Delay")
             .description("Delay in ticks before removing existing entities.")
-            .defaultValue(6)
+            .defaultValue(20)
             .min(0)
             .sliderMax(100)
             .build());
@@ -126,6 +141,7 @@ public class AutoDisplays extends Module {
     private CopyOnWriteArrayList<PlayerListEntry> players;
     private int tickTimer = 0;
     private int killTimer = 0;
+    private Queue<String> commandQueue = new LinkedList<>();
     @EventHandler
     private void onScreenOpen(OpenScreenEvent event) {
         if (disconnectdisable.get() && event.screen instanceof DisconnectedScreen) {
@@ -180,6 +196,16 @@ public class AutoDisplays extends Module {
     }
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
+        if (!commandQueue.isEmpty() && useDelay.get()) {
+            if (tickTimer >= commandDelay.get()) {
+                ChatUtils.sendPlayerMsg(commandQueue.poll());
+                tickTimer = 0;
+            } else {
+                tickTimer++;
+            }
+            return;
+        }
+
         if (tickTimer >= tickDelay.get()) {
             tickTimer = 0;
 
@@ -209,7 +235,10 @@ public class AutoDisplays extends Module {
                     }
                     String friendsString = String.join(",", friendNames);
                     String thecommand = "/execute at @a[" + friendsString + "] run summon minecraft:block_display ~" + (x - 0.5) + " ~" + y + " ~" + (z - 0.5) + " {block_state:{Name:\"minecraft:"+blockName+"\"},brightness:{sky:"+blockbrightness.get()+",block:"+blockbrightness.get()+"},Tags:[\"MOL\"]}";
-                    if (thecommand.length()<=257)ChatUtils.sendPlayerMsg(thecommand);
+                    if (thecommand.length()<=257) {
+                        if (useDelay.get()) commandQueue.add(thecommand);
+                        else ChatUtils.sendPlayerMsg(thecommand);
+                    }
                     else {
                         error("Command too long, too many friends are online.");
                         toggle();
@@ -233,13 +262,20 @@ public class AutoDisplays extends Module {
         String thecommand3 = "/execute at @a[" + friendsString + "] run summon text_display ~"+distance.get()+" ~1 ~ {brightness:{sky:"+textbrightness.get()+",block:"+textbrightness.get()+"},background:" + color + ",text:'\"" + text.get() + "\"',Tags:[\"MOL\"],Rotation:[90f, 0f]}";
         String thecommand4 = "/execute at @a[" + friendsString + "] run summon text_display ~-"+distance.get()+" ~1 ~ {brightness:{sky:"+textbrightness.get()+",block:"+textbrightness.get()+"},background:" + color + ",text:'\"" + text.get() + "\"',Tags:[\"MOL\"],Rotation:[-90f, 0f]}";
         if (thecommand1.length()<=257 && thecommand2.length()<=257 && thecommand3.length()<=257 && thecommand4.length()<=257){
-            ChatUtils.sendPlayerMsg(thecommand1);
-            ChatUtils.sendPlayerMsg(thecommand2);
-            ChatUtils.sendPlayerMsg(thecommand3);
-            ChatUtils.sendPlayerMsg(thecommand4);
+            if (useDelay.get()) {
+                commandQueue.add(thecommand1);
+                commandQueue.add(thecommand2);
+                commandQueue.add(thecommand3);
+                commandQueue.add(thecommand4);
+            } else {
+                ChatUtils.sendPlayerMsg(thecommand1);
+                ChatUtils.sendPlayerMsg(thecommand2);
+                ChatUtils.sendPlayerMsg(thecommand3);
+                ChatUtils.sendPlayerMsg(thecommand4);
+            }
         }
         else {
-            int characterstodelete = thecommand1.length()-259; //259 because of the difference in length of the commands
+            int characterstodelete = thecommand1.length()-259;
             error("The command is too long. Shorten it by "+characterstodelete+" characters, or you may also have too many friends online.");
             toggle();
         }
