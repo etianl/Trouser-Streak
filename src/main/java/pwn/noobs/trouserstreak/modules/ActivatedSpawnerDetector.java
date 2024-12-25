@@ -200,10 +200,10 @@
         private void onPreTick(TickEvent.Pre event) {
             if (mc.world == null) return;
 
-            int renderDistance = mc.options.getViewDistance().getValue();
+            int renderdistance = mc.options.getViewDistance().getValue();
             ChunkPos playerChunkPos = new ChunkPos(mc.player.getBlockPos());
-            for (int chunkX = playerChunkPos.x - renderDistance; chunkX <= playerChunkPos.x + renderDistance; chunkX++) {
-                for (int chunkZ = playerChunkPos.z - renderDistance; chunkZ <= playerChunkPos.z + renderDistance; chunkZ++) {
+            for (int chunkX = playerChunkPos.x - renderdistance; chunkX <= playerChunkPos.x + renderdistance; chunkX++) {
+                for (int chunkZ = playerChunkPos.z - renderdistance; chunkZ <= playerChunkPos.z + renderdistance; chunkZ++) {
                     WorldChunk chunk = mc.world.getChunk(chunkX, chunkZ);
                     List<BlockEntity> blockEntities = new ArrayList<>(chunk.getBlockEntities().values());
 
@@ -211,7 +211,8 @@
                         if (blockEntity instanceof MobSpawnerBlockEntity){
                             MobSpawnerBlockEntity spawner = (MobSpawnerBlockEntity) blockEntity;
                             BlockPos pos = spawner.getPos();
-                            if (!trialspawnerPositions.contains(pos) && !noRenderPositions.contains(pos) && !deactivatedSpawnerPositions.contains(pos) && !spawnerPositions.contains(pos) && spawner.getLogic().spawnDelay != 20) {
+                            BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
+                            if (playerPos.isWithinDistance(pos, renderDistance.get() * 16) && !trialspawnerPositions.contains(pos) && !noRenderPositions.contains(pos) && !deactivatedSpawnerPositions.contains(pos) && !spawnerPositions.contains(pos) && spawner.getLogic().spawnDelay != 20) {
                                 if (mc.world.getRegistryKey() == World.NETHER && spawner.getLogic().spawnDelay == 0) return;
                                 if (spawner.getLogic().spawnEntry.getNbt().get("id") != null){
                                     String monster = spawner.getLogic().spawnEntry.getNbt().get("id").toString();
@@ -298,9 +299,10 @@
                             }
                         }
                         if (blockEntity instanceof TrialSpawnerBlockEntity){
-                            TrialSpawnerBlockEntity trialSpawner = (TrialSpawnerBlockEntity) blockEntity;
-                            BlockPos tPos = trialSpawner.getPos();
-                            if (!trialspawnerPositions.contains(tPos) && !noRenderPositions.contains(tPos) && !deactivatedSpawnerPositions.contains(tPos) && !spawnerPositions.contains(tPos) && trialSpawner.getSpawnerState() != TrialSpawnerState.WAITING_FOR_PLAYERS) {
+                            TrialSpawnerBlockEntity trialspawner = (TrialSpawnerBlockEntity) blockEntity;
+                            BlockPos tPos = trialspawner.getPos();
+                            BlockPos playerPos = new BlockPos(mc.player.getBlockX(), tPos.getY(), mc.player.getBlockZ());
+                            if (playerPos.isWithinDistance(tPos, renderDistance.get() * 16) && trialSpawner.get() && !trialspawnerPositions.contains(tPos) && !noRenderPositions.contains(tPos) && !deactivatedSpawnerPositions.contains(tPos) && !spawnerPositions.contains(tPos) && trialspawner.getSpawnerState() != TrialSpawnerState.WAITING_FOR_PLAYERS) {
                                 if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated §cTRIAL§r Spawner! Block Position: " + tPos));
                                 else ChatUtils.sendMsg(Text.of("Detected Activated §cTRIAL§r Spawner!"));
                                 trialspawnerPositions.add(tPos);
