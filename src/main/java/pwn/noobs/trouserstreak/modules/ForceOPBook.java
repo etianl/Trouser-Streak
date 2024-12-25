@@ -2,6 +2,8 @@ package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.gui.utils.StarscriptTextBoxRenderer;
+import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import net.minecraft.component.ComponentChanges;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.WrittenBookContentComponent;
@@ -32,7 +34,8 @@ public class ForceOPBook extends Module {
     private final Setting<String> theCommand = sgGeneral.add(new StringSetting.Builder()
             .name("Command")
             .description("What command is run")
-            .defaultValue("/kill @e")
+            .defaultValue("/kill @e[name=!"{player}"]")
+            .renderer(StarscriptTextBoxRenderer.class)
             .visible(() -> mode.get() == Modes.AnyCommand)
             .build()
     );
@@ -53,6 +56,7 @@ public class ForceOPBook extends Module {
             .name("Text")
             .description("What text is on the book's page")
             .defaultValue("")
+            .renderer(StarscriptTextBoxRenderer.class)
             .build()
     );
 
