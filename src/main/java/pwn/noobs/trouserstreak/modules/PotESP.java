@@ -135,7 +135,8 @@ public class PotESP extends Module {
         if (potSideColor.get().a > 5 || potLineColor.get().a > 5) {
             synchronized (potLocations) {
                 for (BlockPos pos : potLocations) {
-                    if (pos != null && mc.getCameraEntity().getBlockPos().isWithinDistance(pos, renderDistance.get() * 16)) {
+                    BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
+                    if (pos != null && playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
                         int startX = pos.getX();
                         int startY = pos.getY();
                         int startZ = pos.getZ();
@@ -153,12 +154,14 @@ public class PotESP extends Module {
         event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, lines, shapeMode, 0);
     }
     private void removeChunksOutsideRenderDistance() {
-        BlockPos cameraPos = mc.getCameraEntity().getBlockPos();
         double renderDistanceBlocks = renderDistance.get() * 16;
 
-        removeChunksOutsideRenderDistance(potLocations, cameraPos, renderDistanceBlocks);
+        removeChunksOutsideRenderDistance(potLocations, renderDistanceBlocks);
     }
-    private void removeChunksOutsideRenderDistance(Set<BlockPos> chunkSet, BlockPos cameraPos, double renderDistanceBlocks) {
-        chunkSet.removeIf(chunkPos -> !cameraPos.isWithinDistance(chunkPos, renderDistanceBlocks));
+    private void removeChunksOutsideRenderDistance(Set<BlockPos> chunkSet, double renderDistanceBlocks) {
+        chunkSet.removeIf(blockPos -> {
+            BlockPos playerPos = new BlockPos(mc.player.getBlockX(), blockPos.getY(), mc.player.getBlockZ());
+            return !playerPos.isWithinDistance(blockPos, renderDistanceBlocks);
+        });
     }
 }

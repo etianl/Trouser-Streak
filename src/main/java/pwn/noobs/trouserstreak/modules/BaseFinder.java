@@ -867,11 +867,15 @@ public class BaseFinder extends Module {
     }
     @EventHandler
     private void onRender(Render3DEvent event) {
+        int topY = renderHeightY.get();
+        int bottomY = renderHeightYbottom.get();
+        int midpoint = (topY + bottomY) / 2;
+        BlockPos playerPos = new BlockPos(mc.player.getBlockX(), midpoint, mc.player.getBlockZ());
         if (baseChunksLineColor.get().a > 5 || baseChunksSideColor.get().a > 5){
             if (!nearesttrcr.get()){
                 synchronized (baseChunks) {
                     for (ChunkPos c : baseChunks) {
-                        if (mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
+                        if (playerPos.isWithinDistance(new BlockPos(c.getCenterX(), midpoint, c.getCenterZ()), renderDistance.get()*16)) {
                             render(new Box(new Vec3d(c.getStartPos().getX()+7, c.getStartPos().getY()+renderHeightYbottom.get(), c.getStartPos().getZ()+7), new Vec3d(c.getStartPos().getX()+8, c.getStartPos().getY()+renderHeightY.get(), c.getStartPos().getZ()+8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
                         }
                     }
@@ -879,7 +883,7 @@ public class BaseFinder extends Module {
             } else if (nearesttrcr.get()){
                 synchronized (baseChunks) {
                     for (ChunkPos c : baseChunks) {
-                        if (mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
+                        if (playerPos.isWithinDistance(new BlockPos(c.getCenterX(), midpoint, c.getCenterZ()), renderDistance.get()*16)) {
                             render(new Box(new Vec3d(c.getStartPos().getX()+7, c.getStartPos().getY()+renderHeightYbottom.get(), c.getStartPos().getZ()+7), new Vec3d(c.getStartPos().getX()+8, c.getStartPos().getY()+renderHeightY.get(), c.getStartPos().getZ()+8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
                         }
                     }
@@ -1378,12 +1382,15 @@ public class BaseFinder extends Module {
                 !(block ==Blocks.LAVA);
     }
     private void removeChunksOutsideRenderDistance() {
-        BlockPos cameraPos = mc.getCameraEntity().getBlockPos();
+        int topY = renderHeightY.get();
+        int bottomY = renderHeightYbottom.get();
+        int midpoint = (topY + bottomY) / 2;
+        BlockPos playerPos = new BlockPos(mc.player.getBlockX(), midpoint, mc.player.getBlockZ());
         double renderDistanceBlocks = renderDistance.get() * 16;
 
-        removeChunksOutsideRenderDistance(baseChunks, cameraPos, renderDistanceBlocks);
+        removeChunksOutsideRenderDistance(baseChunks, playerPos, renderDistanceBlocks, midpoint);
     }
-    private void removeChunksOutsideRenderDistance(Set<ChunkPos> chunkSet, BlockPos cameraPos, double renderDistanceBlocks) {
-        chunkSet.removeIf(chunkPos -> !cameraPos.isWithinDistance(chunkPos.getStartPos(), renderDistanceBlocks));
+    private void removeChunksOutsideRenderDistance(Set<ChunkPos> chunkSet, BlockPos playerPos, double renderDistanceBlocks, int midpoint) {
+        chunkSet.removeIf(c -> !playerPos.isWithinDistance(new BlockPos(c.getCenterX(), midpoint, c.getCenterZ()), renderDistanceBlocks));
     }
 }

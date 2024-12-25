@@ -33,7 +33,6 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new PotESP());
                 Modules.get().add(new OnlinePlayerActivityDetector());
                 Modules.get().add(new HoleAndTunnelAndStairsESP());
-                Modules.get().add(new TrouserBlockESP());
                 Modules.get().add(new StorageLooter());
                 Modules.get().add(new LavaAura());
                 Modules.get().add(new SuperInstaMine());
@@ -51,6 +50,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new AutoScoreboard());
                 Modules.get().add(new AutoTitles());
                 Modules.get().add(new AutoDisplays());
+                Modules.get().add(new AutoNames());
                 Modules.get().add(new OPplayerTPmodule());
 
                 //Modules.get().add(new -----> Create Illegal things with Creative mode! <-----());
@@ -84,7 +84,6 @@ public class Trouser extends MeteorAddon {
                 Commands.add(new AutoVclipCommand());
                 Commands.add(new AutoVaultClipCommand());
                 Modules.get().add(new BlockListMineCommand());
-                Commands.add(new NewChunkCounter());
                 Commands.add(new GarbageCleanerCommand());
         }
 

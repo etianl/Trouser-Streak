@@ -167,12 +167,10 @@ public class NewerNewChunks extends Module {
 		table.row();
 		return table;
 	}
-
-	// render
 	public final Setting<Integer> renderDistance = sgRender.add(new IntSetting.Builder()
 			.name("Render-Distance(Chunks)")
 			.description("How many chunks from the character to render the detected chunks.")
-			.defaultValue(128)
+			.defaultValue(64)
 			.min(6)
 			.sliderRange(6,1024)
 			.build()
@@ -282,13 +280,6 @@ public class NewerNewChunks extends Module {
 	private boolean worldchange=false;
 	private int justenabledsavedata=0;
 	private boolean saveDataWasOn = false;
-	public int chunkcounterticks=0;
-	public static boolean chunkcounter;
-	public static int newchunksfound=0;
-	public static int oldchunksfound=0;
-	public static int beingUpdatedOldChunksfound=0;
-	public static int OldGenerationOldChunksfound=0;
-	public static int tickexploitchunksfound=0;
 	private static final Set<Block> ORE_BLOCKS = new HashSet<>();
 	static {
 		ORE_BLOCKS.add(Blocks.COAL_ORE);
@@ -391,14 +382,6 @@ public class NewerNewChunks extends Module {
 	public NewerNewChunks() {
 		super(Trouser.Main,"NewerNewChunks", "Detects new chunks by scanning the order of chunk section palettes. Can also check liquid flow, and block ticking packets.");
 	}
-	private void resetCounterValues() {
-		chunkcounterticks=0;
-		newchunksfound=0;
-		oldchunksfound=0;
-		beingUpdatedOldChunksfound=0;
-		OldGenerationOldChunksfound=0;
-		tickexploitchunksfound=0;
-	}
 	private void clearChunkData() {
 		newChunks.clear();
 		oldChunks.clear();
@@ -426,7 +409,7 @@ public class NewerNewChunks extends Module {
 			try {
 				Files.createDirectories(Paths.get("TrouserStreak", "NewChunks", serverip, world));
 			} catch (IOException e) {
-				//e.printStackTrace();
+				e.printStackTrace();
 			}
 		}
 		if (save.get() || load.get()) {
@@ -440,7 +423,7 @@ public class NewerNewChunks extends Module {
 						Files.createFile(fullPath);
 					}
 				} catch (IOException e) {
-					//e.printStackTrace();
+					e.printStackTrace();
 				}
 			}
 		}
@@ -454,7 +437,6 @@ public class NewerNewChunks extends Module {
 	}
 	@Override
 	public void onDeactivate() {
-		chunkcounterticks=0;
 		autoreloadticks=0;
 		loadingticks=0;
 		worldchange=false;
@@ -467,19 +449,16 @@ public class NewerNewChunks extends Module {
 	@EventHandler
 	private void onScreenOpen(OpenScreenEvent event) {
 		if (event.screen instanceof DisconnectedScreen) {
-			resetCounterValues();
 			if (worldleaveremove.get()) {
 				clearChunkData();
 			}
 		}
 		if (event.screen instanceof DownloadingTerrainScreen) {
-			resetCounterValues();
 			worldchange=true;
 		}
 	}
 	@EventHandler
 	private void onGameLeft(GameLeftEvent event) {
-		resetCounterValues();
 		if (worldleaveremove.get()) {
 			clearChunkData();
 		}
@@ -505,11 +484,12 @@ public class NewerNewChunks extends Module {
 				Files.deleteIfExists(Paths.get("TrouserStreak", "NewChunks", serverip, world, "OldGenerationChunkData.txt"));
 				Files.deleteIfExists(Paths.get("TrouserStreak", "NewChunks", serverip, world, "BlockExploitChunkData.txt"));
 			} catch (IOException e) {
-				//e.printStackTrace();
+				e.printStackTrace();
 			}
 			error("Chunk Data deleted for this Dimension.");
 			deletewarning=0;
 		}
+
 		if (detectmode.get()== DetectMode.Normal && blockupdateexploit.get()){
 			if (errticks<6){
 				errticks++;}
@@ -517,6 +497,7 @@ public class NewerNewChunks extends Module {
 				error("BlockExploitMode RECOMMENDED. Required to determine false positives from the Block Exploit from the OldChunks.");
 			}
 		} else errticks=0;
+
 		if (load.get()){
 			if (loadingticks<1){
 				loadData();
@@ -524,61 +505,6 @@ public class NewerNewChunks extends Module {
 			}
 		} else if (!load.get()){
 			loadingticks=0;
-		}
-
-		if (chunkcounter=true){ //this only runs when the NewChunkCounter command is used
-			chunkcounterticks++;
-			if (chunkcounterticks>=1){
-				resetCounterValues();
-				chunkcounter=false;
-			}
-			if (chunkcounter=true && chunkcounterticks<1){
-				try {
-					List<String> allLines = Files.readAllLines(Paths.get("TrouserStreak/NewChunks/"+serverip+"/"+world+"/OldChunkData.txt"));
-
-					for (String line : allLines) {
-						oldchunksfound++;
-					}
-				} catch (IOException e) {
-					//e.printStackTrace();
-				}
-				try {
-					List<String> allLines = Files.readAllLines(Paths.get("TrouserStreak/NewChunks/"+serverip+"/"+world+"/BeingUpdatedChunkData.txt"));
-
-					for (String line : allLines) {
-						beingUpdatedOldChunksfound++;
-					}
-				} catch (IOException e) {
-					//e.printStackTrace();
-				}
-				try {
-					List<String> allLines = Files.readAllLines(Paths.get("TrouserStreak/NewChunks/"+serverip+"/"+world+"/OldGenerationChunkData.txt"));
-
-					for (String line : allLines) {
-						OldGenerationOldChunksfound++;
-					}
-				} catch (IOException e) {
-					//e.printStackTrace();
-				}
-				try {
-					List<String> allLines = Files.readAllLines(Paths.get("TrouserStreak/NewChunks/"+serverip+"/"+world+"/NewChunkData.txt"));
-
-					for (String line : allLines) {
-						newchunksfound++;
-					}
-				} catch (IOException e) {
-					//e.printStackTrace();
-				}
-				try {
-					List<String> allLines = Files.readAllLines(Paths.get("TrouserStreak/NewChunks/"+serverip+"/"+world+"/BlockExploitChunkData.txt"));
-
-					for (String line : allLines) {
-						tickexploitchunksfound++;
-					}
-				} catch (IOException e) {
-					//e.printStackTrace();
-				}
-			}
 		}
 
 		if (autoreload.get()) {
@@ -592,14 +518,15 @@ public class NewerNewChunks extends Module {
 				autoreloadticks=0;
 			}
 		}
-		//autoreload when entering different dimensions
-		if (load.get() && worldchange == true){
+
+		if (load.get() && worldchange == true){		//autoreload when entering different dimensions
 			if (worldleaveremove.get()){
 				clearChunkData();
 			}
 			loadData();
 			worldchange=false;
 		}
+
 		if (!save.get())saveDataWasOn = false;
 		if (save.get() && justenabledsavedata<=2 && saveDataWasOn == false){
 			justenabledsavedata++;
@@ -631,14 +558,16 @@ public class NewerNewChunks extends Module {
 				}
 			}
 		}
+
 		if (removerenderdist.get())removeChunksOutsideRenderDistance();
 	}
 	@EventHandler
 	private void onRender(Render3DEvent event) {
+		BlockPos playerPos = new BlockPos(mc.player.getBlockX(), renderHeight.get(), mc.player.getBlockZ());
 		if (newChunksLineColor.get().a > 5 || newChunksSideColor.get().a > 5) {
 			synchronized (newChunks) {
 				for (ChunkPos c : newChunks) {
-					if (c != null && mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
+					if (c != null && playerPos.isWithinDistance(new BlockPos(c.getCenterX(), renderHeight.get(), c.getCenterZ()), renderDistance.get()*16)) {
 						render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), newChunksSideColor.get(), newChunksLineColor.get(), shapeMode.get(), event);
 					}
 				}
@@ -647,7 +576,7 @@ public class NewerNewChunks extends Module {
 		if (tickexploitChunksLineColor.get().a > 5 || tickexploitChunksSideColor.get().a > 5) {
 			synchronized (tickexploitChunks) {
 				for (ChunkPos c : tickexploitChunks) {
-					if (c != null && mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
+					if (c != null && playerPos.isWithinDistance(new BlockPos(c.getCenterX(), renderHeight.get(), c.getCenterZ()), renderDistance.get()*16)) {
 						if (detectmode.get()== DetectMode.BlockExploitMode && blockupdateexploit.get()) {
 							render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), tickexploitChunksSideColor.get(), tickexploitChunksLineColor.get(), shapeMode.get(), event);
 						} else if ((detectmode.get()== DetectMode.Normal) && blockupdateexploit.get()) {
@@ -664,7 +593,7 @@ public class NewerNewChunks extends Module {
 		if (oldChunksLineColor.get().a > 5 || oldChunksSideColor.get().a > 5){
 			synchronized (oldChunks) {
 				for (ChunkPos c : oldChunks) {
-					if (c != null && mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
+					if (c != null && playerPos.isWithinDistance(new BlockPos(c.getCenterX(), renderHeight.get(), c.getCenterZ()), renderDistance.get()*16)) {
 						render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
 					}
 				}
@@ -673,7 +602,7 @@ public class NewerNewChunks extends Module {
 		if (beingUpdatedOldChunksLineColor.get().a > 5 || beingUpdatedOldChunksSideColor.get().a > 5){
 			synchronized (beingUpdatedOldChunks) {
 				for (ChunkPos c : beingUpdatedOldChunks) {
-					if (c != null && mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
+					if (c != null && playerPos.isWithinDistance(new BlockPos(c.getCenterX(), renderHeight.get(), c.getCenterZ()), renderDistance.get()*16)) {
 						render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), beingUpdatedOldChunksSideColor.get(), beingUpdatedOldChunksLineColor.get(), shapeMode.get(), event);
 					}
 				}
@@ -682,7 +611,7 @@ public class NewerNewChunks extends Module {
 		if (OldGenerationOldChunksLineColor.get().a > 5 || OldGenerationOldChunksSideColor.get().a > 5){
 			synchronized (OldGenerationOldChunks) {
 				for (ChunkPos c : OldGenerationOldChunks) {
-					if (c != null && mc.getCameraEntity().getBlockPos().isWithinDistance(c.getStartPos(), renderDistance.get()*16)) {
+					if (c != null && playerPos.isWithinDistance(new BlockPos(c.getCenterX(), renderHeight.get(), c.getCenterZ()), renderDistance.get()*16)) {
 						render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), OldGenerationOldChunksSideColor.get(), OldGenerationOldChunksLineColor.get(), shapeMode.get(), event);
 					}
 				}
@@ -814,7 +743,6 @@ public class NewerNewChunks extends Module {
 					if (biomesContainer instanceof PalettedContainer<RegistryEntry<Biome>> biomesPaletteContainer) {
 						Palette<RegistryEntry<Biome>> biomePalette = biomesPaletteContainer.data.palette();
 						for (int i = 0; i < biomePalette.getSize(); i++) {
-							//System.out.println("Section: " +0+ " Palette entry :" + i + " Palette entry: " + biomePalette.get(i).getKey().get());
 							if (biomePalette.get(i).getKey().get() == BiomeKeys.THE_END) {
 								isOldGeneration = true;
 								break;
@@ -831,8 +759,6 @@ public class NewerNewChunks extends Module {
 					try {
 						for (ChunkSection section : sections) {
 							if (section != null) {
-								//System.out.println("Processing Chunk Section: " + i);
-
 								int isNewSection = 0;
 								int isBeingUpdatedSection = 0;
 
@@ -841,7 +767,6 @@ public class NewerNewChunks extends Module {
 									Palette<BlockState> blockStatePalette = blockStatesContainer.data.palette();
 									int blockPaletteLength = blockStatePalette.getSize();
 
-									//System.out.println("Block Palette Length for Section " + i + ": " + blockPaletteLength);
 									if (blockStatePalette instanceof BiMapPalette<BlockState>){
 										Set<BlockState> bstates = new HashSet<>();
 										for (int x = 0; x < 16; x++) {
@@ -851,19 +776,15 @@ public class NewerNewChunks extends Module {
 												}
 											}
 										}
-										//System.out.println("Unique BlockStates in Section " + i + ": " + bstates.size());
 										int bstatesSize = bstates.size();
 										if (bstatesSize <= 1) bstatesSize = blockPaletteLength;
 										if (bstatesSize < blockPaletteLength) {
 											isNewSection = 2;
-											//System.out.println("Section: " + loops + " | smaller bstates size!!!!!!!");
 										}
 									}
 
 									for (int i2 = 0; i2 < blockPaletteLength; i2++) {
 										BlockState blockPaletteEntry = blockStatePalette.get(i2);
-										//System.out.println("Section " + i + ", Palette Entry " + i2 + ": " + blockPaletteEntry.getBlock());
-
 										if (i2 == 0 && loops == 0 && blockPaletteEntry.getBlock() == Blocks.AIR && mc.world.getRegistryKey() != World.END)
 											firstchunkappearsnew = true;
 										if (i2 == 0 && blockPaletteEntry.getBlock() == Blocks.AIR && mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END)
@@ -881,15 +802,12 @@ public class NewerNewChunks extends Module {
 									}
 									if (isBeingUpdatedSection >= 2) oldChunkQuantifier++;
 									if (isNewSection >= 2) newChunkQuantifier++;
-									//System.out.println("Section " + i + " - isNewSection: " + isNewSection + ", isBeingUpdatedSection: " + isBeingUpdatedSection);
 								}
 								if (mc.world.getRegistryKey() == World.END) {
 									var biomesContainer = section.getBiomeContainer();
 									if (biomesContainer instanceof PalettedContainer<RegistryEntry<Biome>> biomesPaletteContainer) {
 										Palette<RegistryEntry<Biome>> biomePalette = biomesPaletteContainer.data.palette();
-										//System.out.println("Biome Palette Size for Section " + i + ": " + biomePalette.getSize());
 										for (int i3 = 0; i3 < biomePalette.getSize(); i3++) {
-											//System.out.println("Section: " + i + " Biome Palette entry :" + i3 + " Biome: " + biomePalette.get(i3).getKey().get());
 											if (i3 == 0 && biomePalette.get(i3).getKey().get() == BiomeKeys.PLAINS) isNewChunk = true;
 											if (!isNewChunk && i3 == 0 && biomePalette.get(i3).getKey().get() != BiomeKeys.THE_END) isNewChunk = false;
 										}
@@ -902,24 +820,20 @@ public class NewerNewChunks extends Module {
 						if (loops > 0) {
 							if (beingUpdatedDetector.get() && (mc.world.getRegistryKey() == World.NETHER || mc.world.getRegistryKey() == World.END)){
 								double oldpercentage = ((double) oldChunkQuantifier / loops) * 100;
-								//System.out.println("Being updated Percentage: " + oldpercentage);
 								if (oldpercentage >= 25) chunkIsBeingUpdated = true;
 							}
 							else if (mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END){
 								double percentage = ((double) newChunkQuantifier / loops) * 100;
-								//System.out.println("Percentage: " + percentage);
 								if (percentage >= 51) isNewChunk = true;
 							}
 						}
 					} catch (Exception e) {
 						if (beingUpdatedDetector.get() && (mc.world.getRegistryKey() == World.NETHER || mc.world.getRegistryKey() == World.END)){
 							double oldpercentage = ((double) oldChunkQuantifier / loops) * 100;
-							//System.out.println("Being updated Percentage: " + oldpercentage);
 							if (oldpercentage >= 25) chunkIsBeingUpdated = true;
 						}
 						else if (mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END){
 							double percentage = ((double) newChunkQuantifier / loops) * 100;
-							//System.out.println("Percentage: " + percentage);
 							if (percentage >= 51) isNewChunk = true;
 						}
 					}
@@ -1023,7 +937,7 @@ public class NewerNewChunks extends Module {
 				}
 			}
 		} catch (IOException e) {
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
 	}
 	private void saveData(Path savedDataLocation, ChunkPos chunkpos) {
@@ -1038,20 +952,20 @@ public class NewerNewChunks extends Module {
 					StandardOpenOption.CREATE,
 					StandardOpenOption.APPEND);
 		} catch (IOException e) {
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
 	}
 	private void removeChunksOutsideRenderDistance() {
-		BlockPos cameraPos = mc.getCameraEntity().getBlockPos();
+		BlockPos playerPos = new BlockPos(mc.player.getBlockX(), renderHeight.get(), mc.player.getBlockZ());
 		double renderDistanceBlocks = renderDistance.get() * 16;
 
-		removeChunksOutsideRenderDistance(newChunks, cameraPos, renderDistanceBlocks);
-		removeChunksOutsideRenderDistance(oldChunks, cameraPos, renderDistanceBlocks);
-		removeChunksOutsideRenderDistance(beingUpdatedOldChunks, cameraPos, renderDistanceBlocks);
-		removeChunksOutsideRenderDistance(OldGenerationOldChunks, cameraPos, renderDistanceBlocks);
-		removeChunksOutsideRenderDistance(tickexploitChunks, cameraPos, renderDistanceBlocks);
+		removeChunksOutsideRenderDistance(newChunks, playerPos, renderDistanceBlocks);
+		removeChunksOutsideRenderDistance(oldChunks, playerPos, renderDistanceBlocks);
+		removeChunksOutsideRenderDistance(beingUpdatedOldChunks, playerPos, renderDistanceBlocks);
+		removeChunksOutsideRenderDistance(OldGenerationOldChunks, playerPos, renderDistanceBlocks);
+		removeChunksOutsideRenderDistance(tickexploitChunks, playerPos, renderDistanceBlocks);
 	}
-	private void removeChunksOutsideRenderDistance(Set<ChunkPos> chunkSet, BlockPos cameraPos, double renderDistanceBlocks) {
-		chunkSet.removeIf(chunkPos -> !cameraPos.isWithinDistance(chunkPos.getStartPos(), renderDistanceBlocks));
+	private void removeChunksOutsideRenderDistance(Set<ChunkPos> chunkSet, BlockPos playerPos, double renderDistanceBlocks) {
+		chunkSet.removeIf(c -> !playerPos.isWithinDistance(new BlockPos(c.getCenterX(), renderHeight.get(), c.getCenterZ()), renderDistanceBlocks));
 	}
 }

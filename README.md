@@ -29,13 +29,13 @@ In no particular order
  </p>
 
 ## Features:
-- **ActivatedSpawnerDetector** Detects if a player was ever near a spawner block. The intended use for this module would be on anarchy servers where people try to hide their items within chests in dungeons and mineshafts. (Credits to etianl :D)
+- **ActivatedSpawnerDetector** Detects if a player was ever near a spawner or trial spawner block. The intended use for this module would be on anarchy servers where people try to hide their items within chests in dungeons, mineshafts, and trial chambers. (Credits to etianl :D)
 - **Airstrike+:** Rains down whatever entities you desire. It used to only rain fireballs, and I also changed the positioning of the spawning. (Credits to Allah-Hack for the original)
 - **AnHero:** Become An Hero! (A quick way back to spawn.) (Credits to etianl :D)
 - **AutoCommand:** Automates a list of commands you set in it's options at the push of a button! Credits to [aaaasdfghjkllll](https://github.com/aaaasdfghjkllll). I only added a full auto option because who doesn't love full auto?
 - **AutoDisplays:** Automatically spams block displays around all player's heads to blind them or text displays around them for trolling and advertising. Requires operator access. (Credits to etianl :D)
 - **AutoDrop:** Drops the stack in your selected slot automatically, or you can choose a slot to dump. You can shift click your inventory items to dump your trash easily. (Credits to etianl :D)
-- **AutoLavaCaster** Simple timer based bot for lavacasting. Aim at the top of the block you want to cast on and activate the module. It places lava, then after an amount of time removes the lava, places the water after a specified delay, removes it after a specified delay, it will build the mountain upward, tower you up and repeat. Position yourself on a block above and diagonally, mostly perpendicular from the targeted block for best results. (Credits to etianl :D)
+- **AutoLavaCaster:** Simple timer based bot for lavacasting. Aim at the top of the block you want to cast on and activate the module. It places lava, then after an amount of time removes the lava, places the water after a specified delay, removes it after a specified delay, it will build the mountain upward, tower you up and repeat. Position yourself on a block above and diagonally, mostly perpendicular from the targeted block for best results. (Credits to etianl :D)
 - *AutoLavaCaster Notes:*
 - If not choosing the amount of time lava flows for, there are lava timing estimation modes.
 - The UseLastMountain timing mode uses your last Mountain to predict the LavaTimer and calculates the flow rate if the top of the mountain is a 45 degree angle and the rest is going straight down to the ground.
@@ -65,6 +65,7 @@ In no particular order
 - ForwardKey Turns mountain up, Back Key turns mountain down.
 - JumpKey adjusts spacing of stairs according to the OnDemandSpacing value.
 - Start building, then hold SneakKey and also hold Left or RightKey as well to build stairs diagonally. Release left or right key first to continue building in the direction you were prior.
+- **AutoNames** Automatically change player name colors, prefix, suffix in tab and chat. Requires OP status. Credits to [DedicateDev](https://github.com/DedicateDev)
 - **AutoScoreboard:** Automates the creation of a custom scoreboard. Useful for advertising on griefed servers. Requires OP status. Credits to [aaaasdfghjkllll](https://github.com/aaaasdfghjkllll)
 - **AutoStaircase:** Builds stairs upward in the direction you are facing by running forward and jumping. (Credits to etianl for bringing it to life! As well as Credits to [majorsopa](https://github.com/majorsopa) for writing the original. <3) I just had to fix up some stuff for this one but Frostburn Client had the base code there. I believe this is the first publicly available automatic staircase builder in a Meteor addon, correct me if I'm wrong maybe I didn't have to learn some Java to do this.
 - **AutoTitles:** Displays text (such as advertisements) across the screen of all the individuals who are online on a server at the time. Requires OP status. Credits to [ogmur](https://www.youtube.com/@Ogmur) for figuring out these commands, and to etianl for writing a module for it.
@@ -112,7 +113,6 @@ In no particular order
 - If the game crashes, chunk data is saved! No loss in tracing progress.
 - Save and Load ChunkData options are for the stored files.
 - There is also an option for deleting chunk data in that particular dimension on the server.
-- The .newchunkcount command can tell you how many chunks have been saved in data in the dimension you are in.
 - You can even send chunk data to your friends! Just copy the TrouserStreak/NewChunks folder and send it.
 
 ***l33t new 3xpl0its:***
@@ -159,7 +159,6 @@ In no particular order
 - **Teleport:** Sets your position ontop of targeted block, within a possible reach of 64 blocks. Rarely can cause damage, be careful. ***EXPERIMENTAL*** (Credits to etianl :D)
 - **TPFly:** It is a purely setPos based flight. PointAndFly mode is based off the ClickTP and AirPlace code, credits to Meteor for that. ***EXPERIMENTAL, movement is a little weird lol.*** (Credits to etianl :D)
 - **TrailMaker:** Leaves blocks behind you in a trail. Has a place delay option to spread placement further apart. Select the blocks you want to use in the block list setting for it to work. (Credits to etianl :D)
-- **TrouserBlockESP:** A block esp module that uses chunk sections for block scanning. (Credits to etianl. :D)
 - **TrouserBuild:** It can build either horizontally or vertically according to a 5x5 grid centered on the block you are aiming at. Right click to build at the targeted location. (Credits to etianl, and to Banana for the checkboxes and idea. :D)
 - **ViewNbtCommand:** Returns the nbt data for the item in your hand in the chat box. There is also a Save option for the command that saves the data to a text file in your .minecraft folder in the "SavedNBT" folder.
 - **Voider+:** Replaces the world from the top down. (Credits to Allah-Hack) I added a 3x3 voiding script, a TP foward option for deleting strips, as well as options to set max and minimum height for voiding, and instead of just air it can do whatever block you want now too.

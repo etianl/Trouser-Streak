@@ -5,4 +5,5 @@ accessible field net/minecraft/world/chunk/PalettedContainer data Lnet/minecraft
 accessible method net/minecraft/world/chunk/PalettedContainer$Data palette ()Lnet/minecraft/world/chunk/Palette;
 accessible method net/minecraft/client/network/ClientPlayerEntity getPermissionLevel ()I
 accessible field net/minecraft/block/spawner/MobSpawnerLogic spawnDelay I
+accessible field net/minecraft/block/spawner/MobSpawnerLogic spawnEntry Lnet/minecraft/block/spawner/MobSpawnerEntry;
 accessible field net/minecraft/block/entity/DecoratedPotBlockEntity stack Lnet/minecraft/item/ItemStack;
