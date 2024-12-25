@@ -5,6 +5,8 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.gui.utils.StarscriptTextBoxRenderer;
+import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.network.PlayerListEntry;
@@ -49,6 +51,7 @@ public class ForceOPSign extends Module {
             .name("Click Command1")
             .description("What command is run")
             .defaultValue("/kill @e")
+            .renderer(StarscriptTextBoxRenderer.class)
             .visible(() -> mode.get() == Modes.AnyCommand)
             .build()
     );
@@ -84,6 +87,7 @@ public class ForceOPSign extends Module {
             .name("Click Command2")
             .description("What command is run")
             .defaultValue("")
+            .renderer(StarscriptTextBoxRenderer.class)
             .visible(() -> !skynet.get() || !crashpeople.get())
             .build()
     );
@@ -91,6 +95,7 @@ public class ForceOPSign extends Module {
             .name("Click Command3")
             .description("What command is run")
             .defaultValue("")
+            .renderer(StarscriptTextBoxRenderer.class)
             .visible(() -> !skynet.get())
             .build()
     );
