@@ -16,7 +16,7 @@ public class FasterUse extends Module {
     private final SettingGroup sgGeneral = settings.createGroup("Rate");
 
     public FasterUse() {
-        super(Trouser.Main, "Faster-use", "Fast use but faster... WAY faster");
+        super(Trouser.Main, "Faster-use", "Fast use but faster... WAY faster (made by maytrixd)");
     }
 
     private final Setting<Integer> uses = sgGeneral.add(new IntSetting.Builder()
