@@ -53,6 +53,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new AutoDisplays());
                 Modules.get().add(new AutoNames());
                 Modules.get().add(new AutoTexts());
+                Commands.add(new TextCommand());
                 Modules.get().add(new OPplayerTPmodule());
 
                 //Modules.get().add(new -----> Create Illegal things with Creative mode! <-----());
@@ -62,7 +63,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new AirstrikePlus());
                 Modules.get().add(new BoomPlus());
                 Modules.get().add(new ExplosionAura());
-                Modules.get().add(new FasterUse());
+                // Modules.get().add(new FasterUse());
 
                 //Modules.get().add(new -----> Exploits for old versions! <-----());
                 Modules.get().add(new ShulkerDupe());
