@@ -23,8 +23,14 @@ import net.minecraft.util.math.Vec3d;
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class TextCommand extends Command {
+    public enum ColorModes {
+        aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green,
+        dark_purple, dark_red, gold, gray, green, italic, light_purple,
+        red, white, yellow
+    }
+
     public TextCommand() {
-        super("text", "Spawns a text hologram with custom text in front of you. Use | for new lines.");
+        super("text", "Spawns a text hologram with custom text in front of you. Use | for new lines and #color for text color.");
     }
 
     @Override
@@ -33,13 +39,32 @@ public class TextCommand extends Command {
             String text = context.getArgument("message", String.class);
             String[] lines = text.split("\\|");
             for (int i = lines.length - 1; i >= 0; i--) {
-                spawnText(lines[i].trim(), ((lines.length - 1 - i) * 0.3) + 1);
+                String line = lines[i].trim();
+                StringBuilder formattedText = new StringBuilder();
+                String currentColor = "white";
+
+                String[] words = line.split(" ");
+                for (String word : words) {
+                    if (word.startsWith("#")) {
+                        try {
+                            ColorModes.valueOf(word.substring(1).toLowerCase());
+                            currentColor = word.substring(1).toLowerCase();
+                        } catch (IllegalArgumentException ignored) {
+                            formattedText.append(word).append(" ");
+                        }
+                    } else {
+                        formattedText.append("{\"text\":\"").append(word).append(" \",\"color\":\"").append(currentColor).append("\"},");
+                    }
+                }
+
+                String finalText = "[" + formattedText.substring(0, formattedText.length() - 1) + "]";
+                spawnText(finalText, ((lines.length - 1 - i) * 0.3) + 1, true);
             }
             return SINGLE_SUCCESS;
         }));
     }
 
-    private void spawnText(String message, double yOffset) {
+    private void spawnText(String message, double yOffset, boolean isJson) {
         if (!mc.player.getAbilities().creativeMode) {
             error("Creative mode required!");
             return;
@@ -50,8 +75,7 @@ public class TextCommand extends Command {
         Vec3d pos = mc.player.getPos().add(mc.player.getRotationVector().multiply(2)).add(0, yOffset, 0);
 
         var changes = ComponentChanges.builder()
-                .add(DataComponentTypes.CUSTOM_NAME, Text.literal(message).formatted(Formatting.WHITE))
-                .add(DataComponentTypes.ENTITY_DATA, createEntityData(pos, message))
+                .add(DataComponentTypes.ENTITY_DATA, createEntityData(pos, message, isJson))
                 .build();
 
         armorStand.applyChanges(changes);
@@ -62,7 +86,7 @@ public class TextCommand extends Command {
         mc.interactionManager.clickCreativeStack(current, 36 + mc.player.getInventory().selectedSlot);
     }
 
-    private NbtComponent createEntityData(Vec3d pos, String text) {
+    private NbtComponent createEntityData(Vec3d pos, String text, boolean isJson) {
         NbtCompound entityTag = new NbtCompound();
         NbtList position = new NbtList();
 
@@ -76,7 +100,7 @@ public class TextCommand extends Command {
         entityTag.putBoolean("Marker", true);
         entityTag.putBoolean("NoGravity", true);
         entityTag.putBoolean("CustomNameVisible", true);
-        entityTag.putString("CustomName", "{\"text\":\"" + text + "\",\"color\":\"white\"}");
+        entityTag.putString("CustomName", isJson ? text : "{\"text\":\"" + text + "\"}");
 
         return NbtComponent.of(entityTag);
     }
