@@ -70,6 +70,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new BoatKill());
                 Modules.get().add(new InstantKill());
                 Modules.get().add(new LecternCrash());
+                Modules.get().add(new AttributeSwap());
 
                 //Modules.get().add(new -----> And much more <-----());
                 Modules.get().add(new BookAndQuillDupe());
