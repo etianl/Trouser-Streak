@@ -32,6 +32,10 @@ import java.util.stream.Stream;
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class TextCommand extends Command {
+    private static final double LINE_SPACING = 0.3;
+    private static final double INITIAL_HEIGHT_OFFSET = 1.0;
+    private static final String PRESETS_DIRECTORY = "TrouserStreak/TextPresets";
+
     public enum ColorModes {
         aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green,
         dark_purple, dark_red, gold, gray, green, italic, light_purple,
@@ -45,39 +49,41 @@ public class TextCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(argument("message", StringArgumentType.greedyString()).executes(context -> {
-            String text = context.getArgument("message", String.class);
-            spawnTextLines(text);
-            return SINGLE_SUCCESS;
-        }));
-
-        builder.then(literal("save").then(argument("presetName", StringArgumentType.word())
-                .then(argument("text", StringArgumentType.greedyString()).executes(context -> {
-                    String presetName = context.getArgument("presetName", String.class);
-                    String text = context.getArgument("text", String.class);
-                    savePreset(presetName, text);
-                    info("Saved preset: " + presetName);
-                    return SINGLE_SUCCESS;
-                }))));
-
-        builder.then(literal("load").then(argument("presetName", StringArgumentType.word())
-                .suggests((context, suggestionsBuilder) -> suggestPresets(suggestionsBuilder))
-                .executes(context -> {
-                    String presetName = context.getArgument("presetName", String.class);
-                    String text = loadPreset(presetName);
-                    if (text != null) {
-                        spawnTextLines(text);
-                        info("Loaded preset: " + presetName);
-                    } else {
-                        error("Preset not found: " + presetName);
-                    }
-                    return SINGLE_SUCCESS;
-                })));
+        builder
+                .then(argument("message", StringArgumentType.greedyString())
+                        .executes(context -> {
+                            spawnTextLines(context.getArgument("message", String.class));
+                            return SINGLE_SUCCESS;
+                        }))
+                .then(literal("save")
+                        .then(argument("presetName", StringArgumentType.word())
+                                .then(argument("text", StringArgumentType.greedyString())
+                                        .executes(context -> {
+                                            String presetName = context.getArgument("presetName", String.class);
+                                            String text = context.getArgument("text", String.class);
+                                            savePreset(presetName, text);
+                                            info("Saved preset: " + presetName);
+                                            return SINGLE_SUCCESS;
+                                        }))))
+                .then(literal("load")
+                        .then(argument("presetName", StringArgumentType.word())
+                                .suggests((context, suggestionsBuilder) -> suggestPresets(suggestionsBuilder))
+                                .executes(context -> {
+                                    String presetName = context.getArgument("presetName", String.class);
+                                    String text = loadPreset(presetName);
+                                    if (text != null) {
+                                        spawnTextLines(text);
+                                        info("Loaded preset: " + presetName);
+                                    } else {
+                                        error("Preset not found: " + presetName);
+                                    }
+                                    return SINGLE_SUCCESS;
+                                })));
     }
 
     private CompletableFuture<Suggestions> suggestPresets(SuggestionsBuilder builder) {
         try {
-            Path presetsDir = Paths.get("TrouserStreak", "TextPresets");
+            Path presetsDir = Paths.get(PRESETS_DIRECTORY);
             if (Files.exists(presetsDir)) {
                 try (Stream<Path> files = Files.list(presetsDir)) {
                     files.filter(path -> path.toString().endsWith(".txt"))
@@ -93,31 +99,37 @@ public class TextCommand extends Command {
         String[] lines = text.split("\\|");
         for (int i = lines.length - 1; i >= 0; i--) {
             String line = lines[i].trim();
-            StringBuilder formattedText = new StringBuilder();
-            String currentColor = "white";
-
-            String[] words = line.split(" ");
-            for (String word : words) {
-                if (word.startsWith("#")) {
-                    try {
-                        ColorModes.valueOf(word.substring(1).toLowerCase());
-                        currentColor = word.substring(1).toLowerCase();
-                    } catch (IllegalArgumentException ignored) {
-                        formattedText.append(word).append(" ");
-                    }
-                } else {
-                    formattedText.append("{\"text\":\"").append(word).append(" \",\"color\":\"").append(currentColor).append("\"},");
-                }
-            }
-
-            String finalText = "[" + formattedText.substring(0, formattedText.length() - 1) + "]";
-            spawnText(finalText, ((lines.length - 1 - i) * 0.3) + 1, true);
+            String formattedText = formatTextWithColors(line);
+            double heightOffset = ((lines.length - 1 - i) * LINE_SPACING) + INITIAL_HEIGHT_OFFSET;
+            spawnText(formattedText, heightOffset, true);
         }
+    }
+
+    private String formatTextWithColors(String line) {
+        StringBuilder formattedText = new StringBuilder();
+        String currentColor = "white";
+        String[] words = line.split(" ");
+
+        for (String word : words) {
+            if (word.startsWith("#")) {
+                try {
+                    ColorModes.valueOf(word.substring(1).toLowerCase());
+                    currentColor = word.substring(1).toLowerCase();
+                } catch (IllegalArgumentException ignored) {
+                    formattedText.append(word).append(" ");
+                }
+            } else {
+                formattedText.append("{\"text\":\"").append(word).append(" \",\"color\":\"")
+                        .append(currentColor).append("\"},");
+            }
+        }
+
+        return "[" + formattedText.substring(0, formattedText.length() - 1) + "]";
     }
 
     private void savePreset(String presetName, String text) {
         try {
-            Path dirPath = Paths.get("TrouserStreak", "TextPresets");
+            Path dirPath = Paths.get(PRESETS_DIRECTORY);
             Files.createDirectories(dirPath);
             Path filePath = dirPath.resolve(presetName + ".txt");
             Files.write(filePath, text.getBytes(StandardCharsets.UTF_8),
@@ -130,7 +142,7 @@ public class TextCommand extends Command {
 
     private String loadPreset(String presetName) {
         try {
-            Path filePath = Paths.get("TrouserStreak", "TextPresets", presetName + ".txt");
+            Path filePath = Paths.get(PRESETS_DIRECTORY, presetName + ".txt");
             if (Files.exists(filePath)) {
                 return Files.readString(filePath);
             }
@@ -143,12 +155,12 @@ public class TextCommand extends Command {
     private void createDefaultPresets() {
         String[] defaultPresets = {
                 "trolled=#green [ #dark_red Trolled! #green ]|#gold Mountains of Lava Inc.|#red Youtube: #blue www.youtube.com/@mountainsoflavainc.6913|#green [ #dark_red Trolled! #green ]",
-                "mountains=#red Mountains Of Lava Inc.|#gold youtube.com/@mountainsoflavainc.6913"
+                "mountains=#red Mountains Of Lava Inc.|#gold youtube.com/@mountainsoflavainc.6913",
         };
 
         for (String preset : defaultPresets) {
             String[] parts = preset.split("=", 2);
-            if (!Files.exists(Paths.get("TrouserStreak", "TextPresets", parts[0] + ".txt"))) {
+            if (!Files.exists(Paths.get(PRESETS_DIRECTORY, parts[0] + ".txt"))) {
                 savePreset(parts[0], parts[1]);
             }
         }
