@@ -124,7 +124,7 @@ public class BaseFinder extends Module {
             .min(-64)
             .sliderRange(-64, 319)
             .defaultValue(260)
-            .visible(() -> skybuildfind.get())
+            .visible(skybuildfind::get)
             .build());
     private final Setting<Boolean> bedrockfind = sgDetectors.add(new BoolSetting.Builder()
             .name("Bedrock Finder")
@@ -137,7 +137,7 @@ public class BaseFinder extends Module {
             .min(0)
             .sliderRange(0, 384)
             .defaultValue(4)
-            .visible(() -> bedrockfind.get())
+            .visible(bedrockfind::get)
             .build());
     private final Setting<Boolean> spawner = sgDetectors.add(new BoolSetting.Builder()
             .name("Unnatural Spawner Finder")
@@ -215,6 +215,11 @@ public class BaseFinder extends Module {
             .sliderRange(0,300)
             .defaultValue(5)
             .build());
+    private final Setting<Boolean> list1Activar = sglists.add(new BoolSetting.Builder()
+            .name("List #1 Activate")
+            .description("Activates checks for List #1")
+            .defaultValue(true)
+            .build());
     private final Setting<List<Block>> Blawcks1 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #1 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
@@ -248,49 +253,86 @@ public class BaseFinder extends Module {
                     Blocks.LAVA_CAULDRON, Blocks.POWDER_SNOW_CAULDRON, Blocks.ACTIVATOR_RAIL, Blocks.BEACON, Blocks.BEEHIVE, Blocks.REPEATING_COMMAND_BLOCK, Blocks.COMMAND_BLOCK, Blocks.CHAIN_COMMAND_BLOCK, Blocks.EMERALD_BLOCK, Blocks.IRON_BLOCK, Blocks.NETHERITE_BLOCK, Blocks.RAW_GOLD_BLOCK, Blocks.CONDUIT, Blocks.DAYLIGHT_DETECTOR, Blocks.DETECTOR_RAIL, Blocks.DRIED_KELP_BLOCK, Blocks.DROPPER, Blocks.ENCHANTING_TABLE,
                     Blocks.PIGLIN_HEAD, Blocks.PIGLIN_WALL_HEAD, Blocks.CREEPER_HEAD, Blocks.CREEPER_WALL_HEAD, Blocks.DRAGON_WALL_HEAD, Blocks.DRAGON_HEAD, Blocks.PLAYER_HEAD, Blocks.PLAYER_WALL_HEAD, Blocks.ZOMBIE_HEAD, Blocks.ZOMBIE_WALL_HEAD, Blocks.SKELETON_WALL_SKULL, Blocks.WITHER_SKELETON_SKULL, Blocks.WITHER_SKELETON_WALL_SKULL, Blocks.HEAVY_CORE,
                     Blocks.HONEY_BLOCK, Blocks.HONEYCOMB_BLOCK, Blocks.HOPPER, Blocks.JUKEBOX, Blocks.LIGHTNING_ROD, Blocks.LODESTONE, Blocks.OBSERVER, Blocks.POWERED_RAIL, Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE, Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE, Blocks.BIRCH_PRESSURE_PLATE, Blocks.JUNGLE_PRESSURE_PLATE, Blocks.DARK_OAK_PRESSURE_PLATE, Blocks.MANGROVE_PRESSURE_PLATE, Blocks.CRIMSON_PRESSURE_PLATE, Blocks.WARPED_PRESSURE_PLATE, Blocks.RESPAWN_ANCHOR, Blocks.CALIBRATED_SCULK_SENSOR, Blocks.SNIFFER_EGG
-                    )
+            )
+            .visible(list1Activar::get)
             .filter(this::filterBlocks)
             .build()
     );
+    private final Setting<Boolean> list2Activar = sglists.add(new BoolSetting.Builder()
+            .name("List #2 Activate")
+            .description("Activates checks for List #2")
+            .defaultValue(true)
+            .build());
     private final Setting<List<Block>> Blawcks2 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #2 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
             .defaultValue(Blocks.SPRUCE_WALL_SIGN, Blocks.POLISHED_DIORITE, Blocks.NOTE_BLOCK, Blocks.MANGROVE_WOOD, Blocks.WEATHERED_COPPER)
+            .visible(list2Activar::get)
             .filter(this::filterBlocks)
             .build()
     );
+    private final Setting<Boolean> list3Activar = sglists.add(new BoolSetting.Builder()
+            .name("List #3 Activate")
+            .description("Activates checks for List #3")
+            .defaultValue(true)
+            .build());
     private final Setting<List<Block>> Blawcks3 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #3 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
             .defaultValue(Blocks.CRAFTING_TABLE, Blocks.BREWING_STAND, Blocks.ENDER_CHEST, Blocks.SMOOTH_QUARTZ, Blocks.REDSTONE_BLOCK, Blocks.DIAMOND_BLOCK, Blocks.BROWN_STAINED_GLASS, Blocks.MAGENTA_BED, Blocks.BROWN_BED)
+            .visible(list3Activar::get)
             .filter(this::filterBlocks)
             .build()
     );
+    private final Setting<Boolean> list4Activar = sglists.add(new BoolSetting.Builder()
+            .name("List #4 Activate")
+            .description("Activates checks for List #4")
+            .defaultValue(true)
+            .build());
     private final Setting<List<Block>> Blawcks4 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #4 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
             .defaultValue(Blocks.OAK_WALL_SIGN, Blocks.TRAPPED_CHEST, Blocks.IRON_TRAPDOOR, Blocks.LAPIS_BLOCK)
+            .visible(list4Activar::get)
             .filter(this::filterBlocks)
             .build()
     );
+    private final Setting<Boolean> list5Activar = sglists.add(new BoolSetting.Builder()
+            .name("List #5 Activate")
+            .description("Activates checks for List #5")
+            .defaultValue(true)
+            .build());
     private final Setting<List<Block>> Blawcks5 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #5 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
             .defaultValue(Blocks.QUARTZ_BLOCK, Blocks.RED_BED, Blocks.WHITE_BED, Blocks.YELLOW_BED, Blocks.ORANGE_BED, Blocks.BLUE_BED, Blocks.CYAN_BED, Blocks.GREEN_BED, Blocks.LIME_BED, Blocks.PURPLE_BED, Blocks.WHITE_CONCRETE)
+            .visible(list5Activar::get)
             .filter(this::filterBlocks)
             .build()
     );
+    private final Setting<Boolean> list6Activar = sglists.add(new BoolSetting.Builder()
+            .name("List #6 Activate")
+            .description("Activates checks for List #6")
+            .defaultValue(true)
+            .build());
     private final Setting<List<Block>> Blawcks6 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #6 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
             .defaultValue(Blocks.REDSTONE_TORCH, Blocks.REDSTONE_WALL_TORCH, Blocks.FURNACE)
+            .visible(list6Activar::get)
             .filter(this::filterBlocks)
             .build()
     );
+    private final Setting<Boolean> list7Activar = sglists.add(new BoolSetting.Builder()
+            .name("List #7 Activate")
+            .description("Activates checks for List #7")
+            .defaultValue(true)
+            .build());
     private final Setting<List<Block>> Blawcks7 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #7 (Extra Custom)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
             .defaultValue()
+            .visible(list7Activar::get)
             .filter(this::filterBlocks)
             .build()
     );
@@ -300,6 +342,7 @@ public class BaseFinder extends Module {
             .min(1)
             .sliderRange(1,100)
             .defaultValue(1)
+            .visible(list1Activar::get)
             .build());
     private final Setting<Integer> blowkfind2 = sglists.add(new IntSetting.Builder()
             .name("(List #2) Number Of Blocks to Find")
@@ -307,6 +350,7 @@ public class BaseFinder extends Module {
             .min(1)
             .sliderRange(1,100)
             .defaultValue(6)
+            .visible(list2Activar::get)
             .build());
     private final Setting<Integer> blowkfind3 = sglists.add(new IntSetting.Builder()
             .name("(List #3) Number Of Blocks to Find")
@@ -314,6 +358,7 @@ public class BaseFinder extends Module {
             .min(1)
             .sliderRange(1,100)
             .defaultValue(4)
+            .visible(list3Activar::get)
             .build());
     private final Setting<Integer> blowkfind4 = sglists.add(new IntSetting.Builder()
             .name("(List #4) Number Of Blocks to Find")
@@ -321,6 +366,7 @@ public class BaseFinder extends Module {
             .min(1)
             .sliderRange(1,100)
             .defaultValue(2)
+            .visible(list4Activar::get)
             .build());
     private final Setting<Integer> blowkfind5 = sglists.add(new IntSetting.Builder()
             .name("(List #5) Number Of Blocks to Find")
@@ -328,6 +374,7 @@ public class BaseFinder extends Module {
             .min(1)
             .sliderRange(1,100)
             .defaultValue(12)
+            .visible(list5Activar::get)
             .build());
     private final Setting<Integer> blowkfind6 = sglists.add(new IntSetting.Builder()
             .name("(List #6) Number Of Blocks to Find")
@@ -335,6 +382,7 @@ public class BaseFinder extends Module {
             .min(1)
             .sliderRange(1,100)
             .defaultValue(12)
+            .visible(list6Activar::get)
             .build());
     private final Setting<Integer> blowkfind7 = sglists.add(new IntSetting.Builder()
             .name("(List #7) Number Of Blocks to Find")
@@ -342,6 +390,7 @@ public class BaseFinder extends Module {
             .min(1)
             .sliderRange(1,100)
             .defaultValue(1)
+            .visible(list7Activar::get)
             .build());
     private final Setting<Boolean> remove = sgcacheCdata.add(new BoolSetting.Builder()
             .name("RemoveOnModuleDisabled")
@@ -377,7 +426,7 @@ public class BaseFinder extends Module {
             .name("AutoReloadBases")
             .description("Reloads the bases automatically from your savefiles on a delay.")
             .defaultValue(false)
-            .visible(() -> load.get())
+            .visible(load::get)
             .build()
     );
     private final Setting<Integer> removedelay = sgCdata.add(new IntSetting.Builder()
@@ -484,9 +533,9 @@ public class BaseFinder extends Module {
         WButton deletedata = table.add(theme.button("**DELETE ALL BASE DATA**")).expandX().minWidth(100).widget();
         deletedata.action = () -> {
             if (!(mc.world==null) && mc.world.isChunkLoaded(mc.player.getChunkPos().x,mc.player.getChunkPos().z)){
-            if (deletewarning==0) error("PRESS AGAIN WITHIN 5s TO DELETE ALL BASE DATA FOR THIS DIMENSION.");
-            deletewarningTicks=0;
-            deletewarning++;
+                if (deletewarning==0) error("PRESS AGAIN WITHIN 5s TO DELETE ALL BASE DATA FOR THIS DIMENSION.");
+                deletewarningTicks=0;
+                deletewarning++;
             }
         };
         table.row();
@@ -533,7 +582,7 @@ public class BaseFinder extends Module {
             .description("How far from the base chunk to still render a tracer.")
             .defaultValue(32)
             .sliderRange(1,1024)
-            .visible(() -> trcr.get())
+            .visible(trcr::get)
             .build()
     );
     private final Setting<SettingColor> baseChunksSideColor = sgRender.add(new ColorSetting.Builder()
@@ -546,7 +595,7 @@ public class BaseFinder extends Module {
             .name("Base-chunks-tracer-color")
             .description("Color of tracers to the chunks that may contain bases or builds.")
             .defaultValue(new SettingColor(255, 127, 0, 255, true))
-            .visible(() -> trcr.get())
+            .visible(trcr::get)
             .build()
     );
     private static final ExecutorService taskExecutor = Executors.newCachedThreadPool();
@@ -614,7 +663,7 @@ public class BaseFinder extends Module {
             clearChunkData();
         }
         if (save.get() || load.get()) {
-            if (mc.isInSingleplayer()==true){
+            if (mc.isInSingleplayer()){
                 String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("/|\\\\");
                 serverip=array[array.length-2];
                 world= mc.world.getRegistryKey().getValue().toString().replace(':', '_');
@@ -670,8 +719,8 @@ public class BaseFinder extends Module {
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         world = mc.world.getRegistryKey().getValue().toString().replace(':', '_');
-        
-        if (basefound == true && basefoundspamTicks < bsefndtickdelay.get()) basefoundspamTicks++;
+
+        if (basefound && basefoundspamTicks < bsefndtickdelay.get()) basefoundspamTicks++;
         else if (basefoundspamTicks >= bsefndtickdelay.get()) {
             basefound = false;
             basefoundspamTicks = 0;
@@ -726,7 +775,7 @@ public class BaseFinder extends Module {
         }
 
         if (save.get() || load.get()) {
-            if (mc.isInSingleplayer() == true) {
+            if (mc.isInSingleplayer()) {
                 String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("/|\\\\");
                 serverip = array[array.length - 2];
                 world = mc.world.getRegistryKey().getValue().toString().replace(':', '_');
@@ -748,7 +797,7 @@ public class BaseFinder extends Module {
             }
         }
         //autoreload when entering different dimensions
-        if (load.get() && worldchange == true) {
+        if (load.get() && worldchange) {
             if (worldleaveremove.get()) {
                 clearChunkData();
             }
@@ -756,7 +805,7 @@ public class BaseFinder extends Module {
             worldchange = false;
         }
         if (!save.get()) saveDataWasOn = false;
-        if (save.get() && justenabledsavedata <= 2 && saveDataWasOn == false) {
+        if (save.get() && justenabledsavedata <= 2 && !saveDataWasOn) {
             justenabledsavedata++;
             if (justenabledsavedata == 1) {
                 synchronized (baseChunks) {
@@ -871,13 +920,13 @@ public class BaseFinder extends Module {
         BlockPos playerPos = new BlockPos(mc.player.getBlockX(), midpoint, mc.player.getBlockZ());
         if (baseChunksLineColor.get().a > 5 || baseChunksSideColor.get().a > 5){
             if (!nearesttrcr.get()){
-            synchronized (baseChunks) {
-                for (ChunkPos c : baseChunks) {
-                    if (playerPos.isWithinDistance(new BlockPos(c.getCenterX(), midpoint, c.getCenterZ()), renderDistance.get()*16)) {
-                        render(new Box(new Vec3d(c.getStartPos().getX()+7, c.getStartPos().getY()+renderHeightYbottom.get(), c.getStartPos().getZ()+7), new Vec3d(c.getStartPos().getX()+8, c.getStartPos().getY()+renderHeightY.get(), c.getStartPos().getZ()+8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
+                synchronized (baseChunks) {
+                    for (ChunkPos c : baseChunks) {
+                        if (playerPos.isWithinDistance(new BlockPos(c.getCenterX(), midpoint, c.getCenterZ()), renderDistance.get()*16)) {
+                            render(new Box(new Vec3d(c.getStartPos().getX()+7, c.getStartPos().getY()+renderHeightYbottom.get(), c.getStartPos().getZ()+7), new Vec3d(c.getStartPos().getX()+8, c.getStartPos().getY()+renderHeightY.get(), c.getStartPos().getZ()+8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
+                        }
                     }
                 }
-            }
             } else if (nearesttrcr.get()){
                 synchronized (baseChunks) {
                     for (ChunkPos c : baseChunks) {
@@ -894,7 +943,7 @@ public class BaseFinder extends Module {
     private void render(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
         if (trcr.get() && Math.abs(box.minX-RenderUtils.center.x)<=trcrdist.get()*16 && Math.abs(box.minZ-RenderUtils.center.z)<=trcrdist.get()*16)
             if (!nearesttrcr.get())
-            event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
+                event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
         event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
     }
     private void render2(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
@@ -906,8 +955,7 @@ public class BaseFinder extends Module {
     @EventHandler
     private void onReadPacket(PacketEvent.Receive event) {
         if (event.packet instanceof PlayerMoveC2SPacket) return; //this keeps getting cast to the chunkdata for no reason
-        if (!(event.packet instanceof PlayerMoveC2SPacket) && event.packet instanceof ChunkDataS2CPacket && mc.world != null) {
-            ChunkDataS2CPacket packet = (ChunkDataS2CPacket) event.packet;
+        if (!(event.packet instanceof PlayerMoveC2SPacket) && event.packet instanceof ChunkDataS2CPacket packet && mc.world != null) {
 
             basepos = new ChunkPos(packet.getChunkX(), packet.getChunkZ());
 
@@ -921,7 +969,7 @@ public class BaseFinder extends Module {
                     future.join();
                 } catch (CompletionException e) {}
 
-                if (bubblesFinder.get() || spawner.get() || signFinder.get() || portalFinder.get() || roofDetector.get() || bedrockfind.get() || skybuildfind.get() || Blawcks1.get().size()>0 || Blawcks2.get().size()>0 || Blawcks3.get().size()>0 || Blawcks4.get().size()>0 || Blawcks5.get().size()>0 || Blawcks6.get().size()>0 || Blawcks7.get().size()>0){
+                if (bubblesFinder.get() || spawner.get() || signFinder.get() || portalFinder.get() || roofDetector.get() || bedrockfind.get() || skybuildfind.get() || !Blawcks1.get().isEmpty() || !Blawcks2.get().isEmpty() || !Blawcks3.get().isEmpty() || !Blawcks4.get().isEmpty() || !Blawcks5.get().isEmpty() || !Blawcks6.get().isEmpty() || !Blawcks7.get().isEmpty()){
                     int Ymin = mc.world.getBottomY()+minY.get();
                     int Ymax = mc.world.getTopY()-maxY.get();
                     try {
@@ -960,15 +1008,15 @@ public class BaseFinder extends Module {
                                                             for (Text line : lines) {
                                                                 if (line.getLiteralString().length() != 0 && (line.getString() != "<----" && i == 1) && (line.getString() != "---->" && i == 2)){ //handling for arrows is for igloos
                                                                     signtextfound = true;
-                                                                    if (signtextfound == true) break;
+                                                                    if (signtextfound) break;
                                                                 }
                                                                 i++;
                                                             }
                                                             for (Text line2 : lines2) {
-                                                                if (signtextfound == true) break;
+                                                                if (signtextfound) break;
                                                                 if (line2.getLiteralString().length() != 0){
                                                                     signtextfound = true;
-                                                                    if (signtextfound == true) break;
+                                                                    if (signtextfound) break;
                                                                 }
                                                             }
                                                         } else if (blockEntity instanceof HangingSignBlockEntity) {
@@ -979,18 +1027,18 @@ public class BaseFinder extends Module {
                                                             for (Text line : lines) {
                                                                 if (line.getLiteralString().length() != 0){ //handling for arrows is for igloos
                                                                     signtextfound = true;
-                                                                    if (signtextfound == true) break;
+                                                                    if (signtextfound) break;
                                                                 }
                                                             }
                                                             for (Text line2 : lines2) {
-                                                                if (signtextfound == true) break;
+                                                                if (signtextfound) break;
                                                                 if (line2.getLiteralString().length() != 0){
                                                                     signtextfound = true;
-                                                                    if (signtextfound == true) break;
+                                                                    if (signtextfound) break;
                                                                 }
                                                             }
                                                         }
-                                                        if (signtextfound == true && !baseChunks.contains(basepos)){
+                                                        if (signtextfound && !baseChunks.contains(basepos)){
                                                             baseChunks.add(basepos);
                                                             if (save.get()) {
                                                                 saveBaseChunkData(basepos);
@@ -1016,7 +1064,7 @@ public class BaseFinder extends Module {
                                                         }
                                                     }
                                                 }
-                                                if (bubblesFinder.get() && blerks.getBlock() instanceof BubbleColumnBlock && blerks.get(BubbleColumnBlock.DRAG) == false) {
+                                                if (bubblesFinder.get() && blerks.getBlock() instanceof BubbleColumnBlock && !blerks.get(BubbleColumnBlock.DRAG)) {
                                                     if (!baseChunks.contains(basepos)){
                                                         baseChunks.add(basepos);
                                                         if (save.get()) {
@@ -1077,49 +1125,49 @@ public class BaseFinder extends Module {
                                                     if (mc.world.getRegistryKey() == World.OVERWORLD && (blerks.getBlock()==Blocks.MOSSY_COBBLESTONE || blerks.getBlock()==Blocks.COBWEB || blerks.getBlock()==Blocks.STONE_BRICK_STAIRS || blerks.getBlock()==Blocks.BUDDING_AMETHYST))spawnernaturalblocks=true;
                                                     else if (mc.world.getRegistryKey() == World.NETHER && (blerks.getBlock()==Blocks.NETHER_BRICK_FENCE || blerks.getBlock()==Blocks.CHAIN))spawnernaturalblocks=true;
                                                 }
-                                                if (Blawcks1.get().size()>0){
+                                                if (list1Activar.get() && !Blawcks1.get().isEmpty()){
                                                     if (Blawcks1.get().contains(blerks.getBlock())) {
                                                         blockpositions1.add(blockposi);
                                                         found1= blockpositions1.size();
                                                         lastblockfound1=blerks.getBlock().toString();
                                                     }
                                                 }
-                                                if (Blawcks2.get().size()>0){
+                                                if (list2Activar.get() && !Blawcks2.get().isEmpty()){
                                                     if (Blawcks2.get().contains(blerks.getBlock())) {
                                                         blockpositions2.add(blockposi);
                                                         found2= blockpositions2.size();
                                                         lastblockfound2=blerks.getBlock().toString();
                                                     }
                                                 }
-                                                if (Blawcks3.get().size()>0){
+                                                if (list3Activar.get() && !Blawcks3.get().isEmpty()){
                                                     if (Blawcks3.get().contains(blerks.getBlock())) {
                                                         blockpositions3.add(blockposi);
                                                         found3= blockpositions3.size();
                                                         lastblockfound3=blerks.getBlock().toString();
                                                     }
                                                 }
-                                                if (Blawcks4.get().size()>0){
+                                                if (list4Activar.get() && !Blawcks4.get().isEmpty()){
                                                     if (Blawcks4.get().contains(blerks.getBlock())) {
                                                         blockpositions4.add(blockposi);
                                                         found4= blockpositions4.size();
                                                         lastblockfound4=blerks.getBlock().toString();
                                                     }
                                                 }
-                                                if (Blawcks5.get().size()>0){
+                                                if (list5Activar.get() && !Blawcks5.get().isEmpty()){
                                                     if (Blawcks5.get().contains(blerks.getBlock())) {
                                                         blockpositions5.add(blockposi);
                                                         found5= blockpositions5.size();
                                                         lastblockfound5=blerks.getBlock().toString();
                                                     }
                                                 }
-                                                if (Blawcks6.get().size()>0){
+                                                if (list6Activar.get() && !Blawcks6.get().isEmpty()){
                                                     if (Blawcks6.get().contains(blerks.getBlock())) {
                                                         blockpositions6.add(blockposi);
                                                         found6= blockpositions6.size();
                                                         lastblockfound6=blerks.getBlock().toString();
                                                     }
                                                 }
-                                                if (Blawcks7.get().size()>0){
+                                                if (list7Activar.get() && !Blawcks7.get().isEmpty()){
                                                     if (Blawcks7.get().contains(blerks.getBlock())) {
                                                         blockpositions7.add(blockposi);
                                                         found7= blockpositions7.size();
@@ -1128,21 +1176,21 @@ public class BaseFinder extends Module {
                                                 }
                                             }
                                         }
-                                        if (Blawcks1.get().size()>0)checkingchunk1=true;
-                                        if (Blawcks2.get().size()>0)checkingchunk2=true;
-                                        if (Blawcks3.get().size()>0)checkingchunk3=true;
-                                        if (Blawcks4.get().size()>0)checkingchunk4=true;
-                                        if (Blawcks5.get().size()>0)checkingchunk5=true;
-                                        if (Blawcks6.get().size()>0)checkingchunk6=true;
-                                        if (Blawcks7.get().size()>0)checkingchunk7=true;
+                                        if (!Blawcks1.get().isEmpty())checkingchunk1=true;
+                                        if (!Blawcks2.get().isEmpty())checkingchunk2=true;
+                                        if (!Blawcks3.get().isEmpty())checkingchunk3=true;
+                                        if (!Blawcks4.get().isEmpty())checkingchunk4=true;
+                                        if (!Blawcks5.get().isEmpty())checkingchunk5=true;
+                                        if (!Blawcks6.get().isEmpty())checkingchunk6=true;
+                                        if (!Blawcks7.get().isEmpty())checkingchunk7=true;
                                     }
                                 }
                             }
                             Y+=16;
                         }
                         //CheckList 1
-                        if (Blawcks1.get().size()>0){
-                            if (checkingchunk1==true && found1>=blowkfind1.get()) {
+                        if (!Blawcks1.get().isEmpty()){
+                            if (checkingchunk1 && found1>=blowkfind1.get()) {
                                 if (!baseChunks.contains(basepos)){
                                     baseChunks.add(basepos);
                                     if (save.get()) {
@@ -1157,7 +1205,7 @@ public class BaseFinder extends Module {
                                 blockpositions1.clear();
                                 found1 = 0;
                                 checkingchunk1=false;
-                            } else if (checkingchunk1==true && found1<blowkfind1.get()){
+                            } else if (checkingchunk1 && found1<blowkfind1.get()){
                                 blockpositions1.clear();
                                 found1 = 0;
                                 checkingchunk1=false;
@@ -1165,8 +1213,8 @@ public class BaseFinder extends Module {
                         }
 
                         //CheckList 2
-                        if (Blawcks2.get().size()>0){
-                            if (checkingchunk2==true && found2>=blowkfind2.get()) {
+                        if (!Blawcks2.get().isEmpty()){
+                            if (checkingchunk2 && found2>=blowkfind2.get()) {
                                 if (!baseChunks.contains(basepos)){
                                     baseChunks.add(basepos);
                                     if (save.get()) {
@@ -1181,7 +1229,7 @@ public class BaseFinder extends Module {
                                 blockpositions2.clear();
                                 found2 = 0;
                                 checkingchunk2=false;
-                            } else if (checkingchunk2==true && found2<blowkfind2.get()){
+                            } else if (checkingchunk2 && found2<blowkfind2.get()){
                                 blockpositions2.clear();
                                 found2 = 0;
                                 checkingchunk2=false;
@@ -1189,8 +1237,8 @@ public class BaseFinder extends Module {
                         }
 
                         //CheckList 3
-                        if (Blawcks3.get().size()>0){
-                            if (checkingchunk3==true && found3>=blowkfind3.get()) {
+                        if (!Blawcks3.get().isEmpty()){
+                            if (checkingchunk3 && found3>=blowkfind3.get()) {
                                 if (!baseChunks.contains(basepos)){
                                     baseChunks.add(basepos);
                                     if (save.get()) {
@@ -1205,7 +1253,7 @@ public class BaseFinder extends Module {
                                 blockpositions3.clear();
                                 found3 = 0;
                                 checkingchunk3=false;
-                            } else if (checkingchunk3==true && found3<blowkfind3.get()){
+                            } else if (checkingchunk3 && found3<blowkfind3.get()){
                                 blockpositions3.clear();
                                 found3 = 0;
                                 checkingchunk3=false;
@@ -1213,8 +1261,8 @@ public class BaseFinder extends Module {
                         }
 
                         //CheckList 4
-                        if (Blawcks4.get().size()>0){
-                            if (checkingchunk4==true && found4>=blowkfind4.get()) {
+                        if (!Blawcks4.get().isEmpty()){
+                            if (checkingchunk4 && found4>=blowkfind4.get()) {
                                 if (!baseChunks.contains(basepos)){
                                     baseChunks.add(basepos);
                                     if (save.get()) {
@@ -1229,7 +1277,7 @@ public class BaseFinder extends Module {
                                 blockpositions4.clear();
                                 found4 = 0;
                                 checkingchunk4=false;
-                            } else if (checkingchunk4==true && found4<blowkfind4.get()){
+                            } else if (checkingchunk4 && found4<blowkfind4.get()){
                                 blockpositions4.clear();
                                 found4 = 0;
                                 checkingchunk4=false;
@@ -1237,8 +1285,8 @@ public class BaseFinder extends Module {
                         }
 
                         //CheckList 5
-                        if (Blawcks5.get().size()>0){
-                            if (checkingchunk5==true && found5>=blowkfind5.get()) {
+                        if (!Blawcks5.get().isEmpty()){
+                            if (checkingchunk5 && found5>=blowkfind5.get()) {
                                 if (!baseChunks.contains(basepos)){
                                     baseChunks.add(basepos);
                                     if (save.get()) {
@@ -1253,7 +1301,7 @@ public class BaseFinder extends Module {
                                 blockpositions5.clear();
                                 found5 = 0;
                                 checkingchunk5=false;
-                            } else if (checkingchunk5==true && found5<blowkfind5.get()){
+                            } else if (checkingchunk5 && found5<blowkfind5.get()){
                                 blockpositions5.clear();
                                 found5 = 0;
                                 checkingchunk5=false;
@@ -1261,8 +1309,8 @@ public class BaseFinder extends Module {
                         }
 
                         //CheckList 6
-                        if (Blawcks6.get().size()>0){
-                            if (checkingchunk6==true && found6>=blowkfind6.get()) {
+                        if (!Blawcks6.get().isEmpty()){
+                            if (checkingchunk6 && found6>=blowkfind6.get()) {
                                 if (!baseChunks.contains(basepos)){
                                     baseChunks.add(basepos);
                                     if (save.get()) {
@@ -1277,7 +1325,7 @@ public class BaseFinder extends Module {
                                 blockpositions6.clear();
                                 found6 = 0;
                                 checkingchunk6=false;
-                            } else if (checkingchunk6==true && found6<blowkfind6.get()){
+                            } else if (checkingchunk6 && found6<blowkfind6.get()){
                                 blockpositions6.clear();
                                 found6 = 0;
                                 checkingchunk6=false;
@@ -1285,8 +1333,8 @@ public class BaseFinder extends Module {
                         }
 
                         //CheckList 7
-                        if (Blawcks7.get().size()>0){
-                            if (checkingchunk7==true && found7>=blowkfind7.get()) {
+                        if (!Blawcks7.get().isEmpty()){
+                            if (checkingchunk7 && found7>=blowkfind7.get()) {
                                 if (!baseChunks.contains(basepos)){
                                     baseChunks.add(basepos);
                                     if (save.get()) {
@@ -1301,7 +1349,7 @@ public class BaseFinder extends Module {
                                 blockpositions7.clear();
                                 found7 = 0;
                                 checkingchunk7=false;
-                            } else if (checkingchunk7==true && found7<blowkfind7.get()){
+                            } else if (checkingchunk7 && found7<blowkfind7.get()){
                                 blockpositions7.clear();
                                 found7 = 0;
                                 checkingchunk7=false;
@@ -1312,7 +1360,7 @@ public class BaseFinder extends Module {
                         //e.printStackTrace();
                     }
                 }
-                if (spawnerfound==true && spawnernaturalblocks==false){
+                if (spawnerfound && !spawnernaturalblocks){
                     if (!baseChunks.contains(basepos)){
                         baseChunks.add(basepos);
                         if (save.get()) {
@@ -1326,7 +1374,7 @@ public class BaseFinder extends Module {
                     }
                     spawnerfound=false;
                     spawnernaturalblocks=false;
-                } else if ((spawnerfound==true && spawnernaturalblocks==true) || (spawnerfound==false && spawnernaturalblocks==true) || (spawnerfound==false && spawnernaturalblocks==false)){
+                } else if ((spawnerfound && spawnernaturalblocks) || (!spawnerfound && spawnernaturalblocks) || (!spawnerfound && !spawnernaturalblocks)){
                     spawnerfound=false;
                     spawnernaturalblocks=false;
                 }

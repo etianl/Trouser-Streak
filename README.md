@@ -32,6 +32,9 @@ In no particular order
 - **ActivatedSpawnerDetector** Detects if a player was ever near a spawner or trial spawner block. The intended use for this module would be on anarchy servers where people try to hide their items within chests in dungeons, mineshafts, and trial chambers. (Credits to etianl :D)
 - **Airstrike+:** Rains down whatever entities you desire. It used to only rain fireballs, and I also changed the positioning of the spawning. (Credits to Allah-Hack for the original)
 - **AnHero:** Become An Hero! (A quick way back to spawn.) (Credits to etianl :D)
+- **Attribute Swap:** Swaps the current main hand item with another item on the hotbar for a single tick when you attack an entity. This cause the attributes from the target item you are swapping to be applied to the first item.Thank you to [DonKisser](https://github.com/DonKisser) for making this module for us!
+  Their inspiration was this Youtube video by @scilangaming:
+  https://www.youtube.com/watch?v=q99eqD_fBqo
 - **AutoCommand:** Automates a list of commands you set in it's options at the push of a button! Credits to [aaaasdfghjkllll](https://github.com/aaaasdfghjkllll). I only added a full auto option because who doesn't love full auto?
 - **AutoDisplays:** Automatically spams block displays around all player's heads to blind them or text displays around them for trolling and advertising. Requires operator access. (Credits to etianl :D)
 - **AutoDrop:** Drops the stack in your selected slot automatically, or you can choose a slot to dump. You can shift click your inventory items to dump your trash easily. (Credits to etianl :D)
@@ -68,6 +71,12 @@ In no particular order
 - **AutoNames** Automatically change player name colors, prefix, suffix in tab and chat. Requires OP status. Credits to [DedicateDev](https://github.com/DedicateDev)
 - **AutoScoreboard:** Automates the creation of a custom scoreboard. Useful for advertising on griefed servers. Requires OP status. Credits to [aaaasdfghjkllll](https://github.com/aaaasdfghjkllll)
 - **AutoStaircase:** Builds stairs upward in the direction you are facing by running forward and jumping. (Credits to etianl for bringing it to life! As well as Credits to [majorsopa](https://github.com/majorsopa) for writing the original. <3) I just had to fix up some stuff for this one but Frostburn Client had the base code there. I believe this is the first publicly available automatic staircase builder in a Meteor addon, correct me if I'm wrong maybe I didn't have to learn some Java to do this.
+- **AutoTexts:** Automatically spawns words around you by creating invisible armor stands with names. You can specify the text you want to spawn in, and the color of the text. Thank you to [DedicateDev](https://github.com/DedicateDev)!
+- **TextCommand:** Very similar to the **AutoTexts** module. The difference with this one is that it can display many lines one after the other. Thank you to [DedicateDev](https://github.com/DedicateDev)!
+- The command is accessed by typing .text followed by one of the subcommands. You can choose load or save a preset set of text.
+- The saved presets for the .text command will be saved in the .minecraft/TrouserStreak/TextPresets folder.
+- Some example commands would be ".text load mountains" or ".text save mountains #green [ #dark_red Trolled! #green ]|#gold Mountains of Lava Inc.|#red Youtube: #blue www.youtube.com/@mountainsoflavainc.6913"
+- Individual lines are seperated by a | (pipe character) and you can also use #red "wordhere" to format the color of the text.
 - **AutoTitles:** Displays text (such as advertisements) across the screen of all the individuals who are online on a server at the time. Requires OP status. Credits to [ogmur](https://www.youtube.com/@Ogmur) for figuring out these commands, and to etianl for writing a module for it.
 - **AutoVclipCommand** Automatically selects the nearest two block gap going either up or down to vclip into. (Credits to etianl, and credits to the original [AutoVclip](https://github.com/kittenvr/AutoVclip) for minecraft 1.19.2 which inspired me to make this one. :D)
 - **BaseFinder:** Automatically detects if a Base or Build could be in a chunk by checking every block and entity in each chunk to see if there are "Un-natural" things within them. (Credits to etianl :D, and to Meteor-Rejects for some code from newchunks.)
@@ -103,6 +112,7 @@ In no particular order
 - **LavaAura:** Automatically places and picks up lava buckets at an entity's position on a tick delay, or sets the entity on fire using flint and steel or fire charges. Also has the option of placing lavabuckets or fire on every block face which may be useful in creative mode. (Credits to etianl :D)
 - **LecternCrash:** Crash 1.18.X vanilla servers and possibly below. (Credits to Coderx-Gamer)
 - **MaceKill:** Exploits Mace mechanics to make the Mace super OP everytime you swing it instead of just when you drop from a height. (Credits to etianl :D)
+- **MultiUse:** Allows you to do the item use action more than once per item use. Essentially a strange form of the FastUse module and may work well combined with it. Initially created by [maytrixc](https://github.com/maytrixc), modified by etianl to use doItemUse.
 - **NbtEditor:** Requires Creative mode. Generates custom entities in the form of a custom spawn egg, generate items with custom enchantments (Only in Minecraft 1.20.4 and below), and potions with custom effects all based on the settings you configure. It can also copy the Nbt data from one item to another.  (Credits to etianl :D)
 - **NewerNewChunks:** NewChunks module with new newchunk estimation exploits, and the ability to save chunk data for later! Comes with several new homebrewed newchunks methods made by yours truly. (Credits to Meteor Rejects, and BleachHack from where it was ported, and etianl for updating :D.)
 
