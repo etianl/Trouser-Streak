@@ -7,3 +7,4 @@ accessible method net/minecraft/client/network/ClientPlayerEntity getPermissionL
 accessible field net/minecraft/block/spawner/MobSpawnerLogic spawnDelay I
 accessible field net/minecraft/block/spawner/MobSpawnerLogic spawnEntry Lnet/minecraft/block/spawner/MobSpawnerEntry;
 accessible field net/minecraft/block/entity/DecoratedPotBlockEntity stack Lnet/minecraft/item/ItemStack;
+accessible method net/minecraft/client/MinecraftClient doItemUse ()V
