@@ -1,3 +1,7 @@
+/*Thank you to [DonKisser](https://github.com/DonKisser) for making this module for us!
+        Their inspiration was this Youtube video by @scilangaming:
+        https://www.youtube.com/watch?v=q99eqD_fBqo*/
+
 package pwn.noobs.trouserstreak.modules;
 
 import pwn.noobs.trouserstreak.Trouser;
@@ -13,13 +17,13 @@ import meteordevelopment.orbit.EventHandler;
 
 public class AttributeSwap extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final Setting<Integer> targetSlot = sgGeneral.add(new IntSetting.Builder().name("target-slot").description("The hotbar slot to swap to when attacking.").sliderRange(0, 8).defaultValue(0).build());
+    private final Setting<Integer> targetSlot = sgGeneral.add(new IntSetting.Builder().name("target-slot").description("The hotbar slot to swap to when attacking.").sliderRange(1, 9).defaultValue(1).min(1).build());
     private final Setting<Boolean> swapBack = sgGeneral.add(new BoolSetting.Builder().name("swap-back").description("Swap back to the original slot after a short delay.").defaultValue(true).build());
-    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder().name("swap-back-delay").description("Delay in ticks before swapping back to the previous slot.").sliderRange(1, 20).defaultValue(1).visible(swapBack::get).build());
+    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder().name("swap-back-delay").description("Delay in ticks before swapping back to the previous slot.").sliderRange(1, 20).defaultValue(1).min(1).visible(swapBack::get).build());
     private int prevSlot = -1;
     private int dDelay = 0;
     public AttributeSwap() {
-        super(Trouser.Main, "Attribute Swap", "Tries the Atrribute Swap bug");
+        super(Trouser.Main, "attribute-swap", "Swaps attributes of the main hand item with the target slot on attack");
     }
     @EventHandler
     private void onAttack(AttackEntityEvent event) {
@@ -27,7 +31,7 @@ public class AttributeSwap extends Module {
         if (swapBack.get()) {
             prevSlot = mc.player.getInventory().selectedSlot;
         }
-        InvUtils.swap(targetSlot.get(), false);
+        InvUtils.swap(targetSlot.get()-1, false);
         if (swapBack.get() && prevSlot != -1) {
             dDelay = delay.get();
         }

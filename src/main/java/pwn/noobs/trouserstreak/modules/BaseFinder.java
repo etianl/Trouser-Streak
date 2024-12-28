@@ -532,9 +532,9 @@ public class BaseFinder extends Module {
         WButton deletedata = table.add(theme.button("**DELETE ALL BASE DATA**")).expandX().minWidth(100).widget();
         deletedata.action = () -> {
             if (!(mc.world==null) && mc.world.isChunkLoaded(mc.player.getChunkPos().x,mc.player.getChunkPos().z)){
-            if (deletewarning==0) error("PRESS AGAIN WITHIN 5s TO DELETE ALL BASE DATA FOR THIS DIMENSION.");
-            deletewarningTicks=0;
-            deletewarning++;
+                if (deletewarning==0) error("PRESS AGAIN WITHIN 5s TO DELETE ALL BASE DATA FOR THIS DIMENSION.");
+                deletewarningTicks=0;
+                deletewarning++;
             }
         };
         table.row();
@@ -718,7 +718,7 @@ public class BaseFinder extends Module {
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         world = mc.world.getRegistryKey().getValue().toString().replace(':', '_');
-        
+
         if (basefound && basefoundspamTicks < bsefndtickdelay.get()) basefoundspamTicks++;
         else if (basefoundspamTicks >= bsefndtickdelay.get()) {
             basefound = false;
@@ -919,13 +919,13 @@ public class BaseFinder extends Module {
         BlockPos playerPos = new BlockPos(mc.player.getBlockX(), midpoint, mc.player.getBlockZ());
         if (baseChunksLineColor.get().a > 5 || baseChunksSideColor.get().a > 5){
             if (!nearesttrcr.get()){
-            synchronized (baseChunks) {
-                for (ChunkPos c : baseChunks) {
-                    if (playerPos.isWithinDistance(new BlockPos(c.getCenterX(), midpoint, c.getCenterZ()), renderDistance.get()*16)) {
-                        render(new Box(new Vec3d(c.getStartPos().getX()+7, c.getStartPos().getY()+renderHeightYbottom.get(), c.getStartPos().getZ()+7), new Vec3d(c.getStartPos().getX()+8, c.getStartPos().getY()+renderHeightY.get(), c.getStartPos().getZ()+8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
+                synchronized (baseChunks) {
+                    for (ChunkPos c : baseChunks) {
+                        if (playerPos.isWithinDistance(new BlockPos(c.getCenterX(), midpoint, c.getCenterZ()), renderDistance.get()*16)) {
+                            render(new Box(new Vec3d(c.getStartPos().getX()+7, c.getStartPos().getY()+renderHeightYbottom.get(), c.getStartPos().getZ()+7), new Vec3d(c.getStartPos().getX()+8, c.getStartPos().getY()+renderHeightY.get(), c.getStartPos().getZ()+8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
+                        }
                     }
                 }
-            }
             } else if (nearesttrcr.get()){
                 synchronized (baseChunks) {
                     for (ChunkPos c : baseChunks) {
@@ -942,7 +942,7 @@ public class BaseFinder extends Module {
     private void render(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
         if (trcr.get() && Math.abs(box.minX-RenderUtils.center.x)<=trcrdist.get()*16 && Math.abs(box.minZ-RenderUtils.center.z)<=trcrdist.get()*16)
             if (!nearesttrcr.get())
-            event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
+                event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
         event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
     }
     private void render2(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {

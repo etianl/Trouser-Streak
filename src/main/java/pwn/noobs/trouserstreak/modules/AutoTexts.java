@@ -1,3 +1,4 @@
+//Credits to DedicateDev for making this!
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;

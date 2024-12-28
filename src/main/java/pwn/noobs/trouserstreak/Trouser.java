@@ -41,6 +41,14 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new BetterScaffold());
                 Modules.get().add(new RedstoneNuker());
 
+                //Modules.get().add(new -----> Create Illegal things with Creative mode! <-----());
+                Modules.get().add(new ForceOPSign());
+                Modules.get().add(new ForceOPBook());
+                Modules.get().add(new NbtEditor());
+                Modules.get().add(new AirstrikePlus());
+                Modules.get().add(new BoomPlus());
+                Modules.get().add(new ExplosionAura());
+
                 //Modules.get().add(new -----> Overpowered OP mode modules! <-----());
                 Modules.get().add(new BungeeSpoofer());
                 Modules.get().add(new HandOfGod());
@@ -51,19 +59,10 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new AutoScoreboard());
                 Modules.get().add(new AutoTitles());
                 Modules.get().add(new AutoDisplays());
-                Modules.get().add(new AutoNames());
                 Modules.get().add(new AutoTexts());
                 Commands.add(new TextCommand());
+                Modules.get().add(new AutoNames());
                 Modules.get().add(new OPplayerTPmodule());
-
-                //Modules.get().add(new -----> Create Illegal things with Creative mode! <-----());
-                Modules.get().add(new ForceOPSign());
-                Modules.get().add(new ForceOPBook());
-                Modules.get().add(new NbtEditor());
-                Modules.get().add(new AirstrikePlus());
-                Modules.get().add(new BoomPlus());
-                Modules.get().add(new ExplosionAura());
-                // Modules.get().add(new FasterUse());
 
                 //Modules.get().add(new -----> Exploits for old versions! <-----());
                 Modules.get().add(new ShulkerDupe());
@@ -71,17 +70,18 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new BoatKill());
                 Modules.get().add(new InstantKill());
                 Modules.get().add(new LecternCrash());
-                Modules.get().add(new AttributeSwap());
 
                 //Modules.get().add(new -----> And much more <-----());
                 Modules.get().add(new BookAndQuillDupe());
-                Modules.get().add(new BetterAutoSign());
+                Modules.get().add(new AttributeSwap());
                 Modules.get().add(new Teleport());
                 Modules.get().add(new TPFly());
                 Modules.get().add(new FlightAntikick());
+                Modules.get().add(new BetterAutoSign());
                 Modules.get().add(new InstaSafetyBox());
                 Modules.get().add(new TrouserBuild());
                 Modules.get().add(new TrailMaker());
+                Modules.get().add(new MultiUse());
                 Modules.get().add(new AutoDrop());
                 Modules.get().add(new AnHero());
                 Commands.add(new WorldInfoCommand());
