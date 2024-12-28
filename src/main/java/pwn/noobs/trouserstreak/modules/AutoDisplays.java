@@ -69,7 +69,7 @@ public class AutoDisplays extends Module {
             .defaultValue(2)
             .min(1)
             .sliderMax(20)
-            .visible(() -> useDelay.get())
+            .visible(useDelay::get)
             .build());
     private final Setting<Integer> tickDelay = sgGeneral.add(new IntSetting.Builder()
             .name("Tick Delay")
@@ -154,6 +154,7 @@ public class AutoDisplays extends Module {
     }
     @Override
     public void onActivate() {
+        if (mc.player == null) return;
         tickTimer = 0;
         killTimer = 0;
         if (notOP.get() && !(mc.player.hasPermissionLevel(2)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {

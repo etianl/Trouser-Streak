@@ -138,6 +138,7 @@ public class InstaMineNuker extends Module {
 
     @Override
     public void onActivate() {
+        if (mc.player == null) return;
         direction=mc.player.getHorizontalFacing();
         ticks = 0;
         for (RenderBlock renderBlock : renderBlocks) renderBlockPool.free(renderBlock);
@@ -198,6 +199,7 @@ public class InstaMineNuker extends Module {
             blocks.sort(Comparator.comparingDouble(pos -> pos.getSquaredDistance(mc.player.getPos())));
 
             for (BlockPos blockPos : blocks) {
+                assert mc.world != null;
                 if (count >= maxBlocksPerTick.get()) break;
                 // Get the block at the current coordinates
                 if (onlyInstamineable.get()){

@@ -16,8 +16,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import pwn.noobs.trouserstreak.Trouser;
 
-import java.lang.reflect.Method;
-
 public class MaceKill extends Module {
     private final SettingGroup specialGroup2 = settings.createGroup("Disable \"Smash Attack\" in the Criticals module to make this module work.");
     private final SettingGroup specialGroup = settings.createGroup("Values higher than 22 only work on Paper/Spigot");
@@ -47,7 +45,7 @@ public class MaceKill extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (mc.player.getInventory().getMainHandStack().getItem() == Items.MACE && event.packet instanceof IPlayerInteractEntityC2SPacket packet && packet.meteor$getType() == PlayerInteractEntityC2SPacket.InteractType.ATTACK) {
+        if (mc.player != null && mc.player.getInventory().getMainHandStack().getItem() == Items.MACE && event.packet instanceof IPlayerInteractEntityC2SPacket packet && packet.meteor$getType() == PlayerInteractEntityC2SPacket.InteractType.ATTACK) {
             try {
                 if (packet.meteor$getEntity() instanceof LivingEntity) {
                     LivingEntity targetEntity = (LivingEntity) packet.meteor$getEntity();

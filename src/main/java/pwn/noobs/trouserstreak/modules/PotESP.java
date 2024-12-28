@@ -38,7 +38,7 @@ public class PotESP extends Module {
             .name("Display Coords")
             .description("Displays coords of activated spawners in chat.")
             .defaultValue(true)
-            .visible(()->potMessage.get())
+            .visible(potMessage::get)
             .build()
     );
     private final Setting<List<Item>> junkItemList = sgGeneral.add(new ItemListSetting.Builder()
@@ -109,7 +109,6 @@ public class PotESP extends Module {
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         if (mc.world == null) return;
-
         int renderDistance = mc.options.getViewDistance().getValue();
         ChunkPos playerChunkPos = new ChunkPos(mc.player.getBlockPos());
         for (int chunkX = playerChunkPos.x - renderDistance; chunkX <= playerChunkPos.x + renderDistance; chunkX++) {
@@ -139,7 +138,7 @@ public class PotESP extends Module {
     }
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (potSideColor.get().a > 5 || potLineColor.get().a > 5) {
+        if ((potSideColor.get().a > 5 || potLineColor.get().a > 5) && mc.player != null) {
             synchronized (potLocations) {
                 for (BlockPos pos : potLocations) {
                     BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());

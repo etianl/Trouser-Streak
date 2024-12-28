@@ -9,17 +9,14 @@ import meteordevelopment.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3i;
-import net.minecraft.util.shape.VoxelShape;
 import pwn.noobs.trouserstreak.Trouser;
 import pwn.noobs.trouserstreak.events.OffGroundSpeedEvent;
 
@@ -66,7 +63,7 @@ public class TPFly extends Module {
             .defaultValue(1)
             .min(1)
             .sliderMax(5)
-            .visible(() -> Acceleration.get())
+            .visible(Acceleration::get)
             .build()
     );
     private final Setting<Integer> upacceleration = sgGeneral.add(new IntSetting.Builder()
@@ -75,7 +72,7 @@ public class TPFly extends Module {
             .defaultValue(1)
             .min(1)
             .sliderMax(5)
-            .visible(() -> Acceleration.get())
+            .visible(Acceleration::get)
             .build()
     );
     private final Setting<Integer> downacceleration = sgGeneral.add(new IntSetting.Builder()
@@ -84,7 +81,7 @@ public class TPFly extends Module {
             .defaultValue(1)
             .min(1)
             .sliderMax(5)
-            .visible(() -> Acceleration.get())
+            .visible(Acceleration::get)
             .build()
     );
     public final Setting<Boolean> akick = sgGeneral.add(new BoolSetting.Builder()
@@ -98,7 +95,7 @@ public class TPFly extends Module {
             .description("The amount of delay, in ticks, between toggles.")
             .defaultValue(20)
             .sliderRange(0, 60)
-            .visible(() -> akick.get())
+            .visible(akick::get)
             .build()
     );
     private final Setting<Integer> offTime = sgGeneral.add(new IntSetting.Builder()
@@ -106,7 +103,7 @@ public class TPFly extends Module {
             .description("The amount of delay, in ticks, that TPFly is toggled off.")
             .defaultValue(3)
             .sliderRange(0, 200)
-            .visible(() -> akick.get())
+            .visible(akick::get)
             .build()
     );
 
@@ -120,6 +117,7 @@ public class TPFly extends Module {
     private int offLeft = offTime.get();
     @Override
     public void onDeactivate() {
+        if (mc.player == null) return;
         mc.player.setVelocity(0,0.01,0);
         if (!mc.options.sneakKey.isPressed()){
             mc.player.setPos(mc.player.getX(),mc.player.getY()+0.1,mc.player.getZ());
@@ -132,23 +130,26 @@ public class TPFly extends Module {
     //making absolutely sure there is no velocity and that this is setPos movement only
     @EventHandler
     private void onKeyEvent(KeyEvent event) {
-        if (mc.options.jumpKey.isPressed() || mc.options.sneakKey.isPressed() || mc.options.forwardKey.isPressed() || mc.options.backKey.isPressed() || mc.options.leftKey.isPressed() || mc.options.rightKey.isPressed()){
+        if (mc.player != null && mc.options.jumpKey.isPressed() || mc.options.sneakKey.isPressed() || mc.options.forwardKey.isPressed() || mc.options.backKey.isPressed() || mc.options.leftKey.isPressed() || mc.options.rightKey.isPressed()){
             mc.player.setVelocity(0,0,0);
             mc.player.setMovementSpeed(0);
         }
     }
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent playerMoveEvent) {
+        if (mc.player == null) return;
         mc.player.setVelocity(0,0,0);
         mc.player.setMovementSpeed(0);
     }
     @EventHandler
     private void onTick(TickEvent event) {
+        if (mc.player == null) return;
         mc.player.setVelocity(0,0,0);
         mc.player.setMovementSpeed(0);
     }
     @EventHandler
     private void onTick(TickEvent.Pre event) {
+        if (mc.player == null) return;
         mc.player.setVelocity(0,0,0);
         mc.player.setMovementSpeed(0);
         if (Acceleration.get() && Range < range.get() && (mc.options.forwardKey.isPressed() || mc.options.backKey.isPressed() || mc.options.rightKey.isPressed() || mc.options.leftKey.isPressed() || mc.options.sneakKey.isPressed() || mc.options.jumpKey.isPressed())){
@@ -171,7 +172,7 @@ public class TPFly extends Module {
     }
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (event.packet instanceof PlayerMoveC2SPacket){
+        if (event.packet instanceof PlayerMoveC2SPacket && mc.player != null){
             ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
             mc.player.setVelocity(0,0,0);
             mc.player.setMovementSpeed(0);
@@ -179,6 +180,7 @@ public class TPFly extends Module {
     }
     @EventHandler
     private void onTick(TickEvent.Post event) {
+        if (mc.player == null || mc.world == null) return;
         BlockPos playerPos = mc.player.getBlockPos();
         mc.player.setVelocity(0,0,0);
         mc.player.setMovementSpeed(0);

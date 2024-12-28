@@ -1,6 +1,5 @@
 package pwn.noobs.trouserstreak.modules;
 
-import com.sun.jdi.event.BreakpointEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
@@ -174,21 +173,21 @@ public class LavaAura extends Module {
             .name("Target Flammable Only")
             .description("Lava or set fire to only the flammable blocks.")
             .defaultValue(true)
-            .visible(() -> lavaeverything.get())
+            .visible(lavaeverything::get)
             .build()
     );
     private final Setting<Boolean> ignorebelowplayer = sgBurnEverything.add(new BoolSetting.Builder()
             .name("Burn Only Above Player Y Level")
             .description("Lava or set fire to only the blocks above your Y level.")
             .defaultValue(true)
-            .visible(() -> lavaeverything.get())
+            .visible(lavaeverything::get)
             .build()
     );
     private final Setting<List<Block>> skippableBlox = sgBurnEverything.add(new BlockListSetting.Builder()
             .name("Blocks to Skip")
             .description("Skips burning these blocks.")
             .defaultValue(Blocks.SHORT_GRASS, Blocks.TALL_GRASS)
-            .visible(() -> lavaeverything.get())
+            .visible(lavaeverything::get)
             .build()
     );
     private final Setting<Boolean> pauseOnLag = sgGeneral.add(new BoolSetting.Builder()
@@ -207,7 +206,7 @@ public class LavaAura extends Module {
     private int placementTicks = 0;
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (!mc.player.isAlive() || PlayerUtils.getGameMode() == GameMode.SPECTATOR) return;
+        if (mc.player != null && !mc.player.isAlive() || PlayerUtils.getGameMode() == GameMode.SPECTATOR) return;
         if (pauseOnLag.get() && TickRate.INSTANCE.getTimeSinceLastTick() >= 1f) return;
         float originalYaw = mc.player.getYaw();
         float originalPitch = mc.player.getPitch();
@@ -537,7 +536,7 @@ public class LavaAura extends Module {
             findItemResult = InvUtils.findInHotbar(Items.FIRE_CHARGE);
         }
 
-        if (!findItemResult.found()) {
+        if (!findItemResult.found() || mc.player == null || mc.interactionManager == null) {
             return; // Exit if the required item is not found
         }
         int prevSlot = mc.player.getInventory().selectedSlot;
@@ -552,8 +551,8 @@ public class LavaAura extends Module {
         mc.player.getInventory().selectedSlot = prevSlot;
     }
     private void pickUpLavaOnTick() {
+        if (mc.player == null || mc.world == null) return;
         BlockPos playerPos = mc.player.getBlockPos();
-
         for (int x = (int) -Math.round(range.get()+1); x <= range.get()+1; x++) {
             for (int y = (int) -Math.round(range.get()+1); y <= range.get()+1; y++) {
                 for (int z = (int) -Math.round(range.get()+1); z <= range.get()+1; z++) {
@@ -582,8 +581,8 @@ public class LavaAura extends Module {
         }
     }
     private void extinguishFireOnTick() {
+        if (mc.player == null || mc.world == null || mc.interactionManager == null) return;
         BlockPos playerPos = mc.player.getBlockPos();
-
         for (int x = (int) -Math.round(range.get()+1); x <= range.get()+1; x++) {
             for (int y = (int) -Math.round(range.get()+1); y <= range.get()+1; y++) {
                 for (int z = (int) -Math.round(range.get()+1); z <= range.get()+1; z++) {
@@ -618,7 +617,7 @@ public class LavaAura extends Module {
     }
     private void pickupLiquid() {
         FindItemResult findItemResult = InvUtils.findInHotbar(Items.BUCKET);
-        if (!findItemResult.found()) {
+        if (!findItemResult.found() || mc.player == null || mc.interactionManager == null) {
             return;
         }
         int prevSlot = mc.player.getInventory().selectedSlot;

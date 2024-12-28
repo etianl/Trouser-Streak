@@ -68,7 +68,7 @@ public class BetterScaffold extends Module {
             .defaultValue(6)
             .min(0)
             .sliderMax(8)
-            .visible(() -> keepY.get())
+            .visible(keepY::get)
             .build()
     );
     private final Setting<Boolean> fastTower = sgGeneral.add(new BoolSetting.Builder()
@@ -191,6 +191,7 @@ public class BetterScaffold extends Module {
 
     @Override
     public void onActivate() {
+        if (mc.player == null) return;
         initialY = mc.player.getBlockY()-1;
         lastWasSneaking = mc.options.sneakKey.isPressed();
         if (lastWasSneaking) {
@@ -241,7 +242,7 @@ public class BetterScaffold extends Module {
                             }
                         }
                     }
-                    if (blockPosArray.size() == 0) {
+                    if (blockPosArray.isEmpty()) {
                         return;
                     }
 

@@ -232,6 +232,7 @@ public class BetterAutoSign extends Module {
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
+        if (mc.player == null || mc.interactionManager == null) return;
         if (signAura.get() && mc.player.getMainHandStack().getItem() instanceof HangingSignItem && warningticks<=3){
             warningticks++;
             if (warningticks==2)error("Sign Aura does not work properly with hanging signs when holding a hanging sign.");
@@ -334,7 +335,7 @@ public class BetterAutoSign extends Module {
     }
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
-        if (!editrear || !bothside.get() || prevsignPos == signPos) return;
+        if (!editrear || !bothside.get() || prevsignPos == signPos || mc.player == null || mc.world == null || mc.interactionManager != null) return;
         if (!(mc.world.getBlockState(signPos).getBlock().asItem() instanceof HangingSignItem) && mc.world.getBlockState(signPos).getBlock().asItem() instanceof SignItem){
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(signPos.getX(), signPos.getY(), signPos.getZ()), Direction.DOWN, signPos, false));
                 if (differentText.get())

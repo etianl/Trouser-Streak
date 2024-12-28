@@ -261,7 +261,7 @@ public class NbtEditor extends Module {
     }
     @Override
     public void onActivate() {
-        if (mc.player.getAbilities().creativeMode) {
+        if (mc.player != null  && mc.interactionManager != null && mc.world != null && mc.player.getAbilities().creativeMode) {
             switch (mode.get()) {
                 case Entity -> {
                     ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
