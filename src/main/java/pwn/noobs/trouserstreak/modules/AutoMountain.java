@@ -121,7 +121,7 @@ public class AutoMountain extends Module {
             .min (1)
             .defaultValue(5)
             .sliderRange(0, 100)
-            .visible(() -> delayakick.get())
+            .visible(delayakick::get)
             .build()
     );
     private final Setting<Integer> offTime = sgTimings.add(new IntSetting.Builder()
@@ -130,7 +130,7 @@ public class AutoMountain extends Module {
             .min (1)
             .defaultValue(20)
             .sliderRange(1, 200)
-            .visible(() -> delayakick.get())
+            .visible(delayakick::get)
             .build()
     );
     private final Setting<Integer> botlimit = sgBuild.add(new IntSetting.Builder()
@@ -139,7 +139,7 @@ public class AutoMountain extends Module {
             .min (3)
             .sliderRange(3, 380)
             .defaultValue(30)
-            .visible(() -> autolavamountain.get())
+            .visible(autolavamountain::get)
             .build());
     private final Setting<Integer> limit = sgBuild.add(new IntSetting.Builder()
             .name("UpwardBuildLimit")
@@ -192,7 +192,7 @@ public class AutoMountain extends Module {
             .min(0)
             .sliderRange(0, 10)
             .defaultValue(1)
-            .visible(() -> lagpause.get())
+            .visible(lagpause::get)
             .build());
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
@@ -206,7 +206,7 @@ public class AutoMountain extends Module {
             .name("shape-mode")
             .description("How the shapes are rendered.")
             .defaultValue(ShapeMode.Both)
-            .visible(() -> render.get())
+            .visible(render::get)
             .build()
     );
 
@@ -214,7 +214,7 @@ public class AutoMountain extends Module {
             .name("side-color")
             .description("The color of the sides of the blocks being rendered.")
             .defaultValue(new SettingColor(255, 0, 255, 15))
-            .visible(() -> render.get())
+            .visible(render::get)
             .build()
     );
 
@@ -222,7 +222,7 @@ public class AutoMountain extends Module {
             .name("line-color")
             .description("The color of the lines of the blocks being rendered.")
             .defaultValue(new SettingColor(255, 0, 255, 255))
-            .visible(() -> render.get())
+            .visible(render::get)
             .build()
     );
     public final Setting<Boolean> lowYrst = sgGeneral.add(new BoolSetting.Builder()
@@ -288,11 +288,11 @@ public class AutoMountain extends Module {
         groundY2=0;
         lowblockY=-1;
         highblockY=-1;
-        if (startPaused.get() == true){
+        if (startPaused.get()){
             pause = false;
             if (autolavamountain.get()) ChatUtils.sendMsg(Text.of("Press UseKey (RightClick) to Build a Mountain! Please wait while the bot works."));
             else ChatUtils.sendMsg(Text.of("Press UseKey (RightClick) to Build Stairs!"));
-        } else if (startPaused.get() == false){
+        } else if (!startPaused.get()){
             mc.player.setPos(mc.player.getX(),Math.ceil(mc.player.getY()),mc.player.getZ());
             wasfacing=mc.player.getHorizontalFacing();
             prevPitch=Math.round(mc.player.getPitch());
@@ -321,15 +321,16 @@ public class AutoMountain extends Module {
 
     @Override
     public void onDeactivate() {
+        if (mc.player == null) return;
         mc.player.setNoGravity(false);
-        if (isthisfirstblock==true){
+        if (isthisfirstblock){
             highestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
             lowestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
             isthisfirstblock=false;
         }
         if (pause=true){
-            if (isthisfirstblock==false && mc.player.getY()<lowestblock.getY()) lowestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
-            if (isthisfirstblock==false && mc.player.getY()>highestblock.getY()+1) highestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
+            if (!isthisfirstblock && mc.player.getY()<lowestblock.getY()) lowestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
+            if (!isthisfirstblock && mc.player.getY()>highestblock.getY()+1) highestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
         }
         search=true;
         seekground();
@@ -339,7 +340,7 @@ public class AutoMountain extends Module {
         resetTimer = true;
         Modules.get().get(Timer.class).setOverride(Timer.OFF);
         if (isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack())) return;
-        if (pause==false){
+        if (!pause){
             BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
             if (mc.world.getBlockState(pos).isReplaceable()) {
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
@@ -349,7 +350,7 @@ public class AutoMountain extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (render.get()) {
+        if (render.get() && mc.player != null) {
             if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
                 if ((mouseT.get() && mc.player.getPitch() <= 40) || (!mouseT.get() && prevPitch <= 40)){            //UP
                     if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {
@@ -393,12 +394,12 @@ public class AutoMountain extends Module {
                     if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {
                         BlockPos pos1 = renderplayerPos.add(new Vec3i(0, 0, -1));
                         event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                        if (autolavamountain.get() && pause==false){
+                        if (autolavamountain.get() && !pause){
                             BlockPos pos2 = renderplayerPos.add(new Vec3i(0, botlimit.get()-1, -botlimit.get()));
                             BlockPos pos3 = renderplayerPos.add(new Vec3i(0, 1, -2));
                             event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                             event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                        } else if (autolavamountain.get() && pause==true){
+                        } else if (autolavamountain.get() && pause){
                             BlockPos pos2 = lowestblock.add(new Vec3i(0, botlimit.get(), -botlimit.get()));
                             BlockPos pos3 = renderplayerPos.add(new Vec3i(0, 1, -2));
                             event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
@@ -408,12 +409,12 @@ public class AutoMountain extends Module {
                     if ((mouseT.get() && mc.player.getMovementDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {
                         BlockPos pos1 = renderplayerPos.add(new Vec3i(0, 0, 1));
                         event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                        if (autolavamountain.get() && pause==false){
+                        if (autolavamountain.get() && !pause){
                             BlockPos pos2 = renderplayerPos.add(new Vec3i(0, botlimit.get()-1, botlimit.get()));
                             BlockPos pos3 = renderplayerPos.add(new Vec3i(0, 1, 2));
                             event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                             event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                        } else if (autolavamountain.get() && pause==true){
+                        } else if (autolavamountain.get() && pause){
                             BlockPos pos2 = lowestblock.add(new Vec3i(0, botlimit.get(), botlimit.get()));
                             BlockPos pos3 = renderplayerPos.add(new Vec3i(0, 1, 2));
                             event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
@@ -423,12 +424,12 @@ public class AutoMountain extends Module {
                     if ((mouseT.get() && mc.player.getMovementDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {
                         BlockPos pos1 = renderplayerPos.add(new Vec3i(1, 0, 0));
                         event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                        if (autolavamountain.get() && pause==false){
+                        if (autolavamountain.get() && !pause){
                             BlockPos pos3 = renderplayerPos.add(new Vec3i(2, 1, 0));
                             BlockPos pos2 = renderplayerPos.add(new Vec3i(botlimit.get(), botlimit.get()-1, 0));
                             event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                             event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                        } else if (autolavamountain.get() && pause==true){
+                        } else if (autolavamountain.get() && pause){
                             BlockPos pos3 = renderplayerPos.add(new Vec3i(2, 1, 0));
                             BlockPos pos2 = lowestblock.add(new Vec3i(botlimit.get(), botlimit.get(), 0));
                             event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
@@ -438,12 +439,12 @@ public class AutoMountain extends Module {
                     if ((mouseT.get() && mc.player.getMovementDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {
                         BlockPos pos1 = renderplayerPos.add(new Vec3i(-1, 0, -0));
                         event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                        if (autolavamountain.get() && pause==false){
+                        if (autolavamountain.get() && !pause){
                             BlockPos pos3 = renderplayerPos.add(new Vec3i(-2, 1, 0));
                             BlockPos pos2 = renderplayerPos.add(new Vec3i(-botlimit.get(), botlimit.get()-1, 0));
                             event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                             event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                        } else if (autolavamountain.get() && pause==true){
+                        } else if (autolavamountain.get() && pause){
                             BlockPos pos3 = renderplayerPos.add(new Vec3i(-2, 1, 0));
                             BlockPos pos2 = lowestblock.add(new Vec3i(-botlimit.get(), botlimit.get(), 0));
                             event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
@@ -475,30 +476,30 @@ public class AutoMountain extends Module {
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if (mc.options.useKey.isPressed()){
-            if (pause==true){
+            if (pause){
                 BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
                 if (mc.world.getBlockState(pos).isReplaceable()) {
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
                     mc.player.swingHand(Hand.MAIN_HAND);}
             }
-            if (pause==false)mc.player.setPos(mc.player.getX(),Math.ceil(mc.player.getY()),mc.player.getZ());
-            pause = pause ? false : true;
+            if (!pause)mc.player.setPos(mc.player.getX(),Math.ceil(mc.player.getY()),mc.player.getZ());
+            pause = !pause;
             mc.player.setVelocity(0,0,0);
             cookie=0;
             speed=0;
             resetTimer = true;
             Modules.get().get(Timer.class).setOverride(Timer.OFF);
             if (isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack())) return;
-            if (isthisfirstblock==true){
+            if (isthisfirstblock){
                 highestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
                 lowestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
                 isthisfirstblock=false;
             }
-            if (isthisfirstblock==false&&mc.player.getY()<lowestblock.getY()){
+            if (!isthisfirstblock &&mc.player.getY()<lowestblock.getY()){
                 lowestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
                 seekground();
             }
-            if (isthisfirstblock==false && mc.player.getY()>highestblock.getY()+1){
+            if (!isthisfirstblock && mc.player.getY()>highestblock.getY()+1){
                 highestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
                 seekground2();
             }
@@ -506,7 +507,7 @@ public class AutoMountain extends Module {
     }
     @EventHandler
     private void onKeyEvent(KeyEvent event) {
-        if (pause == false)return;
+        if (!pause)return;
         if (!autolavamountain.get()){
             if (mc.options.forwardKey.isPressed()){
                 if (mouseT.get())mc.player.setPitch(35);
@@ -516,7 +517,7 @@ public class AutoMountain extends Module {
                 if (mouseT.get())mc.player.setPitch(75);
                 if (!mouseT.get())prevPitch=75;
             }
-            if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack()) ||  pause == false) return;
+            if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack()) || !pause) return;
             if (mc.options.leftKey.isPressed() && !mc.options.sneakKey.isPressed()){
                 if (mouseT.get())mc.player.setYaw(mc.player.getYaw()-90);
                 if (!mouseT.get()){
@@ -555,7 +556,6 @@ public class AutoMountain extends Module {
                     }
                     if (wasfacing==Direction.EAST){
                         wasfacing=Direction.SOUTH;
-                        return;
                     }
                 }
             }
@@ -569,7 +569,7 @@ public class AutoMountain extends Module {
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         playerPos = mc.player.getBlockPos();
-        if (mc.player.getY() % 1 != 0 && pause != true){
+        if (mc.player.getY() % 1 != 0 && !pause){
             renderplayerPos = new BlockPos(mc.player.getBlockX(), mc.player.getBlockY()+1, mc.player.getBlockZ());
         } else renderplayerPos = mc.player.getBlockPos();
         timeSinceLastTick = TickRate.INSTANCE.getTimeSinceLastTick();
@@ -582,7 +582,7 @@ public class AutoMountain extends Module {
             go=true;
             speed=0;
         }
-        if (pause==false){
+        if (!pause){
             wasfacing=mc.player.getHorizontalFacing();
             prevPitch=Math.round(mc.player.getPitch());
             if (autolavamountain.get()){
@@ -594,7 +594,7 @@ public class AutoMountain extends Module {
             search=true;
             search2=true;
         }
-        if (pause==false) return;
+        if (!pause) return;
         if (swap.get()){
             cascadingpileof();
         }
@@ -630,7 +630,7 @@ public class AutoMountain extends Module {
             resetTimer = true;
             Modules.get().get(Timer.class).setOverride(Timer.OFF);
         }
-        if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack()) ||  pause == false || go==false) return;
+        if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack()) || !pause || !go) return;
         if (mc.options.sneakKey.isPressed() && mc.options.rightKey.isPressed() && delayLeft <= 0 && offLeft > 0 && !autolavamountain.get()){
             cookie++;
             if (cookie==munscher.get()){
@@ -700,17 +700,17 @@ public class AutoMountain extends Module {
             cookieyaw=mc.player.getYaw();
             cookie=0;
         }
-        if (pause==true){
-            if (isthisfirstblock==true){
+        if (pause){
+            if (isthisfirstblock){
                 highestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
                 lowestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
                 isthisfirstblock=false;
             }
-            if (isthisfirstblock==false&&mc.player.getY()<lowestblock.getY()){
+            if (!isthisfirstblock &&mc.player.getY()<lowestblock.getY()){
                 lowestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
                 seekground();
             }
-            if (isthisfirstblock==false && mc.player.getY()>highestblock.getY()+1){
+            if (!isthisfirstblock && mc.player.getY()>highestblock.getY()+1){
                 highestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
                 seekground2();
             }}
@@ -718,7 +718,7 @@ public class AutoMountain extends Module {
 
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
-        if (pause==true && autolavamountain.get()) {
+        if (pause && autolavamountain.get()) {
             if (wasfacingBOT==Direction.NORTH) mc.player.setYaw(180);
             if (wasfacingBOT==Direction.SOUTH) mc.player.setYaw(0);
             if (wasfacingBOT==Direction.WEST) mc.player.setYaw(90);
@@ -737,14 +737,14 @@ public class AutoMountain extends Module {
                 toggle();
             }
         }
-        if (pause == false) return;
+        if (!pause) return;
 
         if (((mouseT.get() && mc.player.getPitch() <= 40 || autolavamountain.get())) || (!mouseT.get() && prevPitch <= 40)){
             if (delayLeft > 0) delayLeft--;
             else if ((!lagpause.get() || timeSinceLastTick < lag.get()) && delayLeft <= 0 && offLeft > 0 && (mc.player.getY() <= limit.get() &&  mc.player.getY() >= downlimit.get() && !autolavamountain.get() || mc.player.getY() <= limit.get()-4 && mc.player.getY() <= lowestblock.getY()+botlimit.get()+1 && autolavamountain.get())) {
                 offLeft--;
                 if (mc.player == null || mc.world == null) {toggle(); return;}
-                if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack()) ||  pause == false || go==false) return;
+                if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack()) || !pause || !go) return;
                 if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {            //UP
                     if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
                         BlockPos un1 = playerPos.add(new Vec3i(0,spcoffset.get()+2,0));
@@ -914,7 +914,7 @@ public class AutoMountain extends Module {
             else if ((!lagpause.get() || timeSinceLastTick < lag.get()) && delayLeft <= 0 && offLeft > 0 && mc.player.getY() <= limit.get() && mc.player.getY() >= downlimit.get()) {
                 offLeft--;
                 if (mc.player == null || mc.world == null) {toggle(); return;}
-                if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack()) || pause == false || go==false) return;
+                if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack()) || !pause || !go) return;
                 if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {            //DOWN
                     if (mc.options.jumpKey.isPressed()){
                         BlockPos dn1 = playerPos.add(new Vec3i(0,-spcoffset.get()-1,-1));
@@ -1074,7 +1074,7 @@ public class AutoMountain extends Module {
         else {
             for (lowblockY = -2; lowblockY > -319;) {
                 BlockPos lowpos1= lowestblock.add(new Vec3i(0, lowblockY,0));
-                if (mc.world.getBlockState(lowpos1).getBlock()==Blocks.AIR && search==true) {
+                if (mc.world.getBlockState(lowpos1).getBlock()==Blocks.AIR && search) {
                     groundY=lowpos1.getY();
                 }
                 if (!(mc.world.getBlockState(lowpos1).getBlock()==Blocks.AIR)) search=false;
@@ -1087,7 +1087,7 @@ public class AutoMountain extends Module {
         else {
             for (highblockY = -2; highblockY > -319;) {
                 BlockPos lowpos1= highestblock.add(new Vec3i(0, highblockY,0));
-                if (mc.world.getBlockState(lowpos1).getBlock()==Blocks.AIR && search2==true) {
+                if (mc.world.getBlockState(lowpos1).getBlock()==Blocks.AIR && search2) {
                     groundY2=lowpos1.getY();
                 }
                 if (!(mc.world.getBlockState(lowpos1).getBlock()==Blocks.AIR)) search2=false;

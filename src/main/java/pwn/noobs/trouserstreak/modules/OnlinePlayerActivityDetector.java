@@ -144,19 +144,13 @@ public class OnlinePlayerActivityDetector extends Module {
         FalsePositivesNETHER.clear();
         FalsePositivesEND.clear();
         if (Blawcks.get() != null) {
-            for (Block block : Blawcks.get()) {
-                if (!FalsePositivesOVERWORLD.contains(block))FalsePositivesOVERWORLD.add(block);
-            }
+            FalsePositivesOVERWORLD.addAll(Blawcks.get());
         }
         if (Blawcks2.get() != null) {
-            for (Block block : Blawcks2.get()) {
-                if (!FalsePositivesNETHER.contains(block))FalsePositivesNETHER.add(block);
-            }
+            FalsePositivesNETHER.addAll(Blawcks2.get());
         }
         if (Blawcks3.get() != null) {
-            for (Block block : Blawcks3.get()) {
-                if (!FalsePositivesEND.contains(block))FalsePositivesEND.add(block);
-            }
+            FalsePositivesEND.addAll(Blawcks3.get());
         }
     }
     @Override
@@ -172,25 +166,19 @@ public class OnlinePlayerActivityDetector extends Module {
         FalsePositivesNETHER.clear();
         FalsePositivesEND.clear();
         if (Blawcks.get() != null) {
-            for (Block block : Blawcks.get()) {
-                if (!FalsePositivesOVERWORLD.contains(block))FalsePositivesOVERWORLD.add(block);
-            }
+            FalsePositivesOVERWORLD.addAll(Blawcks.get());
         }
         if (Blawcks2.get() != null) {
-            for (Block block : Blawcks2.get()) {
-                if (!FalsePositivesNETHER.contains(block))FalsePositivesNETHER.add(block);
-            }
+            FalsePositivesNETHER.addAll(Blawcks2.get());
         }
         if (Blawcks3.get() != null) {
-            for (Block block : Blawcks3.get()) {
-                if (!FalsePositivesEND.contains(block))FalsePositivesEND.add(block);
-            }
+            FalsePositivesEND.addAll(Blawcks3.get());
         }
         if (removerenderdist.get())removeChunksOutsideRenderDistance();
     }
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (playerChunksLineColor.get().a > 5 || playerChunksSideColor.get().a > 5) {
+        if ((playerChunksLineColor.get().a > 5 || playerChunksSideColor.get().a > 5) && mc.player != null) {
             synchronized (playerActivityPositions) {
                 for (BlockPos pos : playerActivityPositions) {
                     BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
@@ -216,8 +204,7 @@ public class OnlinePlayerActivityDetector extends Module {
     @EventHandler
     private void onReadPacket(PacketEvent.Receive event) {
         if (event.packet instanceof AcknowledgeChunksC2SPacket)return; //for some reason this packet keeps getting cast to other packets
-        if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && !(event.packet instanceof PlayerMoveC2SPacket) && event.packet instanceof ChunkDataS2CPacket && mc.world != null) {
-            ChunkDataS2CPacket packet = (ChunkDataS2CPacket) event.packet;
+        if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && !(event.packet instanceof PlayerMoveC2SPacket) && event.packet instanceof ChunkDataS2CPacket packet && mc.world != null) {
             ChunkPos playerActivityPos = new ChunkPos(packet.getChunkX(), packet.getChunkZ());
 
             if (mc.world.getChunkManager().getChunk(packet.getChunkX(), packet.getChunkZ()) == null) {

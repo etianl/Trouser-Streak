@@ -84,7 +84,7 @@ public class HandOfGod extends Module {
             .name("Block to Replace.")
             .description("What is replaced when clicking or using the Sweep Away option")
             .defaultValue(Blocks.GRASS_BLOCK)
-            .visible(() -> replace.get())
+            .visible(replace::get)
             .build());
 
     private final Setting<Integer> cwidth = sgClick.add(new IntSetting.Builder()
@@ -127,7 +127,7 @@ public class HandOfGod extends Module {
             .defaultValue(2)
             .min(0)
             .sliderMax(20)
-            .visible(() -> auto.get())
+            .visible(auto::get)
             .build()
     );
     public final Setting<Boolean> fluids = sgClick.add(new BoolSetting.Builder()
@@ -146,21 +146,21 @@ public class HandOfGod extends Module {
             .name("SweepBlock")
             .description("What is created when sweeping (Default: Air)")
             .defaultValue(Blocks.AIR)
-            .visible(() -> SwpAway.get())
+            .visible(SwpAway::get)
             .build());
     private final Setting<Integer> sweepradius = sgClick.add(new IntSetting.Builder()
             .name("SweepAwayRadius")
             .description("radius")
             .defaultValue(90)
             .sliderRange(1, 90)
-            .visible(() -> SwpAway.get())
+            .visible(SwpAway::get)
             .build());
     private final Setting<Integer> sweepstart = sgClick.add(new IntSetting.Builder()
             .name("SweepAwayStartingDistance")
             .description("Starting distance from character for the sweeper.")
             .defaultValue(3)
             .sliderRange(1, 30)
-            .visible(() -> SwpAway.get())
+            .visible(SwpAway::get)
             .build());
     public final Setting<Boolean> pReplace = sgPcentered.add(new BoolSetting.Builder()
             .name("Replace Blocks")
@@ -172,13 +172,13 @@ public class HandOfGod extends Module {
             .name("Block to Replace.")
             .description("What is replaced around the character")
             .defaultValue(Blocks.GRASS_BLOCK)
-            .visible(() -> pReplace.get())
+            .visible(pReplace::get)
             .build());
     private final Setting<Block> pblock = sgPcentered.add(new BlockSetting.Builder()
             .name("Replacement Block")
             .description("What is put in place of the replaced blocks (Default: Lava)")
             .defaultValue(Blocks.LAVA)
-            .visible(() -> pReplace.get())
+            .visible(pReplace::get)
             .build());
     public final Setting<Boolean> rndplyr = sgPcentered.add(new BoolSetting.Builder()
             .name("NukeAroundPlayer")
@@ -192,7 +192,7 @@ public class HandOfGod extends Module {
             .defaultValue(17)
             .min(1)
             .sliderMax(30)
-            .visible(() -> rndplyr.get())
+            .visible(rndplyr::get)
             .build()
     );
     public final Setting<Integer> pheight = sgPcentered.add(new IntSetting.Builder()
@@ -201,7 +201,7 @@ public class HandOfGod extends Module {
             .defaultValue(11)
             .min(1)
             .sliderMax(30)
-            .visible(() -> rndplyr.get())
+            .visible(rndplyr::get)
             .build()
     );
     public final Setting<Integer> pdepth = sgPcentered.add(new IntSetting.Builder()
@@ -210,7 +210,7 @@ public class HandOfGod extends Module {
             .defaultValue(17)
             .min(1)
             .sliderMax(30)
-            .visible(() -> rndplyr.get())
+            .visible(rndplyr::get)
             .build()
     );
     public final Setting<Integer> tickdelay = sgPcentered.add(new IntSetting.Builder()
@@ -219,7 +219,7 @@ public class HandOfGod extends Module {
             .defaultValue(2)
             .min(0)
             .sliderMax(100)
-            .visible(() -> rndplyr.get())
+            .visible(rndplyr::get)
             .build()
     );
     public final Setting<Boolean> mgcersr = sgPcentered.add(new BoolSetting.Builder()
@@ -233,14 +233,14 @@ public class HandOfGod extends Module {
             .description("radius")
             .defaultValue(30)
             .sliderRange(1, 90)
-            .visible(() -> mgcersr.get())
+            .visible(mgcersr::get)
             .build());
     private final Setting<Integer> mgcdist = sgPcentered.add(new IntSetting.Builder()
             .name("MagicEraserDistance")
             .description("Distance from player which the layer is /fill'ed")
             .defaultValue(5)
             .sliderRange(1, 30)
-            .visible(() -> mgcersr.get())
+            .visible(mgcersr::get)
             .build());
 
     public final Setting<Boolean> voider = sgPcentered.add(new BoolSetting.Builder()
@@ -254,14 +254,14 @@ public class HandOfGod extends Module {
             .description("radius")
             .defaultValue(90)
             .sliderRange(1, 90)
-            .visible(() -> voider.get())
+            .visible(voider::get)
             .build());
     private final Setting<Integer> vrange = sgPcentered.add(new IntSetting.Builder()
             .name("VerticalRange")
             .description("How Far vertically from player to void.")
             .defaultValue(5)
             .sliderRange(1, 20)
-            .visible(() -> voider.get())
+            .visible(voider::get)
             .build());
     public final Setting<Boolean> roofer = sgPcentered.add(new BoolSetting.Builder()
             .name("Roofer")
@@ -273,21 +273,21 @@ public class HandOfGod extends Module {
             .name("RooferBlock")
             .description("What is created.")
             .defaultValue(Blocks.OBSIDIAN)
-            .visible(() -> roofer.get())
+            .visible(roofer::get)
             .build());
     private final Setting<Integer> roofradius = sgPcentered.add(new IntSetting.Builder()
             .name("radius")
             .description("radius")
             .defaultValue(90)
             .sliderRange(1, 90)
-            .visible(() -> roofer.get())
+            .visible(roofer::get)
             .build());
     private final Setting<Integer> roofheight = sgPcentered.add(new IntSetting.Builder()
             .name("height")
             .description("height")
             .defaultValue(255)
             .sliderRange(64, 319)
-            .visible(() -> roofer.get())
+            .visible(roofer::get)
             .build());
     public final Setting<Integer> rooftickdelay = sgPcentered.add(new IntSetting.Builder()
             .name("TickDelay")
@@ -295,7 +295,7 @@ public class HandOfGod extends Module {
             .defaultValue(20)
             .min(0)
             .sliderMax(100)
-            .visible(() -> roofer.get())
+            .visible(roofer::get)
             .build()
     );
     public final Setting<Boolean> troll = sgTroll.add(new BoolSetting.Builder()
@@ -308,14 +308,14 @@ public class HandOfGod extends Module {
             .name("Only Render Distance")
             .description("Run /fill on players only within render distance.")
             .defaultValue(false)
-            .visible(() -> troll.get())
+            .visible(troll::get)
             .build()
     );
     public final Setting<Boolean> trollfriends = sgTroll.add(new BoolSetting.Builder()
             .name("/fill Friends")
             .description("Runs /fill around friends too")
             .defaultValue(false)
-            .visible(() -> troll.get())
+            .visible(troll::get)
             .build()
     );
     public final Setting<Integer> trolltickdelay = sgTroll.add(new IntSetting.Builder()
@@ -324,20 +324,20 @@ public class HandOfGod extends Module {
             .defaultValue(0)
             .min(0)
             .sliderMax(100)
-            .visible(() -> troll.get())
+            .visible(troll::get)
             .build()
     );
     private final Setting<Block> trollblock = sgTroll.add(new BlockSetting.Builder()
             .name("OtherPlayersBlock")
             .description("What is created around the players (Default: Lava)")
             .defaultValue(Blocks.LAVA)
-            .visible(() -> troll.get())
+            .visible(troll::get)
             .build());
     public final Setting<Boolean> trollreplace = sgTroll.add(new BoolSetting.Builder()
             .name("Replace Blocks")
             .description("Replace certain blocks in the selection instead of all blocks")
             .defaultValue(false)
-            .visible(() -> troll.get())
+            .visible(troll::get)
             .build()
     );
     private final Setting<Block> trollblocktoreplace = sgTroll.add(new BlockSetting.Builder()
@@ -352,7 +352,7 @@ public class HandOfGod extends Module {
             .defaultValue(17)
             .min(1)
             .sliderMax(30)
-            .visible(() -> troll.get())
+            .visible(troll::get)
             .build()
     );
     public final Setting<Integer> trollheight = sgTroll.add(new IntSetting.Builder()
@@ -361,7 +361,7 @@ public class HandOfGod extends Module {
             .defaultValue(11)
             .min(1)
             .sliderMax(30)
-            .visible(() -> troll.get())
+            .visible(troll::get)
             .build()
     );
     public final Setting<Integer> trolldepth = sgTroll.add(new IntSetting.Builder()
@@ -370,7 +370,7 @@ public class HandOfGod extends Module {
             .defaultValue(17)
             .min(1)
             .sliderMax(30)
-            .visible(() -> troll.get())
+            .visible(troll::get)
             .build()
     );
     public final Setting<Boolean> terminate = sgTerminate.add(new BoolSetting.Builder()
@@ -383,7 +383,7 @@ public class HandOfGod extends Module {
             .name("Only Render Distance")
             .description("Run /fill on entities only within render distance.")
             .defaultValue(false)
-            .visible(() -> terminate.get())
+            .visible(terminate::get)
             .build()
     );
     public final Setting<Integer> terminatetickdelay = sgTerminate.add(new IntSetting.Builder()
@@ -392,20 +392,20 @@ public class HandOfGod extends Module {
             .defaultValue(0)
             .min(0)
             .sliderMax(100)
-            .visible(() -> terminate.get())
+            .visible(terminate::get)
             .build()
     );
     private final Setting<Block> terminateblock = sgTerminate.add(new BlockSetting.Builder()
             .name("EntitiesBlock")
             .description("What is created around the Entities (Default: Lava)")
             .defaultValue(Blocks.LAVA)
-            .visible(() -> terminate.get())
+            .visible(terminate::get)
             .build());
     public final Setting<Boolean> terminatereplace = sgTerminate.add(new BoolSetting.Builder()
             .name("Replace Blocks")
             .description("Replace certain blocks in the selection instead of all blocks")
             .defaultValue(false)
-            .visible(() -> terminate.get())
+            .visible(terminate::get)
             .build()
     );
     private final Setting<Block> terminateblocktoreplace = sgTerminate.add(new BlockSetting.Builder()
@@ -420,7 +420,7 @@ public class HandOfGod extends Module {
             .defaultValue(2)
             .min(1)
             .sliderMax(30)
-            .visible(() -> terminate.get())
+            .visible(terminate::get)
             .build()
     );
     public final Setting<Integer> terminateheight = sgTerminate.add(new IntSetting.Builder()
@@ -429,7 +429,7 @@ public class HandOfGod extends Module {
             .defaultValue(2)
             .min(1)
             .sliderMax(30)
-            .visible(() -> terminate.get())
+            .visible(terminate::get)
             .build()
     );
     public final Setting<Integer> terminatedepth = sgTerminate.add(new IntSetting.Builder()
@@ -438,7 +438,7 @@ public class HandOfGod extends Module {
             .defaultValue(2)
             .min(1)
             .sliderMax(30)
-            .visible(() -> terminate.get())
+            .visible(terminate::get)
             .build()
     );
     public HandOfGod() {
@@ -486,6 +486,7 @@ public class HandOfGod extends Module {
     }
     @Override
     public void onActivate() {
+        if (mc.player == null || mc.world == null) return;
         if (notOP.get() && !(mc.player.hasPermissionLevel(2)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
             toggle();
             error("Must have permission level 2 or higher");
@@ -511,7 +512,7 @@ public class HandOfGod extends Module {
 
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
-        if (mc.options.attackKey.isPressed() && mc.currentScreen == null) {
+        if (mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player != null && mc.world != null && mc.interactionManager != null) {
             HitResult hr = mc.cameraEntity.raycast(900, 0, fluids.get());
             Vec3d god = hr.getPos();
             BlockPos pos = BlockPos.ofFloored(god);
@@ -537,22 +538,23 @@ public class HandOfGod extends Module {
             String repblockName = repblock.replace("}", "");
             switch (mc.player.getHorizontalFacing()){
                 case NORTH, SOUTH -> {
-                    int x1 = Math.round(pos.getX()) + cwidth.get();
-                    int y1 = Math.round(pos.getY()) + cheight.get();
-                    int z1 = Math.round(pos.getZ()) + cdepth.get();
-                    int x2 = Math.round(pos.getX()) - cwidth.get();
-                    int y2 = Math.round(pos.getY()) - cheight.get();
-                    int z2 = Math.round(pos.getZ()) - cdepth.get();
+                    //they both int, why you want to round it?
+                    int x1 = pos.getX() + cwidth.get();
+                    int y1 = pos.getY() + cheight.get();
+                    int z1 = pos.getZ() + cdepth.get();
+                    int x2 = pos.getX() - cwidth.get();
+                    int y2 = pos.getY() - cheight.get();
+                    int z2 = pos.getZ() - cdepth.get();
                     if (!replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + adjustYValue(y1) + " " + z1 + " " + x2 + " " + adjustYValue(y2) + " " + z2 + " " + blockName);
                     else if (replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + adjustYValue(y1) + " " + z1 + " " + x2 + " " + adjustYValue(y2) + " " + z2 + " " + blockName + " replace " + repblockName);
                 }
                 case EAST, WEST -> {
-                    int x1 = Math.round(pos.getX()) + cdepth.get();
-                    int y1 = Math.round(pos.getY()) + cheight.get();
-                    int z1 = Math.round(pos.getZ()) + cwidth.get();
-                    int x2 = Math.round(pos.getX()) - cdepth.get();
-                    int y2 = Math.round(pos.getY()) - cheight.get();
-                    int z2 = Math.round(pos.getZ()) - cwidth.get();
+                    int x1 = pos.getX() + cdepth.get();
+                    int y1 = pos.getY() + cheight.get();
+                    int z1 = pos.getZ() + cwidth.get();
+                    int x2 = pos.getX() - cdepth.get();
+                    int y2 = pos.getY() - cheight.get();
+                    int z2 = pos.getZ() - cwidth.get();
                     if (!replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + adjustYValue(y1) + " " + z1 + " " + x2 + " " + adjustYValue(y2) + " " + z2 + " " + blockName);
                     else if (replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + adjustYValue(y1) + " " + z1 + " " + x2 + " " + adjustYValue(y2) + " " + z2 + " " + blockName + " replace " + repblockName);
                 }
@@ -562,6 +564,7 @@ public class HandOfGod extends Module {
 
     @EventHandler
     public void onTick(TickEvent.Pre event) {
+        if (mc.player == null) return;
         pX=mc.player.getBlockPos().getX();
         pY=mc.player.getBlockPos().getY();
         pZ=mc.player.getBlockPos().getZ();
@@ -606,22 +609,22 @@ public class HandOfGod extends Module {
                 String repblockName = repblock.replace("}", "");
                 switch (mc.player.getHorizontalFacing()){
                     case NORTH, SOUTH -> {
-                        int x1 = Math.round(pos.getX()) + cwidth.get();
-                        int y1 = Math.round(pos.getY()) + cheight.get();
-                        int z1 = Math.round(pos.getZ()) + cdepth.get();
-                        int x2 = Math.round(pos.getX()) - cwidth.get();
-                        int y2 = Math.round(pos.getY()) - cheight.get();
-                        int z2 = Math.round(pos.getZ()) - cdepth.get();
+                        int x1 = pos.getX() + cwidth.get();
+                        int y1 = pos.getY() + cheight.get();
+                        int z1 = pos.getZ() + cdepth.get();
+                        int x2 = pos.getX() - cwidth.get();
+                        int y2 = pos.getY() - cheight.get();
+                        int z2 = pos.getZ() - cdepth.get();
                         if (!replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + adjustYValue(y1) + " " + z1 + " " + x2 + " " + adjustYValue(y2) + " " + z2 + " " + blockName);
                         else if (replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + adjustYValue(y1) + " " + z1 + " " + x2 + " " + adjustYValue(y2) + " " + z2 + " " + blockName + " replace " + repblockName);
                     }
                     case EAST, WEST -> {
-                        int x1 = Math.round(pos.getX()) + cdepth.get();
-                        int y1 = Math.round(pos.getY()) + cheight.get();
-                        int z1 = Math.round(pos.getZ()) + cwidth.get();
-                        int x2 = Math.round(pos.getX()) - cdepth.get();
-                        int y2 = Math.round(pos.getY()) - cheight.get();
-                        int z2 = Math.round(pos.getZ()) - cwidth.get();
+                        int x1 = pos.getX() + cdepth.get();
+                        int y1 = pos.getY() + cheight.get();
+                        int z1 = pos.getZ() + cwidth.get();
+                        int x2 = pos.getX() - cdepth.get();
+                        int y2 = pos.getY() - cheight.get();
+                        int z2 = pos.getZ() - cwidth.get();
                         if (!replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + adjustYValue(y1) + " " + z1 + " " + x2 + " " + adjustYValue(y2) + " " + z2 + " " + blockName);
                         else if (replace.get()) ChatUtils.sendPlayerMsg("/fill " + x1 + " " + adjustYValue(y1) + " " + z1 + " " + x2 + " " + adjustYValue(y2) + " " + z2 + " " + blockName + " replace " + repblockName);
                     }
@@ -632,13 +635,13 @@ public class HandOfGod extends Module {
         if (SwpAway.get()){
             if (mc.options.useKey.isPressed()){
                 sweep=true;
-            }else if (mc.options.useKey.isPressed()==false) sweep=false;
-            if (sweep==false){
+            }else if (!mc.options.useKey.isPressed()) sweep=false;
+            if (!sweep){
                 sX=mc.player.getBlockX();
                 sY=mc.player.getBlockY();
                 sZ=mc.player.getBlockZ();
             }
-            if (sweep==true){
+            if (sweep){
                 String sfullString = sweepblock.get().toString();
                 String[] sparts = sfullString.split(":");
                 String sblock = sparts[1];

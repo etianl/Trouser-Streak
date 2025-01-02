@@ -80,14 +80,15 @@ public class TrailMaker extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
+        if (mc.player == null || mc.world == null || mc.interactionManager == null) return;
         currentblock=mc.player.getBlockPos();
 
         if (currentblock.getX()> rememberedblock.getX()+1 || currentblock.getX()<rememberedblock.getX()-1 ||currentblock.getY()> rememberedblock.getY()+1 || currentblock.getY()<rememberedblock.getY()-1 || currentblock.getZ()> rememberedblock.getZ()+1 || currentblock.getZ()<rememberedblock.getZ()-1){
             placeticks++;
-            if (blocks.get().size()>0) {
+            if (!blocks.get().isEmpty()) {
                     FindItemResult item = InvUtils.findInHotbar(itemStack -> validItem(itemStack));
                     if (!item.found()) return;
-                    else if (item.found()){
+                    else {
                         mc.player.getInventory().selectedSlot= item.slot();
                     }
                     if (placeticks<=attemptplaceticks.get()){

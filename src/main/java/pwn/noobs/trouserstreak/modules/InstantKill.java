@@ -37,7 +37,7 @@ public class InstantKill extends Module {
 	}
 	@EventHandler
 	public void onTick(TickEvent.Post event) {
-		if (auto.get() && mc.player.getMainHandStack().getItem() == Items.BOW){
+		if (mc.player != null && auto.get() && mc.player.getMainHandStack().getItem() == Items.BOW){
 		if (!mc.player.isUsingItem()) {
 		mc.options.useKey.setPressed(true);
 		}
@@ -49,6 +49,7 @@ public class InstantKill extends Module {
 	}
 
 	public static void addVelocityToPlayer(){
+		if (mc.player == null) return;
 		if(shouldAddVelocity){
 			mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_SPRINTING));
 			for (int i = 0; i < 100; i++) {

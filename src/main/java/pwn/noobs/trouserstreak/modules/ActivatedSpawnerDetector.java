@@ -41,7 +41,7 @@
                 .name("Less Stash Spam")
                 .description("Do not display the message reminding you about stashes if NO chests within 16 blocks of spawner.")
                 .defaultValue(true)
-                .visible(() -> extramessage.get())
+                .visible(extramessage::get)
                 .build()
         );
         private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
@@ -74,7 +74,7 @@
                 .defaultValue(1)
                 .min(1)
                 .sliderRange(1,10)
-                .visible(() -> deactivatedSpawner.get())
+                .visible(deactivatedSpawner::get)
                 .build()
         );
         private final Setting<Boolean> lessRenderSpam = sgRender.add(new BoolSetting.Builder()
@@ -204,7 +204,7 @@
         }
         @EventHandler
         private void onPreTick(TickEvent.Pre event) {
-            if (mc.world == null) return;
+            if (mc.world == null || mc.player == null) return;
 
             int renderdistance = mc.options.getViewDistance().getValue();
             ChunkPos playerChunkPos = new ChunkPos(mc.player.getBlockPos());

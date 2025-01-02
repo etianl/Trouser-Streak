@@ -32,7 +32,7 @@ public class AutoDrop extends Module {
                 .min(1)
                 .max(9)
             .defaultValue(1)
-            .visible(() -> dropthisslot.get())
+            .visible(dropthisslot::get)
             .build());
 
     public AutoDrop() {super(Trouser.Main, "auto-drop", "Drops the stack in your selected slot automatically");}
@@ -41,7 +41,8 @@ public class AutoDrop extends Module {
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (tool.get() == true && (mc.player.getMainHandStack().getItem() instanceof BucketItem || mc.player.getMainHandStack().getItem() instanceof FlintAndSteelItem || mc.player.getMainHandStack().getItem() instanceof MiningToolItem || mc.player.getMainHandStack().getItem() instanceof ShearsItem))return;
+        if (mc.player == null) return;
+        if (tool.get() && (mc.player.getMainHandStack().getItem() instanceof BucketItem || mc.player.getMainHandStack().getItem() instanceof FlintAndSteelItem || mc.player.getMainHandStack().getItem() instanceof MiningToolItem || mc.player.getMainHandStack().getItem() instanceof ShearsItem))return;
         if (dropthisslot.get() && !mc.player.getInventory().getStack(dropslot.get()-1).isEmpty()){
                     previousslot=mc.player.getInventory().selectedSlot;
                     mc.player.getInventory().selectedSlot = dropslot.get()-1;
@@ -50,7 +51,7 @@ public class AutoDrop extends Module {
     }
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
-        if (getprevslot==true){
+        if (getprevslot){
             mc.player.dropSelectedItem(true);
             mc.player.getInventory().selectedSlot = previousslot;
             getprevslot=false;

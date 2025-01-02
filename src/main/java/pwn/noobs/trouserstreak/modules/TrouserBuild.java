@@ -87,7 +87,7 @@ public class TrouserBuild extends Module {
             .name("shape-mode")
             .description("How the shapes are rendered.")
             .defaultValue(ShapeMode.Both)
-            .visible(() -> render.get())
+            .visible(render::get)
             .build()
     );
 
@@ -95,7 +95,7 @@ public class TrouserBuild extends Module {
             .name("side-color")
             .description("The color of the sides of the blocks being rendered.")
             .defaultValue(new SettingColor(255, 0, 255, 15))
-            .visible(() -> render.get())
+            .visible(render::get)
             .build()
     );
 
@@ -103,7 +103,7 @@ public class TrouserBuild extends Module {
             .name("line-color")
             .description("The color of the lines of the blocks being rendered.")
             .defaultValue(new SettingColor(255, 0, 255, 255))
-            .visible(() -> render.get())
+            .visible(render::get)
             .build()
     );
 
@@ -217,21 +217,23 @@ public class TrouserBuild extends Module {
     }
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
+        if (mc.player == null) return;
         if (mc.options.useKey.isPressed()){
             lava = cast();
             playerdir=mc.player.getHorizontalFacing();
             playerpitch=mc.player.getPitch();
-            pause = pause ? false : true;
+            pause = !pause;
         }
     }
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (pause==true) {
+        if (mc.player == null || mc.world == null || mc.interactionManager == null) return;
+        if (pause) {
             lava=cast();
             blockticks=0;
             loops=0;
         }
-        if (pause==false){
+        if (!pause){
             blockticks++;
             if (blockticks>tickdelay.get()*5){
                 blockticks=0;
@@ -242,7 +244,7 @@ public class TrouserBuild extends Module {
                 loops=0;
             }
         }
-        if (((orientation.get() && playerpitch>40 | playerpitch<-40) || (mode.get() == Modes.Horizontal && !orientation.get())) && pause==false){
+        if (((orientation.get() && playerpitch>40 | playerpitch<-40) || (mode.get() == Modes.Horizontal && !orientation.get())) && !pause){
             cascadingpileof();
             //north
             BlockPos Nettpos = new BlockPos(lava.getX()-2,lava.getY(),lava.getZ()-2);
@@ -352,27 +354,27 @@ public class TrouserBuild extends Module {
             if (playerdir == Direction.NORTH){
                 //1st row
                 if (ett){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Nettpos).isReplaceable()){
+                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Nettpos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nettpos), Direction.DOWN, Nettpos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Ntvapos).isReplaceable()){
+                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Ntvapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntvapos), Direction.DOWN, Ntvapos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Ntreepos).isReplaceable()){
+                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Ntreepos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntreepos), Direction.DOWN, Ntreepos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Nfyrapos).isReplaceable()){
+                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Nfyrapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfyrapos), Direction.DOWN, Nfyrapos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Nfempos).isReplaceable()){
+                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Nfempos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfempos), Direction.DOWN, Nfempos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
@@ -489,27 +491,27 @@ public class TrouserBuild extends Module {
             if (playerdir == Direction.SOUTH){
                 //1st row
                 if (ett){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Settpos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Settpos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Settpos), Direction.DOWN, Settpos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Stvapos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Stvapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stvapos), Direction.DOWN, Stvapos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Streepos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Streepos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Streepos), Direction.DOWN, Streepos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Sfyrapos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Sfyrapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfyrapos), Direction.DOWN, Sfyrapos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Sfempos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Sfempos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfempos), Direction.DOWN, Sfempos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
@@ -626,27 +628,27 @@ public class TrouserBuild extends Module {
             if (playerdir == Direction.EAST){
                 //1st row
                 if (ett){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Eettpos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Eettpos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Eettpos), Direction.DOWN, Eettpos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Etvapos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Etvapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etvapos), Direction.DOWN, Etvapos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Etreepos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Etreepos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etreepos), Direction.DOWN, Etreepos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Efyrapos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Efyrapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efyrapos), Direction.DOWN, Efyrapos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Efempos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Efempos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efempos), Direction.DOWN, Efempos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
@@ -763,27 +765,27 @@ public class TrouserBuild extends Module {
             if (playerdir == Direction.WEST){
                 //1st row
                 if (ett){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wettpos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Wettpos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wettpos), Direction.DOWN, Wettpos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wtvapos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Wtvapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtvapos), Direction.DOWN, Wtvapos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wtreepos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Wtreepos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtreepos), Direction.DOWN, Wtreepos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wfyrapos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Wfyrapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfyrapos), Direction.DOWN, Wfyrapos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wfempos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Wfempos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfempos), Direction.DOWN, Wfempos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
@@ -897,7 +899,7 @@ public class TrouserBuild extends Module {
                 }
             }
         }
-        if (((orientation.get() && playerpitch<=40 && playerpitch>=-40) || (mode.get() == Modes.Vertical && !orientation.get())) && pause==false){
+        if (((orientation.get() && playerpitch<=40 && playerpitch>=-40) || (mode.get() == Modes.Vertical && !orientation.get())) && !pause){
             cascadingpileof();
             //north
             BlockPos Nettpos = new BlockPos(lava.getX()-2,lava.getY()+2,lava.getZ());
@@ -1007,27 +1009,27 @@ public class TrouserBuild extends Module {
             if (playerdir == Direction.NORTH){
                 //1st row
                 if (ett){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Nettpos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Nettpos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nettpos), Direction.DOWN, Nettpos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Ntvapos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Ntvapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntvapos), Direction.DOWN, Ntvapos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Ntreepos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Ntreepos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntreepos), Direction.DOWN, Ntreepos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Nfyrapos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Nfyrapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfyrapos), Direction.DOWN, Nfyrapos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Nfempos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Nfempos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfempos), Direction.DOWN, Nfempos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
@@ -1144,27 +1146,27 @@ public class TrouserBuild extends Module {
             if (playerdir == Direction.SOUTH){
                 //1st row
                 if (ett){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Settpos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Settpos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Settpos), Direction.DOWN, Settpos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Stvapos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Stvapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stvapos), Direction.DOWN, Stvapos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Streepos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Streepos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Streepos), Direction.DOWN, Streepos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Sfyrapos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Sfyrapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfyrapos), Direction.DOWN, Sfyrapos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Sfempos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Sfempos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfempos), Direction.DOWN, Sfempos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
@@ -1281,27 +1283,27 @@ public class TrouserBuild extends Module {
             if (playerdir == Direction.EAST){
                 //1st row
                 if (ett){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Eettpos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Eettpos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Eettpos), Direction.DOWN, Eettpos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Etvapos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Etvapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etvapos), Direction.DOWN, Etvapos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Etreepos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Etreepos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etreepos), Direction.DOWN, Etreepos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Efyrapos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Efyrapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efyrapos), Direction.DOWN, Efyrapos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Efempos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Efempos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efempos), Direction.DOWN, Efempos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
@@ -1418,27 +1420,27 @@ public class TrouserBuild extends Module {
             if (playerdir == Direction.WEST){
                 //1st row
                 if (ett){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wettpos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Wettpos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wettpos), Direction.DOWN, Wettpos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tva){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wtvapos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Wtvapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtvapos), Direction.DOWN, Wtvapos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (tree){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wtreepos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Wtreepos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtreepos), Direction.DOWN, Wtreepos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fyra){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wfyrapos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Wfyrapos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfyrapos), Direction.DOWN, Wfyrapos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
                 if (fem){
-                    if (blockticks==tickdelay.get()*1 && mc.world.getBlockState(Wfempos).isReplaceable()){
+                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Wfempos).isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfempos), Direction.DOWN, Wfempos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);}
                 }
@@ -1572,6 +1574,7 @@ public class TrouserBuild extends Module {
         return ((BlockHitResult) blockHit).getBlockPos();
     }
     private void cascadingpileof() {
+        if (mc.player == null) return;
         FindItemResult findResult = InvUtils.findInHotbar(block -> !isInvalidBlock(block));
         if (!findResult.found()) {
             return;

@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
 import net.minecraft.item.Items;
 import net.minecraft.item.MiningToolItem;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
@@ -196,6 +195,7 @@ public class SuperInstaMine extends Module {
 
     @EventHandler
     private void onStartBreakingBlock(StartBreakingBlockEvent event) {
+        if (mc.player == null) return;
         direction = event.direction;
         playermovingdirection = mc.player.getMovementDirection();
         playerpitch= Math.round(mc.player.getPitch());
@@ -549,13 +549,14 @@ public class SuperInstaMine extends Module {
     }
 
     private boolean shouldMine() {
+        assert mc.player != null;
         if (blockPos.getY() == -128) return false;
         return !pick.get() || (mc.player.getMainHandStack().getItem() == Items.DIAMOND_PICKAXE || mc.player.getMainHandStack().getItem() == Items.NETHERITE_PICKAXE);
     }
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (!render.get() || !shouldMine()) return;
+        if (!render.get() || !shouldMine() || mc.world == null || mc.player == null) return;
         if (((listmode.get()==listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get()==listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && BlockUtils.canBreak(blockPos))event.renderer.box(blockPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         if (((listmode.get()==listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos1).getBlock())) || (listmode.get()==listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos1).getBlock()))) && (((range.get()==-1 && playermovingdirection==Direction.SOUTH) || (range.get()==1 && playermovingdirection==Direction.NORTH) || (range.get()==2 && (playermovingdirection==Direction.NORTH | playermovingdirection==Direction.SOUTH))) && (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof MiningToolItem)) && BlockUtils.canBreak(blockPos1)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos1)))))event.renderer.box(blockPos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         if (((listmode.get()==listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos2).getBlock())) || (listmode.get()==listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos2).getBlock()))) && (((range.get()==-1 && playermovingdirection==Direction.NORTH) || (range.get()==1 && playermovingdirection==Direction.SOUTH) || (range.get()==2 && (playermovingdirection==Direction.NORTH | playermovingdirection==Direction.SOUTH))) && (((mc.player.getAbilities().creativeMode | !(mc.player.getMainHandStack().getItem() instanceof MiningToolItem)) && BlockUtils.canBreak(blockPos2)) || mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(blockPos2)))))event.renderer.box(blockPos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);

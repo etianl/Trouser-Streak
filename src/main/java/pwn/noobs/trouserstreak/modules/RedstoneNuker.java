@@ -254,7 +254,7 @@ public class RedstoneNuker extends Module {
             .defaultValue(10)
             .range(1, 100)
             .sliderRange(1, 100)
-            .visible(() -> antiBreak.get())
+            .visible(antiBreak::get)
             .build()
     );
 
@@ -502,7 +502,7 @@ public class RedstoneNuker extends Module {
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onStartBreakingBlock(StartBreakingBlockEvent event) {
-        if (Modules.get().isActive(InfinityMiner.class)) return;
+        if (Modules.get().isActive(InfinityMiner.class) || mc.world == null || mc.player == null) return;
 
         // Get blockState
         BlockState blockState = mc.world.getBlockState(event.blockPos);

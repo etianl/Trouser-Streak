@@ -55,7 +55,7 @@ public class Teleport extends Module {
             .name("shape-mode")
             .description("How the shapes are rendered.")
             .defaultValue(ShapeMode.Both)
-            .visible(() -> render.get())
+            .visible(render::get)
             .build()
     );
 
@@ -63,7 +63,7 @@ public class Teleport extends Module {
             .name("side-color-solid-block")
             .description("The color of the sides of the blocks being rendered.")
             .defaultValue(new SettingColor(255, 0, 255, 15))
-            .visible(() -> render.get())
+            .visible(render::get)
             .build()
     );
 
@@ -71,14 +71,14 @@ public class Teleport extends Module {
             .name("line-color-solid-block")
             .description("The color of the lines of the blocks being rendered.")
             .defaultValue(new SettingColor(255, 0, 255, 255))
-            .visible(() -> render.get())
+            .visible(render::get)
             .build()
     );
     private final Setting<SettingColor> sideColor2 = sgRender.add(new ColorSetting.Builder()
             .name("side-color-non-solid")
             .description("The color of the sides of the blocks being rendered.")
             .defaultValue(new SettingColor(0, 255, 255, 15))
-            .visible(() -> render.get())
+            .visible(render::get)
             .build()
     );
 
@@ -86,7 +86,7 @@ public class Teleport extends Module {
             .name("line-color-non-solid")
             .description("The color of the lines of the blocks being rendered.")
             .defaultValue(new SettingColor(0, 255, 255, 255))
-            .visible(() -> render.get())
+            .visible(render::get)
             .build()
     );
 
@@ -121,23 +121,23 @@ public class Teleport extends Module {
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         Modules.get().get(Timer.class).setOverride(Timer.OFF);
-        if (TPnow = true && notponactivateplz == false){
+        if (TPnow && !notponactivateplz && mc.player != null && mc.world != null){
             ticks++;
-            if (ticks == 1 && notponactivateplz == false){
+            if (ticks == 1 && !notponactivateplz){
                 location=target();
                 startpos = mc.player.getPos();}
             if (location.getX()+0.5-startpos.getX() <= 8 && location.getX()+0.5-startpos.getX()>=-8 && location.getY()+0.5-startpos.getY()<=8 && location.getY()+0.5-startpos.getY()>=-8 && location.getZ()+0.5-startpos.getZ()<=8 && location.getZ()+0.5-startpos.getZ()>=-8 ){
                 BlockPos tptarget= new BlockPos(location.getX(), location.getY()+1, location.getZ());
-                if (!mc.world.getBlockState(location).isReplaceable() && !mc.world.getBlockState(tptarget).isReplaceable() && ticks==2 && notponactivateplz==false){
+                if (!mc.world.getBlockState(location).isReplaceable() && !mc.world.getBlockState(tptarget).isReplaceable() && ticks==2 && !notponactivateplz){
                     error("Blocks in the target zone.");
-                } else if (liquids.get() && !mc.world.getBlockState(location).isOf(Blocks.AIR) && !mc.world.getBlockState(tptarget).isOf(Blocks.AIR) && ticks==2 && notponactivateplz==false){
+                } else if (liquids.get() && !mc.world.getBlockState(location).isOf(Blocks.AIR) && !mc.world.getBlockState(tptarget).isOf(Blocks.AIR) && ticks==2 && !notponactivateplz){
                     error("Blocks in the target zone.");
                 }
-                else if (ticks==2 && notponactivateplz==false){
+                else if (ticks==2 && !notponactivateplz){
                     mc.player.setPos(location.getX()+0.5, location.getY()+1.1, location.getZ()+0.5);
                     mc.player.setVelocity(0,0.2,0);
                 }
-                else if (ticks <=2 && notponactivateplz==false){
+                else if (ticks <=2 && !notponactivateplz){
                     mc.options.jumpKey.setPressed(false);
                     mc.options.sneakKey.setPressed(false);
                     mc.options.forwardKey.setPressed(false);
@@ -152,28 +152,28 @@ public class Teleport extends Module {
                     TPnow = false;
                     Modules.get().get(Timer.class).setOverride(Timer.OFF);
                 }
-                if (ticks >=1 && ticks <=2 && notponactivateplz==false){
+                if (ticks >=1 && ticks <=2 && !notponactivateplz){
                     Modules.get().get(Timer.class).setOverride(tpTimer.get());
                 }
             } else if (location.getX()+0.5-startpos.getX()<=16 && location.getX()+0.5-startpos.getX()>=-16 && location.getY()+0.5-startpos.getY()<=16 && location.getY()+0.5-startpos.getY()>=-16 && location.getZ()+0.5-startpos.getZ()<=16 && location.getZ()+0.5-startpos.getZ()>=-16 ){
-                if (ticks==2 && notponactivateplz==false){
+                if (ticks==2 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.5), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.5)+1.05), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.5));
                     mc.player.setVelocity(0,0.05,0);}
                 BlockPos tptarget= new BlockPos(location.getX(), location.getY()+1, location.getZ());
-                if (!mc.world.getBlockState(location).isReplaceable() && !mc.world.getBlockState(tptarget).isReplaceable() && ticks==3 && notponactivateplz==false){
+                if (!mc.world.getBlockState(location).isReplaceable() && !mc.world.getBlockState(tptarget).isReplaceable() && ticks==3 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.5), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.5)+1.05), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.5));
                     mc.player.setVelocity(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
-                } else if (liquids.get() && !mc.world.getBlockState(location).isOf(Blocks.AIR) && !mc.world.getBlockState(tptarget).isOf(Blocks.AIR) && ticks==3 && notponactivateplz==false){
+                } else if (liquids.get() && !mc.world.getBlockState(location).isOf(Blocks.AIR) && !mc.world.getBlockState(tptarget).isOf(Blocks.AIR) && ticks==3 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.5), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.5)+1.05), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.5));
                     mc.player.setVelocity(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
                 }
-                else if (ticks == 3 && notponactivateplz==false){
+                else if (ticks == 3 && !notponactivateplz){
                     mc.player.setPos(location.getX()+0.5, location.getY()+1.1, location.getZ()+0.5);
                     mc.player.setVelocity(0,0.2,0);
                 }
-                else if (ticks <=3 && notponactivateplz==false){
+                else if (ticks <=3 && !notponactivateplz){
                     mc.options.jumpKey.setPressed(false);
                     mc.options.sneakKey.setPressed(false);
                     mc.options.forwardKey.setPressed(false);
@@ -188,34 +188,34 @@ public class Teleport extends Module {
                     TPnow = false;
                     Modules.get().get(Timer.class).setOverride(Timer.OFF);
                 }
-                if (ticks >= 1 && ticks <=3 && notponactivateplz==false){
+                if (ticks >= 1 && ticks <=3 && !notponactivateplz){
                     Modules.get().get(Timer.class).setOverride(tpTimer.get());
                 }
             } else if (location.getX()+0.5-startpos.getX() <= 32 && location.getX()+0.5-startpos.getX() >=-32 && location.getY()+0.5-startpos.getY()<=32 && location.getY()+0.5-startpos.getY()>=-32 && location.getZ()+0.5-startpos.getZ()<=32 && location.getZ()+0.5-startpos.getZ()>=-32 ){
-                if (ticks ==2 && notponactivateplz==false){
+                if (ticks ==2 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.25), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.25)+1.025), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.25));
                     mc.player.setVelocity(0,0.05,0);}
-                else if (ticks ==3 && notponactivateplz==false){
+                else if (ticks ==3 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.5), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.5)+1.05), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.5));
                     mc.player.setVelocity(0,0.05,0);}
-                else if (ticks ==4 && notponactivateplz==false){
+                else if (ticks ==4 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.75), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.75)+1.075), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.75));
                     mc.player.setVelocity(0,0.05,0);}
                 BlockPos tptarget= new BlockPos(location.getX(), location.getY()+1, location.getZ());
-                if (!mc.world.getBlockState(location).isReplaceable() && !mc.world.getBlockState(tptarget).isReplaceable() && ticks==5 && notponactivateplz==false){
+                if (!mc.world.getBlockState(location).isReplaceable() && !mc.world.getBlockState(tptarget).isReplaceable() && ticks==5 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.75), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.75)+1.075), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.75));
                     mc.player.setVelocity(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
-                } else if (liquids.get() && !mc.world.getBlockState(location).isOf(Blocks.AIR) && !mc.world.getBlockState(tptarget).isOf(Blocks.AIR) && ticks==5 && notponactivateplz==false){
+                } else if (liquids.get() && !mc.world.getBlockState(location).isOf(Blocks.AIR) && !mc.world.getBlockState(tptarget).isOf(Blocks.AIR) && ticks==5 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.75), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.75)+1.075), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.75));
                     mc.player.setVelocity(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
                 }
-                else if (ticks ==5 && notponactivateplz==false){
+                else if (ticks ==5 && !notponactivateplz){
                     mc.player.setPos(location.getX()+0.5, location.getY()+1.1, location.getZ()+0.5);
                     mc.player.setVelocity(0,0.2,0);
                 }
-                else if (ticks <=5 && notponactivateplz == false){
+                else if (ticks <=5 && !notponactivateplz){
                     mc.options.jumpKey.setPressed(false);
                     mc.options.sneakKey.setPressed(false);
                     mc.options.forwardKey.setPressed(false);
@@ -230,46 +230,46 @@ public class Teleport extends Module {
                     TPnow=false;
                     Modules.get().get(Timer.class).setOverride(Timer.OFF);
                 }
-                if (ticks >=1 && ticks <=5 && notponactivateplz == false){
+                if (ticks >=1 && ticks <=5 && !notponactivateplz){
                     Modules.get().get(Timer.class).setOverride(tpTimer.get());
                 }
             } else if (location.getX()+0.5-startpos.getX()<=64 && location.getX()+0.5-startpos.getX()>=-64 && location.getY()+0.5-startpos.getY()<=64 && location.getY()+0.5-startpos.getY()>=-64 && location.getZ()+0.5-startpos.getZ()<=64 && location.getZ()+0.5-startpos.getZ()>=-64 ){
-                if (ticks ==2 && notponactivateplz==false){
+                if (ticks ==2 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.125), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.125)+1.0125), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.125));
                     mc.player.setVelocity(0,0.05,0);}
-                else if (ticks ==3 && notponactivateplz==false){
+                else if (ticks ==3 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.25), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.25)+1.025), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.25));
                     mc.player.setVelocity(0,0.05,0);}
-                else if (ticks == 4 && notponactivateplz==false){
+                else if (ticks == 4 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.375), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.375)+1.0375), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.375));
                     mc.player.setVelocity(0,0.05,0);}
-                else if (ticks == 5 && notponactivateplz==false){
+                else if (ticks == 5 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.50), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.50)+1.05), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.50));
                     mc.player.setVelocity(0,0.05,0);}
-                else if (ticks == 6 && notponactivateplz==false){
+                else if (ticks == 6 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.625), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.625)+1.0625), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.625));
                     mc.player.setVelocity(0,0.05,0);}
-                else if (ticks == 7 && notponactivateplz==false){
+                else if (ticks == 7 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.75), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.75)+1.075), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.75));
                     mc.player.setVelocity(0,0.05,0);}
-                else if (ticks == 8 && notponactivateplz==false){
+                else if (ticks == 8 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.875), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.875)+1.0875), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.875));
                     mc.player.setVelocity(0,0.05,0);}
                 BlockPos tptarget= new BlockPos(location.getX(), location.getY()+1, location.getZ());
-                if (!mc.world.getBlockState(location).isReplaceable() && !mc.world.getBlockState(tptarget).isReplaceable() && ticks==9 && notponactivateplz==false){
+                if (!mc.world.getBlockState(location).isReplaceable() && !mc.world.getBlockState(tptarget).isReplaceable() && ticks==9 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.875), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.875)+1.0875), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.875));
                     mc.player.setVelocity(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
-                } else if (liquids.get() && !mc.world.getBlockState(location).isOf(Blocks.AIR) && !mc.world.getBlockState(tptarget).isOf(Blocks.AIR) && ticks==9 && notponactivateplz==false){
+                } else if (liquids.get() && !mc.world.getBlockState(location).isOf(Blocks.AIR) && !mc.world.getBlockState(tptarget).isOf(Blocks.AIR) && ticks==9 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.875), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.875)+1.0875), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.875));
                     mc.player.setVelocity(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
                 }
-                else if (ticks ==9 && notponactivateplz==false){
+                else if (ticks ==9 && !notponactivateplz){
                     mc.player.setPos(location.getX()+0.5, location.getY()+1.1, location.getZ()+0.5);
                     mc.player.setVelocity(0,0.2,0);
                 }
-                else if (ticks <=9 && notponactivateplz==false){
+                else if (ticks <=9 && !notponactivateplz){
                     mc.options.jumpKey.setPressed(false);
                     mc.options.sneakKey.setPressed(false);
                     mc.options.forwardKey.setPressed(false);
@@ -284,58 +284,58 @@ public class Teleport extends Module {
                     TPnow = false;
                     Modules.get().get(Timer.class).setOverride(Timer.OFF);
                 }
-                if (ticks >=1 && ticks <=9 && notponactivateplz == false){
+                if (ticks >=1 && ticks <=9 && !notponactivateplz){
                     Modules.get().get(Timer.class).setOverride(tpTimer.get());
                 }
             } else if (location.getX()+0.5-startpos.getX() > 64 || location.getX()+0.5-startpos.getX() <-64 || location.getY()+0.5-startpos.getY()>64 || location.getY()+0.5-startpos.getY()<-64 || location.getZ()+0.5-startpos.getZ()>64 || location.getZ()+0.5-startpos.getZ()<-64 ) {
-                if (ticks==2 && notponactivateplz==false){
+                if (ticks==2 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.0833333333333333), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.0833333333333333)+1.00833333333333333), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.0833333333333333));
                     mc.player.setVelocity(0,0.05,0);}
-                else if (ticks == 3 && notponactivateplz == false){
+                else if (ticks == 3 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.1666666666666667), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.1666666666666667)+1.01666666666666667), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.1666666666666667));
                     mc.player.setVelocity(0,0.05,0);}
-                else if (ticks == 4 && notponactivateplz == false){
+                else if (ticks == 4 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.25), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.25)+1.025), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.25));
                     mc.player.setVelocity(0,0.05,0);}
-                else if (ticks == 5 && notponactivateplz == false){
+                else if (ticks == 5 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.3333333333333333), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.3333333333333333)+1.03333333333333333), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.3333333333333333));
                     mc.player.setVelocity(0,0.05,0);}
-                else if (ticks == 6 && notponactivateplz == false){
+                else if (ticks == 6 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.4166666666666667), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.4166666666666667)+1.04166666666666667), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.4166666666666667));
                     mc.player.setVelocity(0,0.05,0);}
-                else if (ticks == 7 && notponactivateplz == false){
+                else if (ticks == 7 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.5), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.5)+1.05), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.5));
                     mc.player.setVelocity(0,0.05,0);}
-                else if (ticks == 8 && notponactivateplz == false){
+                else if (ticks == 8 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.5833333333333333), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.5833333333333333)+1.05833333333333333), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.5833333333333333));
                     mc.player.setVelocity(0,0.05,0);}
-                else if (ticks == 9 && notponactivateplz == false){
+                else if (ticks == 9 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.6666666666666667), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.6666666666666667)+1.06666666666666667), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.6666666666666667));
                     mc.player.setVelocity(0,0.05,0);}
-                else if (ticks == 10 && notponactivateplz == false){
+                else if (ticks == 10 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.75), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.75)+1.075), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.75));
                     mc.player.setVelocity(0,0.05,0);}
-                else if (ticks == 11 && notponactivateplz == false){
+                else if (ticks == 11 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.8333333333333333), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.8333333333333333)+1.08333333333333333), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.8333333333333333));
                     mc.player.setVelocity(0,0.05,0);}
-                else if (ticks == 12 && notponactivateplz == false){
+                else if (ticks == 12 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.9166666666666667), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.9166666666666667)+1.09166666666666667), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.9166666666666667));
                     mc.player.setVelocity(0,0.05,0);}
                 BlockPos tptarget= new BlockPos(location.getX(), location.getY()+1, location.getZ());
-                if (!mc.world.getBlockState(location).isReplaceable() && !mc.world.getBlockState(tptarget).isReplaceable() && ticks==13 && notponactivateplz==false){
+                if (!mc.world.getBlockState(location).isReplaceable() && !mc.world.getBlockState(tptarget).isReplaceable() && ticks==13 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.9166666666666667), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.9166666666666667)+1.09166666666666667), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.9166666666666667));
                     mc.player.setVelocity(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
-                } else if (liquids.get() && !mc.world.getBlockState(location).isOf(Blocks.AIR) && !mc.world.getBlockState(tptarget).isOf(Blocks.AIR) && ticks==13 && notponactivateplz==false){
+                } else if (liquids.get() && !mc.world.getBlockState(location).isOf(Blocks.AIR) && !mc.world.getBlockState(tptarget).isOf(Blocks.AIR) && ticks==13 && !notponactivateplz){
                     mc.player.setPos(startpos.getX()+((location.getX()+0.5-startpos.getX())*0.9166666666666667), startpos.getY()+(((location.getY()+0.5-startpos.getY()+0.5)*0.9166666666666667)+1.09166666666666667), startpos.getZ()+((location.getZ()+0.5-startpos.getZ())*0.9166666666666667));
                     mc.player.setVelocity(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
                 }
-                else if (ticks == 13 && notponactivateplz == false){
+                else if (ticks == 13 && !notponactivateplz){
                     mc.player.setPos(location.getX()+0.5, location.getY()+1.1, location.getZ()+0.5);
                     mc.player.setVelocity(0,0.2,0);
                 }
-                else if (ticks <=13 && notponactivateplz==false){
+                else if (ticks <=13 && !notponactivateplz){
                     mc.options.jumpKey.setPressed(false);
                     mc.options.sneakKey.setPressed(false);
                     mc.options.forwardKey.setPressed(false);
@@ -349,7 +349,7 @@ public class Teleport extends Module {
                     TPnow=false;
                     Modules.get().get(Timer.class).setOverride(Timer.OFF);
                 }
-                if (ticks >= 1 && ticks <=13 && notponactivateplz == false){
+                if (ticks >= 1 && ticks <=13 && !notponactivateplz){
                     Modules.get().get(Timer.class).setOverride(tpTimer.get());
                 }
             }
@@ -357,9 +357,9 @@ public class Teleport extends Module {
     }
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (TPnow==false){
+        if (!TPnow){
             location=target();}
-        if (location == null) return;
+        if (location == null || mc.world == null) return;
         double x1 = location.getX();
         double y1 = location.getY()+1;
         double z1 = location.getZ();
