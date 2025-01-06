@@ -55,6 +55,7 @@ public class ForceOPBook extends Module {
 
     @Override
     public void onActivate() {
+        if (mc.player == null || mc.interactionManager == null) return;
         if (!mc.player.getAbilities().creativeMode) {
             error("You need creative mode to make the book.");
             toggle();

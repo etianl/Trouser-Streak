@@ -49,7 +49,7 @@ public class AutoLavaCaster extends Module {
             .name("Timer Estimation Mode")
             .description("FortyFiveDegreeStairs estimates based on 45degree stairs down to sealevel(Y63), or down to Y-60 if you are below Y64. Other two options are self-explanatory.")
             .defaultValue(Modes.UseLastMountain)
-            .visible(() -> estlavatime.get())
+            .visible(estlavatime::get)
             .build());
     private final Setting<Boolean> aposition = sgGeneral.add(new BoolSetting.Builder()
             .name("AutoPosition")
@@ -99,14 +99,14 @@ public class AutoLavaCaster extends Module {
     private final Setting<List<Block>> skippableBlox = sgBuild.add(new BlockListSetting.Builder()
             .name("Blocks to not use")
             .description("Do not use these blocks for mountains.")
-            .visible(() -> incY.get())
+            .visible(incY::get)
             .build()
     );
     private final Setting<Boolean> bstyle = sgBuild.add(new BoolSetting.Builder()
             .name("SwitchBuildStyletoPlusSign")
             .description("Switches build style to increase flow")
             .defaultValue(true)
-            .visible(() -> incY.get())
+            .visible(incY::get)
             .build()
     );
     private final Setting<Integer> watertime2 = sgTimer.add(new IntSetting.Builder()
@@ -133,7 +133,7 @@ public class AutoLavaCaster extends Module {
             .defaultValue(4)
             .sliderRange(1,100)
             .min(1)
-            .visible(() -> (incY.get()))
+            .visible(incY::get)
             .build()
     );
     private final Setting<Integer> buildlimit = sgBuild.add(new IntSetting.Builder()
@@ -141,14 +141,14 @@ public class AutoLavaCaster extends Module {
             .description("Halts bot when you reach this Y level")
             .defaultValue(319)
             .sliderRange(-63,319)
-            .visible(() -> (incY.get()))
+            .visible(incY::get)
             .build()
     );
     private final Setting<Boolean> MountainsOfLavaInc = sgBuild.add(new BoolSetting.Builder()
             .name("MountainsOfLava")
             .description("Leaves Lava as the last layer on your Mountain, for added danger when the noobs log back in.")
             .defaultValue(false)
-            .visible(() -> incY.get())
+            .visible(incY::get)
             .build()
     );
     private final Setting<Boolean> sneaky = sgGeneral.add(new BoolSetting.Builder()
@@ -177,7 +177,7 @@ public class AutoLavaCaster extends Module {
             .name("shape-mode")
             .description("How the shapes are rendered.")
             .defaultValue(ShapeMode.Both)
-            .visible(() -> render.get())
+            .visible(render::get)
             .build()
     );
 
@@ -185,7 +185,7 @@ public class AutoLavaCaster extends Module {
             .name("side-color")
             .description("The color of the sides of the blocks being rendered.")
             .defaultValue(new SettingColor(255, 0, 255, 15))
-            .visible(() -> render.get())
+            .visible(render::get)
             .build()
     );
 
@@ -193,7 +193,7 @@ public class AutoLavaCaster extends Module {
             .name("line-color")
             .description("The color of the lines of the blocks being rendered.")
             .defaultValue(new SettingColor(255, 0, 255, 255))
-            .visible(() -> render.get())
+            .visible(render::get)
             .build()
     );
     public final Setting<Boolean> lowYrst = sgGeneral.add(new BoolSetting.Builder()

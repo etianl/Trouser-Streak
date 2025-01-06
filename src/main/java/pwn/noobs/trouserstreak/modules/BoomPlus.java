@@ -175,7 +175,7 @@ public class BoomPlus extends Module {
             .defaultValue(2)
             .min(0)
             .sliderMax(20)
-            .visible(() -> auto.get())
+            .visible(auto::get)
             .build()
     );
 

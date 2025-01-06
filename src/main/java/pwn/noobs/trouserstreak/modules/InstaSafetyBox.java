@@ -23,6 +23,7 @@ import pwn.noobs.trouserstreak.Trouser;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 public class InstaSafetyBox extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -121,7 +122,7 @@ public class InstaSafetyBox extends Module {
         if (mode.get()==Modes.Sphere) reach=spherereach.get();
         else if (mode.get()==Modes.Box) reach=boxreach.get();
         if (center.get()) PlayerUtils.centerPlayer();
-        if (sneaky.get() && mc.player.isOnGround() && mc.player.getY() >= Math.floor(mc.player.getY()) + 0.2) {
+        if (mc.player != null && sneaky.get() && mc.player.isOnGround() && mc.player.getY() >= Math.floor(mc.player.getY()) + 0.2) {
             mc.options.sneakKey.setPressed(true);
             playerneedstosneak = true;
         }
@@ -140,13 +141,13 @@ public class InstaSafetyBox extends Module {
                         switch (mode.get()) {
                             case Sphere -> {
                                 if (distance1 <= reach || distance2 <= reach) {
-                                    if (!blocks.contains(blockPos) && blockPos != new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ()) && blockPos != new BlockPos(mc.player.getBlockX(), mc.player.getBlockY()+1, mc.player.getBlockZ()) && mc.world.getBlockState(blockPos).getBlock().getDefaultState().isReplaceable()) {
+                                    if (!blocks.contains(blockPos) && !blockPos.equals(new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ())) && blockPos != new BlockPos(mc.player.getBlockX(), mc.player.getBlockY()+1, mc.player.getBlockZ()) && mc.world.getBlockState(blockPos).getBlock().getDefaultState().isReplaceable()) {
                                         blocks.add(blockPos);
                                     }
                                 }
                             }
                             case Box -> {
-                                if (!blocks.contains(blockPos) && blockPos != new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ()) && blockPos != new BlockPos(mc.player.getBlockX(), mc.player.getBlockY()+1, mc.player.getBlockZ()) && mc.world.getBlockState(blockPos).getBlock().getDefaultState().isReplaceable()) {
+                                if (!blocks.contains(blockPos) && !blockPos.equals(new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ())) && blockPos != new BlockPos(mc.player.getBlockX(), mc.player.getBlockY()+1, mc.player.getBlockZ()) && mc.world.getBlockState(blockPos).getBlock().getDefaultState().isReplaceable()) {
                                     blocks.add(blockPos);
                                 }
                             }
@@ -160,12 +161,12 @@ public class InstaSafetyBox extends Module {
 
             int count = 0;
             for (BlockPos blockPos : blocks) {
-                if (count >= blockpertick.get()) {
+                if (count >= blockpertick.get() || mc.interactionManager == null) {
                     break;
                 }
                 if (hard.get() || isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack())) cascadingpileof();
 
-                if (blockPos != new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ()) && blockPos != new BlockPos(mc.player.getBlockX(), mc.player.getBlockY()+1, mc.player.getBlockZ()) && mc.world.getBlockState(blockPos).getBlock().getDefaultState().isReplaceable() && !isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack())) {
+                if (!Objects.equals(blockPos, new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ())) && blockPos != new BlockPos(mc.player.getBlockX(), mc.player.getBlockY()+1, mc.player.getBlockZ()) && mc.world.getBlockState(blockPos).getBlock().getDefaultState().isReplaceable() && !isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack())) {
                     if (rotate.get())Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos));
                     if (swing.get())mc.player.swingHand(Hand.MAIN_HAND);
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(blockPos), Direction.DOWN, blockPos, false));
@@ -214,9 +215,7 @@ public class InstaSafetyBox extends Module {
                 }))
                 .orElse(null);
 
-        if (hardestBlock != null) {
-            mc.player.getInventory().selectedSlot = mc.player.getInventory().indexOf(hardestBlock);
-        }
+        mc.player.getInventory().selectedSlot = mc.player.getInventory().getSlotWithStack(hardestBlock);
     }
     private boolean isInvalidBlock(ItemStack stack) {
         return !(stack.getItem() instanceof BlockItem)
@@ -239,7 +238,10 @@ public class InstaSafetyBox extends Module {
                 || ((BlockItem) stack.getItem()).getBlock() instanceof BellBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof CarpetBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof ConduitBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof CoralParentBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof CoralFanBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof CoralWallFanBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof DeadCoralFanBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof DeadCoralWallFanBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof TripwireHookBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof PointedDripstoneBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof TripwireBlock

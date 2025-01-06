@@ -120,6 +120,7 @@ public class AutoTexts extends Module {
 
     @Override
     public void onActivate() {
+        if (mc.player == null) return;
         if (!mc.player.getAbilities().creativeMode) {
             error("Creative mode required!");
             toggle();

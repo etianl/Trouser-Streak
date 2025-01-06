@@ -46,7 +46,7 @@ public class VoiderPlus extends Module {
             .description("maxheight")
             .defaultValue(0)
             .sliderRange(-64, 64)
-            .visible(() -> getplayerY.get())
+            .visible(getplayerY::get)
             .build());
     private final Setting<Integer> maxheight = sgGeneral.add(new IntSetting.Builder()
             .name("maxheight")
@@ -77,7 +77,7 @@ public class VoiderPlus extends Module {
             .name("Toggle off after TP forward")
             .description("Turn module off after TP, or not.")
             .defaultValue(false)
-            .visible(() -> tpfwd.get())
+            .visible(tpfwd::get)
             .build()
     );
 
@@ -107,6 +107,7 @@ public class VoiderPlus extends Module {
     }
     @Override
     public void onActivate() {
+        if (mc.player == null || mc.world == null) return;
         if (notOP.get() && !(mc.player.hasPermissionLevel(2)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
             toggle();
             error("Must have permission level 2 or higher");
@@ -122,6 +123,7 @@ public class VoiderPlus extends Module {
     }
     @EventHandler
     public void onTick(TickEvent.Post event) {
+        if (mc.player == null || mc.world == null) return;
         if (!threebythree.get() && !tpfwd.get()){
             ChatUtils.sendPlayerMsg("/fill " + (sX - radius.get()) + " " + i +" "+ (sZ - radius.get()) +" "+ (sX + radius.get()) + " " + i +" "+ (sZ + radius.get()) + " "+block);
             i--;
@@ -143,18 +145,10 @@ public class VoiderPlus extends Module {
             i--;
             if (i<=minheight.get()){
                 switch (mc.player.getMovementDirection()){
-                    case EAST -> {
-                        ChatUtils.sendPlayerMsg("/tp "+(sX+(radius.get()*2))+" "+sY+" "+sZ);
-                    }
-                    case WEST ->  {
-                        ChatUtils.sendPlayerMsg("/tp "+(sX+(-(radius.get()*2)))+" "+sY+" "+sZ);
-                    }
-                    case NORTH ->  {
-                        ChatUtils.sendPlayerMsg("/tp "+sX+" "+sY+" "+(sZ+(-(radius.get()*2))));
-                    }
-                    case SOUTH ->  {
-                        ChatUtils.sendPlayerMsg("/tp "+sX+" "+sY+" "+(sZ+(radius.get()*2)));
-                    }
+                    case EAST -> ChatUtils.sendPlayerMsg("/tp "+(sX+(radius.get()*2))+" "+sY+" "+sZ);
+                    case WEST -> ChatUtils.sendPlayerMsg("/tp "+(sX+(-(radius.get()*2)))+" "+sY+" "+sZ);
+                    case NORTH -> ChatUtils.sendPlayerMsg("/tp "+sX+" "+sY+" "+(sZ+(-(radius.get()*2))));
+                    case SOUTH -> ChatUtils.sendPlayerMsg("/tp "+sX+" "+sY+" "+(sZ+(radius.get()*2)));
                 }
                 if (!getplayerY.get()){
                     i = maxheight.get();

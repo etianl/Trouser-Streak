@@ -5,13 +5,14 @@
   <p><strong>Official Griefing Utilities of <a href="https://www.youtube.com/@mountainsoflavainc.6913">Mountains of Lava Inc.</a></strong></p>
   <p><strong>Trouser-Streak</strong> is a compilation of modules for <strong><a href="https://meteorclient.com/">Meteor Client</a></strong>.</p> 
   <p><strong><em>Updated to the latest version and optimized for maximum grief!</em></strong></p>
-    <p><strong>Discord server for updates and help: <a href="https://discord.gg/Az3G3p4ZCj">https://discord.gg/Az3G3p4ZCj</a></strong></p>
+    <p><strong>Customer Service Discord: <a href="https://discord.gg/Az3G3p4ZCj">https://discord.gg/Az3G3p4ZCj</a></strong></p>
   <img src="src/main/resources/assets/icon/icon.png" alt="Trouser-Streak Logo" width="28%"/>
 </div>
 
 ***A few of these modules were not made by me!***
 ## Credits to the people I skidded from:
 In no particular order
+- All of these people https://github.com/etianl/Trouser-Streak/graphs/contributors
 - [DAMcraft (ServerSeeker)](https://github.com/DAMcraft/MeteorServerSeeker)
 - [Meteor Client](https://github.com/meteordevelopment/meteor-client)
 - [Allah-Hack](https://github.com/TaxEvasiqn/allah-hack)
@@ -97,6 +98,7 @@ In no particular order
 - **Book And Quill Dupe:** Overflows data in a book's title to cause dupes and chunk bans. Credits to [Thorioum](https://github.com/Thorioum)!
 - **Boom+:** Throws entities or spawns them on the targeted block when you click (Credits to Allah-Hack for the original) I just added more fun things you might want to throw as well as included the option for height based on player Y level.
 - **BungeeSpoofer:** Allows you to join servers with an exposed bungeecord backend. (Credits to DAMcraft of ServerSeeker!)
+- **CaveDisturbanceDetector:** Scans for single air blocks within the cave air blocks found in caves and underground structures in 1.13+ chunks. (Credits to etianl :D)
 - **CrashCommand:** Crashes other players out using a nasty particle effect. Requires OP status. Credits to [aaaasdfghjkllll](https://github.com/aaaasdfghjkllll)
 - **ExplosionAura:** Spawns creepers at your position as you move that explode instantly. Like a bigger, more laggy Nuker module for creative mode. The use of the module Velocity is recommended to avoid being thrown around. (Credits to etianl :D)
 - **FlightAntikick:** Moves you down on a tick-based timer. Added in to substitute the lack of a "Normal" mode antikick for velocity flight in MeteorClient (not a great antikick it's just something). Bind it to the same key as Flight. (Credits to etianl :D)
@@ -161,6 +163,7 @@ In no particular order
 - **OnlinePlayerActivityDetector:** Detects if an online player is nearby if there are blocks missing from a BlockState palette and your render distances are overlapping. It can detect players that are outside of render distance. (Credits to etianl :D)
 - **OPplayerTPmodule:** Uses operator commands to teleport you to each player online one by one at the push of a button, or those players to you one by one. There is a button in the options for it to reset the current player to zero. Thank you to [ogmur](https://www.youtube.com/@Ogmur) for the module suggestion (Credits to etianl for writing :D). REQUIRES OP STATUS
 - **OPServerKillModule:** Runs a set of operator commands to disable a server and cover up the tracks of the kill command. REQUIRES OP STATUS (Credits to etianl :D)
+- **PortalPatternFinder:** Scans for the shapes of broken/removed Nether Portals within the cave air blocks found in caves and underground structures in 1.13+ chunks. **May be useful for finding portal skips in the Nether**. (Credits to etianl :D)
 - **PotESP:** Detects Decorated Pots with un-natural contents, and also tells you what item it is and the location of the pot. (Credits to etianl :D)
 - **RedstoneNuker:** It's just the regular Nuker module from Meteor client, customized for only breaking things that generate redstone signals. Also with included AutoTool. To keep you safer when placing lots of TNT. (Credits to Meteor Client for Nuker code, and AutoTool code inthere.)
 - **ShulkerDupe:** Duplicates the contents of a shulker when pressing "Dupe" or "Dupe All" in the shulker menu. Only works on Vanilla, Forge, and Fabric servers 1.19 and below. Use multiconnect or viafabric (Credits to Allah-Hack, I just brought back the buttons, and make it dupe slot1 as well.)

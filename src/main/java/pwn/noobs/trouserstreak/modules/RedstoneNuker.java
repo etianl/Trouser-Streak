@@ -482,7 +482,7 @@ public class RedstoneNuker extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (Modules.get().isActive(InfinityMiner.class)) return;
+        if (Modules.get().isActive(InfinityMiner.class) || mc.world == null || mc.player == null) return;
 
         if (switchBack.get() && !mc.options.attackKey.isPressed() && wasPressed && InvUtils.previousSlot != -1) {
             InvUtils.swapBack();

@@ -62,7 +62,7 @@ public class ForceOPSign extends Module {
             .name("Command Block Termination")
             .description("Sets up Command blocks to run the following commands above the sign.")
             .defaultValue(false)
-            .visible(() -> skynet.get())
+            .visible(skynet::get)
             .build()
     );
     public final Setting<Integer> blockskynetYlevel = commandParameters.add(new IntSetting.Builder()
@@ -77,7 +77,7 @@ public class ForceOPSign extends Module {
             .name("crash out players")
             .description("Crashes everyone excluding your friends and you.")
             .defaultValue(true)
-            .visible(() -> skynet.get())
+            .visible(skynet::get)
             .build()
     );
     private final Setting<String> thecommand2 = commandlines.add(new StringSetting.Builder()
@@ -112,21 +112,21 @@ public class ForceOPSign extends Module {
             .name("dont-terminate-friends")
             .description("Terminate everyone excluding your friends and you.")
             .defaultValue(true)
-            .visible(() -> skynet.get())
+            .visible(skynet::get)
             .build()
     );
     private final Setting<Block> terminateblock = commandParameters.add(new BlockSetting.Builder()
             .name("TerminationBlock PLAYERS")
             .description("What is created around the Players (Default: Lava)")
             .defaultValue(Blocks.LAVA)
-            .visible(() -> skynet.get())
+            .visible(skynet::get)
             .build());
     public final Setting<Integer> terminateheight1 = commandParameters.add(new IntSetting.Builder()
             .name("TerminationTop PLAYERS")
             .description("Height /fill'd around Players")
             .defaultValue(1)
             .sliderRange(0,90)
-            .visible(() -> skynet.get())
+            .visible(skynet::get)
             .build()
     );
     public final Setting<Integer> terminateheight2 = commandParameters.add(new IntSetting.Builder()
@@ -134,7 +134,7 @@ public class ForceOPSign extends Module {
             .description("Height /fill'd around Players")
             .defaultValue(1)
             .sliderRange(0,90)
-            .visible(() -> skynet.get())
+            .visible(skynet::get)
             .build()
     );
     public final Setting<Integer> terminatewidth = commandParameters.add(new IntSetting.Builder()
@@ -142,7 +142,7 @@ public class ForceOPSign extends Module {
             .description("Width /fill'd around Players")
             .defaultValue(50)
             .sliderRange(0,90)
-            .visible(() -> skynet.get())
+            .visible(skynet::get)
             .build()
     );
     public final Setting<Integer> terminatedepth = commandParameters.add(new IntSetting.Builder()
@@ -150,21 +150,21 @@ public class ForceOPSign extends Module {
             .description("Depth /fill'd around Players")
             .defaultValue(50)
             .sliderRange(0,90)
-            .visible(() -> skynet.get())
+            .visible(skynet::get)
             .build()
     );
     private final Setting<Block> eterminateblock = commandParameters.add(new BlockSetting.Builder()
             .name("TerminationBlock ENTITIES")
             .description("What is created around the Entities (Default: Lava)")
             .defaultValue(Blocks.LAVA)
-            .visible(() -> skynet.get())
+            .visible(skynet::get)
             .build());
     public final Setting<Integer> eterminateheight1 = commandParameters.add(new IntSetting.Builder()
             .name("TerminationTop ENTITIES")
             .description("Height /fill'd around Entities")
             .defaultValue(2)
             .sliderRange(0,90)
-            .visible(() -> skynet.get())
+            .visible(skynet::get)
             .build()
     );
     public final Setting<Integer> eterminateheight2 = commandParameters.add(new IntSetting.Builder()
@@ -172,7 +172,7 @@ public class ForceOPSign extends Module {
             .description("Height /fill'd around Entities")
             .defaultValue(1)
             .sliderRange(0,90)
-            .visible(() -> skynet.get())
+            .visible(skynet::get)
             .build()
     );
     public final Setting<Integer> eterminatewidth = commandParameters.add(new IntSetting.Builder()
@@ -180,7 +180,7 @@ public class ForceOPSign extends Module {
             .description("Width /fill'd around Entities")
             .defaultValue(10)
             .sliderRange(0,90)
-            .visible(() -> skynet.get())
+            .visible(skynet::get)
             .build()
     );
     public final Setting<Integer> eterminatedepth = commandParameters.add(new IntSetting.Builder()
@@ -188,7 +188,7 @@ public class ForceOPSign extends Module {
             .description("Depth /fill'd around Entities")
             .defaultValue(10)
             .sliderRange(0,90)
-            .visible(() -> skynet.get())
+            .visible(skynet::get)
             .build()
     );
     public ForceOPSign() {
@@ -197,6 +197,7 @@ public class ForceOPSign extends Module {
 
     @Override
     public void onActivate() {
+        if (mc.player == null) return;
         if (versionwarning.get()) error("!!!You need TrouserStreak for Minecraft 1.20.4 to make it work on versions less than 1.20.5!!!");
         if (!mc.player.getAbilities().creativeMode) {
             error("You need creative mode to make the sign.");

@@ -37,7 +37,7 @@ public class AnHero extends Module {
             .name("TheMessage")
             .description("What is said before you become an hero.")
             .defaultValue("I Regret Nothing.")
-            .visible(() -> chatmsg.get())
+            .visible(chatmsg::get)
             .build());
 
     public AnHero() {
@@ -49,14 +49,14 @@ public class AnHero extends Module {
     @EventHandler
     private void onScreenOpen(OpenScreenEvent event) {
         if (event.screen instanceof DisconnectedScreen) {
-            if (nofallwason==true && !Modules.get().get(NoFall.class).isActive()){
+            if (nofallwason && !Modules.get().get(NoFall.class).isActive()){
                 Modules.get().get(NoFall.class).toggle();
             }
             Modules.get().get(Timer.class).setOverride(Timer.OFF);
             toggle();
         }
         if (event.screen instanceof DeathScreen) {
-            if (nofallwason==true && !Modules.get().get(NoFall.class).isActive()){
+            if (nofallwason && !Modules.get().get(NoFall.class).isActive()){
                 Modules.get().get(NoFall.class).toggle();
             }
             Modules.get().get(Timer.class).setOverride(Timer.OFF);
@@ -65,7 +65,7 @@ public class AnHero extends Module {
     }
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
-        if (nofallwason==true && !Modules.get().get(NoFall.class).isActive()){
+        if (nofallwason && !Modules.get().get(NoFall.class).isActive()){
             Modules.get().get(NoFall.class).toggle();
         }
         Modules.get().get(Timer.class).setOverride(Timer.OFF);
@@ -73,6 +73,7 @@ public class AnHero extends Module {
     }
     @Override
     public void onActivate() {
+        if (mc.player == null) return;
         if (chatmsg.get()){
             ChatUtils.sendPlayerMsg(message.get());
         }
@@ -95,7 +96,7 @@ public class AnHero extends Module {
     }
     @Override
     public void onDeactivate() {
-        if (nofallwason==true && !Modules.get().get(NoFall.class).isActive()){
+        if (nofallwason && !Modules.get().get(NoFall.class).isActive()){
             Modules.get().get(NoFall.class).toggle();
         }
         Modules.get().get(Timer.class).setOverride(Timer.OFF);
