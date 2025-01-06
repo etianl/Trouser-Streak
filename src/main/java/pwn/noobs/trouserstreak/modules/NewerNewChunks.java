@@ -627,13 +627,13 @@ public class NewerNewChunks extends Module {
 		if (event.packet instanceof AcknowledgeChunksC2SPacket )return; //for some reason this packet keeps getting cast to other packets
 		if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && event.packet instanceof ChunkDeltaUpdateS2CPacket packet && liquidexploit.get()) {
 
-            packet.visitUpdates((pos, state) -> {
+			packet.visitUpdates((pos, state) -> {
 				ChunkPos chunkPos = new ChunkPos(pos);
 				if (!state.getFluidState().isEmpty() && !state.getFluidState().isStill()) {
 					for (Direction dir: searchDirs) {
 						try {
 							if (mc.world != null && mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!OldGenerationOldChunks.contains(chunkPos) && !beingUpdatedOldChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
-                                tickexploitChunks.remove(chunkPos);
+								tickexploitChunks.remove(chunkPos);
 								newChunks.add(chunkPos);
 								if (save.get()){
 									saveData(Paths.get("NewChunkData.txt"), chunkPos);
@@ -646,7 +646,7 @@ public class NewerNewChunks extends Module {
 			});
 		}
 		else if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && event.packet instanceof BlockUpdateS2CPacket packet) {
-            ChunkPos chunkPos = new ChunkPos(packet.getPos());
+			ChunkPos chunkPos = new ChunkPos(packet.getPos());
 			if (blockupdateexploit.get()){
 				try {
 					if (!OldGenerationOldChunks.contains(chunkPos) && !beingUpdatedOldChunks.contains(chunkPos) && !tickexploitChunks.contains(chunkPos) && !oldChunks.contains(chunkPos) && !newChunks.contains(chunkPos)){
@@ -662,7 +662,7 @@ public class NewerNewChunks extends Module {
 				for (Direction dir: searchDirs) {
 					try {
 						if (mc.world != null && mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!OldGenerationOldChunks.contains(chunkPos) && !beingUpdatedOldChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
-                            tickexploitChunks.remove(chunkPos);
+							tickexploitChunks.remove(chunkPos);
 							newChunks.add(chunkPos);
 							if (save.get()){
 								saveData(Paths.get("NewChunkData.txt"), chunkPos);
@@ -674,7 +674,7 @@ public class NewerNewChunks extends Module {
 			}
 		}
 		else if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && !(event.packet instanceof PlayerMoveC2SPacket) && event.packet instanceof ChunkDataS2CPacket packet && mc.world != null) {
-            ChunkPos oldpos = new ChunkPos(packet.getChunkX(), packet.getChunkZ());
+			ChunkPos oldpos = new ChunkPos(packet.getChunkX(), packet.getChunkZ());
 
 			if (mc.world.getChunkManager().getChunk(packet.getChunkX(), packet.getChunkZ()) == null) {
 				WorldChunk chunk = new WorldChunk(mc.world, oldpos);

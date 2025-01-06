@@ -203,25 +203,25 @@ public class TPFly extends Module {
             if (mc.player.getMovementDirection() == Direction.NORTH) {
                 BlockPos pos12 = playerPos.add(new Vec3i(0,0,-Range));
                 if (mc.world.getBlockState(pos12).isReplaceable() && mc.world.getBlockState(pos12).getBlock() != Blocks.LAVA){
-                mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()-Range);
+                    mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()-Range);
                 }
             }
             if (mc.player.getMovementDirection() == Direction.SOUTH) {
                 BlockPos pos13 = playerPos.add(new Vec3i(0,0,Range));
                 if (mc.world.getBlockState(pos13).isReplaceable() && mc.world.getBlockState(pos13).getBlock() != Blocks.LAVA){
-                mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()+Range);
+                    mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()+Range);
                 }
             }
             if (mc.player.getMovementDirection() == Direction.EAST) {
                 BlockPos pos14 = playerPos.add(new Vec3i(Range,0,0));
                 if (mc.world.getBlockState(pos14).isReplaceable() && mc.world.getBlockState(pos14).getBlock() != Blocks.LAVA){
-                mc.player.setPos(mc.player.getX()+Range,mc.player.getY(),mc.player.getZ());
+                    mc.player.setPos(mc.player.getX()+Range,mc.player.getY(),mc.player.getZ());
                 }
             }
             if (mc.player.getMovementDirection() == Direction.WEST) {
                 BlockPos pos15 = playerPos.add(new Vec3i(-Range,0,0));
                 if (mc.world.getBlockState(pos15).isReplaceable() && mc.world.getBlockState(pos15).getBlock() != Blocks.LAVA){
-                mc.player.setPos(mc.player.getX()-Range,mc.player.getY(),mc.player.getZ());
+                    mc.player.setPos(mc.player.getX()-Range,mc.player.getY(),mc.player.getZ());
                 }
             }
         }
@@ -230,25 +230,25 @@ public class TPFly extends Module {
             if (mc.player.getMovementDirection() == Direction.NORTH) {
                 BlockPos pos16 = playerPos.add(new Vec3i(0,0,Range));
                 if (mc.world.getBlockState(pos16).isReplaceable() && mc.world.getBlockState(pos16).getBlock() != Blocks.LAVA){
-                mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()+Range);
+                    mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()+Range);
                 }
             }
             if (mc.player.getMovementDirection() == Direction.SOUTH) {
                 BlockPos pos17 = playerPos.add(new Vec3i(0,0,-Range));
                 if (mc.world.getBlockState(pos17).isReplaceable() && mc.world.getBlockState(pos17).getBlock() != Blocks.LAVA){
-                mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()-Range);
+                    mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()-Range);
                 }
             }
             if (mc.player.getMovementDirection() == Direction.EAST) {
                 BlockPos pos18 = playerPos.add(new Vec3i(-Range,0,0));
                 if (mc.world.getBlockState(pos18).isReplaceable() && mc.world.getBlockState(pos18).getBlock() != Blocks.LAVA){
-                mc.player.setPos(mc.player.getX()-Range,mc.player.getY(),mc.player.getZ());
+                    mc.player.setPos(mc.player.getX()-Range,mc.player.getY(),mc.player.getZ());
                 }
             }
             if (mc.player.getMovementDirection() == Direction.WEST) {
                 BlockPos pos19 = playerPos.add(new Vec3i(Range,0,0));
                 if (mc.world.getBlockState(pos19).isReplaceable() && mc.world.getBlockState(pos19).getBlock() != Blocks.LAVA){
-                mc.player.setPos(mc.player.getX()+Range,mc.player.getY(),mc.player.getZ());
+                    mc.player.setPos(mc.player.getX()+Range,mc.player.getY(),mc.player.getZ());
                 }
             }
         }
@@ -257,25 +257,25 @@ public class TPFly extends Module {
             if (mc.player.getMovementDirection() == Direction.NORTH) {
                 BlockPos pos20 = playerPos.add(new Vec3i(0,0,-Range));
                 if (mc.world.getBlockState(pos20).isReplaceable() && mc.world.getBlockState(pos20).getBlock() != Blocks.LAVA){
-                mc.player.setPos(mc.player.getX()-Range,mc.player.getY(),mc.player.getZ());
+                    mc.player.setPos(mc.player.getX()-Range,mc.player.getY(),mc.player.getZ());
                 }
             }
             if (mc.player.getMovementDirection() == Direction.SOUTH) {
                 BlockPos pos21 = playerPos.add(new Vec3i(0,0,Range));
                 if (mc.world.getBlockState(pos21).isReplaceable() && mc.world.getBlockState(pos21).getBlock() != Blocks.LAVA){
-                mc.player.setPos(mc.player.getX()+Range,mc.player.getY(),mc.player.getZ());
+                    mc.player.setPos(mc.player.getX()+Range,mc.player.getY(),mc.player.getZ());
                 }
             }
             if (mc.player.getMovementDirection() == Direction.EAST) {
                 BlockPos pos22 = playerPos.add(new Vec3i(Range,0,0));
                 if (mc.world.getBlockState(pos22).isReplaceable() && mc.world.getBlockState(pos22).getBlock() != Blocks.LAVA){
-                mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()-Range);
+                    mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()-Range);
                 }
             }
             if (mc.player.getMovementDirection() == Direction.WEST) {
                 BlockPos pos23 = playerPos.add(new Vec3i(-Range,0,0));
                 if (mc.world.getBlockState(pos23).isReplaceable() && mc.world.getBlockState(pos23).getBlock() != Blocks.LAVA){
-                mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()+Range);
+                    mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()+Range);
                 }
             }
         }
@@ -284,25 +284,25 @@ public class TPFly extends Module {
             if (mc.player.getMovementDirection() == Direction.NORTH) {
                 BlockPos pos24 = playerPos.add(new Vec3i(0,0,-Range));
                 if (mc.world.getBlockState(pos24).isReplaceable() && mc.world.getBlockState(pos24).getBlock() != Blocks.LAVA){
-                mc.player.setPos(mc.player.getX()+Range,mc.player.getY(),mc.player.getZ());
+                    mc.player.setPos(mc.player.getX()+Range,mc.player.getY(),mc.player.getZ());
                 }
             }
             if (mc.player.getMovementDirection() == Direction.SOUTH) {
                 BlockPos pos25 = playerPos.add(new Vec3i(0,0,Range));
                 if (mc.world.getBlockState(pos25).isReplaceable() && mc.world.getBlockState(pos25).getBlock() != Blocks.LAVA){
-                mc.player.setPos(mc.player.getX()-Range,mc.player.getY(),mc.player.getZ());
+                    mc.player.setPos(mc.player.getX()-Range,mc.player.getY(),mc.player.getZ());
                 }
             }
             if (mc.player.getMovementDirection() == Direction.EAST) {
                 BlockPos pos26 = playerPos.add(new Vec3i(Range,0,0));
                 if (mc.world.getBlockState(pos26).isReplaceable() && mc.world.getBlockState(pos26).getBlock() != Blocks.LAVA){
-                mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()+Range);
+                    mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()+Range);
                 }
             }
             if (mc.player.getMovementDirection() == Direction.WEST) {
                 BlockPos pos27 = playerPos.add(new Vec3i(-Range,0,0));
                 if (mc.world.getBlockState(pos27).isReplaceable() && mc.world.getBlockState(pos27).getBlock() != Blocks.LAVA){
-                mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()-Range);
+                    mc.player.setPos(mc.player.getX(),mc.player.getY(),mc.player.getZ()-Range);
                 }
             }
         }
@@ -316,7 +316,7 @@ public class TPFly extends Module {
             BlockPos pos10 = playerPos.add(new Vec3i(0,5,0));
             BlockPos pos11 = playerPos.add(new Vec3i(0,6,0));
             if (mc.world.getBlockState(pos6).isReplaceable() && mc.world.getBlockState(pos7).isReplaceable() && mc.world.getBlockState(pos8).isReplaceable() && mc.world.getBlockState(pos9).isReplaceable() && mc.world.getBlockState(pos10).isReplaceable() && mc.world.getBlockState(pos11).isReplaceable() && mc.world.getBlockState(pos6).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos7).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos8).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos9).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos10).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos11).getBlock() != Blocks.LAVA){
-            mc.player.setPos(mc.player.getX(),mc.player.getY()+upRange,mc.player.getZ());
+                mc.player.setPos(mc.player.getX(),mc.player.getY()+upRange,mc.player.getZ());
             }
 
         } else if (mode.get() == Modes.WASDFly && mc.options.jumpKey.isPressed() && mc.options.backKey.isPressed()){
@@ -358,7 +358,7 @@ public class TPFly extends Module {
             BlockPos pos4 = playerPos.add(new Vec3i(0,-5,0));
             BlockPos pos5 = playerPos.add(new Vec3i(0,-6,0));
             if (mc.world.getBlockState(pos).isReplaceable() && mc.world.getBlockState(pos1).isReplaceable() && mc.world.getBlockState(pos2).isReplaceable() && mc.world.getBlockState(pos3).isReplaceable() && mc.world.getBlockState(pos4).isReplaceable() && mc.world.getBlockState(pos5).isReplaceable() && mc.world.getBlockState(pos).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos1).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos2).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos3).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos4).getBlock() != Blocks.LAVA && mc.world.getBlockState(pos5).getBlock() != Blocks.LAVA){
-            mc.player.setPos(mc.player.getX(),mc.player.getY()-downRange,mc.player.getZ());
+                mc.player.setPos(mc.player.getX(),mc.player.getY()-downRange,mc.player.getZ());
             }
         } else if (mode.get() == Modes.WASDFly && mc.options.sneakKey.isPressed() && mc.options.backKey.isPressed()){
             mc.player.setPos(mc.player.getX(),mc.player.getY()-downRange,mc.player.getZ());

@@ -215,7 +215,6 @@ public class AutoLavaCaster extends Module {
     int layers;
     @Override
     public void onActivate() {
-        if (mc.player == null) return;
         mc.player.setNoGravity(false);
         if (Modules.get().get(Flight.class).isActive()) {
             Modules.get().get(Flight.class).toggle();

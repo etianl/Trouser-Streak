@@ -253,77 +253,77 @@ public class LavaAura extends Module {
                                 BlockPos targetBlockPos = BlockPos.ofFloored(targetPos);
 
                                 if (mc.world.getBlockState(targetBlockPos).getBlock() != Blocks.WATER && mc.world.getBlockState(targetBlockPos).getBlock() != Blocks.LAVA) {
-                                        Block blockBelow = mc.world.getBlockState(targetBlockPos.down()).getBlock();
-                                        if (mode.get() == Mode.LAVA) {
-                                            if (nolavaburning.get() && !entity.isOnFire() && placementTicks >= placelavatickdelay.get()){
+                                    Block blockBelow = mc.world.getBlockState(targetBlockPos.down()).getBlock();
+                                    if (mode.get() == Mode.LAVA) {
+                                        if (nolavaburning.get() && !entity.isOnFire() && placementTicks >= placelavatickdelay.get()){
+                                            mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, targetPos);
+                                            placeLava();
+                                            placementTicks=0;
+                                        }
+                                        else if (!nolavaburning.get() && placementTicks >= placelavatickdelay.get()){
+                                            mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, targetPos);
+                                            placeLava();
+                                            placementTicks=0;
+                                        }
+                                    } else if ((!mc.player.isSneaking() &&
+                                            !(blockBelow instanceof AbstractFurnaceBlock ||
+                                                    blockBelow instanceof AbstractSignBlock ||
+                                                    blockBelow instanceof AnvilBlock ||
+                                                    blockBelow instanceof BarrelBlock ||
+                                                    blockBelow instanceof BeaconBlock ||
+                                                    blockBelow instanceof BedBlock ||
+                                                    blockBelow instanceof BellBlock ||
+                                                    blockBelow instanceof BrewingStandBlock ||
+                                                    blockBelow instanceof ButtonBlock ||
+                                                    blockBelow instanceof CakeBlock ||
+                                                    blockBelow instanceof CampfireBlock ||
+                                                    blockBelow instanceof CandleBlock ||
+                                                    blockBelow instanceof CandleCakeBlock ||
+                                                    blockBelow instanceof CartographyTableBlock ||
+                                                    blockBelow instanceof ChestBlock ||
+                                                    (mc.player.hasPermissionLevel(2) && blockBelow instanceof CommandBlock) ||
+                                                    blockBelow instanceof ComparatorBlock ||
+                                                    blockBelow instanceof CrafterBlock ||
+                                                    blockBelow instanceof CraftingTableBlock ||
+                                                    blockBelow instanceof DaylightDetectorBlock ||
+                                                    blockBelow instanceof DecoratedPotBlock ||
+                                                    blockBelow instanceof DispenserBlock ||
+                                                    blockBelow instanceof DoorBlock ||
+                                                    blockBelow instanceof DragonEggBlock ||
+                                                    blockBelow instanceof EnchantingTableBlock ||
+                                                    blockBelow instanceof EnderChestBlock ||
+                                                    blockBelow instanceof FenceBlock ||
+                                                    blockBelow instanceof FenceGateBlock ||
+                                                    blockBelow instanceof GrindstoneBlock ||
+                                                    blockBelow instanceof HangingSignBlock ||
+                                                    blockBelow instanceof HopperBlock ||
+                                                    blockBelow instanceof LecternBlock ||
+                                                    blockBelow instanceof LeverBlock ||
+                                                    (mc.player.hasPermissionLevel(2) && blockBelow instanceof LightBlock) ||
+                                                    blockBelow instanceof LoomBlock ||
+                                                    blockBelow instanceof NoteBlock ||
+                                                    blockBelow instanceof RedstoneOreBlock ||
+                                                    blockBelow instanceof RedstoneWireBlock ||
+                                                    blockBelow instanceof RepeaterBlock ||
+                                                    blockBelow instanceof RespawnAnchorBlock ||
+                                                    blockBelow instanceof ShulkerBoxBlock ||
+                                                    blockBelow instanceof SmithingTableBlock ||
+                                                    blockBelow instanceof StonecutterBlock ||
+                                                    blockBelow instanceof SweetBerryBushBlock ||
+                                                    blockBelow instanceof TntBlock ||
+                                                    blockBelow instanceof TrapdoorBlock ||
+                                                    blockBelow instanceof WallHangingSignBlock) &&
+                                            !blockHasOnUseMethod(mc.world.getBlockState(targetBlockPos).getBlock()) && mode.get() == Mode.FIRE) ||
+                                            mc.player.isSneaking() && mode.get() == Mode.FIRE) {
+                                        if (placementTicks >= placefiretickdelay.get()){
+                                            if (!norotate.get())
                                                 mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, targetPos);
-                                                placeLava();
-                                                placementTicks=0;
-                                            }
-                                            else if (!nolavaburning.get() && placementTicks >= placelavatickdelay.get()){
-                                                mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, targetPos);
-                                                placeLava();
-                                                placementTicks=0;
-                                            }
-                                        } else if ((!mc.player.isSneaking() &&
-                                                !(blockBelow instanceof AbstractFurnaceBlock ||
-                                                        blockBelow instanceof AbstractSignBlock ||
-                                                        blockBelow instanceof AnvilBlock ||
-                                                        blockBelow instanceof BarrelBlock ||
-                                                        blockBelow instanceof BeaconBlock ||
-                                                        blockBelow instanceof BedBlock ||
-                                                        blockBelow instanceof BellBlock ||
-                                                        blockBelow instanceof BrewingStandBlock ||
-                                                        blockBelow instanceof ButtonBlock ||
-                                                        blockBelow instanceof CakeBlock ||
-                                                        blockBelow instanceof CampfireBlock ||
-                                                        blockBelow instanceof CandleBlock ||
-                                                        blockBelow instanceof CandleCakeBlock ||
-                                                        blockBelow instanceof CartographyTableBlock ||
-                                                        blockBelow instanceof ChestBlock ||
-                                                        (mc.player.hasPermissionLevel(2) && blockBelow instanceof CommandBlock) ||
-                                                        blockBelow instanceof ComparatorBlock ||
-                                                        blockBelow instanceof CrafterBlock ||
-                                                        blockBelow instanceof CraftingTableBlock ||
-                                                        blockBelow instanceof DaylightDetectorBlock ||
-                                                        blockBelow instanceof DecoratedPotBlock ||
-                                                        blockBelow instanceof DispenserBlock ||
-                                                        blockBelow instanceof DoorBlock ||
-                                                        blockBelow instanceof DragonEggBlock ||
-                                                        blockBelow instanceof EnchantingTableBlock ||
-                                                        blockBelow instanceof EnderChestBlock ||
-                                                        blockBelow instanceof FenceBlock ||
-                                                        blockBelow instanceof FenceGateBlock ||
-                                                        blockBelow instanceof GrindstoneBlock ||
-                                                        blockBelow instanceof HangingSignBlock ||
-                                                        blockBelow instanceof HopperBlock ||
-                                                        blockBelow instanceof LecternBlock ||
-                                                        blockBelow instanceof LeverBlock ||
-                                                        (mc.player.hasPermissionLevel(2) && blockBelow instanceof LightBlock) ||
-                                                        blockBelow instanceof LoomBlock ||
-                                                        blockBelow instanceof NoteBlock ||
-                                                        blockBelow instanceof RedstoneOreBlock ||
-                                                        blockBelow instanceof RedstoneWireBlock ||
-                                                        blockBelow instanceof RepeaterBlock ||
-                                                        blockBelow instanceof RespawnAnchorBlock ||
-                                                        blockBelow instanceof ShulkerBoxBlock ||
-                                                        blockBelow instanceof SmithingTableBlock ||
-                                                        blockBelow instanceof StonecutterBlock ||
-                                                        blockBelow instanceof SweetBerryBushBlock ||
-                                                        blockBelow instanceof TntBlock ||
-                                                        blockBelow instanceof TrapdoorBlock ||
-                                                        blockBelow instanceof WallHangingSignBlock) &&
-                                                !blockHasOnUseMethod(mc.world.getBlockState(targetBlockPos).getBlock()) && mode.get() == Mode.FIRE) ||
-                                                mc.player.isSneaking() && mode.get() == Mode.FIRE) {
-                                            if (placementTicks >= placefiretickdelay.get()){
-                                                if (!norotate.get())
-                                                    mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, targetPos);
-                                                if (noburnburning.get() && !entity.isOnFire()) placeFire(targetBlockPos);
-                                                else if (!noburnburning.get()) placeFire(targetBlockPos);
-                                                placementTicks=0;
-                                            }
+                                            if (noburnburning.get() && !entity.isOnFire()) placeFire(targetBlockPos);
+                                            else if (!noburnburning.get()) placeFire(targetBlockPos);
+                                            placementTicks=0;
                                         }
                                     }
+                                }
 
                             }
                         }
@@ -331,70 +331,70 @@ public class LavaAura extends Module {
                         if (distance <= range.get() && distance > noburnrange.get()) {
                             BlockPos targetBlockPos = BlockPos.ofFloored(targetPos);
 
-                                Block blockBelow = mc.world.getBlockState(targetBlockPos.down()).getBlock();
+                            Block blockBelow = mc.world.getBlockState(targetBlockPos.down()).getBlock();
 
-                                if ((!mc.player.isSneaking() &&
-                                        !(blockBelow instanceof AbstractFurnaceBlock ||
-                                        blockBelow instanceof AbstractSignBlock ||
-                                        blockBelow instanceof AnvilBlock ||
-                                        blockBelow instanceof BarrelBlock ||
-                                        blockBelow instanceof BeaconBlock ||
-                                        blockBelow instanceof BedBlock ||
-                                        blockBelow instanceof BellBlock ||
-                                        blockBelow instanceof BrewingStandBlock ||
-                                        blockBelow instanceof ButtonBlock ||
-                                        blockBelow instanceof CakeBlock ||
-                                        blockBelow instanceof CampfireBlock ||
-                                        blockBelow instanceof CandleBlock ||
-                                        blockBelow instanceof CandleCakeBlock ||
-                                        blockBelow instanceof CartographyTableBlock ||
-                                        blockBelow instanceof ChestBlock ||
-                                                (mc.player.hasPermissionLevel(2) && blockBelow instanceof CommandBlock) ||
-                                        blockBelow instanceof ComparatorBlock ||
-                                        blockBelow instanceof CrafterBlock ||
-                                        blockBelow instanceof CraftingTableBlock ||
-                                        blockBelow instanceof DaylightDetectorBlock ||
-                                        blockBelow instanceof DecoratedPotBlock ||
-                                        blockBelow instanceof DispenserBlock ||
-                                        blockBelow instanceof DoorBlock ||
-                                        blockBelow instanceof DragonEggBlock ||
-                                        blockBelow instanceof EnchantingTableBlock ||
-                                        blockBelow instanceof EnderChestBlock ||
-                                        blockBelow instanceof FenceBlock ||
-                                        blockBelow instanceof FenceGateBlock ||
-                                        blockBelow instanceof GrindstoneBlock ||
-                                        blockBelow instanceof HangingSignBlock ||
-                                        blockBelow instanceof HopperBlock ||
-                                        blockBelow instanceof LecternBlock ||
-                                        blockBelow instanceof LeverBlock ||
-                                                (mc.player.hasPermissionLevel(2) && blockBelow instanceof LightBlock) ||
-                                        blockBelow instanceof LoomBlock ||
-                                        blockBelow instanceof NoteBlock ||
-                                        blockBelow instanceof RedstoneOreBlock ||
-                                        blockBelow instanceof RedstoneWireBlock ||
-                                        blockBelow instanceof RepeaterBlock ||
-                                        blockBelow instanceof RespawnAnchorBlock ||
-                                        blockBelow instanceof ShulkerBoxBlock ||
-                                        blockBelow instanceof SmithingTableBlock ||
-                                        blockBelow instanceof StonecutterBlock ||
-                                        blockBelow instanceof SweetBerryBushBlock ||
-                                        blockBelow instanceof TntBlock ||
-                                        blockBelow instanceof TrapdoorBlock ||
-                                        blockBelow instanceof WallHangingSignBlock) &&
-                                        mc.world.getBlockState(targetBlockPos).getBlock() != Blocks.WATER &&
-                                        mc.world.getBlockState(targetBlockPos).getBlock() != Blocks.LAVA &&
-                                        !blockHasOnUseMethod(mc.world.getBlockState(targetBlockPos).getBlock())) ||
-                                        (mc.player.isSneaking() &&
-                                                mc.world.getBlockState(targetBlockPos).getBlock() != Blocks.WATER &&
-                                                mc.world.getBlockState(targetBlockPos).getBlock() != Blocks.LAVA)) {
-                                    if (placementTicks >= placefiretickdelay.get()){
-                                        if (!norotate.get())
-                                            mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, targetPos);
-                                        if (noburnburning.get() && !entity.isOnFire()) placeFire(targetBlockPos);
-                                        else if (!noburnburning.get()) placeFire(targetBlockPos);
-                                        placementTicks=0;
-                                    }
+                            if ((!mc.player.isSneaking() &&
+                                    !(blockBelow instanceof AbstractFurnaceBlock ||
+                                            blockBelow instanceof AbstractSignBlock ||
+                                            blockBelow instanceof AnvilBlock ||
+                                            blockBelow instanceof BarrelBlock ||
+                                            blockBelow instanceof BeaconBlock ||
+                                            blockBelow instanceof BedBlock ||
+                                            blockBelow instanceof BellBlock ||
+                                            blockBelow instanceof BrewingStandBlock ||
+                                            blockBelow instanceof ButtonBlock ||
+                                            blockBelow instanceof CakeBlock ||
+                                            blockBelow instanceof CampfireBlock ||
+                                            blockBelow instanceof CandleBlock ||
+                                            blockBelow instanceof CandleCakeBlock ||
+                                            blockBelow instanceof CartographyTableBlock ||
+                                            blockBelow instanceof ChestBlock ||
+                                            (mc.player.hasPermissionLevel(2) && blockBelow instanceof CommandBlock) ||
+                                            blockBelow instanceof ComparatorBlock ||
+                                            blockBelow instanceof CrafterBlock ||
+                                            blockBelow instanceof CraftingTableBlock ||
+                                            blockBelow instanceof DaylightDetectorBlock ||
+                                            blockBelow instanceof DecoratedPotBlock ||
+                                            blockBelow instanceof DispenserBlock ||
+                                            blockBelow instanceof DoorBlock ||
+                                            blockBelow instanceof DragonEggBlock ||
+                                            blockBelow instanceof EnchantingTableBlock ||
+                                            blockBelow instanceof EnderChestBlock ||
+                                            blockBelow instanceof FenceBlock ||
+                                            blockBelow instanceof FenceGateBlock ||
+                                            blockBelow instanceof GrindstoneBlock ||
+                                            blockBelow instanceof HangingSignBlock ||
+                                            blockBelow instanceof HopperBlock ||
+                                            blockBelow instanceof LecternBlock ||
+                                            blockBelow instanceof LeverBlock ||
+                                            (mc.player.hasPermissionLevel(2) && blockBelow instanceof LightBlock) ||
+                                            blockBelow instanceof LoomBlock ||
+                                            blockBelow instanceof NoteBlock ||
+                                            blockBelow instanceof RedstoneOreBlock ||
+                                            blockBelow instanceof RedstoneWireBlock ||
+                                            blockBelow instanceof RepeaterBlock ||
+                                            blockBelow instanceof RespawnAnchorBlock ||
+                                            blockBelow instanceof ShulkerBoxBlock ||
+                                            blockBelow instanceof SmithingTableBlock ||
+                                            blockBelow instanceof StonecutterBlock ||
+                                            blockBelow instanceof SweetBerryBushBlock ||
+                                            blockBelow instanceof TntBlock ||
+                                            blockBelow instanceof TrapdoorBlock ||
+                                            blockBelow instanceof WallHangingSignBlock) &&
+                                    mc.world.getBlockState(targetBlockPos).getBlock() != Blocks.WATER &&
+                                    mc.world.getBlockState(targetBlockPos).getBlock() != Blocks.LAVA &&
+                                    !blockHasOnUseMethod(mc.world.getBlockState(targetBlockPos).getBlock())) ||
+                                    (mc.player.isSneaking() &&
+                                            mc.world.getBlockState(targetBlockPos).getBlock() != Blocks.WATER &&
+                                            mc.world.getBlockState(targetBlockPos).getBlock() != Blocks.LAVA)) {
+                                if (placementTicks >= placefiretickdelay.get()){
+                                    if (!norotate.get())
+                                        mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, targetPos);
+                                    if (noburnburning.get() && !entity.isOnFire()) placeFire(targetBlockPos);
+                                    else if (!noburnburning.get()) placeFire(targetBlockPos);
+                                    placementTicks=0;
                                 }
+                            }
                         }
                     }
                 }
@@ -476,13 +476,13 @@ public class LavaAura extends Module {
                                                         blockBelow instanceof TrapdoorBlock ||
                                                         blockBelow instanceof WallHangingSignBlock) &&
                                                 !blockHasOnUseMethod(mc.world.getBlockState(blockPos).getBlock())) || mc.player.isSneaking()) {
-                                                    if (placementTicks >= placefiretickdelay.get()){
-                                                        if (!norotate.get())mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
-                                                        placeFire(blockPos.up());
-                                                        placementTicks=0;
-                                                        lavaPlaced.add(blockPos);
-                                                    }
-                                                }
+                                            if (placementTicks >= placefiretickdelay.get()){
+                                                if (!norotate.get())mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
+                                                placeFire(blockPos.up());
+                                                placementTicks=0;
+                                                lavaPlaced.add(blockPos);
+                                            }
+                                        }
                                     };
                                 }
                             }

@@ -60,9 +60,9 @@ public class ShulkerDupe extends Module {
                 Modules.get().get(Timer.class).toggle();
             }
             for (int i = 0; i < 8; i++) {
-            if (autoT.get() && (mc.player.getInventory().getStack(0).getItem() instanceof PickaxeItem || mc.player.getInventory().getStack(1).getItem() instanceof PickaxeItem ||mc.player.getInventory().getStack(2).getItem() instanceof PickaxeItem ||mc.player.getInventory().getStack(3).getItem() instanceof PickaxeItem ||mc.player.getInventory().getStack(4).getItem() instanceof PickaxeItem ||mc.player.getInventory().getStack(5).getItem() instanceof PickaxeItem ||mc.player.getInventory().getStack(6).getItem() instanceof PickaxeItem ||mc.player.getInventory().getStack(7).getItem() instanceof PickaxeItem ||mc.player.getInventory().getStack(8).getItem() instanceof PickaxeItem) && !(mc.player.getInventory().getMainHandStack().getItem() instanceof PickaxeItem)){
-                mc.player.getInventory().selectedSlot++;
-                if (mc.player.getInventory().selectedSlot>8) mc.player.getInventory().selectedSlot=0;
+                if (autoT.get() && (mc.player.getInventory().getStack(0).getItem() instanceof PickaxeItem || mc.player.getInventory().getStack(1).getItem() instanceof PickaxeItem ||mc.player.getInventory().getStack(2).getItem() instanceof PickaxeItem ||mc.player.getInventory().getStack(3).getItem() instanceof PickaxeItem ||mc.player.getInventory().getStack(4).getItem() instanceof PickaxeItem ||mc.player.getInventory().getStack(5).getItem() instanceof PickaxeItem ||mc.player.getInventory().getStack(6).getItem() instanceof PickaxeItem ||mc.player.getInventory().getStack(7).getItem() instanceof PickaxeItem ||mc.player.getInventory().getStack(8).getItem() instanceof PickaxeItem) && !(mc.player.getInventory().getMainHandStack().getItem() instanceof PickaxeItem)){
+                    mc.player.getInventory().selectedSlot++;
+                    if (mc.player.getInventory().selectedSlot>8) mc.player.getInventory().selectedSlot=0;
                 }
             }
         } else if (!shouldDupe| !shouldDupeAll){
@@ -79,7 +79,7 @@ public class ShulkerDupe extends Module {
             HitResult wow = mc.crosshairTarget;
             BlockHitResult a = (BlockHitResult) wow;
             if (shouldDupe| shouldDupeAll){
-            mc.interactionManager.updateBlockBreakingProgress(a.getBlockPos(), Direction.DOWN);
+                mc.interactionManager.updateBlockBreakingProgress(a.getBlockPos(), Direction.DOWN);
             }
         }
     }
@@ -88,17 +88,17 @@ public class ShulkerDupe extends Module {
     public void onSendPacket(PacketEvent.Sent event) {
         if (event.packet instanceof PlayerActionC2SPacket && mc.interactionManager != null && mc.player != null) {
             if (shouldDupeAll){
-            if (((PlayerActionC2SPacket) event.packet).getAction() == PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK) {
-                for (int i = 0; i < 27; i++) {
-                    mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, i, 0, SlotActionType.QUICK_MOVE, mc.player);
+                if (((PlayerActionC2SPacket) event.packet).getAction() == PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK) {
+                    for (int i = 0; i < 27; i++) {
+                        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, i, 0, SlotActionType.QUICK_MOVE, mc.player);
+                    }
+                    shouldDupeAll=false;
                 }
-                shouldDupeAll=false;
-            }
             } else if (shouldDupe){
-            if (((PlayerActionC2SPacket) event.packet).getAction() == PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK) {
+                if (((PlayerActionC2SPacket) event.packet).getAction() == PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK) {
                     mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 0, 0, SlotActionType.QUICK_MOVE, mc.player);
                     shouldDupe=false;
-            }
+                }
             }
         }
     }

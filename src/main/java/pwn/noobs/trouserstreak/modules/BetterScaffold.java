@@ -38,17 +38,17 @@ public class BetterScaffold extends Module {
     private final SettingGroup sgRender = settings.createGroup("Render");
 
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
-        .name("blocks")
-        .description("Selected blocks.")
+            .name("blocks")
+            .description("Selected blocks.")
             .defaultValue(Blocks.TNT)
             .build()
     );
 
     private final Setting<ListMode> blocksFilter = sgGeneral.add(new EnumSetting.Builder<ListMode>()
-        .name("blocks-filter")
-        .description("How to use the block list setting")
-        .defaultValue(ListMode.Whitelist)
-        .build()
+            .name("blocks-filter")
+            .description("How to use the block list setting")
+            .defaultValue(ListMode.Whitelist)
+            .build()
     );
     private final Setting<PlaceMode> placementMode = sgGeneral.add(new EnumSetting.Builder<PlaceMode>()
             .name("Placement Mode")
@@ -72,74 +72,74 @@ public class BetterScaffold extends Module {
             .build()
     );
     private final Setting<Boolean> fastTower = sgGeneral.add(new BoolSetting.Builder()
-        .name("fast-tower")
-        .description("Whether or not to scaffold upwards faster.")
-        .defaultValue(false)
-        .build()
+            .name("fast-tower")
+            .description("Whether or not to scaffold upwards faster.")
+            .defaultValue(false)
+            .build()
     );
     private final Setting<Boolean> renderSwing = sgGeneral.add(new BoolSetting.Builder()
-        .name("swing")
-        .description("Renders your client-side swing.")
-        .defaultValue(false)
-        .build()
+            .name("swing")
+            .description("Renders your client-side swing.")
+            .defaultValue(false)
+            .build()
     );
 
     private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
-        .name("auto-switch")
-        .description("Automatically swaps to a block before placing.")
-        .defaultValue(true)
-        .build()
+            .name("auto-switch")
+            .description("Automatically swaps to a block before placing.")
+            .defaultValue(true)
+            .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-        .name("rotate")
-        .description("Rotates towards the blocks being placed.")
-        .defaultValue(true)
-        .build()
+            .name("rotate")
+            .description("Rotates towards the blocks being placed.")
+            .defaultValue(true)
+            .build()
     );
 
     private final Setting<Boolean> airPlace = sgGeneral.add(new BoolSetting.Builder()
-        .name("air-place")
-        .description("Allow air place.")
-        .defaultValue(true)
-        .build()
+            .name("air-place")
+            .description("Allow air place.")
+            .defaultValue(true)
+            .build()
     );
 
     private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
-        .name("closest-block-range")
-        .description("How far can scaffold place blocks.")
-        .defaultValue(4)
-        .min(0)
-        .sliderMax(8)
-        .visible(() -> !airPlace.get())
-        .build()
+            .name("closest-block-range")
+            .description("How far can scaffold place blocks.")
+            .defaultValue(4)
+            .min(0)
+            .sliderMax(8)
+            .visible(() -> !airPlace.get())
+            .build()
     );
 
     private final Setting<Boolean> onSurface = sgGeneral.add(new BoolSetting.Builder()
-        .name("on-surface")
-        .description("Places horizontal and vertical blocks when already standing on a block.")
-        .defaultValue(true)
-        .build()
+            .name("on-surface")
+            .description("Places horizontal and vertical blocks when already standing on a block.")
+            .defaultValue(true)
+            .build()
     );
 
     private final Setting<Integer> horizontalRadius = sgGeneral.add(new IntSetting.Builder()
-        .name("horizontal-radius")
-        .description("How far scaffold should place blocks horizontally.")
-        .defaultValue(1)
-        .min(1)
-        .sliderMin(1)
-        .sliderMax(8)
-        .build()
+            .name("horizontal-radius")
+            .description("How far scaffold should place blocks horizontally.")
+            .defaultValue(1)
+            .min(1)
+            .sliderMin(1)
+            .sliderMax(8)
+            .build()
     );
 
     private final Setting<Integer> verticalRadius = sgGeneral.add(new IntSetting.Builder()
-        .name("vertical-radius")
-        .description("How far scaffold should place blocks vertically.")
-        .defaultValue(1)
-        .min(1)
-        .sliderMin(1)
-        .sliderMax(8)
-        .build()
+            .name("vertical-radius")
+            .description("How far scaffold should place blocks vertically.")
+            .defaultValue(1)
+            .min(1)
+            .sliderMin(1)
+            .sliderMax(8)
+            .build()
     );
     private final Setting<Integer> aboveHeadDistance = sgGeneral.add(new IntSetting.Builder()
             .name("distance-above-head")
@@ -155,24 +155,24 @@ public class BetterScaffold extends Module {
     // Render
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
-        .name("shape-mode")
-        .description("How the shapes are rendered.")
-        .defaultValue(ShapeMode.Both)
-        .build()
+            .name("shape-mode")
+            .description("How the shapes are rendered.")
+            .defaultValue(ShapeMode.Both)
+            .build()
     );
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
-        .name("side-color")
-        .description("The side color of the target block rendering.")
-        .defaultValue(new SettingColor(197, 137, 232, 10))
-        .build()
+            .name("side-color")
+            .description("The side color of the target block rendering.")
+            .defaultValue(new SettingColor(197, 137, 232, 10))
+            .build()
     );
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
-        .name("line-color")
-        .description("The line color of the target block rendering.")
-        .defaultValue(new SettingColor(197, 137, 232))
-        .build()
+            .name("line-color")
+            .description("The line color of the target block rendering.")
+            .defaultValue(new SettingColor(197, 137, 232))
+            .build()
     );
 
     private final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
@@ -252,8 +252,8 @@ public class BetterScaffold extends Module {
                 }
 
                 Vec3d vecPrevBP = new Vec3d((double) prevBp.getX() + 0.5f,
-                    (double) prevBp.getY() + 0.5f,
-                    (double) prevBp.getZ() + 0.5f);
+                        (double) prevBp.getY() + 0.5f,
+                        (double) prevBp.getZ() + 0.5f);
 
                 Vec3d sub = pos.subtract(vecPrevBP);
                 Direction facing;
@@ -367,59 +367,59 @@ public class BetterScaffold extends Module {
             }
         }
 
-     if(horizontalRadius.get() > 1) {
+        if(horizontalRadius.get() > 1) {
 
-         for (int v = 0; v < verticalRadius.get(); v++) {
-             int vOffset;
-             if (placementMode.get() == PlaceMode.BelowFeet) {
-                 vOffset = -v;
-             } else if (placementMode.get() == PlaceMode.AboveHead) {
-                 vOffset = v + aboveHeadDistance.get()+2;
-             } else {
-                 continue; // Skip the loop iteration if the placement mode is not valid
-             }
+            for (int v = 0; v < verticalRadius.get(); v++) {
+                int vOffset;
+                if (placementMode.get() == PlaceMode.BelowFeet) {
+                    vOffset = -v;
+                } else if (placementMode.get() == PlaceMode.AboveHead) {
+                    vOffset = v + aboveHeadDistance.get()+2;
+                } else {
+                    continue; // Skip the loop iteration if the placement mode is not valid
+                }
 
-             for (int h = 1; h < horizontalRadius.get(); h++) {
-                 for (int d = -h + 1; d <= h - 1; d++) {
-                     //Front
-                     if (BlockUtils.place(bp.add(h, vOffset, d), item, rotate.get(), 50, renderSwing.get(), true)) {
-                         renderBlocks.add(renderBlockPool.get().set(bp.add(h, vOffset, d)));
-                     }
-                     //Back
-                     if (BlockUtils.place(bp.add(-h, vOffset, d), item, rotate.get(), 50, renderSwing.get(), true)) {
-                         renderBlocks.add(renderBlockPool.get().set(bp.add(-h, vOffset, d)));
-                     }
+                for (int h = 1; h < horizontalRadius.get(); h++) {
+                    for (int d = -h + 1; d <= h - 1; d++) {
+                        //Front
+                        if (BlockUtils.place(bp.add(h, vOffset, d), item, rotate.get(), 50, renderSwing.get(), true)) {
+                            renderBlocks.add(renderBlockPool.get().set(bp.add(h, vOffset, d)));
+                        }
+                        //Back
+                        if (BlockUtils.place(bp.add(-h, vOffset, d), item, rotate.get(), 50, renderSwing.get(), true)) {
+                            renderBlocks.add(renderBlockPool.get().set(bp.add(-h, vOffset, d)));
+                        }
 
-                     //Left
-                     if (BlockUtils.place(bp.add(d, vOffset, h), item, rotate.get(), 50, renderSwing.get(), true)) {
-                         renderBlocks.add(renderBlockPool.get().set(bp.add(d, vOffset, h)));
-                     }
+                        //Left
+                        if (BlockUtils.place(bp.add(d, vOffset, h), item, rotate.get(), 50, renderSwing.get(), true)) {
+                            renderBlocks.add(renderBlockPool.get().set(bp.add(d, vOffset, h)));
+                        }
 
-                     //Right
-                     if (BlockUtils.place(bp.add(d, vOffset, -h), item, rotate.get(), 50, renderSwing.get(), true)) {
-                         renderBlocks.add(renderBlockPool.get().set(bp.add(d, vOffset, -h)));
-                     }
-                 }
-                 //Diagonals
-                 if (BlockUtils.place(bp.add(h, vOffset, -h), item, rotate.get(), 50, renderSwing.get(), true)) {
-                     renderBlocks.add(renderBlockPool.get().set(bp.add(h, vOffset, -h)));
-                 }
+                        //Right
+                        if (BlockUtils.place(bp.add(d, vOffset, -h), item, rotate.get(), 50, renderSwing.get(), true)) {
+                            renderBlocks.add(renderBlockPool.get().set(bp.add(d, vOffset, -h)));
+                        }
+                    }
+                    //Diagonals
+                    if (BlockUtils.place(bp.add(h, vOffset, -h), item, rotate.get(), 50, renderSwing.get(), true)) {
+                        renderBlocks.add(renderBlockPool.get().set(bp.add(h, vOffset, -h)));
+                    }
 
-                 if (BlockUtils.place(bp.add(-h, vOffset, h), item, rotate.get(), 50, renderSwing.get(), true)) {
-                     renderBlocks.add(renderBlockPool.get().set(bp.add(-h, vOffset, h)));
-                 }
+                    if (BlockUtils.place(bp.add(-h, vOffset, h), item, rotate.get(), 50, renderSwing.get(), true)) {
+                        renderBlocks.add(renderBlockPool.get().set(bp.add(-h, vOffset, h)));
+                    }
 
-                 if (BlockUtils.place(bp.add(h, vOffset, h), item, rotate.get(), 50, renderSwing.get(), true)) {
-                     renderBlocks.add(renderBlockPool.get().set(bp.add(h, vOffset, h)));
-                 }
+                    if (BlockUtils.place(bp.add(h, vOffset, h), item, rotate.get(), 50, renderSwing.get(), true)) {
+                        renderBlocks.add(renderBlockPool.get().set(bp.add(h, vOffset, h)));
+                    }
 
-                 if (BlockUtils.place(bp.add(-h, vOffset, -h), item, rotate.get(), 50, renderSwing.get(), true)) {
-                     renderBlocks.add(renderBlockPool.get().set(bp.add(-h, vOffset, -h)));
-                 }
+                    if (BlockUtils.place(bp.add(-h, vOffset, -h), item, rotate.get(), 50, renderSwing.get(), true)) {
+                        renderBlocks.add(renderBlockPool.get().set(bp.add(-h, vOffset, -h)));
+                    }
 
-             }
-         }
-     }
+                }
+            }
+        }
     }
 
     @EventHandler

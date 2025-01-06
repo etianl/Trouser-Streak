@@ -386,7 +386,7 @@ public class StorageLooter extends Module {
     }
     @EventHandler
     private void onTickPre(TickEvent.Pre event) {
-        if (!hasEnoughFreeSlots() && stopLoot.get() || mc.player == null || mc.world == null) return;
+        if ((!hasEnoughFreeSlots() && stopLoot.get()) || mc.player == null || mc.world == null) return;
         updateReach();
         int bottomlimit = (int) (mc.player.getBlockY() - Math.round(Math.ceil(reach)));
         if (!isContainerScreen(mc.player.currentScreenHandler)) autoStealTicks = 0;
@@ -395,7 +395,7 @@ public class StorageLooter extends Module {
             Block block = blockState.getBlock();
 
             if (isValidContainerBlock(block) && containerList.get().contains(block.asItem())) {
-                if (isContainerScreen(mc.player.currentScreenHandler)) {
+                if (mc.player.currentScreenHandler != null && isContainerScreen(mc.player.currentScreenHandler)) {
                     if (autoStealTicks == 0) {
                         processContainerItems();
                     }
@@ -410,7 +410,7 @@ public class StorageLooter extends Module {
             }
             for (Entity entity : mc.world.getEntities()) {
                 if (entity.getBlockPos().equals(lastInteractedBlockPos) && entity instanceof ChestMinecartEntity && containerList.get().contains(Items.CHEST_MINECART)) {
-                    if (isContainerScreen(mc.player.currentScreenHandler)) {
+                    if (mc.player.currentScreenHandler != null && isContainerScreen(mc.player.currentScreenHandler)) {
                         if (autoStealTicks == 0) {
                         processContainerItems();
                         }
@@ -743,7 +743,7 @@ public class StorageLooter extends Module {
         chestsToProcess.entrySet().removeIf(entry -> {
             int delay = entry.getValue();
             if (delay <= 0) {
-                if (isContainerScreen(mc.player.currentScreenHandler)) {
+                if (mc.player.currentScreenHandler != null && isContainerScreen(mc.player.currentScreenHandler)) {
                     processContainerItems();
                     mc.player.closeHandledScreen();
                     if (rotate.get()){
@@ -1019,6 +1019,7 @@ public class StorageLooter extends Module {
         assert mc.player != null;
         int count = 0;
         String itemName = item.toString().toLowerCase();
+
         for (ItemStack stack : mc.player.getInventory().main) {
             Item stackItem = stack.getItem();
             if (isSameItem(stackItem, item, itemName)) {

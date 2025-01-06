@@ -86,7 +86,7 @@ public class OPServerKillModule extends Module {
             toggle();
             error("Must have permission level 2 or higher");
         }
-            ticks=0;
+        ticks=0;
     }
 
     @EventHandler

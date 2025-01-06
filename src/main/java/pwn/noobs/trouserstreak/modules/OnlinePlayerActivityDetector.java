@@ -216,7 +216,7 @@ public class OnlinePlayerActivityDetector extends Module {
                     }, taskExecutor);
                     future.join();
                 } catch (CompletionException e) {}
-                
+
                 ChunkSection[] sections = chunk.getSectionArray();
 
                 try {

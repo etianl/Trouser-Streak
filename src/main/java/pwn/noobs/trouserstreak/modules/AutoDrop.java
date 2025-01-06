@@ -28,9 +28,9 @@ public class AutoDrop extends Module {
     private final Setting<Integer> dropslot = sgGeneral.add(new IntSetting.Builder()
             .name("DrotSlot#")
             .description("Drops this Slot if items are in it.")
-                .sliderRange(1,9)
-                .min(1)
-                .max(9)
+            .sliderRange(1,9)
+            .min(1)
+            .max(9)
             .defaultValue(1)
             .visible(dropthisslot::get)
             .build());
@@ -44,9 +44,9 @@ public class AutoDrop extends Module {
         if (mc.player == null) return;
         if (tool.get() && (mc.player.getMainHandStack().getItem() instanceof BucketItem || mc.player.getMainHandStack().getItem() instanceof FlintAndSteelItem || mc.player.getMainHandStack().getItem() instanceof MiningToolItem || mc.player.getMainHandStack().getItem() instanceof ShearsItem))return;
         if (dropthisslot.get() && !mc.player.getInventory().getStack(dropslot.get()-1).isEmpty()){
-                    previousslot=mc.player.getInventory().selectedSlot;
-                    mc.player.getInventory().selectedSlot = dropslot.get()-1;
-                    getprevslot=true;
+            previousslot=mc.player.getInventory().selectedSlot;
+            mc.player.getInventory().selectedSlot = dropslot.get()-1;
+            getprevslot=true;
         }else if (!dropthisslot.get()) mc.player.dropSelectedItem(true);
     }
     @EventHandler

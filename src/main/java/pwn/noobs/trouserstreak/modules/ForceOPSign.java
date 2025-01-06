@@ -197,8 +197,9 @@ public class ForceOPSign extends Module {
 
     @Override
     public void onActivate() {
+        if (mc.player == null) return;
         if (versionwarning.get()) error("!!!You need TrouserStreak for Minecraft 1.20.4 to make it work on versions less than 1.20.5!!!");
-        if (mc.player != null && !mc.player.getAbilities().creativeMode) {
+        if (!mc.player.getAbilities().creativeMode) {
             error("You need creative mode to make the sign.");
             toggle();
             return;

@@ -192,7 +192,7 @@ public class HandOfGod extends Module {
             .defaultValue(17)
             .min(1)
             .sliderMax(30)
-            .visible(rndplyr::get)
+            .visible(pReplace::get)
             .build()
     );
     public final Setting<Integer> pheight = sgPcentered.add(new IntSetting.Builder()
@@ -201,7 +201,7 @@ public class HandOfGod extends Module {
             .defaultValue(11)
             .min(1)
             .sliderMax(30)
-            .visible(rndplyr::get)
+            .visible(pReplace::get)
             .build()
     );
     public final Setting<Integer> pdepth = sgPcentered.add(new IntSetting.Builder()
@@ -210,7 +210,7 @@ public class HandOfGod extends Module {
             .defaultValue(17)
             .min(1)
             .sliderMax(30)
-            .visible(rndplyr::get)
+            .visible(pReplace::get)
             .build()
     );
     public final Setting<Integer> tickdelay = sgPcentered.add(new IntSetting.Builder()
@@ -219,7 +219,7 @@ public class HandOfGod extends Module {
             .defaultValue(2)
             .min(0)
             .sliderMax(100)
-            .visible(rndplyr::get)
+            .visible(pReplace::get)
             .build()
     );
     public final Setting<Boolean> mgcersr = sgPcentered.add(new BoolSetting.Builder()
@@ -538,7 +538,6 @@ public class HandOfGod extends Module {
             String repblockName = repblock.replace("}", "");
             switch (mc.player.getHorizontalFacing()){
                 case NORTH, SOUTH -> {
-                    //they both int, why you want to round it?
                     int x1 = pos.getX() + cwidth.get();
                     int y1 = pos.getY() + cheight.get();
                     int z1 = pos.getZ() + cdepth.get();
