@@ -143,7 +143,7 @@ public class NewerNewChunks extends Module {
 			.name("AutoReloadChunks")
 			.description("Reloads the chunks automatically from your savefiles on a delay.")
 			.defaultValue(false)
-			.visible(() -> load.get())
+			.visible(load::get)
 			.build()
 	);
 	private final Setting<Integer> removedelay = sgCdata.add(new IntSetting.Builder()
@@ -361,8 +361,6 @@ public class NewerNewChunks extends Module {
 		NEW_NETHER_BLOCKS.add(Blocks.NETHER_GOLD_ORE);
 		NEW_NETHER_BLOCKS.add(Blocks.WARPED_NYLIUM);
 		NEW_NETHER_BLOCKS.add(Blocks.WARPED_STEM);
-		NEW_NETHER_BLOCKS.add(Blocks.WARPED_NYLIUM);
-		NEW_NETHER_BLOCKS.add(Blocks.CRIMSON_NYLIUM);
 		NEW_NETHER_BLOCKS.add(Blocks.TWISTING_VINES);
 		NEW_NETHER_BLOCKS.add(Blocks.WEEPING_VINES);
 		NEW_NETHER_BLOCKS.add(Blocks.BONE_BLOCK);
@@ -396,7 +394,7 @@ public class NewerNewChunks extends Module {
 		if (autoreload.get()) {
 			clearChunkData();
 		}
-		if (save.get() || load.get()) {
+		if (save.get() || load.get() && mc.world != null) {
 			world= mc.world.getRegistryKey().getValue().toString().replace(':', '_');
 			if (mc.isInSingleplayer()){
 				String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("/|\\\\");
@@ -519,7 +517,7 @@ public class NewerNewChunks extends Module {
 			}
 		}
 
-		if (load.get() && worldchange == true){		//autoreload when entering different dimensions
+		if (load.get() && worldchange){		//autoreload when entering different dimensions
 			if (worldleaveremove.get()){
 				clearChunkData();
 			}
@@ -528,7 +526,7 @@ public class NewerNewChunks extends Module {
 		}
 
 		if (!save.get())saveDataWasOn = false;
-		if (save.get() && justenabledsavedata<=2 && saveDataWasOn == false){
+		if (save.get() && justenabledsavedata<=2 && !saveDataWasOn){
 			justenabledsavedata++;
 			if (justenabledsavedata == 1){
 				synchronized (newChunks) {
@@ -563,6 +561,7 @@ public class NewerNewChunks extends Module {
 	}
 	@EventHandler
 	private void onRender(Render3DEvent event) {
+		if (mc.player == null) return;
 		BlockPos playerPos = new BlockPos(mc.player.getBlockX(), renderHeight.get(), mc.player.getBlockZ());
 		if (newChunksLineColor.get().a > 5 || newChunksSideColor.get().a > 5) {
 			synchronized (newChunks) {
@@ -625,17 +624,16 @@ public class NewerNewChunks extends Module {
 
 	@EventHandler
 	private void onReadPacket(PacketEvent.Receive event) {
-		if (event.packet instanceof AcknowledgeChunksC2SPacket)return; //for some reason this packet keeps getting cast to other packets
-		if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && event.packet instanceof ChunkDeltaUpdateS2CPacket && liquidexploit.get()) {
-			ChunkDeltaUpdateS2CPacket packet = (ChunkDeltaUpdateS2CPacket) event.packet;
+		if (event.packet instanceof AcknowledgeChunksC2SPacket )return; //for some reason this packet keeps getting cast to other packets
+		if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && event.packet instanceof ChunkDeltaUpdateS2CPacket packet && liquidexploit.get()) {
 
 			packet.visitUpdates((pos, state) -> {
 				ChunkPos chunkPos = new ChunkPos(pos);
 				if (!state.getFluidState().isEmpty() && !state.getFluidState().isStill()) {
 					for (Direction dir: searchDirs) {
 						try {
-							if (mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!OldGenerationOldChunks.contains(chunkPos) && !beingUpdatedOldChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
-								if (tickexploitChunks.contains(chunkPos)) tickexploitChunks.remove(chunkPos);
+							if (mc.world != null && mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!OldGenerationOldChunks.contains(chunkPos) && !beingUpdatedOldChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+								tickexploitChunks.remove(chunkPos);
 								newChunks.add(chunkPos);
 								if (save.get()){
 									saveData(Paths.get("NewChunkData.txt"), chunkPos);
@@ -647,8 +645,7 @@ public class NewerNewChunks extends Module {
 				}
 			});
 		}
-		else if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && event.packet instanceof BlockUpdateS2CPacket) {
-			BlockUpdateS2CPacket packet = (BlockUpdateS2CPacket) event.packet;
+		else if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && event.packet instanceof BlockUpdateS2CPacket packet) {
 			ChunkPos chunkPos = new ChunkPos(packet.getPos());
 			if (blockupdateexploit.get()){
 				try {
@@ -664,8 +661,8 @@ public class NewerNewChunks extends Module {
 			if (!packet.getState().getFluidState().isEmpty() && !packet.getState().getFluidState().isStill() && liquidexploit.get()) {
 				for (Direction dir: searchDirs) {
 					try {
-						if (mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!OldGenerationOldChunks.contains(chunkPos) && !beingUpdatedOldChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
-							if (tickexploitChunks.contains(chunkPos)) tickexploitChunks.remove(chunkPos);
+						if (mc.world != null && mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!OldGenerationOldChunks.contains(chunkPos) && !beingUpdatedOldChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+							tickexploitChunks.remove(chunkPos);
 							newChunks.add(chunkPos);
 							if (save.get()){
 								saveData(Paths.get("NewChunkData.txt"), chunkPos);
@@ -676,8 +673,7 @@ public class NewerNewChunks extends Module {
 				}
 			}
 		}
-		else if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && !(event.packet instanceof PlayerMoveC2SPacket) && event.packet instanceof ChunkDataS2CPacket && mc.world != null) {
-			ChunkDataS2CPacket packet = (ChunkDataS2CPacket) event.packet;
+		else if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && !(event.packet instanceof PlayerMoveC2SPacket) && event.packet instanceof ChunkDataS2CPacket packet && mc.world != null) {
 			ChunkPos oldpos = new ChunkPos(packet.getChunkX(), packet.getChunkZ());
 
 			if (mc.world.getChunkManager().getChunk(packet.getChunkX(), packet.getChunkZ()) == null) {
@@ -956,6 +952,7 @@ public class NewerNewChunks extends Module {
 		}
 	}
 	private void removeChunksOutsideRenderDistance() {
+		if (mc.player == null) return;
 		BlockPos playerPos = new BlockPos(mc.player.getBlockX(), renderHeight.get(), mc.player.getBlockZ());
 		double renderDistanceBlocks = renderDistance.get() * 16;
 

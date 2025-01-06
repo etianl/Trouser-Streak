@@ -70,7 +70,7 @@ public class AutoScoreboard extends Module {
             .defaultValue(2)
             .min(1)
             .sliderMax(20)
-            .visible(() -> useDelay.get())
+            .visible(useDelay::get)
             .build()
     );
 

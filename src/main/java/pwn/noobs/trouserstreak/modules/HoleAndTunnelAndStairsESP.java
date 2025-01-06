@@ -112,7 +112,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
             .defaultValue(3)
             .min(1)
             .sliderMax(20)
-            .visible(() -> diagonals.get())
+            .visible(diagonals::get)
             .build()
     );
     private final Setting<Integer> minDiagonalWidth = sgTParams.add(new IntSetting.Builder()
@@ -121,7 +121,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
             .defaultValue(2)
             .min(2)
             .sliderMax(10)
-            .visible(() -> diagonals.get())
+            .visible(diagonals::get)
             .build()
     );
     private final Setting<Integer> maxDiagonalWidth = sgTParams.add(new IntSetting.Builder()
@@ -130,7 +130,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
             .defaultValue(4)
             .min(2)
             .sliderMax(10)
-            .visible(() -> diagonals.get())
+            .visible(diagonals::get)
             .build()
     );
     private final Setting<Integer> minStaircaseLength = sgSParams.add(new IntSetting.Builder()

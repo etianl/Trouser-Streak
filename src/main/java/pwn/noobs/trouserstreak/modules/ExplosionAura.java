@@ -50,13 +50,13 @@ public class ExplosionAura extends Module {
             .defaultValue(10)
             .min(1)
             .sliderMax(127)
-            .visible(() -> click.get())
+            .visible(click::get)
             .build());
     public final Setting<Boolean> auto = sgGeneral.add(new BoolSetting.Builder()
             .name("FULLAUTO")
             .description("FULL AUTO BABY!")
             .defaultValue(false)
-            .visible(() -> click.get())
+            .visible(click::get)
             .build()
     );
     public final Setting<Integer> atickdelay = sgGeneral.add(new IntSetting.Builder()
@@ -118,7 +118,7 @@ public class ExplosionAura extends Module {
     }
     @EventHandler
     public void onTick(TickEvent.Post event) {
-        if (mc.player.getAbilities().creativeMode) {
+        if (mc.player != null && mc.interactionManager != null && mc.player.getAbilities().creativeMode) {
             if (auto.get() && mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player.getAbilities().creativeMode) {
                 if (click.get()) {
                     if (aticks<=atickdelay.get()){

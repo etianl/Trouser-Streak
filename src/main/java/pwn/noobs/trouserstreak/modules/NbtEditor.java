@@ -258,7 +258,7 @@ public class NbtEditor extends Module {
     }
     @Override
     public void onActivate() {
-        if (mc.player.getAbilities().creativeMode) {
+        if (mc.player != null  && mc.interactionManager != null && mc.world != null && mc.player.getAbilities().creativeMode) {
             switch (mode.get()) {
                 case Entity -> {
                     String entityName = entity.get().trim().replace(" ", "_");

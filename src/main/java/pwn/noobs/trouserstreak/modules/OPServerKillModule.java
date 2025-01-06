@@ -6,6 +6,7 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import pwn.noobs.trouserstreak.Trouser;
 
@@ -76,7 +77,8 @@ public class OPServerKillModule extends Module {
 
     @Override
     public void onActivate() {
-        if (dontBeStupid.get() && mc.getInstance().isInSingleplayer()) {
+        if (mc.player == null || mc.world == null) return;
+        if (dontBeStupid.get() && MinecraftClient.getInstance().isInSingleplayer()) {
             toggle();
             error("Don't break your single player world, it sucks.");
         }
@@ -84,14 +86,14 @@ public class OPServerKillModule extends Module {
             toggle();
             error("Must have permission level 2 or higher");
         }
-            ticks=0;
+        ticks=0;
     }
 
     @EventHandler
     public void onTick(TickEvent.Pre event) {
         ticks++;
         if (sendCommandFeedback.get() && logAdminCommands.get() && !crashOtherPlayers.get()){
-            if (ticks == 1*tickdelay.get()){ //prevent people from seeing the commands being executed
+            if (ticks == tickdelay.get()){ //prevent people from seeing the commands being executed
                 ChatUtils.sendPlayerMsg("/gamerule sendCommandFeedback false");
             }
             if (ticks == 2*tickdelay.get()){ //prevent console logging the command to cover up tracks
@@ -105,7 +107,7 @@ public class OPServerKillModule extends Module {
                 error("Server Killed.");
             }
         } else if (!sendCommandFeedback.get() && logAdminCommands.get() && !crashOtherPlayers.get()){
-            if (ticks == 1*tickdelay.get()){
+            if (ticks == tickdelay.get()){
                 ChatUtils.sendPlayerMsg("/gamerule logAdminCommands false");
             }
             if (ticks == 2*tickdelay.get()){
@@ -116,7 +118,7 @@ public class OPServerKillModule extends Module {
                 error("Server Killed.");
             }
         } else if (sendCommandFeedback.get() && !logAdminCommands.get() && !crashOtherPlayers.get()){
-            if (ticks == 1*tickdelay.get()){
+            if (ticks == tickdelay.get()){
                 ChatUtils.sendPlayerMsg("/gamerule sendCommandFeedback false");
             }
             if (ticks == 2*tickdelay.get()){
@@ -127,18 +129,19 @@ public class OPServerKillModule extends Module {
                 error("Server Killed.");
             }
         } else if (!sendCommandFeedback.get() && !logAdminCommands.get() && !crashOtherPlayers.get()){
-            if (ticks == 1*tickdelay.get()){
+            if (ticks == tickdelay.get()){
                 ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
             }
-            if (ticks > 1*tickdelay.get()){
+            if (ticks > tickdelay.get()){
                 toggle();
                 error("Server Killed.");
             }
         } else if (!sendCommandFeedback.get() && logAdminCommands.get() && crashOtherPlayers.get()){
-            if (ticks == 1*tickdelay.get()){
+            if (ticks == tickdelay.get()){
                 ChatUtils.sendPlayerMsg("/gamerule logAdminCommands false");
             }
             if (ticks == 2*tickdelay.get()){ //crash players
+                if (mc.player == null) return;
                 if (!nocrashfrend.get())ChatUtils.sendPlayerMsg("/execute at @a[name=!"+mc.player.getName().getLiteralString()+"] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[name=!"+mc.player.getName().getLiteralString()+"]");
                 else if (nocrashfrend.get()) {
                     players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
@@ -165,10 +168,11 @@ public class OPServerKillModule extends Module {
                 error("Server Killed.");
             }
         } else if (sendCommandFeedback.get() && !logAdminCommands.get() && crashOtherPlayers.get()){
-            if (ticks == 1*tickdelay.get()){ //prevent people from seeing the commands being executed
+            if (ticks == tickdelay.get()){ //prevent people from seeing the commands being executed
                 ChatUtils.sendPlayerMsg("/gamerule sendCommandFeedback false");
             }
             if (ticks == 2*tickdelay.get()){ //crash players
+                if (mc.player == null) return;
                 if (!nocrashfrend.get())ChatUtils.sendPlayerMsg("/execute at @a[name=!"+mc.player.getName().getLiteralString()+"] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[name=!"+mc.player.getName().getLiteralString()+"]");
                 else if (nocrashfrend.get()) {
                     players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
@@ -195,13 +199,14 @@ public class OPServerKillModule extends Module {
                 error("Server Killed.");
             }
         } else if (sendCommandFeedback.get() && logAdminCommands.get() && crashOtherPlayers.get()){
-            if (ticks == 1*tickdelay.get()){ //prevent people from seeing the commands being executed
+            if (ticks == tickdelay.get()){ //prevent people from seeing the commands being executed
                 ChatUtils.sendPlayerMsg("/gamerule sendCommandFeedback false");
             }
             if (ticks == 2*tickdelay.get()){ //prevent console logging the command to cover up tracks
                 ChatUtils.sendPlayerMsg("/gamerule logAdminCommands false");
             }
             if (ticks == 3*tickdelay.get()){ //crash players
+                if (mc.player == null) return;
                 if (!nocrashfrend.get())ChatUtils.sendPlayerMsg("/execute at @a[name=!"+mc.player.getName().getLiteralString()+"] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[name=!"+mc.player.getName().getLiteralString()+"]");
                 else if (nocrashfrend.get()) {
                     players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());

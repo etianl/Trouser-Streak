@@ -72,14 +72,14 @@ public class StorageLooter extends Module {
                     Items.GLOW_ITEM_FRAME, Items.ITEM_FRAME, Items.PAINTING, Items.PAPER, Items.CLOCK, Items.COMPASS, Items.PUFFERFISH, Items.TROPICAL_FISH, Items.GLISTERING_MELON_SLICE, Items.MAGMA_CREAM,
                     Items.LEAD, Items.SADDLE, Items.CARROT_ON_A_STICK, Items.WARPED_FUNGUS_ON_A_STICK, Items.FROGSPAWN, Items.TURTLE_EGG, Items.SNIFFER_EGG, Items.GOAT_HORN, Items.BOOK, Items.WRITABLE_BOOK, Items.WRITTEN_BOOK, Items.BRUSH
             ))
-            .visible(() -> moveJunkToContainer.get())
+            .visible(moveJunkToContainer::get)
             .build()
     );
     private final Setting<Boolean> nonitemlistjunk = sgGeneral.add(new BoolSetting.Builder()
             .name("Items not on a List are Junk")
             .description("If enabled, items not listed in the item lists (excluding the junk list) are treated as junk items.")
             .defaultValue(false)
-            .visible(() -> moveJunkToContainer.get())
+            .visible(moveJunkToContainer::get)
             .build());
     private final Setting<List<Item>> containerList = sgGeneral.add(new ItemListSetting.Builder()
             .name("Containers to loot from")
@@ -104,7 +104,7 @@ public class StorageLooter extends Module {
             .defaultValue(5)
             .sliderRange(0, 20)
             .min(0)
-            .visible(() -> autoloot.get())
+            .visible(autoloot::get)
             .build());
     private final Setting<Integer> opendelay = sgAutoLoot.add(new IntSetting.Builder()
             .name("held open delay")
@@ -112,13 +112,13 @@ public class StorageLooter extends Module {
             .defaultValue(10)
             .sliderRange(0, 20)
             .min(0)
-            .visible(() -> autoloot.get())
+            .visible(autoloot::get)
             .build());
     private final Setting<Modes> mode = sgAutoLoot.add(new EnumSetting.Builder<Modes>()
             .name("Reach Shape")
             .description("the shape of your reach")
             .defaultValue(Modes.Sphere)
-            .visible(() -> autoloot.get())
+            .visible(autoloot::get)
             .build());
     private final Setting<Double> spherereach = sgAutoLoot.add(new DoubleSetting.Builder()
             .name("Sphere Range")
@@ -140,14 +140,14 @@ public class StorageLooter extends Module {
             .name("Swing Hand")
             .description("Do or Do Not swing hand when opening chests.")
             .defaultValue(false)
-            .visible(() -> autoloot.get())
+            .visible(autoloot::get)
             .build()
     );
     private final Setting<Boolean> rotate = sgAutoLoot.add(new BoolSetting.Builder()
             .name("rotate")
             .description("Faces the containers being opened server side.")
             .defaultValue(false)
-            .visible(() -> autoloot.get())
+            .visible(autoloot::get)
             .build()
     );
     private final Setting<Boolean> autosteal = sgAutoSteal.add(new BoolSetting.Builder()
@@ -363,8 +363,7 @@ public class StorageLooter extends Module {
         if (event.packet instanceof PlayerInteractBlockC2SPacket) {
             lastInteractedBlockPos = ((PlayerInteractBlockC2SPacket) event.packet).getBlockHitResult().getBlockPos();
         }
-        else if (event.packet instanceof PlayerInteractEntityC2SPacket) {
-            PlayerInteractEntityC2SPacket packet = (PlayerInteractEntityC2SPacket) event.packet;
+        else if (event.packet instanceof PlayerInteractEntityC2SPacket packet) {
             Entity entity = mc.world.getEntityById(getEntityId(packet));
             if (entity != null) {
                 lastInteractedBlockPos = entity.getBlockPos();
@@ -383,7 +382,7 @@ public class StorageLooter extends Module {
     }
     @EventHandler
     private void onTickPre(TickEvent.Pre event) {
-        if (!hasEnoughFreeSlots() && stopLoot.get()) return;
+        if ((!hasEnoughFreeSlots() && stopLoot.get()) || mc.player == null || mc.world == null) return;
         updateReach();
         int bottomlimit = (int) (mc.player.getBlockY() - Math.round(Math.ceil(reach)));
         if (!isContainerScreen(mc.player.currentScreenHandler)) autoStealTicks = 0;
@@ -424,6 +423,7 @@ public class StorageLooter extends Module {
             }
         }
         if (ticks < delay.get())ticks++;
+        if (mc.interactionManager == null) return;
         if (ticks >= delay.get() && autoloot.get()) {
             List<BlockPos> blocks = getBlocksInRange(bottomlimit);
             blocks.sort(Comparator.comparingDouble(pos -> pos.getSquaredDistance(mc.player.getPos())));
@@ -474,6 +474,7 @@ public class StorageLooter extends Module {
     }
 
     private boolean hasEnoughFreeSlots() {
+        assert mc.player != null;
         int freeSlots = 0;
         for (ItemStack stack : mc.player.getInventory().main) {
             if (stack.isEmpty()) {
@@ -509,6 +510,7 @@ public class StorageLooter extends Module {
     }
 
     private void processContainerItems() {
+        if (mc.player == null) return;
         int playerInvStart = mc.player.currentScreenHandler.slots.size() - 36;
         maxClicks = maxClicksPerTick.get();
 
@@ -543,6 +545,7 @@ public class StorageLooter extends Module {
         totalClicksThisTick = 0; // Reset the total clicks for the next tick
     }
     private void moveExcessItemsToContainer(int playerInvStart) {
+        if (mc.player == null || mc.interactionManager == null) return;
         for (int i = playerInvStart; i < mc.player.currentScreenHandler.slots.size(); i++) {
             ItemStack playerStack = mc.player.currentScreenHandler.getSlot(i).getStack();
             if (!playerStack.isEmpty()) {
@@ -647,6 +650,7 @@ public class StorageLooter extends Module {
     }
 
     private void processItemList(List<Item> itemList, int playerInvStart) {
+        if (mc.player == null) return;
         List<Integer> slotIndices = new ArrayList<>();
         for (int i = 0; i < mc.player.currentScreenHandler.slots.size(); i++) {
             Item item = mc.player.currentScreenHandler.getSlot(i).getStack().getItem();
@@ -688,6 +692,7 @@ public class StorageLooter extends Module {
     }
 
     private List<BlockPos> getBlocksInRange(int bottomlimit) {
+        assert mc.player != null;
         List<BlockPos> blocks = new ArrayList<>();
         for (int x = (int) (mc.player.getBlockX() - Math.round(Math.ceil(reach))); x <= mc.player.getBlockX() + Math.round(Math.ceil(reach)); x++) {
             for (int y = bottomlimit; y <= (mc.player.getBlockY() + 1) + Math.round(Math.ceil(reach)); y++) {
@@ -713,6 +718,7 @@ public class StorageLooter extends Module {
     }
 
     private void openContainer(BlockPos blockPos, Block block) {
+        if (mc.player == null) return;
         if (rotate.get()){
             originalYaw = mc.player.getYaw();
             originalPitch = mc.player.getPitch();
@@ -729,6 +735,7 @@ public class StorageLooter extends Module {
     }
 
     private void processChestsAfterDelay() {
+        if (mc.player == null) return;
         chestsToProcess.entrySet().removeIf(entry -> {
             int delay = entry.getValue();
             if (delay <= 0) {
@@ -750,6 +757,7 @@ public class StorageLooter extends Module {
     }
 
     private void swapSmallerStacksForBigger(int playerInvStart) {
+        if (mc.player == null) return;
         List<Integer> containerSlotIndices = new ArrayList<>();
         for (int i = 0; i < playerInvStart; i++) {
             ItemStack containerStack = mc.player.currentScreenHandler.getSlot(i).getStack();
@@ -797,6 +805,7 @@ public class StorageLooter extends Module {
     }
 
     private int getItemScore(ItemStack stack) {
+        assert mc.player != null;
         String itemName = stack.getItem().getTranslationKey().toLowerCase();
         int score = 0;
 
@@ -884,7 +893,7 @@ public class StorageLooter extends Module {
     }
 
     private void swapItems(int playerSlotIndex, int containerSlotIndex, int playerInvStart) {
-        if (mc.player.currentScreenHandler != null && isContainerScreen(mc.player.currentScreenHandler)) {
+        if (mc.player != null && mc.interactionManager != null && isContainerScreen(mc.player.currentScreenHandler)) {
             // Perform the swap if we have enough clicks left
             if (totalClicksThisTick + 3 <= maxClicks) {
                 // Move the entire stack to the container
@@ -907,7 +916,7 @@ public class StorageLooter extends Module {
     }
 
     private void moveItems(int slotIndex, int amountToMove) {
-        if (mc.player.currentScreenHandler != null && isContainerScreen(mc.player.currentScreenHandler) && slotIndex >= 0 && slotIndex < mc.player.currentScreenHandler.slots.size()) {
+        if (mc.player != null && mc.interactionManager != null && isContainerScreen(mc.player.currentScreenHandler) && slotIndex >= 0 && slotIndex < mc.player.currentScreenHandler.slots.size()) {
             ItemStack sourceStack = mc.player.currentScreenHandler.getSlot(slotIndex).getStack();
             if (!sourceStack.isEmpty() && Math.round(((double)sourceStack.getCount() / sourceStack.getItem().getMaxCount()) * 100) >= minLootableStackSize.get()) {
                 amountToMove = Math.min(amountToMove, sourceStack.getCount());
@@ -926,6 +935,7 @@ public class StorageLooter extends Module {
         }
     }
     private int getCurrentItemCount(Item item) {
+        assert mc.player != null;
         int count = 0;
         String itemName = item.toString().toLowerCase();
         for (ItemStack stack : mc.player.getInventory().main) {
@@ -1015,6 +1025,7 @@ public class StorageLooter extends Module {
     }
 
     private int getItemCount(Item item, List<Item> itemList) {
+        assert mc.player != null;
         int count = 0;
         String itemName = item.toString().toLowerCase();
 
@@ -1148,7 +1159,7 @@ public class StorageLooter extends Module {
                 Items.DIAMOND_BOOTS
         );
 
-        if (item instanceof ToolItem || item instanceof ArmorItem) {
+        if (item instanceof MiningToolItem || item instanceof ArmorItem) {
             return diamondItems.contains(item);
         }
 

@@ -64,6 +64,7 @@ public class AutoStaircase extends Module {
 
     @Override
     public void onActivate() {
+        if (mc.player == null) return;
         mc.player.setVelocity(0,0,0);
         resetTimer = false;
         PlayerUtils.centerPlayer();

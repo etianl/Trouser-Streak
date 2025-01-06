@@ -117,7 +117,7 @@ public class AutoCommand extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (!mc.player.hasPermissionLevel(permissionLevel.get())) return;
+        if (mc.player == null || !mc.player.hasPermissionLevel(permissionLevel.get())) return;
 
         if (commandQueue.isEmpty()) {
             if (sent && !auto.get()) {
