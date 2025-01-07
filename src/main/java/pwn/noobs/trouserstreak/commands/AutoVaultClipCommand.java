@@ -34,7 +34,7 @@ public class AutoVaultClipCommand extends Command {
                     if (player.hasVehicle()) {
                         Entity vehicle = player.getVehicle();
                         for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
-                            mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(mc.player.getVehicle()));
+                            mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
                         }
                         vehicle.setPosition(vehicle.getX(), isopenair1.getY(), vehicle.getZ());
                     }
@@ -59,7 +59,7 @@ public class AutoVaultClipCommand extends Command {
                     if (player.hasVehicle()) {
                         Entity vehicle = player.getVehicle();
                         for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
-                            mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(mc.player.getVehicle()));
+                            mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
                         }
                         vehicle.setPosition(vehicle.getX(), isopenair2.getY(), vehicle.getZ());
                     }
@@ -85,7 +85,7 @@ public class AutoVaultClipCommand extends Command {
                     if (player.hasVehicle()) {
                         Entity vehicle = player.getVehicle();
                         for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
-                            mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(mc.player.getVehicle()));
+                            mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
                         }
 
                         vehicle.setPosition(vehicle.getX(), newopenair2.getY(), vehicle.getZ());

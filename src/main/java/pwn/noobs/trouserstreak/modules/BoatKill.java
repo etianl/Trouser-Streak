@@ -56,6 +56,6 @@ public class BoatKill extends Module {
 
     public void moveTo(Vec3d pos){
         mc.player.getVehicle().setPosition(pos);
-        mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(mc.player.getVehicle()));
+        mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
     }
 }
