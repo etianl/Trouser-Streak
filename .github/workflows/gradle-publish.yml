@@ -9,7 +9,7 @@ name: Gradle Package
 
 on:
   release:
-    types: [created]
+    types: [workflow_dispatch]
 
 jobs:
   build:
