@@ -7,9 +7,7 @@
 
 name: Gradle Package
 
-on:
-  release:
-    types: [workflow_dispatch]
+on: workflow_dispatch
 
 jobs:
   build:
