@@ -18,7 +18,7 @@ jobs:
     - name: Archive build artifacts
       run: tar -czf build-artifacts.tar.gz -C build .
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: build-artifacts
         path: build-artifacts.tar.gz
