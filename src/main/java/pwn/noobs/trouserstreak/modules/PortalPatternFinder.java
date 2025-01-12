@@ -133,7 +133,6 @@ public class PortalPatternFinder extends Module {
 			.visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both || trcr.get()))
 			.build()
 	);
-	private static final ExecutorService taskExecutor = Executors.newCachedThreadPool();
 	private final Set<ChunkPos> scannedChunks = Collections.synchronizedSet(new HashSet<>());
 	private final Set<Box> possiblePortalLocations = Collections.synchronizedSet(new HashSet<>());
 	private int closestPortalX=2000000000;
@@ -192,6 +191,7 @@ public class PortalPatternFinder extends Module {
 	}
 	@EventHandler
 	private void onPreTick(TickEvent.Pre event) {
+		scanTheAir();
 		if (nearesttrcr.get()){
 			try {
 				if (possiblePortalLocations.stream().toList().size() > 0) {
@@ -210,28 +210,6 @@ public class PortalPatternFinder extends Module {
 			}
 		}
 		if (removerenderdist.get())removeChunksOutsideRenderDistance();
-	}
-	@EventHandler
-	private void onReadPacket(PacketEvent.Receive event) {
-		if (event.packet instanceof AcknowledgeChunksC2SPacket)return; //for some reason this packet keeps getting cast to other packets
-		if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && !(event.packet instanceof PlayerMoveC2SPacket) && event.packet instanceof ChunkDataS2CPacket packet && mc.world != null) {
-			ChunkPos playerActivityPos = new ChunkPos(packet.getChunkX(), packet.getChunkZ());
-
-			if (mc.world.getChunkManager().getChunk(packet.getChunkX(), packet.getChunkZ()) == null) {
-				WorldChunk chunk = new WorldChunk(mc.world, playerActivityPos);
-				try {
-					CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-						chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), new NbtCompound(),
-								packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ()));
-					}, taskExecutor);
-					future.join();
-				} catch (CompletionException e) {}
-				if (chunk != null && !scannedChunks.contains(chunk.getPos())) {
-					processChunk(chunk);
-					scannedChunks.add(chunk.getPos());
-				}
-			}
-		}
 	}
 
 	private void processChunk(WorldChunk chunk) {

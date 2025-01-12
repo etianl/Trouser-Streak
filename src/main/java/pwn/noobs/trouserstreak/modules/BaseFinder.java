@@ -218,7 +218,7 @@ public class BaseFinder extends Module {
             .description("Once this many entities are found in a chunk trigger it as being a base.")
             .min(1)
             .sliderRange(1,100)
-            .defaultValue(12)
+            .defaultValue(14)
             .build());
     private final Setting<Integer> bsefndtickdelay = sgGeneral.add(new IntSetting.Builder()
             .name("Base Found Message Tick Delay")
@@ -1246,7 +1246,7 @@ public class BaseFinder extends Module {
                                     if (basefoundspamTicks== 0) {
                                         if (chatFeedback.get()){
                                             if (displaycoords.get())ChatUtils.sendMsg(Text.of("(List1)Possible build located near X" + basepos.getCenterX() + ", Y" + blockpositions1.stream().toList().get(0).getY() + ", Z" + basepos.getCenterZ() + " (" + lastblockfound1 + ")"));
-                                            else ChatUtils.sendMsg(Text.of("(List1)Possible build located!"));
+                                            else ChatUtils.sendMsg(Text.of("(List1)Possible build located!"+" ("+lastblockfound1+")"));
                                         }
                                         LastBaseFound= new ChunkPos(basepos.x, basepos.z);
                                         basefound=true;
@@ -1273,7 +1273,7 @@ public class BaseFinder extends Module {
                                     if (basefoundspamTicks== 0) {
                                         if (chatFeedback.get()){
                                             if (displaycoords.get())ChatUtils.sendMsg(Text.of("(List2)Possible build located near X" + basepos.getCenterX() + ", Y" + blockpositions2.stream().toList().get(0).getY() + ", Z" + basepos.getCenterZ() + " (" + lastblockfound2 + ")"));
-                                            else ChatUtils.sendMsg(Text.of("(List2)Possible build located!"));
+                                            else ChatUtils.sendMsg(Text.of("(List2)Possible build located!"+" ("+lastblockfound2+")"));
                                         }
                                         LastBaseFound= new ChunkPos(basepos.x, basepos.z);
                                         basefound=true;
@@ -1300,7 +1300,7 @@ public class BaseFinder extends Module {
                                     if (basefoundspamTicks== 0) {
                                         if (chatFeedback.get()){
                                             if (displaycoords.get())ChatUtils.sendMsg(Text.of("(List3)Possible build located near X" + basepos.getCenterX() + ", Y" + blockpositions3.stream().toList().get(0).getY() + ", Z" + basepos.getCenterZ() + " (" + lastblockfound3 + ")"));
-                                            else ChatUtils.sendMsg(Text.of("(List3)Possible build located!"));
+                                            else ChatUtils.sendMsg(Text.of("(List3)Possible build located!"+" ("+lastblockfound3+")"));
                                         }
                                         LastBaseFound= new ChunkPos(basepos.x, basepos.z);
                                         basefound=true;
@@ -1327,7 +1327,7 @@ public class BaseFinder extends Module {
                                     if (basefoundspamTicks== 0) {
                                         if (chatFeedback.get()){
                                             if (displaycoords.get())ChatUtils.sendMsg(Text.of("(List4)Possible build located near X" + basepos.getCenterX() + ", Y" + blockpositions4.stream().toList().get(0).getY() + ", Z" + basepos.getCenterZ() + " (" + lastblockfound4 + ")"));
-                                            else ChatUtils.sendMsg(Text.of("(List4)Possible build located!"));
+                                            else ChatUtils.sendMsg(Text.of("(List4)Possible build located!"+" ("+lastblockfound4+")"));
                                         }
                                         LastBaseFound= new ChunkPos(basepos.x, basepos.z);
                                         basefound=true;
@@ -1354,7 +1354,7 @@ public class BaseFinder extends Module {
                                     if (basefoundspamTicks== 0) {
                                         if (chatFeedback.get()){
                                             if (displaycoords.get())ChatUtils.sendMsg(Text.of("(List5)Possible build located near X"+basepos.getCenterX()+", Y"+blockpositions5.stream().toList().get(0).getY()+", Z"+basepos.getCenterZ()+" ("+lastblockfound5+")"));
-                                            else ChatUtils.sendMsg(Text.of("(List5)Possible build located!"));
+                                            else ChatUtils.sendMsg(Text.of("(List5)Possible build located!"+" ("+lastblockfound5+")"));
                                         }
                                         LastBaseFound= new ChunkPos(basepos.x, basepos.z);
                                         basefound=true;
@@ -1381,7 +1381,7 @@ public class BaseFinder extends Module {
                                     if (basefoundspamTicks== 0) {
                                         if (chatFeedback.get()){
                                             if (displaycoords.get())ChatUtils.sendMsg(Text.of("(List6)Possible build located near X"+basepos.getCenterX()+", Y"+blockpositions6.stream().toList().get(0).getY()+", Z"+basepos.getCenterZ()+" ("+lastblockfound6+")"));
-                                            else ChatUtils.sendMsg(Text.of("(List6)Possible build located!"));
+                                            else ChatUtils.sendMsg(Text.of("(List6)Possible build located!"+" ("+lastblockfound6+")"));
                                         }
                                         LastBaseFound= new ChunkPos(basepos.x, basepos.z);
                                         basefound=true;
@@ -1408,7 +1408,7 @@ public class BaseFinder extends Module {
                                     if (basefoundspamTicks== 0) {
                                         if (chatFeedback.get()){
                                             if (displaycoords.get())ChatUtils.sendMsg(Text.of("(List7)Possible build located near X"+basepos.getCenterX()+", Y"+blockpositions7.stream().toList().get(0).getY()+", Z"+basepos.getCenterZ()+" ("+lastblockfound7+")"));
-                                            else ChatUtils.sendMsg(Text.of("(List7)Possible build located!"));
+                                            else ChatUtils.sendMsg(Text.of("(List7)Possible build located!"+" ("+lastblockfound7+")"));
                                         }
                                         LastBaseFound= new ChunkPos(basepos.x, basepos.z);
                                         basefound=true;
