@@ -115,7 +115,7 @@ In no particular order
 - **LecternCrash:** Crash 1.18.X vanilla servers and possibly below. (Credits to Coderx-Gamer)
 - **MaceKill:** Exploits Mace mechanics to make the Mace super OP everytime you swing it instead of just when you drop from a height. (Credits to etianl :D)
 - **MultiUse:** Allows you to do the item use action more than once per item use. Essentially a strange form of the FastUse module and may work well combined with it. Initially created by [maytrixc](https://github.com/maytrixc), modified by etianl to use doItemUse.
-- **NbtEditor:** Requires Creative mode. Generates custom entities in the form of a custom spawn egg, generate items with custom enchantments (Only in Minecraft 1.20.4 and below), and potions with custom effects all based on the settings you configure. It can also copy the Nbt data from one item to another.  (Credits to etianl :D)
+- **NbtEditor:** Requires Creative mode. Generates custom entities in the form of a custom spawn egg, generate items with custom enchantments, and potions with custom effects all based on the settings you configure. It can also copy the Nbt data from one item to another.  (Credits to etianl :D)
 - **NewerNewChunks:** NewChunks module with new newchunk estimation exploits, and the ability to save chunk data for later! Comes with several new homebrewed newchunks methods made by yours truly. (Credits to Meteor Rejects, and BleachHack from where it was ported, and etianl for updating :D.)
 
 -------------------------------------------------------------------------------------
@@ -193,9 +193,8 @@ In no particular order
 - Joining a server with HandOfGod or Voider already on causes the module to be turned off due to "Not being OP" even if you are an operator
 
 ## Requirements:
-- If you are using Minecraft version **1.21.4**, then use the latest **MeteorClient Dev Build of v0.6.0**
-- If you are using Minecraft version **1.21.3**, then use **MeteorClient "Full Release" v0.5.9**
+- If you are using Minecraft version **1.21.4**, then use the latest **MeteorClient Build for Minecraft 1.21.4**
+- If you are using Minecraft version **1.21.3**, then use **MeteorClient "Full Release" v0.5.9** (Not available for download anymore)
 - Please try [ViaFabricPlus](https://github.com/FlorianMichael/ViaFabricPlus), which will let you connect to almost any version from a new version client.
-- Don't forget to try updating any other mods you are using if your game is crashing.
 
 plz give me star on githoob kthx

@@ -20,6 +20,7 @@
     import net.minecraft.block.enums.TrialSpawnerState;
     import net.minecraft.client.gui.screen.DisconnectedScreen;
     import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
+    import net.minecraft.entity.EntityType;
     import net.minecraft.entity.vehicle.ChestMinecartEntity;
     import net.minecraft.text.Text;
     import net.minecraft.util.math.BlockPos;
@@ -35,6 +36,57 @@
     public class ActivatedSpawnerDetector extends Module {
         private final SettingGroup sgGeneral = settings.getDefaultGroup();
         private final SettingGroup sgRender = settings.createGroup("Render");
+        private final SettingGroup sgLocations = settings.createGroup("Location Toggles");
+        private final Setting<Boolean> trialSpawner = sgLocations.add(new BoolSetting.Builder()
+                .name("Trial Spawner Detector")
+                .description("Detects activated Trial Spawners.")
+                .defaultValue(true)
+                .build()
+        );
+        private final Setting<Boolean> showmoremenu = sgLocations.add(new BoolSetting.Builder()
+                .name("Show More Location Toggles")
+                .description("Make the options menu bigger or smaller.")
+                .defaultValue(false)
+                .build());
+        private final Setting<Boolean> enableDungeon = sgLocations.add(new BoolSetting.Builder()
+                .name("Enable Dungeon")
+                .description("Enable detection for dungeons.")
+                .defaultValue(true)
+                .visible(showmoremenu::get)
+                .build());
+
+        private final Setting<Boolean> enableMineshaft = sgLocations.add(new BoolSetting.Builder()
+                .name("Enable Mineshaft")
+                .description("Enable detection for mineshafts.")
+                .defaultValue(true)
+                .visible(showmoremenu::get)
+                .build());
+
+        private final Setting<Boolean> enableBastion = sgLocations.add(new BoolSetting.Builder()
+                .name("Enable Bastion")
+                .description("Enable detection for bastions.")
+                .defaultValue(true)
+                .visible(showmoremenu::get)
+                .build());
+
+        private final Setting<Boolean> enableWoodlandMansion = sgLocations.add(new BoolSetting.Builder()
+                .name("Enable Woodland Mansion")
+                .description("Enable detection for woodland mansions.")
+                .defaultValue(true)
+                .visible(showmoremenu::get)
+                .build());
+        private final Setting<Boolean> enableFortress = sgLocations.add(new BoolSetting.Builder()
+                .name("Enable Fortress")
+                .description("Enable detection for fortresses.")
+                .defaultValue(true)
+                .visible(showmoremenu::get)
+                .build());
+        private final Setting<Boolean> enableStronghold = sgLocations.add(new BoolSetting.Builder()
+                .name("Enable Stronghold")
+                .description("Enable detection for strongholds.")
+                .defaultValue(true)
+                .visible(showmoremenu::get)
+                .build());
         private final Setting<Boolean> chatFeedback = sgGeneral.add(new BoolSetting.Builder()
                 .name("Chat feedback")
                 .description("Display info about spawners in chat.")
@@ -75,12 +127,6 @@
         private final Setting<Boolean> deactivatedSpawner = sgGeneral.add(new BoolSetting.Builder()
                 .name("De-Activated Spawner Detector")
                 .description("Detects spawners with torches on them.")
-                .defaultValue(true)
-                .build()
-        );
-        private final Setting<Boolean> trialSpawner = sgGeneral.add(new BoolSetting.Builder()
-                .name("Trial Spawner Detector")
-                .description("Detects activated Trial Spawners.")
                 .defaultValue(true)
                 .build()
         );
@@ -216,6 +262,7 @@
         private int closestSpawnerY=2000000000;
         private int closestSpawnerZ=2000000000;
         private double SpawnerDistance=2000000000;
+        private boolean activatedSpawnerFound = false;
 
         public ActivatedSpawnerDetector() {
             super(Trouser.Main,"ActivatedSpawnerDetector", "Detects if a player has been near a mob spawner in the past. May be useful for finding player made stashes in dungeons, mineshafts, and other places.");
@@ -260,7 +307,7 @@
 
                     for (BlockEntity blockEntity : blockEntities) {
                         if (blockEntity instanceof MobSpawnerBlockEntity){
-                            boolean activatedSpawnerFound = false;
+                            activatedSpawnerFound = false;
                             MobSpawnerBlockEntity spawner = (MobSpawnerBlockEntity) blockEntity;
                             BlockPos pos = spawner.getPos();
                             BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
@@ -283,8 +330,6 @@
                                                 }
                                             }
                                             if (caveAirFound && airFound) {
-                                                spawnerPositions.add(pos);
-                                                activatedSpawnerFound = true;
                                                 if (monster == ":spider") displayMessage("dungeon", pos, ":spider");
                                                 else displayMessage("dungeon", pos, "null");
                                             }
@@ -300,8 +345,6 @@
                                                 }
                                             }
                                             if (caveAirFound && airFound) {
-                                                spawnerPositions.add(pos);
-                                                activatedSpawnerFound = true;
                                                 displayMessage("cave_spider", pos, "null");
                                             }
                                         } else if (monster.contains("silverfish")) {
@@ -316,8 +359,6 @@
                                                 }
                                             }
                                             if (caveAirFound && airFound) {
-                                                spawnerPositions.add(pos);
-                                                activatedSpawnerFound = true;
                                                 displayMessage("silverfish", pos, "null");
                                             }
                                         }
@@ -341,14 +382,16 @@
                                             } else {
                                                 if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated Spawner! Block Position: " + pos));
                                                 else ChatUtils.sendMsg(Text.of("Detected Activated Spawner!"));
+                                                spawnerPositions.add(pos);
+                                                activatedSpawnerFound = true;
                                             }
                                         } else {
                                             if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated Spawner! Block Position: " + pos));
                                             else ChatUtils.sendMsg(Text.of("Detected Activated Spawner!"));
+                                            spawnerPositions.add(pos);
+                                            activatedSpawnerFound = true;
                                         }
                                     }
-                                    spawnerPositions.add(pos);
-                                    activatedSpawnerFound = true;
                                 }
                                 if (activatedSpawnerFound == true) {
                                     if (deactivatedSpawner.get()){
@@ -523,30 +566,50 @@
             if (chatFeedback.get()){
                 if (key=="dungeon") {
                     if (key2==":spider") {
-                        if (mc.world.getBlockState(pos.down()).getBlock() == Blocks.BIRCH_PLANKS){
+                        if (mc.world.getBlockState(pos.down()).getBlock() == Blocks.BIRCH_PLANKS && enableWoodlandMansion.get()){
+                            activatedSpawnerFound = true;
+                            spawnerPositions.add(pos);
                             if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated §cWOODLAND MANSION§r Spawner! Block Position: " + pos));
                             else ChatUtils.sendMsg(Text.of("Detected Activated §cWOODLAND MANSION§r Spawner!"));
                         } else {
+                            if (enableDungeon.get()){
+                                activatedSpawnerFound = true;
+                                spawnerPositions.add(pos);
+                                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated §cDUNGEON§r Spawner! Block Position: " + pos));
+                                else ChatUtils.sendMsg(Text.of("Detected Activated §cDUNGEON§r Spawner!"));
+                            }
+                        }
+                    } else {
+                        if (enableDungeon.get()){
+                            activatedSpawnerFound = true;
+                            spawnerPositions.add(pos);
                             if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated §cDUNGEON§r Spawner! Block Position: " + pos));
                             else ChatUtils.sendMsg(Text.of("Detected Activated §cDUNGEON§r Spawner!"));
                         }
-                    } else {
-                        if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated §cDUNGEON§r Spawner! Block Position: " + pos));
-                        else ChatUtils.sendMsg(Text.of("Detected Activated §cDUNGEON§r Spawner!"));
                     }
-                } else if (key=="cave_spider") {
+                } else if (key=="cave_spider" && enableMineshaft.get()) {
+                    activatedSpawnerFound = true;
+                    spawnerPositions.add(pos);
                     if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated §cMINESHAFT§r Spawner! Block Position: " + pos));
                     else ChatUtils.sendMsg(Text.of("Detected Activated §cMINESHAFT§r Spawner!"));
-                } else if (key=="silverfish") {
+                } else if (key=="silverfish" && enableStronghold.get()) {
+                    activatedSpawnerFound = true;
+                    spawnerPositions.add(pos);
                     if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated §cSTRONGHOLD§r Spawner! Block Position: " + pos));
                     else ChatUtils.sendMsg(Text.of("Detected Activated §cSTRONGHOLD§r Spawner!"));
-                } else if (key=="blaze") {
+                } else if (key=="blaze" && enableFortress.get()) {
+                    activatedSpawnerFound = true;
+                    spawnerPositions.add(pos);
                     if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated §cFORTRESS§r Spawner! Block Position: " + pos));
                     else ChatUtils.sendMsg(Text.of("Detected Activated §cFORTRESS§r Spawner!"));
-                } else if (key=="magma") {
+                } else if (key=="magma" && enableBastion.get()) {
+                    activatedSpawnerFound = true;
+                    spawnerPositions.add(pos);
                     if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated §cBASTION§r Spawner! Block Position: " + pos));
                     else ChatUtils.sendMsg(Text.of("Detected Activated §cBASTION§r Spawner!"));
                 } else {
+                    activatedSpawnerFound = true;
+                    spawnerPositions.add(pos);
                     if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated Spawner! Block Position: " + pos));
                     else ChatUtils.sendMsg(Text.of("Detected Activated Spawner!"));
                 }
