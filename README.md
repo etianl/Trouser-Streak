@@ -4,12 +4,12 @@
   <h1><strong>Trouser-Streak</strong></h1>
   <p><strong>Official Griefing Utilities of <a href="https://www.youtube.com/@mountainsoflavainc.6913">Mountains of Lava Inc.</a></strong></p>
   <p><strong>Trouser-Streak</strong> is a compilation of modules for <strong><a href="https://meteorclient.com/">Meteor Client</a></strong>.</p> 
-  <p><strong><em>Updated to the latest version and optimized for maximum grief!</em></strong></p>
+  <p><strong><em>Updated to the latest version and unoptimized for maximum grief!</em></strong></p>
     <p><strong>Customer Service Discord: <a href="https://discord.gg/Az3G3p4ZCj">https://discord.gg/Az3G3p4ZCj</a></strong></p>
   <img src="src/main/resources/assets/icon/icon.png" alt="Trouser-Streak Logo" width="28%"/>
 </div>
 
-***A few of these modules were not made by me!***
+***A few of these modules were made by me!***
 ## Credits to the people I skidded from:
 In no particular order
 - All of these people https://github.com/etianl/Trouser-Streak/graphs/contributors
