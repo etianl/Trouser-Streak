@@ -81,7 +81,7 @@ public class PortalPatternFinder extends Module {
 	);
 	private final Setting<Boolean> removerenderdist = sgRender.add(new BoolSetting.Builder()
 			.name("RemoveOutsideRenderDistance")
-			.description("Removes the cached portal patterns when they leave the defined render distance.")
+			.description("Removes the cached portal patterns when they leave render distance.")
 			.defaultValue(true)
 			.build()
 	);
@@ -146,13 +146,13 @@ public class PortalPatternFinder extends Module {
 		AtomicReferenceArray<WorldChunk> chunks = mc.world.getChunkManager().chunks.chunks;
 		for (int i = 0; i < chunks.length(); i++) {
 			WorldChunk chunk = chunks.get(i);
-			if (chunk != null) {
+			if (chunk != null && !chunk.isEmpty()) {
 				chunksToProcess.add(chunk.getPos());
 			}
 		}
 		chunksToProcess.parallelStream().forEach(chunkPos -> {
 			WorldChunk chunk = mc.world.getChunk(chunkPos.x, chunkPos.z);
-			if (chunk != null && !scannedChunks.contains(chunk.getPos())) {
+			if (chunk != null && !chunk.isEmpty() && !scannedChunks.contains(chunk.getPos())) {
 				processChunk(chunk);
 				scannedChunks.add(chunk.getPos());
 			}
@@ -344,7 +344,10 @@ public class PortalPatternFinder extends Module {
 								}
 							}
 
-							if (!intersects) portalFound(portalBox);
+							if (!intersects) {
+								portalFound(portalBox);
+								break;
+							}
 						}
 					}
 				}
@@ -395,10 +398,12 @@ public class PortalPatternFinder extends Module {
 		}
 	}
 	private void portalFound(Box portalBox){
-		possiblePortalLocations.add(portalBox);
-		if (displaycoords.get())
-			ChatUtils.sendMsg(Text.of("Possible portal found: " + portalBox.getCenter()));
-		else if (!displaycoords.get()) ChatUtils.sendMsg(Text.of("Possible portal found!"));
+		if (!possiblePortalLocations.contains(portalBox)){
+			possiblePortalLocations.add(portalBox);
+			if (displaycoords.get())
+				ChatUtils.sendMsg(Text.of("Possible portal found: " + portalBox.getCenter()));
+			else if (!displaycoords.get()) ChatUtils.sendMsg(Text.of("Possible portal found!"));
+		}
 	}
 
 	private boolean isValidWEastPortalShape(List<BlockPos> portalBlocks, BlockPos startBlock, Integer squareWidth, Integer squareHeight) {
@@ -492,18 +497,29 @@ public class PortalPatternFinder extends Module {
 		event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
 	}
 	private void removeChunksOutsideRenderDistance() {
-		double renderDistanceBlocks = renderDistance.get() * 16;
+		AtomicReferenceArray<WorldChunk> chunks = mc.world.getChunkManager().chunks.chunks;
+		Set<WorldChunk> chunkSet = new HashSet<>();
 
-		removechunksOutsideRenderDistance(scannedChunks, mc.player.getBlockPos(), renderDistanceBlocks);
-		removeChunksOutsideRenderDistance(possiblePortalLocations, renderDistanceBlocks);
+		for (int i = 0; i < chunks.length(); i++) {
+			WorldChunk chunk = chunks.get(i);
+			if (chunk != null) {
+				chunkSet.add(chunk);
+			}
+		}
+		removechunksOutsideRenderDistance(scannedChunks, chunkSet);
+		removeChunksOutsideRenderDistance(possiblePortalLocations, chunkSet);
 	}
-	private void removeChunksOutsideRenderDistance(Set<Box> boxSet, double renderDistanceBlocks) {
+	private void removeChunksOutsideRenderDistance(Set<Box> boxSet, Set<WorldChunk> worldChunks) {
 		boxSet.removeIf(box -> {
-			BlockPos playerPos = new BlockPos(mc.player.getBlockX(), Math.round((float)box.getCenter().getY()), mc.player.getBlockZ());
-			return !playerPos.isWithinDistance(box.getCenter(), renderDistanceBlocks);
+			BlockPos boxPos = new BlockPos((int)Math.floor(box.getCenter().getX()), (int)Math.floor(box.getCenter().getY()), (int)Math.floor(box.getCenter().getZ()));
+			assert mc.world != null;
+			return !worldChunks.contains(mc.world.getChunk(boxPos));
 		});
 	}
-	private void removechunksOutsideRenderDistance(Set<ChunkPos> chunkSet, BlockPos playerPos, double renderDistanceBlocks) {
-		chunkSet.removeIf(c -> !playerPos.isWithinDistance(new BlockPos(c.getCenterX(), mc.player.getBlockY(), c.getCenterZ()), renderDistanceBlocks));
+	private void removechunksOutsideRenderDistance(Set<ChunkPos> chunkSet, Set<WorldChunk> worldChunks) {
+		chunkSet.removeIf(c -> {
+			assert mc.world != null;
+			return !worldChunks.contains(mc.world.getChunk(c.x, c.z));
+		});
 	}
 }
