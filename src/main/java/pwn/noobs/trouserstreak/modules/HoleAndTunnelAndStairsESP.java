@@ -166,7 +166,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
     public final Setting<Integer> renderDistance = sgRender.add(new IntSetting.Builder()
             .name("Render-Distance(Chunks)")
             .description("How many chunks from the character to render the detected holes/tunnels.")
-            .defaultValue(128)
+            .defaultValue(32)
             .min(6)
             .sliderRange(6,1024)
             .build()
@@ -382,20 +382,29 @@ public class HoleAndTunnelAndStairsESP extends Module {
     private void checkHole(BlockPos pos, Set<Box> holes) {
         if (isValidHoleSection(pos)) {
             BlockPos.Mutable currentPos = pos.mutableCopy();
+
             while (isValidHoleSection(currentPos)) {
                 currentPos.move(Direction.UP);
             }
-            if (currentPos.getY()-pos.getY() >= minHoleDepth.get()) {
+
+            if (!isPassableBlock(currentPos.north()) || !isPassableBlock(currentPos.south()) ||
+                    !isPassableBlock(currentPos.east()) || !isPassableBlock(currentPos.west())) {
+                return;
+            }
+
+            if (currentPos.getY() - pos.getY() >= minHoleDepth.get()) {
                 Box holeBox = new Box(
                         pos.getX(), pos.getY(), pos.getZ(),
                         pos.getX() + 1, currentPos.getY(), pos.getZ() + 1
                 );
+
                 if (!holes.contains(holeBox) && holes.stream().noneMatch(existingHole -> existingHole.intersects(holeBox))) {
                     holes.add(holeBox);
                 }
             }
         }
     }
+
     private boolean isValidHoleSection(BlockPos pos) {
         return isPassableBlock(pos) && !isPassableBlock(pos.north()) && !isPassableBlock(pos.south()) && !isPassableBlock(pos.east()) && !isPassableBlock(pos.west());
     }
@@ -406,51 +415,63 @@ public class HoleAndTunnelAndStairsESP extends Module {
             BlockPos startPos = null;
             BlockPos endPos = null;
             int maxHeight = 0;
-            if (startPos == null && isTunnelSection(currentPos, dir)) {
-                startPos = currentPos.toImmutable();
-            }
-            while (isTunnelSection(currentPos, dir)) {
+
+            if (!isTunnelSection(currentPos, dir)) continue;
+
+            startPos = currentPos.toImmutable();
+
+            while (true) {
+                if (!isTunnelSection(currentPos, dir)) {
+                    break;
+                }
+
                 maxHeight = Math.max(maxHeight, getTunnelHeight(currentPos));
-
                 endPos = currentPos.toImmutable();
-
                 currentPos.move(dir);
                 stepCount++;
             }
 
-            if (stepCount >= minTunnelLength.get() && maxHeight >= minTunnelHeight.get() && maxHeight <= maxTunnelHeight.get()) {
-                Box tunnelBox = new Box(
-                        Math.min(startPos.getX(), endPos.getX()),
-                        startPos.getY(),
-                        Math.min(startPos.getZ(), endPos.getZ()),
-                        Math.max(startPos.getX(), endPos.getX()) + 1,
-                        startPos.getY() + maxHeight,
-                        Math.max(startPos.getZ(), endPos.getZ()) + 1
-                );
+            if (stepCount < minTunnelLength.get() || maxHeight < minTunnelHeight.get() || maxHeight > maxTunnelHeight.get()) {
+                continue;
+            }
 
-                if (!tunnels.contains(tunnelBox) && tunnels.stream().noneMatch(existingTunnel -> existingTunnel.intersects(tunnelBox))) {
-                    tunnels.add(tunnelBox);
-                }
+            Box tunnelBox = new Box(
+                    Math.min(startPos.getX(), endPos.getX()),
+                    startPos.getY(),
+                    Math.min(startPos.getZ(), endPos.getZ()),
+                    Math.max(startPos.getX(), endPos.getX()) + 1,
+                    startPos.getY() + maxHeight,
+                    Math.max(startPos.getZ(), endPos.getZ()) + 1
+            );
+
+            if (!tunnels.contains(tunnelBox) && tunnels.stream().noneMatch(existingTunnel -> existingTunnel.intersects(tunnelBox))) {
+                tunnels.add(tunnelBox);
             }
         }
     }
+
     private boolean isTunnelSection(BlockPos pos, Direction dir) {
         int height = getTunnelHeight(pos);
         if (height < minTunnelHeight.get() || height > maxTunnelHeight.get()) return false;
         if (isPassableBlock(pos.down()) || isPassableBlock(pos.up(height))) return false;
+
         Direction[] perpDirs = dir.getAxis() == Direction.Axis.X ? new Direction[]{Direction.NORTH, Direction.SOUTH} : new Direction[]{Direction.EAST, Direction.WEST};
+
         for (Direction perpDir : perpDirs) {
             for (int i = 0; i < height; i++) {
-                if (isPassableBlock(pos.up(i).offset(perpDir))) {
+                BlockPos checkPos = pos.up(i).offset(perpDir);
+                if (isPassableBlock(checkPos)) {
                     return false;
                 }
             }
         }
+
         return true;
     }
+
     private void checkDiagonalTunnel(BlockPos pos) {
         for (Direction dir : DIRECTIONS) {
-            for (int i = minDiagonalWidth.get()-1; i < maxDiagonalWidth.get(); i++) {
+            for (int i = minDiagonalWidth.get() - 1; i < maxDiagonalWidth.get(); i++) {
                 BlockPos.Mutable currentPos = pos.mutableCopy();
                 int stepCount = 0;
                 List<Box> potentialBoxes = new ArrayList<>();
@@ -458,7 +479,11 @@ public class HoleAndTunnelAndStairsESP extends Module {
                 Direction checkingDir = dir;
                 boolean turnRight = true;
 
-                while (isDiagonalTunnelSection(currentPos, checkingDir)) {
+                while (true) {
+                    if (!isDiagonalTunnelSection(currentPos, checkingDir)) {
+                        break;
+                    }
+
                     int height = getTunnelHeight(currentPos);
                     Box tunnelBox = new Box(
                             currentPos.getX(),
@@ -468,6 +493,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
                             currentPos.getY() + height,
                             currentPos.getZ() + 1
                     );
+
                     if (!potentialBoxes.contains(tunnelBox) && !potentialBoxes.stream().anyMatch(existingDiagonal -> existingDiagonal.intersects(tunnelBox))) {
                         potentialBoxes.add(tunnelBox);
                     }
@@ -484,7 +510,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
                     stepCount++;
                 }
 
-                if (stepCount/minDiagonalWidth.get() >= minDiagonalLength.get()) {
+                if (stepCount / minDiagonalWidth.get() >= minDiagonalLength.get()) {
                     potentialBoxes.forEach(potentialBox -> {
                         if (!tunnels.contains(potentialBox) && tunnels.stream().noneMatch(existingDiagonal -> existingDiagonal.intersects(potentialBox))) {
                             tunnels.add(potentialBox);
@@ -500,13 +526,11 @@ public class HoleAndTunnelAndStairsESP extends Module {
         if (height < minTunnelHeight.get() || height > maxTunnelHeight.get()) return false;
         if (isPassableBlock(pos.down()) || isPassableBlock(pos.up(height))) return false;
 
-        boolean waspassableblockfound = false;
+        boolean wasPassableBlockFound = false;
         for (int i = 0; i < height; i++) {
-            if (isPassableBlock(pos.up(i).offset(dir))) waspassableblockfound = true;
+            if (isPassableBlock(pos.up(i).offset(dir))) wasPassableBlockFound = true;
         }
-        if (waspassableblockfound) return false;
-
-        return true;
+        return !wasPassableBlockFound;
     }
 
     private int getTunnelHeight(BlockPos pos) {
@@ -522,7 +546,11 @@ public class HoleAndTunnelAndStairsESP extends Module {
             int stepCount = 0;
             List<Box> potentialStaircaseBoxes = new ArrayList<>();
 
-            while (isStaircaseSection(currentPos, dir)) {
+            while (true) {
+                if (!isStaircaseSection(currentPos, dir)) {
+                    break;
+                }
+
                 int height = getStaircaseHeight(currentPos);
                 Box stairsBox = new Box(
                         currentPos.getX(),
@@ -532,32 +560,29 @@ public class HoleAndTunnelAndStairsESP extends Module {
                         currentPos.getY() + height,
                         currentPos.getZ() + 1
                 );
+
                 if (!potentialStaircaseBoxes.contains(stairsBox) && !potentialStaircaseBoxes.stream().anyMatch(existingStaircase -> existingStaircase.intersects(stairsBox))) {
                     potentialStaircaseBoxes.add(stairsBox);
                 }
+
                 currentPos.move(dir);
                 currentPos.move(Direction.UP);
                 stepCount++;
             }
 
-            for (Box stairsBox : potentialStaircaseBoxes){
+            for (Box stairsBox : potentialStaircaseBoxes) {
                 if (stepCount >= minStaircaseLength.get() && !staircases.contains(stairsBox) && !staircases.stream().anyMatch(existingStaircase -> existingStaircase.intersects(stairsBox))) {
                     staircases.add(stairsBox);
                 }
             }
         }
     }
-    private int getStaircaseHeight(BlockPos pos) {
-        int height = 0;
-        while (isPassableBlock(pos.up(height)) && height < maxStaircaseHeight.get()) {
-            height++;
-        }
-        return height;
-    }
+
     private boolean isStaircaseSection(BlockPos pos, Direction dir) {
         int height = getStaircaseHeight(pos);
         if (height < minStaircaseHeight.get() || height > maxStaircaseHeight.get()) return false;
         if (isPassableBlock(pos.down()) || isPassableBlock(pos.up(height))) return false;
+
         Direction[] perpDirs = dir.getAxis() == Direction.Axis.X ? new Direction[]{Direction.NORTH, Direction.SOUTH} : new Direction[]{Direction.EAST, Direction.WEST};
         for (Direction perpDir : perpDirs) {
             for (int i = 0; i < height; i++) {
@@ -568,6 +593,15 @@ public class HoleAndTunnelAndStairsESP extends Module {
         }
         return true;
     }
+
+    private int getStaircaseHeight(BlockPos pos) {
+        int height = 0;
+        while (isPassableBlock(pos.up(height)) && height < maxStaircaseHeight.get()) {
+            height++;
+        }
+        return height;
+    }
+
     private boolean isPassableBlock(BlockPos pos) {
         BlockState state = mc.world.getBlockState(pos);
         if (airBlocks.get()) {
