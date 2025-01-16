@@ -3,7 +3,6 @@ package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
-import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
@@ -18,10 +17,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.c2s.play.AcknowledgeChunksC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -32,10 +27,7 @@ import net.minecraft.world.chunk.WorldChunk;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 
 public class CaveDisturbanceDetector extends Module {
 	private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -106,7 +98,6 @@ public class CaveDisturbanceDetector extends Module {
 			.visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both || trcr.get()))
 			.build()
 	);
-	private static final ExecutorService taskExecutor = Executors.newCachedThreadPool();
 	private final Set<ChunkPos> scannedChunks = Collections.synchronizedSet(new HashSet<>());
 	private final Set<BlockPos> scannedAir = Collections.synchronizedSet(new HashSet<>());
 	private final Set<BlockPos> disturbanceLocations = Collections.synchronizedSet(new HashSet<>());
@@ -122,20 +113,17 @@ public class CaveDisturbanceDetector extends Module {
 	@Override
 	public void onActivate() {
 		clearChunkData();
-		scanTheAir();
 	}
 	private void scanTheAir() {
 		if (mc.world == null) return;
-		int renderdistance = renderDistance.get();
-		ChunkPos playerChunkPos = new ChunkPos(mc.player.getBlockPos());
 		List<ChunkPos> chunksToProcess = new ArrayList<>();
-
-		for (int chunkX = playerChunkPos.x - renderdistance; chunkX <= playerChunkPos.x + renderdistance; chunkX++) {
-			for (int chunkZ = playerChunkPos.z - renderdistance; chunkZ <= playerChunkPos.z + renderdistance; chunkZ++) {
-				chunksToProcess.add(new ChunkPos(chunkX, chunkZ));
+		AtomicReferenceArray<WorldChunk> chunks = mc.world.getChunkManager().chunks.chunks;
+		for (int i = 0; i < chunks.length(); i++) {
+			WorldChunk chunk = chunks.get(i);
+			if (chunk != null) {
+				chunksToProcess.add(chunk.getPos());
 			}
 		}
-
 		chunksToProcess.parallelStream().forEach(chunkPos -> {
 			WorldChunk chunk = mc.world.getChunk(chunkPos.x, chunkPos.z);
 			if (chunk != null && !scannedChunks.contains(chunk.getPos())) {

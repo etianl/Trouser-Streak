@@ -137,19 +137,32 @@ public class MobGearESP extends Module {
             .defaultValue(true)
             .build()
     );
-
-    public final Setting<Boolean> distance = sgColors.add(new BoolSetting.Builder()
-            .name("distance-colors")
-            .description("Changes the color of tracers depending on distance.")
-            .defaultValue(false)
-            .build()
-    );
-
     private final Setting<SettingColor> monstersColor = sgColors.add(new ColorSetting.Builder()
             .name("monsters-color")
             .description("The mob's bounding box and tracer color.")
             .defaultValue(new SettingColor(255, 25, 25, 255))
-            .visible(() -> !distance.get())
+            .build()
+    );
+    public final Setting<Boolean> distance = sgColors.add(new BoolSetting.Builder()
+            .name("distance-colors")
+            .description("Changes the color of tracers depending on distance.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<SettingColor> distantColor = sgColors.add(new ColorSetting.Builder()
+            .name("distant-color")
+            .description("The mob's bounding box and tracer color when you are far away.")
+            .defaultValue(new SettingColor(25, 25, 255, 255))
+            .visible(distance::get)
+            .build()
+    );
+    public final Setting<Integer> distanceInt = sgColors.add(new IntSetting.Builder()
+            .name("distance-colors-threshold")
+            .description("The max distance for colors to change.")
+            .defaultValue(128)
+            .min(1)
+            .sliderRange(1, 1024)
+            .visible(distance::get)
             .build()
     );
 
@@ -211,27 +224,45 @@ public class MobGearESP extends Module {
 
     private void drawTracer(Render3DEvent event, Entity entity) {
         if (mc.options.hudHidden) return;
-        Color color = monstersColor.get();
+
+        Color baseColor = monstersColor.get();
+        if (distance.get()){
+            baseColor = getOpposingColor(baseColor, entity);
+        }
+
         double x = entity.prevX + (entity.getX() - entity.prevX) * event.tickDelta;
         double y = entity.prevY + (entity.getY() - entity.prevY) * event.tickDelta;
         double z = entity.prevZ + (entity.getZ() - entity.prevZ) * event.tickDelta;
         double height = entity.getBoundingBox().maxY - entity.getBoundingBox().minY;
-        y += height / 2; // target the body of entity
-        event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, x, y, z, color);
+        y += height / 2;
+
+        event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, x, y, z, baseColor);
+    }
+    private Color getOpposingColor(Color c, Entity e) {
+        Color interpolatedColor;
+        Color oppositeColor = distantColor.get();
+
+        double distance = Math.sqrt(mc.player.squaredDistanceTo(e));
+
+        double maxDistance = distanceInt.get();
+        double percent = MathHelper.clamp(distance / maxDistance, 0, 1);
+
+        int r = (int) (c.r + (oppositeColor.r - c.r) * percent);
+        int g = (int) (c.g + (oppositeColor.g - c.g) * percent);
+        int b = (int) (c.b + (oppositeColor.b - c.b) * percent);
+        int a = c.a;
+
+        interpolatedColor = new Color(r, g, b, a);
+        return interpolatedColor;
     }
 
-    // Utils
-
-    // checks a mob for any player items and returns a list of them
     private ArrayList<Item> getPlayerItems(LivingEntity livingEntity) {
         ArrayList<Item> playerItems = new ArrayList<>();
         for (ItemStack item  : livingEntity.getArmorItems()) {
-            // if we require enchants, the item is enchantable, and it has no enchants
             if (enchants.get() && item.isEnchantable() && item.getEnchantments().isEmpty()) continue;
             if (items.get().contains(item.getItem())) playerItems.add(item.getItem());
 
         }
-        // check held items
         for (ItemStack item : livingEntity.getHandItems()) {
             if (enchants.get() && item.isEnchantable() && item.getEnchantments().isEmpty()) continue;
             if (items.get().contains(item.getItem())) playerItems.add(item.getItem());
@@ -250,6 +281,9 @@ public class MobGearESP extends Module {
         double alpha = getFadeAlpha(entity);
         if (alpha == 0) return null;
         Color color = monstersColor.get();
+        if (distance.get()){
+            color = getOpposingColor(color, entity);
+        }
         return baseColor.set(color.r, color.g, color.b, (int) (color.a * alpha));
     }
 

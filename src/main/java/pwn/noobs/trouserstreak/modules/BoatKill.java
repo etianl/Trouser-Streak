@@ -27,7 +27,7 @@ public class BoatKill extends Module {
     );
 
     public BoatKill() {
-        super(Trouser.Main, "BoatKill", "Kill everyone in a boat using funny packets.");
+        super(Trouser.Main, "BoatKill", "Kills people in a boat using funny packets. Patched in Minecraft 1.21.2");
     }
 
     @Override
