@@ -33,6 +33,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new PortalPatternFinder());
                 Modules.get().add(new CaveDisturbanceDetector());
                 Modules.get().add(new PotESP());
+                Modules.get().add(new MobGearESP());
                 Modules.get().add(new OnlinePlayerActivityDetector());
                 Modules.get().add(new HoleAndTunnelAndStairsESP());
                 Modules.get().add(new StorageLooter());
