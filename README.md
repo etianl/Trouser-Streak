@@ -30,7 +30,8 @@ In no particular order
  </p>
 
 ## Features:
-- **ActivatedSpawnerDetector** Detects if a player was ever near a spawner or trial spawner block. The intended use for this module would be on anarchy servers where people try to hide their items within chests in dungeons, mineshafts, and trial chambers. (Credits to etianl :D)
+- **ActivatedSpawnerDetector:** Detects if a player was ever near a spawner or trial spawner block. The intended use for this module would be on anarchy servers where people try to hide their items within chests in dungeons, mineshafts, and trial chambers. (Credits to etianl :D)
+- **AdvancedItemESP:** An ESP module which detects any individual item you are searching for. By default it looks for valuable player dropped items. Just like **MobGearESP** there is an option to only detect enchanted Tools and Armors (Thank you to [windoid](https://github.com/windoid) for writing the MobGearESP which I modified to make this!)
 - **Airstrike+:** Rains down whatever entities you desire. It used to only rain fireballs, and I also changed the positioning of the spawning. (Credits to Allah-Hack for the original)
 - **AnHero:** Become An Hero! (A quick way back to spawn.) (Credits to etianl :D)
 - **Attribute Swap:** Swaps the current main hand item with another item on the hotbar for a single tick when you attack an entity. This cause the attributes from the target item you are swapping to be applied to the first item.Thank you to [DonKisser](https://github.com/DonKisser) for making this module for us!
