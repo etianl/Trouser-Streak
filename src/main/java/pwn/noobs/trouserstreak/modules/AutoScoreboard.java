@@ -9,13 +9,14 @@ import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import org.apache.commons.lang3.RandomStringUtils;
 import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-public class AutoScoreboard extends Module {
+public class AutoScoreboard extends TrouserModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgTitle = settings.createGroup("Title Options");
     private final SettingGroup sgContent = settings.createGroup("Content Options");
@@ -78,7 +79,7 @@ public class AutoScoreboard extends Module {
     private Queue<String> commandQueue = new LinkedList<>();
 
     public AutoScoreboard() {
-        super(Trouser.Main, "auto-scoreboard", "Automatically create a scoreboard using Starscript. Requires operator access.");
+        super("auto-scoreboard", "Automatically create a scoreboard using Starscript. Requires operator access.");
     }
 
     @Override

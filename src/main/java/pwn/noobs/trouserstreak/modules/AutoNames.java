@@ -3,18 +3,17 @@ package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import net.minecraft.client.network.PlayerListEntry;
-import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class AutoNames extends Module {
+public class AutoNames extends TrouserModule {
     private static final String TEAM_PREFIX = "mol_";
 
     private final SettingGroup sgGeneral = settings.createGroup("General");
@@ -105,7 +104,7 @@ public class AutoNames extends Module {
     private String teamName;
 
     public AutoNames() {
-        super(Trouser.Main, "auto-names", "Automatically change player name colors, prefix, suffix in tab and chat. Requires operator access.");
+        super("auto-names", "Automatically change player name colors, prefix, suffix in tab and chat. Requires operator access.");
     }
 
     @Override

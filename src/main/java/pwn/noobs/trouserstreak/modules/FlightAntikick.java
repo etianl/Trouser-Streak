@@ -5,15 +5,14 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
-import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.MovementType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
-import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
-public class FlightAntikick extends Module {
+public class FlightAntikick extends TrouserModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
@@ -32,8 +31,9 @@ public class FlightAntikick extends Module {
     );
 
     public FlightAntikick() {
-        super(Trouser.Main, "FlightAntikick", "Moves you down. Only made because Meteor still missing normal mode antikick.");
+        super("FlightAntikick", "Moves you down. Only made because Meteor still missing normal mode antikick.");
     }
+
     private int delayLeft = delay.get();
     private int offLeft = offTime.get();
 
@@ -43,9 +43,9 @@ public class FlightAntikick extends Module {
         else if (delayLeft <= 0 && offLeft > 0) {
             offLeft--;
             BlockPos playerPos = mc.player.getBlockPos();
-            BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
-            if (mc.world.getBlockState(pos).isAir() || (!mc.world.getBlockState(pos).isAir() && mc.player.getY()>=pos.getY()+1.11)){
-                mc.player.move(MovementType.SELF, new Vec3d(0,-0.1,0));
+            BlockPos pos = playerPos.add(new Vec3i(0, -1, 0));
+            if (mc.world.getBlockState(pos).isAir() || (!mc.world.getBlockState(pos).isAir() && mc.player.getY() >= pos.getY() + 1.11)) {
+                mc.player.move(MovementType.SELF, new Vec3d(0, -0.1, 0));
             }
         } else if (delayLeft <= 0 && offLeft <= 0) {
             delayLeft = delay.get();

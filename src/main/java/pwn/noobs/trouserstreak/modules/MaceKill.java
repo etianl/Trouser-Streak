@@ -3,9 +3,10 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.mixininterface.IPlayerInteractEntityC2SPacket;
 import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
-import meteordevelopment.meteorclient.renderer.ShapeMode;
-import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.LivingEntity;
@@ -15,9 +16,9 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
-public class MaceKill extends Module {
+public class MaceKill extends TrouserModule {
     private final SettingGroup specialGroup2 = settings.createGroup("Disable \"Smash Attack\" in the Criticals module to make this module work.");
     private final SettingGroup specialGroup = settings.createGroup("Values higher than 22 only work on Paper/Spigot");
     private final Setting<Boolean> maxPower = specialGroup.add(new BoolSetting.Builder()
@@ -41,7 +42,7 @@ public class MaceKill extends Module {
             .build());
 
     public MaceKill() {
-        super(Trouser.Main, "MaceKill", "Makes the Mace powerful when swung.");
+        super("MaceKill", "Makes the Mace powerful when swung.");
     }
 
     private Vec3d previouspos;
@@ -53,7 +54,8 @@ public class MaceKill extends Module {
                 if (packet.meteor$getEntity() instanceof LivingEntity) {
                     LivingEntity targetEntity = (LivingEntity) packet.meteor$getEntity();
 
-                    if (packetDisable.get() && ((targetEntity.isBlocking() && targetEntity.blockedByShield(targetEntity.getRecentDamageSource())) || targetEntity.isInvulnerable() || targetEntity.isInCreativeMode())) return;
+                    if (packetDisable.get() && ((targetEntity.isBlocking() && targetEntity.blockedByShield(targetEntity.getRecentDamageSource())) || targetEntity.isInvulnerable() || targetEntity.isInCreativeMode()))
+                        return;
                     previouspos = mc.player.getPos();
                     int blocks = getMaxHeightAbovePlayer();
 

@@ -11,7 +11,6 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.text.Text;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.WorldChunk;
 
@@ -24,16 +23,13 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-
 public class WorldInfoCommand extends Command {
     public WorldInfoCommand() {
         super("world", "Tells you the coordinates of each world border, and the spawn location.");
     }
 
     private static final Set<Block> NEW_OVERWORLD_BLOCKS = new HashSet<>();
+
     static {
         NEW_OVERWORLD_BLOCKS.add(Blocks.DEEPSLATE);
         NEW_OVERWORLD_BLOCKS.add(Blocks.AMETHYST_BLOCK);
@@ -102,17 +98,17 @@ public class WorldInfoCommand extends Command {
             } else {
                 ChatUtils.sendMsg(Text.of("This chunk is new generation! (post-1.17)"));
             }
-            ChatUtils.sendMsg(Text.of("East World Border X: "+(int) mc.world.getWorldBorder().getBoundEast()+", West World Border X: "+(int) mc.world.getWorldBorder().getBoundWest()+", South World Border Z: "+(int) mc.world.getWorldBorder().getBoundSouth()+", North World Border Z: "+(int) mc.world.getWorldBorder().getBoundNorth()));
-            ChatUtils.sendMsg(Text.of("WorldSpawn Location: x"+mc.world.getLevelProperties().getSpawnPos().getX()+" y"+mc.world.getLevelProperties().getSpawnPos().getY()+" z"+mc.world.getLevelProperties().getSpawnPos().getZ()));
-            ChatUtils.sendMsg(Text.of("Difficulty: "+mc.world.getDifficulty().toString()));
-            ChatUtils.sendMsg(Text.of("Permission Level: "+mc.player.getPermissionLevel()));
-            ChatUtils.sendMsg(Text.of("Simulation Distance (chunks): "+mc.world.getSimulationDistance()));
-            ChatUtils.sendMsg(Text.of("Day Count: "+Math.floor(mc.world.getTime()/24000)));
-            ChatUtils.sendMsg(Text.of("KnownPlayers (Names with a period are bedrock players): "+getKnownPlayers));
+            ChatUtils.sendMsg(Text.of("East World Border X: " + (int) mc.world.getWorldBorder().getBoundEast() + ", West World Border X: " + (int) mc.world.getWorldBorder().getBoundWest() + ", South World Border Z: " + (int) mc.world.getWorldBorder().getBoundSouth() + ", North World Border Z: " + (int) mc.world.getWorldBorder().getBoundNorth()));
+            ChatUtils.sendMsg(Text.of("WorldSpawn Location: x" + mc.world.getLevelProperties().getSpawnPos().getX() + " y" + mc.world.getLevelProperties().getSpawnPos().getY() + " z" + mc.world.getLevelProperties().getSpawnPos().getZ()));
+            ChatUtils.sendMsg(Text.of("Difficulty: " + mc.world.getDifficulty().toString()));
+            ChatUtils.sendMsg(Text.of("Permission Level: " + mc.player.getPermissionLevel()));
+            ChatUtils.sendMsg(Text.of("Simulation Distance (chunks): " + mc.world.getSimulationDistance()));
+            ChatUtils.sendMsg(Text.of("Day Count: " + Math.floor(mc.world.getTime() / 24000)));
+            ChatUtils.sendMsg(Text.of("KnownPlayers (Names with a period are bedrock players): " + getKnownPlayers));
             return SINGLE_SUCCESS;
         });
         builder.then(literal("save").executes(ctx -> {
-            if (!mc.player.getMainHandStack().isEmpty()){
+            if (!mc.player.getMainHandStack().isEmpty()) {
                 Scoreboard scoreboard = mc.world.getScoreboard();
                 Collection<ScoreHolder> scoreHolders = scoreboard.getKnownScoreHolders();
                 StringBuilder namesBuilder = new StringBuilder();
@@ -145,31 +141,32 @@ public class WorldInfoCommand extends Command {
                 } else {
                     ChatUtils.sendMsg(Text.of("This chunk is new generation! (post-1.17)"));
                 }
-                ChatUtils.sendMsg(Text.of("East World Border X: "+(int) mc.world.getWorldBorder().getBoundEast()+", West World Border X: "+(int) mc.world.getWorldBorder().getBoundWest()+", South World Border Z: "+(int) mc.world.getWorldBorder().getBoundSouth()+", North World Border Z: "+(int) mc.world.getWorldBorder().getBoundNorth()));
-                ChatUtils.sendMsg(Text.of("WorldSpawn Location: x"+mc.world.getLevelProperties().getSpawnPos().getX()+" y"+mc.world.getLevelProperties().getSpawnPos().getY()+" z"+mc.world.getLevelProperties().getSpawnPos().getZ()));
-                ChatUtils.sendMsg(Text.of("Difficulty: "+mc.world.getDifficulty().toString()));
-                ChatUtils.sendMsg(Text.of("Permission Level: "+mc.player.getPermissionLevel()));
-                ChatUtils.sendMsg(Text.of("Simulation Distance (chunks): "+mc.world.getSimulationDistance()));
-                ChatUtils.sendMsg(Text.of("Day Count: "+Math.floor(mc.world.getTime()/24000)));
-                ChatUtils.sendMsg(Text.of("KnownPlayers (Names with a period are bedrock players): "+getKnownPlayers));
+                ChatUtils.sendMsg(Text.of("East World Border X: " + (int) mc.world.getWorldBorder().getBoundEast() + ", West World Border X: " + (int) mc.world.getWorldBorder().getBoundWest() + ", South World Border Z: " + (int) mc.world.getWorldBorder().getBoundSouth() + ", North World Border Z: " + (int) mc.world.getWorldBorder().getBoundNorth()));
+                ChatUtils.sendMsg(Text.of("WorldSpawn Location: x" + mc.world.getLevelProperties().getSpawnPos().getX() + " y" + mc.world.getLevelProperties().getSpawnPos().getY() + " z" + mc.world.getLevelProperties().getSpawnPos().getZ()));
+                ChatUtils.sendMsg(Text.of("Difficulty: " + mc.world.getDifficulty().toString()));
+                ChatUtils.sendMsg(Text.of("Permission Level: " + mc.player.getPermissionLevel()));
+                ChatUtils.sendMsg(Text.of("Simulation Distance (chunks): " + mc.world.getSimulationDistance()));
+                ChatUtils.sendMsg(Text.of("Day Count: " + Math.floor(mc.world.getTime() / 24000)));
+                ChatUtils.sendMsg(Text.of("KnownPlayers (Names with a period are bedrock players): " + getKnownPlayers));
 
                 String serverip;
-                if (mc.isInSingleplayer()==true){
+                if (mc.isInSingleplayer() == true) {
                     String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("/|\\\\");
-                    serverip=array[array.length-2];
+                    serverip = array[array.length - 2];
                 } else {
                     serverip = mc.getCurrentServerEntry().address.replace(':', '_');
                 }
 
-                if (!Files.exists(Paths.get("TrouserStreak/SavedWorldInfo/"+serverip+"/WorldInfoData.txt"))){
-                    File file = new File("TrouserStreak/SavedWorldInfo/"+serverip+"/WorldInfoData.txt");
+                if (!Files.exists(Paths.get("TrouserStreak/SavedWorldInfo/" + serverip + "/WorldInfoData.txt"))) {
+                    File file = new File("TrouserStreak/SavedWorldInfo/" + serverip + "/WorldInfoData.txt");
                     try {
                         file.createNewFile();
-                    } catch (IOException e) {}
+                    } catch (IOException e) {
+                    }
                 }
                 try {
-                    new File("TrouserStreak/SavedWorldInfo/"+serverip+"/").mkdirs();
-                    FileWriter writer = new FileWriter("TrouserStreak/SavedWorldInfo/"+serverip+"/WorldInfoData.txt", true);
+                    new File("TrouserStreak/SavedWorldInfo/" + serverip + "/").mkdirs();
+                    FileWriter writer = new FileWriter("TrouserStreak/SavedWorldInfo/" + serverip + "/WorldInfoData.txt", true);
                     if (!isNewGeneration) {
                         writer.write("This chunk is pre 1.17 generation!");
                         writer.write("\r\n");   // write new line
@@ -177,19 +174,19 @@ public class WorldInfoCommand extends Command {
                         writer.write("This chunk is new generation! (post-1.17)");
                         writer.write("\r\n");   // write new line
                     }
-                    writer.write("East World Border X: "+(int) mc.world.getWorldBorder().getBoundEast()+", West World Border X: "+(int) mc.world.getWorldBorder().getBoundWest()+", South World Border Z: "+(int) mc.world.getWorldBorder().getBoundSouth()+", North World Border Z: "+(int) mc.world.getWorldBorder().getBoundNorth());
+                    writer.write("East World Border X: " + (int) mc.world.getWorldBorder().getBoundEast() + ", West World Border X: " + (int) mc.world.getWorldBorder().getBoundWest() + ", South World Border Z: " + (int) mc.world.getWorldBorder().getBoundSouth() + ", North World Border Z: " + (int) mc.world.getWorldBorder().getBoundNorth());
                     writer.write("\r\n");   // write new line
-                    writer.write("WorldSpawn Location: x"+mc.world.getLevelProperties().getSpawnPos().getX()+" y"+mc.world.getLevelProperties().getSpawnPos().getY()+" z"+mc.world.getLevelProperties().getSpawnPos().getZ());
+                    writer.write("WorldSpawn Location: x" + mc.world.getLevelProperties().getSpawnPos().getX() + " y" + mc.world.getLevelProperties().getSpawnPos().getY() + " z" + mc.world.getLevelProperties().getSpawnPos().getZ());
                     writer.write("\r\n");   // write new line
-                    writer.write("Difficulty: "+mc.world.getDifficulty().toString());
+                    writer.write("Difficulty: " + mc.world.getDifficulty().toString());
                     writer.write("\r\n");   // write new line
-                    writer.write("Permission Level: "+mc.player.getPermissionLevel());
+                    writer.write("Permission Level: " + mc.player.getPermissionLevel());
                     writer.write("\r\n");   // write new line
-                    writer.write("Simulation Distance (chunks): "+mc.world.getSimulationDistance());
+                    writer.write("Simulation Distance (chunks): " + mc.world.getSimulationDistance());
                     writer.write("\r\n");   // write new line
-                    writer.write("Day Count: "+Math.floor(mc.world.getTime()/24000));
+                    writer.write("Day Count: " + Math.floor(mc.world.getTime() / 24000));
                     writer.write("\r\n");   // write new line
-                    writer.write("KnownPlayers (Names with a period are bedrock players): "+getKnownPlayers);
+                    writer.write("KnownPlayers (Names with a period are bedrock players): " + getKnownPlayers);
                     writer.write("\r\n");   // write new line
                     writer.close();
                 } catch (IOException e) {
@@ -199,6 +196,7 @@ public class WorldInfoCommand extends Command {
             return SINGLE_SUCCESS;
         }));
     }
+
     private boolean isOreBlock(Block block) {
         return block == Blocks.COAL_ORE
                 || block == Blocks.COPPER_ORE

@@ -4,7 +4,6 @@ package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
-import meteordevelopment.meteorclient.systems.modules.Module;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.network.PlayerListEntry;
@@ -16,13 +15,13 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
-import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class ForceOPSign extends Module {
+public class ForceOPSign extends TrouserModule {
     private final SettingGroup commandModes = settings.createGroup("Command Modes");
     private final SettingGroup commandlines = settings.createGroup("Commands");
     private final SettingGroup commandParameters = settings.createGroup("Command Parameters");
@@ -41,7 +40,7 @@ public class ForceOPSign extends Module {
             .name("Clone Sign Y Level")
             .description("Clones the sign to this Y level above the sign.")
             .defaultValue(255)
-            .sliderRange(-64,319)
+            .sliderRange(-64, 319)
             .visible(() -> mode.get() == Modes.CloneSign)
             .build()
     );
@@ -69,7 +68,7 @@ public class ForceOPSign extends Module {
             .name("Command Block Y Level")
             .description("Sets up Command blocks at this Y level above the sign.")
             .defaultValue(254)
-            .sliderRange(-64,319)
+            .sliderRange(-64, 319)
             .visible(() -> skynet.get() && blockskynet.get())
             .build()
     );
@@ -125,7 +124,7 @@ public class ForceOPSign extends Module {
             .name("TerminationTop PLAYERS")
             .description("Height /fill'd around Players")
             .defaultValue(1)
-            .sliderRange(0,90)
+            .sliderRange(0, 90)
             .visible(skynet::get)
             .build()
     );
@@ -133,7 +132,7 @@ public class ForceOPSign extends Module {
             .name("TerminationBottom PLAYERS")
             .description("Height /fill'd around Players")
             .defaultValue(1)
-            .sliderRange(0,90)
+            .sliderRange(0, 90)
             .visible(skynet::get)
             .build()
     );
@@ -141,7 +140,7 @@ public class ForceOPSign extends Module {
             .name("TerminationWidth PLAYERS")
             .description("Width /fill'd around Players")
             .defaultValue(50)
-            .sliderRange(0,90)
+            .sliderRange(0, 90)
             .visible(skynet::get)
             .build()
     );
@@ -149,7 +148,7 @@ public class ForceOPSign extends Module {
             .name("TerminationDepth PLAYERS")
             .description("Depth /fill'd around Players")
             .defaultValue(50)
-            .sliderRange(0,90)
+            .sliderRange(0, 90)
             .visible(skynet::get)
             .build()
     );
@@ -163,7 +162,7 @@ public class ForceOPSign extends Module {
             .name("TerminationTop ENTITIES")
             .description("Height /fill'd around Entities")
             .defaultValue(2)
-            .sliderRange(0,90)
+            .sliderRange(0, 90)
             .visible(skynet::get)
             .build()
     );
@@ -171,7 +170,7 @@ public class ForceOPSign extends Module {
             .name("TerminationBottom ENTITIES")
             .description("Height /fill'd around Entities")
             .defaultValue(1)
-            .sliderRange(0,90)
+            .sliderRange(0, 90)
             .visible(skynet::get)
             .build()
     );
@@ -179,7 +178,7 @@ public class ForceOPSign extends Module {
             .name("TerminationWidth ENTITIES")
             .description("Width /fill'd around Entities")
             .defaultValue(10)
-            .sliderRange(0,90)
+            .sliderRange(0, 90)
             .visible(skynet::get)
             .build()
     );
@@ -187,18 +186,20 @@ public class ForceOPSign extends Module {
             .name("TerminationDepth ENTITIES")
             .description("Depth /fill'd around Entities")
             .defaultValue(10)
-            .sliderRange(0,90)
+            .sliderRange(0, 90)
             .visible(skynet::get)
             .build()
     );
+
     public ForceOPSign() {
-        super(Trouser.Main, "ForceOPSign", "Requires Creative mode! Creates a ClickEvent sign in your inventory. Give it to someone with OP who is also in creative mode and have them place then click the sign.");
+        super("ForceOPSign", "Requires Creative mode! Creates a ClickEvent sign in your inventory. Give it to someone with OP who is also in creative mode and have them place then click the sign.");
     }
 
     @Override
     public void onActivate() {
         if (mc.player == null) return;
-        if (versionwarning.get()) error("!!!You need TrouserStreak for Minecraft 1.20.4 to make it work on versions less than 1.20.5!!!");
+        if (versionwarning.get())
+            error("!!!You need TrouserStreak for Minecraft 1.20.4 to make it work on versions less than 1.20.5!!!");
         if (!mc.player.getAbilities().creativeMode) {
             error("You need creative mode to make the sign.");
             toggle();
@@ -230,26 +231,30 @@ public class ForceOPSign extends Module {
         String commandValue3 = thecommand3.get();
         String commandValue4 = thecommand4.get();
 
-        if (mode.get()== Modes.ForceOP) commandValue1 = "op "+mc.player.getName().getLiteralString();
-        else if (mode.get()== Modes.CloneSign) commandValue1 = "clone ~ ~ ~ ~ ~ ~ to minecraft:overworld ~ "+cloneSignYlevel.get()+" ~ replace force";
-        else if (mode.get()== Modes.AnyCommand) {
+        if (mode.get() == Modes.ForceOP) commandValue1 = "op " + mc.player.getName().getLiteralString();
+        else if (mode.get() == Modes.CloneSign)
+            commandValue1 = "clone ~ ~ ~ ~ ~ ~ to minecraft:overworld ~ " + cloneSignYlevel.get() + " ~ replace force";
+        else if (mode.get() == Modes.AnyCommand) {
             if (commandValue1.startsWith("/")) {
                 commandValue1 = commandValue1.substring(1);
             } else commandValue1 = thecommand1.get();
         }
-        String theCommand = "execute as @a[name=!"+mc.player.getName().getLiteralString()+"] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @s[name=!"+mc.player.getName().getLiteralString()+"]";
-        if (blockskynet.get()) theCommand = ("setblock ~ "+(blockskynetYlevel.get()-2)+" ~ minecraft:repeating_command_block{auto:1b,Command:\"execute as @a[name=!"+mc.player.getName().getLiteralString()+"] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @s[name=!"+mc.player.getName().getLiteralString()+"]\"}");
+        String theCommand = "execute as @a[name=!" + mc.player.getName().getLiteralString() + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @s[name=!" + mc.player.getName().getLiteralString() + "]";
+        if (blockskynet.get())
+            theCommand = ("setblock ~ " + (blockskynetYlevel.get() - 2) + " ~ minecraft:repeating_command_block{auto:1b,Command:\"execute as @a[name=!" + mc.player.getName().getLiteralString() + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @s[name=!" + mc.player.getName().getLiteralString() + "]\"}");
         CopyOnWriteArrayList<PlayerListEntry> players;
         if (nocrashfrend.get()) {
             players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
             List<String> friendNames = new ArrayList<>();
             friendNames.add("name=!" + mc.player.getName().getLiteralString());
-            for(PlayerListEntry player : players) {
-                if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().getName());
+            for (PlayerListEntry player : players) {
+                if (Friends.get().isFriend(player) && nocrashfrend.get())
+                    friendNames.add("name=!" + player.getProfile().getName());
             }
             String friendsString = String.join(",", friendNames);
             theCommand = "execute as @a[" + friendsString + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @s[" + friendsString + "]";
-            if (blockskynet.get()) theCommand = ("setblock ~ "+(blockskynetYlevel.get()-2)+" ~ minecraft:repeating_command_block{auto:1b,Command:\"execute as @a[" + friendsString + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @s[" + friendsString + "]\"}");
+            if (blockskynet.get())
+                theCommand = ("setblock ~ " + (blockskynetYlevel.get() - 2) + " ~ minecraft:repeating_command_block{auto:1b,Command:\"execute as @a[" + friendsString + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @s[" + friendsString + "]\"}");
         }
         if (skynet.get() && crashpeople.get()) commandValue2 = theCommand;
         else {
@@ -261,18 +266,21 @@ public class ForceOPSign extends Module {
         String[] tparts = tfullString.split(":");
         String tblock = tparts[1];
         String tBlockName = tblock.replace("}", "");
-        String theCommand2 = ("execute as @e at @s[name=!"+mc.player.getName().getLiteralString()+", type=!minecraft:player, type=!minecraft:wither, type=!minecraft:item] run fill " + "~" + eterminatewidth.get() + " " + "~" + eterminateheight1.get() + " " + "~" + eterminatedepth.get() + " " + "~-" + eterminatewidth.get() + " " + "~-" + eterminateheight2.get() + " " + "~-" + eterminatedepth.get() + " " + tBlockName);
-        if (blockskynet.get()) theCommand2 = ("setblock ~ "+(blockskynetYlevel.get()-1)+" ~ minecraft:repeating_command_block{auto:1b,Command:\"execute as @e at @s[name=!"+mc.player.getName().getLiteralString()+", type=!minecraft:player, type=!minecraft:wither, type=!minecraft:item] run fill " + "~" + eterminatewidth.get() + " " + "~" + eterminateheight1.get() + " " + "~" + eterminatedepth.get() + " " + "~-" + eterminatewidth.get() + " " + "~-" + eterminateheight2.get() + " " + "~-" + eterminatedepth.get() + " " + tBlockName+"\"}");
+        String theCommand2 = ("execute as @e at @s[name=!" + mc.player.getName().getLiteralString() + ", type=!minecraft:player, type=!minecraft:wither, type=!minecraft:item] run fill " + "~" + eterminatewidth.get() + " " + "~" + eterminateheight1.get() + " " + "~" + eterminatedepth.get() + " " + "~-" + eterminatewidth.get() + " " + "~-" + eterminateheight2.get() + " " + "~-" + eterminatedepth.get() + " " + tBlockName);
+        if (blockskynet.get())
+            theCommand2 = ("setblock ~ " + (blockskynetYlevel.get() - 1) + " ~ minecraft:repeating_command_block{auto:1b,Command:\"execute as @e at @s[name=!" + mc.player.getName().getLiteralString() + ", type=!minecraft:player, type=!minecraft:wither, type=!minecraft:item] run fill " + "~" + eterminatewidth.get() + " " + "~" + eterminateheight1.get() + " " + "~" + eterminatedepth.get() + " " + "~-" + eterminatewidth.get() + " " + "~-" + eterminateheight2.get() + " " + "~-" + eterminatedepth.get() + " " + tBlockName + "\"}");
         if (noterminatefrend.get()) {
             players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
             List<String> friendNames = new ArrayList<>();
             friendNames.add("name=!" + mc.player.getName().getLiteralString());
-            for(PlayerListEntry player : players) {
-                if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().getName());
+            for (PlayerListEntry player : players) {
+                if (Friends.get().isFriend(player) && nocrashfrend.get())
+                    friendNames.add("name=!" + player.getProfile().getName());
             }
             String friendsString = String.join(",", friendNames);
             theCommand2 = ("execute as @e at @s[" + friendsString + ", type=!minecraft:player, type=!minecraft:wither, type=!minecraft:item] run fill " + "~" + eterminatewidth.get() + " " + "~" + eterminateheight1.get() + " " + "~" + eterminatedepth.get() + " " + "~-" + eterminatewidth.get() + " " + "~-" + eterminateheight2.get() + " " + "~-" + eterminatedepth.get() + " " + tBlockName);
-            if (blockskynet.get()) theCommand2 = ("setblock ~ "+(blockskynetYlevel.get()-1)+" ~ minecraft:repeating_command_block{auto:1b,Command:\"execute as @e at @s[" + friendsString + ", type=!minecraft:player, type=!minecraft:wither, type=!minecraft:item] run fill " + "~" + eterminatewidth.get() + " " + "~" + eterminateheight1.get() + " " + "~" + eterminatedepth.get() + " " + "~-" + eterminatewidth.get() + " " + "~-" + eterminateheight2.get() + " " + "~-" + eterminatedepth.get() + " " + tBlockName+"\"}");
+            if (blockskynet.get())
+                theCommand2 = ("setblock ~ " + (blockskynetYlevel.get() - 1) + " ~ minecraft:repeating_command_block{auto:1b,Command:\"execute as @e at @s[" + friendsString + ", type=!minecraft:player, type=!minecraft:wither, type=!minecraft:item] run fill " + "~" + eterminatewidth.get() + " " + "~" + eterminateheight1.get() + " " + "~" + eterminatedepth.get() + " " + "~-" + eterminatewidth.get() + " " + "~-" + eterminateheight2.get() + " " + "~-" + eterminatedepth.get() + " " + tBlockName + "\"}");
         }
         if (skynet.get()) commandValue3 = theCommand2;
         else {
@@ -284,18 +292,21 @@ public class ForceOPSign extends Module {
         String[] tparts2 = tfullString2.split(":");
         String tblock2 = tparts2[1];
         String tBlockName2 = tblock2.replace("}", "");
-        String theCommand3 = ("execute as @a at @s[name=!"+mc.player.getName().getLiteralString()+"] run fill " + "~" + terminatewidth.get() + " " + "~" + terminateheight1.get() + " " + "~" + terminatedepth.get() + " " + "~-" + terminatewidth.get() + " " + "~-" + terminateheight2.get() + " " + "~-" + terminatedepth.get() + " " + tBlockName2);
-        if (blockskynet.get()) theCommand3 = ("setblock ~ "+blockskynetYlevel.get()+" ~ minecraft:repeating_command_block{auto:1b,Command:\"execute as @a at @s[name=!"+mc.player.getName().getLiteralString()+"] run fill " + "~" + terminatewidth.get() + " " + "~" + terminateheight1.get() + " " + "~" + terminatedepth.get() + " " + "~-" + terminatewidth.get() + " " + "~-" + terminateheight2.get() + " " + "~-" + terminatedepth.get() + " " + tBlockName2+"\"}");
+        String theCommand3 = ("execute as @a at @s[name=!" + mc.player.getName().getLiteralString() + "] run fill " + "~" + terminatewidth.get() + " " + "~" + terminateheight1.get() + " " + "~" + terminatedepth.get() + " " + "~-" + terminatewidth.get() + " " + "~-" + terminateheight2.get() + " " + "~-" + terminatedepth.get() + " " + tBlockName2);
+        if (blockskynet.get())
+            theCommand3 = ("setblock ~ " + blockskynetYlevel.get() + " ~ minecraft:repeating_command_block{auto:1b,Command:\"execute as @a at @s[name=!" + mc.player.getName().getLiteralString() + "] run fill " + "~" + terminatewidth.get() + " " + "~" + terminateheight1.get() + " " + "~" + terminatedepth.get() + " " + "~-" + terminatewidth.get() + " " + "~-" + terminateheight2.get() + " " + "~-" + terminatedepth.get() + " " + tBlockName2 + "\"}");
         if (noterminatefrend.get()) {
             players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
             List<String> friendNames = new ArrayList<>();
             friendNames.add("name=!" + mc.player.getName().getLiteralString());
-            for(PlayerListEntry player : players) {
-                if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().getName());
+            for (PlayerListEntry player : players) {
+                if (Friends.get().isFriend(player) && nocrashfrend.get())
+                    friendNames.add("name=!" + player.getProfile().getName());
             }
             String friendsString = String.join(",", friendNames);
             theCommand3 = ("execute as @a at @s[" + friendsString + "] run fill " + "~" + terminatewidth.get() + " " + "~" + terminateheight1.get() + " " + "~" + terminatedepth.get() + " " + "~-" + terminatewidth.get() + " " + "~-" + terminateheight2.get() + " " + "~-" + terminatedepth.get() + " " + tBlockName2);
-            if (blockskynet.get()) theCommand3 = ("setblock ~ "+blockskynetYlevel.get()+" ~ minecraft:repeating_command_block{auto:1b,Command:\"execute as @a at @s[" + friendsString + "] run fill " + "~" + terminatewidth.get() + " " + "~" + terminateheight1.get() + " " + "~" + terminatedepth.get() + " " + "~-" + terminatewidth.get() + " " + "~-" + terminateheight2.get() + " " + "~-" + terminatedepth.get() + " " + tBlockName2+"\"}");
+            if (blockskynet.get())
+                theCommand3 = ("setblock ~ " + blockskynetYlevel.get() + " ~ minecraft:repeating_command_block{auto:1b,Command:\"execute as @a at @s[" + friendsString + "] run fill " + "~" + terminatewidth.get() + " " + "~" + terminateheight1.get() + " " + "~" + terminatedepth.get() + " " + "~-" + terminatewidth.get() + " " + "~-" + terminateheight2.get() + " " + "~-" + terminatedepth.get() + " " + tBlockName2 + "\"}");
         }
         if (skynet.get()) commandValue4 = theCommand3;
         else {
@@ -339,6 +350,7 @@ public class ForceOPSign extends Module {
 
         toggle();
     }
+
     public enum Modes {
         ForceOP, CloneSign, AnyCommand
     }

@@ -14,12 +14,9 @@ import java.util.Random;
 
 @Mixin(SplashTextResourceSupplier.class)
 public class TrouserSplashTextMixin {
-    @Unique
-    private boolean override = true;
-    @Unique
-    private int currentIndex = 0;
-    @Unique
-    private final List<String> TrouserSplashes = getTrouserSplashes();
+    @Unique private boolean override = true;
+    @Unique private int currentIndex = 0;
+    @Unique private final List<String> TrouserSplashes = getTrouserSplashes();
 
     @Inject(method = "get", at = @At("HEAD"), cancellable = true)
     private void onApply(CallbackInfoReturnable<SplashTextRenderer> cir) {
@@ -32,8 +29,7 @@ public class TrouserSplashTextMixin {
         override = !override;
     }
 
-    @Unique
-    private static List<String> getTrouserSplashes() {
+    @Unique private static List<String> getTrouserSplashes() {
         return List.of(
                 "Sorry about the turts.",
                 "Sponsored by Mountains of Lava Inc!™",

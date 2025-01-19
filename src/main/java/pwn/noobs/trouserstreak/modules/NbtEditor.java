@@ -1,16 +1,20 @@
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.minecraft.component.*;
-import net.minecraft.component.type.*;
+import net.minecraft.component.ComponentChanges;
+import net.minecraft.component.ComponentMap;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
+import net.minecraft.component.type.PotionContentsComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.*;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -18,12 +22,15 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
-import net.minecraft.util.*;
-import pwn.noobs.trouserstreak.Trouser;
+import net.minecraft.util.Formatting;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
-public class NbtEditor extends Module {
+public class NbtEditor extends TrouserModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgOptions = settings.createGroup("Nbt Options");
     private final SettingGroup sgAEC = settings.createGroup("Area Effect Cloud Options");
@@ -51,7 +58,9 @@ public class NbtEditor extends Module {
             .description("Color the Name")
             .defaultValue(BoomPlus.ColorModes.red)
             .build());
-    public enum ColorModes { aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green, dark_purple, dark_red, gold, gray, green, italic, light_purple, red, white, yellow }
+
+    public enum ColorModes {aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green, dark_purple, dark_red, gold, gray, green, italic, light_purple, red, white, yellow}
+
     private final Setting<String> entity = sgOptions.add(new StringSetting.Builder()
             .name("Entity to Spawn")
             .description("What is created. Ex: fireball, villager, minecart, lightning_bolt, magma cube, area effect cloud")
@@ -257,11 +266,12 @@ public class NbtEditor extends Module {
             .build());
 
     public NbtEditor() {
-        super(Trouser.Main, "NbtEditor", " CREATIVE MODE REQUIRED. Creates custom entities (spawn eggs) and enchanted items based on your specified options.");
+        super("NbtEditor", " CREATIVE MODE REQUIRED. Creates custom entities (spawn eggs) and enchanted items based on your specified options.");
     }
+
     @Override
     public void onActivate() {
-        if (mc.player != null  && mc.interactionManager != null && mc.world != null && mc.player.getAbilities().creativeMode) {
+        if (mc.player != null && mc.interactionManager != null && mc.world != null && mc.player.getAbilities().creativeMode) {
             switch (mode.get()) {
                 case Entity -> {
                     ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
@@ -286,7 +296,7 @@ public class NbtEditor extends Module {
 
                     for (RegistryKey<Enchantment> enchantKey : enchants.get()) {
                         RegistryEntry<Enchantment> enchantEntry = enchantmentRegistry.getOrThrow(enchantKey);
-                         item.addEnchantment(enchantEntry, level.get());
+                        item.addEnchantment(enchantEntry, level.get());
                     }
 
                     item.set(DataComponentTypes.CUSTOM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())));
@@ -297,9 +307,12 @@ public class NbtEditor extends Module {
                     ItemStack item;
 
                     if (!mc.player.getMainHandStack().isEmpty()) {
-                        if (mc.player.getMainHandStack().getItem() != Items.SPLASH_POTION && potionmode.get() == pModes.Splash) item =  new ItemStack(Items.SPLASH_POTION);
-                        else if (mc.player.getMainHandStack().getItem() != Items.LINGERING_POTION && potionmode.get() == pModes.Lingering) item =  new ItemStack(Items.LINGERING_POTION);
-                        else if (mc.player.getMainHandStack().getItem() != Items.POTION && potionmode.get() == pModes.Normal) item =  new ItemStack(Items.POTION);
+                        if (mc.player.getMainHandStack().getItem() != Items.SPLASH_POTION && potionmode.get() == pModes.Splash)
+                            item = new ItemStack(Items.SPLASH_POTION);
+                        else if (mc.player.getMainHandStack().getItem() != Items.LINGERING_POTION && potionmode.get() == pModes.Lingering)
+                            item = new ItemStack(Items.LINGERING_POTION);
+                        else if (mc.player.getMainHandStack().getItem() != Items.POTION && potionmode.get() == pModes.Normal)
+                            item = new ItemStack(Items.POTION);
                         else item = mc.player.getMainHandStack().copy();
                         var changes = ComponentChanges.builder()
                                 .add(DataComponentTypes.ITEM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())))
@@ -307,10 +320,9 @@ public class NbtEditor extends Module {
                                 .build();
                         item.applyChanges(changes);
                         mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
-                    }
-                    else switch (potionmode.get()) {
+                    } else switch (potionmode.get()) {
                         case Normal -> {
-                            item =  new ItemStack(Items.POTION);
+                            item = new ItemStack(Items.POTION);
                             var changes = ComponentChanges.builder()
                                     .add(DataComponentTypes.ITEM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())))
                                     .add(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.empty(), pileOfStatusEffects(), Optional.ofNullable(nom.get())))
@@ -319,7 +331,7 @@ public class NbtEditor extends Module {
                             mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
                         }
                         case Splash -> {
-                            item =  new ItemStack(Items.SPLASH_POTION);
+                            item = new ItemStack(Items.SPLASH_POTION);
                             var changes = ComponentChanges.builder()
                                     .add(DataComponentTypes.ITEM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())))
                                     .add(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.empty(), pileOfStatusEffects(), Optional.ofNullable(nom.get())))
@@ -328,7 +340,7 @@ public class NbtEditor extends Module {
                             mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
                         }
                         case Lingering -> {
-                            item =  new ItemStack(Items.LINGERING_POTION);
+                            item = new ItemStack(Items.LINGERING_POTION);
                             var changes = ComponentChanges.builder()
                                     .add(DataComponentTypes.ITEM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())))
                                     .add(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.empty(), pileOfStatusEffects(), Optional.ofNullable(nom.get())))
@@ -349,10 +361,9 @@ public class NbtEditor extends Module {
                     ComponentMap mainHandComponents = mainHandStack.getComponents();
                     ItemStack offHandStack = mc.player.getOffHandStack();
 
-                    if (copyStack.get()){
+                    if (copyStack.get()) {
                         offHandStack = mainHandStack;
-                    }
-                    else if (!copyStack.get()){
+                    } else if (!copyStack.get()) {
                         if (offHandStack.isEmpty()) {
                             offHandStack = new ItemStack(Items.CARROT_ON_A_STICK);
                         }
@@ -368,6 +379,7 @@ public class NbtEditor extends Module {
             toggle();
         }
     }
+
     private List<StatusEffectInstance> pileOfStatusEffects() {
         List<StatusEffectInstance> effectInstances = new ArrayList<>();
 
@@ -388,18 +400,18 @@ public class NbtEditor extends Module {
         entityTag.putInt("Age", age.get());
         entityTag.putInt("ExplosionPower", exppower.get());
         entityTag.putInt("ExplosionRadius", exppower.get());
-        if (invincible.get())entityTag.putBoolean("Invulnerable", invincible.get());
-        if (silence.get())entityTag.putBoolean("Silent", silence.get());
-        if (glow.get())entityTag.putBoolean("Glowing", glow.get());
-        if (persist.get())entityTag.putBoolean("PersistenceRequired", persist.get());
-        if (nograv.get())entityTag.putBoolean("NoGravity", nograv.get());
-        if(noAI.get())entityTag.putBoolean("NoAI", noAI.get());
-        if(falsefire.get())entityTag.putBoolean("HasVisualFire", falsefire.get());
-        if(powah.get())entityTag.putBoolean("powered", powah.get());
-        if(ignite.get())entityTag.putBoolean("ignited", ignite.get());
+        if (invincible.get()) entityTag.putBoolean("Invulnerable", invincible.get());
+        if (silence.get()) entityTag.putBoolean("Silent", silence.get());
+        if (glow.get()) entityTag.putBoolean("Glowing", glow.get());
+        if (persist.get()) entityTag.putBoolean("PersistenceRequired", persist.get());
+        if (nograv.get()) entityTag.putBoolean("NoGravity", nograv.get());
+        if (noAI.get()) entityTag.putBoolean("NoAI", noAI.get());
+        if (falsefire.get()) entityTag.putBoolean("HasVisualFire", falsefire.get());
+        if (powah.get()) entityTag.putBoolean("powered", powah.get());
+        if (ignite.get()) entityTag.putBoolean("ignited", ignite.get());
         entityTag.putInt("Fuse", fuse.get());
         entityTag.putInt("Size", size.get());
-        if(customname.get())entityTag.putBoolean("CustomNameVisible", customname.get());
+        if (customname.get()) entityTag.putBoolean("CustomNameVisible", customname.get());
         entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
         entityTag.putInt("Radius", cloudradius.get());
         entityTag.putInt("Duration", cloudduration.get());
@@ -407,9 +419,11 @@ public class NbtEditor extends Module {
         entityTag.putString("Potion", ceffect.get());
         return NbtComponent.of(entityTag);
     }
+
     public enum Modes {
         Entity, Item, Potion, Copy
     }
+
     public enum pModes {
         Normal, Splash, Lingering
     }

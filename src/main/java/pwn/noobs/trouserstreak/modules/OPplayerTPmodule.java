@@ -8,15 +8,14 @@ import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.friends.Friends;
-import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.network.PlayerListEntry;
-import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
 //credits to ogmur (https://www.youtube.com/@Ogmur) for the idea, etianl for writing and aaaasdfghjkllll for fixing
-public class OPplayerTPmodule extends Module {
+public class OPplayerTPmodule extends TrouserModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     public final Setting<Boolean> tp2u = sgGeneral.add(new BoolSetting.Builder()
             .name("TP Players to you instead")
@@ -36,6 +35,7 @@ public class OPplayerTPmodule extends Module {
             .defaultValue(true)
             .build()
     );
+
     public WWidget getWidget(GuiTheme theme) {
         WTable table = theme.table();
         WButton deletedata = table.add(theme.button("RESET CURRENT PLAYER")).expandX().minWidth(100).widget();
@@ -43,8 +43,9 @@ public class OPplayerTPmodule extends Module {
         table.row();
         return table;
     }
+
     public OPplayerTPmodule() {
-        super(Trouser.Main, "OPplayerTPmodule", "**REQUIRES OP** Teleports you to each player on the server with a button press if keybound, or teleport people to you.");
+        super("OPplayerTPmodule", "**REQUIRES OP** Teleports you to each player on the server with a button press if keybound, or teleport people to you.");
     }
 
     public static int currentplayer = 0;
@@ -58,21 +59,23 @@ public class OPplayerTPmodule extends Module {
             return;
         }
         players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
-        for(PlayerListEntry player : players) {
-            if(player.getProfile().getName().equals(mc.player.getName().getLiteralString())) players.remove(player);
-            if(Friends.get().isFriend(player) && ignoreFriends.get()) players.remove(player);
+        for (PlayerListEntry player : players) {
+            if (player.getProfile().getName().equals(mc.player.getName().getLiteralString())) players.remove(player);
+            if (Friends.get().isFriend(player) && ignoreFriends.get()) players.remove(player);
         }
-        if(currentplayer < players.size()) currentplayer++;
-        if(players.isEmpty()) {
+        if (currentplayer < players.size()) currentplayer++;
+        if (players.isEmpty()) {
             error("No other players online.");
             currentplayer = 0;
             toggle();
             return;
         }
-        if(currentplayer >= players.size()) currentplayer = players.size();
-        if(tp2u.get()) ChatUtils.sendPlayerMsg("/tp " + players.get(currentplayer - 1).getProfile().getName() + " " + mc.player.getName().getLiteralString());
-        if(!tp2u.get()) ChatUtils.sendPlayerMsg("/tp " + mc.player.getName().getLiteralString() + " " + players.get(currentplayer - 1).getProfile().getName());
-        if(currentplayer >= players.size()) currentplayer = 0;
+        if (currentplayer >= players.size()) currentplayer = players.size();
+        if (tp2u.get())
+            ChatUtils.sendPlayerMsg("/tp " + players.get(currentplayer - 1).getProfile().getName() + " " + mc.player.getName().getLiteralString());
+        if (!tp2u.get())
+            ChatUtils.sendPlayerMsg("/tp " + mc.player.getName().getLiteralString() + " " + players.get(currentplayer - 1).getProfile().getName());
+        if (currentplayer >= players.size()) currentplayer = 0;
         toggle();
     }
 }

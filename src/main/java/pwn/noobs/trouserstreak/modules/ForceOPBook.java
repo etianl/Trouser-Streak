@@ -1,7 +1,9 @@
 package pwn.noobs.trouserstreak.modules;
 
-import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.settings.EnumSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.StringSetting;
 import net.minecraft.component.ComponentChanges;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.WrittenBookContentComponent;
@@ -11,12 +13,12 @@ import net.minecraft.text.ClickEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.RawFilteredPair;
 import net.minecraft.text.Text;
-import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ForceOPBook extends Module {
+public class ForceOPBook extends TrouserModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSpecial = settings.createGroup("!!!You need to use WrittenBook mode on MC servers with versions less than 1.21.2!!!");
     private final Setting<bookModes> bmode = sgSpecial.add(new EnumSetting.Builder<bookModes>()
@@ -57,7 +59,7 @@ public class ForceOPBook extends Module {
     );
 
     public ForceOPBook() {
-        super(Trouser.Main, "ForceOPBook", "Requires Creative mode! Creates a Book that can run commands in your inventory. Give it to someone with OP and have them click on the page in the book.");
+        super("ForceOPBook", "Requires Creative mode! Creates a Book that can run commands in your inventory. Give it to someone with OP and have them click on the page in the book.");
     }
 
     @Override
@@ -69,16 +71,16 @@ public class ForceOPBook extends Module {
             return;
         }
         ItemStack stack = new ItemStack(Items.WRITABLE_BOOK);
-        if (bmode.get() == bookModes.WrittenBook)stack = new ItemStack(Items.WRITTEN_BOOK);
+        if (bmode.get() == bookModes.WrittenBook) stack = new ItemStack(Items.WRITTEN_BOOK);
         RawFilteredPair<String> Title = RawFilteredPair.of(title.get());
         List<RawFilteredPair<Text>> pages = new ArrayList<>();
-        if (mode.get() == Modes.ForceOP){
-        MutableText pageText = Text.literal(text.get()+"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             ")
-                .styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/op "+mc.player.getName().getLiteralString())));
+        if (mode.get() == Modes.ForceOP) {
+            MutableText pageText = Text.literal(text.get() + "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             ")
+                    .styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/op " + mc.player.getName().getLiteralString())));
             pages.add(RawFilteredPair.of(pageText));
         } else {
-        MutableText pageText = Text.literal(text.get()+"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             ")
-                .styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, theCommand.get())));
+            MutableText pageText = Text.literal(text.get() + "                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             ")
+                    .styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, theCommand.get())));
             pages.add(RawFilteredPair.of(pageText));
         }
         WrittenBookContentComponent bookContentComponent = new WrittenBookContentComponent(
@@ -96,9 +98,11 @@ public class ForceOPBook extends Module {
 
         toggle();
     }
+
     public enum Modes {
         ForceOP, AnyCommand
     }
+
     public enum bookModes {
         WritableBook, WrittenBook
     }

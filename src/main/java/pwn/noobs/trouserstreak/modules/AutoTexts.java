@@ -6,7 +6,6 @@ import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.world.PlaySoundEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.component.ComponentChanges;
@@ -24,12 +23,12 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
 import java.util.List;
 import java.util.Random;
 
-public class AutoTexts extends Module {
+public class AutoTexts extends TrouserModule {
     public enum ColorModes {
         aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green,
         dark_purple, dark_red, gold, gray, green, italic, light_purple,
@@ -115,7 +114,7 @@ public class AutoTexts extends Module {
     private String namecolour;
 
     public AutoTexts() {
-        super(Trouser.Main, "auto-texts", "Spawns invisible armor stands with custom text. Requires creative mode.");
+        super("auto-texts", "Spawns invisible armor stands with custom text. Requires creative mode.");
     }
 
     @Override

@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(PacketCodecs.class)
 public interface PacketCodecsMixin {
     @Inject(method = "Lnet/minecraft/network/codec/PacketCodecs;writeCollectionSize(Lio/netty/buffer/ByteBuf;II)V", at = @At("HEAD"), cancellable = true)
-    private static void writeCollectionsSize(ByteBuf buf, int size, int maxSize, CallbackInfo ci){
+    private static void writeCollectionsSize(ByteBuf buf, int size, int maxSize, CallbackInfo ci) {
         VarInts.write(buf, size);
         ci.cancel();
     }

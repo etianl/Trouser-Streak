@@ -9,11 +9,10 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
-import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.PlayerListEntry;
-import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -21,7 +20,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class AutoTitles extends Module {
+public class AutoTitles extends TrouserModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgTitle = settings.createGroup("Title Options");
     private final SettingGroup sgsubTitle = settings.createGroup("Subitle Options");
@@ -169,7 +168,7 @@ public class AutoTitles extends Module {
             .description("How long for the title to fadein, in seconds")
             .defaultValue(2)
             .min(1)
-            .sliderRange(1,999999999)
+            .sliderRange(1, 999999999)
             .visible(() -> fadeinmode.get() == fadeinModes.seconds)
             .build()
     );
@@ -178,7 +177,7 @@ public class AutoTitles extends Module {
             .description("How long for the title to fadein, in days")
             .defaultValue(1)
             .min(1)
-            .sliderRange(1,9999)
+            .sliderRange(1, 9999)
             .visible(() -> fadeinmode.get() == fadeinModes.days)
             .build()
     );
@@ -192,7 +191,7 @@ public class AutoTitles extends Module {
             .description("How long for the title to stay for, in seconds")
             .defaultValue(999999999)
             .min(1)
-            .sliderRange(1,999999999)
+            .sliderRange(1, 999999999)
             .visible(() -> durationmode.get() == durationModes.seconds)
             .build()
     );
@@ -201,7 +200,7 @@ public class AutoTitles extends Module {
             .description("How long for the title to stay for, in days")
             .defaultValue(9999)
             .min(1)
-            .sliderRange(1,9999)
+            .sliderRange(1, 9999)
             .visible(() -> durationmode.get() == durationModes.days)
             .build()
     );
@@ -215,7 +214,7 @@ public class AutoTitles extends Module {
             .description("How long for the title to fadeout, in seconds")
             .defaultValue(999999999)
             .min(1)
-            .sliderRange(1,999999999)
+            .sliderRange(1, 999999999)
             .visible(() -> fadeoutmode.get() == fadeoutModes.seconds)
             .build()
     );
@@ -224,12 +223,13 @@ public class AutoTitles extends Module {
             .description("How long for the title to fadeout, in days")
             .defaultValue(9999)
             .min(1)
-            .sliderRange(1,9999)
+            .sliderRange(1, 9999)
             .visible(() -> fadeoutmode.get() == fadeoutModes.days)
             .build()
     );
+
     public AutoTitles() {
-        super(Trouser.Main, "AutoTitles", "Creates text across the screens for online players. Requires OP.");
+        super("AutoTitles", "Creates text across the screens for online players. Requires OP.");
     }
 
     private CopyOnWriteArrayList<PlayerListEntry> players;
@@ -247,20 +247,20 @@ public class AutoTitles extends Module {
             error("Must have permission level 2 or higher");
         }
         switch (fadeinmode.get()) {
-            case seconds -> fadein=fadeinseconds.get()+"s";
-            case days -> fadein=fadeindays.get()+"d";
+            case seconds -> fadein = fadeinseconds.get() + "s";
+            case days -> fadein = fadeindays.get() + "d";
         }
         switch (durationmode.get()) {
-            case seconds -> duration=durationseconds.get()+"s";
-            case days -> duration=durationdays.get()+"d";
+            case seconds -> duration = durationseconds.get() + "s";
+            case days -> duration = durationdays.get() + "d";
         }
         switch (fadeoutmode.get()) {
-            case seconds -> fadeout=fadeoutseconds.get()+"s";
-            case days -> fadeout=fadeoutdays.get()+"d";
+            case seconds -> fadeout = fadeoutseconds.get() + "s";
+            case days -> fadeout = fadeoutdays.get() + "d";
         }
 
         if (!notitlefrend.get()) {
-            if (notitleself.get()){
+            if (notitleself.get()) {
                 if (messageLengthExceedsLimit("/title @a[name=!" + mc.player.getName().getLiteralString() + "] title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}", "Title")) {
                     toggle();
                     return;
@@ -287,7 +287,7 @@ public class AutoTitles extends Module {
                     if (useDelay.get()) commandQueue.add(command4);
                     else ChatUtils.sendPlayerMsg(command4);
                 }
-            } else if (!notitleself.get()){
+            } else if (!notitleself.get()) {
                 if (messageLengthExceedsLimit("/title @a title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}", "Title")) {
                     toggle();
                     return;
@@ -318,9 +318,10 @@ public class AutoTitles extends Module {
         } else if (notitlefrend.get()) {
             players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
             List<String> friendNames = new ArrayList<>();
-            if (notitleself.get())friendNames.add("name=!" + mc.player.getName().getLiteralString());
-            for(PlayerListEntry player : players) {
-                if(Friends.get().isFriend(player) && notitlefrend.get()) friendNames.add("name=!" + player.getProfile().getName());
+            if (notitleself.get()) friendNames.add("name=!" + mc.player.getName().getLiteralString());
+            for (PlayerListEntry player : players) {
+                if (Friends.get().isFriend(player) && notitlefrend.get())
+                    friendNames.add("name=!" + player.getProfile().getName());
             }
             String friendsString = String.join(",", friendNames);
             if (messageLengthExceedsLimit("/title @a[" + friendsString + "] title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}", "Title")) {
@@ -372,6 +373,7 @@ public class AutoTitles extends Module {
             toggle();
         }
     }
+
     private boolean messageLengthExceedsLimit(String message, String messageType) {
         int maxLength = 257;
         if (message.length() > maxLength) {
@@ -381,12 +383,15 @@ public class AutoTitles extends Module {
         }
         return false;
     }
+
     public enum fadeinModes {
         seconds, days
     }
+
     public enum fadeoutModes {
         days, seconds
     }
+
     public enum durationModes {
         days, seconds
     }

@@ -8,7 +8,6 @@ import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
-import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.Flight;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
@@ -22,7 +21,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
 /**
  * @Author majorsopa
@@ -33,7 +32,7 @@ import pwn.noobs.trouserstreak.Trouser;
  * https://github.com/etianl
  */
 
-public class AutoStaircase extends Module {
+public class AutoStaircase extends TrouserModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final Setting<Double> view = sgGeneral.add(new DoubleSetting.Builder()
         .name("ViewAngle")
@@ -59,7 +58,7 @@ public class AutoStaircase extends Module {
     );
     private boolean resetTimer;
     public AutoStaircase() {
-        super(Trouser.Main, "AutoStaircase", "Make stairs!");
+        super("AutoStaircase", "Make stairs!");
     }
 
     @Override

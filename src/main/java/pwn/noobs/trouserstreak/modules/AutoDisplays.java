@@ -6,7 +6,6 @@ import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
-import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
@@ -14,7 +13,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.network.PlayerListEntry;
-import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -22,7 +21,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class AutoDisplays extends Module {
+public class AutoDisplays extends TrouserModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgBlock = settings.createGroup("Block Display Options");
     private final SettingGroup sgText = settings.createGroup("Text Display Options");
@@ -135,23 +134,28 @@ public class AutoDisplays extends Module {
             .sliderRange(1, 10)
             .visible(() -> displayMode.get() == Modes.TEXT)
             .build());
+
     public AutoDisplays() {
-        super(Trouser.Main, "auto-displays", "Automatically spam block or text displays around players. Requires operator access.");
+        super("auto-displays", "Automatically spam block or text displays around players. Requires operator access.");
     }
+
     private CopyOnWriteArrayList<PlayerListEntry> players;
     private int tickTimer = 0;
     private int killTimer = 0;
     private Queue<String> commandQueue = new LinkedList<>();
+
     @EventHandler
     private void onScreenOpen(OpenScreenEvent event) {
         if (disconnectdisable.get() && event.screen instanceof DisconnectedScreen) {
             toggle();
         }
     }
+
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
-        if (disconnectdisable.get())toggle();
+        if (disconnectdisable.get()) toggle();
     }
+
     @Override
     public void onActivate() {
         if (mc.player == null) return;
@@ -162,20 +166,24 @@ public class AutoDisplays extends Module {
             error("Must have permission level 2 or higher");
         }
     }
+
     @Override
     public void onDeactivate() {
         switch (displayMode.get()) {
             case BLOCK -> {
-                if (killEntities.get())ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:block_display,tag=MOL] run kill @s");
+                if (killEntities.get())
+                    ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:block_display,tag=MOL] run kill @s");
             }
             case TEXT -> {
-                if (killEntities.get())ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:text_display,tag=MOL] run kill @s");
+                if (killEntities.get())
+                    ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:text_display,tag=MOL] run kill @s");
             }
         }
     }
+
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (mc.getNetworkHandler().getPlayerList().toArray().length == 1 && allAloneToggle.get()){
+        if (mc.getNetworkHandler().getPlayerList().toArray().length == 1 && allAloneToggle.get()) {
             toggle();
             error("No other players online.");
         }
@@ -184,17 +192,20 @@ public class AutoDisplays extends Module {
 
             switch (displayMode.get()) {
                 case BLOCK -> {
-                    if (killEntities.get())ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:block_display,tag=MOL] run kill @s");
+                    if (killEntities.get())
+                        ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:block_display,tag=MOL] run kill @s");
                 }
 
                 case TEXT -> {
-                    if (killEntities.get())ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:text_display,tag=MOL] run kill @s");
+                    if (killEntities.get())
+                        ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:text_display,tag=MOL] run kill @s");
                 }
             }
         } else {
             killTimer++;
         }
     }
+
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
         if (!commandQueue.isEmpty() && useDelay.get()) {
@@ -218,6 +229,7 @@ public class AutoDisplays extends Module {
             tickTimer++;
         }
     }
+
     private void createBlockDisplays() {
         for (int y = 2; y >= 0; y--) {
             for (int x = 1; x >= -1; x--) {
@@ -229,18 +241,17 @@ public class AutoDisplays extends Module {
                     String blockName = block.replace("}", "");
                     players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
                     List<String> friendNames = new ArrayList<>();
-                    if (!trollyourself.get())friendNames.add("name=!" + mc.player.getName().getLiteralString());
+                    if (!trollyourself.get()) friendNames.add("name=!" + mc.player.getName().getLiteralString());
                     for (PlayerListEntry player : players) {
                         if (Friends.get().isFriend(player) && !trollfriends.get())
                             friendNames.add("name=!" + player.getProfile().getName());
                     }
                     String friendsString = String.join(",", friendNames);
-                    String thecommand = "/execute at @a[" + friendsString + "] run summon minecraft:block_display ~" + (x - 0.5) + " ~" + y + " ~" + (z - 0.5) + " {block_state:{Name:\"minecraft:"+blockName+"\"},brightness:{sky:"+blockbrightness.get()+",block:"+blockbrightness.get()+"},Tags:[\"MOL\"]}";
-                    if (thecommand.length()<=257) {
+                    String thecommand = "/execute at @a[" + friendsString + "] run summon minecraft:block_display ~" + (x - 0.5) + " ~" + y + " ~" + (z - 0.5) + " {block_state:{Name:\"minecraft:" + blockName + "\"},brightness:{sky:" + blockbrightness.get() + ",block:" + blockbrightness.get() + "},Tags:[\"MOL\"]}";
+                    if (thecommand.length() <= 257) {
                         if (useDelay.get()) commandQueue.add(thecommand);
                         else ChatUtils.sendPlayerMsg(thecommand);
-                    }
-                    else {
+                    } else {
                         error("Command too long, too many friends are online.");
                         toggle();
                     }
@@ -248,21 +259,22 @@ public class AutoDisplays extends Module {
             }
         }
     }
+
     private void createTextDisplays() {
         int color = (backgroundColor.get().a << 24) | (backgroundColor.get().r << 16) | (backgroundColor.get().g << 8) | backgroundColor.get().b;
         players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
         List<String> friendNames = new ArrayList<>();
-        if (!trollyourself.get())friendNames.add("name=!" + mc.player.getName().getLiteralString());
+        if (!trollyourself.get()) friendNames.add("name=!" + mc.player.getName().getLiteralString());
         for (PlayerListEntry player : players) {
             if (Friends.get().isFriend(player) && !trollfriends.get())
                 friendNames.add("name=!" + player.getProfile().getName());
         }
         String friendsString = String.join(",", friendNames);
-        String thecommand1 = "/execute at @a[" + friendsString + "] run summon text_display ~ ~1 ~-"+distance.get()+" {brightness:{sky:"+textbrightness.get()+",block:"+textbrightness.get()+"},background:" + color + ",text:'\"" + text.get() + "\"',Tags:[\"MOL\"],Rotation:[0f, 0f]}";
-        String thecommand2 = "/execute at @a[" + friendsString + "] run summon text_display ~ ~1 ~"+distance.get()+" {brightness:{sky:"+textbrightness.get()+",block:"+textbrightness.get()+"},background:" + color + ",text:'\"" + text.get() + "\"',Tags:[\"MOL\"],Rotation:[180f, 0f]}";
-        String thecommand3 = "/execute at @a[" + friendsString + "] run summon text_display ~"+distance.get()+" ~1 ~ {brightness:{sky:"+textbrightness.get()+",block:"+textbrightness.get()+"},background:" + color + ",text:'\"" + text.get() + "\"',Tags:[\"MOL\"],Rotation:[90f, 0f]}";
-        String thecommand4 = "/execute at @a[" + friendsString + "] run summon text_display ~-"+distance.get()+" ~1 ~ {brightness:{sky:"+textbrightness.get()+",block:"+textbrightness.get()+"},background:" + color + ",text:'\"" + text.get() + "\"',Tags:[\"MOL\"],Rotation:[-90f, 0f]}";
-        if (thecommand1.length()<=257 && thecommand2.length()<=257 && thecommand3.length()<=257 && thecommand4.length()<=257){
+        String thecommand1 = "/execute at @a[" + friendsString + "] run summon text_display ~ ~1 ~-" + distance.get() + " {brightness:{sky:" + textbrightness.get() + ",block:" + textbrightness.get() + "},background:" + color + ",text:'\"" + text.get() + "\"',Tags:[\"MOL\"],Rotation:[0f, 0f]}";
+        String thecommand2 = "/execute at @a[" + friendsString + "] run summon text_display ~ ~1 ~" + distance.get() + " {brightness:{sky:" + textbrightness.get() + ",block:" + textbrightness.get() + "},background:" + color + ",text:'\"" + text.get() + "\"',Tags:[\"MOL\"],Rotation:[180f, 0f]}";
+        String thecommand3 = "/execute at @a[" + friendsString + "] run summon text_display ~" + distance.get() + " ~1 ~ {brightness:{sky:" + textbrightness.get() + ",block:" + textbrightness.get() + "},background:" + color + ",text:'\"" + text.get() + "\"',Tags:[\"MOL\"],Rotation:[90f, 0f]}";
+        String thecommand4 = "/execute at @a[" + friendsString + "] run summon text_display ~-" + distance.get() + " ~1 ~ {brightness:{sky:" + textbrightness.get() + ",block:" + textbrightness.get() + "},background:" + color + ",text:'\"" + text.get() + "\"',Tags:[\"MOL\"],Rotation:[-90f, 0f]}";
+        if (thecommand1.length() <= 257 && thecommand2.length() <= 257 && thecommand3.length() <= 257 && thecommand4.length() <= 257) {
             if (useDelay.get()) {
                 commandQueue.add(thecommand1);
                 commandQueue.add(thecommand2);
@@ -274,13 +286,13 @@ public class AutoDisplays extends Module {
                 ChatUtils.sendPlayerMsg(thecommand3);
                 ChatUtils.sendPlayerMsg(thecommand4);
             }
-        }
-        else {
-            int characterstodelete = thecommand1.length()-259;
-            error("The command is too long. Shorten it by "+characterstodelete+" characters, or you may also have too many friends online.");
+        } else {
+            int characterstodelete = thecommand1.length() - 259;
+            error("The command is too long. Shorten it by " + characterstodelete + " characters, or you may also have too many friends online.");
             toggle();
         }
     }
+
     public enum Modes {
         BLOCK,
         TEXT

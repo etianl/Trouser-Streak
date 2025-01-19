@@ -10,7 +10,6 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
@@ -27,13 +26,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class BetterScaffold extends Module {
+public class BetterScaffold extends TrouserModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
 
@@ -148,7 +147,7 @@ public class BetterScaffold extends Module {
             .min(1)
             .sliderMin(1)
             .sliderMax(8)
-            .visible(() -> placementMode.get()==PlaceMode.AboveHead)
+            .visible(() -> placementMode.get() == PlaceMode.AboveHead)
             .build()
     );
 
@@ -186,13 +185,13 @@ public class BetterScaffold extends Module {
     private double lastSneakingY;
 
     public BetterScaffold() {
-        super(Trouser.Main, "betterScaffold", "Automatically places blocks under you. Credits to MeteorTweaks.");
+        super("betterScaffold", "Automatically places blocks under you. Credits to MeteorTweaks.");
     }
 
     @Override
     public void onActivate() {
         if (mc.player == null) return;
-        initialY = mc.player.getBlockY()-1;
+        initialY = mc.player.getBlockY() - 1;
         lastWasSneaking = mc.options.sneakKey.isPressed();
         if (lastWasSneaking) {
             assert mc.player != null;
@@ -299,7 +298,7 @@ public class BetterScaffold extends Module {
         if (placementMode.get() == PlaceMode.BelowFeet) {
             vOffset = 0;
         } else if (placementMode.get() == PlaceMode.AboveHead) {
-            vOffset = aboveHeadDistance.get()+2;
+            vOffset = aboveHeadDistance.get() + 2;
         } else {
             return; // Skip the rest of the code if the placement mode is not valid
         }
@@ -320,7 +319,7 @@ public class BetterScaffold extends Module {
                     mc.player.setVelocity(0, -0.28f, 0);
                 }
             }
-        } else if(onSurface.get()){
+        } else if (onSurface.get()) {
             horizontalAndVertical(new BlockPos.Mutable(mc.player.getX(), mc.player.getY() - 1, mc.player.getZ()), item);
         }
 
@@ -356,7 +355,7 @@ public class BetterScaffold extends Module {
                 if (placementMode.get() == PlaceMode.BelowFeet) {
                     vOffset = -i;
                 } else if (placementMode.get() == PlaceMode.AboveHead) {
-                    vOffset = i + aboveHeadDistance.get()+2;
+                    vOffset = i + aboveHeadDistance.get() + 2;
                 } else {
                     continue; // Skip the loop iteration if the placement mode is not valid
                 }
@@ -367,14 +366,14 @@ public class BetterScaffold extends Module {
             }
         }
 
-        if(horizontalRadius.get() > 1) {
+        if (horizontalRadius.get() > 1) {
 
             for (int v = 0; v < verticalRadius.get(); v++) {
                 int vOffset;
                 if (placementMode.get() == PlaceMode.BelowFeet) {
                     vOffset = -v;
                 } else if (placementMode.get() == PlaceMode.AboveHead) {
-                    vOffset = v + aboveHeadDistance.get()+2;
+                    vOffset = v + aboveHeadDistance.get() + 2;
                 } else {
                     continue; // Skip the loop iteration if the placement mode is not valid
                 }
@@ -434,10 +433,12 @@ public class BetterScaffold extends Module {
         Whitelist,
         Blacklist
     }
+
     public enum PlaceMode {
         BelowFeet,
         AboveHead
     }
+
     public static class RenderBlock {
         public final BlockPos.Mutable pos = new BlockPos.Mutable();
         public int ticks;

@@ -6,36 +6,28 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
-import meteordevelopment.meteorclient.settings.ColorSetting;
-import meteordevelopment.meteorclient.settings.DoubleSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
-import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Box;
-import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.utils.entity.EntityUtils;
-import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
 import java.util.*;
 
-public class MobGearESP extends Module {
+public class MobGearESP extends TrouserModule {
     private final SettingGroup sgGeneral = this.settings.getDefaultGroup();
     private final SettingGroup sgColors = settings.createGroup("Colors");
 
@@ -86,7 +78,7 @@ public class MobGearESP extends Module {
     ));
 
     public MobGearESP() {
-        super(Trouser.Main, "MobGearESP", "ESP Module that highlights mobs likely wearing player gear.");
+        super("MobGearESP", "ESP Module that highlights mobs likely wearing player gear.");
     }
 
     public final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
@@ -236,7 +228,8 @@ public class MobGearESP extends Module {
             if (shouldSkip(livingEntity)) continue;
             if (!scannedEntities.contains(entity)) { // send chat msg if we haven't scanned mob before
                 StringBuilder message = new StringBuilder(entity.getType().getName().getString() + " found most likely wearing player gear");
-                if (coordsInChat.get()) message.append(" at ").append(entity.getBlockX()).append(", ").append(entity.getBlockY()).append(", ").append(entity.getBlockZ());
+                if (coordsInChat.get())
+                    message.append(" at ").append(entity.getBlockX()).append(", ").append(entity.getBlockY()).append(", ").append(entity.getBlockZ());
                 if (itemsInChat.get()) {
                     ArrayList<Item> playerItems = getPlayerItems(livingEntity);
                     message.append(" holding ");
@@ -258,6 +251,7 @@ public class MobGearESP extends Module {
     public void onActivate() {
         scannedEntities.clear();
     }
+
     @Override
     public void onDeactivate() {
         scannedEntities.clear();
@@ -281,7 +275,7 @@ public class MobGearESP extends Module {
         if (mc.options.hudHidden) return;
 
         Color baseColor = monstersColor.get();
-        if (distance.get()){
+        if (distance.get()) {
             baseColor = getOpposingColor(baseColor, entity);
         }
 
@@ -293,6 +287,7 @@ public class MobGearESP extends Module {
 
         event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, x, y, z, baseColor);
     }
+
     private Color getOpposingColor(Color c, Entity e) {
         Color interpolatedColor;
         Color oppositeColor = distantColor.get();
@@ -313,11 +308,12 @@ public class MobGearESP extends Module {
 
     private ArrayList<Item> getPlayerItems(LivingEntity livingEntity) {
         ArrayList<Item> playerItems = new ArrayList<>();
-        for (ItemStack item  : livingEntity.getArmorItems()) {
+        for (ItemStack item : livingEntity.getArmorItems()) {
             boolean skip = false;
             if (enchants.get()) {
-                if (!certainenchants.get() && item.getItem() instanceof ArmorItem && item.isEnchantable() && item.getEnchantments().isEmpty()) skip = true;
-                else if (certainenchants.get()){
+                if (!certainenchants.get() && item.getItem() instanceof ArmorItem && item.isEnchantable() && item.getEnchantments().isEmpty())
+                    skip = true;
+                else if (certainenchants.get()) {
                     if (item.getItem() instanceof ArmorItem) skip = compareEnchants(item, armorenchants);
                 }
             }
@@ -328,17 +324,18 @@ public class MobGearESP extends Module {
         for (ItemStack item : livingEntity.getHandItems()) {
             boolean skip = false;
             if (enchants.get()) {
-                if (!certainenchants.get() && (item.getItem() instanceof MiningToolItem || item.getItem() instanceof ArmorItem || item.getItem() instanceof SwordItem || item.getItem() instanceof FishingRodItem || item.getItem() instanceof FlintAndSteelItem || item.getItem() instanceof MaceItem || item.getItem() instanceof ShearsItem || item.getItem() instanceof ShieldItem || item.getItem() instanceof TridentItem) && item.isEnchantable() && item.getEnchantments().isEmpty()) skip = true;
-                else if (certainenchants.get()){
-                    if (item.getItem() instanceof MiningToolItem){
+                if (!certainenchants.get() && (item.getItem() instanceof MiningToolItem || item.getItem() instanceof ArmorItem || item.getItem() instanceof SwordItem || item.getItem() instanceof FishingRodItem || item.getItem() instanceof FlintAndSteelItem || item.getItem() instanceof MaceItem || item.getItem() instanceof ShearsItem || item.getItem() instanceof ShieldItem || item.getItem() instanceof TridentItem) && item.isEnchantable() && item.getEnchantments().isEmpty())
+                    skip = true;
+                else if (certainenchants.get()) {
+                    if (item.getItem() instanceof MiningToolItem) {
                         skip = compareEnchants(item, toolenchants);
-                    } else if (item.getItem() instanceof SwordItem){
+                    } else if (item.getItem() instanceof SwordItem) {
                         skip = compareEnchants(item, swordenchants);
-                    } else if (item.getItem() instanceof ArmorItem){
+                    } else if (item.getItem() instanceof ArmorItem) {
                         skip = compareEnchants(item, armorenchants);
-                    } else if (item.getItem() instanceof MaceItem){
+                    } else if (item.getItem() instanceof MaceItem) {
                         skip = compareEnchants(item, maceenchants);
-                    } else if (item.getItem() instanceof TridentItem){
+                    } else if (item.getItem() instanceof TridentItem) {
                         skip = compareEnchants(item, tridentenchants);
                     }
                 }
@@ -348,6 +345,7 @@ public class MobGearESP extends Module {
         }
         return playerItems;
     }
+
     private boolean compareEnchants(ItemStack stack, Setting<Set<RegistryKey<Enchantment>>> enchantsetting) {
         boolean skip = false;
         Set<RegistryKey<Enchantment>> itemenchants = new HashSet<>();
@@ -362,6 +360,7 @@ public class MobGearESP extends Module {
         }
         return skip;
     }
+
     public boolean shouldSkip(LivingEntity entity) {
         if (entity.isPlayer()) return true;
         ArrayList<Item> playerItems = getPlayerItems(entity);
@@ -373,7 +372,7 @@ public class MobGearESP extends Module {
         double alpha = getFadeAlpha(entity);
         if (alpha == 0) return null;
         Color color = monstersColor.get();
-        if (distance.get()){
+        if (distance.get()) {
             color = getOpposingColor(color, entity);
         }
         return baseColor.set(color.r, color.g, color.b, (int) (color.a * alpha));
@@ -392,15 +391,16 @@ public class MobGearESP extends Module {
     public String getInfoString() {
         return Integer.toString(count);
     }
-        @EventHandler
-        private void onPreTick(TickEvent.Pre event) {
-            if (mc.world != null){
-                Iterable<net.minecraft.entity.Entity> entities = mc.world.getEntities();
-                scannedEntities.removeIf(entity -> {
-                    Set<Entity> entitySet = new HashSet<>();
-                    entities.forEach(entity1 -> entitySet.add(entity1));
-                    return !entitySet.contains(entity);
-                });
-            }
+
+    @EventHandler
+    private void onPreTick(TickEvent.Pre event) {
+        if (mc.world != null) {
+            Iterable<net.minecraft.entity.Entity> entities = mc.world.getEntities();
+            scannedEntities.removeIf(entity -> {
+                Set<Entity> entitySet = new HashSet<>();
+                entities.forEach(entity1 -> entitySet.add(entity1));
+                return !entitySet.contains(entity);
+            });
         }
+    }
 }

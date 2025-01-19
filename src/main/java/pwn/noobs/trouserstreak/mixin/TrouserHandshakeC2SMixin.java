@@ -13,18 +13,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pwn.noobs.trouserstreak.modules.BungeeSpoofer;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
+
 //credits to DAM for the sauce
 @Mixin(HandshakeC2SPacket.class)
 public abstract class TrouserHandshakeC2SMixin {
-    @Unique
-    private static final Gson gson = new Gson();
-    @Mutable
-    @Shadow
-    @Final
-    private String address;
-
-    @Shadow
-    public abstract ConnectionIntent intendedState();
+    @Unique private static final Gson gson = new Gson();
+    @Mutable @Shadow @Final private String address;
+    @Shadow public abstract ConnectionIntent intendedState();
 
     @Inject(method = "<init>(ILjava/lang/String;ILnet/minecraft/network/packet/c2s/handshake/ConnectionIntent;)V", at = @At("RETURN"))
     private void onHandshakeC2SPacket(int i, String string, int j, ConnectionIntent connectionIntent, CallbackInfo ci) {

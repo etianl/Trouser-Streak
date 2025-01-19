@@ -4,8 +4,10 @@ import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.component.ComponentChanges;
@@ -16,17 +18,15 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtDouble;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
-public class ExplosionAura extends Module {
+public class ExplosionAura extends TrouserModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     public final Setting<Integer> tickdelay = sgGeneral.add(new IntSetting.Builder()
             .name("ExplosionTickDelayAroundPlayer")
@@ -75,11 +75,11 @@ public class ExplosionAura extends Module {
     );
 
     public ExplosionAura() {
-        super(Trouser.Main, "ExplosionAura", "You explode as you move. Must be in creative.");
+        super("ExplosionAura", "You explode as you move. Must be in creative.");
     }
 
-    private int ticks=0;
-    private int aticks=0;
+    private int ticks = 0;
+    private int aticks = 0;
 
     @EventHandler
     private void onScreenOpen(OpenScreenEvent event) {
@@ -111,14 +111,15 @@ public class ExplosionAura extends Module {
             }
         }
     }
+
     @EventHandler
     public void onTick(TickEvent.Post event) {
         if (mc.player != null && mc.interactionManager != null && mc.player.getAbilities().creativeMode) {
             if (auto.get() && mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player.getAbilities().creativeMode) {
                 if (click.get()) {
-                    if (aticks<=atickdelay.get()){
+                    if (aticks <= atickdelay.get()) {
                         aticks++;
-                    } else if (aticks>atickdelay.get()) {
+                    } else if (aticks > atickdelay.get()) {
                         ItemStack rst = mc.player.getMainHandStack();
                         BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
                         ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
@@ -130,14 +131,14 @@ public class ExplosionAura extends Module {
                         mc.interactionManager.clickCreativeStack(Creeper, 36 + mc.player.getInventory().selectedSlot);
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                         mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                        aticks=0;
+                        aticks = 0;
                     }
                 }
             }
-            if (mc.options.forwardKey.isPressed()||mc.options.jumpKey.isPressed()||mc.options.sneakKey.isPressed()||mc.options.leftKey.isPressed()||mc.options.rightKey.isPressed()||mc.options.backKey.isPressed()) {
-                if (ticks<=tickdelay.get()){
+            if (mc.options.forwardKey.isPressed() || mc.options.jumpKey.isPressed() || mc.options.sneakKey.isPressed() || mc.options.leftKey.isPressed() || mc.options.rightKey.isPressed() || mc.options.backKey.isPressed()) {
+                if (ticks <= tickdelay.get()) {
                     ticks++;
-                } else if (ticks>tickdelay.get()){
+                } else if (ticks > tickdelay.get()) {
                     ItemStack rst = mc.player.getMainHandStack();
                     BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getPos()), false);
                     ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
@@ -149,7 +150,7 @@ public class ExplosionAura extends Module {
                     mc.interactionManager.clickCreativeStack(Creeper, 36 + mc.player.getInventory().selectedSlot);
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                     mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-                    ticks=0;
+                    ticks = 0;
                 }
             }
         } else {
@@ -157,6 +158,7 @@ public class ExplosionAura extends Module {
             toggle();
         }
     }
+
     private NbtComponent createEntityData(boolean click) {
         NbtCompound entityTag = new NbtCompound();
         entityTag.putString("id", "minecraft:creeper");

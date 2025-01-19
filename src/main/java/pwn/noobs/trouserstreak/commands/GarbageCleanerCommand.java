@@ -2,11 +2,9 @@ package pwn.noobs.trouserstreak.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
-import net.minecraft.command.CommandSource;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
-
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class GarbageCleanerCommand extends Command {
     public GarbageCleanerCommand() {
@@ -17,10 +15,12 @@ public class GarbageCleanerCommand extends Command {
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
             {
-                ChatUtils.sendMsg(Text.of("Cleaning RAM."));}
+                ChatUtils.sendMsg(Text.of("Cleaning RAM."));
+            }
             System.gc();
             {
-                ChatUtils.sendMsg(Text.of("RAM Cleared."));}
+                ChatUtils.sendMsg(Text.of("RAM Cleared."));
+            }
             return SINGLE_SUCCESS;
         });
     }

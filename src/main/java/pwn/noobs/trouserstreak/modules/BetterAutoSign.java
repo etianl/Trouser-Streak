@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.AbstractSignEditScreenAccessor;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
@@ -32,12 +31,12 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BetterAutoSign extends Module {
+public class BetterAutoSign extends TrouserModule {
     final SettingGroup sgSign = settings.createGroup("Normal Sign Text");
     final SettingGroup sgHang = settings.createGroup("Hanging Sign Text");
     final SettingGroup sgSignAura = settings.createGroup("Sign Aura");
@@ -219,7 +218,7 @@ public class BetterAutoSign extends Module {
     private int warningticks = 0;
 
     public BetterAutoSign() {
-        super(Trouser.Main, "Better-auto-sign", "Automatically writes signs and can dye them as well. Credits to MeteorTweaks.");
+        super("Better-auto-sign", "Automatically writes signs and can dye them as well. Credits to MeteorTweaks.");
     }
 
     @Override

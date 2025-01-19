@@ -4,19 +4,19 @@ import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.macros.Macros;
-import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.meteorclient.gui.utils.StarscriptTextBoxRenderer;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-public class AutoCommand extends Module {
+public class AutoCommand extends TrouserModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
@@ -100,7 +100,7 @@ public class AutoCommand extends Module {
     private Queue<String> commandQueue = new LinkedList<>();
 
     public AutoCommand() {
-        super(Trouser.Main, "auto-command", "Automatically runs commands when player has/gets operator access");
+        super("auto-command", "Automatically runs commands when player has/gets operator access");
     }
 
     @Override
@@ -152,37 +152,34 @@ public class AutoCommand extends Module {
     }
 
     private void ZeroTickRunCommands() {
-        if(mode.get() == Mode.Manual1) for(String command : commands1.get()) {
+        if (mode.get() == Mode.Manual1) for (String command : commands1.get()) {
             String processedCommand = MeteorStarscript.run(MeteorStarscript.compile(command));
-            if (processedCommand.length()<=256){
+            if (processedCommand.length() <= 256) {
                 ChatUtils.sendPlayerMsg(processedCommand);
-            }
-            else {
-                int characterstodelete = processedCommand.length()-256;
-                error("This command is too long ("+processedCommand+"). Shorten it by "+characterstodelete+" characters.");
+            } else {
+                int characterstodelete = processedCommand.length() - 256;
+                error("This command is too long (" + processedCommand + "). Shorten it by " + characterstodelete + " characters.");
             }
         }
-        if(mode.get() == Mode.Manual2) for(String command : commands2.get()) {
+        if (mode.get() == Mode.Manual2) for (String command : commands2.get()) {
             String processedCommand = MeteorStarscript.run(MeteorStarscript.compile(command));
-            if (processedCommand.length()<=256){
+            if (processedCommand.length() <= 256) {
                 ChatUtils.sendPlayerMsg(processedCommand);
-            }
-            else {
-                int characterstodelete = processedCommand.length()-256;
-                error("This command is too long ("+processedCommand+"). Shorten it by "+characterstodelete+" characters.");
+            } else {
+                int characterstodelete = processedCommand.length() - 256;
+                error("This command is too long (" + processedCommand + "). Shorten it by " + characterstodelete + " characters.");
             }
         }
-        if(mode.get() == Mode.Manual3) for(String command : commands3.get()) {
+        if (mode.get() == Mode.Manual3) for (String command : commands3.get()) {
             String processedCommand = MeteorStarscript.run(MeteorStarscript.compile(command));
-            if (processedCommand.length()<=256){
+            if (processedCommand.length() <= 256) {
                 ChatUtils.sendPlayerMsg(processedCommand);
-            }
-            else {
-                int characterstodelete = processedCommand.length()-256;
-                error("This command is too long ("+processedCommand+"). Shorten it by "+characterstodelete+" characters.");
+            } else {
+                int characterstodelete = processedCommand.length() - 256;
+                error("This command is too long (" + processedCommand + "). Shorten it by " + characterstodelete + " characters.");
             }
         }
-        if(mode.get() == Mode.Macro) {
+        if (mode.get() == Mode.Macro) {
             try {
                 Macros.get().get(macroName.get()).onAction();
             } catch (NullPointerException ex) {

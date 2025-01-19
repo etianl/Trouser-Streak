@@ -4,7 +4,6 @@ import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
@@ -25,11 +24,11 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
 import java.util.Random;
 
-public class AirstrikePlus extends Module {
+public class AirstrikePlus extends TrouserModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgeveryone = settings.createGroup("AIRSTRIKE EVERYONE Command Options");
     private final SettingGroup sgnormal = settings.createGroup("NORMAL Spawn Egg Options");
@@ -70,7 +69,9 @@ public class AirstrikePlus extends Module {
             .description("Color the Name")
             .defaultValue(BoomPlus.ColorModes.red)
             .build());
-    public enum ColorModes { aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green, dark_purple, dark_red, gold, gray, green, italic, light_purple, red, white, yellow }
+
+    public enum ColorModes {aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green, dark_purple, dark_red, gold, gray, green, italic, light_purple, red, white, yellow}
+
     public final Setting<Boolean> randomnomcolor = sgGeneral.add(new BoolSetting.Builder()
             .name("Rainbow Name Colors")
             .description("Name Colors are randomly selected.")
@@ -384,13 +385,13 @@ public class AirstrikePlus extends Module {
             .build());
 
     public AirstrikePlus() {
-        super(Trouser.Main, "Airstrike+", "Rains things down from the sky");
+        super("Airstrike+", "Rains things down from the sky");
     }
 
     final Random r = new Random();
     Vec3d origin = null;
     int i = 0;
-    private int mix=0;
+    private int mix = 0;
     private String namecolour = nomcolor.get().toString();
     private NbtList speedlist = new NbtList();
     private String entityName = entity.get().trim().replace(" ", "_");
@@ -407,21 +408,24 @@ public class AirstrikePlus extends Module {
             "§k888 §r| ",
             "§k999 §r| "
     };
+
     private Vec3d pickRandomPos() {
         double x = r.nextDouble(radius.get() * 2) - radius.get() + origin.x;
-        double y = mc.player.getY()+height.get();
+        double y = mc.player.getY() + height.get();
         double z = r.nextDouble(radius.get() * 2) - radius.get() + origin.z;
         return new Vec3d(x, y, z);
     }
+
     @EventHandler
     private void onScreenOpen(OpenScreenEvent event) {
         if (disconnectdisable.get() && event.screen instanceof DisconnectedScreen) {
             toggle();
         }
     }
+
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
-        if (disconnectdisable.get())toggle();
+        if (disconnectdisable.get()) toggle();
     }
 
     @EventHandler
@@ -440,9 +444,9 @@ public class AirstrikePlus extends Module {
         }
         if (mixer.get()) {
             mix++;
-            if (mix == 1)entityName = entity.get().trim().replace(" ", "_");
+            if (mix == 1) entityName = entity.get().trim().replace(" ", "_");
             if (mix == 2) entityName = entity2.get().trim().replace(" ", "_");
-            if (mix > 2)mix = 0;
+            if (mix > 2) mix = 0;
         } else entityName = entity.get().trim().replace(" ", "_");
         for (int griefs = 0; griefs < grief.get(); griefs++) {
             if (airstrikeEveryone.get()) executeCommandsToCreateEntities();
@@ -477,6 +481,7 @@ public class AirstrikePlus extends Module {
             }
         }
     }
+
     private NbtComponent createEntityData() {
         String fullString = blockstate.get().toString();
         String[] parts = fullString.split(":");
@@ -525,7 +530,7 @@ public class AirstrikePlus extends Module {
 
     private void executeCommandsToCreateEntities() {
         speedlist = new NbtList();
-        if (randomnomcolor.get()){
+        if (randomnomcolor.get()) {
             String[] colorCodes = {"black", "dark_blue", "dark_green", "dark_aqua", "dark_red", "dark_purple", "gold", "gray", "dark_gray", "blue", "green", "aqua", "red", "light_purple", "yellow", "white"};
             Random random = new Random();
             int index = random.nextInt(colorCodes.length);
@@ -567,8 +572,10 @@ public class AirstrikePlus extends Module {
         if (Eabsorption.get() > 0) command += "\"AbsorptionAmount\":" + absorptionPoints + ",";
         if (EageSpecify.get()) command += "\"Age\":" + ageValue + ",";
         if (EblockstateSpecify.get()) command += "\"BlockState\":" + blockState + ",";
-        if (entity.get() == "fireball" || entity2.get() == "fireball") command += "\"ExplosionPower\":" + explosionPower + ",";
-        if (entity.get() == "creeper" || entity2.get() == "creeper") command += "\"ExplosionRadius\":" + explosionRadius + ",";
+        if (entity.get() == "fireball" || entity2.get() == "fireball")
+            command += "\"ExplosionPower\":" + explosionPower + ",";
+        if (entity.get() == "creeper" || entity2.get() == "creeper")
+            command += "\"ExplosionRadius\":" + explosionRadius + ",";
         if (Einvincible.get()) command += "\"Invulnerable\":" + isInvulnerable + ",";
         if (Esilence.get()) command += "\"Silent\":" + isSilent + ",";
         if (Eglow.get()) command += "\"Glowing\":" + isGlowing + ",";
@@ -577,14 +584,18 @@ public class AirstrikePlus extends Module {
         if (EnoAI.get()) command += "\"NoAI\":" + hasNoAI + ",";
         if (Efalsefire.get()) command += "\"HasVisualFire\":" + hasVisualFire + ",";
         if (Epowah.get()) command += "\"powered\":" + isPowered + ",";
-        if (Eignite.get() && entity.get() == "creeper" || entity2.get() == "creeper") command += "\"ignited\":" + isIgnited + ",";
-        if (entity.get() == "tnt" || entity2.get() == "tnt" || entity.get() == "creeper" || entity.get() == "creeper")command += "\"Fuse\":" + fuseTicks + ",";
-        if (entity.get() == "slime" || entity2.get() == "slime" || entity.get() == "magma_cube" || entity.get() == "magma_cube")command += "\"Size\":" + sizeValue + ",";
+        if (Eignite.get() && entity.get() == "creeper" || entity2.get() == "creeper")
+            command += "\"ignited\":" + isIgnited + ",";
+        if (entity.get() == "tnt" || entity2.get() == "tnt" || entity.get() == "creeper" || entity.get() == "creeper")
+            command += "\"Fuse\":" + fuseTicks + ",";
+        if (entity.get() == "slime" || entity2.get() == "slime" || entity.get() == "magma_cube" || entity.get() == "magma_cube")
+            command += "\"Size\":" + sizeValue + ",";
         if (Ecustomname.get()) command += "\"CustomNameVisible\":" + isCustomNameVisible + ",";
-        if (entity.get() == "dragon_fireball" || entity2.get() == "dragon_fireball" || entity.get() == "fireball" || entity.get() == "fireball" || entity.get() == "small_fireball" || entity2.get() == "small_fireball" || entity.get() == "wither_skull" || entity.get() == "wither_skull" || entity.get() == "wind_projectile" || entity.get() == "wind_projectile")command += "\"power\":" + speedlist.toString() + ",";
+        if (entity.get() == "dragon_fireball" || entity2.get() == "dragon_fireball" || entity.get() == "fireball" || entity.get() == "fireball" || entity.get() == "small_fireball" || entity2.get() == "small_fireball" || entity.get() == "wither_skull" || entity.get() == "wither_skull" || entity.get() == "wind_projectile" || entity.get() == "wind_projectile")
+            command += "\"power\":" + speedlist.toString() + ",";
         else command += "\"Motion\":" + speedlist.toString() + "";
         command += "}";
-        if (command.length()<=256)ChatUtils.sendPlayerMsg(command);
+        if (command.length() <= 256) ChatUtils.sendPlayerMsg(command);
         else {
             int characterstodelete = command.length() - 256;
             error("The command is too long (" + command + ").");

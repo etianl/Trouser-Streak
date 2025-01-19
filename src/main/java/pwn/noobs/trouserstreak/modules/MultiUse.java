@@ -6,11 +6,10 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
-import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
-public class MultiUse extends Module {
+public class MultiUse extends TrouserModule {
     private final SettingGroup sgGeneral = settings.createGroup("Rate");
     private final Setting<Integer> uses = sgGeneral.add(new IntSetting.Builder()
             .name("Extra uses per use")
@@ -20,9 +19,11 @@ public class MultiUse extends Module {
             .sliderMax(10)
             .build()
     );
+
     public MultiUse() {
-        super(Trouser.Main, "multi-use", "Uses an item multiple times per item use");
+        super("multi-use", "Uses an item multiple times per item use");
     }
+
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if (mc.options.useKey.isPressed()) {
@@ -31,6 +32,7 @@ public class MultiUse extends Module {
             }
         }
     }
+
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         if (mc.options.useKey.isPressed()) {

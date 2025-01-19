@@ -3,10 +3,10 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.settings.StringSetting;
-import meteordevelopment.meteorclient.systems.modules.Module;
-import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
+
 //credits to DAM for the sauce
-public class BungeeSpoofer extends Module {
+public class BungeeSpoofer extends TrouserModule {
     private final SettingGroup specialGroup = settings.createGroup("Credits to DAMcraft, maker of ServerSeeker.");
 
     public Setting<String> spoofedAddress = specialGroup.add(new StringSetting.Builder()
@@ -18,6 +18,6 @@ public class BungeeSpoofer extends Module {
     );
 
     public BungeeSpoofer() {
-        super(Trouser.Main, "BungeeSpoofer", "Allows you to join servers with an exposed bungeecord backend. ONLY ENABLE THIS IF YOU ACTUALLY WANT TO JOIN A BUNGEESPOOFABLE SERVER!");
+        super("BungeeSpoofer", "Allows you to join servers with an exposed bungeecord backend. ONLY ENABLE THIS IF YOU ACTUALLY WANT TO JOIN A BUNGEESPOOFABLE SERVER!");
     }
 }

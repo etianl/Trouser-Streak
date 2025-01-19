@@ -10,7 +10,6 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.world.InfinityMiner;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -36,24 +35,18 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
-import pwn.noobs.trouserstreak.Trouser;
-import net.minecraft.block.BambooBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class RedstoneNuker extends Module {
+public class RedstoneNuker extends TrouserModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
 
     private final SettingGroup sgAutoTool = settings.createGroup("AutoTool");
-
-    // General
-
     private final Setting<Shape> shape = sgGeneral.add(new EnumSetting.Builder<Shape>()
             .name("shape")
             .description("The shape of nuking algorithm.")
@@ -192,14 +185,14 @@ public class RedstoneNuker extends Module {
     private final Setting<SettingColor> sideColorBox = sgRender.add(new ColorSetting.Builder()
             .name("side-color")
             .description("The side color of the bounding box.")
-            .defaultValue(new SettingColor(16,106,144, 100))
+            .defaultValue(new SettingColor(16, 106, 144, 100))
             .build()
     );
 
     private final Setting<SettingColor> lineColorBox = sgRender.add(new ColorSetting.Builder()
             .name("line-color")
             .description("The line color of the bounding box.")
-            .defaultValue(new SettingColor(16,106,144, 255))
+            .defaultValue(new SettingColor(16, 106, 144, 255))
             .build()
     );
 
@@ -272,7 +265,7 @@ public class RedstoneNuker extends Module {
             .build()
     ));
     static Registry<Enchantment> enchantmentRegistry;
-    private boolean silkTouchForEnderChest=false;
+    private boolean silkTouchForEnderChest = false;
     private boolean wasPressed;
     private boolean shouldSwitch;
     private int ticks;
@@ -297,7 +290,7 @@ public class RedstoneNuker extends Module {
 
 
     public RedstoneNuker() {
-        super(Trouser.Main, "RedstoneNuker", "Breaks redstone, to keep you safe when placing TNT.");
+        super("RedstoneNuker", "Breaks redstone, to keep you safe when placing TNT.");
     }
 
 
@@ -318,16 +311,16 @@ public class RedstoneNuker extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (enableRenderBreaking.get()){
+        if (enableRenderBreaking.get()) {
             // Broken block
             renderBlocks.sort(Comparator.comparingInt(o -> -o.ticks));
             renderBlocks.forEach(renderBlock -> renderBlock.render(event, sideColor.get(), lineColor.get(), shapeModeBreak.get()));
         }
 
-        if (enableRenderBounding.get()){
+        if (enableRenderBounding.get()) {
             // Render bounding box if cube and should break stuff
             if (shape.get() != Shape.Sphere && mode.get() != Mode.Smash) {
-                box = new Box(new Vec3d(pos1.getX(), pos1.getY() , pos1.getZ()), new Vec3d(pos2.getX(), pos2.getY(), pos2.getZ()));
+                box = new Box(new Vec3d(pos1.getX(), pos1.getY(), pos1.getZ()), new Vec3d(pos2.getX(), pos2.getY(), pos2.getZ()));
                 event.renderer.box(box, sideColorBox.get(), lineColorBox.get(), shapeModeBox.get(), 0);
             }
         }
@@ -362,46 +355,46 @@ public class RedstoneNuker extends Module {
 
         if (shape.get() == Shape.UniformCube) {
             pX_ += 1; // weired position stuff
-            pos1.set(pX_ - r, pY - r + 1, pZ - r+1); // down
-            pos2.set(pX_ + r-1, pY + r, pZ + r); // up
+            pos1.set(pX_ - r, pY - r + 1, pZ - r + 1); // down
+            pos2.set(pX_ + r - 1, pY + r, pZ + r); // up
         } else {
             int direction = Math.round((mc.player.getRotationClient().y % 360) / 90);
             direction = Math.floorMod(direction, 4);
 
             // direction == 1
             pos1.set(pX_ - (range_forward.get()), Math.ceil(pY) - range_down.get(), pZ_ - range_right.get()); // down
-            pos2.set(pX_ + range_back.get()+1, Math.ceil(pY + range_up.get() + 1), pZ_ + range_left.get()+1); // up
+            pos2.set(pX_ + range_back.get() + 1, Math.ceil(pY + range_up.get() + 1), pZ_ + range_left.get() + 1); // up
 
             // Only change me if you want to mess with 3D rotations:
             if (direction == 2) {
                 pX_ += 1;
                 pZ_ += 1;
-                pos1.set(pX_ - (range_left.get()+1), Math.ceil(pY) - range_down.get(), pZ_ - (range_forward.get()+1)); // down
+                pos1.set(pX_ - (range_left.get() + 1), Math.ceil(pY) - range_down.get(), pZ_ - (range_forward.get() + 1)); // down
                 pos2.set(pX_ + range_right.get(), Math.ceil(pY + range_up.get() + 1), pZ_ + range_back.get()); // up
             } else if (direction == 3) {
                 pX_ += 1;
-                pos1.set(pX_ - (range_back.get()+1), Math.ceil(pY) - range_down.get(), pZ_ - range_left.get()); // down
-                pos2.set(pX_ + range_forward.get(), Math.ceil(pY + range_up.get() + 1), pZ_ + range_right.get()+1); // up
+                pos1.set(pX_ - (range_back.get() + 1), Math.ceil(pY) - range_down.get(), pZ_ - range_left.get()); // down
+                pos2.set(pX_ + range_forward.get(), Math.ceil(pY + range_up.get() + 1), pZ_ + range_right.get() + 1); // up
             } else if (direction == 0) {
                 pZ_ += 1;
                 pX_ += 1;
-                pos1.set(pX_ - (range_right.get()+1), Math.ceil(pY) - range_down.get(), pZ_ - (range_back.get()+1)); // down
+                pos1.set(pX_ - (range_right.get() + 1), Math.ceil(pY) - range_down.get(), pZ_ - (range_back.get() + 1)); // down
                 pos2.set(pX_ + range_left.get(), Math.ceil(pY + range_up.get() + 1), pZ_ + range_forward.get()); // up
             }
 
             // get largest horizontal
-            maxh = 1 + Math.max(Math.max(Math.max(range_back.get(),range_right.get()),range_forward.get()),range_left.get());
+            maxh = 1 + Math.max(Math.max(Math.max(range_back.get(), range_right.get()), range_forward.get()), range_left.get());
             maxv = 1 + Math.max(range_up.get(), range_down.get());
         }
 
-        if (mode.get() == Mode.Flatten){
+        if (mode.get() == Mode.Flatten) {
             pos1.setY((int) Math.floor(pY));
         }
         box = new Box(pos1.toCenterPos(), pos2.toCenterPos());
 
 
         // Find blocks to break
-        BlockIterator.register(Math.max((int) Math.ceil(range.get()+1), maxh), Math.max((int) Math.ceil(range.get()), maxv), (blockPos, blockState) -> {
+        BlockIterator.register(Math.max((int) Math.ceil(range.get() + 1), maxh), Math.max((int) Math.ceil(range.get()), maxv), (blockPos, blockState) -> {
             // Check for air, unbreakable blocks and distance
             boolean toofarSphere = Utils.squaredDistance(pX, pY, pZ, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5) > rangeSq;
             boolean toofarUniformCube = maxDist(Math.floor(pX), Math.floor(pY), Math.floor(pZ), blockPos.getX(), blockPos.getY(), blockPos.getZ()) >= range.get();
@@ -431,7 +424,7 @@ public class RedstoneNuker extends Module {
             // Sort blocks
 
             if (sortMode.get() == SortMode.TopDown)
-                blocks.sort(Comparator.comparingDouble(value -> -1*value.getY()));
+                blocks.sort(Comparator.comparingDouble(value -> -1 * value.getY()));
             else if (sortMode.get() != SortMode.None)
                 blocks.sort(Comparator.comparingDouble(value -> Utils.squaredDistance(pX, pY, pZ, value.getX() + 0.5, value.getY() + 0.5, value.getZ() + 0.5) * (sortMode.get() == SortMode.Closest ? 1 : -1)));
 
@@ -440,8 +433,7 @@ public class RedstoneNuker extends Module {
                 // If no block was found for long enough then set firstBlock flag to true to not wait before breaking another again
                 if (noBlockTimer++ >= delay.get()) firstBlock = true;
                 return;
-            }
-            else {
+            } else {
                 noBlockTimer = 0;
             }
 
@@ -579,6 +571,7 @@ public class RedstoneNuker extends Module {
     public static boolean isTool(ItemStack itemStack) {
         return itemStack.getItem() instanceof MiningToolItem || itemStack.getItem() instanceof ShearsItem;
     }
+
     private boolean filterBlocks(Block block) {
         return isRedstoneBlock(block);
     }
@@ -604,6 +597,7 @@ public class RedstoneNuker extends Module {
                 block instanceof TripwireBlock ||
                 block instanceof ObserverBlock;
     }
+
     public enum Mode {
         All,
         Flatten,
@@ -617,11 +611,13 @@ public class RedstoneNuker extends Module {
         TopDown
 
     }
+
     public enum Shape {
         Cube,
         UniformCube,
         Sphere
     }
+
     public enum EnchantPreference {
         None,
         Fortune,

@@ -3,7 +3,6 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -12,7 +11,9 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtDouble;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
@@ -21,9 +22,9 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
-public class BoomPlus extends Module {
+public class BoomPlus extends TrouserModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgOptions = settings.createGroup("Nbt Options");
 
@@ -41,7 +42,9 @@ public class BoomPlus extends Module {
             .description("Color the Name")
             .defaultValue(ColorModes.red)
             .build());
-    public enum ColorModes { aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green, dark_purple, dark_red, gold, gray, green, italic, light_purple, red, white, yellow }
+
+    public enum ColorModes {aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green, dark_purple, dark_red, gold, gray, green, italic, light_purple, red, white, yellow}
+
     public final Setting<Boolean> customname = sgOptions.add(new BoolSetting.Builder()
             .name("CustomNameVisible")
             .description("CustomNameVisible or not.")
@@ -180,9 +183,10 @@ public class BoomPlus extends Module {
     );
 
     public BoomPlus() {
-        super(Trouser.Main, "boom+", "shoots something where you click");
+        super("boom+", "shoots something where you click");
     }
-    private int aticks=0;
+
+    private int aticks = 0;
     private String namecolour = nomcolor.get().toString();
     private String customName = nom.get();
 
@@ -194,9 +198,9 @@ public class BoomPlus extends Module {
         }
 
         if (auto.get() && mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player.getAbilities().creativeMode) {
-            if (aticks<=atickdelay.get()){
+            if (aticks <= atickdelay.get()) {
                 aticks++;
-            } else if (aticks>atickdelay.get()) {
+            } else if (aticks > atickdelay.get()) {
                 customName = nom.get();
                 namecolour = nomcolor.get().toString();
                 ItemStack rst = mc.player.getMainHandStack();
@@ -211,8 +215,8 @@ public class BoomPlus extends Module {
                 mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                 mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-            aticks=0;
-        }
+                aticks = 0;
+            }
         }
     }
 
@@ -235,6 +239,7 @@ public class BoomPlus extends Module {
             mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
         }
     }
+
     private NbtComponent createEntityData() {
         String fullString = blockstate.get().toString();
         String[] parts = fullString.split(":");
@@ -269,18 +274,18 @@ public class BoomPlus extends Module {
         NbtCompound blockState = new NbtCompound();
         blockState.putString("Name", "minecraft:" + blockName);
         entityTag.put("BlockState", blockState);
-        if (invincible.get())entityTag.putBoolean("Invulnerable", invincible.get());
-        if (silence.get())entityTag.putBoolean("Silent", silence.get());
-        if (glow.get())entityTag.putBoolean("Glowing", glow.get());
-        if (persist.get())entityTag.putBoolean("PersistenceRequired", persist.get());
-        if (nograv.get())entityTag.putBoolean("NoGravity", nograv.get());
-        if(noAI.get())entityTag.putBoolean("NoAI", noAI.get());
-        if(falsefire.get())entityTag.putBoolean("HasVisualFire", falsefire.get());
-        if(powah.get())entityTag.putBoolean("powered", powah.get());
-        if(ignite.get())entityTag.putBoolean("ignited", ignite.get());
+        if (invincible.get()) entityTag.putBoolean("Invulnerable", invincible.get());
+        if (silence.get()) entityTag.putBoolean("Silent", silence.get());
+        if (glow.get()) entityTag.putBoolean("Glowing", glow.get());
+        if (persist.get()) entityTag.putBoolean("PersistenceRequired", persist.get());
+        if (nograv.get()) entityTag.putBoolean("NoGravity", nograv.get());
+        if (noAI.get()) entityTag.putBoolean("NoAI", noAI.get());
+        if (falsefire.get()) entityTag.putBoolean("HasVisualFire", falsefire.get());
+        if (powah.get()) entityTag.putBoolean("powered", powah.get());
+        if (ignite.get()) entityTag.putBoolean("ignited", ignite.get());
         entityTag.putInt("Fuse", fuse.get());
         entityTag.putInt("Size", size.get());
-        if(customname.get())entityTag.putBoolean("CustomNameVisible", customname.get());
+        if (customname.get()) entityTag.putBoolean("CustomNameVisible", customname.get());
         entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
         return NbtComponent.of(entityTag);
     }

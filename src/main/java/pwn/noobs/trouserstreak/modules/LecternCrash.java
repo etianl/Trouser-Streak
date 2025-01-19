@@ -1,10 +1,9 @@
 package pwn.noobs.trouserstreak.modules;
 
-import meteordevelopment.meteorclient.systems.modules.Module;
-import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
-public class LecternCrash extends Module {
+public class LecternCrash extends TrouserModule {
     public LecternCrash() {
-        super(Trouser.Main, "LecternCrash", "Enable/Disable LecternCrash button");
+        super("LecternCrash", "Enable/Disable LecternCrash button");
     }
 }

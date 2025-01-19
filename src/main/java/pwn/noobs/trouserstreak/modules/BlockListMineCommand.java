@@ -12,13 +12,14 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class BlockListMineCommand extends Module {
+public class BlockListMineCommand extends TrouserModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sglists = settings.createGroup("Blocks To Mine");
 
@@ -81,7 +82,7 @@ public class BlockListMineCommand extends Module {
 
 
     public BlockListMineCommand() {
-        super(Trouser.Main,"BlockList#MineCommand", "Adds a custom #mine command to your message history containing all the blocks in the blocklist that are in the chunk you are in. Press T then up arrow, then ENTER key to execute the command. BETTER CHAT module is recommended for infinitely long commands.");
+        super("BlockList#MineCommand", "Adds a custom #mine command to your message history containing all the blocks in the blocklist that are in the chunk you are in. Press T then up arrow, then ENTER key to execute the command. BETTER CHAT module is recommended for infinitely long commands.");
     }
     @Override
     public void onActivate() {

@@ -7,7 +7,6 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -25,11 +24,11 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.chunk.WorldChunk;
-import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
 import java.util.*;
 
-public class PotESP extends Module {
+public class PotESP extends TrouserModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
 
@@ -56,7 +55,7 @@ public class PotESP extends Module {
             .description("How many chunks from the character to render the detected pots.")
             .defaultValue(32)
             .min(6)
-            .sliderRange(6,1024)
+            .sliderRange(6, 1024)
             .build()
     );
     private final Setting<Boolean> removerenderdist = sgRender.add(new BoolSetting.Builder()
@@ -99,6 +98,7 @@ public class PotESP extends Module {
     );
     private final Set<BlockPos> potLocations = Collections.synchronizedSet(new HashSet<>());
     private static final Set<Item> naturalPot = new HashSet<>();
+
     static {
         naturalPot.add(Items.AIR);
         naturalPot.add(Items.STRING);
@@ -111,36 +111,45 @@ public class PotESP extends Module {
         naturalPot.add(Items.DIAMOND_BLOCK);
         naturalPot.add(Items.MUSIC_DISC_CREATOR_MUSIC_BOX);
     }
-    private int closestPotX=2000000000;
-    private int closestPotY=2000000000;
-    private int closestPotZ=2000000000;
-    private double PotDistance=2000000000;
+
+    private int closestPotX = 2000000000;
+    private int closestPotY = 2000000000;
+    private int closestPotZ = 2000000000;
+    private double PotDistance = 2000000000;
+
     public PotESP() {
-        super(Trouser.Main,"PotESP", "Finds the dank pots... In Minecraft (Locates decorated pots with un-natural items in them)");
+        super("PotESP", "Finds the dank pots... In Minecraft (Locates decorated pots with un-natural items in them)");
     }
+
     @Override
     public void onActivate() {
         clearChunkData();
     }
+
     @Override
     public void onDeactivate() {
         clearChunkData();
     }
+
     @EventHandler
     private void onScreenOpen(OpenScreenEvent event) {
-        if (event.screen instanceof DisconnectedScreen || event.screen instanceof DownloadingTerrainScreen) clearChunkData();
+        if (event.screen instanceof DisconnectedScreen || event.screen instanceof DownloadingTerrainScreen)
+            clearChunkData();
     }
+
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
         clearChunkData();
     }
-    private void clearChunkData(){
+
+    private void clearChunkData() {
         potLocations.clear();
-        closestPotX=2000000000;
-        closestPotY=2000000000;
-        closestPotZ=2000000000;
-        PotDistance=2000000000;
+        closestPotX = 2000000000;
+        closestPotY = 2000000000;
+        closestPotZ = 2000000000;
+        PotDistance = 2000000000;
     }
+
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         if (mc.world == null) return;
@@ -153,7 +162,7 @@ public class PotESP extends Module {
                 List<BlockEntity> blockEntities = new ArrayList<>(chunk.getBlockEntities().values());
 
                 for (BlockEntity blockEntity : blockEntities) {
-                    if (blockEntity instanceof DecoratedPotBlockEntity){
+                    if (blockEntity instanceof DecoratedPotBlockEntity) {
                         DecoratedPotBlockEntity pot = (DecoratedPotBlockEntity) blockEntity;
                         Item potItem = pot.stack.getItem();
 
@@ -170,7 +179,7 @@ public class PotESP extends Module {
                 }
             }
         }
-        if (nearesttrcr.get()){
+        if (nearesttrcr.get()) {
             try {
                 if (potLocations.stream().toList().size() > 0) {
                     for (int b = 0; b < potLocations.stream().toList().size(); b++) {
@@ -187,26 +196,14 @@ public class PotESP extends Module {
                 e.printStackTrace();
             }
         }
-        if (removerenderdist.get())removeChunksOutsideRenderDistance();
+        if (removerenderdist.get()) removeChunksOutsideRenderDistance();
     }
+
     @EventHandler
     private void onRender(Render3DEvent event) {
         if ((potSideColor.get().a > 5 || potLineColor.get().a > 5) && mc.player != null) {
             synchronized (potLocations) {
                 if (!nearesttrcr.get()) {
-                    for (BlockPos pos : potLocations) {
-                    BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
-                        if (pos != null && playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
-                            int startX = pos.getX();
-                            int startY = pos.getY();
-                            int startZ = pos.getZ();
-                            int endX = pos.getX();
-                            int endY = pos.getY();
-                            int endZ = pos.getZ();
-                            render(new Box(new Vec3d(startX+1, startY+1, startZ+1), new Vec3d(endX, endY, endZ)), potSideColor.get(), potLineColor.get(), shapeMode.get(), event);
-                        }
-                    }
-                } else if (nearesttrcr.get()){
                     for (BlockPos pos : potLocations) {
                         BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
                         if (pos != null && playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
@@ -216,31 +213,47 @@ public class PotESP extends Module {
                             int endX = pos.getX();
                             int endY = pos.getY();
                             int endZ = pos.getZ();
-                            render(new Box(new Vec3d(startX+1, startY+1, startZ+1), new Vec3d(endX, endY, endZ)), potSideColor.get(), potLineColor.get(), shapeMode.get(), event);
+                            render(new Box(new Vec3d(startX + 1, startY + 1, startZ + 1), new Vec3d(endX, endY, endZ)), potSideColor.get(), potLineColor.get(), shapeMode.get(), event);
                         }
                     }
-                    render2(new Box(new Vec3d(closestPotX+1, closestPotY+1, closestPotZ+1), new Vec3d (closestPotX, closestPotY, closestPotZ)), potSideColor.get(), potLineColor.get(),ShapeMode.Sides, event);
+                } else if (nearesttrcr.get()) {
+                    for (BlockPos pos : potLocations) {
+                        BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
+                        if (pos != null && playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
+                            int startX = pos.getX();
+                            int startY = pos.getY();
+                            int startZ = pos.getZ();
+                            int endX = pos.getX();
+                            int endY = pos.getY();
+                            int endZ = pos.getZ();
+                            render(new Box(new Vec3d(startX + 1, startY + 1, startZ + 1), new Vec3d(endX, endY, endZ)), potSideColor.get(), potLineColor.get(), shapeMode.get(), event);
+                        }
+                    }
+                    render2(new Box(new Vec3d(closestPotX + 1, closestPotY + 1, closestPotZ + 1), new Vec3d(closestPotX, closestPotY, closestPotZ)), potSideColor.get(), potLineColor.get(), ShapeMode.Sides, event);
                 }
             }
         }
     }
 
     private void render(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
-        if (trcr.get() && Math.abs(box.minX- RenderUtils.center.x)<=renderDistance.get()*16 && Math.abs(box.minZ-RenderUtils.center.z)<=renderDistance.get()*16)
+        if (trcr.get() && Math.abs(box.minX - RenderUtils.center.x) <= renderDistance.get() * 16 && Math.abs(box.minZ - RenderUtils.center.z) <= renderDistance.get() * 16)
             if (!nearesttrcr.get())
-                event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
-        event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
+                event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX + 0.5, box.minY + ((box.maxY - box.minY) / 2), box.minZ + 0.5, lines);
+        event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0, 0, 0, 0), shapeMode, 0);
     }
+
     private void render2(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
-        if (trcr.get() && Math.abs(box.minX-RenderUtils.center.x)<=renderDistance.get()*16 && Math.abs(box.minZ-RenderUtils.center.z)<=renderDistance.get()*16)
-            event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
-        event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
+        if (trcr.get() && Math.abs(box.minX - RenderUtils.center.x) <= renderDistance.get() * 16 && Math.abs(box.minZ - RenderUtils.center.z) <= renderDistance.get() * 16)
+            event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX + 0.5, box.minY + ((box.maxY - box.minY) / 2), box.minZ + 0.5, lines);
+        event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0, 0, 0, 0), shapeMode, 0);
     }
+
     private void removeChunksOutsideRenderDistance() {
         double renderDistanceBlocks = renderDistance.get() * 16;
 
         removeChunksOutsideRenderDistance(potLocations, renderDistanceBlocks);
     }
+
     private void removeChunksOutsideRenderDistance(Set<BlockPos> chunkSet, double renderDistanceBlocks) {
         chunkSet.removeIf(blockPos -> {
             BlockPos playerPos = new BlockPos(mc.player.getBlockX(), blockPos.getY(), mc.player.getBlockZ());

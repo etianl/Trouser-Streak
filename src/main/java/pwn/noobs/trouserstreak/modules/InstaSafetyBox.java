@@ -5,7 +5,6 @@ import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
@@ -18,14 +17,14 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-public class InstaSafetyBox extends Module {
+public class InstaSafetyBox extends TrouserModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final Setting<Modes> mode = sgGeneral.add(new EnumSetting.Builder<Modes>()
             .name("mode")
@@ -41,8 +40,8 @@ public class InstaSafetyBox extends Module {
             .name("Sphere Range")
             .description("Your Range, in blocks.")
             .defaultValue(1)
-            .sliderRange(1,5)
-            .min (1)
+            .sliderRange(1, 5)
+            .min(1)
             .visible(() -> mode.get() == Modes.Sphere)
             .build()
     );
@@ -50,8 +49,8 @@ public class InstaSafetyBox extends Module {
             .name("Box Range")
             .description("Your Range, in blocks.")
             .defaultValue(1)
-            .sliderRange(1,4)
-            .min (1)
+            .sliderRange(1, 4)
+            .min(1)
             .visible(() -> mode.get() == Modes.Box)
             .build()
     );
@@ -59,8 +58,8 @@ public class InstaSafetyBox extends Module {
             .name("Blocks per Tick")
             .description("How many blocks to place per tick.")
             .defaultValue(4)
-            .sliderRange(1,10)
-            .min (1)
+            .sliderRange(1, 10)
+            .min(1)
             .build()
     );
     private final Setting<Integer> tickdelay = sgGeneral.add(new IntSetting.Builder()
@@ -111,16 +110,18 @@ public class InstaSafetyBox extends Module {
     private double reach = 0;
 
     public InstaSafetyBox() {
-        super(Trouser.Main, "InstaSafetyBox", "Makes you safe by building box.");
+        super("InstaSafetyBox", "Makes you safe by building box.");
     }
+
     @Override
     public void onDeactivate() {
-        if (playerneedstosneak)mc.options.sneakKey.setPressed(false);
+        if (playerneedstosneak) mc.options.sneakKey.setPressed(false);
     }
+
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (mode.get()==Modes.Sphere) reach=spherereach.get();
-        else if (mode.get()==Modes.Box) reach=boxreach.get();
+        if (mode.get() == Modes.Sphere) reach = spherereach.get();
+        else if (mode.get() == Modes.Box) reach = boxreach.get();
         if (center.get()) PlayerUtils.centerPlayer();
         if (mc.player != null && sneaky.get() && mc.player.isOnGround() && mc.player.getY() >= Math.floor(mc.player.getY()) + 0.2) {
             mc.options.sneakKey.setPressed(true);
@@ -131,23 +132,23 @@ public class InstaSafetyBox extends Module {
             List<BlockPos> blocks = new ArrayList<>();
 
             for (int x = (int) (mc.player.getBlockX() - Math.round(Math.ceil(reach))); x <= mc.player.getBlockX() + Math.round(Math.ceil(reach)); x++) {
-                for (int y = (int) (mc.player.getBlockY() - Math.round(Math.ceil(reach))); y <= (mc.player.getBlockY()+1) + Math.round(Math.ceil(reach)); y++) {
+                for (int y = (int) (mc.player.getBlockY() - Math.round(Math.ceil(reach))); y <= (mc.player.getBlockY() + 1) + Math.round(Math.ceil(reach)); y++) {
                     for (int z = (int) (mc.player.getBlockZ() - Math.round(Math.ceil(reach))); z <= mc.player.getBlockZ() + Math.round(Math.ceil(reach)); z++) {
                         BlockPos blockPos = new BlockPos(x, y, z);
                         Vec3d playerPos1 = new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ()).toCenterPos();
-                        Vec3d playerPos2 = new BlockPos(mc.player.getBlockX(), mc.player.getBlockY()+1, mc.player.getBlockZ()).toCenterPos();
+                        Vec3d playerPos2 = new BlockPos(mc.player.getBlockX(), mc.player.getBlockY() + 1, mc.player.getBlockZ()).toCenterPos();
                         double distance1 = playerPos1.distanceTo(blockPos.toCenterPos());
                         double distance2 = playerPos2.distanceTo(blockPos.toCenterPos());
                         switch (mode.get()) {
                             case Sphere -> {
                                 if (distance1 <= reach || distance2 <= reach) {
-                                    if (!blocks.contains(blockPos) && !blockPos.equals(new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ())) && blockPos != new BlockPos(mc.player.getBlockX(), mc.player.getBlockY()+1, mc.player.getBlockZ()) && mc.world.getBlockState(blockPos).getBlock().getDefaultState().isReplaceable()) {
+                                    if (!blocks.contains(blockPos) && !blockPos.equals(new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ())) && blockPos != new BlockPos(mc.player.getBlockX(), mc.player.getBlockY() + 1, mc.player.getBlockZ()) && mc.world.getBlockState(blockPos).getBlock().getDefaultState().isReplaceable()) {
                                         blocks.add(blockPos);
                                     }
                                 }
                             }
                             case Box -> {
-                                if (!blocks.contains(blockPos) && !blockPos.equals(new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ())) && blockPos != new BlockPos(mc.player.getBlockX(), mc.player.getBlockY()+1, mc.player.getBlockZ()) && mc.world.getBlockState(blockPos).getBlock().getDefaultState().isReplaceable()) {
+                                if (!blocks.contains(blockPos) && !blockPos.equals(new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ())) && blockPos != new BlockPos(mc.player.getBlockX(), mc.player.getBlockY() + 1, mc.player.getBlockZ()) && mc.world.getBlockState(blockPos).getBlock().getDefaultState().isReplaceable()) {
                                     blocks.add(blockPos);
                                 }
                             }
@@ -164,11 +165,12 @@ public class InstaSafetyBox extends Module {
                 if (count >= blockpertick.get() || mc.interactionManager == null) {
                     break;
                 }
-                if (hard.get() || isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack())) cascadingpileof();
+                if (hard.get() || isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack()))
+                    cascadingpileof();
 
-                if (!Objects.equals(blockPos, new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ())) && blockPos != new BlockPos(mc.player.getBlockX(), mc.player.getBlockY()+1, mc.player.getBlockZ()) && mc.world.getBlockState(blockPos).getBlock().getDefaultState().isReplaceable() && !isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack())) {
-                    if (rotate.get())Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos));
-                    if (swing.get())mc.player.swingHand(Hand.MAIN_HAND);
+                if (!Objects.equals(blockPos, new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ())) && blockPos != new BlockPos(mc.player.getBlockX(), mc.player.getBlockY() + 1, mc.player.getBlockZ()) && mc.world.getBlockState(blockPos).getBlock().getDefaultState().isReplaceable() && !isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack())) {
+                    if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos));
+                    if (swing.get()) mc.player.swingHand(Hand.MAIN_HAND);
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(blockPos), Direction.DOWN, blockPos, false));
                     count++;
                 }
@@ -181,6 +183,7 @@ public class InstaSafetyBox extends Module {
         }
         ticks++;
     }
+
     @EventHandler
     private void onScreenOpen(OpenScreenEvent event) {
         if (event.screen instanceof DisconnectedScreen) {
@@ -190,10 +193,12 @@ public class InstaSafetyBox extends Module {
             toggle();
         }
     }
+
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
         toggle();
     }
+
     private void cascadingpileof() {
         List<ItemStack> validBlocks = new ArrayList<>();
         for (int i = 0; i < 9; i++) {
@@ -217,6 +222,7 @@ public class InstaSafetyBox extends Module {
 
         mc.player.getInventory().selectedSlot = mc.player.getInventory().getSlotWithStack(hardestBlock);
     }
+
     private boolean isInvalidBlock(ItemStack stack) {
         return !(stack.getItem() instanceof BlockItem)
                 || stack.getItem() instanceof BedItem
@@ -270,6 +276,7 @@ public class InstaSafetyBox extends Module {
                 || ((BlockItem) stack.getItem()).getBlock() instanceof HeavyCoreBlock
                 || skippableBlox.get().contains(((BlockItem) stack.getItem()).getBlock());
     }
+
     public enum Modes {
         Sphere, Box
     }

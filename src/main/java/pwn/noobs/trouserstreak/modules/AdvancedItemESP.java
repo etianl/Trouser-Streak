@@ -8,7 +8,6 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
@@ -24,11 +23,11 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
-import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.modules.addon.TrouserModule;
 
 import java.util.*;
 
-public class AdvancedItemESP extends Module {
+public class AdvancedItemESP extends TrouserModule {
     private final SettingGroup sgGeneral = this.settings.getDefaultGroup();
     private final SettingGroup sgColors = settings.createGroup("Colors");
 
@@ -79,7 +78,7 @@ public class AdvancedItemESP extends Module {
     ));
 
     public AdvancedItemESP() {
-        super(Trouser.Main, "AdvancedItemESP", "ESP Module that highlights only certain items.");
+        super("AdvancedItemESP", "ESP Module that highlights only certain items.");
     }
 
     public final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
@@ -354,7 +353,7 @@ public class AdvancedItemESP extends Module {
             Iterable<net.minecraft.entity.Entity> entities = mc.world.getEntities();
             scannedEntities.removeIf(entity -> {
                 Set<Entity> entitySet = new HashSet<>();
-                entities.forEach(entity1 -> entitySet.add(entity1));
+                entities.forEach(entitySet::add);
                 return !entitySet.contains(entity);
             });
         }
