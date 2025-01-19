@@ -1,41 +1,35 @@
-// module written by windoid,
+// Original MobGearESP module written by windoid,
 // sorta based on the esp and tracer code from meteor client
+// This was heavily modified by etianl to form this new module.
 
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
-import meteordevelopment.meteorclient.settings.ColorSetting;
-import meteordevelopment.meteorclient.settings.DoubleSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.utils.entity.EntityUtils;
-import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.*;
 
-public class MobGearESP extends Module {
+public class AdvancedItemESP extends Module {
     private final SettingGroup sgGeneral = this.settings.getDefaultGroup();
     private final SettingGroup sgColors = settings.createGroup("Colors");
 
@@ -85,8 +79,8 @@ public class MobGearESP extends Module {
             Items.BLACK_SHULKER_BOX
     ));
 
-    public MobGearESP() {
-        super(Trouser.Main, "MobGearESP", "ESP Module that highlights mobs likely wearing player gear.");
+    public AdvancedItemESP() {
+        super(Trouser.Main, "AdvancedItemESP", "ESP Module that highlights only certain items.");
     }
 
     public final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
@@ -116,7 +110,7 @@ public class MobGearESP extends Module {
 
     private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
             .name("item-checker")
-            .description("Player-like items to check for on mob")
+            .description("Items to check for.")
             .defaultValue(defaultPlayerItems)
             .build()
     );
@@ -127,6 +121,7 @@ public class MobGearESP extends Module {
             .defaultValue(true)
             .build()
     );
+
     public final Setting<Boolean> certainenchants = sgGeneral.add(new BoolSetting.Builder()
             .name("find-certain-item-enchants")
             .description("Requires that armor and tools must be enchanted with these enchants.")
@@ -166,36 +161,29 @@ public class MobGearESP extends Module {
             .build());
     private final Setting<Boolean> chatFeedback = sgGeneral.add(new BoolSetting.Builder()
             .name("Chat feedback")
-            .description("Display info about mobs holding gear in chat")
+            .description("Display info about items in chat")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> coordsInChat = sgGeneral.add(new BoolSetting.Builder()
             .name("Display coords in chat")
-            .description("Display coords of a detected mob")
+            .description("Display coords of a detected item")
             .visible(chatFeedback::get)
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> itemsInChat = sgGeneral.add(new BoolSetting.Builder()
-            .name("Display found items in chat")
-            .description("Display items detected by mod in chat")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> tracers = sgGeneral.add(new BoolSetting.Builder()
             .name("Tracers")
-            .description("Add tracers to mobs detected")
+            .description("Add tracers to item detected")
             .defaultValue(true)
             .build()
     );
     private final Setting<SettingColor> monstersColor = sgColors.add(new ColorSetting.Builder()
-            .name("monsters-color")
-            .description("The mob's bounding box and tracer color.")
-            .defaultValue(new SettingColor(255, 25, 25, 255))
+            .name("items-color")
+            .description("The item's bounding box and tracer color.")
+            .defaultValue(new SettingColor(255, 25, 255, 255))
             .build()
     );
     public final Setting<Boolean> distance = sgColors.add(new BoolSetting.Builder()
@@ -206,8 +194,8 @@ public class MobGearESP extends Module {
     );
     private final Setting<SettingColor> distantColor = sgColors.add(new ColorSetting.Builder()
             .name("distant-color")
-            .description("The mob's bounding box and tracer color when you are far away.")
-            .defaultValue(new SettingColor(25, 25, 255, 255))
+            .description("The item's bounding box and tracer color when you are far away.")
+            .defaultValue(new SettingColor(25, 255, 255, 255))
             .visible(distance::get)
             .build()
     );
@@ -232,19 +220,11 @@ public class MobGearESP extends Module {
     private void onRender3D(Render3DEvent event) {
         count = 0;
         for (Entity entity : mc.world.getEntities()) {
-            if (!(entity instanceof LivingEntity livingEntity)) continue;
-            if (shouldSkip(livingEntity)) continue;
-            if (!scannedEntities.contains(entity)) { // send chat msg if we haven't scanned mob before
-                StringBuilder message = new StringBuilder(entity.getType().getName().getString() + " found most likely wearing player gear");
+            if (!(entity instanceof ItemEntity itemEntity)) continue;
+            if (shouldSkip(itemEntity)) continue;
+            if (!scannedEntities.contains(entity)) {
+                StringBuilder message = new StringBuilder(itemEntity.getStack().getItem().getName().getString() + " found ");
                 if (coordsInChat.get()) message.append(" at ").append(entity.getBlockX()).append(", ").append(entity.getBlockY()).append(", ").append(entity.getBlockZ());
-                if (itemsInChat.get()) {
-                    ArrayList<Item> playerItems = getPlayerItems(livingEntity);
-                    message.append(" holding ");
-                    for (Item item : playerItems) {
-                        message.append(item.getTranslationKey().split("\\.")[2]).append(", ");
-                    }
-                    message.setLength(message.length() - 2); // chop off ", " from end of chat message
-                }
                 ChatUtils.sendMsg(Text.of(message.toString()));
             }
             scannedEntities.add(entity);
@@ -311,47 +291,31 @@ public class MobGearESP extends Module {
         return interpolatedColor;
     }
 
-    private ArrayList<Item> getPlayerItems(LivingEntity livingEntity) {
-        ArrayList<Item> playerItems = new ArrayList<>();
-        for (ItemStack item  : livingEntity.getArmorItems()) {
-            boolean skip = false;
-            if (enchants.get()) {
-                if (!certainenchants.get() && item.getItem() instanceof ArmorItem && item.isEnchantable() && item.getEnchantments().isEmpty()) skip = true;
-                else if (certainenchants.get()){
-                    if (item.getItem() instanceof ArmorItem) skip = compareEnchants(item, armorenchants);
+    public boolean shouldSkip(ItemEntity entity) {
+        boolean skip = false;
+        if (enchants.get()) {
+            if (!certainenchants.get() && (entity.getStack().getItem() instanceof MiningToolItem || entity.getStack().getItem() instanceof ArmorItem || entity.getStack().getItem() instanceof SwordItem || entity.getStack().getItem() instanceof FishingRodItem || entity.getStack().getItem() instanceof FlintAndSteelItem || entity.getStack().getItem() instanceof MaceItem || entity.getStack().getItem() instanceof ShearsItem || entity.getStack().getItem() instanceof ShieldItem || entity.getStack().getItem() instanceof TridentItem) && entity.getStack().isEnchantable() && entity.getStack().getEnchantments().isEmpty()) skip = true;
+            else if (certainenchants.get()){
+                if (entity.getStack().getItem() instanceof MiningToolItem){
+                    skip = compareEnchants(entity, toolenchants);
+                } else if (entity.getStack().getItem() instanceof SwordItem){
+                    skip = compareEnchants(entity, swordenchants);
+                } else if (entity.getStack().getItem() instanceof ArmorItem){
+                    skip = compareEnchants(entity, armorenchants);
+                } else if (entity.getStack().getItem() instanceof MaceItem){
+                    skip = compareEnchants(entity, maceenchants);
+                } else if (entity.getStack().getItem() instanceof TridentItem){
+                    skip = compareEnchants(entity, tridentenchants);
                 }
             }
-            if (skip) continue;
-            if (items.get().contains(item.getItem())) playerItems.add(item.getItem());
-
         }
-        for (ItemStack item : livingEntity.getHandItems()) {
-            boolean skip = false;
-            if (enchants.get()) {
-                if (!certainenchants.get() && (item.getItem() instanceof MiningToolItem || item.getItem() instanceof ArmorItem || item.getItem() instanceof SwordItem || item.getItem() instanceof FishingRodItem || item.getItem() instanceof FlintAndSteelItem || item.getItem() instanceof MaceItem || item.getItem() instanceof ShearsItem || item.getItem() instanceof ShieldItem || item.getItem() instanceof TridentItem) && item.isEnchantable() && item.getEnchantments().isEmpty()) skip = true;
-                else if (certainenchants.get()){
-                    if (item.getItem() instanceof MiningToolItem){
-                        skip = compareEnchants(item, toolenchants);
-                    } else if (item.getItem() instanceof SwordItem){
-                        skip = compareEnchants(item, swordenchants);
-                    } else if (item.getItem() instanceof ArmorItem){
-                        skip = compareEnchants(item, armorenchants);
-                    } else if (item.getItem() instanceof MaceItem){
-                        skip = compareEnchants(item, maceenchants);
-                    } else if (item.getItem() instanceof TridentItem){
-                        skip = compareEnchants(item, tridentenchants);
-                    }
-                }
-            }
-            if (skip) continue;
-            if (items.get().contains(item.getItem())) playerItems.add(item.getItem());
-        }
-        return playerItems;
+        if (!items.get().contains(entity.getStack().getItem())) skip = true;
+        return skip;
     }
-    private boolean compareEnchants(ItemStack stack, Setting<Set<RegistryKey<Enchantment>>> enchantsetting) {
+    private boolean compareEnchants(ItemEntity entity, Setting<Set<RegistryKey<Enchantment>>> enchantsetting) {
         boolean skip = false;
         Set<RegistryKey<Enchantment>> itemenchants = new HashSet<>();
-        stack.getEnchantments().getEnchantments().forEach(enchantment -> {
+        entity.getStack().getEnchantments().getEnchantments().forEach(enchantment -> {
             itemenchants.add(enchantment.getKey().get());
         });
         for (RegistryKey<Enchantment> enchantKey : enchantsetting.get()) {
@@ -362,13 +326,6 @@ public class MobGearESP extends Module {
         }
         return skip;
     }
-    public boolean shouldSkip(LivingEntity entity) {
-        if (entity.isPlayer()) return true;
-        ArrayList<Item> playerItems = getPlayerItems(entity);
-        if (entity == mc.cameraEntity && mc.options.getPerspective().isFirstPerson()) return true;
-        return playerItems.isEmpty() || !EntityUtils.isInRenderDistance(entity);
-    }
-
     public Color getColor(Entity entity) {
         double alpha = getFadeAlpha(entity);
         if (alpha == 0) return null;
