@@ -30,6 +30,11 @@ dependencies {
 }
 
 processResources {
+    inputs.properties([
+        "version": project.version,
+        "mc_version": project.minecraft_version
+    ])
+
     filesMatching("fabric.mod.json") {
         expand "version": project.version, "mc_version": project.minecraft_version
     }
