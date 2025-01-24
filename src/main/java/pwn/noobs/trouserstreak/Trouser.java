@@ -2,11 +2,13 @@ package pwn.noobs.trouserstreak;
 
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.commands.Commands;
+import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pwn.noobs.trouserstreak.commands.*;
+import pwn.noobs.trouserstreak.hud.*;
 import pwn.noobs.trouserstreak.modules.*;
 
 
@@ -44,6 +46,8 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new InstaMineNuker());
                 Modules.get().add(new BetterScaffold());
                 Modules.get().add(new RedstoneNuker());
+                Modules.get().add(new ItemESP());
+                Modules.get().add(new EntityClusterESP());
 
                 //Modules.get().add(new -----> Create Illegal things with Creative mode! <-----());
                 Modules.get().add(new ForceOPSign());
@@ -94,6 +98,9 @@ public class Trouser extends MeteorAddon {
                 Commands.add(new AutoVaultClipCommand());
                 Modules.get().add(new BlockListMineCommand());
                 Commands.add(new GarbageCleanerCommand());
+
+                // HUD
+                Hud.get().register(ElytraCount.INFO);
         }
 
         @Override
