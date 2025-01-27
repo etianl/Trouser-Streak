@@ -37,9 +37,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import pwn.noobs.trouserstreak.Trouser;
-import net.minecraft.block.BambooBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -47,27 +44,18 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class RedstoneNuker extends Module {
+    static Registry<Enchantment> enchantmentRegistry;
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
 
-    private final SettingGroup sgAutoTool = settings.createGroup("AutoTool");
-
     // General
-
+    private final SettingGroup sgAutoTool = settings.createGroup("AutoTool");
     private final Setting<Shape> shape = sgGeneral.add(new EnumSetting.Builder<Shape>()
             .name("shape")
             .description("The shape of nuking algorithm.")
             .defaultValue(Shape.Sphere)
             .build()
     );
-
-    private final Setting<RedstoneNuker.Mode> mode = sgGeneral.add(new EnumSetting.Builder<RedstoneNuker.Mode>()
-            .name("mode")
-            .description("The way the blocks are broken.")
-            .defaultValue(Mode.All)
-            .build()
-    );
-
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
             .description("The break range.")
@@ -131,14 +119,18 @@ public class RedstoneNuker extends Module {
             .visible(() -> shape.get() == Shape.Cube)
             .build()
     );
-
+    private final Setting<RedstoneNuker.Mode> mode = sgGeneral.add(new EnumSetting.Builder<RedstoneNuker.Mode>()
+            .name("mode")
+            .description("The way the blocks are broken.")
+            .defaultValue(Mode.All)
+            .build()
+    );
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
             .description("Delay in ticks between breaking blocks.")
             .defaultValue(0)
             .build()
     );
-
     private final Setting<Integer> maxBlocksPerTick = sgGeneral.add(new IntSetting.Builder()
             .name("max-blocks-per-tick")
             .description("Maximum blocks to try to break per tick. Useful when insta mining.")
@@ -147,21 +139,18 @@ public class RedstoneNuker extends Module {
             .sliderRange(1, 6)
             .build()
     );
-
     private final Setting<RedstoneNuker.SortMode> sortMode = sgGeneral.add(new EnumSetting.Builder<RedstoneNuker.SortMode>()
             .name("sort-mode")
             .description("The blocks you want to mine first.")
             .defaultValue(RedstoneNuker.SortMode.Closest)
             .build()
     );
-
     private final Setting<Boolean> swingHand = sgGeneral.add(new BoolSetting.Builder()
             .name("swing-hand")
             .description("Swing hand client side.")
             .defaultValue(true)
             .build()
     );
-
     // Whitelist
     private final Setting<List<Block>> whitelist = sgGeneral.add(new BlockListSetting.Builder()
             .name("blocks")
@@ -173,7 +162,6 @@ public class RedstoneNuker extends Module {
             .filter(this::filterBlocks)
             .build()
     );
-
     // Bounding box
     private final Setting<Boolean> enableRenderBounding = sgRender.add(new BoolSetting.Builder()
             .name("bounding-box")
@@ -181,58 +169,50 @@ public class RedstoneNuker extends Module {
             .defaultValue(true)
             .build()
     );
-
     private final Setting<ShapeMode> shapeModeBox = sgRender.add(new EnumSetting.Builder<ShapeMode>()
             .name("nuke-box-mode")
             .description("How the shape for the bounding box is rendered.")
             .defaultValue(ShapeMode.Lines)
             .build()
     );
-
     private final Setting<SettingColor> sideColorBox = sgRender.add(new ColorSetting.Builder()
             .name("side-color")
             .description("The side color of the bounding box.")
-            .defaultValue(new SettingColor(16,106,144, 100))
-            .build()
-    );
-
-    private final Setting<SettingColor> lineColorBox = sgRender.add(new ColorSetting.Builder()
-            .name("line-color")
-            .description("The line color of the bounding box.")
-            .defaultValue(new SettingColor(16,106,144, 255))
+            .defaultValue(new SettingColor(16, 106, 144, 100))
             .build()
     );
 
     // Broken blocks
-
+    private final Setting<SettingColor> lineColorBox = sgRender.add(new ColorSetting.Builder()
+            .name("line-color")
+            .description("The line color of the bounding box.")
+            .defaultValue(new SettingColor(16, 106, 144, 255))
+            .build()
+    );
     private final Setting<Boolean> enableRenderBreaking = sgRender.add(new BoolSetting.Builder()
             .name("broken-blocks")
             .description("Enable rendering bounding box for Cube and Uniform Cube.")
             .defaultValue(true)
             .build()
     );
-
     private final Setting<ShapeMode> shapeModeBreak = sgRender.add(new EnumSetting.Builder<ShapeMode>()
             .name("nuke-block-mode")
             .description("How the shapes for broken blocks are rendered.")
             .defaultValue(ShapeMode.Both)
             .build()
     );
-
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
             .name("side-color")
             .description("The side color of the target block rendering.")
             .defaultValue(new SettingColor(255, 0, 0, 10))
             .build()
     );
-
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
             .name("line-color")
             .description("The line color of the target block rendering.")
             .defaultValue(new SettingColor(255, 0, 0, 255))
             .build()
     );
-
     //AutoTool
     private final Setting<EnchantPreference> prefer = sgAutoTool.add(new EnumSetting.Builder<EnchantPreference>()
             .name("prefer")
@@ -240,14 +220,12 @@ public class RedstoneNuker extends Module {
             .defaultValue(EnchantPreference.None)
             .build()
     );
-
     private final Setting<Boolean> antiBreak = sgAutoTool.add(new BoolSetting.Builder()
             .name("anti-break")
             .description("Stops you from breaking your tool.")
             .defaultValue(false)
             .build()
     );
-
     private final Setting<Integer> breakDurability = sgAutoTool.add(new IntSetting.Builder()
             .name("anti-break-percentage")
             .description("The durability percentage to stop using a tool.")
@@ -257,49 +235,84 @@ public class RedstoneNuker extends Module {
             .visible(antiBreak::get)
             .build()
     );
-
     private final Setting<Boolean> switchBack = sgAutoTool.add(new BoolSetting.Builder()
             .name("switch-back")
             .description("Switches your hand to whatever was selected when releasing your attack key.")
             .defaultValue(false)
             .build()
     );
-
     private final Setting<Integer> switchDelay = sgAutoTool.add((new IntSetting.Builder()
             .name("switch-delay")
             .description("Delay in ticks before switching tools.")
             .defaultValue(0)
             .build()
     ));
-    static Registry<Enchantment> enchantmentRegistry;
-    private boolean silkTouchForEnderChest=false;
+    private final Pool<BlockPos.Mutable> blockPosPool = new Pool<>(BlockPos.Mutable::new);
+    private final List<BlockPos.Mutable> blocks = new ArrayList<>();
+    private final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
+    private final List<RenderBlock> renderBlocks = new ArrayList<>();
+    private final BlockPos.Mutable lastBlockPos = new BlockPos.Mutable();
+    int maxh = 0;
+    int maxv = 0;
+    private final boolean silkTouchForEnderChest = false;
     private boolean wasPressed;
     private boolean shouldSwitch;
     private int ticks;
     private int bestSlot;
-    private final Pool<BlockPos.Mutable> blockPosPool = new Pool<>(BlockPos.Mutable::new);
-    private final List<BlockPos.Mutable> blocks = new ArrayList<>();
-
-    private final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
-    private final List<RenderBlock> renderBlocks = new ArrayList<>();
-
     private boolean firstBlock;
-    private final BlockPos.Mutable lastBlockPos = new BlockPos.Mutable();
-
     private int timer;
     private int noBlockTimer;
-
-    private BlockPos.Mutable pos1 = new BlockPos.Mutable(); // Rendering for cubes
-    private BlockPos.Mutable pos2 = new BlockPos.Mutable();
+    private final BlockPos.Mutable pos1 = new BlockPos.Mutable(); // Rendering for cubes
+    private final BlockPos.Mutable pos2 = new BlockPos.Mutable();
     private Box box;
-    int maxh = 0;
-    int maxv = 0;
 
 
     public RedstoneNuker() {
         super(Trouser.Main, "RedstoneNuker", "Breaks redstone, to keep you safe when placing TNT.");
     }
 
+    public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, RedstoneNuker.EnchantPreference enchantPreference, Predicate<ItemStack> good) {
+        if (!good.test(itemStack) || !isTool(itemStack)) return -1;
+
+        if (enchantmentRegistry != null) {
+            if (silkTouchEnderChest
+                    && state.getBlock() == Blocks.ENDER_CHEST
+                    && EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.SILK_TOUCH), itemStack) == 0) {
+                return -1;
+            }
+        }
+
+        double score = 0;
+
+        score += itemStack.getMiningSpeedMultiplier(state) * 1000;
+        if (enchantmentRegistry != null) {
+            score += EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.UNBREAKING), itemStack);
+            score += EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.EFFICIENCY), itemStack);
+            score += EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.MENDING), itemStack);
+
+            if (enchantPreference == EnchantPreference.Fortune)
+                score += EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.FORTUNE), itemStack);
+            if (enchantPreference == EnchantPreference.SilkTouch)
+                score += EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.SILK_TOUCH), itemStack);
+        }
+
+        if (itemStack.getItem() instanceof SwordItem item && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooShootBlock))
+            score += 9000 + (item.getComponents().get(DataComponentTypes.TOOL).getSpeed(state) * 1000);
+
+        return score;
+    }
+
+    public static boolean isTool(ItemStack itemStack) {
+        return itemStack.getItem() instanceof MiningToolItem || itemStack.getItem() instanceof ShearsItem;
+    }
+
+    public static double maxDist(double x1, double y1, double z1, double x2, double y2, double z2) {
+        // Gets the largest X, Y or Z difference, manhattan style
+        double dX = Math.ceil(Math.abs(x2 - x1));
+        double dY = Math.ceil(Math.abs(y2 - y1));
+        double dZ = Math.ceil(Math.abs(z2 - z1));
+        return Math.max(Math.max(dX, dY), dZ);
+    }
 
     @Override
     public void onActivate() {
@@ -318,16 +331,16 @@ public class RedstoneNuker extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (enableRenderBreaking.get()){
+        if (enableRenderBreaking.get()) {
             // Broken block
             renderBlocks.sort(Comparator.comparingInt(o -> -o.ticks));
             renderBlocks.forEach(renderBlock -> renderBlock.render(event, sideColor.get(), lineColor.get(), shapeModeBreak.get()));
         }
 
-        if (enableRenderBounding.get()){
+        if (enableRenderBounding.get()) {
             // Render bounding box if cube and should break stuff
             if (shape.get() != Shape.Sphere && mode.get() != Mode.Smash) {
-                box = new Box(new Vec3d(pos1.getX(), pos1.getY() , pos1.getZ()), new Vec3d(pos2.getX(), pos2.getY(), pos2.getZ()));
+                box = new Box(new Vec3d(pos1.getX(), pos1.getY(), pos1.getZ()), new Vec3d(pos2.getX(), pos2.getY(), pos2.getZ()));
                 event.renderer.box(box, sideColorBox.get(), lineColorBox.get(), shapeModeBox.get(), 0);
             }
         }
@@ -362,46 +375,46 @@ public class RedstoneNuker extends Module {
 
         if (shape.get() == Shape.UniformCube) {
             pX_ += 1; // weired position stuff
-            pos1.set(pX_ - r, pY - r + 1, pZ - r+1); // down
-            pos2.set(pX_ + r-1, pY + r, pZ + r); // up
+            pos1.set(pX_ - r, pY - r + 1, pZ - r + 1); // down
+            pos2.set(pX_ + r - 1, pY + r, pZ + r); // up
         } else {
             int direction = Math.round((mc.player.getRotationClient().y % 360) / 90);
             direction = Math.floorMod(direction, 4);
 
             // direction == 1
             pos1.set(pX_ - (range_forward.get()), Math.ceil(pY) - range_down.get(), pZ_ - range_right.get()); // down
-            pos2.set(pX_ + range_back.get()+1, Math.ceil(pY + range_up.get() + 1), pZ_ + range_left.get()+1); // up
+            pos2.set(pX_ + range_back.get() + 1, Math.ceil(pY + range_up.get() + 1), pZ_ + range_left.get() + 1); // up
 
             // Only change me if you want to mess with 3D rotations:
             if (direction == 2) {
                 pX_ += 1;
                 pZ_ += 1;
-                pos1.set(pX_ - (range_left.get()+1), Math.ceil(pY) - range_down.get(), pZ_ - (range_forward.get()+1)); // down
+                pos1.set(pX_ - (range_left.get() + 1), Math.ceil(pY) - range_down.get(), pZ_ - (range_forward.get() + 1)); // down
                 pos2.set(pX_ + range_right.get(), Math.ceil(pY + range_up.get() + 1), pZ_ + range_back.get()); // up
             } else if (direction == 3) {
                 pX_ += 1;
-                pos1.set(pX_ - (range_back.get()+1), Math.ceil(pY) - range_down.get(), pZ_ - range_left.get()); // down
-                pos2.set(pX_ + range_forward.get(), Math.ceil(pY + range_up.get() + 1), pZ_ + range_right.get()+1); // up
+                pos1.set(pX_ - (range_back.get() + 1), Math.ceil(pY) - range_down.get(), pZ_ - range_left.get()); // down
+                pos2.set(pX_ + range_forward.get(), Math.ceil(pY + range_up.get() + 1), pZ_ + range_right.get() + 1); // up
             } else if (direction == 0) {
                 pZ_ += 1;
                 pX_ += 1;
-                pos1.set(pX_ - (range_right.get()+1), Math.ceil(pY) - range_down.get(), pZ_ - (range_back.get()+1)); // down
+                pos1.set(pX_ - (range_right.get() + 1), Math.ceil(pY) - range_down.get(), pZ_ - (range_back.get() + 1)); // down
                 pos2.set(pX_ + range_left.get(), Math.ceil(pY + range_up.get() + 1), pZ_ + range_forward.get()); // up
             }
 
             // get largest horizontal
-            maxh = 1 + Math.max(Math.max(Math.max(range_back.get(),range_right.get()),range_forward.get()),range_left.get());
+            maxh = 1 + Math.max(Math.max(Math.max(range_back.get(), range_right.get()), range_forward.get()), range_left.get());
             maxv = 1 + Math.max(range_up.get(), range_down.get());
         }
 
-        if (mode.get() == Mode.Flatten){
+        if (mode.get() == Mode.Flatten) {
             pos1.setY((int) Math.floor(pY));
         }
         box = new Box(pos1.toCenterPos(), pos2.toCenterPos());
 
 
         // Find blocks to break
-        BlockIterator.register(Math.max((int) Math.ceil(range.get()+1), maxh), Math.max((int) Math.ceil(range.get()), maxv), (blockPos, blockState) -> {
+        BlockIterator.register(Math.max((int) Math.ceil(range.get() + 1), maxh), Math.max((int) Math.ceil(range.get()), maxv), (blockPos, blockState) -> {
             // Check for air, unbreakable blocks and distance
             boolean toofarSphere = Utils.squaredDistance(pX, pY, pZ, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5) > rangeSq;
             boolean toofarUniformCube = maxDist(Math.floor(pX), Math.floor(pY), Math.floor(pZ), blockPos.getX(), blockPos.getY(), blockPos.getZ()) >= range.get();
@@ -431,7 +444,7 @@ public class RedstoneNuker extends Module {
             // Sort blocks
 
             if (sortMode.get() == SortMode.TopDown)
-                blocks.sort(Comparator.comparingDouble(value -> -1*value.getY()));
+                blocks.sort(Comparator.comparingDouble(value -> -1 * value.getY()));
             else if (sortMode.get() != SortMode.None)
                 blocks.sort(Comparator.comparingDouble(value -> Utils.squaredDistance(pX, pY, pZ, value.getX() + 0.5, value.getY() + 0.5, value.getZ() + 0.5) * (sortMode.get() == SortMode.Closest ? 1 : -1)));
 
@@ -440,8 +453,7 @@ public class RedstoneNuker extends Module {
                 // If no block was found for long enough then set firstBlock flag to true to not wait before breaking another again
                 if (noBlockTimer++ >= delay.get()) firstBlock = true;
                 return;
-            }
-            else {
+            } else {
                 noBlockTimer = 0;
             }
 
@@ -545,40 +557,6 @@ public class RedstoneNuker extends Module {
         return antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamage()) < (itemStack.getMaxDamage() * breakDurability.get() / 100);
     }
 
-    public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, RedstoneNuker.EnchantPreference enchantPreference, Predicate<ItemStack> good) {
-        if (!good.test(itemStack) || !isTool(itemStack)) return -1;
-
-        if (enchantmentRegistry != null) {
-            if (silkTouchEnderChest
-                    && state.getBlock() == Blocks.ENDER_CHEST
-                    && EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.SILK_TOUCH), itemStack) == 0) {
-                return -1;
-            }
-        }
-
-        double score = 0;
-
-        score += itemStack.getMiningSpeedMultiplier(state) * 1000;
-        if (enchantmentRegistry != null) {
-            score += EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.UNBREAKING), itemStack);
-            score += EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.EFFICIENCY), itemStack);
-            score += EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.MENDING), itemStack);
-
-            if (enchantPreference == EnchantPreference.Fortune)
-                score += EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.FORTUNE), itemStack);
-            if (enchantPreference == EnchantPreference.SilkTouch)
-                score += EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.SILK_TOUCH), itemStack);
-        }
-
-        if (itemStack.getItem() instanceof SwordItem item && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooShootBlock))
-            score += 9000 + (item.getComponents().get(DataComponentTypes.TOOL).getSpeed(state) * 1000);
-
-        return score;
-    }
-
-    public static boolean isTool(ItemStack itemStack) {
-        return itemStack.getItem() instanceof MiningToolItem || itemStack.getItem() instanceof ShearsItem;
-    }
     private boolean filterBlocks(Block block) {
         return isRedstoneBlock(block);
     }
@@ -604,6 +582,7 @@ public class RedstoneNuker extends Module {
                 block instanceof TripwireBlock ||
                 block instanceof ObserverBlock;
     }
+
     public enum Mode {
         All,
         Flatten,
@@ -617,24 +596,18 @@ public class RedstoneNuker extends Module {
         TopDown
 
     }
+
     public enum Shape {
         Cube,
         UniformCube,
         Sphere
     }
+
+
     public enum EnchantPreference {
         None,
         Fortune,
         SilkTouch
-    }
-
-
-    public static double maxDist(double x1, double y1, double z1, double x2, double y2, double z2) {
-        // Gets the largest X, Y or Z difference, manhattan style
-        double dX = Math.ceil(Math.abs(x2 - x1));
-        double dY = Math.ceil(Math.abs(y2 - y1));
-        double dZ = Math.ceil(Math.abs(z2 - z1));
-        return Math.max(Math.max(dX, dY), dZ);
     }
 
     public static class RenderBlock {

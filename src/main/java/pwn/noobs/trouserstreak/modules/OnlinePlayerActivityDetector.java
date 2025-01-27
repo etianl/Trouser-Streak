@@ -17,20 +17,72 @@ import net.minecraft.block.Blocks;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.c2s.play.AcknowledgeChunksC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.s2c.play.*;
+import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.*;
+import net.minecraft.world.chunk.ArrayPalette;
+import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.world.chunk.Palette;
+import net.minecraft.world.chunk.WorldChunk;
 import pwn.noobs.trouserstreak.Trouser;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class OnlinePlayerActivityDetector extends Module {
+    private static final ExecutorService taskExecutor = Executors.newCachedThreadPool();
+    private static final Set<Block> FalsePositivesOVERWORLD = new HashSet<>();
+    private static final Set<Block> FalsePositivesNETHER = new HashSet<>();
+    private static final Set<Block> FalsePositivesEND = new HashSet<>();
+    private static final Set<Block> ORE_BLOCKS = new HashSet<>();
+    private static final Set<Block> NETHER_ORE_BLOCKS = new HashSet<>();
+
+    static {
+        ORE_BLOCKS.add(Blocks.COAL_ORE);
+        ORE_BLOCKS.add(Blocks.DEEPSLATE_COAL_ORE);
+        ORE_BLOCKS.add(Blocks.COPPER_ORE);
+        ORE_BLOCKS.add(Blocks.DEEPSLATE_COPPER_ORE);
+        ORE_BLOCKS.add(Blocks.IRON_ORE);
+        ORE_BLOCKS.add(Blocks.DEEPSLATE_IRON_ORE);
+        ORE_BLOCKS.add(Blocks.GOLD_ORE);
+        ORE_BLOCKS.add(Blocks.DEEPSLATE_GOLD_ORE);
+        ORE_BLOCKS.add(Blocks.LAPIS_ORE);
+        ORE_BLOCKS.add(Blocks.DEEPSLATE_LAPIS_ORE);
+        ORE_BLOCKS.add(Blocks.DIAMOND_ORE);
+        ORE_BLOCKS.add(Blocks.DEEPSLATE_DIAMOND_ORE);
+        ORE_BLOCKS.add(Blocks.REDSTONE_ORE);
+        ORE_BLOCKS.add(Blocks.DEEPSLATE_REDSTONE_ORE);
+        ORE_BLOCKS.add(Blocks.EMERALD_ORE);
+        ORE_BLOCKS.add(Blocks.DEEPSLATE_EMERALD_ORE);
+    }
+
+    static {
+        ORE_BLOCKS.add(Blocks.NETHER_GOLD_ORE);
+        ORE_BLOCKS.add(Blocks.NETHER_QUARTZ_ORE);
+        ORE_BLOCKS.add(Blocks.GILDED_BLACKSTONE);
+    }
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSpecial = settings.createGroup("There may be false positive detection near NewChunks.");
     private final SettingGroup sgRender = settings.createGroup("Render");
+    public final Setting<Integer> renderDistance = sgRender.add(new IntSetting.Builder()
+            .name("Render-Distance(Chunks)")
+            .description("How many chunks from the character to render the detected chunks.")
+            .defaultValue(32)
+            .min(6)
+            .sliderRange(6, 1024)
+            .build()
+    );
     private final Setting<Boolean> removerenderdist = sgGeneral.add(new BoolSetting.Builder()
             .name("RemoveOutsideRenderDistance")
             .description("Removes the cached chunks when they leave the defined render distance.")
@@ -63,7 +115,7 @@ public class OnlinePlayerActivityDetector extends Module {
             .name("NETHER False Positive blocks")
             .description("Exclude these blocks from the detection.")
             .defaultValue(
-                    Blocks.BARRIER, Blocks.AIR, Blocks.CAVE_AIR, Blocks.LAVA, Blocks.FIRE, Blocks.NETHERRACK, Blocks.MAGMA_BLOCK, Blocks.SOUL_SAND, Blocks.SOUL_SOIL, Blocks. NETHER_BRICK_FENCE,
+                    Blocks.BARRIER, Blocks.AIR, Blocks.CAVE_AIR, Blocks.LAVA, Blocks.FIRE, Blocks.NETHERRACK, Blocks.MAGMA_BLOCK, Blocks.SOUL_SAND, Blocks.SOUL_SOIL, Blocks.NETHER_BRICK_FENCE,
                     Blocks.CRIMSON_NYLIUM, Blocks.CRIMSON_ROOTS, Blocks.WEEPING_VINES_PLANT, Blocks.WEEPING_VINES, Blocks.RED_MUSHROOM, Blocks.BROWN_MUSHROOM, Blocks.CRIMSON_FUNGUS, Blocks.WARPED_FUNGUS
             )
             .build()
@@ -74,14 +126,6 @@ public class OnlinePlayerActivityDetector extends Module {
             .defaultValue(
                     Blocks.AIR, Blocks.BARRIER, Blocks.CHORUS_PLANT, Blocks.PURPUR_STAIRS
             )
-            .build()
-    );
-    public final Setting<Integer> renderDistance = sgRender.add(new IntSetting.Builder()
-            .name("Render-Distance(Chunks)")
-            .description("How many chunks from the character to render the detected chunks.")
-            .defaultValue(32)
-            .min(6)
-            .sliderRange(6,1024)
             .build()
     );
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
@@ -104,39 +148,12 @@ public class OnlinePlayerActivityDetector extends Module {
             .visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both))
             .build()
     );
-    private static final ExecutorService taskExecutor = Executors.newCachedThreadPool();
     private final Set<BlockPos> playerActivityPositions = Collections.synchronizedSet(new HashSet<>());
-    private static final Set<Block> FalsePositivesOVERWORLD = new HashSet<>();
-    private static final Set<Block> FalsePositivesNETHER = new HashSet<>();
-    private static final Set<Block> FalsePositivesEND = new HashSet<>();
-    private static final Set<Block> ORE_BLOCKS = new HashSet<>();
-    static {
-        ORE_BLOCKS.add(Blocks.COAL_ORE);
-        ORE_BLOCKS.add(Blocks.DEEPSLATE_COAL_ORE);
-        ORE_BLOCKS.add(Blocks.COPPER_ORE);
-        ORE_BLOCKS.add(Blocks.DEEPSLATE_COPPER_ORE);
-        ORE_BLOCKS.add(Blocks.IRON_ORE);
-        ORE_BLOCKS.add(Blocks.DEEPSLATE_IRON_ORE);
-        ORE_BLOCKS.add(Blocks.GOLD_ORE);
-        ORE_BLOCKS.add(Blocks.DEEPSLATE_GOLD_ORE);
-        ORE_BLOCKS.add(Blocks.LAPIS_ORE);
-        ORE_BLOCKS.add(Blocks.DEEPSLATE_LAPIS_ORE);
-        ORE_BLOCKS.add(Blocks.DIAMOND_ORE);
-        ORE_BLOCKS.add(Blocks.DEEPSLATE_DIAMOND_ORE);
-        ORE_BLOCKS.add(Blocks.REDSTONE_ORE);
-        ORE_BLOCKS.add(Blocks.DEEPSLATE_REDSTONE_ORE);
-        ORE_BLOCKS.add(Blocks.EMERALD_ORE);
-        ORE_BLOCKS.add(Blocks.DEEPSLATE_EMERALD_ORE);
-    }
-    private static final Set<Block> NETHER_ORE_BLOCKS = new HashSet<>();
-    static {
-        ORE_BLOCKS.add(Blocks.NETHER_GOLD_ORE);
-        ORE_BLOCKS.add(Blocks.NETHER_QUARTZ_ORE);
-        ORE_BLOCKS.add(Blocks.GILDED_BLACKSTONE);
-    }
+
     public OnlinePlayerActivityDetector() {
-        super(Trouser.Main,"OnlinePlayerActivityDetector", "Detects if an online player is still nearby if there are blocks missing from a BlockState palette and your render distances are overlapping.");
+        super(Trouser.Main, "OnlinePlayerActivityDetector", "Detects if an online player is still nearby if there are blocks missing from a BlockState palette and your render distances are overlapping.");
     }
+
     @Override
     public void onActivate() {
         playerActivityPositions.clear();
@@ -153,6 +170,7 @@ public class OnlinePlayerActivityDetector extends Module {
             FalsePositivesEND.addAll(Blawcks3.get());
         }
     }
+
     @Override
     public void onDeactivate() {
         playerActivityPositions.clear();
@@ -160,6 +178,7 @@ public class OnlinePlayerActivityDetector extends Module {
         FalsePositivesNETHER.clear();
         FalsePositivesEND.clear();
     }
+
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         FalsePositivesOVERWORLD.clear();
@@ -174,8 +193,9 @@ public class OnlinePlayerActivityDetector extends Module {
         if (Blawcks3.get() != null) {
             FalsePositivesEND.addAll(Blawcks3.get());
         }
-        if (removerenderdist.get())removeChunksOutsideRenderDistance();
+        if (removerenderdist.get()) removeChunksOutsideRenderDistance();
     }
+
     @EventHandler
     private void onRender(Render3DEvent event) {
         if ((playerChunksLineColor.get().a > 5 || playerChunksSideColor.get().a > 5) && mc.player != null) {
@@ -203,7 +223,8 @@ public class OnlinePlayerActivityDetector extends Module {
 
     @EventHandler
     private void onReadPacket(PacketEvent.Receive event) {
-        if (event.packet instanceof AcknowledgeChunksC2SPacket)return; //for some reason this packet keeps getting cast to other packets
+        if (event.packet instanceof AcknowledgeChunksC2SPacket)
+            return; //for some reason this packet keeps getting cast to other packets
         if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && !(event.packet instanceof PlayerMoveC2SPacket) && event.packet instanceof ChunkDataS2CPacket packet && mc.world != null) {
             ChunkPos playerActivityPos = new ChunkPos(packet.getChunkX(), packet.getChunkZ());
 
@@ -215,24 +236,25 @@ public class OnlinePlayerActivityDetector extends Module {
                                 packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ()));
                     }, taskExecutor);
                     future.join();
-                } catch (CompletionException e) {}
+                } catch (CompletionException e) {
+                }
 
                 ChunkSection[] sections = chunk.getSectionArray();
 
                 try {
-                    int Y=mc.world.getBottomY();
-                    int i=0;
+                    int Y = mc.world.getBottomY();
+                    int i = 0;
                     boolean firstsectionappearsnew = false;
                     for (ChunkSection section : sections) {
                         var blockStatesContainer = section.getBlockStateContainer();
 
                         Palette<BlockState> blockStatePalette = blockStatesContainer.data.palette();
-                        if (!(blockStatePalette instanceof ArrayPalette<BlockState>))return;
+                        if (!(blockStatePalette instanceof ArrayPalette<BlockState>)) return;
 
                         int blockPaletteLength = blockStatePalette.getSize();
                         for (int i2 = 0; i2 < blockPaletteLength; i2++) {
                             BlockState blockPaletteEntry = blockStatePalette.get(i2);
-                            if (i2 == 0 && i == 0 && blockPaletteEntry.getBlock() == Blocks.AIR && mc.world.getRegistryKey() != World.END){
+                            if (i2 == 0 && i == 0 && blockPaletteEntry.getBlock() == Blocks.AIR && mc.world.getRegistryKey() != World.END) {
                                 firstsectionappearsnew = true;
                                 break;
                             }
@@ -264,24 +286,26 @@ public class OnlinePlayerActivityDetector extends Module {
                             if (!missingBlocks.isEmpty()) {
                                 for (BlockState missingBlock : missingBlocks) {
                                     if (mc.world.getRegistryKey() == World.OVERWORLD) {
-                                        if (FalsePositivesOVERWORLD.contains(missingBlock.getBlock())) falsepositive = true;
-                                        if (!detectOres.get() && ORE_BLOCKS.contains(missingBlock.getBlock())) falsepositive = true;
+                                        if (FalsePositivesOVERWORLD.contains(missingBlock.getBlock()))
+                                            falsepositive = true;
+                                        if (!detectOres.get() && ORE_BLOCKS.contains(missingBlock.getBlock()))
+                                            falsepositive = true;
                                         if (!falsepositive && !detectOres.get() && !FalsePositivesOVERWORLD.contains(missingBlock.getBlock())) {
                                             detectedBlocks.add(missingBlock);
                                             missingAblock = true;
-                                        }
-                                        else if (!falsepositive && detectOres.get() && !ORE_BLOCKS.contains(missingBlock.getBlock()) && !FalsePositivesOVERWORLD.contains(missingBlock.getBlock())) {
+                                        } else if (!falsepositive && detectOres.get() && !ORE_BLOCKS.contains(missingBlock.getBlock()) && !FalsePositivesOVERWORLD.contains(missingBlock.getBlock())) {
                                             detectedBlocks.add(missingBlock);
                                             missingAblock = true;
                                         }
                                     } else if (mc.world.getRegistryKey() == World.NETHER) {
-                                        if (FalsePositivesNETHER.contains(missingBlock.getBlock())) falsepositive = true;
-                                        if (!detectOres.get() && NETHER_ORE_BLOCKS.contains(missingBlock.getBlock())) falsepositive = true;
+                                        if (FalsePositivesNETHER.contains(missingBlock.getBlock()))
+                                            falsepositive = true;
+                                        if (!detectOres.get() && NETHER_ORE_BLOCKS.contains(missingBlock.getBlock()))
+                                            falsepositive = true;
                                         if (!falsepositive && !detectOres.get() && !FalsePositivesNETHER.contains(missingBlock.getBlock())) {
                                             detectedBlocks.add(missingBlock);
                                             missingAblock = true;
-                                        }
-                                        else if (!falsepositive && detectOres.get() && !NETHER_ORE_BLOCKS.contains(missingBlock.getBlock()) && !FalsePositivesNETHER.contains(missingBlock.getBlock())) {
+                                        } else if (!falsepositive && detectOres.get() && !NETHER_ORE_BLOCKS.contains(missingBlock.getBlock()) && !FalsePositivesNETHER.contains(missingBlock.getBlock())) {
                                             detectedBlocks.add(missingBlock);
                                             missingAblock = true;
                                         }
@@ -299,22 +323,25 @@ public class OnlinePlayerActivityDetector extends Module {
                                 for (BlockState state : detectedBlocks) {
                                     ChatUtils.sendMsg(Text.of("Missing block in Section " + i + ": " + state.getBlock()));
                                 }
-                                ChatUtils.sendMsg(Text.of("Detected Player Activity. X: " + playerActivityPos.getCenterX() + " Y: " + (Y+8) + " Z: " + playerActivityPos.getCenterZ()));
-                                playerActivityPositions.add(new BlockPos(playerActivityPos.getCenterX(), Y+8, playerActivityPos.getCenterZ()));
+                                ChatUtils.sendMsg(Text.of("Detected Player Activity. X: " + playerActivityPos.getCenterX() + " Y: " + (Y + 8) + " Z: " + playerActivityPos.getCenterZ()));
+                                playerActivityPositions.add(new BlockPos(playerActivityPos.getCenterX(), Y + 8, playerActivityPos.getCenterZ()));
                             }
                         }
                         i++;
-                        Y+=16;
+                        Y += 16;
                     }
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                }
             }
         }
     }
+
     private void removeChunksOutsideRenderDistance() {
         double renderDistanceBlocks = renderDistance.get() * 16;
 
         removeChunksOutsideRenderDistance(playerActivityPositions, renderDistanceBlocks);
     }
+
     private void removeChunksOutsideRenderDistance(Set<BlockPos> chunkSet, double renderDistanceBlocks) {
         chunkSet.removeIf(blockPos -> {
             BlockPos playerPos = new BlockPos(mc.player.getBlockX(), blockPos.getY(), mc.player.getBlockZ());

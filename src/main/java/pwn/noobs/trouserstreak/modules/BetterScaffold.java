@@ -56,6 +56,16 @@ public class BetterScaffold extends Module {
             .defaultValue(PlaceMode.BelowFeet)
             .build()
     );
+    private final Setting<Integer> aboveHeadDistance = sgGeneral.add(new IntSetting.Builder()
+            .name("distance-above-head")
+            .description("How far scaffold should place blocks from the player's head.")
+            .defaultValue(2)
+            .min(1)
+            .sliderMin(1)
+            .sliderMax(8)
+            .visible(() -> placementMode.get() == PlaceMode.AboveHead)
+            .build()
+    );
     private final Setting<Boolean> keepY = sgGeneral.add(new BoolSetting.Builder()
             .name("Keep Y")
             .description("Only places at the Y level you are at when enabling the module.")
@@ -83,28 +93,24 @@ public class BetterScaffold extends Module {
             .defaultValue(false)
             .build()
     );
-
     private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-switch")
             .description("Automatically swaps to a block before placing.")
             .defaultValue(true)
             .build()
     );
-
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
             .description("Rotates towards the blocks being placed.")
             .defaultValue(true)
             .build()
     );
-
     private final Setting<Boolean> airPlace = sgGeneral.add(new BoolSetting.Builder()
             .name("air-place")
             .description("Allow air place.")
             .defaultValue(true)
             .build()
     );
-
     private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
             .name("closest-block-range")
             .description("How far can scaffold place blocks.")
@@ -114,14 +120,12 @@ public class BetterScaffold extends Module {
             .visible(() -> !airPlace.get())
             .build()
     );
-
     private final Setting<Boolean> onSurface = sgGeneral.add(new BoolSetting.Builder()
             .name("on-surface")
             .description("Places horizontal and vertical blocks when already standing on a block.")
             .defaultValue(true)
             .build()
     );
-
     private final Setting<Integer> horizontalRadius = sgGeneral.add(new IntSetting.Builder()
             .name("horizontal-radius")
             .description("How far scaffold should place blocks horizontally.")
@@ -131,7 +135,6 @@ public class BetterScaffold extends Module {
             .sliderMax(8)
             .build()
     );
-
     private final Setting<Integer> verticalRadius = sgGeneral.add(new IntSetting.Builder()
             .name("vertical-radius")
             .description("How far scaffold should place blocks vertically.")
@@ -141,19 +144,8 @@ public class BetterScaffold extends Module {
             .sliderMax(8)
             .build()
     );
-    private final Setting<Integer> aboveHeadDistance = sgGeneral.add(new IntSetting.Builder()
-            .name("distance-above-head")
-            .description("How far scaffold should place blocks from the player's head.")
-            .defaultValue(2)
-            .min(1)
-            .sliderMin(1)
-            .sliderMax(8)
-            .visible(() -> placementMode.get()==PlaceMode.AboveHead)
-            .build()
-    );
 
     // Render
-
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
             .name("shape-mode")
             .description("How the shapes are rendered.")
@@ -192,7 +184,7 @@ public class BetterScaffold extends Module {
     @Override
     public void onActivate() {
         if (mc.player == null) return;
-        initialY = mc.player.getBlockY()-1;
+        initialY = mc.player.getBlockY() - 1;
         lastWasSneaking = mc.options.sneakKey.isPressed();
         if (lastWasSneaking) {
             assert mc.player != null;
@@ -299,7 +291,7 @@ public class BetterScaffold extends Module {
         if (placementMode.get() == PlaceMode.BelowFeet) {
             vOffset = 0;
         } else if (placementMode.get() == PlaceMode.AboveHead) {
-            vOffset = aboveHeadDistance.get()+2;
+            vOffset = aboveHeadDistance.get() + 2;
         } else {
             return; // Skip the rest of the code if the placement mode is not valid
         }
@@ -320,7 +312,7 @@ public class BetterScaffold extends Module {
                     mc.player.setVelocity(0, -0.28f, 0);
                 }
             }
-        } else if(onSurface.get()){
+        } else if (onSurface.get()) {
             horizontalAndVertical(new BlockPos.Mutable(mc.player.getX(), mc.player.getY() - 1, mc.player.getZ()), item);
         }
 
@@ -356,7 +348,7 @@ public class BetterScaffold extends Module {
                 if (placementMode.get() == PlaceMode.BelowFeet) {
                     vOffset = -i;
                 } else if (placementMode.get() == PlaceMode.AboveHead) {
-                    vOffset = i + aboveHeadDistance.get()+2;
+                    vOffset = i + aboveHeadDistance.get() + 2;
                 } else {
                     continue; // Skip the loop iteration if the placement mode is not valid
                 }
@@ -367,14 +359,14 @@ public class BetterScaffold extends Module {
             }
         }
 
-        if(horizontalRadius.get() > 1) {
+        if (horizontalRadius.get() > 1) {
 
             for (int v = 0; v < verticalRadius.get(); v++) {
                 int vOffset;
                 if (placementMode.get() == PlaceMode.BelowFeet) {
                     vOffset = -v;
                 } else if (placementMode.get() == PlaceMode.AboveHead) {
-                    vOffset = v + aboveHeadDistance.get()+2;
+                    vOffset = v + aboveHeadDistance.get() + 2;
                 } else {
                     continue; // Skip the loop iteration if the placement mode is not valid
                 }
@@ -434,10 +426,12 @@ public class BetterScaffold extends Module {
         Whitelist,
         Blacklist
     }
+
     public enum PlaceMode {
         BelowFeet,
         AboveHead
     }
+
     public static class RenderBlock {
         public final BlockPos.Mutable pos = new BlockPos.Mutable();
         public int ticks;

@@ -12,7 +12,7 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.*;
+import net.minecraft.block.Block;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.Hand;
@@ -35,6 +35,24 @@ public class InstaMineNuker extends Module {
             .description("the shape of the breaking")
             .defaultValue(Modes.Sphere)
             .build());
+    private final Setting<Double> spherereach = sgGeneral.add(new DoubleSetting.Builder()
+            .name("Sphere Range")
+            .description("Your Range, in blocks.")
+            .defaultValue(5)
+            .sliderRange(1, 5)
+            .min(1)
+            .visible(() -> mode.get() == Modes.Sphere)
+            .build()
+    );
+    private final Setting<Integer> boxreach = sgGeneral.add(new IntSetting.Builder()
+            .name("Box Range")
+            .description("Your Range, in blocks.")
+            .defaultValue(4)
+            .sliderRange(1, 4)
+            .min(1)
+            .visible(() -> mode.get() == Modes.Box)
+            .build()
+    );
     private final Setting<Boolean> onlyInstamineable = sgGeneral.add(new BoolSetting.Builder()
             .name("Only break Instamineable blocks")
             .description("Only breaks the Instamineable blocks")
@@ -49,31 +67,13 @@ public class InstaMineNuker extends Module {
     private final Setting<List<Block>> skippableBlox = sgGeneral.add(new BlockListSetting.Builder()
             .name("Blocks to Skip")
             .description("Skips instamining this block.")
-            .visible(() -> listmode.get()== listModes.blacklist)
+            .visible(() -> listmode.get() == listModes.blacklist)
             .build()
     );
     private final Setting<List<Block>> nonskippableBlox = sgGeneral.add(new BlockListSetting.Builder()
             .name("Blocks to Break")
             .description("Only instamine these blocks.")
-            .visible(() -> listmode.get()== listModes.whitelist)
-            .build()
-    );
-    private final Setting<Double> spherereach = sgGeneral.add(new DoubleSetting.Builder()
-            .name("Sphere Range")
-            .description("Your Range, in blocks.")
-            .defaultValue(5)
-            .sliderRange(1,5)
-            .min (1)
-            .visible(() -> mode.get() == Modes.Sphere)
-            .build()
-    );
-    private final Setting<Integer> boxreach = sgGeneral.add(new IntSetting.Builder()
-            .name("Box Range")
-            .description("Your Range, in blocks.")
-            .defaultValue(4)
-            .sliderRange(1,4)
-            .min (1)
-            .visible(() -> mode.get() == Modes.Box)
+            .visible(() -> listmode.get() == listModes.whitelist)
             .build()
     );
     private final Setting<Boolean> nobelowfeet = sgGeneral.add(new BoolSetting.Builder()
@@ -126,10 +126,10 @@ public class InstaMineNuker extends Module {
             .defaultValue(new SettingColor(255, 0, 0, 255))
             .build()
     );
-    private Direction direction;
-    private int ticks;
     private final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
     private final List<RenderBlock> renderBlocks = new ArrayList<>();
+    private Direction direction;
+    private int ticks;
     private double reach = 0;
 
     public InstaMineNuker() {
@@ -139,7 +139,7 @@ public class InstaMineNuker extends Module {
     @Override
     public void onActivate() {
         if (mc.player == null) return;
-        direction=mc.player.getHorizontalFacing();
+        direction = mc.player.getHorizontalFacing();
         ticks = 0;
         for (RenderBlock renderBlock : renderBlocks) renderBlockPool.free(renderBlock);
         renderBlocks.clear();
@@ -158,34 +158,37 @@ public class InstaMineNuker extends Module {
         renderBlocks.forEach(renderBlock -> renderBlock.render(event, sideColor.get(), lineColor.get(), shapeModeBreak.get()));
 
     }
+
     @EventHandler
     private void onStartBreakingBlock(StartBreakingBlockEvent event) {
         direction = event.direction;
     }
+
     @EventHandler
     private void onTickPre(TickEvent.Pre event) {
-        if (mode.get() == Modes.Sphere) reach=spherereach.get();
-        else if (mode.get() == Modes.Box) reach=boxreach.get();
+        if (mode.get() == Modes.Sphere) reach = spherereach.get();
+        else if (mode.get() == Modes.Box) reach = boxreach.get();
         ticks++;
         renderBlocks.forEach(RenderBlock::tick);
         renderBlocks.removeIf(renderBlock -> renderBlock.ticks <= 0);
         int count = 0;
         int bottomlimit = (int) (mc.player.getBlockY() - Math.round(Math.ceil(reach)));
         if (nobelowfeet.get()) bottomlimit = mc.player.getBlockY();
-        if (ticks>=delay.get()){
+        if (ticks >= delay.get()) {
             // Create a list of all the blocks within the specified range
             List<BlockPos> blocks = new ArrayList<>();
             for (int x = (int) (mc.player.getBlockX() - Math.round(Math.ceil(reach))); x <= mc.player.getBlockX() + Math.round(Math.ceil(reach)); x++) {
-                for (int y = bottomlimit; y <= (mc.player.getBlockY()+1) + Math.round(Math.ceil(reach)); y++) {
+                for (int y = bottomlimit; y <= (mc.player.getBlockY() + 1) + Math.round(Math.ceil(reach)); y++) {
                     for (int z = (int) (mc.player.getBlockZ() - Math.round(Math.ceil(reach))); z <= mc.player.getBlockZ() + Math.round(Math.ceil(reach)); z++) {
                         BlockPos blockPos = new BlockPos(x, y, z);
                         Vec3d playerPos1 = new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ()).toCenterPos();
-                        Vec3d playerPos2 = new BlockPos(mc.player.getBlockX(), mc.player.getBlockY()+1, mc.player.getBlockZ()).toCenterPos();
+                        Vec3d playerPos2 = new BlockPos(mc.player.getBlockX(), mc.player.getBlockY() + 1, mc.player.getBlockZ()).toCenterPos();
                         double distance1 = playerPos1.distanceTo(blockPos.toCenterPos());
                         double distance2 = playerPos2.distanceTo(blockPos.toCenterPos());
                         switch (mode.get()) {
                             case Sphere -> {
-                                if (!blocks.contains(blockPos) && distance1 <= reach || distance2 <= reach) blocks.add(blockPos);
+                                if (!blocks.contains(blockPos) && distance1 <= reach || distance2 <= reach)
+                                    blocks.add(blockPos);
                             }
                             case Box -> {
                                 if (!blocks.contains(blockPos)) blocks.add(blockPos);
@@ -202,70 +205,74 @@ public class InstaMineNuker extends Module {
                 assert mc.world != null;
                 if (count >= maxBlocksPerTick.get()) break;
                 // Get the block at the current coordinates
-                if (onlyInstamineable.get()){
-                    if (((listmode.get()== listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get()== listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && rotate.get() && BlockUtils.canBreak(blockPos) && BlockUtils.canInstaBreak(blockPos)){
+                if (onlyInstamineable.get()) {
+                    if (((listmode.get() == listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get() == listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && rotate.get() && BlockUtils.canBreak(blockPos) && BlockUtils.canInstaBreak(blockPos)) {
                         renderBlocks.add(renderBlockPool.get().set(blockPos));
                         if (direction != null) {
                             Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction)));
-                            if (swing.get()){
+                            if (swing.get()) {
                                 mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
                                 mc.player.swingHand(Hand.MAIN_HAND);
                             }
                         }
-                    }
-                    else if (((listmode.get()== listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get()== listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && !rotate.get() && BlockUtils.canBreak(blockPos) && BlockUtils.canInstaBreak(blockPos)){
+                    } else if (((listmode.get() == listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get() == listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && !rotate.get() && BlockUtils.canBreak(blockPos) && BlockUtils.canInstaBreak(blockPos)) {
                         renderBlocks.add(renderBlockPool.get().set(blockPos));
                         mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
-                        if (swing.get()){
+                        if (swing.get()) {
                             mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
                             mc.player.swingHand(Hand.MAIN_HAND);
                         }
                     }
-                    if (((listmode.get()== listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get()== listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && rotate.get() && BlockUtils.canBreak(blockPos) && BlockUtils.canInstaBreak(blockPos)){
+                    if (((listmode.get() == listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get() == listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && rotate.get() && BlockUtils.canBreak(blockPos) && BlockUtils.canInstaBreak(blockPos)) {
                         if (direction != null) {
                             Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
                             count++;
                         }
-                    }
-                    else if (((listmode.get()== listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get()== listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && !rotate.get() && BlockUtils.canBreak(blockPos) && BlockUtils.canInstaBreak(blockPos)){
+                    } else if (((listmode.get() == listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get() == listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && !rotate.get() && BlockUtils.canBreak(blockPos) && BlockUtils.canInstaBreak(blockPos)) {
                         mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
                         count++;
                     }
                 } else if (!onlyInstamineable.get()) {
-                    if (((listmode.get()== listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get()== listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && rotate.get() && BlockUtils.canBreak(blockPos)){
+                    if (((listmode.get() == listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get() == listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && rotate.get() && BlockUtils.canBreak(blockPos)) {
                         renderBlocks.add(renderBlockPool.get().set(blockPos));
                         if (direction != null) {
                             Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction)));
-                            if (swing.get()){
+                            if (swing.get()) {
                                 mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
                                 mc.player.swingHand(Hand.MAIN_HAND);
                             }
                         }
-                    }
-                    else if (((listmode.get()== listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get()== listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && !rotate.get() && BlockUtils.canBreak(blockPos)){
+                    } else if (((listmode.get() == listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get() == listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && !rotate.get() && BlockUtils.canBreak(blockPos)) {
                         renderBlocks.add(renderBlockPool.get().set(blockPos));
                         mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
-                        if (swing.get()){
+                        if (swing.get()) {
                             mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
                             mc.player.swingHand(Hand.MAIN_HAND);
                         }
                     }
-                    if (((listmode.get()== listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get()== listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && rotate.get() && BlockUtils.canBreak(blockPos)){
+                    if (((listmode.get() == listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get() == listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && rotate.get() && BlockUtils.canBreak(blockPos)) {
                         if (direction != null) {
                             Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
                             count++;
                         }
-                    }
-                    else if (((listmode.get()== listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get()== listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && !rotate.get() && BlockUtils.canBreak(blockPos)){
+                    } else if (((listmode.get() == listModes.whitelist && nonskippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock())) || (listmode.get() == listModes.blacklist && !skippableBlox.get().contains(mc.world.getBlockState(blockPos).getBlock()))) && !rotate.get() && BlockUtils.canBreak(blockPos)) {
                         mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
                         count++;
                     }
                 }
             }
-            ticks=0;
+            ticks = 0;
         }
     }
 
+
+    public enum Modes {
+        Sphere, Box
+    }
+
+    public enum listModes {
+        whitelist, blacklist
+    }
 
     public static class RenderBlock {
         public BlockPos.Mutable pos = new BlockPos.Mutable();
@@ -294,12 +301,5 @@ public class InstaMineNuker extends Module {
             sides.a = preSideA;
             lines.a = preLineA;
         }
-    }
-
-    public enum Modes {
-        Sphere, Box
-    }
-    public enum listModes {
-        whitelist, blacklist
     }
 }

@@ -3,8 +3,10 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.mixininterface.IPlayerInteractEntityC2SPacket;
 import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
-import meteordevelopment.meteorclient.renderer.ShapeMode;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Blocks;
@@ -39,21 +41,20 @@ public class MaceKill extends Module {
             .description("Does not send movement packets if the attack was blocked. (prevents death)")
             .defaultValue(true)
             .build());
+    private Vec3d previouspos;
 
     public MaceKill() {
         super(Trouser.Main, "MaceKill", "Makes the Mace powerful when swung.");
     }
 
-    private Vec3d previouspos;
-
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
         if (mc.player != null && mc.player.getInventory().getMainHandStack().getItem() == Items.MACE && event.packet instanceof IPlayerInteractEntityC2SPacket packet && packet.meteor$getType() == PlayerInteractEntityC2SPacket.InteractType.ATTACK) {
             try {
-                if (packet.meteor$getEntity() instanceof LivingEntity) {
-                    LivingEntity targetEntity = (LivingEntity) packet.meteor$getEntity();
+                if (packet.meteor$getEntity() instanceof LivingEntity targetEntity) {
 
-                    if (packetDisable.get() && ((targetEntity.isBlocking() && targetEntity.blockedByShield(targetEntity.getRecentDamageSource())) || targetEntity.isInvulnerable() || targetEntity.isInCreativeMode())) return;
+                    if (packetDisable.get() && ((targetEntity.isBlocking() && targetEntity.blockedByShield(targetEntity.getRecentDamageSource())) || targetEntity.isInvulnerable() || targetEntity.isInCreativeMode()))
+                        return;
                     previouspos = mc.player.getPos();
                     int blocks = getMaxHeightAbovePlayer();
 

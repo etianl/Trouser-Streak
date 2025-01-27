@@ -1,12 +1,12 @@
 package pwn.noobs.trouserstreak.mixin;
 
-import pwn.noobs.trouserstreak.events.OffGroundSpeedEvent;
 import meteordevelopment.meteorclient.MeteorClient;
 import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import pwn.noobs.trouserstreak.events.OffGroundSpeedEvent;
 
 @Mixin(PlayerEntity.class)
 public class PlayerEntityMixin {

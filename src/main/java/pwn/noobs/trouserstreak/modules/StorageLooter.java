@@ -1,8 +1,6 @@
 //Made by etianl
 package pwn.noobs.trouserstreak.modules;
 
-import net.minecraft.command.argument.EntityAnchorArgumentType;
-import net.minecraft.component.type.FoodComponents;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
@@ -12,6 +10,8 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.*;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
+import net.minecraft.command.argument.EntityAnchorArgumentType;
+import net.minecraft.component.type.FoodComponents;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
@@ -37,6 +37,20 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 public class StorageLooter extends Module {
+    //item list filters
+    private static final Set<String> FOOD_ITEMS = new HashSet<>();
+
+    static {
+        try {
+            Field[] fields = FoodComponents.class.getFields();
+            for (Field field : fields) {
+                FOOD_ITEMS.add(field.getName().toLowerCase());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgAutoLoot = settings.createGroup("Auto Open Options");
     private final SettingGroup sgAutoSteal = settings.createGroup("Steal On Tick Options");
@@ -202,7 +216,7 @@ public class StorageLooter extends Module {
                     Items.DIAMOND_LEGGINGS,
                     Items.DIAMOND_BOOTS,
                     Items.SHULKER_BOX
-                    ))
+            ))
             .filter(this::isValidLootItem)
             .build()
     );
@@ -249,7 +263,7 @@ public class StorageLooter extends Module {
             .name("Wood Items to Loot")
             .description("Select the wood items to loot.")
             .defaultValue(Arrays.asList(
-                    Items.OAK_LOG, Items.BIRCH_LOG, Items.CHERRY_LOG, Items.DARK_OAK_LOG, Items.JUNGLE_LOG,Items.MANGROVE_LOG, Items.SPRUCE_LOG, Items.CRIMSON_STEM, Items.WARPED_STEM,
+                    Items.OAK_LOG, Items.BIRCH_LOG, Items.CHERRY_LOG, Items.DARK_OAK_LOG, Items.JUNGLE_LOG, Items.MANGROVE_LOG, Items.SPRUCE_LOG, Items.CRIMSON_STEM, Items.WARPED_STEM,
                     Items.STRIPPED_OAK_LOG, Items.STRIPPED_BIRCH_LOG, Items.STRIPPED_CHERRY_LOG, Items.STRIPPED_DARK_OAK_LOG, Items.STRIPPED_JUNGLE_LOG, Items.STRIPPED_MANGROVE_LOG, Items.STRIPPED_SPRUCE_LOG, Items.STRIPPED_CRIMSON_STEM, Items.STRIPPED_WARPED_STEM,
                     Items.OAK_WOOD, Items.OAK_WOOD, Items.BIRCH_WOOD, Items.CHERRY_WOOD, Items.DARK_OAK_WOOD, Items.JUNGLE_WOOD, Items.MANGROVE_WOOD, Items.SPRUCE_WOOD, Items.CRIMSON_HYPHAE, Items.WARPED_HYPHAE,
                     Items.STRIPPED_OAK_WOOD, Items.STRIPPED_BIRCH_WOOD, Items.STRIPPED_CHERRY_WOOD, Items.STRIPPED_DARK_OAK_WOOD, Items.STRIPPED_JUNGLE_WOOD, Items.STRIPPED_MANGROVE_WOOD, Items.STRIPPED_SPRUCE_WOOD, Items.STRIPPED_CRIMSON_HYPHAE, Items.STRIPPED_WARPED_HYPHAE,
@@ -296,7 +310,6 @@ public class StorageLooter extends Module {
             .min(0)
             .build()
     );
-
     private final Setting<List<Item>> miscItemList = sgItems.add(new ItemListSetting.Builder()
             .name("Miscellaneous items to Loot")
             .description("Select the miscellaneous items to loot.")
@@ -366,14 +379,14 @@ public class StorageLooter extends Module {
     private void onSendPacket(PacketEvent.Send event) {
         if (event.packet instanceof PlayerInteractBlockC2SPacket) {
             lastInteractedBlockPos = ((PlayerInteractBlockC2SPacket) event.packet).getBlockHitResult().getBlockPos();
-        }
-        else if (event.packet instanceof PlayerInteractEntityC2SPacket packet) {
+        } else if (event.packet instanceof PlayerInteractEntityC2SPacket packet) {
             Entity entity = mc.world.getEntityById(getEntityId(packet));
             if (entity != null) {
                 lastInteractedBlockPos = entity.getBlockPos();
             }
         }
     }
+
     private int getEntityId(PlayerInteractEntityC2SPacket packet) {
         try {
             Field entityIdField = PlayerInteractEntityC2SPacket.class.getDeclaredField("entityId");
@@ -384,6 +397,7 @@ public class StorageLooter extends Module {
         }
         return -1; // Return -1 if the field cannot be accessed
     }
+
     @EventHandler
     private void onTickPre(TickEvent.Pre event) {
         if ((!hasEnoughFreeSlots() && stopLoot.get()) || mc.player == null || mc.world == null) return;
@@ -395,14 +409,13 @@ public class StorageLooter extends Module {
             Block block = blockState.getBlock();
 
             if (isValidContainerBlock(block) && containerList.get().contains(block.asItem())) {
-                if (mc.player.currentScreenHandler != null && isContainerScreen(mc.player.currentScreenHandler)) {
+                if (isContainerScreen(mc.player.currentScreenHandler)) {
                     if (autoStealTicks == 0) {
                         processContainerItems();
                     }
-                    if (autoStealTicks<autoStealDelay.get()) {
+                    if (autoStealTicks < autoStealDelay.get()) {
                         autoStealTicks++;
-                    }
-                    else if (autoStealTicks>=autoStealDelay.get()){
+                    } else if (autoStealTicks >= autoStealDelay.get()) {
                         processContainerItems();
                         autoStealTicks = 0;
                     }
@@ -410,14 +423,13 @@ public class StorageLooter extends Module {
             }
             for (Entity entity : mc.world.getEntities()) {
                 if (entity.getBlockPos().equals(lastInteractedBlockPos) && entity instanceof ChestMinecartEntity && containerList.get().contains(Items.CHEST_MINECART)) {
-                    if (mc.player.currentScreenHandler != null && isContainerScreen(mc.player.currentScreenHandler)) {
+                    if (isContainerScreen(mc.player.currentScreenHandler)) {
                         if (autoStealTicks == 0) {
-                        processContainerItems();
+                            processContainerItems();
                         }
-                        if (autoStealTicks<autoStealDelay.get()) {
+                        if (autoStealTicks < autoStealDelay.get()) {
                             autoStealTicks++;
-                        }
-                        else if (autoStealTicks>=autoStealDelay.get()){
+                        } else if (autoStealTicks >= autoStealDelay.get()) {
                             processContainerItems();
                             autoStealTicks = 0;
                         }
@@ -426,7 +438,7 @@ public class StorageLooter extends Module {
                 }
             }
         }
-        if (ticks < delay.get())ticks++;
+        if (ticks < delay.get()) ticks++;
         if (mc.interactionManager == null) return;
         if (ticks >= delay.get() && autoloot.get()) {
             List<BlockPos> blocks = getBlocksInRange(bottomlimit);
@@ -452,12 +464,12 @@ public class StorageLooter extends Module {
                 for (Entity entity : mc.world.getEntities()) {
                     if (entity instanceof ChestMinecartEntity && containerList.get().contains(Items.CHEST_MINECART) && blocks.contains(entity.getBlockPos())) {
                         if (!openedEntities.contains(entity.getId()) && !processedChests.contains(entity.getBlockPos()) && !isChestOpen) {
-                            if (rotate.get()){
+                            if (rotate.get()) {
                                 originalYaw = mc.player.getYaw();
                                 originalPitch = mc.player.getPitch();
                                 mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(entity.getX(), entity.getY(), entity.getZ()));
                             }
-                            if (swing.get()){
+                            if (swing.get()) {
                                 mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
                                 mc.player.swingHand(Hand.MAIN_HAND);
                             }
@@ -548,6 +560,7 @@ public class StorageLooter extends Module {
 
         totalClicksThisTick = 0; // Reset the total clicks for the next tick
     }
+
     private void moveExcessItemsToContainer(int playerInvStart) {
         if (mc.player == null || mc.interactionManager == null) return;
         for (int i = playerInvStart; i < mc.player.currentScreenHandler.slots.size(); i++) {
@@ -556,7 +569,7 @@ public class StorageLooter extends Module {
                 Item playerItem = playerStack.getItem();
 
                 // Check if the item is in the junk item list
-                if (moveJunkToContainer.get() && (junkItemList.get().contains(playerItem) || (nonitemlistjunk.get() && (!itemList.get().contains(playerItem) && !blockItemList.get().contains(playerItem)  && !woodItemList.get().contains(playerItem) && !foodItemList.get().contains(playerItem) && !miscItemList.get().contains(playerItem) && !isNonJunkVariant(playerStack, itemList.get()))))) {
+                if (moveJunkToContainer.get() && (junkItemList.get().contains(playerItem) || (nonitemlistjunk.get() && (!itemList.get().contains(playerItem) && !blockItemList.get().contains(playerItem) && !woodItemList.get().contains(playerItem) && !foodItemList.get().contains(playerItem) && !miscItemList.get().contains(playerItem) && !isNonJunkVariant(playerStack, itemList.get()))))) {
                     // Move the entire stack to the container
                     for (int j = 0; j < playerInvStart; j++) {
                         ItemStack containerStack = mc.player.currentScreenHandler.getSlot(j).getStack();
@@ -611,6 +624,7 @@ public class StorageLooter extends Module {
             }
         }
     }
+
     private boolean isNonJunkVariant(ItemStack playerItem, List<Item> itemList) {
         String itemName = playerItem.getItem().getTranslationKey().toLowerCase();
 
@@ -638,6 +652,7 @@ public class StorageLooter extends Module {
 
         return false;
     }
+
     private List<Item> getItemList(Item item) {
         if (itemList.get().contains(item)) {
             return itemList.get();
@@ -688,7 +703,7 @@ public class StorageLooter extends Module {
 
     private void moveItemsWithLimit(int slotIndex, Item item, int maxCount, List<Item> itemlist) {
         int currentCount = getItemCount(item, itemlist);
-        if (itemlist==itemList.get()) currentCount = getCurrentItemCount(item);
+        if (itemlist == itemList.get()) currentCount = getCurrentItemCount(item);
         if (currentCount < maxCount) {
             int amountToMove = maxCount - currentCount;
             moveItems(slotIndex, amountToMove);
@@ -723,12 +738,12 @@ public class StorageLooter extends Module {
 
     private void openContainer(BlockPos blockPos, Block block) {
         if (mc.player == null) return;
-        if (rotate.get()){
+        if (rotate.get()) {
             originalYaw = mc.player.getYaw();
             originalPitch = mc.player.getPitch();
             mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
         }
-        if (swing.get()){
+        if (swing.get()) {
             mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             mc.player.swingHand(Hand.MAIN_HAND);
         }
@@ -743,10 +758,10 @@ public class StorageLooter extends Module {
         chestsToProcess.entrySet().removeIf(entry -> {
             int delay = entry.getValue();
             if (delay <= 0) {
-                if (mc.player.currentScreenHandler != null && isContainerScreen(mc.player.currentScreenHandler)) {
+                if (isContainerScreen(mc.player.currentScreenHandler)) {
                     processContainerItems();
                     mc.player.closeHandledScreen();
-                    if (rotate.get()){
+                    if (rotate.get()) {
                         mc.player.setYaw(originalYaw);
                         mc.player.setPitch(originalPitch);
                     }
@@ -909,7 +924,7 @@ public class StorageLooter extends Module {
     private void moveItems(int slotIndex, int amountToMove) {
         if (mc.player != null && mc.interactionManager != null && isContainerScreen(mc.player.currentScreenHandler) && slotIndex >= 0 && slotIndex < mc.player.currentScreenHandler.slots.size()) {
             ItemStack sourceStack = mc.player.currentScreenHandler.getSlot(slotIndex).getStack();
-            if (!sourceStack.isEmpty() && Math.round(((double)sourceStack.getCount() / sourceStack.getItem().getMaxCount()) * 100) >= minLootableStackSize.get()) {
+            if (!sourceStack.isEmpty() && Math.round(((double) sourceStack.getCount() / sourceStack.getItem().getMaxCount()) * 100) >= minLootableStackSize.get()) {
                 amountToMove = Math.min(amountToMove, sourceStack.getCount());
 
                 // Calculate the number of clicks needed
@@ -925,6 +940,7 @@ public class StorageLooter extends Module {
             }
         }
     }
+
     private int getCurrentItemCount(Item item) {
         assert mc.player != null;
         int count = 0;
@@ -944,6 +960,7 @@ public class StorageLooter extends Module {
         }
         return count;
     }
+
     private int getMaxCount(Item item) {
         int maxCount = 1;
         String itemName = item.toString().toLowerCase();
@@ -1010,7 +1027,8 @@ public class StorageLooter extends Module {
                 if (!limitString.isEmpty()) {
                     maxCount = Integer.parseInt(limitString);
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
         return maxCount;
     }
@@ -1071,6 +1089,7 @@ public class StorageLooter extends Module {
 
         return count;
     }
+
     private boolean isSameItem(Item stackItem, Item item, String itemName) {
         return stackItem == item || (itemName.contains("shulker_box") && stackItem.toString().toLowerCase().contains("shulker_box")) ||
                 (itemName.contains("_pickaxe") && stackItem.toString().toLowerCase().contains("_pickaxe")) ||
@@ -1100,35 +1119,20 @@ public class StorageLooter extends Module {
                 || item == Items.CHEST_MINECART;
     }
 
-    public enum Modes {
-        Sphere, Box
-    }
-
-    //item list filters
-    private static final Set<String> FOOD_ITEMS = new HashSet<>();
-
-    static {
-        try {
-            Field[] fields = FoodComponents.class.getFields();
-            for (Field field : fields) {
-                FOOD_ITEMS.add(field.getName().toLowerCase());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     private boolean isValidFoodItem(Item item) {
         String itemName = item.toString().toLowerCase();
         return FOOD_ITEMS.contains(itemName);
     }
+
     private boolean isValidBlockItem(Item item) {
         return item instanceof BlockItem;
     }
+
     private boolean isValidWoodItem(Item item) {
         String itemName = item.toString().toLowerCase();
         return itemName.contains("_wood") || itemName.contains("log") || itemName.contains("plank") || itemName.contains("hyphae") || itemName.contains("bamboo_block");
     }
+
     private boolean isValidLootItem(Item item) {
         if (item instanceof BlockItem) {
             Block block = ((BlockItem) item).getBlock();
@@ -1155,5 +1159,9 @@ public class StorageLooter extends Module {
         }
 
         return true;
+    }
+
+    public enum Modes {
+        Sphere, Box
     }
 }

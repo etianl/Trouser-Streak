@@ -3,10 +3,10 @@ package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
-import meteordevelopment.meteorclient.systems.friends.Friends;
 import net.minecraft.client.network.PlayerListEntry;
 import pwn.noobs.trouserstreak.Trouser;
 
@@ -27,21 +27,6 @@ public class AutoNames extends Module {
             .defaultValue(Presets.MOUNTAINS_OF_LAVA)
             .build()
     );
-
-    private final Setting<Boolean> targetSelf = sgGeneral.add(new BoolSetting.Builder()
-            .name("target-self")
-            .description("Apply changes to your own name")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> trollfriends = sgGeneral.add(new BoolSetting.Builder()
-            .name("apply-to-friends")
-            .description("Whether or not to apply team formatting to friends")
-            .defaultValue(true)
-            .build()
-    );
-
     private final Setting<String> prefix = sgFormat.add(new StringSetting.Builder()
             .name("prefix")
             .description("Text to add before player names")
@@ -49,7 +34,6 @@ public class AutoNames extends Module {
             .visible(() -> presetMode.get() == Presets.CUSTOM)
             .build()
     );
-
     private final Setting<String> suffix = sgFormat.add(new StringSetting.Builder()
             .name("suffix")
             .description("Text to add after player names")
@@ -57,7 +41,18 @@ public class AutoNames extends Module {
             .visible(() -> presetMode.get() == Presets.CUSTOM)
             .build()
     );
-
+    private final Setting<Boolean> targetSelf = sgGeneral.add(new BoolSetting.Builder()
+            .name("target-self")
+            .description("Apply changes to your own name")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Boolean> trollfriends = sgGeneral.add(new BoolSetting.Builder()
+            .name("apply-to-friends")
+            .description("Whether or not to apply team formatting to friends")
+            .defaultValue(true)
+            .build()
+    );
     private final Setting<Boolean> rainbow = sgColors.add(new BoolSetting.Builder()
             .name("rainbow")
             .description("Makes the colors cycle smoothly through rainbow colors")

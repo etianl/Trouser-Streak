@@ -30,10 +30,16 @@ import pwn.noobs.trouserstreak.Trouser;
 import java.util.Random;
 
 public class AirstrikePlus extends Module {
+    final Random r = new Random();
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    public final Setting<Boolean> randomnomcolor = sgGeneral.add(new BoolSetting.Builder()
+            .name("Rainbow Name Colors")
+            .description("Name Colors are randomly selected.")
+            .defaultValue(true)
+            .build()
+    );
     private final SettingGroup sgeveryone = settings.createGroup("AIRSTRIKE EVERYONE Command Options");
     private final SettingGroup sgnormal = settings.createGroup("NORMAL Spawn Egg Options");
-
     private final Setting<Boolean> disconnectdisable = sgGeneral.add(new BoolSetting.Builder()
             .name("Disable on Disconnect")
             .description("Disables module on disconnecting")
@@ -44,6 +50,7 @@ public class AirstrikePlus extends Module {
             .description("What is created. Ex: fireball, villager, minecart, lightning_bolt, magma_cube, tnt")
             .defaultValue("fireball")
             .build());
+    private String entityName = entity.get().trim().replace(" ", "_");
     private final Setting<Boolean> mixer = sgGeneral.add(new BoolSetting.Builder()
             .name("Mixer")
             .description("Mixes entities.")
@@ -65,18 +72,13 @@ public class AirstrikePlus extends Module {
             .description("Name the Entity")
             .defaultValue("MOUNTAINSOFLAVAINC")
             .build());
+    private String customName = nom.get();
     private final Setting<BoomPlus.ColorModes> nomcolor = sgGeneral.add(new EnumSetting.Builder<BoomPlus.ColorModes>()
             .name("Custom Name Color")
             .description("Color the Name")
             .defaultValue(BoomPlus.ColorModes.red)
             .build());
-    public enum ColorModes { aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green, dark_purple, dark_red, gold, gray, green, italic, light_purple, red, white, yellow }
-    public final Setting<Boolean> randomnomcolor = sgGeneral.add(new BoolSetting.Builder()
-            .name("Rainbow Name Colors")
-            .description("Name Colors are randomly selected.")
-            .defaultValue(true)
-            .build()
-    );
+    private String namecolour = nomcolor.get().toString();
     private final Setting<Integer> radius = sgGeneral.add(new IntSetting.Builder()
             .name("radius")
             .description("radius they spawn from the player")
@@ -84,14 +86,12 @@ public class AirstrikePlus extends Module {
             .sliderRange(1, 100)
             .min(1)
             .build());
-
     private final Setting<Integer> height = sgGeneral.add(new IntSetting.Builder()
             .name("HeightAboveHead")
             .description("How far from your Characters Y level to spawn at.")
             .defaultValue(20)
             .sliderRange(-63, 319)
             .build());
-
     private final Setting<Integer> speed = sgGeneral.add(new IntSetting.Builder()
             .name("speed")
             .description("speed of entities")
@@ -100,7 +100,6 @@ public class AirstrikePlus extends Module {
             .min(1)
             .max(10)
             .build());
-
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
             .description("its in ticks")
@@ -382,21 +381,11 @@ public class AirstrikePlus extends Module {
             .defaultValue(Blocks.BEDROCK)
             .visible(() -> airstrikeEveryone.get() && EblockstateSpecify.get())
             .build());
-
-    public AirstrikePlus() {
-        super(Trouser.Main, "Airstrike+", "Rains things down from the sky");
-    }
-
-    final Random r = new Random();
     Vec3d origin = null;
     int i = 0;
-    private int mix=0;
-    private String namecolour = nomcolor.get().toString();
+    private int mix = 0;
     private NbtList speedlist = new NbtList();
-    private String entityName = entity.get().trim().replace(" ", "_");
-    private String customName = nom.get();
-
-    private String[] prefixes = {
+    private final String[] prefixes = {
             "§k111 §r| ",
             "§k222 §r| ",
             "§k333 §r| ",
@@ -407,21 +396,27 @@ public class AirstrikePlus extends Module {
             "§k888 §r| ",
             "§k999 §r| "
     };
+    public AirstrikePlus() {
+        super(Trouser.Main, "Airstrike+", "Rains things down from the sky");
+    }
+
     private Vec3d pickRandomPos() {
         double x = r.nextDouble(radius.get() * 2) - radius.get() + origin.x;
-        double y = mc.player.getY()+height.get();
+        double y = mc.player.getY() + height.get();
         double z = r.nextDouble(radius.get() * 2) - radius.get() + origin.z;
         return new Vec3d(x, y, z);
     }
+
     @EventHandler
     private void onScreenOpen(OpenScreenEvent event) {
         if (disconnectdisable.get() && event.screen instanceof DisconnectedScreen) {
             toggle();
         }
     }
+
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
-        if (disconnectdisable.get())toggle();
+        if (disconnectdisable.get()) toggle();
     }
 
     @EventHandler
@@ -440,9 +435,9 @@ public class AirstrikePlus extends Module {
         }
         if (mixer.get()) {
             mix++;
-            if (mix == 1)entityName = entity.get().trim().replace(" ", "_");
+            if (mix == 1) entityName = entity.get().trim().replace(" ", "_");
             if (mix == 2) entityName = entity2.get().trim().replace(" ", "_");
-            if (mix > 2)mix = 0;
+            if (mix > 2) mix = 0;
         } else entityName = entity.get().trim().replace(" ", "_");
         for (int griefs = 0; griefs < grief.get(); griefs++) {
             if (airstrikeEveryone.get()) executeCommandsToCreateEntities();
@@ -477,6 +472,7 @@ public class AirstrikePlus extends Module {
             }
         }
     }
+
     private NbtComponent createEntityData() {
         String fullString = blockstate.get().toString();
         String[] parts = fullString.split(":");
@@ -525,7 +521,7 @@ public class AirstrikePlus extends Module {
 
     private void executeCommandsToCreateEntities() {
         speedlist = new NbtList();
-        if (randomnomcolor.get()){
+        if (randomnomcolor.get()) {
             String[] colorCodes = {"black", "dark_blue", "dark_green", "dark_aqua", "dark_red", "dark_purple", "gold", "gray", "dark_gray", "blue", "green", "aqua", "red", "light_purple", "yellow", "white"};
             Random random = new Random();
             int index = random.nextInt(colorCodes.length);
@@ -567,8 +563,10 @@ public class AirstrikePlus extends Module {
         if (Eabsorption.get() > 0) command += "\"AbsorptionAmount\":" + absorptionPoints + ",";
         if (EageSpecify.get()) command += "\"Age\":" + ageValue + ",";
         if (EblockstateSpecify.get()) command += "\"BlockState\":" + blockState + ",";
-        if (entity.get() == "fireball" || entity2.get() == "fireball") command += "\"ExplosionPower\":" + explosionPower + ",";
-        if (entity.get() == "creeper" || entity2.get() == "creeper") command += "\"ExplosionRadius\":" + explosionRadius + ",";
+        if (entity.get() == "fireball" || entity2.get() == "fireball")
+            command += "\"ExplosionPower\":" + explosionPower + ",";
+        if (entity.get() == "creeper" || entity2.get() == "creeper")
+            command += "\"ExplosionRadius\":" + explosionRadius + ",";
         if (Einvincible.get()) command += "\"Invulnerable\":" + isInvulnerable + ",";
         if (Esilence.get()) command += "\"Silent\":" + isSilent + ",";
         if (Eglow.get()) command += "\"Glowing\":" + isGlowing + ",";
@@ -577,14 +575,18 @@ public class AirstrikePlus extends Module {
         if (EnoAI.get()) command += "\"NoAI\":" + hasNoAI + ",";
         if (Efalsefire.get()) command += "\"HasVisualFire\":" + hasVisualFire + ",";
         if (Epowah.get()) command += "\"powered\":" + isPowered + ",";
-        if (Eignite.get() && entity.get() == "creeper" || entity2.get() == "creeper") command += "\"ignited\":" + isIgnited + ",";
-        if (entity.get() == "tnt" || entity2.get() == "tnt" || entity.get() == "creeper" || entity.get() == "creeper")command += "\"Fuse\":" + fuseTicks + ",";
-        if (entity.get() == "slime" || entity2.get() == "slime" || entity.get() == "magma_cube" || entity.get() == "magma_cube")command += "\"Size\":" + sizeValue + ",";
+        if (Eignite.get() && entity.get() == "creeper" || entity2.get() == "creeper")
+            command += "\"ignited\":" + isIgnited + ",";
+        if (entity.get() == "tnt" || entity2.get() == "tnt" || entity.get() == "creeper" || entity.get() == "creeper")
+            command += "\"Fuse\":" + fuseTicks + ",";
+        if (entity.get() == "slime" || entity2.get() == "slime" || entity.get() == "magma_cube" || entity.get() == "magma_cube")
+            command += "\"Size\":" + sizeValue + ",";
         if (Ecustomname.get()) command += "\"CustomNameVisible\":" + isCustomNameVisible + ",";
-        if (entity.get() == "dragon_fireball" || entity2.get() == "dragon_fireball" || entity.get() == "fireball" || entity.get() == "fireball" || entity.get() == "small_fireball" || entity2.get() == "small_fireball" || entity.get() == "wither_skull" || entity.get() == "wither_skull" || entity.get() == "wind_projectile" || entity.get() == "wind_projectile")command += "\"power\":" + speedlist.toString() + ",";
-        else command += "\"Motion\":" + speedlist.toString() + "";
+        if (entity.get() == "dragon_fireball" || entity2.get() == "dragon_fireball" || entity.get() == "fireball" || entity.get() == "fireball" || entity.get() == "small_fireball" || entity2.get() == "small_fireball" || entity.get() == "wither_skull" || entity.get() == "wither_skull" || entity.get() == "wind_projectile" || entity.get() == "wind_projectile")
+            command += "\"power\":" + speedlist.toString() + ",";
+        else command += "\"Motion\":" + speedlist.toString();
         command += "}";
-        if (command.length()<=256)ChatUtils.sendPlayerMsg(command);
+        if (command.length() <= 256) ChatUtils.sendPlayerMsg(command);
         else {
             int characterstodelete = command.length() - 256;
             error("The command is too long (" + command + ").");
@@ -594,4 +596,6 @@ public class AirstrikePlus extends Module {
         }
         i = 0;
     }
+
+    public enum ColorModes {aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green, dark_purple, dark_red, gold, gray, green, italic, light_purple, red, white, yellow}
 }

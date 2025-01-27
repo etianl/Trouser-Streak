@@ -5,6 +5,7 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.settings.StringSetting;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import pwn.noobs.trouserstreak.Trouser;
+
 //credits to DAM for the sauce
 public class BungeeSpoofer extends Module {
     private final SettingGroup specialGroup = settings.createGroup("Credits to DAMcraft, maker of ServerSeeker.");

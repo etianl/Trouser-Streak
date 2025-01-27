@@ -16,7 +16,9 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.*;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.HangingSignBlock;
+import net.minecraft.block.WallHangingSignBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.gui.screen.ingame.HangingSignEditScreen;
@@ -55,30 +57,6 @@ public class BetterAutoSign extends Module {
             .defaultValue(false)
             .build()
     );
-    private final Setting<String> lineOne = sgSign.add(new StringSetting.Builder()
-            .name("line-one")
-            .description("What to put on the first line of the sign.")
-            .defaultValue("Steve")
-            .build()
-    );
-    private final Setting<String> lineTwo = sgSign.add(new StringSetting.Builder()
-            .name("line-two")
-            .description("What to put on the second line of the sign.")
-            .defaultValue("did")
-            .build()
-    );
-    private final Setting<String> lineThree = sgSign.add(new StringSetting.Builder()
-            .name("line-three")
-            .description("What to put on the third line of the sign.")
-            .defaultValue("nothing")
-            .build()
-    );
-    private final Setting<String> lineFour = sgSign.add(new StringSetting.Builder()
-            .name("line-four")
-            .description("What to put on the fourth line of the sign.")
-            .defaultValue("wrong.")
-            .build()
-    );
     private final Setting<String> lineOnedif = sgSign.add(new StringSetting.Builder()
             .name("rear-line-one")
             .description("What to put on the first line of the sign.")
@@ -105,30 +83,6 @@ public class BetterAutoSign extends Module {
             .description("What to put on the fourth line of the sign.")
             .defaultValue("ON YOUTUBE")
             .visible(differentText::get)
-            .build()
-    );
-    private final Setting<String> HlineOne = sgHang.add(new StringSetting.Builder()
-            .name("line-one")
-            .description("What to put on the first line of the hanging sign.")
-            .defaultValue("Steve")
-            .build()
-    );
-    private final Setting<String> HlineTwo = sgHang.add(new StringSetting.Builder()
-            .name("line-two")
-            .description("What to put on the second line of the hanging sign.")
-            .defaultValue("did")
-            .build()
-    );
-    private final Setting<String> HlineThree = sgHang.add(new StringSetting.Builder()
-            .name("line-three")
-            .description("What to put on the third line of the hanging sign.")
-            .defaultValue("nothing")
-            .build()
-    );
-    private final Setting<String> HlineFour = sgHang.add(new StringSetting.Builder()
-            .name("line-four")
-            .description("What to put on the fourth line of the hanging sign.")
-            .defaultValue("wrong.")
             .build()
     );
     private final Setting<String> HlineOnedif = sgHang.add(new StringSetting.Builder()
@@ -159,6 +113,54 @@ public class BetterAutoSign extends Module {
             .visible(differentText::get)
             .build()
     );
+    private final Setting<String> lineOne = sgSign.add(new StringSetting.Builder()
+            .name("line-one")
+            .description("What to put on the first line of the sign.")
+            .defaultValue("Steve")
+            .build()
+    );
+    private final Setting<String> lineTwo = sgSign.add(new StringSetting.Builder()
+            .name("line-two")
+            .description("What to put on the second line of the sign.")
+            .defaultValue("did")
+            .build()
+    );
+    private final Setting<String> lineThree = sgSign.add(new StringSetting.Builder()
+            .name("line-three")
+            .description("What to put on the third line of the sign.")
+            .defaultValue("nothing")
+            .build()
+    );
+    private final Setting<String> lineFour = sgSign.add(new StringSetting.Builder()
+            .name("line-four")
+            .description("What to put on the fourth line of the sign.")
+            .defaultValue("wrong.")
+            .build()
+    );
+    private final Setting<String> HlineOne = sgHang.add(new StringSetting.Builder()
+            .name("line-one")
+            .description("What to put on the first line of the hanging sign.")
+            .defaultValue("Steve")
+            .build()
+    );
+    private final Setting<String> HlineTwo = sgHang.add(new StringSetting.Builder()
+            .name("line-two")
+            .description("What to put on the second line of the hanging sign.")
+            .defaultValue("did")
+            .build()
+    );
+    private final Setting<String> HlineThree = sgHang.add(new StringSetting.Builder()
+            .name("line-three")
+            .description("What to put on the third line of the hanging sign.")
+            .defaultValue("nothing")
+            .build()
+    );
+    private final Setting<String> HlineFour = sgHang.add(new StringSetting.Builder()
+            .name("line-four")
+            .description("What to put on the fourth line of the hanging sign.")
+            .defaultValue("wrong.")
+            .build()
+    );
     // based on ChestAura from Meteor Rejects
     private final Setting<Boolean> signAura = sgSignAura.add(new BoolSetting.Builder()
             .name("sign-aura")
@@ -179,7 +181,7 @@ public class BetterAutoSign extends Module {
             .defaultValue(4)
             .min(0)
             .max(6)
-            .sliderRange(0,6)
+            .sliderRange(0, 6)
             .visible(signAura::get)
             .build()
     );
@@ -210,11 +212,10 @@ public class BetterAutoSign extends Module {
             .defaultValue(false)
             .build()
     );
-
-    private boolean editrear = false;
-    private BlockPos signPos = new BlockPos(99999999,99999999,99999999);
-    private BlockPos prevsignPos = new BlockPos(99999999,99999999,99999999);
     private final ArrayList<BlockPos> openedSigns = new ArrayList<>();
+    private boolean editrear = false;
+    private BlockPos signPos = new BlockPos(99999999, 99999999, 99999999);
+    private BlockPos prevsignPos = new BlockPos(99999999, 99999999, 99999999);
     private int timer = 0;
     private int warningticks = 0;
 
@@ -227,27 +228,29 @@ public class BetterAutoSign extends Module {
         warningticks = 0;
         timer = 0;
         openedSigns.clear();
-        editrear=false;
+        editrear = false;
     }
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         if (mc.player == null || mc.interactionManager == null) return;
-        if (signAura.get() && mc.player.getMainHandStack().getItem() instanceof HangingSignItem && warningticks<=3){
+        if (signAura.get() && mc.player.getMainHandStack().getItem() instanceof HangingSignItem && warningticks <= 3) {
             warningticks++;
-            if (warningticks==2)error("Sign Aura does not work properly with hanging signs when holding a hanging sign.");
+            if (warningticks == 2)
+                error("Sign Aura does not work properly with hanging signs when holding a hanging sign.");
         }
         timer--;
-        if(!signAura.get() || timer > 0) return;
+        if (!signAura.get() || timer > 0) return;
 
-        for(BlockEntity block : Utils.blockEntities()) {
-            if(!(block instanceof SignBlockEntity) || mc.player.getEyePos().distanceTo(Vec3d.ofCenter(block.getPos())) >= signAuraRange.get()) continue;
+        for (BlockEntity block : Utils.blockEntities()) {
+            if (!(block instanceof SignBlockEntity) || mc.player.getEyePos().distanceTo(Vec3d.ofCenter(block.getPos())) >= signAuraRange.get())
+                continue;
 
             BlockPos pos = block.getPos();
-            if(openedSigns.contains(pos)) continue;
+            if (openedSigns.contains(pos)) continue;
 
             Runnable click = () -> mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(pos.getX(), pos.getY(), pos.getZ()), Direction.UP, pos, false));
-            if(signAuraRotate.get()) Rotations.rotate(Rotations.getYaw(pos), Rotations.getPitch(pos), click);
+            if (signAuraRotate.get()) Rotations.rotate(Rotations.getYaw(pos), Rotations.getPitch(pos), click);
             else click.run();
 
             openedSigns.add(pos);
@@ -258,42 +261,42 @@ public class BetterAutoSign extends Module {
 
     @EventHandler
     private void onOpenScreen(OpenScreenEvent event) {
-        if(!(event.screen instanceof SignEditScreen) && !(event.screen instanceof HangingSignEditScreen)) return;
+        if (!(event.screen instanceof SignEditScreen) && !(event.screen instanceof HangingSignEditScreen)) return;
 
         SignBlockEntity sign = ((AbstractSignEditScreenAccessor) event.screen).getSign();
-        if (!(mc.world.getBlockState(sign.getPos()).getBlock().asItem() instanceof HangingSignItem) && mc.world.getBlockState(sign.getPos()).getBlock().asItem() instanceof SignItem){
-        mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(),true,
-                lineOne.get(),
-                lineTwo.get(),
-                lineThree.get(),
-                lineFour.get()
-        ));
-        if (bothside.get()){
-            editrear = true;
-            if (prevsignPos != sign.getPos())signPos = sign.getPos();
-        }
-        } else if (mc.world.getBlockState(sign.getPos()).getBlock().asItem() instanceof HangingSignItem){
-            mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(),true,
+        if (!(mc.world.getBlockState(sign.getPos()).getBlock().asItem() instanceof HangingSignItem) && mc.world.getBlockState(sign.getPos()).getBlock().asItem() instanceof SignItem) {
+            mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), true,
+                    lineOne.get(),
+                    lineTwo.get(),
+                    lineThree.get(),
+                    lineFour.get()
+            ));
+            if (bothside.get()) {
+                editrear = true;
+                if (prevsignPos != sign.getPos()) signPos = sign.getPos();
+            }
+        } else if (mc.world.getBlockState(sign.getPos()).getBlock().asItem() instanceof HangingSignItem) {
+            mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), true,
                     HlineOne.get(),
                     HlineTwo.get(),
                     HlineThree.get(),
                     HlineFour.get()
             ));
-            if (bothside.get()){
+            if (bothside.get()) {
                 editrear = true;
-                if (prevsignPos != sign.getPos())signPos = sign.getPos();
+                if (prevsignPos != sign.getPos()) signPos = sign.getPos();
             }
         }
 
         event.cancel();
 
-        BlockHitResult thesign = new BlockHitResult (
+        BlockHitResult thesign = new BlockHitResult(
                 new Vec3d(sign.getPos().getX(), sign.getPos().getY(), sign.getPos().getZ()),
                 Direction.UP,
                 sign.getPos(),
                 true
         );
-        if(autoDye.get()) {
+        if (autoDye.get()) {
             int slot = -1;
             for (int i = 0; i < 36; i++) {
                 if (dyeColors.get().contains(mc.player.getInventory().getStack(i).getItem())) {
@@ -312,7 +315,7 @@ public class BetterAutoSign extends Module {
 
             }
         }
-        if(autoGlow.get()) {
+        if (autoGlow.get()) {
 
             int slot = -1;
             for (int i = 0; i < 36; i++) {
@@ -333,29 +336,31 @@ public class BetterAutoSign extends Module {
             }
         }
     }
+
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
-        if (!editrear || !bothside.get() || prevsignPos == signPos || mc.player == null || mc.world == null || mc.interactionManager != null) return;
-        if (!(mc.world.getBlockState(signPos).getBlock().asItem() instanceof HangingSignItem) && mc.world.getBlockState(signPos).getBlock().asItem() instanceof SignItem){
-                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(signPos.getX(), signPos.getY(), signPos.getZ()), Direction.DOWN, signPos, false));
-                if (differentText.get())
-                    mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
+        if (!editrear || !bothside.get() || prevsignPos == signPos || mc.player == null || mc.world == null || mc.interactionManager != null)
+            return;
+        if (!(mc.world.getBlockState(signPos).getBlock().asItem() instanceof HangingSignItem) && mc.world.getBlockState(signPos).getBlock().asItem() instanceof SignItem) {
+            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(signPos.getX(), signPos.getY(), signPos.getZ()), Direction.DOWN, signPos, false));
+            if (differentText.get())
+                mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos, false,
                         lineOnedif.get(),
                         lineTwodif.get(),
                         lineThreedif.get(),
                         lineFourdif.get()
-                    ));
-                else
-                    mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
+                ));
+            else
+                mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos, false,
                         lineOne.get(),
                         lineTwo.get(),
                         lineThree.get(),
                         lineFour.get()
-                    ));
+                ));
             prevsignPos = signPos;
 
-            editrear=false;
-        } else if (mc.world.getBlockState(signPos).getBlock().asItem() instanceof HangingSignItem){
+            editrear = false;
+        } else if (mc.world.getBlockState(signPos).getBlock().asItem() instanceof HangingSignItem) {
             BlockState blockState = mc.world.getBlockState(signPos);
             if (blockState.getBlock() instanceof WallHangingSignBlock) {
                 Direction facing = blockState.get(WallHangingSignBlock.FACING);
@@ -366,23 +371,24 @@ public class BetterAutoSign extends Module {
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(signPos.getX(), signPos.getY(), signPos.getZ()), direction, signPos, false));
             }
             if (differentText.get())
-                mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
+                mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos, false,
                         HlineOnedif.get(),
                         HlineTwodif.get(),
                         HlineThreedif.get(),
                         HlineFourdif.get()
                 ));
             else
-                mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
+                mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos, false,
                         HlineOne.get(),
                         HlineTwo.get(),
                         HlineThree.get(),
                         HlineFour.get()
                 ));
             prevsignPos = signPos;
-            editrear=false;
+            editrear = false;
         }
     }
+
     private boolean filter(Item item) {
         return Items.WHITE_DYE.equals(item)
                 || Items.BLACK_DYE.equals(item)

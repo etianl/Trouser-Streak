@@ -30,42 +30,31 @@ import java.util.List;
 import java.util.Random;
 
 public class AutoTexts extends Module {
-    public enum ColorModes {
-        aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green,
-        dark_purple, dark_red, gold, gray, green, italic, light_purple,
-        red, white, yellow
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgText = settings.createGroup("Text Options");
     private final SettingGroup sgSpawning = settings.createGroup("Spawn Settings");
     private final SettingGroup sgMisc = settings.createGroup("Miscellaneous");
-
     private final Setting<Boolean> disconnectdisable = sgGeneral.add(new BoolSetting.Builder()
             .name("Disable on Disconnect")
             .description("Disables module on disconnecting")
             .defaultValue(false)
             .build());
-
     private final Setting<List<String>> texts = sgText.add(new StringListSetting.Builder()
             .name("Texts")
             .description("Text lines to display")
             .defaultValue(List.of("Trolled by Mountains of Lava Inc", "www.youtube.com/@mountainsoflavainc.6913"))
             .build());
-
     private final Setting<Boolean> rainbow = sgText.add(new BoolSetting.Builder()
             .name("Rainbow")
             .description("Randomly cycles through all available colors")
             .defaultValue(false)
             .build());
-
     private final Setting<ColorModes> textColor = sgText.add(new EnumSetting.Builder<ColorModes>()
             .name("Text Color")
             .description("Color of the text")
             .defaultValue(ColorModes.red)
             .visible(() -> !rainbow.get())
             .build());
-
     private final Setting<Integer> radius = sgSpawning.add(new IntSetting.Builder()
             .name("Radius")
             .description("Spawn radius")
@@ -73,20 +62,17 @@ public class AutoTexts extends Module {
             .min(1)
             .sliderMax(8)
             .build());
-
     private final Setting<Integer> height = sgSpawning.add(new IntSetting.Builder()
             .name("Height")
             .description("Base spawn height relative to player")
             .defaultValue(0)
             .sliderRange(-8, 8)
             .build());
-
     private final Setting<Boolean> heightVariation = sgSpawning.add(new BoolSetting.Builder()
             .name("Height Variation")
             .description("Enable random height variation")
             .defaultValue(false)
             .build());
-
     private final Setting<Integer> spawnDelay = sgSpawning.add(new IntSetting.Builder()
             .name("Spawn Delay")
             .description("Delay between spawns in ticks")
@@ -94,7 +80,6 @@ public class AutoTexts extends Module {
             .min(0)
             .sliderMax(20)
             .build());
-
     private final Setting<Integer> spawnCount = sgSpawning.add(new IntSetting.Builder()
             .name("Spawn Count")
             .description("How many to spawn per tick")
@@ -102,18 +87,15 @@ public class AutoTexts extends Module {
             .min(1)
             .sliderMax(100)
             .build());
-
     private final Setting<Boolean> muteSounds = sgMisc.add(new BoolSetting.Builder()
             .name("Mute Sounds")
             .description("Prevents playing armor stand placement sounds")
             .defaultValue(true)
             .build());
-
     private final Random random = new Random();
     private int ticks;
     private Vec3d origin;
     private String namecolour;
-
     public AutoTexts() {
         super(Trouser.Main, "auto-texts", "Spawns invisible armor stands with custom text. Requires creative mode.");
     }
@@ -218,5 +200,11 @@ public class AutoTexts extends Module {
         entityTag.putString("CustomName", "{\"text\":\"" + selectedText + "\",\"color\":\"" + namecolour + "\"}");
 
         return NbtComponent.of(entityTag);
+    }
+
+    public enum ColorModes {
+        aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green,
+        dark_purple, dark_red, gold, gray, green, italic, light_purple,
+        red, white, yellow
     }
 }

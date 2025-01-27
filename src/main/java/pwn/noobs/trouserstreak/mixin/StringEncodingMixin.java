@@ -11,8 +11,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(StringEncoding.class)
 public class StringEncodingMixin {
-    @Inject(method ="Lnet/minecraft/network/encoding/StringEncoding;encode(Lio/netty/buffer/ByteBuf;Ljava/lang/CharSequence;I)V" , at = @At("HEAD"), cancellable = true)
-    private static void writeCollectionsSize(ByteBuf buf, CharSequence string, int maxLength, CallbackInfo ci){
+    @Inject(method = "Lnet/minecraft/network/encoding/StringEncoding;encode(Lio/netty/buffer/ByteBuf;Ljava/lang/CharSequence;I)V", at = @At("HEAD"), cancellable = true)
+    private static void writeCollectionsSize(ByteBuf buf, CharSequence string, int maxLength, CallbackInfo ci) {
         int i = ByteBufUtil.utf8MaxBytes(string);
         ByteBuf byteBuf = buf.alloc().buffer(i);
 

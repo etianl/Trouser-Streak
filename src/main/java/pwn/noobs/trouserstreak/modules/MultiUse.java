@@ -20,9 +20,11 @@ public class MultiUse extends Module {
             .sliderMax(10)
             .build()
     );
+
     public MultiUse() {
         super(Trouser.Main, "multi-use", "Uses an item multiple times per item use");
     }
+
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if (mc.options.useKey.isPressed()) {
@@ -31,6 +33,7 @@ public class MultiUse extends Module {
             }
         }
     }
+
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         if (mc.options.useKey.isPressed()) {

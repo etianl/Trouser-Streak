@@ -36,12 +36,6 @@ public class TextCommand extends Command {
     private static final double INITIAL_HEIGHT_OFFSET = 1.0;
     private static final String PRESETS_DIRECTORY = "TrouserStreak/TextPresets";
 
-    public enum ColorModes {
-        aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green,
-        dark_purple, dark_red, gold, gray, green, italic, light_purple,
-        red, white, yellow
-    }
-
     public TextCommand() {
         super("text", "Spawns a text hologram with custom text in front of you. Use | for new lines and #color for text color.");
         createDefaultPresets();
@@ -105,7 +99,8 @@ public class TextCommand extends Command {
                             .forEach(builder::suggest);
                 }
             }
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
         return builder.buildFuture();
     }
 
@@ -165,6 +160,7 @@ public class TextCommand extends Command {
         }
         return null;
     }
+
     private void deletePreset(String presetName) {
         Path filePath = Paths.get(PRESETS_DIRECTORY, presetName + ".txt");
         try {
@@ -178,6 +174,7 @@ public class TextCommand extends Command {
             error("Failed to delete preset: " + e.getMessage());
         }
     }
+
     private void createDefaultPresets() {
         String[] defaultPresets = {
                 "trolled=#green [ #dark_red Trolled! #green ]|#gold Mountains of Lava Inc.|#red Youtube: #blue www.youtube.com/@mountainsoflavainc.6913|#green [ #dark_red Trolled! #green ]",
@@ -192,6 +189,7 @@ public class TextCommand extends Command {
             }
         }
     }
+
     private void regenDefaultPresets() {
         String[] defaultPresetNames = {
                 "trolled",
@@ -274,5 +272,11 @@ public class TextCommand extends Command {
         entityTag.putString("CustomName", isJson ? text : "{\"text\":\"" + text + "\"}");
 
         return NbtComponent.of(entityTag);
+    }
+
+    public enum ColorModes {
+        aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green,
+        dark_purple, dark_red, gold, gray, green, italic, light_purple,
+        red, white, yellow
     }
 }

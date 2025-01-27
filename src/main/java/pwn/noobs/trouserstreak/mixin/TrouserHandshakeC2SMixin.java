@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pwn.noobs.trouserstreak.modules.BungeeSpoofer;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
+
 //credits to DAM for the sauce
 @Mixin(HandshakeC2SPacket.class)
 public abstract class TrouserHandshakeC2SMixin {

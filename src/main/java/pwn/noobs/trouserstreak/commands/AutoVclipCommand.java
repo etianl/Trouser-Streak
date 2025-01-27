@@ -10,13 +10,11 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
 import net.minecraft.util.math.BlockPos;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class AutoVclipCommand extends Command {
     public AutoVclipCommand() {
         super("autovclip", "Lets you clip through blocks vertically automatically.");
     }
+
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(ctx -> {
@@ -27,9 +25,9 @@ public class AutoVclipCommand extends Command {
             ClientPlayerEntity player = mc.player;
             assert player != null;
             for (int i = 0; i < 21; i++) {
-                BlockPos isopenair1 = (player.getBlockPos().add(0,i+2,0));
-                BlockPos isopenair2 = (player.getBlockPos().add(0,i+3,0));
-                if (mc.world.getBlockState(isopenair1).isReplaceable() && mc.world.getFluidState(isopenair1).isEmpty() && !mc.world.getBlockState(isopenair1).isOf(Blocks.POWDER_SNOW) && mc.world.getBlockState(isopenair2).isReplaceable() && mc.world.getFluidState(isopenair2).isEmpty() && !mc.world.getBlockState(isopenair2).isOf(Blocks.POWDER_SNOW)){
+                BlockPos isopenair1 = (player.getBlockPos().add(0, i + 2, 0));
+                BlockPos isopenair2 = (player.getBlockPos().add(0, i + 3, 0));
+                if (mc.world.getBlockState(isopenair1).isReplaceable() && mc.world.getFluidState(isopenair1).isEmpty() && !mc.world.getBlockState(isopenair1).isOf(Blocks.POWDER_SNOW) && mc.world.getBlockState(isopenair2).isReplaceable() && mc.world.getFluidState(isopenair2).isEmpty() && !mc.world.getBlockState(isopenair2).isOf(Blocks.POWDER_SNOW)) {
                     if (player.hasVehicle()) {
                         Entity vehicle = player.getVehicle();
                         for (int packetNumber = 0; packetNumber < 4; packetNumber++) {
@@ -51,9 +49,9 @@ public class AutoVclipCommand extends Command {
             ClientPlayerEntity player = mc.player;
             assert player != null;
             for (int i = 0; i > -22; i--) {
-                BlockPos isopenair1 = (player.getBlockPos().add(0,i,0));
-                BlockPos isopenair2 = (player.getBlockPos().add(0,i-1,0));
-                if (mc.world.getBlockState(isopenair1).isReplaceable() && mc.world.getFluidState(isopenair1).isEmpty() && !mc.world.getBlockState(isopenair1).isOf(Blocks.POWDER_SNOW) && mc.world.getBlockState(isopenair2).isReplaceable() && mc.world.getFluidState(isopenair2).isEmpty() && !mc.world.getBlockState(isopenair2).isOf(Blocks.POWDER_SNOW)){
+                BlockPos isopenair1 = (player.getBlockPos().add(0, i, 0));
+                BlockPos isopenair2 = (player.getBlockPos().add(0, i - 1, 0));
+                if (mc.world.getBlockState(isopenair1).isReplaceable() && mc.world.getFluidState(isopenair1).isEmpty() && !mc.world.getBlockState(isopenair1).isOf(Blocks.POWDER_SNOW) && mc.world.getBlockState(isopenair2).isReplaceable() && mc.world.getFluidState(isopenair2).isEmpty() && !mc.world.getBlockState(isopenair2).isOf(Blocks.POWDER_SNOW)) {
                     if (player.hasVehicle()) {
                         Entity vehicle = player.getVehicle();
                         for (int packetNumber = 0; packetNumber < 4; packetNumber++) {
@@ -76,7 +74,7 @@ public class AutoVclipCommand extends Command {
             assert player != null;
 
             for (int i = 21; i > 0; i--) {
-                BlockPos isopenair1 = (player.getBlockPos().add(0,i,0));
+                BlockPos isopenair1 = (player.getBlockPos().add(0, i, 0));
                 BlockPos newopenair2 = isopenair1.up(1);
                 if (!mc.world.getBlockState(isopenair1).isReplaceable() || mc.world.getBlockState(isopenair1).isOf(Blocks.POWDER_SNOW) || !mc.world.getFluidState(isopenair1).isEmpty()) {
                     if (player.hasVehicle()) {

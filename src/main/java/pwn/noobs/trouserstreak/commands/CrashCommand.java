@@ -11,14 +11,12 @@ import net.minecraft.text.Text;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class CrashCommand extends Command {
+    private CopyOnWriteArrayList<PlayerListEntry> players;
+
     public CrashCommand() {
         super("crash", "Crash players, requires permission level 2 or higher");
     }
-    private CopyOnWriteArrayList<PlayerListEntry> players;
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
@@ -28,7 +26,7 @@ public class CrashCommand extends Command {
                 error("No other players found on the server");
                 return SINGLE_SUCCESS;
             }
-            if(mc.player.hasPermissionLevel(2)) {
+            if (mc.player.hasPermissionLevel(2)) {
                 ChatUtils.sendPlayerMsg("/execute at @a[name=!" + mc.player.getName().getLiteralString() + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[name=!" + mc.player.getName().getLiteralString() + "]");
                 StringBuilder playerNames = new StringBuilder("Crashing players: ");
                 for (PlayerListEntry player : players) {

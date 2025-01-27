@@ -23,6 +23,7 @@ public class FlightAntikick extends Module {
             .sliderRange(0, 60)
             .build()
     );
+    private int delayLeft = delay.get();
     private final Setting<Integer> offTime = sgGeneral.add(new IntSetting.Builder()
             .name("off-time")
             .description("The amount of delay, in ticks that you are moved down.")
@@ -30,12 +31,10 @@ public class FlightAntikick extends Module {
             .sliderRange(0, 200)
             .build()
     );
-
+    private int offLeft = offTime.get();
     public FlightAntikick() {
         super(Trouser.Main, "FlightAntikick", "Moves you down. Only made because Meteor still missing normal mode antikick.");
     }
-    private int delayLeft = delay.get();
-    private int offLeft = offTime.get();
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
@@ -43,9 +42,9 @@ public class FlightAntikick extends Module {
         else if (delayLeft <= 0 && offLeft > 0) {
             offLeft--;
             BlockPos playerPos = mc.player.getBlockPos();
-            BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
-            if (mc.world.getBlockState(pos).isAir() || (!mc.world.getBlockState(pos).isAir() && mc.player.getY()>=pos.getY()+1.11)){
-                mc.player.move(MovementType.SELF, new Vec3d(0,-0.1,0));
+            BlockPos pos = playerPos.add(new Vec3i(0, -1, 0));
+            if (mc.world.getBlockState(pos).isAir() || (!mc.world.getBlockState(pos).isAir() && mc.player.getY() >= pos.getY() + 1.11)) {
+                mc.player.move(MovementType.SELF, new Vec3d(0, -0.1, 0));
             }
         } else if (delayLeft <= 0 && offLeft <= 0) {
             delayLeft = delay.get();

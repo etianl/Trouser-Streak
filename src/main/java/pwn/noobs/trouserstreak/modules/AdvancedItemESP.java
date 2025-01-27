@@ -30,8 +30,86 @@ import java.util.*;
 
 public class AdvancedItemESP extends Module {
     private final SettingGroup sgGeneral = this.settings.getDefaultGroup();
+    public final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
+            .name("shape-mode")
+            .description("How the shapes are rendered.")
+            .defaultValue(ShapeMode.Both)
+            .build()
+    );
+    public final Setting<Double> fillOpacity = sgGeneral.add(new DoubleSetting.Builder()
+            .name("fill-opacity")
+            .description("The opacity of the shape fill.")
+            .defaultValue(0.3)
+            .range(0, 1)
+            .sliderMax(1)
+            .build()
+    );
+    public final Setting<Boolean> enchants = sgGeneral.add(new BoolSetting.Builder()
+            .name("enforce-item-enchants")
+            .description("Requires that armor and tools must be enchanted for module to detect.")
+            .defaultValue(true)
+            .build()
+    );
+    public final Setting<Boolean> certainenchants = sgGeneral.add(new BoolSetting.Builder()
+            .name("find-certain-item-enchants")
+            .description("Requires that armor and tools must be enchanted with these enchants.")
+            .defaultValue(false)
+            .visible(() -> enchants.get())
+            .build()
+    );
+    private final Setting<Set<RegistryKey<Enchantment>>> toolenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+            .name("Mining Tool Enchants")
+            .description("List of enchantments required.")
+            .visible(() -> enchants.get() && certainenchants.get())
+            .defaultValue(Enchantments.EFFICIENCY, Enchantments.UNBREAKING, Enchantments.MENDING)
+            .build());
+    private final Setting<Set<RegistryKey<Enchantment>>> swordenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+            .name("Sword Enchants")
+            .description("List of enchantments required.")
+            .visible(() -> enchants.get() && certainenchants.get())
+            .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
+            .build());
+    private final Setting<Set<RegistryKey<Enchantment>>> armorenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+            .name("Armor Enchants")
+            .description("List of enchantments required.")
+            .visible(() -> enchants.get() && certainenchants.get())
+            .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
+            .build());
+    private final Setting<Set<RegistryKey<Enchantment>>> maceenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+            .name("Mace Enchants")
+            .description("List of enchantments required.")
+            .visible(() -> enchants.get() && certainenchants.get())
+            .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
+            .build());
+    private final Setting<Set<RegistryKey<Enchantment>>> tridentenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+            .name("Trident Enchants")
+            .description("List of enchantments required.")
+            .visible(() -> enchants.get() && certainenchants.get())
+            .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
+            .build());
     private final SettingGroup sgColors = settings.createGroup("Colors");
-
+    public final Setting<Boolean> distance = sgColors.add(new BoolSetting.Builder()
+            .name("distance-colors")
+            .description("Changes the color of tracers depending on distance.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<SettingColor> distantColor = sgColors.add(new ColorSetting.Builder()
+            .name("distant-color")
+            .description("The item's bounding box and tracer color when you are far away.")
+            .defaultValue(new SettingColor(25, 255, 255, 255))
+            .visible(distance::get)
+            .build()
+    );
+    public final Setting<Integer> distanceInt = sgColors.add(new IntSetting.Builder()
+            .name("distance-colors-threshold")
+            .description("The max distance for colors to change.")
+            .defaultValue(128)
+            .min(1)
+            .sliderRange(1, 1024)
+            .visible(distance::get)
+            .build()
+    );
     private final List<Item> defaultPlayerItems = new ArrayList<>(List.of(
             Items.DIAMOND_HELMET,
             Items.DIAMOND_CHESTPLATE,
@@ -77,27 +155,6 @@ public class AdvancedItemESP extends Module {
             Items.BROWN_SHULKER_BOX,
             Items.BLACK_SHULKER_BOX
     ));
-
-    public AdvancedItemESP() {
-        super(Trouser.Main, "AdvancedItemESP", "ESP Module that highlights only certain items.");
-    }
-
-    public final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
-            .name("shape-mode")
-            .description("How the shapes are rendered.")
-            .defaultValue(ShapeMode.Both)
-            .build()
-    );
-
-    public final Setting<Double> fillOpacity = sgGeneral.add(new DoubleSetting.Builder()
-            .name("fill-opacity")
-            .description("The opacity of the shape fill.")
-            .defaultValue(0.3)
-            .range(0, 1)
-            .sliderMax(1)
-            .build()
-    );
-
     private final Setting<Double> fadeDistance = sgGeneral.add(new DoubleSetting.Builder()
             .name("fade-distance")
             .description("The distance from an entity where the color begins to fade.")
@@ -106,65 +163,18 @@ public class AdvancedItemESP extends Module {
             .sliderMax(12)
             .build()
     );
-
     private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
             .name("item-checker")
             .description("Items to check for.")
             .defaultValue(defaultPlayerItems)
             .build()
     );
-
-    public final Setting<Boolean> enchants = sgGeneral.add(new BoolSetting.Builder()
-            .name("enforce-item-enchants")
-            .description("Requires that armor and tools must be enchanted for module to detect.")
-            .defaultValue(true)
-            .build()
-    );
-
-    public final Setting<Boolean> certainenchants = sgGeneral.add(new BoolSetting.Builder()
-            .name("find-certain-item-enchants")
-            .description("Requires that armor and tools must be enchanted with these enchants.")
-            .defaultValue(false)
-            .visible(() -> enchants.get())
-            .build()
-    );
-    private final Setting<Set<RegistryKey<Enchantment>>> toolenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
-            .name("Mining Tool Enchants")
-            .description("List of enchantments required.")
-            .visible(() -> enchants.get() && certainenchants.get())
-            .defaultValue(Enchantments.EFFICIENCY, Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> swordenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
-            .name("Sword Enchants")
-            .description("List of enchantments required.")
-            .visible(() -> enchants.get() && certainenchants.get())
-            .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> armorenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
-            .name("Armor Enchants")
-            .description("List of enchantments required.")
-            .visible(() -> enchants.get() && certainenchants.get())
-            .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> maceenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
-            .name("Mace Enchants")
-            .description("List of enchantments required.")
-            .visible(() -> enchants.get() && certainenchants.get())
-            .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> tridentenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
-            .name("Trident Enchants")
-            .description("List of enchantments required.")
-            .visible(() -> enchants.get() && certainenchants.get())
-            .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build());
     private final Setting<Boolean> chatFeedback = sgGeneral.add(new BoolSetting.Builder()
             .name("Chat feedback")
             .description("Display info about items in chat")
             .defaultValue(true)
             .build()
     );
-
     private final Setting<Boolean> coordsInChat = sgGeneral.add(new BoolSetting.Builder()
             .name("Display coords in chat")
             .description("Display coords of a detected item")
@@ -172,7 +182,6 @@ public class AdvancedItemESP extends Module {
             .defaultValue(true)
             .build()
     );
-
     private final Setting<Boolean> tracers = sgGeneral.add(new BoolSetting.Builder()
             .name("Tracers")
             .description("Add tracers to item detected")
@@ -185,35 +194,14 @@ public class AdvancedItemESP extends Module {
             .defaultValue(new SettingColor(255, 25, 255, 255))
             .build()
     );
-    public final Setting<Boolean> distance = sgColors.add(new BoolSetting.Builder()
-            .name("distance-colors")
-            .description("Changes the color of tracers depending on distance.")
-            .defaultValue(true)
-            .build()
-    );
-    private final Setting<SettingColor> distantColor = sgColors.add(new ColorSetting.Builder()
-            .name("distant-color")
-            .description("The item's bounding box and tracer color when you are far away.")
-            .defaultValue(new SettingColor(25, 255, 255, 255))
-            .visible(distance::get)
-            .build()
-    );
-    public final Setting<Integer> distanceInt = sgColors.add(new IntSetting.Builder()
-            .name("distance-colors-threshold")
-            .description("The max distance for colors to change.")
-            .defaultValue(128)
-            .min(1)
-            .sliderRange(1, 1024)
-            .visible(distance::get)
-            .build()
-    );
-
     private final Color lineColor = new Color();
     private final Color sideColor = new Color();
     private final Color baseColor = new Color();
-
-    private int count;
     private final Set<Entity> scannedEntities = Collections.synchronizedSet(new HashSet<>());
+    private int count;
+    public AdvancedItemESP() {
+        super(Trouser.Main, "AdvancedItemESP", "ESP Module that highlights only certain items.");
+    }
 
     @EventHandler
     private void onRender3D(Render3DEvent event) {
@@ -223,7 +211,8 @@ public class AdvancedItemESP extends Module {
             if (shouldSkip(itemEntity)) continue;
             if (!scannedEntities.contains(entity)) {
                 StringBuilder message = new StringBuilder(itemEntity.getStack().getItem().getName().getString() + " found ");
-                if (coordsInChat.get()) message.append(" at ").append(entity.getBlockX()).append(", ").append(entity.getBlockY()).append(", ").append(entity.getBlockZ());
+                if (coordsInChat.get())
+                    message.append(" at ").append(entity.getBlockX()).append(", ").append(entity.getBlockY()).append(", ").append(entity.getBlockZ());
                 ChatUtils.sendMsg(Text.of(message.toString()));
             }
             scannedEntities.add(entity);
@@ -237,6 +226,7 @@ public class AdvancedItemESP extends Module {
     public void onActivate() {
         scannedEntities.clear();
     }
+
     @Override
     public void onDeactivate() {
         scannedEntities.clear();
@@ -260,7 +250,7 @@ public class AdvancedItemESP extends Module {
         if (mc.options.hudHidden) return;
 
         Color baseColor = monstersColor.get();
-        if (distance.get()){
+        if (distance.get()) {
             baseColor = getOpposingColor(baseColor, entity);
         }
 
@@ -272,6 +262,7 @@ public class AdvancedItemESP extends Module {
 
         event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, x, y, z, baseColor);
     }
+
     private Color getOpposingColor(Color c, Entity e) {
         Color interpolatedColor;
         Color oppositeColor = distantColor.get();
@@ -293,17 +284,18 @@ public class AdvancedItemESP extends Module {
     public boolean shouldSkip(ItemEntity entity) {
         boolean skip = false;
         if (enchants.get()) {
-            if (!certainenchants.get() && (entity.getStack().getItem() instanceof MiningToolItem || entity.getStack().getItem() instanceof ArmorItem || entity.getStack().getItem() instanceof SwordItem || entity.getStack().getItem() instanceof FishingRodItem || entity.getStack().getItem() instanceof FlintAndSteelItem || entity.getStack().getItem() instanceof MaceItem || entity.getStack().getItem() instanceof ShearsItem || entity.getStack().getItem() instanceof ShieldItem || entity.getStack().getItem() instanceof TridentItem) && entity.getStack().isEnchantable() && entity.getStack().getEnchantments().isEmpty()) skip = true;
-            else if (certainenchants.get()){
-                if (entity.getStack().getItem() instanceof MiningToolItem){
+            if (!certainenchants.get() && (entity.getStack().getItem() instanceof MiningToolItem || entity.getStack().getItem() instanceof ArmorItem || entity.getStack().getItem() instanceof SwordItem || entity.getStack().getItem() instanceof FishingRodItem || entity.getStack().getItem() instanceof FlintAndSteelItem || entity.getStack().getItem() instanceof MaceItem || entity.getStack().getItem() instanceof ShearsItem || entity.getStack().getItem() instanceof ShieldItem || entity.getStack().getItem() instanceof TridentItem) && entity.getStack().isEnchantable() && entity.getStack().getEnchantments().isEmpty())
+                skip = true;
+            else if (certainenchants.get()) {
+                if (entity.getStack().getItem() instanceof MiningToolItem) {
                     skip = compareEnchants(entity, toolenchants);
-                } else if (entity.getStack().getItem() instanceof SwordItem){
+                } else if (entity.getStack().getItem() instanceof SwordItem) {
                     skip = compareEnchants(entity, swordenchants);
-                } else if (entity.getStack().getItem() instanceof ArmorItem){
+                } else if (entity.getStack().getItem() instanceof ArmorItem) {
                     skip = compareEnchants(entity, armorenchants);
-                } else if (entity.getStack().getItem() instanceof MaceItem){
+                } else if (entity.getStack().getItem() instanceof MaceItem) {
                     skip = compareEnchants(entity, maceenchants);
-                } else if (entity.getStack().getItem() instanceof TridentItem){
+                } else if (entity.getStack().getItem() instanceof TridentItem) {
                     skip = compareEnchants(entity, tridentenchants);
                 }
             }
@@ -311,6 +303,7 @@ public class AdvancedItemESP extends Module {
         if (!items.get().contains(entity.getStack().getItem())) skip = true;
         return skip;
     }
+
     private boolean compareEnchants(ItemEntity entity, Setting<Set<RegistryKey<Enchantment>>> enchantsetting) {
         boolean skip = false;
         Set<RegistryKey<Enchantment>> itemenchants = new HashSet<>();
@@ -325,11 +318,12 @@ public class AdvancedItemESP extends Module {
         }
         return skip;
     }
+
     public Color getColor(Entity entity) {
         double alpha = getFadeAlpha(entity);
         if (alpha == 0) return null;
         Color color = monstersColor.get();
-        if (distance.get()){
+        if (distance.get()) {
             color = getOpposingColor(color, entity);
         }
         return baseColor.set(color.r, color.g, color.b, (int) (color.a * alpha));
@@ -348,9 +342,10 @@ public class AdvancedItemESP extends Module {
     public String getInfoString() {
         return Integer.toString(count);
     }
+
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (mc.world != null){
+        if (mc.world != null) {
             Iterable<net.minecraft.entity.Entity> entities = mc.world.getEntities();
             scannedEntities.removeIf(entity -> {
                 Set<Entity> entitySet = new HashSet<>();

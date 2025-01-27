@@ -15,22 +15,11 @@ import java.util.Random;
 @Mixin(SplashTextResourceSupplier.class)
 public class TrouserSplashTextMixin {
     @Unique
+    private final List<String> TrouserSplashes = getTrouserSplashes();
+    @Unique
     private boolean override = true;
     @Unique
     private int currentIndex = 0;
-    @Unique
-    private final List<String> TrouserSplashes = getTrouserSplashes();
-
-    @Inject(method = "get", at = @At("HEAD"), cancellable = true)
-    private void onApply(CallbackInfoReturnable<SplashTextRenderer> cir) {
-        if (Config.get() == null || !Config.get().titleScreenSplashes.get()) return;
-
-        if (override) {
-            currentIndex = new Random().nextInt(TrouserSplashes.size());
-            cir.setReturnValue(new SplashTextRenderer(TrouserSplashes.get(currentIndex)));
-        }
-        override = !override;
-    }
 
     @Unique
     private static List<String> getTrouserSplashes() {
@@ -51,5 +40,16 @@ public class TrouserSplashTextMixin {
                 "If at first you don't succeed, grief, grief again",
                 "Stop and take time to smell the explosions."
         );
+    }
+
+    @Inject(method = "get", at = @At("HEAD"), cancellable = true)
+    private void onApply(CallbackInfoReturnable<SplashTextRenderer> cir) {
+        if (Config.get() == null || !Config.get().titleScreenSplashes.get()) return;
+
+        if (override) {
+            currentIndex = new Random().nextInt(TrouserSplashes.size());
+            cir.setReturnValue(new SplashTextRenderer(TrouserSplashes.get(currentIndex)));
+        }
+        override = !override;
     }
 }

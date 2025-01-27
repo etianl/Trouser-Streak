@@ -4,7 +4,6 @@
 
 package pwn.noobs.trouserstreak.modules;
 
-import pwn.noobs.trouserstreak.Trouser;
 import meteordevelopment.meteorclient.events.entity.player.AttackEntityEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
@@ -14,6 +13,7 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
+import pwn.noobs.trouserstreak.Trouser;
 
 public class AttributeSwap extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -22,20 +22,23 @@ public class AttributeSwap extends Module {
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder().name("swap-back-delay").description("Delay in ticks before swapping back to the previous slot.").sliderRange(1, 20).defaultValue(1).min(1).visible(swapBack::get).build());
     private int prevSlot = -1;
     private int dDelay = 0;
+
     public AttributeSwap() {
         super(Trouser.Main, "attribute-swap", "Swaps attributes of the main hand item with the target slot on attack");
     }
+
     @EventHandler
     private void onAttack(AttackEntityEvent event) {
         if (mc.player == null || mc.world == null) return;
         if (swapBack.get()) {
             prevSlot = mc.player.getInventory().selectedSlot;
         }
-        InvUtils.swap(targetSlot.get()-1, false);
+        InvUtils.swap(targetSlot.get() - 1, false);
         if (swapBack.get() && prevSlot != -1) {
             dDelay = delay.get();
         }
     }
+
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (dDelay > 0) {

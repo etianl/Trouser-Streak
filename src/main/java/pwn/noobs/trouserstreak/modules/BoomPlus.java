@@ -12,7 +12,9 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtDouble;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
@@ -25,50 +27,34 @@ import pwn.noobs.trouserstreak.Trouser;
 
 public class BoomPlus extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    public final Setting<Boolean> target = sgGeneral.add(new BoolSetting.Builder()
+            .name("OnTarget")
+            .description("spawns on target")
+            .defaultValue(false)
+            .build()
+    );
+    public final Setting<Boolean> auto = sgGeneral.add(new BoolSetting.Builder()
+            .name("FULLAUTO")
+            .description("FULL AUTO BABY!")
+            .defaultValue(false)
+            .build()
+    );
+    public final Setting<Integer> atickdelay = sgGeneral.add(new IntSetting.Builder()
+            .name("FULLAUTOTickDelay")
+            .description("Tick Delay for FULLAUTO option.")
+            .defaultValue(2)
+            .min(0)
+            .sliderMax(20)
+            .visible(auto::get)
+            .build()
+    );
     private final SettingGroup sgOptions = settings.createGroup("Nbt Options");
-
-    private final Setting<String> entity = sgGeneral.add(new StringSetting.Builder()
-            .name("Entity to Spawn")
-            .description("What is created. Ex: fireball, villager, minecart, lightning_bolt, magma_cube, tnt")
-            .defaultValue("fireball")
-            .build());
-    private final Setting<String> nom = sgGeneral.add(new StringSetting.Builder()
-            .name("Custom Name")
-            .description("Name the Entity")
-            .defaultValue("MOUNTAINSOFLAVAINC").build());
-    private final Setting<ColorModes> nomcolor = sgGeneral.add(new EnumSetting.Builder<ColorModes>()
-            .name("Custom Name Color")
-            .description("Color the Name")
-            .defaultValue(ColorModes.red)
-            .build());
-    public enum ColorModes { aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green, dark_purple, dark_red, gold, gray, green, italic, light_purple, red, white, yellow }
     public final Setting<Boolean> customname = sgOptions.add(new BoolSetting.Builder()
             .name("CustomNameVisible")
             .description("CustomNameVisible or not.")
             .defaultValue(true)
             .build()
     );
-    private final Setting<Integer> health = sgOptions.add(new IntSetting.Builder()
-            .name("Health Points")
-            .description("How much health.")
-            .defaultValue(100)
-            .min(0)
-            .sliderRange(0, 100)
-            .build());
-    private final Setting<Integer> absorption = sgOptions.add(new IntSetting.Builder()
-            .name("Absorption Points")
-            .description("How much absorption.")
-            .defaultValue(0)
-            .min(0)
-            .sliderRange(0, 100)
-            .build());
-    private final Setting<Integer> age = sgOptions.add(new IntSetting.Builder()
-            .name("Age")
-            .description("It's age, 0 is baby.")
-            .defaultValue(1)
-            .min(0)
-            .sliderRange(0, 100)
-            .build());
     public final Setting<Boolean> invincible = sgOptions.add(new BoolSetting.Builder()
             .name("Invulnerable")
             .description("Invulnerable or not")
@@ -123,6 +109,43 @@ public class BoomPlus extends Module {
             .defaultValue(false)
             .build()
     );
+    private final Setting<String> entity = sgGeneral.add(new StringSetting.Builder()
+            .name("Entity to Spawn")
+            .description("What is created. Ex: fireball, villager, minecart, lightning_bolt, magma_cube, tnt")
+            .defaultValue("fireball")
+            .build());
+    private final Setting<String> nom = sgGeneral.add(new StringSetting.Builder()
+            .name("Custom Name")
+            .description("Name the Entity")
+            .defaultValue("MOUNTAINSOFLAVAINC").build());
+    private String customName = nom.get();
+    private final Setting<ColorModes> nomcolor = sgGeneral.add(new EnumSetting.Builder<ColorModes>()
+            .name("Custom Name Color")
+            .description("Color the Name")
+            .defaultValue(ColorModes.red)
+            .build());
+    private String namecolour = nomcolor.get().toString();
+    private final Setting<Integer> health = sgOptions.add(new IntSetting.Builder()
+            .name("Health Points")
+            .description("How much health.")
+            .defaultValue(100)
+            .min(0)
+            .sliderRange(0, 100)
+            .build());
+    private final Setting<Integer> absorption = sgOptions.add(new IntSetting.Builder()
+            .name("Absorption Points")
+            .description("How much absorption.")
+            .defaultValue(0)
+            .min(0)
+            .sliderRange(0, 100)
+            .build());
+    private final Setting<Integer> age = sgOptions.add(new IntSetting.Builder()
+            .name("Age")
+            .description("It's age, 0 is baby.")
+            .defaultValue(1)
+            .min(0)
+            .sliderRange(0, 100)
+            .build());
     private final Setting<Integer> fuse = sgOptions.add(new IntSetting.Builder()
             .name("Creeper/TNT Fuse")
             .description("In ticks")
@@ -149,13 +172,6 @@ public class BoomPlus extends Module {
             .description("What is created when specifying falling_block as the entity.")
             .defaultValue(Blocks.BEDROCK)
             .build());
-    public final Setting<Boolean> target = sgGeneral.add(new BoolSetting.Builder()
-            .name("OnTarget")
-            .description("spawns on target")
-            .defaultValue(false)
-            .build()
-    );
-
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
             .description("fastness of thing")
@@ -163,28 +179,10 @@ public class BoomPlus extends Module {
             .min(1)
             .sliderMax(10)
             .build());
-    public final Setting<Boolean> auto = sgGeneral.add(new BoolSetting.Builder()
-            .name("FULLAUTO")
-            .description("FULL AUTO BABY!")
-            .defaultValue(false)
-            .build()
-    );
-    public final Setting<Integer> atickdelay = sgGeneral.add(new IntSetting.Builder()
-            .name("FULLAUTOTickDelay")
-            .description("Tick Delay for FULLAUTO option.")
-            .defaultValue(2)
-            .min(0)
-            .sliderMax(20)
-            .visible(auto::get)
-            .build()
-    );
-
+    private int aticks = 0;
     public BoomPlus() {
         super(Trouser.Main, "boom+", "shoots something where you click");
     }
-    private int aticks=0;
-    private String namecolour = nomcolor.get().toString();
-    private String customName = nom.get();
 
     @EventHandler
     public void onTick(TickEvent.Post event) {
@@ -194,9 +192,9 @@ public class BoomPlus extends Module {
         }
 
         if (auto.get() && mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player.getAbilities().creativeMode) {
-            if (aticks<=atickdelay.get()){
+            if (aticks <= atickdelay.get()) {
                 aticks++;
-            } else if (aticks>atickdelay.get()) {
+            } else if (aticks > atickdelay.get()) {
                 customName = nom.get();
                 namecolour = nomcolor.get().toString();
                 ItemStack rst = mc.player.getMainHandStack();
@@ -211,8 +209,8 @@ public class BoomPlus extends Module {
                 mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                 mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-            aticks=0;
-        }
+                aticks = 0;
+            }
         }
     }
 
@@ -235,6 +233,7 @@ public class BoomPlus extends Module {
             mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
         }
     }
+
     private NbtComponent createEntityData() {
         String fullString = blockstate.get().toString();
         String[] parts = fullString.split(":");
@@ -269,19 +268,21 @@ public class BoomPlus extends Module {
         NbtCompound blockState = new NbtCompound();
         blockState.putString("Name", "minecraft:" + blockName);
         entityTag.put("BlockState", blockState);
-        if (invincible.get())entityTag.putBoolean("Invulnerable", invincible.get());
-        if (silence.get())entityTag.putBoolean("Silent", silence.get());
-        if (glow.get())entityTag.putBoolean("Glowing", glow.get());
-        if (persist.get())entityTag.putBoolean("PersistenceRequired", persist.get());
-        if (nograv.get())entityTag.putBoolean("NoGravity", nograv.get());
-        if(noAI.get())entityTag.putBoolean("NoAI", noAI.get());
-        if(falsefire.get())entityTag.putBoolean("HasVisualFire", falsefire.get());
-        if(powah.get())entityTag.putBoolean("powered", powah.get());
-        if(ignite.get())entityTag.putBoolean("ignited", ignite.get());
+        if (invincible.get()) entityTag.putBoolean("Invulnerable", invincible.get());
+        if (silence.get()) entityTag.putBoolean("Silent", silence.get());
+        if (glow.get()) entityTag.putBoolean("Glowing", glow.get());
+        if (persist.get()) entityTag.putBoolean("PersistenceRequired", persist.get());
+        if (nograv.get()) entityTag.putBoolean("NoGravity", nograv.get());
+        if (noAI.get()) entityTag.putBoolean("NoAI", noAI.get());
+        if (falsefire.get()) entityTag.putBoolean("HasVisualFire", falsefire.get());
+        if (powah.get()) entityTag.putBoolean("powered", powah.get());
+        if (ignite.get()) entityTag.putBoolean("ignited", ignite.get());
         entityTag.putInt("Fuse", fuse.get());
         entityTag.putInt("Size", size.get());
-        if(customname.get())entityTag.putBoolean("CustomNameVisible", customname.get());
+        if (customname.get()) entityTag.putBoolean("CustomNameVisible", customname.get());
         entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
         return NbtComponent.of(entityTag);
     }
+
+    public enum ColorModes {aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green, dark_purple, dark_red, gold, gray, green, italic, light_purple, red, white, yellow}
 }

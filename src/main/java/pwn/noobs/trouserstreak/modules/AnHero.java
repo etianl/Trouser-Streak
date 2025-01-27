@@ -23,7 +23,7 @@ public class AnHero extends Module {
             .name("Hero Multiplier")
             .description("The multiplier value for how fast to become an hero.")
             .defaultValue(1)
-            .sliderRange(0.5,10)
+            .sliderRange(0.5, 10)
             .min(0)
             .build()
     );
@@ -39,42 +39,43 @@ public class AnHero extends Module {
             .defaultValue("I Regret Nothing.")
             .visible(chatmsg::get)
             .build());
-
+    private int ticks;
+    private boolean nofallwason;
     public AnHero() {
         super(Trouser.Main, "AnHero", "Become An Hero!");
     }
-    private int ticks;
-    private boolean nofallwason;
 
     @EventHandler
     private void onScreenOpen(OpenScreenEvent event) {
         if (event.screen instanceof DisconnectedScreen) {
-            if (nofallwason && !Modules.get().get(NoFall.class).isActive()){
+            if (nofallwason && !Modules.get().get(NoFall.class).isActive()) {
                 Modules.get().get(NoFall.class).toggle();
             }
             Modules.get().get(Timer.class).setOverride(Timer.OFF);
             toggle();
         }
         if (event.screen instanceof DeathScreen) {
-            if (nofallwason && !Modules.get().get(NoFall.class).isActive()){
+            if (nofallwason && !Modules.get().get(NoFall.class).isActive()) {
                 Modules.get().get(NoFall.class).toggle();
             }
             Modules.get().get(Timer.class).setOverride(Timer.OFF);
             toggle();
         }
     }
+
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
-        if (nofallwason && !Modules.get().get(NoFall.class).isActive()){
+        if (nofallwason && !Modules.get().get(NoFall.class).isActive()) {
             Modules.get().get(NoFall.class).toggle();
         }
         Modules.get().get(Timer.class).setOverride(Timer.OFF);
         toggle();
     }
+
     @Override
     public void onActivate() {
         if (mc.player == null) return;
-        if (chatmsg.get()){
+        if (chatmsg.get()) {
             ChatUtils.sendPlayerMsg(message.get());
         }
         if (Modules.get().get(Flight.class).isActive()) {
@@ -87,25 +88,27 @@ public class AnHero extends Module {
             Modules.get().get(TPFly.class).toggle();
         }
         if (Modules.get().get(NoFall.class).isActive()) {
-            nofallwason=true;
+            nofallwason = true;
             Modules.get().get(NoFall.class).toggle();
-        } else if (!Modules.get().get(NoFall.class).isActive()){
-            nofallwason=false;
+        } else if (!Modules.get().get(NoFall.class).isActive()) {
+            nofallwason = false;
         }
-        ticks=0;
+        ticks = 0;
     }
+
     @Override
     public void onDeactivate() {
-        if (nofallwason && !Modules.get().get(NoFall.class).isActive()){
+        if (nofallwason && !Modules.get().get(NoFall.class).isActive()) {
             Modules.get().get(NoFall.class).toggle();
         }
         Modules.get().get(Timer.class).setOverride(Timer.OFF);
-        ticks=0;
+        ticks = 0;
     }
+
     @EventHandler
     public void onPreTick(TickEvent.Pre event) {
-        if (mc.player.getHealth()==0) {
-            if (nofallwason==true && !Modules.get().get(NoFall.class).isActive()){
+        if (mc.player.getHealth() == 0) {
+            if (nofallwason && !Modules.get().get(NoFall.class).isActive()) {
                 Modules.get().get(NoFall.class).toggle();
             }
             Modules.get().get(Timer.class).setOverride(Timer.OFF);
@@ -113,20 +116,20 @@ public class AnHero extends Module {
         }
         ticks++;
         Modules.get().get(Timer.class).setOverride(toasterbath.get());
-        if (ticks==1){
-            mc.player.move(MovementType.SELF, new Vec3d(0, +7,0));
-        }else if (ticks==2){
-            mc.player.move(MovementType.SELF, new Vec3d(0, +7,0));
-        }else if (ticks==3){
-            mc.player.move(MovementType.SELF, new Vec3d(0, +7,0));
-        }else if (ticks==4){
-            mc.player.move(MovementType.SELF, new Vec3d(0, +7,0));
-        }else if (ticks==5){
-            mc.player.move(MovementType.SELF, new Vec3d(0, +7,0));
-        }else if (ticks>=6 && ticks<20){
-            mc.player.setVelocity(0.01,-10,0);
-        }else if (ticks>=20){
-            ticks=0;
+        if (ticks == 1) {
+            mc.player.move(MovementType.SELF, new Vec3d(0, +7, 0));
+        } else if (ticks == 2) {
+            mc.player.move(MovementType.SELF, new Vec3d(0, +7, 0));
+        } else if (ticks == 3) {
+            mc.player.move(MovementType.SELF, new Vec3d(0, +7, 0));
+        } else if (ticks == 4) {
+            mc.player.move(MovementType.SELF, new Vec3d(0, +7, 0));
+        } else if (ticks == 5) {
+            mc.player.move(MovementType.SELF, new Vec3d(0, +7, 0));
+        } else if (ticks >= 6 && ticks < 20) {
+            mc.player.setVelocity(0.01, -10, 0);
+        } else if (ticks >= 20) {
+            ticks = 0;
         }
     }
 }
