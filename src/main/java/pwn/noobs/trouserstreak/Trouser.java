@@ -71,6 +71,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new OPplayerTPmodule());
 
                 //Modules.get().add(new -----> Exploits for old versions! <-----());
+                Modules.get().add(new BookAndQuillDupe());
                 Modules.get().add(new ShulkerDupe());
                 Modules.get().add(new InvDupeModule());
                 Modules.get().add(new BoatKill());
@@ -78,7 +79,6 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new LecternCrash());
 
                 //Modules.get().add(new -----> And much more <-----());
-                Modules.get().add(new BookAndQuillDupe());
                 Modules.get().add(new AttributeSwap());
                 Modules.get().add(new Teleport());
                 Modules.get().add(new TPFly());
@@ -97,7 +97,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new BlockListMineCommand());
                 Commands.add(new GarbageCleanerCommand());
 
-                // HUD
+                //Modules.get().add(new -----> Additions to the HUD module! <-----());
                 Hud.get().register(ElytraCount.INFO);
         }
 
