@@ -16,6 +16,7 @@ In no particular order
 - [DAMcraft (ServerSeeker)](https://github.com/DAMcraft/MeteorServerSeeker)
 - [Meteor Client](https://github.com/meteordevelopment/meteor-client)
 - [Allah-Hack](https://github.com/TaxEvasiqn/allah-hack)
+- [Meteor-Tweaks](https://github.com/Declipsonator/Meteor-Tweaks)
 - [Meteor-Rejects](https://github.com/AntiCope/meteor-rejects)
 - [Frostburn Client](https://github.com/evaan/FrostBurn)
 - [Banana](https://github.com/Bennooo/banana-for-everyone) Credits for checkbox array from AutoBuild, and the idea for TrouserBuild
