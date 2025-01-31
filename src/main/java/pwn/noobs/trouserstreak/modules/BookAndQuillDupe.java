@@ -20,7 +20,6 @@ import java.util.Optional;
 
 public class BookAndQuillDupe extends Module {
     private final SettingGroup sgSpecial = settings.createGroup("Book And Quill Dupe works on server versions 1.20.6+");
-    private final SettingGroup sgSpecial2 = settings.createGroup("Does not work on latest Paper updates.");
     private final Setting<Boolean> disconnectdisable = sgSpecial.add(new BoolSetting.Builder()
             .name("Disable on Disconnect")
             .description("Disables module on disconnecting")
@@ -39,7 +38,7 @@ public class BookAndQuillDupe extends Module {
             .build()
     );
     public BookAndQuillDupe() {
-        super(Trouser.Main, "Book-And-Quill-Dupe", "Overflows data in a book's title to cause dupes and chunk bans. Credits to Thorioum!");
+        super(Trouser.Main, "Book-And-Quill-Dupe", "Overflows data in a book's title to cause dupes and chunk bans. Credits to Thorioum! Only works in servers up to version 1.21, or Vanilla 1.21.1.");
     }
     @EventHandler
     private void onScreenOpen(OpenScreenEvent event) {
