@@ -448,6 +448,76 @@ public class BaseFinder extends Module {
             .defaultValue(60)
             .visible(() -> autoreload.get() && load.get())
             .build());
+
+    private final SettingGroup sgXaeros = settings.createGroup("Xaeros Waypoints");
+    private final Setting<Boolean> createXaerosWaypoint = sgXaeros.add(new BoolSetting.Builder()
+            .name("create-xaeros-waypoint")
+            .description("If true, append a Xaeros waypoint entry when a base is discovered.  Note that a relog is required to see the waypoints.")
+            .defaultValue(false)
+            .build()
+    );
+    private final Setting<String> xaerosWaypointName = sgXaeros.add(new StringSetting.Builder()
+            .name("xaeros-waypoint-name")
+            .description("The name to use in the Xaeros waypoint entry.")
+            .defaultValue("Base")
+            .visible(createXaerosWaypoint::get)
+            .build()
+    );
+    private final Setting<String> xaerosWaypointLetter = sgXaeros.add(new StringSetting.Builder()
+            .name("xaeros-waypoint-letter")
+            .description("The letter to use in the Xaeros waypoint entry.")
+            .defaultValue("B")
+            .visible(createXaerosWaypoint::get)
+            .build()
+    );
+    private final Setting<Integer> xaerosColorNumber = sgXaeros.add(new IntSetting.Builder()
+            .name("xaeros-color-number")
+            .description("The color number to use in the Xaeros waypoint entry.")
+            .defaultValue(1)
+            .min(0)
+            .visible(createXaerosWaypoint::get)
+            .build()
+    );
+    private final Setting<String> xaerosOverworldWaypointFilePath = sgXaeros.add(new StringSetting.Builder()
+            .name("xaeros-overworld-waypoint-file-path")
+            .description("The file path for Xaeros waypoints in the Overworld.  Normally {MinecraftPath}/xaero/minimap/World/dim%0/mw$default_1.txt")
+            .defaultValue("path/to/overworld/waypoints.txt")
+            .visible(createXaerosWaypoint::get)
+            .build()
+    );
+    private final Setting<String> xaerosNetherWaypointFilePath = sgXaeros.add(new StringSetting.Builder()
+            .name("xaeros-nether-waypoint-file-path")
+            .description("The file path for Xaeros waypoints in the Nether.  Normally {MinecraftPath}/xaero/minimap/World/dim%-1/mw$default_1.txt")
+            .defaultValue("path/to/nether/waypoints.txt")
+            .visible(createXaerosWaypoint::get)
+            .build()
+    );
+    private final Setting<String> xaerosEndWaypointFilePath = sgXaeros.add(new StringSetting.Builder()
+            .name("xaeros-end-waypoint-file-path")
+            .description("The file path for Xaeros waypoints in the End.  Normally {MinecraftPath}/xaero/minimap/World/dim%-2/mw$default_1.txt")
+            .defaultValue("path/to/end/waypoints.txt")
+            .visible(createXaerosWaypoint::get)
+            .build()
+    );
+    private final Setting<Boolean> createOverworldWaypoints = sgXaeros.add(new BoolSetting.Builder()
+            .name("create-overworld-waypoints")
+            .description("If true, create Xaeros waypoints in the Overworld.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Boolean> createNetherWaypoints = sgXaeros.add(new BoolSetting.Builder()
+            .name("create-nether-waypoints")
+            .description("If true, create Xaeros waypoints in the Nether.")
+            .defaultValue(false)
+            .build()
+    );
+    private final Setting<Boolean> createEndWaypoints = sgXaeros.add(new BoolSetting.Builder()
+            .name("create-end-waypoints")
+            .description("If true, create Xaeros waypoints in the End.")
+            .defaultValue(true)
+            .build()
+    );
+
     @Override
     public WWidget getWidget(GuiTheme theme) {
         WTable table = theme.table();
@@ -1510,5 +1580,159 @@ public class BaseFinder extends Module {
     }
     private void removeChunksOutsideRenderDistance(Set<ChunkPos> chunkSet, BlockPos playerPos, double renderDistanceBlocks, int midpoint) {
         chunkSet.removeIf(c -> !playerPos.isWithinDistance(new BlockPos(c.getCenterX(), midpoint, c.getCenterZ()), renderDistanceBlocks));
+    }
+
+    private final java.util.List<LoggedBase> loggedBases = new java.util.ArrayList<>();
+    private final java.util.Set<ChunkPos> loggedBasePositions = new java.util.HashSet<>();
+    private static final com.google.gson.Gson gson = new com.google.gson.GsonBuilder().setPrettyPrinting().create();
+
+    @EventHandler
+    private void onPostTick(TickEvent.Post event) {
+        for(ChunkPos pos : baseChunks) {
+            if(!loggedBasePositions.contains(pos)) {
+                loggedBasePositions.add(pos);
+                int x = pos.getCenterX();
+                int z = pos.getCenterZ();
+                int y = (renderHeightY.get() + renderHeightYbottom.get()) / 2;
+                loggedBases.add(new LoggedBase(x, y, z));
+                saveJsonLog();
+                saveCsvLog();
+                if(createXaerosWaypoint.get()){
+                    appendWaypoint(new LoggedBase(x, y, z));
+                }
+            }
+        }
+    }
+
+    private void saveCsvLog() {
+        try {
+            java.nio.file.Path path = java.nio.file.Paths.get("TrouserStreak", "BaseChunks", serverip, world, "bases.csv");
+            java.nio.file.Files.createDirectories(path.getParent());
+            StringBuilder sb = new StringBuilder();
+            sb.append("X,Y,Z\n");
+            for(LoggedBase lb : loggedBases) {
+                sb.append(lb.x).append(",").append(lb.y).append(",").append(lb.z).append("\n");
+            }
+            java.nio.file.Files.write(path, sb.toString().getBytes(StandardCharsets.UTF_8), java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.WRITE);
+        } catch (IOException e) {}
+    }
+
+    private void saveJsonLog() {
+        try {
+            java.nio.file.Path path = java.nio.file.Paths.get("TrouserStreak", "BaseChunks", serverip, world, "bases.json");
+            java.nio.file.Files.createDirectories(path.getParent());
+            String json = gson.toJson(loggedBases);
+            java.nio.file.Files.write(path, json.getBytes(StandardCharsets.UTF_8), java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.WRITE);
+        } catch (IOException e) {}
+    }
+
+    private void appendWaypoint(LoggedBase lb) {
+        String filePath;
+        String dimStr = mc.world.getRegistryKey().getValue().toString();
+        if(dimStr.equals("minecraft:overworld")){
+            if(!createOverworldWaypoints.get()) return;
+            filePath = xaerosOverworldWaypointFilePath.get();
+        } else if(dimStr.equals("minecraft:the_nether")){
+            if(!createNetherWaypoints.get()) return;
+            filePath = xaerosNetherWaypointFilePath.get();
+        } else if(dimStr.equals("minecraft:the_end")){
+            if(!createEndWaypoints.get()) return;
+            filePath = xaerosEndWaypointFilePath.get();
+        } else {
+            if(!createOverworldWaypoints.get()) return;
+            filePath = xaerosOverworldWaypointFilePath.get();
+        }
+        String entry = String.format("waypoint:%s:%s:%d:%d:%d:%d:false:0:gui.xaero_default:false:0:0:false",
+                xaerosWaypointName.get(),
+                xaerosWaypointLetter.get(),
+                lb.x, lb.y, lb.z,
+                xaerosColorNumber.get()
+        );
+        try {
+            java.nio.file.Path path = java.nio.file.Paths.get(filePath);
+            java.nio.file.Files.createDirectories(path.getParent());
+            java.nio.file.Files.write(path, (System.lineSeparator() + entry).getBytes(StandardCharsets.UTF_8), java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+        } catch (IOException e) {}
+    }
+
+    public WWidget getLoggedWidget(GuiTheme theme) {
+        java.util.List<LoggedBase> sortedBases = new java.util.ArrayList<>(loggedBases);
+        sortedBases.sort((a, b) -> Integer.compare(a.y, b.y));
+        var list = theme.verticalList();
+        var clear = list.add(theme.button("Clear Logged Bases")).widget();
+        var table = theme.table();
+        if(!sortedBases.isEmpty()) list.add(table);
+        clear.action = () -> {
+            loggedBases.clear();
+            loggedBasePositions.clear();
+            table.clear();
+            saveJsonLog();
+            saveCsvLog();
+        };
+        for(LoggedBase lb : sortedBases) {
+            table.add(theme.label("Pos: " + lb.x + ", " + lb.y + ", " + lb.z));
+            WButton gotoBtn = table.add(theme.button("Goto")).widget();
+            gotoBtn.action = () -> { meteordevelopment.meteorclient.pathing.PathManagers.get().moveTo(new BlockPos(lb.x, lb.y, lb.z), true); };
+            var delete = table.add(theme.button("-")).widget();
+            delete.action = () -> {
+                loggedBases.remove(lb);
+                loggedBasePositions.remove(new ChunkPos((lb.x - 8) / 16, (lb.z - 8) / 16));
+                table.clear();
+                for(LoggedBase l : loggedBases) {
+                    table.add(theme.label("Pos: " + l.x + ", " + l.y + ", " + l.z));
+                    WButton gotoBtn2 = table.add(theme.button("Goto")).widget();
+                    gotoBtn2.action = () -> { meteordevelopment.meteorclient.pathing.PathManagers.get().moveTo(new BlockPos(l.x, l.y, l.z), true); };
+                    var delete2 = table.add(theme.button("-")).widget();
+                    delete2.action = () -> {
+                        loggedBases.remove(l);
+                        loggedBasePositions.remove(new ChunkPos((l.x - 8) / 16, (l.z - 8) / 16));
+                        table.clear();
+                        for(LoggedBase l2 : loggedBases) {
+                            table.add(theme.label("Pos: " + l2.x + ", " + l2.y + ", " + l2.z));
+                            WButton gotoBtn3 = table.add(theme.button("Goto")).widget();
+                            gotoBtn3.action = () -> { meteordevelopment.meteorclient.pathing.PathManagers.get().moveTo(new BlockPos(l2.x, l2.y, l2.z), true); };
+                            var delete3 = table.add(theme.button("-")).widget();
+                            delete3.action = () -> {
+                                loggedBases.remove(l2);
+                                loggedBasePositions.remove(new ChunkPos((l2.x - 8) / 16, (l2.z - 8) / 16));
+                            };
+                            table.row();
+                        }
+                        saveJsonLog();
+                        saveCsvLog();
+                    };
+                    table.row();
+                }
+                saveJsonLog();
+                saveCsvLog();
+            };
+            table.row();
+        }
+        return list;
+    }
+
+    private static class LoggedBase {
+        public int x;
+        public int y;
+        public int z;
+        public LoggedBase(int x, int y, int z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+        public void write(java.io.Writer writer) throws java.io.IOException {
+            writer.write(x + "," + y + "," + z + "\n");
+        }
+        @Override
+        public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            LoggedBase that = (LoggedBase) o;
+            return x == that.x && y == that.y && z == that.z;
+        }
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(x, y, z);
+        }
     }
 }
