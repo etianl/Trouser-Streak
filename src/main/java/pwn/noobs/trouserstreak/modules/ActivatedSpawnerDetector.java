@@ -314,6 +314,19 @@ public class ActivatedSpawnerDetector extends Module {
             .visible(createXaerosWaypoint::get)
             .build()
     );
+    private enum WaypointType {
+        Regular,
+        Disabled,
+        Temporary,
+        Destination
+    }
+    public final Setting<WaypointType> waypointType = sgXaeros.add(new EnumSetting.Builder<WaypointType>()
+            .name("waypoint-type")
+            .description("The type of Xaeros waypoint to create.")
+            .defaultValue(WaypointType.Destination)
+            .visible(createXaerosWaypoint::get)
+            .build()
+    );
     private final Setting<String> xaerosOverworldWaypointFilePath = sgXaeros.add(new StringSetting.Builder()
             .name("xaeros-overworld-waypoint-file-path")
             .description("The file path for Xaeros waypoints in the Overworld. Normally {MinecraftPath}/xaero/minimap/World/dim%0/mw$default_1.txt")
@@ -339,18 +352,21 @@ public class ActivatedSpawnerDetector extends Module {
             .name("create-overworld-waypoints")
             .description("If true, create Xaeros waypoints in the Overworld.")
             .defaultValue(true)
+            .visible(createXaerosWaypoint::get)
             .build()
     );
     private final Setting<Boolean> createNetherWaypoints = sgXaeros.add(new BoolSetting.Builder()
             .name("create-nether-waypoints")
             .description("If true, create Xaeros waypoints in the Nether.")
             .defaultValue(false)
+            .visible(createXaerosWaypoint::get)
             .build()
     );
     private final Setting<Boolean> createEndWaypoints = sgXaeros.add(new BoolSetting.Builder()
             .name("create-end-waypoints")
             .description("If true, create Xaeros waypoints in the End.")
             .defaultValue(true)
+            .visible(createXaerosWaypoint::get)
             .build()
     );
 
@@ -364,6 +380,7 @@ public class ActivatedSpawnerDetector extends Module {
     private int closestSpawnerZ = 2000000000;
     private double SpawnerDistance = 2000000000;
     private boolean activatedSpawnerFound = false;
+    private int waypointNum;
 
     public ActivatedSpawnerDetector() {
         super(Trouser.Main, "ActivatedSpawnerDetector", "Detects if a player has been near a mob spawner in the past. May be useful for finding player made stashes in dungeons, mineshafts, and other places.");
@@ -838,27 +855,39 @@ public class ActivatedSpawnerDetector extends Module {
         String filePath;
         Identifier dimId = mc.world.getRegistryKey().getValue();
         String dimStr = dimId.toString();
-        if (dimStr.equals("minecraft:overworld")) {
-            if (!createOverworldWaypoints.get()) return;
-            filePath = xaerosOverworldWaypointFilePath.get();
-        } else if (dimStr.equals("minecraft:the_nether")) {
-            if (!createNetherWaypoints.get()) return;
-            filePath = xaerosNetherWaypointFilePath.get();
-        } else if (dimStr.equals("minecraft:the_end")) {
-            if (!createEndWaypoints.get()) return;
-            filePath = xaerosEndWaypointFilePath.get();
-        } else {
-            if (!createOverworldWaypoints.get()) return;
-            filePath = xaerosOverworldWaypointFilePath.get();
+        switch (waypointType.get()) {
+            case WaypointType.Regular -> {waypointNum = 0;}
+            case WaypointType.Disabled -> {waypointNum = 1;}
+            case WaypointType.Temporary -> {waypointNum = 2;}
+            case WaypointType.Destination -> {waypointNum = 3;}
+        }
+        switch (dimStr) {
+            case "minecraft:overworld" -> {
+                if (!createOverworldWaypoints.get()) return;
+                filePath = xaerosOverworldWaypointFilePath.get();
+            }
+            case "minecraft:the_nether" -> {
+                if (!createNetherWaypoints.get()) return;
+                filePath = xaerosNetherWaypointFilePath.get();
+            }
+            case "minecraft:the_end" -> {
+                if (!createEndWaypoints.get()) return;
+                filePath = xaerosEndWaypointFilePath.get();
+            }
+            default -> {
+                if (!createOverworldWaypoints.get()) return;
+                filePath = xaerosOverworldWaypointFilePath.get();
+            }
         }
         int x = spawner.x;
         int y = spawner.y;
         int z = spawner.z;
-        String entry = String.format("waypoint:%s:%s:%d:%d:%d:%d:false:0:gui.xaero_default:false:0:0:false",
+        String entry = String.format("waypoint:%s:%s:%d:%d:%d:%d:false:%d:gui.xaero_default:false:0:0:false",
                 xaerosWaypointName.get(),
                 xaerosWaypointLetter.get(),
                 x, y, z,
-                xaerosColorNumber.get()
+                xaerosColorNumber.get(),
+                waypointNum
         );
         try {
             File file = new File(filePath);

@@ -40,6 +40,7 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -478,6 +479,19 @@ public class BaseFinder extends Module {
             .visible(createXaerosWaypoint::get)
             .build()
     );
+    private enum WaypointType {
+        Regular,
+        Disabled,
+        Temporary,
+        Destination
+    }
+    public final Setting<WaypointType> waypointType = sgXaeros.add(new EnumSetting.Builder<WaypointType>()
+            .name("waypoint-type")
+            .description("The type of Xaeros waypoint to create.")
+            .defaultValue(WaypointType.Destination)
+            .visible(createXaerosWaypoint::get)
+            .build()
+    );
     private final Setting<String> xaerosOverworldWaypointFilePath = sgXaeros.add(new StringSetting.Builder()
             .name("xaeros-overworld-waypoint-file-path")
             .description("The file path for Xaeros waypoints in the Overworld.  Normally {MinecraftPath}/xaero/minimap/World/dim%0/mw$default_1.txt")
@@ -503,18 +517,21 @@ public class BaseFinder extends Module {
             .name("create-overworld-waypoints")
             .description("If true, create Xaeros waypoints in the Overworld.")
             .defaultValue(true)
+            .visible(createXaerosWaypoint::get)
             .build()
     );
     private final Setting<Boolean> createNetherWaypoints = sgXaeros.add(new BoolSetting.Builder()
             .name("create-nether-waypoints")
             .description("If true, create Xaeros waypoints in the Nether.")
             .defaultValue(false)
+            .visible(createXaerosWaypoint::get)
             .build()
     );
     private final Setting<Boolean> createEndWaypoints = sgXaeros.add(new BoolSetting.Builder()
             .name("create-end-waypoints")
             .description("If true, create Xaeros waypoints in the End.")
             .defaultValue(true)
+            .visible(createXaerosWaypoint::get)
             .build()
     );
 
@@ -726,6 +743,7 @@ public class BaseFinder extends Module {
     private String lastblockfound6;
     private String lastblockfound7;
     private int entityScanTicks;
+    private int waypointNum;
     public BaseFinder() {
         super(Trouser.Main,"BaseFinder", "Estimates if a build or base may be in the chunk based on the blocks it contains.");
     }
@@ -1628,25 +1646,38 @@ public class BaseFinder extends Module {
 
     private void appendWaypoint(LoggedBase lb) {
         String filePath;
-        String dimStr = mc.world.getRegistryKey().getValue().toString();
-        if(dimStr.equals("minecraft:overworld")){
-            if(!createOverworldWaypoints.get()) return;
-            filePath = xaerosOverworldWaypointFilePath.get();
-        } else if(dimStr.equals("minecraft:the_nether")){
-            if(!createNetherWaypoints.get()) return;
-            filePath = xaerosNetherWaypointFilePath.get();
-        } else if(dimStr.equals("minecraft:the_end")){
-            if(!createEndWaypoints.get()) return;
-            filePath = xaerosEndWaypointFilePath.get();
-        } else {
-            if(!createOverworldWaypoints.get()) return;
-            filePath = xaerosOverworldWaypointFilePath.get();
+        Identifier dimId = mc.world.getRegistryKey().getValue();
+        String dimStr = dimId.toString();
+        switch (waypointType.get()) {
+            case WaypointType.Regular -> {waypointNum = 0;}
+            case WaypointType.Disabled -> {waypointNum = 1;}
+            case WaypointType.Temporary -> {waypointNum = 2;}
+            case WaypointType.Destination -> {waypointNum = 3;}
         }
-        String entry = String.format("waypoint:%s:%s:%d:%d:%d:%d:false:0:gui.xaero_default:false:0:0:false",
+        switch (dimStr) {
+            case "minecraft:overworld" -> {
+                if (!createOverworldWaypoints.get()) return;
+                filePath = xaerosOverworldWaypointFilePath.get();
+            }
+            case "minecraft:the_nether" -> {
+                if (!createNetherWaypoints.get()) return;
+                filePath = xaerosNetherWaypointFilePath.get();
+            }
+            case "minecraft:the_end" -> {
+                if (!createEndWaypoints.get()) return;
+                filePath = xaerosEndWaypointFilePath.get();
+            }
+            default -> {
+                if (!createOverworldWaypoints.get()) return;
+                filePath = xaerosOverworldWaypointFilePath.get();
+            }
+        }
+        String entry = String.format("waypoint:%s:%s:%d:%d:%d:%d:false:%d:gui.xaero_default:false:0:0:false",
                 xaerosWaypointName.get(),
                 xaerosWaypointLetter.get(),
                 lb.x, lb.y, lb.z,
-                xaerosColorNumber.get()
+                xaerosColorNumber.get(),
+                waypointNum
         );
         try {
             java.nio.file.Path path = java.nio.file.Paths.get(filePath);
