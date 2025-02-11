@@ -103,6 +103,12 @@ public class MultiverseDeleter extends Module {
         if (event.getMessage() != null && mc.player != null) {
             String message = event.getMessage().getString();
 
+            if (message.contains("Unknown or incomplete command")) {
+                ChatUtils.error("§cMultiverse not detected. Module disabled.");
+                toggle();
+                return;
+            }
+            
             if (message.contains("====[ Multiverse World List ]====")) {
                 ChatUtils.info("World list found, extracting worlds...");
             }
