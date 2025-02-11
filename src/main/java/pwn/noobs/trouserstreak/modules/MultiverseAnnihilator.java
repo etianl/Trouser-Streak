@@ -37,7 +37,7 @@ public class MultiverseDeleter extends Module {
     private int deleteIndex = 0;
 
     public MultiverseDeleter() {
-        super(Trouser.Main, "MultiverseDeleter", "Effortlessly deletes all Multiverse worlds! Made by https://youtube.com/@ogmur");
+        super(Trouser.Main, "MultiverseAnnihilator", "Effortlessly deletes all Multiverse worlds! Made by https://youtube.com/@ogmur");
     }
 
     @Override
