@@ -69,6 +69,7 @@ public class Trouser extends MeteorAddon {
                 Commands.add(new TextCommand());
                 Modules.get().add(new AutoNames());
                 Modules.get().add(new OPplayerTPmodule());
+                Modules.get().add(new MultiverseAnnihilator());
 
                 //Modules.get().add(new -----> Exploits for old versions! <-----());
                 Modules.get().add(new BookAndQuillDupe());
