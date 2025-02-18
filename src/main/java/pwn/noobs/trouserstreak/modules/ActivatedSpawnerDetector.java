@@ -140,8 +140,8 @@ public class ActivatedSpawnerDetector extends Module {
     );
     private final Setting<Boolean> airChecker = sgGeneral.add(new BoolSetting.Builder()
             .name("Check Air Disturbances")
-            .description("Displays spawners as activated if there are disturbances in the air around them. For example if a torch was placed and removed it will detect that.")
-            .defaultValue(true)
+            .description("Displays spawners as activated if there are disturbances in the air around them. For example if a torch was placed and removed it will detect that. THERE CAN BE SOME FALSE POSITIVES WITH THIS!")
+            .defaultValue(false)
             .build()
     );
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
