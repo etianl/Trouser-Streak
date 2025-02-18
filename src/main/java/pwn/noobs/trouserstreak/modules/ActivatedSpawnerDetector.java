@@ -856,10 +856,10 @@ public class ActivatedSpawnerDetector extends Module {
         Identifier dimId = mc.world.getRegistryKey().getValue();
         String dimStr = dimId.toString();
         switch (waypointType.get()) {
-            case WaypointType.Regular -> {waypointNum = 0;}
-            case WaypointType.Disabled -> {waypointNum = 1;}
-            case WaypointType.Temporary -> {waypointNum = 2;}
-            case WaypointType.Destination -> {waypointNum = 3;}
+            case Regular -> {waypointNum = 0;}
+            case Disabled -> {waypointNum = 1;}
+            case Temporary -> {waypointNum = 2;}
+            case Destination -> {waypointNum = 3;}
         }
         switch (dimStr) {
             case "minecraft:overworld" -> {
