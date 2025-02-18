@@ -31,54 +31,54 @@ public class ElytraCount extends HudElement {
     // General
 
     public final Setting<Integer> minDurability = sgGeneral.add(new IntSetting.Builder()
-        .name("min-durability")
-        .description("Durability threshold to count elytras.")
-        .defaultValue(300)
-        .range(1, Items.ELYTRA.getComponents().get(DataComponentTypes.MAX_DAMAGE) - 1)
-        .sliderRange(1, Items.ELYTRA.getComponents().get(DataComponentTypes.MAX_DAMAGE) - 1)
-        .build()
+            .name("min-durability")
+            .description("Durability threshold to count elytras.")
+            .defaultValue(300)
+            .range(1, Items.ELYTRA.getComponents().get(DataComponentTypes.MAX_DAMAGE) - 1)
+            .sliderRange(1, Items.ELYTRA.getComponents().get(DataComponentTypes.MAX_DAMAGE) - 1)
+            .build()
     );
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-        .name("none-mode")
-        .description("How to render the item when you don't have the specified item in your inventory.")
-        .defaultValue(Mode.HideCount)
-        .build()
+            .name("none-mode")
+            .description("How to render the item when you don't have the specified item in your inventory.")
+            .defaultValue(Mode.HideCount)
+            .build()
     );
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-        .name("scale")
-        .description("Scale of the item.")
-        .defaultValue(2)
-        .onChanged(aDouble -> calculateSize())
-        .min(1)
-        .sliderRange(1, 4)
-        .build()
+            .name("scale")
+            .description("Scale of the item.")
+            .defaultValue(2)
+            .onChanged(aDouble -> calculateSize())
+            .min(1)
+            .sliderRange(1, 4)
+            .build()
     );
 
     private final Setting<Integer> border = sgGeneral.add(new IntSetting.Builder()
-        .name("border")
-        .description("How much space to add around the element.")
-        .defaultValue(0)
-        .onChanged(integer -> calculateSize())
-        .build()
+            .name("border")
+            .description("How much space to add around the element.")
+            .defaultValue(0)
+            .onChanged(integer -> calculateSize())
+            .build()
     );
 
     // Background
 
     private final Setting<Boolean> background = sgBackground.add(new BoolSetting.Builder()
-        .name("background")
-        .description("Displays background.")
-        .defaultValue(false)
-        .build()
+            .name("background")
+            .description("Displays background.")
+            .defaultValue(false)
+            .build()
     );
 
     private final Setting<SettingColor> backgroundColor = sgBackground.add(new ColorSetting.Builder()
-        .name("background-color")
-        .description("Color used for the background.")
-        .visible(background::get)
-        .defaultValue(new SettingColor(25, 25, 25, 50))
-        .build()
+            .name("background-color")
+            .description("Color used for the background.")
+            .visible(background::get)
+            .defaultValue(new SettingColor(25, 25, 25, 50))
+            .build()
     );
 
     public ElytraCount() {
@@ -100,8 +100,8 @@ public class ElytraCount extends HudElement {
     public void render(HudRenderer renderer) {
 
         ItemStack itemStack = new ItemStack(Items.ELYTRA, InvUtils.find(stack ->
-            stack.getItem() == Items.ELYTRA &&
-                (stack.getMaxDamage() - stack.getDamage()) > minDurability.get()
+                stack.getItem() == Items.ELYTRA &&
+                        (stack.getMaxDamage() - stack.getDamage()) > minDurability.get()
         ).count());
 
         if (mode.get() == Mode.HideItem && itemStack.isEmpty()) {
