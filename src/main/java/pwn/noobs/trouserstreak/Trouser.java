@@ -68,6 +68,7 @@ public class Trouser extends MeteorAddon {
                 Commands.add(new TextCommand());
                 Modules.get().add(new AutoNames());
                 Modules.get().add(new OPplayerTPmodule());
+                Modules.get().add(new MultiverseAnnihilator());
 
                 //Modules.get().add(new -----> Exploits for old versions! <-----());
                 Modules.get().add(new BookAndQuillDupe());
@@ -80,6 +81,8 @@ public class Trouser extends MeteorAddon {
                 //Modules.get().add(new -----> And much more <-----());
                 Modules.get().add(new AttributeSwap());
                 Modules.get().add(new Teleport());
+                Modules.get().add(new PortalGodMode());
+                Modules.get().add(new ItemTractorBeam());
                 Modules.get().add(new TPFly());
                 Modules.get().add(new FlightAntikick());
                 Modules.get().add(new BetterAutoSign());

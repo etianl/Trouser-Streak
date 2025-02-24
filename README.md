@@ -80,6 +80,7 @@ In no particular order
 - The saved presets for the .text command will be saved in the .minecraft/TrouserStreak/TextPresets folder.
 - Some example commands would be ".text load mountains" or ".text save mountains #green [ #dark_red Trolled! #green ]|#gold Mountains of Lava Inc.|#red Youtube: #blue www.youtube.com/@mountainsoflavainc.6913"
 - Individual lines are seperated by a | (pipe character) and you can also use #red "wordhere" to format the color of the text.
+- You can obfuscate words by using #obfuscated
 - **AutoTitles:** Displays text (such as advertisements) across the screen of all the individuals who are online on a server at the time. Requires OP status. Credits to [ogmur](https://www.youtube.com/@Ogmur) for figuring out these commands, and to etianl for writing a module for it.
 - **AutoVclipCommand** Automatically selects the nearest two block gap going either up or down to vclip into. (Credits to etianl, and credits to the original [AutoVclip](https://github.com/kittenvr/AutoVclip) for minecraft 1.19.2 which inspired me to make this one. :D)
 - **BaseFinder:** Automatically detects if a Base or Build could be in a chunk by checking every block and entity in each chunk to see if there are "Un-natural" things within them. (Credits to etianl :D, and to Meteor-Rejects for some code from newchunks.)
@@ -113,11 +114,13 @@ In no particular order
 - **InstaKill:** Shoots arrows and tridents with incredible power and velocity. Enabling multiple buttons causes the amount of packets to add up. (Credits to Saturn5Vfive)
 - **InstaMineNuker:** Sends packets to instantly mine the blocks around you until they are gone. There is an option in it to make it only target instamineable blocks such as crops, grass, slimeblocks, and more.. (Credits to etianl and to Meteor Client, as well as Meteor Rejects for some borrowed code)
 - **InstaSafetyBox:** Places a box around you for safety using the hardest blocks available in your hotbar. Also with adjustable range for thic box. (Credits to etianl :D)
+- **ItemTractorBeam:** Sucks up items from a very far distance using hunger points. Only works well for items on the same Y level. The code for this module is based off of the InstaKill code by Saturn5Vfive!
 - **LavaAura:** Automatically places and picks up lava buckets at an entity's position on a tick delay, or sets the entity on fire using flint and steel or fire charges. Also has the option of placing lavabuckets or fire on every block face which may be useful in creative mode. (Credits to etianl :D)
 - **LecternCrash:** Crash 1.18.X vanilla servers and possibly below. (Credits to Coderx-Gamer)
 - **MaceKill:** Exploits Mace mechanics to make the Mace super OP everytime you swing it instead of just when you drop from a height. (Credits to etianl :D)
 - **MobGearESP:** ESP Module that highlights mobs likely wearing player gear. (Thank you to [windoid](https://github.com/windoid) for writing this!)
 - **MultiUse:** Allows you to do the item use action more than once per item use. Essentially a strange form of the FastUse module and may work well combined with it. Initially created by [maytrixc](https://github.com/maytrixc), modified by etianl to use doItemUse.
+- **MultiverseAnnihilator:** With the press of a single button you can quickly delete every world listed on a server that has the Multiverse plugin installed. OP status is required. (credits to [ogmur](https://www.youtube.com/@Ogmur) for writing this)
 - **NbtEditor:** Requires Creative mode. Generates custom entities in the form of a custom spawn egg, generate items with custom enchantments, and potions with custom effects all based on the settings you configure. It can also copy the Nbt data from one item to another.  (Credits to etianl :D)
 - **NewerNewChunks:** NewChunks module with new newchunk estimation exploits, and the ability to save chunk data for later! Comes with several new homebrewed newchunks methods made by yours truly. (Credits to Meteor Rejects, and BleachHack from where it was ported, and etianl for updating :D.)
 
@@ -166,6 +169,7 @@ In no particular order
 - **OnlinePlayerActivityDetector:** Detects if an online player is nearby if there are blocks missing from a BlockState palette and your render distances are overlapping. It can detect players that are outside of render distance. (Credits to etianl :D)
 - **OPplayerTPmodule:** Uses operator commands to teleport you to each player online one by one at the push of a button, or those players to you one by one. There is a button in the options for it to reset the current player to zero. Thank you to [ogmur](https://www.youtube.com/@Ogmur) for the module suggestion (Credits to etianl for writing :D). REQUIRES OP STATUS
 - **OPServerKillModule:** Runs a set of operator commands to disable a server and cover up the tracks of the kill command. REQUIRES OP STATUS (Credits to etianl :D)
+- **PortalGodMode:** Makes you invincible after you walk through a portal. You will not be able to move while invincible until you disable the god mode.
 - **PortalPatternFinder:** Scans for the shapes of broken/removed Nether Portals within the cave air blocks found in caves and underground structures in 1.13+ chunks. **May be useful for finding portal skips in the Nether**. (Credits to etianl :D)
 - **PotESP:** Detects Decorated Pots with un-natural contents, and also tells you what item it is and the location of the pot. (Credits to etianl :D)
 - **RedstoneNuker:** It's just the regular Nuker module from Meteor client, customized for only breaking things that generate redstone signals. Also with included AutoTool. To keep you safer when placing lots of TNT. (Credits to Meteor Client for Nuker code, and AutoTool code inthere.)
