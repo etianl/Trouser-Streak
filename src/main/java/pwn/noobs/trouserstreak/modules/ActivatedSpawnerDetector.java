@@ -24,7 +24,6 @@ import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
-import meteordevelopment.meteorclient.settings.StringSetting;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
@@ -42,7 +41,6 @@ import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
 import net.minecraft.entity.vehicle.ChestMinecartEntity;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
@@ -63,6 +61,7 @@ public class ActivatedSpawnerDetector extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
     private final SettingGroup sgLocations = settings.createGroup("Location Toggles");
+    private final SettingGroup locationLogs = settings.createGroup("Location Logs");
     private final Setting<Boolean> trialSpawner = sgLocations.add(new BoolSetting.Builder()
             .name("Trial Spawner Detector")
             .description("Detects activated Trial Spawners.")
@@ -279,96 +278,16 @@ public class ActivatedSpawnerDetector extends Module {
             .visible(() -> trialSpawner.get() && rangerendering.get() && (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both))
             .build()
     );
-
+    private final Setting<Boolean> locLogging = locationLogs.add(new BoolSetting.Builder()
+            .name("Enable Location Logging")
+            .description("Logs the locations of detected spawners to a csv file as well as a table in this options menu.")
+            .defaultValue(false)
+            .build()
+    );
     private final List<LoggedSpawner> loggedSpawners = new ArrayList<>();
     private final Set<BlockPos> loggedSpawnerPositions = new HashSet<>();
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-
-    private final SettingGroup sgXaeros = settings.createGroup("Xaeros Waypoints");
-    private final Setting<Boolean> createXaerosWaypoint = sgXaeros.add(new BoolSetting.Builder()
-            .name("create-xaeros-waypoint")
-            .description("If true, append a Xaeros waypoint entry when a spawner is discovered. Note that a relog is required to see the waypoints.")
-            .defaultValue(false)
-            .build()
-    );
-    private final Setting<String> xaerosWaypointName = sgXaeros.add(new StringSetting.Builder()
-            .name("xaeros-waypoint-name")
-            .description("The name to use in the Xaeros waypoint entry.")
-            .defaultValue("Spawner")
-            .visible(createXaerosWaypoint::get)
-            .build()
-    );
-    private final Setting<String> xaerosWaypointLetter = sgXaeros.add(new StringSetting.Builder()
-            .name("xaeros-waypoint-letter")
-            .description("The letter to use in the Xaeros waypoint entry.")
-            .defaultValue("S")
-            .visible(createXaerosWaypoint::get)
-            .build()
-    );
-    private final Setting<Integer> xaerosColorNumber = sgXaeros.add(new IntSetting.Builder()
-            .name("xaeros-color-number")
-            .description("The color number to use in the Xaeros waypoint entry.")
-            .defaultValue(1)
-            .min(0)
-            .visible(createXaerosWaypoint::get)
-            .build()
-    );
-    private enum WaypointType {
-        Regular,
-        Disabled,
-        Temporary,
-        Destination
-    }
-    public final Setting<WaypointType> waypointType = sgXaeros.add(new EnumSetting.Builder<WaypointType>()
-            .name("waypoint-type")
-            .description("The type of Xaeros waypoint to create.")
-            .defaultValue(WaypointType.Destination)
-            .visible(createXaerosWaypoint::get)
-            .build()
-    );
-    private final Setting<String> xaerosOverworldWaypointFilePath = sgXaeros.add(new StringSetting.Builder()
-            .name("xaeros-overworld-waypoint-file-path")
-            .description("The file path for Xaeros waypoints in the Overworld. Normally {MinecraftPath}/xaero/minimap/World/dim%0/mw$default_1.txt")
-            .defaultValue("path/to/overworld/waypoints.txt")
-            .visible(createXaerosWaypoint::get)
-            .build()
-    );
-    private final Setting<String> xaerosNetherWaypointFilePath = sgXaeros.add(new StringSetting.Builder()
-            .name("xaeros-nether-waypoint-file-path")
-            .description("The file path for Xaeros waypoints in the Nether. Normally {MinecraftPath}/.minecraft/xaero/minimap/World/dim%-1/mw$default_1.txt")
-            .defaultValue("path/to/nether/waypoints.txt")
-            .visible(createXaerosWaypoint::get)
-            .build()
-    );
-    private final Setting<String> xaerosEndWaypointFilePath = sgXaeros.add(new StringSetting.Builder()
-            .name("xaeros-end-waypoint-file-path")
-            .description("The file path for Xaeros waypoints in the End. Normally {MinecraftPath}/xaero/minimap/World/dim%-2/mw$default_1.txt")
-            .defaultValue("path/to/end/waypoints.txt")
-            .visible(createXaerosWaypoint::get)
-            .build()
-    );
-    private final Setting<Boolean> createOverworldWaypoints = sgXaeros.add(new BoolSetting.Builder()
-            .name("create-overworld-waypoints")
-            .description("If true, create Xaeros waypoints in the Overworld.")
-            .defaultValue(true)
-            .visible(createXaerosWaypoint::get)
-            .build()
-    );
-    private final Setting<Boolean> createNetherWaypoints = sgXaeros.add(new BoolSetting.Builder()
-            .name("create-nether-waypoints")
-            .description("If true, create Xaeros waypoints in the Nether.")
-            .defaultValue(false)
-            .visible(createXaerosWaypoint::get)
-            .build()
-    );
-    private final Setting<Boolean> createEndWaypoints = sgXaeros.add(new BoolSetting.Builder()
-            .name("create-end-waypoints")
-            .description("If true, create Xaeros waypoints in the End.")
-            .defaultValue(true)
-            .visible(createXaerosWaypoint::get)
-            .build()
-    );
 
     private final Set<BlockPos> scannedPositions = Collections.synchronizedSet(new HashSet<>());
     private final Set<BlockPos> spawnerPositions = Collections.synchronizedSet(new HashSet<>());
@@ -380,7 +299,6 @@ public class ActivatedSpawnerDetector extends Module {
     private int closestSpawnerZ = 2000000000;
     private double SpawnerDistance = 2000000000;
     private boolean activatedSpawnerFound = false;
-    private int waypointNum;
 
     public ActivatedSpawnerDetector() {
         super(Trouser.Main, "ActivatedSpawnerDetector", "Detects if a player has been near a mob spawner in the past. May be useful for finding player made stashes in dungeons, mineshafts, and other places.");
@@ -503,14 +421,14 @@ public class ActivatedSpawnerDetector extends Module {
                                             else ChatUtils.sendMsg(Text.of("Detected Activated Spawner!"));
                                             spawnerPositions.add(pos);
                                             activatedSpawnerFound = true;
-                                            logSpawner(pos);
+                                            if (locLogging.get())logSpawner(pos);
                                         }
                                     } else {
                                         if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated Spawner! Block Position: " + pos));
                                         else ChatUtils.sendMsg(Text.of("Detected Activated Spawner!"));
                                         spawnerPositions.add(pos);
                                         activatedSpawnerFound = true;
-                                        logSpawner(pos);
+                                        if (locLogging.get())logSpawner(pos);
                                     }
                                 }
                             }
@@ -599,7 +517,7 @@ public class ActivatedSpawnerDetector extends Module {
                                 if (lessSpam.get() && chestfound && extramessage.get()) error("There may be stashed items in the storage near the spawners!");
                                 else if (!lessSpam.get() && extramessage.get()) error("There may be stashed items in the storage near the spawners!");
                             }
-                            logSpawner(tPos);
+                            if (locLogging.get())logSpawner(tPos);
                         }
                     }
                 }
@@ -735,7 +653,7 @@ public class ActivatedSpawnerDetector extends Module {
                 if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated Spawner! Block Position: " + pos));
                 else ChatUtils.sendMsg(Text.of("Detected Activated Spawner!"));
             }
-            logSpawner(pos);
+            if (locLogging.get())logSpawner(pos);
         }
     }
     private void render(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
@@ -774,9 +692,6 @@ public class ActivatedSpawnerDetector extends Module {
             loggedSpawners.add(new LoggedSpawner(pos.getX(), pos.getY(), pos.getZ()));
             saveJson();
             saveCsv();
-            if (createXaerosWaypoint.get()) {
-                appendWaypoint(new LoggedSpawner(pos.getX(), pos.getY(), pos.getZ()));
-            }
         }
     }
 
@@ -804,11 +719,11 @@ public class ActivatedSpawnerDetector extends Module {
     }
 
     private File getJsonFile() {
-        return new File(new File(new File(MeteorClient.FOLDER, "spawners"), Utils.getFileWorldName()), "spawners.json");
+        return new File(new File(new File("TrouserStreak", "ActivatedSpawners"), Utils.getFileWorldName()), "spawners.json");
     }
 
     private File getCsvFile() {
-        return new File(new File(new File(MeteorClient.FOLDER, "spawners"), Utils.getFileWorldName()), "spawners.csv");
+        return new File(new File(new File("TrouserStreak", "ActivatedSpawners"), Utils.getFileWorldName()), "spawners.csv");
     }
 
     private void loadLogs() {
@@ -851,61 +766,12 @@ public class ActivatedSpawnerDetector extends Module {
         }
     }
 
-    private void appendWaypoint(LoggedSpawner spawner) {
-        String filePath;
-        Identifier dimId = mc.world.getRegistryKey().getValue();
-        String dimStr = dimId.toString();
-        switch (waypointType.get()) {
-            case Regular -> {waypointNum = 0;}
-            case Disabled -> {waypointNum = 1;}
-            case Temporary -> {waypointNum = 2;}
-            case Destination -> {waypointNum = 3;}
-        }
-        switch (dimStr) {
-            case "minecraft:overworld" -> {
-                if (!createOverworldWaypoints.get()) return;
-                filePath = xaerosOverworldWaypointFilePath.get();
-            }
-            case "minecraft:the_nether" -> {
-                if (!createNetherWaypoints.get()) return;
-                filePath = xaerosNetherWaypointFilePath.get();
-            }
-            case "minecraft:the_end" -> {
-                if (!createEndWaypoints.get()) return;
-                filePath = xaerosEndWaypointFilePath.get();
-            }
-            default -> {
-                if (!createOverworldWaypoints.get()) return;
-                filePath = xaerosOverworldWaypointFilePath.get();
-            }
-        }
-        int x = spawner.x;
-        int y = spawner.y;
-        int z = spawner.z;
-        String entry = String.format("waypoint:%s:%s:%d:%d:%d:%d:false:%d:gui.xaero_default:false:0:0:false",
-                xaerosWaypointName.get(),
-                xaerosWaypointLetter.get(),
-                x, y, z,
-                xaerosColorNumber.get(),
-                waypointNum
-        );
-        try {
-            File file = new File(filePath);
-            file.getParentFile().mkdirs();
-            FileWriter fw = new FileWriter(file, true);
-            fw.write(System.lineSeparator() + entry);
-            fw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     @Override
     public WWidget getWidget(GuiTheme theme) {
         // Sort by Y coordinate for display purposes.
         loggedSpawners.sort(Comparator.comparingInt(s -> s.y));
         WVerticalList list = theme.verticalList();
-        WButton clear = list.add(theme.button("Clear Logged Spawners")).widget();
+        WButton clear = list.add(theme.button("Clear Logged Positions")).widget();
         WTable table = new WTable();
         if (!loggedSpawners.isEmpty()) list.add(table);
         clear.action = () -> {
@@ -920,20 +786,24 @@ public class ActivatedSpawnerDetector extends Module {
     }
 
     private void fillTable(GuiTheme theme, WTable table) {
+        List<LoggedSpawner> spawnerCoords = new ArrayList<>();
         for (LoggedSpawner ls : loggedSpawners) {
-            table.add(theme.label("Pos: " + ls.x + ", " + ls.y + ", " + ls.z));
-            WButton gotoBtn = table.add(theme.button("Goto")).widget();
-            gotoBtn.action = () -> PathManagers.get().moveTo(new BlockPos(ls.x, ls.y, ls.z), true);
-            WMinus delete = table.add(theme.minus()).widget();
-            delete.action = () -> {
-                loggedSpawners.remove(ls);
-                loggedSpawnerPositions.remove(new BlockPos(ls.x, ls.y, ls.z));
-                table.clear();
-                fillTable(theme, table);
-                saveJson();
-                saveCsv();
-            };
-            table.row();
+            if (!spawnerCoords.contains(ls)) {
+                spawnerCoords.add(ls);
+                table.add(theme.label("Pos: " + ls.x + ", " + ls.y + ", " + ls.z));
+                WButton gotoBtn = table.add(theme.button("Goto")).widget();
+                gotoBtn.action = () -> PathManagers.get().moveTo(new BlockPos(ls.x, ls.y, ls.z), true);
+                WMinus delete = table.add(theme.minus()).widget();
+                delete.action = () -> {
+                    loggedSpawners.remove(ls);
+                    loggedSpawnerPositions.remove(new BlockPos(ls.x, ls.y, ls.z));
+                    table.clear();
+                    fillTable(theme, table);
+                    saveJson();
+                    saveCsv();
+                };
+                table.row();
+            }
         }
     }
 

@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -52,16 +53,16 @@ import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.WorldChunk;
 import pwn.noobs.trouserstreak.Trouser;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
@@ -83,6 +84,7 @@ public class BaseFinder extends Module {
     private final SettingGroup sgCdata = settings.createGroup("Saved Base Data");
     private final SettingGroup sgcacheCdata = settings.createGroup("Cached Base Data");
     private final SettingGroup sgRender = settings.createGroup("Render");
+    private final SettingGroup locationLogs = settings.createGroup("Location Logs");
 
     // general
     private final Setting<Boolean> chatFeedback = sgGeneral.add(new BoolSetting.Builder()
@@ -93,7 +95,7 @@ public class BaseFinder extends Module {
     );
     private final Setting<Boolean> displaycoords = sgGeneral.add(new BoolSetting.Builder()
             .name("DisplayCoords")
-            .description("Displays coords of air disturbances in chat.")
+            .description("Displays coords of bases in chat.")
             .defaultValue(true)
             .build()
     );
@@ -450,95 +452,11 @@ public class BaseFinder extends Module {
             .visible(() -> autoreload.get() && load.get())
             .build());
 
-    private final SettingGroup sgXaeros = settings.createGroup("Xaeros Waypoints");
-    private final Setting<Boolean> createXaerosWaypoint = sgXaeros.add(new BoolSetting.Builder()
-            .name("create-xaeros-waypoint")
-            .description("If true, append a Xaeros waypoint entry when a base is discovered.  Note that a relog is required to see the waypoints.")
-            .defaultValue(false)
-            .build()
-    );
-    private final Setting<String> xaerosWaypointName = sgXaeros.add(new StringSetting.Builder()
-            .name("xaeros-waypoint-name")
-            .description("The name to use in the Xaeros waypoint entry.")
-            .defaultValue("Base")
-            .visible(createXaerosWaypoint::get)
-            .build()
-    );
-    private final Setting<String> xaerosWaypointLetter = sgXaeros.add(new StringSetting.Builder()
-            .name("xaeros-waypoint-letter")
-            .description("The letter to use in the Xaeros waypoint entry.")
-            .defaultValue("B")
-            .visible(createXaerosWaypoint::get)
-            .build()
-    );
-    private final Setting<Integer> xaerosColorNumber = sgXaeros.add(new IntSetting.Builder()
-            .name("xaeros-color-number")
-            .description("The color number to use in the Xaeros waypoint entry.")
-            .defaultValue(1)
-            .min(0)
-            .visible(createXaerosWaypoint::get)
-            .build()
-    );
-    private enum WaypointType {
-        Regular,
-        Disabled,
-        Temporary,
-        Destination
-    }
-    public final Setting<WaypointType> waypointType = sgXaeros.add(new EnumSetting.Builder<WaypointType>()
-            .name("waypoint-type")
-            .description("The type of Xaeros waypoint to create.")
-            .defaultValue(WaypointType.Destination)
-            .visible(createXaerosWaypoint::get)
-            .build()
-    );
-    private final Setting<String> xaerosOverworldWaypointFilePath = sgXaeros.add(new StringSetting.Builder()
-            .name("xaeros-overworld-waypoint-file-path")
-            .description("The file path for Xaeros waypoints in the Overworld.  Normally {MinecraftPath}/xaero/minimap/World/dim%0/mw$default_1.txt")
-            .defaultValue("path/to/overworld/waypoints.txt")
-            .visible(createXaerosWaypoint::get)
-            .build()
-    );
-    private final Setting<String> xaerosNetherWaypointFilePath = sgXaeros.add(new StringSetting.Builder()
-            .name("xaeros-nether-waypoint-file-path")
-            .description("The file path for Xaeros waypoints in the Nether.  Normally {MinecraftPath}/xaero/minimap/World/dim%-1/mw$default_1.txt")
-            .defaultValue("path/to/nether/waypoints.txt")
-            .visible(createXaerosWaypoint::get)
-            .build()
-    );
-    private final Setting<String> xaerosEndWaypointFilePath = sgXaeros.add(new StringSetting.Builder()
-            .name("xaeros-end-waypoint-file-path")
-            .description("The file path for Xaeros waypoints in the End.  Normally {MinecraftPath}/xaero/minimap/World/dim%-2/mw$default_1.txt")
-            .defaultValue("path/to/end/waypoints.txt")
-            .visible(createXaerosWaypoint::get)
-            .build()
-    );
-    private final Setting<Boolean> createOverworldWaypoints = sgXaeros.add(new BoolSetting.Builder()
-            .name("create-overworld-waypoints")
-            .description("If true, create Xaeros waypoints in the Overworld.")
-            .defaultValue(true)
-            .visible(createXaerosWaypoint::get)
-            .build()
-    );
-    private final Setting<Boolean> createNetherWaypoints = sgXaeros.add(new BoolSetting.Builder()
-            .name("create-nether-waypoints")
-            .description("If true, create Xaeros waypoints in the Nether.")
-            .defaultValue(false)
-            .visible(createXaerosWaypoint::get)
-            .build()
-    );
-    private final Setting<Boolean> createEndWaypoints = sgXaeros.add(new BoolSetting.Builder()
-            .name("create-end-waypoints")
-            .description("If true, create Xaeros waypoints in the End.")
-            .defaultValue(true)
-            .visible(createXaerosWaypoint::get)
-            .build()
-    );
-
     @Override
     public WWidget getWidget(GuiTheme theme) {
+        WTable table1 = theme.table();
         WTable table = theme.table();
-        WButton nearestB = table.add(theme.button("NearestBase")).expandX().minWidth(100).widget();
+        WButton nearestB = table1.add(theme.button("NearestBase")).expandX().minWidth(100).widget();
         nearestB.action = () -> {
             if(isBaseFinderModuleOn==0){
                 error("Please turn on BaseFinder module and push the button again.");
@@ -546,8 +464,8 @@ public class BaseFinder extends Module {
                 findnearestbaseticks=1;
             }
         };
-        table.row();
-        WButton adddata = table.add(theme.button("AddBase")).expandX().minWidth(100).widget();
+        table1.row();
+        WButton adddata = table1.add(theme.button("AddBase")).expandX().minWidth(100).widget();
         adddata.action = () -> {
             if(isBaseFinderModuleOn==0){
                 error("Please turn on BaseFinder module and push the button again.");
@@ -568,13 +486,12 @@ public class BaseFinder extends Module {
                     } catch (IOException e) {
                         //e.printStackTrace();
                     }
-
                 }
                 ChatUtils.sendMsg(Text.of("Base near X"+mc.player.getChunkPos().getCenterX()+", Z"+mc.player.getChunkPos().getCenterZ()+" added to the BaseFinder."));
             }
         };
-        table.row();
-        WButton deldata = table.add(theme.button("RemoveBase")).expandX().minWidth(100).widget();
+        table1.row();
+        WButton deldata = table1.add(theme.button("RemoveBase")).expandX().minWidth(100).widget();
         deldata.action = () -> {
             if(isBaseFinderModuleOn==0){
                 error("Please turn on BaseFinder module and push the button again.");
@@ -599,8 +516,8 @@ public class BaseFinder extends Module {
                 ChatUtils.sendMsg(Text.of("Base near X"+mc.player.getChunkPos().getCenterX()+", Z"+mc.player.getChunkPos().getCenterZ()+" removed from the BaseFinder."));
             }
         };
-        table.row();
-        WButton dellastdata = table.add(theme.button("RemoveLastBase")).expandX().minWidth(100).widget();
+        table1.row();
+        WButton dellastdata = table1.add(theme.button("RemoveLastBase")).expandX().minWidth(100).widget();
         dellastdata.action = () -> {
             if(isBaseFinderModuleOn==0){
                 error("Please turn on BaseFinder module and push the button again.");
@@ -628,8 +545,8 @@ public class BaseFinder extends Module {
                 LastBaseFound= new ChunkPos(2000000000, 2000000000);
             }
         };
-        table.row();
-        WButton deletedata = table.add(theme.button("**DELETE ALL BASE DATA**")).expandX().minWidth(100).widget();
+        table1.row();
+        WButton deletedata = table1.add(theme.button("**DELETE ALL BASE DATA**")).expandX().minWidth(100).widget();
         deletedata.action = () -> {
             if (!(mc.world==null) && mc.world.isChunkLoaded(mc.player.getChunkPos().x,mc.player.getChunkPos().z)){
                 if (deletewarning==0) error("PRESS AGAIN WITHIN 5s TO DELETE ALL BASE DATA FOR THIS DIMENSION.");
@@ -637,8 +554,60 @@ public class BaseFinder extends Module {
                 deletewarning++;
             }
         };
-        table.row();
-        return table;
+        table1.row();
+        java.util.List<LoggedBase> sortedBases = new java.util.ArrayList<>(loggedBases);
+        sortedBases.sort(Comparator.comparingInt(a -> a.y));
+        var list = theme.verticalList();
+        list.add(table1);
+        var clear = list.add(theme.button("Clear Logged Positions")).widget();
+        if(!sortedBases.isEmpty()) list.add(table);
+        clear.action = () -> {
+            loggedBases.clear();
+            loggedBasePositions.clear();
+            table.clear();
+            saveJsonLog();
+            saveCsvLog();
+        };
+        for(LoggedBase lb : sortedBases) {
+            table.add(theme.label("Pos: " + lb.x + ", " + lb.y + ", " + lb.z));
+            WButton gotoBtn = table.add(theme.button("Goto")).widget();
+            gotoBtn.action = () -> { meteordevelopment.meteorclient.pathing.PathManagers.get().moveTo(new BlockPos(lb.x, lb.y, lb.z), true); };
+            var delete = table.add(theme.button("-")).widget();
+            delete.action = () -> {
+                loggedBases.remove(lb);
+                loggedBasePositions.remove(new ChunkPos((lb.x - 8) / 16, (lb.z - 8) / 16));
+                table.clear();
+                for(LoggedBase l : loggedBases) {
+                    table.add(theme.label("Pos: " + l.x + ", " + l.y + ", " + l.z));
+                    WButton gotoBtn2 = table.add(theme.button("Goto")).widget();
+                    gotoBtn2.action = () -> { meteordevelopment.meteorclient.pathing.PathManagers.get().moveTo(new BlockPos(l.x, l.y, l.z), true); };
+                    var delete2 = table.add(theme.button("-")).widget();
+                    delete2.action = () -> {
+                        loggedBases.remove(l);
+                        loggedBasePositions.remove(new ChunkPos((l.x - 8) / 16, (l.z - 8) / 16));
+                        table.clear();
+                        for(LoggedBase l2 : loggedBases) {
+                            table.add(theme.label("Pos: " + l2.x + ", " + l2.y + ", " + l2.z));
+                            WButton gotoBtn3 = table.add(theme.button("Goto")).widget();
+                            gotoBtn3.action = () -> { meteordevelopment.meteorclient.pathing.PathManagers.get().moveTo(new BlockPos(l2.x, l2.y, l2.z), true); };
+                            var delete3 = table.add(theme.button("-")).widget();
+                            delete3.action = () -> {
+                                loggedBases.remove(l2);
+                                loggedBasePositions.remove(new ChunkPos((l2.x - 8) / 16, (l2.z - 8) / 16));
+                            };
+                            table.row();
+                        }
+                        saveJsonLog();
+                        saveCsvLog();
+                    };
+                    table.row();
+                }
+                saveJsonLog();
+                saveCsvLog();
+            };
+            table.row();
+        }
+        return list;
     }
 
     // render
@@ -697,6 +666,12 @@ public class BaseFinder extends Module {
             .visible(trcr::get)
             .build()
     );
+    private final Setting<Boolean> locLogging = locationLogs.add(new BoolSetting.Builder()
+            .name("Enable Location Logging")
+            .description("Logs the locations of detected spawners to a csv file as well as a table in this options menu.")
+            .defaultValue(false)
+            .build()
+    );
     private static final ExecutorService taskExecutor = Executors.newCachedThreadPool();
     private int basefoundspamTicks=0;
     private boolean basefound=false;
@@ -743,7 +718,7 @@ public class BaseFinder extends Module {
     private String lastblockfound6;
     private String lastblockfound7;
     private int entityScanTicks;
-    private int waypointNum;
+
     public BaseFinder() {
         super(Trouser.Main,"BaseFinder", "Estimates if a build or base may be in the chunk based on the blocks it contains.");
     }
@@ -1607,7 +1582,7 @@ public class BaseFinder extends Module {
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
         for(ChunkPos pos : baseChunks) {
-            if(!loggedBasePositions.contains(pos)) {
+            if(!loggedBasePositions.contains(pos) && locLogging.get()) {
                 loggedBasePositions.add(pos);
                 int x = pos.getCenterX();
                 int z = pos.getCenterZ();
@@ -1615,131 +1590,38 @@ public class BaseFinder extends Module {
                 loggedBases.add(new LoggedBase(x, y, z));
                 saveJsonLog();
                 saveCsvLog();
-                if(createXaerosWaypoint.get()){
-                    appendWaypoint(new LoggedBase(x, y, z));
-                }
             }
         }
     }
 
     private void saveCsvLog() {
         try {
-            java.nio.file.Path path = java.nio.file.Paths.get("TrouserStreak", "BaseChunks", serverip, world, "bases.csv");
-            java.nio.file.Files.createDirectories(path.getParent());
-            StringBuilder sb = new StringBuilder();
-            sb.append("X,Y,Z\n");
+            File file = getCsvFile();
+            file.getParentFile().mkdirs();
+            Writer writer = new FileWriter(file);
+            writer.write("X,Y,Z\n");
             for(LoggedBase lb : loggedBases) {
-                sb.append(lb.x).append(",").append(lb.y).append(",").append(lb.z).append("\n");
+                lb.write(writer);
             }
-            java.nio.file.Files.write(path, sb.toString().getBytes(StandardCharsets.UTF_8), java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.WRITE);
-        } catch (IOException e) {}
+            writer.close();
+        } catch (IOException ignored) {}
     }
 
     private void saveJsonLog() {
         try {
-            java.nio.file.Path path = java.nio.file.Paths.get("TrouserStreak", "BaseChunks", serverip, world, "bases.json");
-            java.nio.file.Files.createDirectories(path.getParent());
-            String json = gson.toJson(loggedBases);
-            java.nio.file.Files.write(path, json.getBytes(StandardCharsets.UTF_8), java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.WRITE);
-        } catch (IOException e) {}
+            File file = getJsonFile();
+            file.getParentFile().mkdirs();
+            Writer writer = new FileWriter(file);
+            gson.toJson(loggedBases, writer);
+            writer.close();
+        } catch (IOException ignored) {}
+    }
+    private File getJsonFile() {
+        return new File(new File(new File("TrouserStreak", "BaseChunks"), Utils.getFileWorldName()), "bases.json");
     }
 
-    private void appendWaypoint(LoggedBase lb) {
-        String filePath;
-        Identifier dimId = mc.world.getRegistryKey().getValue();
-        String dimStr = dimId.toString();
-        switch (waypointType.get()) {
-            case WaypointType.Regular -> {waypointNum = 0;}
-            case WaypointType.Disabled -> {waypointNum = 1;}
-            case WaypointType.Temporary -> {waypointNum = 2;}
-            case WaypointType.Destination -> {waypointNum = 3;}
-        }
-        switch (dimStr) {
-            case "minecraft:overworld" -> {
-                if (!createOverworldWaypoints.get()) return;
-                filePath = xaerosOverworldWaypointFilePath.get();
-            }
-            case "minecraft:the_nether" -> {
-                if (!createNetherWaypoints.get()) return;
-                filePath = xaerosNetherWaypointFilePath.get();
-            }
-            case "minecraft:the_end" -> {
-                if (!createEndWaypoints.get()) return;
-                filePath = xaerosEndWaypointFilePath.get();
-            }
-            default -> {
-                if (!createOverworldWaypoints.get()) return;
-                filePath = xaerosOverworldWaypointFilePath.get();
-            }
-        }
-        String entry = String.format("waypoint:%s:%s:%d:%d:%d:%d:false:%d:gui.xaero_default:false:0:0:false",
-                xaerosWaypointName.get(),
-                xaerosWaypointLetter.get(),
-                lb.x, lb.y, lb.z,
-                xaerosColorNumber.get(),
-                waypointNum
-        );
-        try {
-            java.nio.file.Path path = java.nio.file.Paths.get(filePath);
-            java.nio.file.Files.createDirectories(path.getParent());
-            java.nio.file.Files.write(path, (System.lineSeparator() + entry).getBytes(StandardCharsets.UTF_8), java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
-        } catch (IOException e) {}
-    }
-
-    public WWidget getLoggedWidget(GuiTheme theme) {
-        java.util.List<LoggedBase> sortedBases = new java.util.ArrayList<>(loggedBases);
-        sortedBases.sort((a, b) -> Integer.compare(a.y, b.y));
-        var list = theme.verticalList();
-        var clear = list.add(theme.button("Clear Logged Bases")).widget();
-        var table = theme.table();
-        if(!sortedBases.isEmpty()) list.add(table);
-        clear.action = () -> {
-            loggedBases.clear();
-            loggedBasePositions.clear();
-            table.clear();
-            saveJsonLog();
-            saveCsvLog();
-        };
-        for(LoggedBase lb : sortedBases) {
-            table.add(theme.label("Pos: " + lb.x + ", " + lb.y + ", " + lb.z));
-            WButton gotoBtn = table.add(theme.button("Goto")).widget();
-            gotoBtn.action = () -> { meteordevelopment.meteorclient.pathing.PathManagers.get().moveTo(new BlockPos(lb.x, lb.y, lb.z), true); };
-            var delete = table.add(theme.button("-")).widget();
-            delete.action = () -> {
-                loggedBases.remove(lb);
-                loggedBasePositions.remove(new ChunkPos((lb.x - 8) / 16, (lb.z - 8) / 16));
-                table.clear();
-                for(LoggedBase l : loggedBases) {
-                    table.add(theme.label("Pos: " + l.x + ", " + l.y + ", " + l.z));
-                    WButton gotoBtn2 = table.add(theme.button("Goto")).widget();
-                    gotoBtn2.action = () -> { meteordevelopment.meteorclient.pathing.PathManagers.get().moveTo(new BlockPos(l.x, l.y, l.z), true); };
-                    var delete2 = table.add(theme.button("-")).widget();
-                    delete2.action = () -> {
-                        loggedBases.remove(l);
-                        loggedBasePositions.remove(new ChunkPos((l.x - 8) / 16, (l.z - 8) / 16));
-                        table.clear();
-                        for(LoggedBase l2 : loggedBases) {
-                            table.add(theme.label("Pos: " + l2.x + ", " + l2.y + ", " + l2.z));
-                            WButton gotoBtn3 = table.add(theme.button("Goto")).widget();
-                            gotoBtn3.action = () -> { meteordevelopment.meteorclient.pathing.PathManagers.get().moveTo(new BlockPos(l2.x, l2.y, l2.z), true); };
-                            var delete3 = table.add(theme.button("-")).widget();
-                            delete3.action = () -> {
-                                loggedBases.remove(l2);
-                                loggedBasePositions.remove(new ChunkPos((l2.x - 8) / 16, (l2.z - 8) / 16));
-                            };
-                            table.row();
-                        }
-                        saveJsonLog();
-                        saveCsvLog();
-                    };
-                    table.row();
-                }
-                saveJsonLog();
-                saveCsvLog();
-            };
-            table.row();
-        }
-        return list;
+    private File getCsvFile() {
+        return new File(new File(new File("TrouserStreak", "BaseChunks"), Utils.getFileWorldName()), "bases.csv");
     }
 
     private static class LoggedBase {

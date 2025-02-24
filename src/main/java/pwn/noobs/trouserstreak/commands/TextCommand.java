@@ -122,19 +122,29 @@ public class TextCommand extends Command {
     private String formatTextWithColors(String line) {
         StringBuilder formattedText = new StringBuilder();
         String currentColor = "white";
+        boolean isObfuscated = false;
         String[] words = line.split(" ");
 
         for (String word : words) {
             if (word.startsWith("#")) {
-                try {
-                    ColorModes.valueOf(word.substring(1).toLowerCase());
-                    currentColor = word.substring(1).toLowerCase();
-                } catch (IllegalArgumentException ignored) {
-                    formattedText.append(word).append(" ");
+                if (word.equalsIgnoreCase("#obfuscated")) {
+                    isObfuscated = true;
+                } else {
+                    try {
+                        ColorModes.valueOf(word.substring(1).toLowerCase());
+                        currentColor = word.substring(1).toLowerCase();
+                    } catch (IllegalArgumentException ignored) {
+                        formattedText.append(word).append(" ");
+                    }
                 }
             } else {
                 formattedText.append("{\"text\":\"").append(word).append(" \",\"color\":\"")
-                        .append(currentColor).append("\"},");
+                        .append(currentColor).append("\"");
+                if (isObfuscated) {
+                    formattedText.append(",\"obfuscated\":true");
+                }
+                formattedText.append("},");
+                isObfuscated = false; // Reset obfuscation after each word
             }
         }
 

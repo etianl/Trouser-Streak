@@ -3,7 +3,6 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.mixininterface.IPlayerInteractEntityC2SPacket;
 import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
-import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
@@ -92,30 +91,21 @@ public class MaceKill extends Module {
                                 for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
                                     mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
                                 }
-                                mc.player.getVehicle().setPosition(mc.player.getVehicle().getX(), mc.player.getVehicle().getY() + blocks, mc.player.getVehicle().getZ());
+                                double maxHeight = mc.player.getVehicle().getY() + blocks;
+                                mc.player.getVehicle().setPosition(mc.player.getVehicle().getX(), maxHeight + blocks, mc.player.getVehicle().getZ());
+                                mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
+                                mc.player.getVehicle().setPosition(previouspos);
                                 mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
                             } else {
                                 for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
                                     mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false, mc.player.horizontalCollision));
                                 }
-                                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ(), false, mc.player.horizontalCollision));
-                                PlayerMoveC2SPacket movepacket = new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ(), false, mc.player.horizontalCollision);
-                                ((IPlayerMoveC2SPacket) movepacket).meteor$setTag(1337);
-                                mc.player.networkHandler.sendPacket(movepacket);
-                            }
-
-                            // Move back to original position
-                            if (mc.player.hasVehicle()) {
-                                mc.player.getVehicle().setPosition(previouspos);
-                                mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
-                                // Do it again to be sure it happens
-                                mc.player.getVehicle().setPosition(previouspos);
-                                mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
-                            } else {
+                                double maxHeight = mc.player.getY() + blocks;
+                                PlayerMoveC2SPacket movepacket = new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), maxHeight, mc.player.getZ(), false, mc.player.horizontalCollision);
                                 PlayerMoveC2SPacket homepacket = new PlayerMoveC2SPacket.PositionAndOnGround(previouspos.getX(), previouspos.getY(), previouspos.getZ(), false, mc.player.horizontalCollision);
                                 ((IPlayerMoveC2SPacket) homepacket).meteor$setTag(1337);
-                                mc.player.networkHandler.sendPacket(homepacket);
-                                // Do it again to be sure it happens
+                                ((IPlayerMoveC2SPacket) movepacket).meteor$setTag(1337);
+                                mc.player.networkHandler.sendPacket(movepacket);
                                 mc.player.networkHandler.sendPacket(homepacket);
                             }
                         }

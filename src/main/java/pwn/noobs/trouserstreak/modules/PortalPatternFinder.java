@@ -4,7 +4,6 @@ package pwn.noobs.trouserstreak.modules;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
@@ -30,7 +29,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.*;
@@ -48,7 +46,7 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
 public class PortalPatternFinder extends Module {
 	private final SettingGroup sgGeneral = settings.getDefaultGroup();
 	private final SettingGroup sgRender = settings.createGroup("Render");
-	private final SettingGroup sgXaeros = settings.createGroup("Xaeros Waypoints");
+	private final SettingGroup locationLogs = settings.createGroup("Location Logs");
 	private final Setting<Boolean> displaycoords = sgGeneral.add(new BoolSetting.Builder()
 			.name("DisplayCoords")
 			.description("Displays coords of portal patterns in chat.")
@@ -145,6 +143,12 @@ public class PortalPatternFinder extends Module {
 			.visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both || trcr.get()))
 			.build()
 	);
+	private final Setting<Boolean> locLogging = locationLogs.add(new BoolSetting.Builder()
+			.name("Enable Location Logging")
+			.description("Logs the locations of detected spawners to a csv file as well as a table in this options menu.")
+			.defaultValue(false)
+			.build()
+	);
 	private final Set<ChunkPos> scannedChunks = Collections.synchronizedSet(new HashSet<>());
 	private final Set<Box> possiblePortalLocations = Collections.synchronizedSet(new HashSet<>());
 	private int closestPortalX=2000000000;
@@ -152,94 +156,9 @@ public class PortalPatternFinder extends Module {
 	private int closestPortalZ=2000000000;
 	private double PortalDistance=2000000000;
 
-	private final Setting<Boolean> createXaerosWaypoint = sgXaeros.add(new BoolSetting.Builder()
-			.name("create-xaeros-waypoint")
-			.description("If true, append a Xaeros waypoint entry when a portal is discovered.  Note that a relog is required to see the waypoints.")
-			.defaultValue(false)
-			.build()
-	);
-	private final Setting<String> xaerosWaypointName = sgXaeros.add(new StringSetting.Builder()
-			.name("xaeros-waypoint-name")
-			.description("The name to use in the Xaeros waypoint entry.")
-			.defaultValue("Portal")
-			.visible(createXaerosWaypoint::get)
-			.build()
-	);
-	private final Setting<String> xaerosWaypointLetter = sgXaeros.add(new StringSetting.Builder()
-			.name("xaeros-waypoint-letter")
-			.description("The letter to use in the Xaeros waypoint entry.")
-			.defaultValue("P")
-			.visible(createXaerosWaypoint::get)
-			.build()
-	);
-	private final Setting<Integer> xaerosColorNumber = sgXaeros.add(new IntSetting.Builder()
-			.name("xaeros-color-number")
-			.description("The color number to use in the Xaeros waypoint entry.")
-			.defaultValue(1)
-			.min(0)
-			.visible(createXaerosWaypoint::get)
-			.build()
-	);
-	private enum WaypointType {
-		Regular,
-		Disabled,
-		Temporary,
-		Destination
-	}
-	public final Setting<WaypointType> waypointType = sgXaeros.add(new EnumSetting.Builder<WaypointType>()
-			.name("waypoint-type")
-			.description("The type of Xaeros waypoint to create.")
-			.defaultValue(WaypointType.Destination)
-			.visible(createXaerosWaypoint::get)
-			.build()
-	);
-	private final Setting<String> xaerosOverworldWaypointFilePath = sgXaeros.add(new StringSetting.Builder()
-			.name("xaeros-overworld-waypoint-file-path")
-			.description("The file path for Xaeros waypoints in the Overworld.  Normally {MinecraftPath}/xaero/minimap/World/dim%0/mw$default_1.txt")
-			.defaultValue("path/to/overworld/waypoints.txt")
-			.visible(createXaerosWaypoint::get)
-			.build()
-	);
-	private final Setting<String> xaerosNetherWaypointFilePath = sgXaeros.add(new StringSetting.Builder()
-			.name("xaeros-nether-waypoint-file-path")
-			.description("The file path for Xaeros waypoints in the Nether.  Normally {MinecraftPath}/.minecraft/xaero/minimap/World/dim%-1/mw$default_1.txt")
-			.defaultValue("path/to/nether/waypoints.txt")
-			.visible(createXaerosWaypoint::get)
-			.build()
-	);
-	private final Setting<String> xaerosEndWaypointFilePath = sgXaeros.add(new StringSetting.Builder()
-			.name("xaeros-end-waypoint-file-path")
-			.description("The file path for Xaeros waypoints in the End.  Normally {MinecraftPath}/xaero/minimap/World/dim%-2/mw$default_1.txt")
-			.defaultValue("path/to/end/waypoints.txt")
-			.visible(createXaerosWaypoint::get)
-			.build()
-	);
-	private final Setting<Boolean> createOverworldWaypoints = sgXaeros.add(new BoolSetting.Builder()
-			.name("create-overworld-waypoints")
-			.description("If true, create Xaeros waypoints in the Overworld.")
-			.defaultValue(true)
-			.visible(createXaerosWaypoint::get)
-			.build()
-	);
-	private final Setting<Boolean> createNetherWaypoints = sgXaeros.add(new BoolSetting.Builder()
-			.name("create-nether-waypoints")
-			.description("If true, create Xaeros waypoints in the Nether.")
-			.defaultValue(false)
-			.visible(createXaerosWaypoint::get)
-			.build()
-	);
-	private final Setting<Boolean> createEndWaypoints = sgXaeros.add(new BoolSetting.Builder()
-			.name("create-end-waypoints")
-			.description("If true, create Xaeros waypoints in the End.")
-			.defaultValue(true)
-			.visible(createXaerosWaypoint::get)
-			.build()
-	);
-
 	private final List<PortalPattern> portalPatterns = new ArrayList<>();
 	private final Set<BlockPos> loggedPortalPositions = Collections.synchronizedSet(new HashSet<>());
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-	private int waypointNum;
 
 	public PortalPatternFinder() {
 		super(Trouser.Main,"PortalPatternFinder", "Scans for the shapes of broken/removed Nether Portals within the cave air blocks found in caves and underground structures in 1.13+ chunks. **May be useful for finding portal skips in the Nether**");
@@ -516,14 +435,11 @@ public class PortalPatternFinder extends Module {
 				ChatUtils.sendMsg(Text.of("Possible portal found: " + portalBox.getCenter()));
 			else if (!displaycoords.get()) ChatUtils.sendMsg(Text.of("Possible portal found!"));
 			BlockPos cp = new BlockPos(Math.round((float)portalBox.getCenter().x),Math.round((float)portalBox.getCenter().y),Math.round((float)portalBox.getCenter().z));
-			if(!loggedPortalPositions.contains(cp)){
+			if(!loggedPortalPositions.contains(cp) && locLogging.get()){
 				loggedPortalPositions.add(cp);
 				portalPatterns.add(new PortalPattern(cp.getX(),cp.getY(),cp.getZ()));
 				saveJson();
 				saveCsv();
-				if(createXaerosWaypoint.get()){
-					appendWaypoint(new PortalPattern(cp.getX(),cp.getY(),cp.getZ()));
-				}
 			}
 		}
 	}
@@ -649,7 +565,7 @@ public class PortalPatternFinder extends Module {
 	public WWidget getWidget(GuiTheme theme) {
 		portalPatterns.sort(Comparator.comparingInt(a -> a.y));
 		WVerticalList list = theme.verticalList();
-		WButton clear = list.add(theme.button("Clear")).widget();
+		WButton clear = list.add(theme.button("Clear Logged Positions")).widget();
 		WTable table = new WTable();
 		if (!portalPatterns.isEmpty()) list.add(table);
 		clear.action = () -> {
@@ -664,24 +580,28 @@ public class PortalPatternFinder extends Module {
 		return list;
 	}
 	private void fillTable(GuiTheme theme, WTable table) {
+		List<PortalPattern> portalCoords = new ArrayList<>();
 		for (PortalPattern p : portalPatterns) {
-			table.add(theme.label("Pos: " + p.x + ", " + p.y + ", " + p.z));
-			WButton gotoBtn = table.add(theme.button("Goto")).widget();
-			gotoBtn.action = () -> PathManagers.get().moveTo(new BlockPos(p.x, p.y, p.z), true);
-			WMinus delete = table.add(theme.minus()).widget();
-			delete.action = () -> {
-				portalPatterns.remove(p);
-				loggedPortalPositions.remove(new BlockPos(p.x, p.y, p.z));
-				possiblePortalLocations.removeIf(box -> {
-					BlockPos cp = new BlockPos(Math.round((float)box.getCenter().x),Math.round((float)box.getCenter().y),Math.round((float)box.getCenter().z));
-					return cp.equals(new BlockPos(p.x, p.y, p.z));
-				});
-				table.clear();
-				fillTable(theme, table);
-				saveJson();
-				saveCsv();
-			};
-			table.row();
+			if (!portalCoords.contains(p)) {
+				portalCoords.add(p);
+				table.add(theme.label("Pos: " + p.x + ", " + p.y + ", " + p.z));
+				WButton gotoBtn = table.add(theme.button("Goto")).widget();
+				gotoBtn.action = () -> PathManagers.get().moveTo(new BlockPos(p.x, p.y, p.z), true);
+				WMinus delete = table.add(theme.minus()).widget();
+				delete.action = () -> {
+					portalPatterns.remove(p);
+					loggedPortalPositions.remove(new BlockPos(p.x, p.y, p.z));
+					possiblePortalLocations.removeIf(box -> {
+						BlockPos cp = new BlockPos(Math.round((float) box.getCenter().x), Math.round((float) box.getCenter().y), Math.round((float) box.getCenter().z));
+						return cp.equals(new BlockPos(p.x, p.y, p.z));
+					});
+					table.clear();
+					fillTable(theme, table);
+					saveJson();
+					saveCsv();
+				};
+				table.row();
+			}
 		}
 	}
 	private void loadPortalPatterns() {
@@ -745,58 +665,10 @@ public class PortalPatternFinder extends Module {
 		}catch(IOException ignored){}
 	}
 	private File getJsonFile() {
-		return new File(new File(new File(MeteorClient.FOLDER, "portalpatterns"), Utils.getFileWorldName()), "portalpatterns.json");
+		return new File(new File(new File("TrouserStreak", "PortalPatterns"), Utils.getFileWorldName()), "portalpatterns.json");
 	}
 	private File getCsvFile() {
-		return new File(new File(new File(MeteorClient.FOLDER, "portalpatterns"), Utils.getFileWorldName()), "portalpatterns.csv");
-	}
-	private void appendWaypoint(PortalPattern p) {
-		String filePath;
-		Identifier dimId = mc.world.getRegistryKey().getValue();
-		String dimStr = dimId.toString();
-		switch (waypointType.get()) {
-			case WaypointType.Regular -> {waypointNum = 0;}
-			case WaypointType.Disabled -> {waypointNum = 1;}
-			case WaypointType.Temporary -> {waypointNum = 2;}
-			case WaypointType.Destination -> {waypointNum = 3;}
-		}
-        switch (dimStr) {
-            case "minecraft:overworld" -> {
-                if (!createOverworldWaypoints.get()) return;
-                filePath = xaerosOverworldWaypointFilePath.get();
-            }
-            case "minecraft:the_nether" -> {
-                if (!createNetherWaypoints.get()) return;
-                filePath = xaerosNetherWaypointFilePath.get();
-            }
-            case "minecraft:the_end" -> {
-                if (!createEndWaypoints.get()) return;
-                filePath = xaerosEndWaypointFilePath.get();
-            }
-            default -> {
-                if (!createOverworldWaypoints.get()) return;
-                filePath = xaerosOverworldWaypointFilePath.get();
-            }
-        }
-		int x = p.x;
-		int y = p.y;
-		int z = p.z;
-		String entry = String.format("waypoint:%s:%s:%d:%d:%d:%d:false:%d:gui.xaero_default:false:0:0:false",
-				xaerosWaypointName.get(),
-				xaerosWaypointLetter.get(),
-				x, y, z,
-				xaerosColorNumber.get(),
-				waypointNum
-		);
-		try{
-			File file = new File(filePath);
-			file.getParentFile().mkdirs();
-			FileWriter fw = new FileWriter(file, true);
-			fw.write(System.lineSeparator() + entry);
-			fw.close();
-		}catch(IOException e){
-			e.printStackTrace();
-		}
+		return new File(new File(new File("TrouserStreak", "PortalPatterns"), Utils.getFileWorldName()), "portalpatterns.csv");
 	}
 	private static class PortalPattern {
 		private static final StringBuilder sb = new StringBuilder();
