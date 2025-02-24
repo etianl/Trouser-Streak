@@ -1,26 +1,44 @@
 //made by etianl :D
 package pwn.noobs.trouserstreak.modules;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
+import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.BlockListSetting;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.ColorSetting;
+import meteordevelopment.meteorclient.settings.EnumSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.*;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.MobSpawnerBlockEntity;
 import net.minecraft.block.entity.TrialSpawnerBlockEntity;
 import net.minecraft.block.enums.TrialSpawnerState;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.vehicle.ChestMinecartEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -31,12 +49,19 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.WorldChunk;
 import pwn.noobs.trouserstreak.Trouser;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.*;
 
 public class ActivatedSpawnerDetector extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
     private final SettingGroup sgLocations = settings.createGroup("Location Toggles");
+    private final SettingGroup locationLogs = settings.createGroup("Location Logs");
     private final Setting<Boolean> trialSpawner = sgLocations.add(new BoolSetting.Builder()
             .name("Trial Spawner Detector")
             .description("Detects activated Trial Spawners.")
@@ -253,23 +278,35 @@ public class ActivatedSpawnerDetector extends Module {
             .visible(() -> trialSpawner.get() && rangerendering.get() && (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both))
             .build()
     );
+    private final Setting<Boolean> locLogging = locationLogs.add(new BoolSetting.Builder()
+            .name("Enable Location Logging")
+            .description("Logs the locations of detected spawners to a csv file as well as a table in this options menu.")
+            .defaultValue(false)
+            .build()
+    );
+    private final List<LoggedSpawner> loggedSpawners = new ArrayList<>();
+    private final Set<BlockPos> loggedSpawnerPositions = new HashSet<>();
+
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+
     private final Set<BlockPos> scannedPositions = Collections.synchronizedSet(new HashSet<>());
     private final Set<BlockPos> spawnerPositions = Collections.synchronizedSet(new HashSet<>());
     private final Set<BlockPos> trialspawnerPositions = Collections.synchronizedSet(new HashSet<>());
     private final Set<BlockPos> deactivatedSpawnerPositions = Collections.synchronizedSet(new HashSet<>());
     private final Set<BlockPos> noRenderPositions = Collections.synchronizedSet(new HashSet<>());
-    private int closestSpawnerX=2000000000;
-    private int closestSpawnerY=2000000000;
-    private int closestSpawnerZ=2000000000;
-    private double SpawnerDistance=2000000000;
+    private int closestSpawnerX = 2000000000;
+    private int closestSpawnerY = 2000000000;
+    private int closestSpawnerZ = 2000000000;
+    private double SpawnerDistance = 2000000000;
     private boolean activatedSpawnerFound = false;
 
     public ActivatedSpawnerDetector() {
-        super(Trouser.Main,"ActivatedSpawnerDetector", "Detects if a player has been near a mob spawner in the past. May be useful for finding player made stashes in dungeons, mineshafts, and other places.");
+        super(Trouser.Main, "ActivatedSpawnerDetector", "Detects if a player has been near a mob spawner in the past. May be useful for finding player made stashes in dungeons, mineshafts, and other places.");
     }
     @Override
     public void onActivate() {
         clearChunkData();
+        loadLogs();
     }
     @Override
     public void onDeactivate() {
@@ -289,10 +326,10 @@ public class ActivatedSpawnerDetector extends Module {
         deactivatedSpawnerPositions.clear();
         noRenderPositions.clear();
         trialspawnerPositions.clear();
-        closestSpawnerX=2000000000;
-        closestSpawnerY=2000000000;
-        closestSpawnerZ=2000000000;
-        SpawnerDistance=2000000000;
+        closestSpawnerX = 2000000000;
+        closestSpawnerY = 2000000000;
+        closestSpawnerZ = 2000000000;
+        SpawnerDistance = 2000000000;
     }
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
@@ -313,11 +350,11 @@ public class ActivatedSpawnerDetector extends Module {
                         BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
                         String monster = null;
                         if (spawner.getLogic().spawnEntry != null && spawner.getLogic().spawnEntry.getNbt().get("id") != null) monster = spawner.getLogic().spawnEntry.getNbt().get("id").toString();
-                        if (playerPos.isWithinDistance(pos, renderDistance.get() * 16) && !trialspawnerPositions.contains(pos) && !noRenderPositions.contains(pos) && !deactivatedSpawnerPositions.contains(pos) && !spawnerPositions.contains(pos)){
-                            if (airChecker.get() && (spawner.getLogic().spawnDelay == 20 || spawner.getLogic().spawnDelay == 0)){
+                        if (playerPos.isWithinDistance(pos, renderDistance.get() * 16) && !trialspawnerPositions.contains(pos) && !noRenderPositions.contains(pos) && !deactivatedSpawnerPositions.contains(pos) && !spawnerPositions.contains(pos)) {
+                            if (airChecker.get() && (spawner.getLogic().spawnDelay == 20 || spawner.getLogic().spawnDelay == 0)) {
                                 boolean airFound = false;
                                 boolean caveAirFound = false;
-                                if (monster != null && !scannedPositions.contains(pos)){
+                                if (monster != null && !scannedPositions.contains(pos)) {
                                     if (monster.contains("zombie") || monster.contains("skeleton") || monster.contains(":spider")) {
                                         for (int x = -2; x < 2; x++) {
                                             for (int y = -1; y < 3; y++) {
@@ -384,12 +421,14 @@ public class ActivatedSpawnerDetector extends Module {
                                             else ChatUtils.sendMsg(Text.of("Detected Activated Spawner!"));
                                             spawnerPositions.add(pos);
                                             activatedSpawnerFound = true;
+                                            if (locLogging.get())logSpawner(pos);
                                         }
                                     } else {
                                         if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated Spawner! Block Position: " + pos));
                                         else ChatUtils.sendMsg(Text.of("Detected Activated Spawner!"));
                                         spawnerPositions.add(pos);
                                         activatedSpawnerFound = true;
+                                        if (locLogging.get())logSpawner(pos);
                                     }
                                 }
                             }
@@ -441,7 +480,7 @@ public class ActivatedSpawnerDetector extends Module {
                             }
                         }
                     }
-                    if (blockEntity instanceof TrialSpawnerBlockEntity){
+                    if (blockEntity instanceof TrialSpawnerBlockEntity) {
                         TrialSpawnerBlockEntity trialspawner = (TrialSpawnerBlockEntity) blockEntity;
                         BlockPos tPos = trialspawner.getPos();
                         BlockPos playerPos = new BlockPos(mc.player.getBlockX(), tPos.getY(), mc.player.getBlockZ());
@@ -455,7 +494,7 @@ public class ActivatedSpawnerDetector extends Module {
                             for (int x = -14; x < 15; x++) {
                                 for (int y = -14; y < 15; y++) {
                                     for (int z = -14; z < 15; z++) {
-                                        BlockPos bpos = new BlockPos(tPos.getX()+x, tPos.getY()+y, tPos.getZ()+z);
+                                        BlockPos bpos = new BlockPos(tPos.getX() + x, tPos.getY() + y, tPos.getZ() + z);
                                         if (blocks.get().contains(mc.world.getBlockState(bpos).getBlock())) {
                                             chestfound = true;
                                             break;
@@ -471,13 +510,14 @@ public class ActivatedSpawnerDetector extends Module {
                                 }
                                 if (chestfound) break;
                             }
-                            if (!chestfound && lessRenderSpam.get()){
+                            if (!chestfound && lessRenderSpam.get()) {
                                 noRenderPositions.add(tPos);
                             }
                             if (chatFeedback.get()) {
                                 if (lessSpam.get() && chestfound && extramessage.get()) error("There may be stashed items in the storage near the spawners!");
                                 else if (!lessSpam.get() && extramessage.get()) error("There may be stashed items in the storage near the spawners!");
                             }
+                            if (locLogging.get())logSpawner(tPos);
                         }
                     }
                 }
@@ -505,7 +545,7 @@ public class ActivatedSpawnerDetector extends Module {
                 e.printStackTrace();
             }
         }
-        if (removerenderdist.get())removeChunksOutsideRenderDistance();
+        if (removerenderdist.get()) removeChunksOutsideRenderDistance();
     }
     @EventHandler
     private void onRender(Render3DEvent event) {
@@ -563,16 +603,16 @@ public class ActivatedSpawnerDetector extends Module {
         }
     }
     private void displayMessage(String key, BlockPos pos, String key2) {
-        if (chatFeedback.get()){
+        if (chatFeedback.get()) {
             if (key=="dungeon") {
                 if (key2==":spider") {
-                    if (mc.world.getBlockState(pos.down()).getBlock() == Blocks.BIRCH_PLANKS && enableWoodlandMansion.get()){
+                    if (mc.world.getBlockState(pos.down()).getBlock() == Blocks.BIRCH_PLANKS && enableWoodlandMansion.get()) {
                         activatedSpawnerFound = true;
                         spawnerPositions.add(pos);
                         if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated §cWOODLAND MANSION§r Spawner! Block Position: " + pos));
                         else ChatUtils.sendMsg(Text.of("Detected Activated §cWOODLAND MANSION§r Spawner!"));
                     } else {
-                        if (enableDungeon.get()){
+                        if (enableDungeon.get()) {
                             activatedSpawnerFound = true;
                             spawnerPositions.add(pos);
                             if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated §cDUNGEON§r Spawner! Block Position: " + pos));
@@ -580,7 +620,7 @@ public class ActivatedSpawnerDetector extends Module {
                         }
                     }
                 } else {
-                    if (enableDungeon.get()){
+                    if (enableDungeon.get()) {
                         activatedSpawnerFound = true;
                         spawnerPositions.add(pos);
                         if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated §cDUNGEON§r Spawner! Block Position: " + pos));
@@ -613,6 +653,7 @@ public class ActivatedSpawnerDetector extends Module {
                 if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated Spawner! Block Position: " + pos));
                 else ChatUtils.sendMsg(Text.of("Detected Activated Spawner!"));
             }
+            if (locLogging.get())logSpawner(pos);
         }
     }
     private void render(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
@@ -643,5 +684,154 @@ public class ActivatedSpawnerDetector extends Module {
             BlockPos playerPos = new BlockPos(mc.player.getBlockX(), blockPos.getY(), mc.player.getBlockZ());
             return !playerPos.isWithinDistance(blockPos, renderDistanceBlocks);
         });
+    }
+
+    private void logSpawner(BlockPos pos) {
+        if (!loggedSpawnerPositions.contains(pos)) {
+            loggedSpawnerPositions.add(pos);
+            loggedSpawners.add(new LoggedSpawner(pos.getX(), pos.getY(), pos.getZ()));
+            saveJson();
+            saveCsv();
+        }
+    }
+
+    private void saveCsv() {
+        try {
+            File file = getCsvFile();
+            file.getParentFile().mkdirs();
+            Writer writer = new FileWriter(file);
+            writer.write("X,Y,Z\n");
+            for (LoggedSpawner ls : loggedSpawners) {
+                ls.write(writer);
+            }
+            writer.close();
+        } catch (IOException ignored) {}
+    }
+
+    private void saveJson() {
+        try {
+            File file = getJsonFile();
+            file.getParentFile().mkdirs();
+            Writer writer = new FileWriter(file);
+            GSON.toJson(loggedSpawners, writer);
+            writer.close();
+        } catch (IOException ignored) {}
+    }
+
+    private File getJsonFile() {
+        return new File(new File(new File("TrouserStreak", "ActivatedSpawners"), Utils.getFileWorldName()), "spawners.json");
+    }
+
+    private File getCsvFile() {
+        return new File(new File(new File("TrouserStreak", "ActivatedSpawners"), Utils.getFileWorldName()), "spawners.csv");
+    }
+
+    private void loadLogs() {
+        File file = getJsonFile();
+        boolean loaded = false;
+        if (file.exists()) {
+            try {
+                FileReader reader = new FileReader(file);
+                List<LoggedSpawner> data = GSON.fromJson(reader, new TypeToken<List<LoggedSpawner>>() {}.getType());
+                reader.close();
+                if (data != null) {
+                    loggedSpawners.addAll(data);
+                    for (LoggedSpawner ls : data) {
+                        loggedSpawnerPositions.add(new BlockPos(ls.x, ls.y, ls.z));
+                    }
+                    loaded = true;
+                }
+            } catch (Exception ignored) {}
+        }
+        if (!loaded) {
+            file = getCsvFile();
+            if (file.exists()) {
+                try {
+                    BufferedReader reader = new BufferedReader(new FileReader(file));
+                    reader.readLine();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        String[] values = line.split(",");
+                        LoggedSpawner ls = new LoggedSpawner(
+                                Integer.parseInt(values[0]),
+                                Integer.parseInt(values[1]),
+                                Integer.parseInt(values[2])
+                        );
+                        loggedSpawners.add(ls);
+                        loggedSpawnerPositions.add(new BlockPos(ls.x, ls.y, ls.z));
+                    }
+                    reader.close();
+                } catch (Exception ignored) {}
+            }
+        }
+    }
+
+    @Override
+    public WWidget getWidget(GuiTheme theme) {
+        // Sort by Y coordinate for display purposes.
+        loggedSpawners.sort(Comparator.comparingInt(s -> s.y));
+        WVerticalList list = theme.verticalList();
+        WButton clear = list.add(theme.button("Clear Logged Positions")).widget();
+        WTable table = new WTable();
+        if (!loggedSpawners.isEmpty()) list.add(table);
+        clear.action = () -> {
+            loggedSpawners.clear();
+            loggedSpawnerPositions.clear();
+            table.clear();
+            saveJson();
+            saveCsv();
+        };
+        fillTable(theme, table);
+        return list;
+    }
+
+    private void fillTable(GuiTheme theme, WTable table) {
+        List<LoggedSpawner> spawnerCoords = new ArrayList<>();
+        for (LoggedSpawner ls : loggedSpawners) {
+            if (!spawnerCoords.contains(ls)) {
+                spawnerCoords.add(ls);
+                table.add(theme.label("Pos: " + ls.x + ", " + ls.y + ", " + ls.z));
+                WButton gotoBtn = table.add(theme.button("Goto")).widget();
+                gotoBtn.action = () -> PathManagers.get().moveTo(new BlockPos(ls.x, ls.y, ls.z), true);
+                WMinus delete = table.add(theme.minus()).widget();
+                delete.action = () -> {
+                    loggedSpawners.remove(ls);
+                    loggedSpawnerPositions.remove(new BlockPos(ls.x, ls.y, ls.z));
+                    table.clear();
+                    fillTable(theme, table);
+                    saveJson();
+                    saveCsv();
+                };
+                table.row();
+            }
+        }
+    }
+
+    // ─── INNER CLASS: LoggedSpawner ─────────────────────────────────────────────
+    private static class LoggedSpawner {
+        public int x, y, z;
+
+        public LoggedSpawner(int x, int y, int z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+
+        public void write(Writer writer) throws IOException {
+            writer.write(x + "," + y + "," + z + "\n");
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof LoggedSpawner)) return false;
+            LoggedSpawner that = (LoggedSpawner) o;
+            return x == that.x && y == that.y && z == that.z;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(x, y, z);
+        }
     }
 }

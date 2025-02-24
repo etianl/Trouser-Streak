@@ -1,13 +1,24 @@
 //made by etianl :D
 package pwn.noobs.trouserstreak.modules;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
+import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -23,12 +34,19 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.*;
 import pwn.noobs.trouserstreak.Trouser;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
 public class PortalPatternFinder extends Module {
 	private final SettingGroup sgGeneral = settings.getDefaultGroup();
 	private final SettingGroup sgRender = settings.createGroup("Render");
+	private final SettingGroup locationLogs = settings.createGroup("Location Logs");
 	private final Setting<Boolean> displaycoords = sgGeneral.add(new BoolSetting.Builder()
 			.name("DisplayCoords")
 			.description("Displays coords of portal patterns in chat.")
@@ -125,12 +143,22 @@ public class PortalPatternFinder extends Module {
 			.visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both || trcr.get()))
 			.build()
 	);
+	private final Setting<Boolean> locLogging = locationLogs.add(new BoolSetting.Builder()
+			.name("Enable Location Logging")
+			.description("Logs the locations of detected spawners to a csv file as well as a table in this options menu.")
+			.defaultValue(false)
+			.build()
+	);
 	private final Set<ChunkPos> scannedChunks = Collections.synchronizedSet(new HashSet<>());
 	private final Set<Box> possiblePortalLocations = Collections.synchronizedSet(new HashSet<>());
 	private int closestPortalX=2000000000;
 	private int closestPortalY=2000000000;
 	private int closestPortalZ=2000000000;
 	private double PortalDistance=2000000000;
+
+	private final List<PortalPattern> portalPatterns = new ArrayList<>();
+	private final Set<BlockPos> loggedPortalPositions = Collections.synchronizedSet(new HashSet<>());
+	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
 	public PortalPatternFinder() {
 		super(Trouser.Main,"PortalPatternFinder", "Scans for the shapes of broken/removed Nether Portals within the cave air blocks found in caves and underground structures in 1.13+ chunks. **May be useful for finding portal skips in the Nether**");
@@ -139,6 +167,7 @@ public class PortalPatternFinder extends Module {
 	@Override
 	public void onActivate() {
 		clearChunkData();
+		loadPortalPatterns();
 	}
 	private void scanTheAir() {
 		if (mc.world == null) return;
@@ -161,6 +190,8 @@ public class PortalPatternFinder extends Module {
 	@Override
 	public void onDeactivate() {
 		clearChunkData();
+		portalPatterns.clear();
+		loggedPortalPositions.clear();
 	}
 	@EventHandler
 	private void onScreenOpen(OpenScreenEvent event) {
@@ -403,6 +434,13 @@ public class PortalPatternFinder extends Module {
 			if (displaycoords.get())
 				ChatUtils.sendMsg(Text.of("Possible portal found: " + portalBox.getCenter()));
 			else if (!displaycoords.get()) ChatUtils.sendMsg(Text.of("Possible portal found!"));
+			BlockPos cp = new BlockPos(Math.round((float)portalBox.getCenter().x),Math.round((float)portalBox.getCenter().y),Math.round((float)portalBox.getCenter().z));
+			if(!loggedPortalPositions.contains(cp) && locLogging.get()){
+				loggedPortalPositions.add(cp);
+				portalPatterns.add(new PortalPattern(cp.getX(),cp.getY(),cp.getZ()));
+				saveJson();
+				saveCsv();
+			}
 		}
 	}
 
@@ -521,5 +559,140 @@ public class PortalPatternFinder extends Module {
 			assert mc.world != null;
 			return !worldChunks.contains(mc.world.getChunk(c.x, c.z));
 		});
+	}
+
+	@Override
+	public WWidget getWidget(GuiTheme theme) {
+		portalPatterns.sort(Comparator.comparingInt(a -> a.y));
+		WVerticalList list = theme.verticalList();
+		WButton clear = list.add(theme.button("Clear Logged Positions")).widget();
+		WTable table = new WTable();
+		if (!portalPatterns.isEmpty()) list.add(table);
+		clear.action = () -> {
+			portalPatterns.clear();
+			loggedPortalPositions.clear();
+			possiblePortalLocations.clear();
+			table.clear();
+			saveJson();
+			saveCsv();
+		};
+		fillTable(theme, table);
+		return list;
+	}
+	private void fillTable(GuiTheme theme, WTable table) {
+		List<PortalPattern> portalCoords = new ArrayList<>();
+		for (PortalPattern p : portalPatterns) {
+			if (!portalCoords.contains(p)) {
+				portalCoords.add(p);
+				table.add(theme.label("Pos: " + p.x + ", " + p.y + ", " + p.z));
+				WButton gotoBtn = table.add(theme.button("Goto")).widget();
+				gotoBtn.action = () -> PathManagers.get().moveTo(new BlockPos(p.x, p.y, p.z), true);
+				WMinus delete = table.add(theme.minus()).widget();
+				delete.action = () -> {
+					portalPatterns.remove(p);
+					loggedPortalPositions.remove(new BlockPos(p.x, p.y, p.z));
+					possiblePortalLocations.removeIf(box -> {
+						BlockPos cp = new BlockPos(Math.round((float) box.getCenter().x), Math.round((float) box.getCenter().y), Math.round((float) box.getCenter().z));
+						return cp.equals(new BlockPos(p.x, p.y, p.z));
+					});
+					table.clear();
+					fillTable(theme, table);
+					saveJson();
+					saveCsv();
+				};
+				table.row();
+			}
+		}
+	}
+	private void loadPortalPatterns() {
+		File file = getJsonFile();
+		boolean loaded = false;
+		if(file.exists()){
+			try{
+				FileReader reader = new FileReader(file);
+				List<PortalPattern> data = GSON.fromJson(reader, new TypeToken<List<PortalPattern>>() {}.getType());
+				reader.close();
+				if(data != null){
+					portalPatterns.addAll(data);
+					for(PortalPattern p : data){
+						loggedPortalPositions.add(new BlockPos(p.x, p.y, p.z));
+					}
+					loaded = true;
+				}
+			}catch(Exception ignored){}
+		}
+		if(!loaded){
+			file = getCsvFile();
+			if(file.exists()){
+				try{
+					BufferedReader reader = new BufferedReader(new FileReader(file));
+					reader.readLine();
+					String line;
+					while((line = reader.readLine()) != null){
+						String[] values = line.split(",");
+						PortalPattern p = new PortalPattern(
+								Integer.parseInt(values[0]),
+								Integer.parseInt(values[1]),
+								Integer.parseInt(values[2])
+						);
+						portalPatterns.add(p);
+						loggedPortalPositions.add(new BlockPos(p.x, p.y, p.z));
+					}
+					reader.close();
+				}catch(Exception ignored){}
+			}
+		}
+	}
+	private void saveCsv() {
+		try{
+			File file = getCsvFile();
+			file.getParentFile().mkdirs();
+			Writer writer = new FileWriter(file);
+			writer.write("X,Y,Z\n");
+			for(PortalPattern p : portalPatterns){
+				p.write(writer);
+			}
+			writer.close();
+		}catch(IOException ignored){}
+	}
+	private void saveJson() {
+		try{
+			File file = getJsonFile();
+			file.getParentFile().mkdirs();
+			Writer writer = new FileWriter(file);
+			GSON.toJson(portalPatterns, writer);
+			writer.close();
+		}catch(IOException ignored){}
+	}
+	private File getJsonFile() {
+		return new File(new File(new File("TrouserStreak", "PortalPatterns"), Utils.getFileWorldName()), "portalpatterns.json");
+	}
+	private File getCsvFile() {
+		return new File(new File(new File("TrouserStreak", "PortalPatterns"), Utils.getFileWorldName()), "portalpatterns.csv");
+	}
+	private static class PortalPattern {
+		private static final StringBuilder sb = new StringBuilder();
+		public int x, y, z;
+		public PortalPattern(int x, int y, int z) {
+			this.x = x;
+			this.y = y;
+			this.z = z;
+		}
+		public void write(Writer writer) throws IOException {
+			sb.setLength(0);
+			sb.append(x).append(',').append(y).append(',').append(z).append('\n');
+			writer.write(sb.toString());
+		}
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			PortalPattern pattern = (PortalPattern) o;
+			return x == pattern.x && y == pattern.y && z == pattern.z;
+		}
+		@Override
+		public int hashCode() {
+			return Objects.hash(x, y, z);
+		}
 	}
 }
