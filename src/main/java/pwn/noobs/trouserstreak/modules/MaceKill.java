@@ -90,35 +90,43 @@ public class MaceKill extends Module {
         if (event.packet instanceof EntityStatusS2CPacket packet) {
             if (Smartkill.get()) {
 
-                fallHeight.set(attack1.get());
+                if(packet.getEntity(mc.world) instanceof net.minecraft.entity.player.PlayerEntity) {
 
-                for (PlayerEntity player : mc.world.getPlayers()) {
-                    if (player.deathTime > 0 || player.getHealth() <= 0) {
-                        fallHeight.set(attack1.get());
-                    }
+                    fallHeight.set(attack1.get());
+                }
 
-                    if (Objects.equals(fallHeight.get(), attack1.get())
+                if (Objects.equals(fallHeight.get(), attack1.get())
                             || packet.getStatus() == EntityStatuses.USE_TOTEM_OF_UNDYING
-                            && packet.getEntity(mc.world) instanceof PlayerEntity
-                    )
+                            && packet.getEntity(mc.world) instanceof PlayerEntity)
 
                     {
                         fallHeight.set(attack2.get());
+
+                        if (Objects.equals(fallHeight.get(), attack2.get())
+                                || packet.getStatus() == EntityStatuses.USE_TOTEM_OF_UNDYING
+                                && packet.getEntity(mc.world) instanceof PlayerEntity)
+
+                        {
+                            fallHeight.set(attack3.get());
+                        }
                     }
 
-                    if (Objects.equals(fallHeight.get(), attack2.get())
-                            || packet.getStatus() == EntityStatuses.USE_TOTEM_OF_UNDYING
-                            && packet.getEntity(mc.world) instanceof PlayerEntity
-                    )
+                if (mc.world != null) {
+                    for (PlayerEntity player : mc.world.getPlayers()) {
+                        if (player.deathTime > 0 || player.getHealth() <= 0) {
+                            fallHeight.set(attack1.get());
 
-                    {
-                        fallHeight.set(attack3.get());
+                        }
                     }
                 }
 
+
                 if (packet.getEntity(mc.world) instanceof net.minecraft.entity.boss.WitherEntity ||
                         packet.getEntity(mc.world) instanceof net.minecraft.entity.boss.dragon.EnderDragonEntity ||
-                        packet.getEntity(mc.world) instanceof net.minecraft.entity.mob.WardenEntity) {
+                        packet.getEntity(mc.world) instanceof net.minecraft.entity.mob.WardenEntity
+                )
+
+                {
                     fallHeight.set(attack4.get());
                 }
             }
