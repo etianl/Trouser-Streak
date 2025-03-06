@@ -80,7 +80,7 @@ public class MaceKill extends Module {
     private Vec3d previouspos;
 
     public MaceKill() {
-        super(Trouser.Main, "MaceKill", "Makes the Mace even more powerful.");
+        super(Trouser.Main, "MaceKill", "Must disable the netire criticals module, allow <pause on mace>in noFall.");
     }
 
 
