@@ -3,35 +3,73 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.mixininterface.IPlayerInteractEntityC2SPacket;
 import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
+import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import pwn.noobs.trouserstreak.Trouser;
 
+import java.util.Objects;
+
 public class MaceKill extends Module {
-    private final SettingGroup specialGroup2 = settings.createGroup("Disable \"Smash Attack\" in the Criticals module to make this module work.");
     private final SettingGroup specialGroup = settings.createGroup("Values higher than 22 only work on Paper/Spigot");
+    private final Setting<Integer> fallHeight = specialGroup.add(new IntSetting.Builder()
+            .name("Mace Power (Fall height)")
+            .description("attack for all")
+            .defaultValue(15)
+            .sliderRange(1, 170)
+            .min(1)
+            .build());
+    private final Setting<Integer> attack1 = specialGroup.add(new IntSetting.Builder()
+            .name("First hit")
+            .description("first attack aimed only to pop one totem")
+            .defaultValue(15)
+            .sliderRange(1, 170)
+            .min(1)
+            .build());
+    private final Setting<Integer> attack2 = specialGroup.add(new IntSetting.Builder()
+            .name("Second hit")
+            .description("second attack, expect kill")
+            .defaultValue(18)
+            .sliderRange(1, 170)
+            .min(1)
+            .build());
+    private final Setting<Integer> attack3 = specialGroup.add(new IntSetting.Builder()
+            .name("Third hit")
+            .description("if still pop, another attack destroy entirely ")
+            .defaultValue(22)
+            .sliderRange(1, 170)
+            .min(1)
+            .build());
+    private final Setting<Integer> attack4 = specialGroup.add(new IntSetting.Builder()
+            .name("Boss hit")
+            .description("DMG for warden,wither,ender dragon")
+            .defaultValue(22)
+            .sliderRange(1, 170)
+            .min(1)
+            .build());
+    private final Setting<Boolean> Smartkill = specialGroup.add(new BoolSetting.Builder()
+            .name("Smart DMG")
+            .description("apply smart DMG configs")
+            .defaultValue(true)
+            .build());
     private final Setting<Boolean> maxPower = specialGroup.add(new BoolSetting.Builder()
             .name("Maximum Mace Power (Paper/Spigot servers only)")
             .description("Simulates a fall from the highest air gap within 170 blocks")
             .defaultValue(false)
-            .build());
-    private final Setting<Integer> fallHeight = specialGroup.add(new IntSetting.Builder()
-            .name("Mace Power (Fall height)")
-            .description("Simulates a fall from this distance")
-            .defaultValue(22)
-            .sliderRange(1, 170)
-            .min(1)
-            .max(170)
-            .visible(() -> !maxPower.get())
             .build());
     private final Setting<Boolean> packetDisable = specialGroup.add(new BoolSetting.Builder()
             .name("Disable When Blocked")
@@ -39,12 +77,56 @@ public class MaceKill extends Module {
             .defaultValue(true)
             .build());
 
-    public MaceKill() {
-        super(Trouser.Main, "MaceKill", "Makes the Mace powerful when swung.");
-    }
-
     private Vec3d previouspos;
 
+    public MaceKill() {
+        super(Trouser.Main, "MaceKill", "Makes the Mace even more powerful.");
+    }
+
+
+    @EventHandler
+    private void onReceivePacket(PacketEvent.Receive event)
+    {
+        if (event.packet instanceof EntityStatusS2CPacket packet) {
+            if (Smartkill.get()) {
+
+                fallHeight.set(attack1.get());
+
+                for (PlayerEntity player : mc.world.getPlayers()) {
+                    if (player.deathTime > 0 || player.getHealth() <= 0) {
+                        fallHeight.set(attack1.get());
+                    }
+
+                    if (Objects.equals(fallHeight.get(), attack1.get())
+                            || packet.getStatus() == EntityStatuses.USE_TOTEM_OF_UNDYING
+                            && packet.getEntity(mc.world) instanceof PlayerEntity
+                    )
+
+                    {
+                        fallHeight.set(attack2.get());
+                    }
+
+                    if (Objects.equals(fallHeight.get(), attack2.get())
+                            || packet.getStatus() == EntityStatuses.USE_TOTEM_OF_UNDYING
+                            && packet.getEntity(mc.world) instanceof PlayerEntity
+                    )
+
+                    {
+                        fallHeight.set(attack3.get());
+                    }
+                }
+
+                if (packet.getEntity(mc.world) instanceof net.minecraft.entity.boss.WitherEntity ||
+                        packet.getEntity(mc.world) instanceof net.minecraft.entity.boss.dragon.EnderDragonEntity ||
+                        packet.getEntity(mc.world) instanceof net.minecraft.entity.mob.WardenEntity) {
+                    fallHeight.set(attack4.get());
+                }
+            }
+        }
+    }
+
+
+    // the mace kill part made by etianl:D
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
         if (mc.player != null && mc.player.getInventory().getMainHandStack().getItem() == Items.MACE && event.packet instanceof IPlayerInteractEntityC2SPacket packet && packet.meteor$getType() == PlayerInteractEntityC2SPacket.InteractType.ATTACK) {
