@@ -1,6 +1,7 @@
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixininterface.IPlayerInteractEntityC2SPacket;
 import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import meteordevelopment.meteorclient.settings.BoolSetting;
@@ -21,50 +22,42 @@ import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import pwn.noobs.trouserstreak.Trouser;
-
 import java.util.Objects;
 
 public class MaceKill extends Module {
     private final SettingGroup specialGroup = settings.createGroup("Values higher than 22 only work on Paper/Spigot");
     private final Setting<Integer> fallHeight = specialGroup.add(new IntSetting.Builder()
             .name("Mace Power (Fall height)")
-            .description("attack for all")
-            .defaultValue(15)
+            .description("general attack")
+            .defaultValue(23)
             .sliderRange(1, 170)
             .min(1)
             .build());
     private final Setting<Integer> attack1 = specialGroup.add(new IntSetting.Builder()
             .name("First hit")
-            .description("first attack aimed only to pop one totem")
-            .defaultValue(15)
+            .description("expect pop")
+            .defaultValue(23)
             .sliderRange(1, 170)
             .min(1)
             .build());
     private final Setting<Integer> attack2 = specialGroup.add(new IntSetting.Builder()
             .name("Second hit")
-            .description("second attack, expect kill")
-            .defaultValue(18)
+            .description("expect kill")
+            .defaultValue(40)
             .sliderRange(1, 170)
             .min(1)
             .build());
-    private final Setting<Integer> attack3 = specialGroup.add(new IntSetting.Builder()
-            .name("Third hit")
-            .description("if still pop, another attack destroy entirely ")
-            .defaultValue(22)
-            .sliderRange(1, 170)
-            .min(1)
+    private final Setting<Integer> debug2 = specialGroup.add(new IntSetting.Builder()
+            .name("resetDebug")
+            .description("Recommend nine, or find a better value and tell me")
+            .defaultValue(9)
+            .sliderRange(0, 20)
+            .min(0)
             .build());
-    private final Setting<Integer> attack4 = specialGroup.add(new IntSetting.Builder()
-            .name("Boss hit")
-            .description("DMG for warden,wither,ender dragon")
-            .defaultValue(22)
-            .sliderRange(1, 170)
-            .min(1)
-            .build());
-    private final Setting<Boolean> Smartkill = specialGroup.add(new BoolSetting.Builder()
-            .name("Smart DMG")
-            .description("apply smart DMG configs")
-            .defaultValue(true)
+    private final Setting<Boolean> miss = specialGroup.add(new BoolSetting.Builder()
+            .name("anti-totem")
+            .description("turn on and grief totem noobs")
+            .defaultValue(false)
             .build());
     private final Setting<Boolean> maxPower = specialGroup.add(new BoolSetting.Builder()
             .name("Maximum Mace Power (Paper/Spigot servers only)")
@@ -79,70 +72,55 @@ public class MaceKill extends Module {
 
     private Vec3d previouspos;
 
-    public MaceKill() {
-        super(Trouser.Main, "MaceKill", "Must disable the netire criticals module, allow <pause on mace>in noFall.");
-    }
-
+    public MaceKill() {super(Trouser.Main, "MaceKill", "Makes the Mace more powerful.");}
 
     @EventHandler
-    private void onReceivePacket(PacketEvent.Receive event)
-    {
-        if (event.packet instanceof EntityStatusS2CPacket packet) {
-            if (Smartkill.get()) {
-
-                if(packet.getEntity(mc.world) instanceof net.minecraft.entity.player.PlayerEntity) {
-
-                    fallHeight.set(attack1.get());
-                }
-
+    private void onReceivePacket(PacketEvent.Receive event) {
+        if (miss.get()) {
+            if (event.packet instanceof EntityStatusS2CPacket packet) {
                 if (Objects.equals(fallHeight.get(), attack1.get())
-                            || packet.getStatus() == EntityStatuses.USE_TOTEM_OF_UNDYING
-                            && packet.getEntity(mc.world) instanceof PlayerEntity)
-
-                    {
-                        fallHeight.set(attack2.get());
-
-                        if (Objects.equals(fallHeight.get(), attack2.get())
-                                || packet.getStatus() == EntityStatuses.USE_TOTEM_OF_UNDYING
-                                && packet.getEntity(mc.world) instanceof PlayerEntity)
-
-                        {
-                            fallHeight.set(attack3.get());
-                        }
-                    }
-
+                        && packet.getStatus() == EntityStatuses.USE_TOTEM_OF_UNDYING) {
+                    fallHeight.set(attack2.get());
+                }
+            }
+            if (!Objects.equals(fallHeight.get(), attack1.get())) {
                 if (mc.world != null) {
                     for (PlayerEntity player : mc.world.getPlayers()) {
-                        if (player.deathTime > 0 || player.getHealth() <= 0) {
+                        if (player.hurtTime > debug2.get()) {
                             fallHeight.set(attack1.get());
-
                         }
                     }
-                }
-
-
-                if (packet.getEntity(mc.world) instanceof net.minecraft.entity.boss.WitherEntity ||
-                        packet.getEntity(mc.world) instanceof net.minecraft.entity.boss.dragon.EnderDragonEntity ||
-                        packet.getEntity(mc.world) instanceof net.minecraft.entity.mob.WardenEntity
-                )
-
-                {
-                    fallHeight.set(attack4.get());
                 }
             }
         }
     }
-
-
-    // the mace kill part made by etianl:D
+    @EventHandler
+    private void onTick(TickEvent.Post event) {
+        if (miss.get()){
+            if (!Objects.equals(fallHeight.get(), attack1.get())){
+                if (mc.world != null) {
+                    for (PlayerEntity player : mc.world.getPlayers()) {
+                        if (player.deathTime > 0 || player.isDead()) {
+                            fallHeight.set(attack1.get());
+                        }
+                    }
+                }
+            }
+        }
+    }
+    //Packet send part by etianl:D
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
         if (mc.player != null && mc.player.getInventory().getMainHandStack().getItem() == Items.MACE && event.packet instanceof IPlayerInteractEntityC2SPacket packet && packet.meteor$getType() == PlayerInteractEntityC2SPacket.InteractType.ATTACK) {
             try {
                 if (packet.meteor$getEntity() instanceof LivingEntity) {
                     LivingEntity targetEntity = (LivingEntity) packet.meteor$getEntity();
-
-                    if (packetDisable.get() && ((targetEntity.isBlocking() && targetEntity.blockedByShield(targetEntity.getRecentDamageSource())) || targetEntity.isInvulnerable() || targetEntity.isInCreativeMode())) return;
+                    if (packetDisable.get()
+                            && ((targetEntity.isBlocking()
+                            && targetEntity.blockedByShield(targetEntity.getRecentDamageSource()))
+                            || targetEntity.isInvulnerable()
+                            || targetEntity.isInCreativeMode())
+                    ) return;
                     previouspos = mc.player.getPos();
                     int blocks = getMaxHeightAbovePlayer();
 
