@@ -22,7 +22,6 @@ import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import pwn.noobs.trouserstreak.Trouser;
@@ -224,8 +223,10 @@ public class AdvancedItemESP extends Module {
             if (shouldSkip(itemEntity)) continue;
             if (!scannedEntities.contains(entity)) {
                 StringBuilder message = new StringBuilder(itemEntity.getStack().getItem().getName().getString() + " found ");
-                if (coordsInChat.get()) message.append(" at ").append(entity.getBlockX()).append(", ").append(entity.getBlockY()).append(", ").append(entity.getBlockZ());
-                ChatUtils.sendMsg(Text.of(message.toString()));
+                if (chatFeedback.get()) {
+                    if (coordsInChat.get()) message.append(" at ").append(entity.getBlockX()).append(", ").append(entity.getBlockY()).append(", ").append(entity.getBlockZ());
+                    ChatUtils.sendMsg(Text.of(message.toString()));
+                }
             }
             scannedEntities.add(entity);
             drawBoundingBox(event, entity);
