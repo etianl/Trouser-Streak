@@ -2,6 +2,8 @@ package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.player.AntiHunger;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
@@ -26,11 +28,17 @@ public class ItemTractorBeam extends Module {
     @Override
     public void onActivate() {
         if (mc.player == null) return;
+        boolean antihungerWasEnabled = false;
+        if (Modules.get().get(AntiHunger.class).isActive()){
+            Modules.get().get(AntiHunger.class).toggle();
+            antihungerWasEnabled = true;
+        }
         mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_SPRINTING));
         for (int i = 0; i < multiply.get(); i++) {
             sendmovementpackets();
         }
         mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.STOP_SPRINTING));
+        if (antihungerWasEnabled) Modules.get().get(AntiHunger.class).toggle();
         toggle();
     }
     // 0.000000001

@@ -166,9 +166,11 @@ In no particular order
 - The **"IgnoreBlockExploit"** will render BlockExploit chunks as an oldchunk instead of a newchunk.
 
 -------------------------------------------------------------------------------------
+- **NoSpawnerDetector:** Uses block checks to detect Dungeons and Mineshafts which have had their spawners removed. (Credits to etianl :D)
 - **OnlinePlayerActivityDetector:** Detects if an online player is nearby if there are blocks missing from a BlockState palette and your render distances are overlapping. It can detect players that are outside of render distance. (Credits to etianl :D)
 - **OPplayerTPmodule:** Uses operator commands to teleport you to each player online one by one at the push of a button, or those players to you one by one. There is a button in the options for it to reset the current player to zero. Thank you to [ogmur](https://www.youtube.com/@Ogmur) for the module suggestion (Credits to etianl for writing :D). REQUIRES OP STATUS
-- **OPServerKillModule:** Runs a set of operator commands to disable a server and cover up the tracks of the kill command. REQUIRES OP STATUS (Credits to etianl :D)
+- **OPServerKillModule:** Runs a set of operator commands to disable a server and cover up the tracks of the kill command. REQUIRES OP STATUS! (Credits to etianl :D)
+- **PlayerJoinedAlarm:** Makes noise when a player is added to the playerlist (if they join the server for example). (Credits to etianl :D)
 - **PortalGodMode:** Makes you invincible after you walk through a portal. You will not be able to move while invincible until you disable the god mode.
 - **PortalPatternFinder:** Scans for the shapes of broken/removed Nether Portals within the cave air blocks found in caves and underground structures in 1.13+ chunks. **May be useful for finding portal skips in the Nether**. (Credits to etianl :D)
 - **PotESP:** Detects Decorated Pots with un-natural contents, and also tells you what item it is and the location of the pot. (Credits to etianl :D)

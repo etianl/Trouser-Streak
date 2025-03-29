@@ -692,8 +692,7 @@ public class BaseFinder extends Module {
     private boolean checkingchunk7=false;
     private int found7 = 0;
     private ChunkPos LastBaseFound = new ChunkPos(2000000000, 2000000000);
-    private int closestbaseX=2000000000;
-    private int closestbaseZ=2000000000;
+    private ChunkPos closestBase = new ChunkPos(2000000000, 2000000000);
     private double basedistance=2000000000;
     private String serverip;
     private String world;
@@ -724,10 +723,9 @@ public class BaseFinder extends Module {
     }
     private void clearChunkData() {
         baseChunks.clear();
-        closestbaseX=2000000000;
-        closestbaseZ=2000000000;
         basedistance=2000000000;
-        LastBaseFound= new ChunkPos(2000000000, 2000000000);
+        closestBase = new ChunkPos(2000000000, 2000000000);
+        LastBaseFound = new ChunkPos(2000000000, 2000000000);
     }
     @Override
     public void onActivate() {
@@ -830,8 +828,7 @@ public class BaseFinder extends Module {
             if (baseChunks.stream().toList().size() > 0) {
                 for (int b = 0; b < baseChunks.stream().toList().size(); b++) {
                     if (basedistance > Math.sqrt(Math.pow(baseChunks.stream().toList().get(b).x - mc.player.getChunkPos().x, 2) + Math.pow(baseChunks.stream().toList().get(b).z - mc.player.getChunkPos().z, 2))) {
-                        closestbaseX = baseChunks.stream().toList().get(b).x;
-                        closestbaseZ = baseChunks.stream().toList().get(b).z;
+                        closestBase = new ChunkPos(baseChunks.stream().toList().get(b).x, baseChunks.stream().toList().get(b).z);
                         basedistance = Math.sqrt(Math.pow(baseChunks.stream().toList().get(b).x - mc.player.getChunkPos().x, 2) + Math.pow(baseChunks.stream().toList().get(b).z - mc.player.getChunkPos().z, 2));
                     }
                 }
@@ -842,9 +839,9 @@ public class BaseFinder extends Module {
         }
 
         if (findnearestbaseticks == 1) {
-            if (closestbaseX < 1000000000 && closestbaseZ < 1000000000)
-                ChatUtils.sendMsg(Text.of("#Nearest possible base at X" + closestbaseX * 16 + " x Z" + closestbaseZ * 16));
-            if (!(closestbaseX < 1000000000 && closestbaseZ < 1000000000))
+            if (closestBase.x < 1000000000 && closestBase.z < 1000000000)
+                ChatUtils.sendMsg(Text.of("#Nearest possible base at X" + closestBase.x * 16 + " x Z" + closestBase.z * 16));
+            if (!(closestBase.x < 1000000000 && closestBase.z < 1000000000))
                 error("No Bases Logged Yet.");
             findnearestbaseticks = 0;
         }
@@ -890,7 +887,6 @@ public class BaseFinder extends Module {
                 }
             }
         }
-        if (removerenderdist.get()) removeChunksOutsideRenderDistance();
 
         if (entityScanTicks < entityScanDelay.get()) entityScanTicks++;
         if (entityScanTicks >= entityScanDelay.get() && (pearlFinder.get() || frameFinder.get() || villagerFinder.get() || nameFinder.get() || boatFinder.get() || entityClusterFinder.get())) {
@@ -1004,6 +1000,7 @@ public class BaseFinder extends Module {
             }
             entityScanTicks = 0;
         }
+        if (removerenderdist.get()) removeChunksOutsideRenderDistance();
     }
     @EventHandler
     private void onRender(Render3DEvent event) {
@@ -1028,7 +1025,7 @@ public class BaseFinder extends Module {
                         }
                     }
                 }
-                render2(new Box(new Vec3d(new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getX()+7, new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getY()+renderHeightYbottom.get(), new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getZ()+7), new Vec3d (new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getX()+8, new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getY()+renderHeightY.get(), new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getZ()+8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
+                render2(new Box(new Vec3d(closestBase.getStartPos().getX()+7, closestBase.getStartPos().getY()+renderHeightYbottom.get(), closestBase.getStartPos().getZ()+7), new Vec3d (closestBase.getStartPos().getX()+8, closestBase.getStartPos().getY()+renderHeightY.get(), closestBase.getStartPos().getZ()+8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
             }
         }
     }
@@ -1570,6 +1567,8 @@ public class BaseFinder extends Module {
         double renderDistanceBlocks = renderDistance.get() * 16;
 
         removeChunksOutsideRenderDistance(baseChunks, playerPos, renderDistanceBlocks, midpoint);
+        if (!playerPos.isWithinDistance(new BlockPos(closestBase.getCenterX(), midpoint, closestBase.getCenterZ()), renderDistanceBlocks))
+            closestBase = new ChunkPos(2000000000, 2000000000);
     }
     private void removeChunksOutsideRenderDistance(Set<ChunkPos> chunkSet, BlockPos playerPos, double renderDistanceBlocks, int midpoint) {
         chunkSet.removeIf(c -> !playerPos.isWithinDistance(new BlockPos(c.getCenterX(), midpoint, c.getCenterZ()), renderDistanceBlocks));

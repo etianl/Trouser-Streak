@@ -225,6 +225,27 @@ public class AutoMountain extends Module {
             .visible(render::get)
             .build()
     );
+    private final Setting<Boolean> rendertopbottomblock = sgRender.add(new BoolSetting.Builder()
+            .name("render highest/lowest block")
+            .description("Renders a block overlay where the highest and lowest blocks are. These positions are used for AutoLavacaster timing calculations.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<SettingColor> topbottomsideColor = sgRender.add(new ColorSetting.Builder()
+            .name("high/low-block-side-color")
+            .description("The color of the sides of the blocks being rendered.")
+            .defaultValue(new SettingColor(255, 0, 255, 15, true))
+            .visible(() -> render.get() && rendertopbottomblock.get())
+            .build()
+    );
+
+    private final Setting<SettingColor> topbottomlineColor = sgRender.add(new ColorSetting.Builder()
+            .name("high/low-block-line-color")
+            .description("The color of the lines of the blocks being rendered.")
+            .defaultValue(new SettingColor(255, 0, 255, 255, true))
+            .visible(() -> render.get() && rendertopbottomblock.get())
+            .build()
+    );
     public final Setting<Boolean> lowYrst = sgGeneral.add(new BoolSetting.Builder()
             .name("ResetLowestBlockOnACTIVATE")
             .description("UNCHECK for proper timings for AutoLavaCaster's UseLastLowestBlockfromAutoMountain timing mode if NOT clicking to pause. LOWEST BLOCK ONLY RESET IF AutoLavaCaster is used or button here is pressed.")
@@ -234,9 +255,10 @@ public class AutoMountain extends Module {
     @Override
     public WWidget getWidget(GuiTheme theme) {
         WTable table = theme.table();
-        WButton rstlowblock = table.add(theme.button("Reset Lowest Block")).expandX().minWidth(100).widget();
+        WButton rstlowblock = table.add(theme.button("Reset Lowest/Highest Block")).expandX().minWidth(100).widget();
         rstlowblock.action = () -> {
             lowestblock= new BlockPos(666,666,666);
+            highestblock= new BlockPos(666,666,666);
             isthisfirstblock = true;
         };
         table.row();
@@ -328,7 +350,7 @@ public class AutoMountain extends Module {
             lowestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
             isthisfirstblock=false;
         }
-        if (pause=true){
+        if (!startPaused.get() && pause==true){
             if (!isthisfirstblock && mc.player.getY()<lowestblock.getY()) lowestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
             if (!isthisfirstblock && mc.player.getY()>highestblock.getY()+1) highestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
         }
@@ -340,7 +362,7 @@ public class AutoMountain extends Module {
         resetTimer = true;
         Modules.get().get(Timer.class).setOverride(Timer.OFF);
         if (isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack())) return;
-        if (!pause){
+        if (!startPaused.get() && !pause){
             BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
             if (mc.world.getBlockState(pos).isReplaceable()) {
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
@@ -468,6 +490,14 @@ public class AutoMountain extends Module {
                         BlockPos pos1 = renderplayerPos.add(new Vec3i(-1, -2, 0));
                         event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
+                }
+            }
+            if (rendertopbottomblock.get()){
+                if (highestblock != new BlockPos(666,666,666)){
+                    event.renderer.box(highestblock, topbottomsideColor.get(), topbottomlineColor.get(), shapeMode.get(), 0);
+                }
+                if (lowestblock != new BlockPos(666,666,666)){
+                    event.renderer.box(lowestblock, topbottomsideColor.get(), topbottomlineColor.get(), shapeMode.get(), 0);
                 }
             }
         }
