@@ -41,6 +41,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
 public class PortalPatternFinder extends Module {
@@ -149,15 +150,15 @@ public class PortalPatternFinder extends Module {
 			.defaultValue(false)
 			.build()
 	);
-	private final Set<ChunkPos> scannedChunks = Collections.synchronizedSet(new HashSet<>());
-	private final Set<Box> possiblePortalLocations = Collections.synchronizedSet(new HashSet<>());
+	private final Set<ChunkPos> scannedChunks = new CopyOnWriteArraySet<>();
+	private final Set<Box> possiblePortalLocations = new CopyOnWriteArraySet<>();
+	private final Set<BlockPos> loggedPortalPositions = new CopyOnWriteArraySet<>();
 	private int closestPortalX=2000000000;
 	private int closestPortalY=2000000000;
 	private int closestPortalZ=2000000000;
 	private double PortalDistance=2000000000;
 
 	private final List<PortalPattern> portalPatterns = new ArrayList<>();
-	private final Set<BlockPos> loggedPortalPositions = Collections.synchronizedSet(new HashSet<>());
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
 	public PortalPatternFinder() {
@@ -179,7 +180,7 @@ public class PortalPatternFinder extends Module {
 				chunksToProcess.add(chunk.getPos());
 			}
 		}
-		chunksToProcess.parallelStream().forEach(chunkPos -> {
+		chunksToProcess.stream().forEach(chunkPos -> {
 			WorldChunk chunk = mc.world.getChunk(chunkPos.x, chunkPos.z);
 			if (chunk != null && !chunk.isEmpty() && !scannedChunks.contains(chunk.getPos())) {
 				processChunk(chunk);
@@ -431,9 +432,11 @@ public class PortalPatternFinder extends Module {
 	private void portalFound(Box portalBox){
 		if (!possiblePortalLocations.contains(portalBox)){
 			possiblePortalLocations.add(portalBox);
-			if (displaycoords.get())
-				ChatUtils.sendMsg(Text.of("Possible portal found: " + portalBox.getCenter()));
-			else if (!displaycoords.get()) ChatUtils.sendMsg(Text.of("Possible portal found!"));
+			mc.execute(() -> {
+				if (displaycoords.get())
+					ChatUtils.sendMsg(Text.of("Possible portal found: " + portalBox.getCenter()));
+				else if (!displaycoords.get()) ChatUtils.sendMsg(Text.of("Possible portal found!"));
+			});
 			BlockPos cp = new BlockPos(Math.round((float)portalBox.getCenter().x),Math.round((float)portalBox.getCenter().y),Math.round((float)portalBox.getCenter().z));
 			if(!loggedPortalPositions.contains(cp) && locLogging.get()){
 				loggedPortalPositions.add(cp);

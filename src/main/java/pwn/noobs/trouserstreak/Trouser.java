@@ -32,6 +32,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new NewerNewChunks());
                 Modules.get().add(new BaseFinder());
                 Modules.get().add(new ActivatedSpawnerDetector());
+                Modules.get().add(new NoSpawnerDetector());
                 Modules.get().add(new PortalPatternFinder());
                 Modules.get().add(new CaveDisturbanceDetector());
                 Modules.get().add(new AdvancedItemESP());
@@ -92,6 +93,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new MultiUse());
                 Modules.get().add(new AutoDrop());
                 Modules.get().add(new AnHero());
+                Modules.get().add(new PlayerJoinedAlarm());
                 Commands.add(new WorldInfoCommand());
                 Commands.add(new ViewNbtCommand());
                 Commands.add(new AutoVclipCommand());
