@@ -31,6 +31,7 @@ import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.*;
+import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.Palette;
 import net.minecraft.world.chunk.WorldChunk;
@@ -209,7 +210,7 @@ public class NoSpawnerDetector extends Module {
             for (int chunkZ = playerChunkPos.z - renderdistance; chunkZ <= playerChunkPos.z + renderdistance; chunkZ++) {
                 WorldChunk chunk = mc.world.getChunk(chunkX, chunkZ);
                 if (chunk.isEmpty() || scannedChunks.contains(chunk.getPos())) continue;
-                if ((enableDungeon.get() && chunkContainsBlock(chunk, Blocks.MOSSY_COBBLESTONE, 20)) || (enableMineshaft.get() && chunkContainsBlock(chunk, Blocks.COBWEB, 20))) {
+                if ((enableDungeon.get() && mc.world.getRegistryKey() == World.OVERWORLD && chunkContainsBlock(chunk, Blocks.MOSSY_COBBLESTONE, Math.min(chunk.getSectionArray().length, 20))) || (enableMineshaft.get() && mc.world.getRegistryKey() == World.OVERWORLD && chunkContainsBlock(chunk, Blocks.COBWEB, Math.min(chunk.getSectionArray().length, 20)))) {
                     for (int x = 0; x < 16; x++) {
                         for (int y = mc.world.getBottomY(); y < mc.world.getTopY(); y++) {
                             for (int z = 0; z < 16; z++) {
