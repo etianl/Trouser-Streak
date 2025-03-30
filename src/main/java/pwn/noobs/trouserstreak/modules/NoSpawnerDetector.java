@@ -39,6 +39,7 @@ import pwn.noobs.trouserstreak.Trouser;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 
 public class NoSpawnerDetector extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -203,24 +204,30 @@ public class NoSpawnerDetector extends Module {
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         if (mc.world == null || mc.player == null) return;
+        AtomicReferenceArray<WorldChunk> chunks = mc.world.getChunkManager().chunks.chunks;
+        Set<WorldChunk> chunkSet = new HashSet<>();
 
-        int renderdistance = mc.options.getViewDistance().getValue();
-        ChunkPos playerChunkPos = new ChunkPos(mc.player.getBlockPos());
-        for (int chunkX = playerChunkPos.x - renderdistance; chunkX <= playerChunkPos.x + renderdistance; chunkX++) {
-            for (int chunkZ = playerChunkPos.z - renderdistance; chunkZ <= playerChunkPos.z + renderdistance; chunkZ++) {
-                WorldChunk chunk = mc.world.getChunk(chunkX, chunkZ);
-                if (chunk.isEmpty() || scannedChunks.contains(chunk.getPos())) continue;
+        for (int i = 0; i < chunks.length(); i++) {
+            WorldChunk chunk = chunks.get(i);
+            if (chunk != null) {
+                chunkSet.add(chunk);
+            }
+        }
+        chunkSet.forEach(chunk -> {
+            if (!chunk.isEmpty() && !scannedChunks.contains(chunk.getPos())){
                 if ((enableDungeon.get() && mc.world.getRegistryKey() == World.OVERWORLD && chunkContainsBlock(chunk, Blocks.MOSSY_COBBLESTONE, Math.min(chunk.getSectionArray().length, 20))) || (enableMineshaft.get() && mc.world.getRegistryKey() == World.OVERWORLD && chunkContainsBlock(chunk, Blocks.COBWEB, Math.min(chunk.getSectionArray().length, 20)))) {
                     for (int x = 0; x < 16; x++) {
                         for (int y = mc.world.getBottomY(); y < mc.world.getTopYInclusive(); y++) {
                             for (int z = 0; z < 16; z++) {
-                                BlockPos blockPos = new BlockPos(x + chunkX * 16, y, z + chunkZ * 16);
+                                BlockPos blockPos = new BlockPos(x + chunk.getPos().x * 16, y, z + chunk.getPos().z * 16);
                                 if (enableDungeon.get() && mc.world.getBlockState(blockPos).getBlock() == Blocks.MOSSY_COBBLESTONE) {
-                                    if (!scannedBlocks.contains(blockPos) && !checkedBlocks.contains(blockPos))scanForDungeonFloor(blockPos);
+                                    if (!scannedBlocks.contains(blockPos) && !checkedBlocks.contains(blockPos))
+                                        scanForDungeonFloor(blockPos);
                                     checkedBlocks.add(blockPos);
                                 }
                                 if (enableMineshaft.get() && mc.world.getBlockState(blockPos).getBlock() == Blocks.COBWEB) {
-                                    if (!scannedBlocks.contains(blockPos) && !checkedBlocks.contains(blockPos))scanForMineshaftSpawner(blockPos);
+                                    if (!scannedBlocks.contains(blockPos) && !checkedBlocks.contains(blockPos))
+                                        scanForMineshaftSpawner(blockPos);
                                     checkedBlocks.add(blockPos);
                                 }
                             }
@@ -229,7 +236,7 @@ public class NoSpawnerDetector extends Module {
                 }
                 scannedChunks.add(chunk.getPos());
             }
-        }
+        });
         if (nearesttrcr.get()){
             try {
                 if (StructurePositions.stream().toList().size() > 0) {
@@ -247,7 +254,7 @@ public class NoSpawnerDetector extends Module {
                 e.printStackTrace();
             }
         }
-        if (removerenderdist.get()) removeChunksOutsideRenderDistance();
+        if (removerenderdist.get()) removeChunksOutsideRenderDistance(chunkSet);
     }
     private void scanForDungeonFloor(BlockPos blockPos) {
         int radius = 4;
@@ -377,13 +384,13 @@ public class NoSpawnerDetector extends Module {
     private void displayMessage(String key, BlockPos pos) {
         if (chatFeedback.get()) {
             if (key=="dungeon") {
-                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected §cDUNGEON§r! Block Position: " + pos));
-                else ChatUtils.sendMsg(Text.of("Detected §cDUNGEON§r!"));
+                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§9NSD§r | Detected §9DUNGEON§r! Block Position: " + pos));
+                else ChatUtils.sendMsg(Text.of("§9NSD§r | Detected §9DUNGEON§r!"));
                 logStructure(pos);
             }
             if (key=="mineshaft") {
-                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected §cMINESHAFT§r! Block Position: " + pos));
-                else ChatUtils.sendMsg(Text.of("Detected §cMINESHAFT§r!"));
+                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§9NSD§r | Detected §9MINESHAFT§r! Block Position: " + pos));
+                else ChatUtils.sendMsg(Text.of("§9NSD§r | Detected §9MINESHAFT§r!"));
                 logStructure(pos);
             }
         }
@@ -399,24 +406,24 @@ public class NoSpawnerDetector extends Module {
             event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
         event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
     }
-    private void removeChunksOutsideRenderDistance() {
-        int renderdist = renderDistance.get();
-        if (mc.options.getViewDistance().getValue() > renderDistance.get())renderdist = mc.options.getViewDistance().getValue()+3;
-        double renderDistanceBlocks = renderdist * 16;
-
-        removechunksOutsideRenderDistance(scannedChunks,mc.player.getBlockPos(),renderDistanceBlocks);
-        removeBlockPosOutsideRenderDistance(StructurePositions, renderDistanceBlocks);
-        removeBlockPosOutsideRenderDistance(scannedBlocks, renderDistanceBlocks);
-        removeBlockPosOutsideRenderDistance(checkedBlocks, renderDistanceBlocks);
+    private void removeChunksOutsideRenderDistance(Set<WorldChunk> chunks) {
+        removechunksOutsideRenderDistance(scannedChunks, chunks);
+        removeBlockPosOutsideRenderDistance(StructurePositions, chunks);
+        removeBlockPosOutsideRenderDistance(scannedBlocks, chunks);
+        removeBlockPosOutsideRenderDistance(checkedBlocks, chunks);
     }
-    private void removeBlockPosOutsideRenderDistance(Set<BlockPos> chunkSet, double renderDistanceBlocks) {
-        chunkSet.removeIf(blockPos -> {
-            BlockPos playerPos = new BlockPos(mc.player.getBlockX(), blockPos.getY(), mc.player.getBlockZ());
-            return !playerPos.isWithinDistance(blockPos, renderDistanceBlocks);
+    private void removeBlockPosOutsideRenderDistance(Set<BlockPos> blockSet, Set<WorldChunk> worldChunks) {
+        blockSet.removeIf(blockpos -> {
+            BlockPos boxPos = new BlockPos((int)Math.floor(blockpos.getX()), (int)Math.floor(blockpos.getY()), (int)Math.floor(blockpos.getZ()));
+            assert mc.world != null;
+            return !worldChunks.contains(mc.world.getChunk(boxPos));
         });
     }
-    private void removechunksOutsideRenderDistance(Set<ChunkPos> chunkSet, BlockPos playerPos, double renderDistanceBlocks) {
-        chunkSet.removeIf(c -> !playerPos.isWithinDistance(new BlockPos(c.getCenterX(), mc.player.getBlockY(), c.getCenterZ()), renderDistanceBlocks));
+    private void removechunksOutsideRenderDistance(Set<ChunkPos> chunkSet, Set<WorldChunk> worldChunks) {
+        chunkSet.removeIf(c -> {
+            assert mc.world != null;
+            return !worldChunks.contains(mc.world.getChunk(c.x, c.z));
+        });
     }
     private void logStructure(BlockPos pos) {
         if (! StructurePositions.contains(pos)) {
