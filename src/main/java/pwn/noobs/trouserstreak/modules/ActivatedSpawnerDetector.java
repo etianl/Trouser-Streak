@@ -4,7 +4,6 @@ package pwn.noobs.trouserstreak.modules;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
@@ -32,6 +31,7 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.MobSpawnerBlockEntity;
@@ -43,9 +43,10 @@ import net.minecraft.entity.vehicle.ChestMinecartEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.world.chunk.Palette;
 import net.minecraft.world.chunk.WorldChunk;
 import pwn.noobs.trouserstreak.Trouser;
 
@@ -56,6 +57,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 
 public class ActivatedSpawnerDetector extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -141,6 +143,13 @@ public class ActivatedSpawnerDetector extends Module {
             .name("Check Air Disturbances")
             .description("Displays spawners as activated if there are disturbances in the air around them. For example if a torch was placed and removed it will detect that. THERE CAN BE SOME FALSE POSITIVES WITH THIS!")
             .defaultValue(false)
+            .build()
+    );
+    private final Setting<Boolean> ignoreGeodes = sgGeneral.add(new BoolSetting.Builder()
+            .name("Ignore Geodes")
+            .description("Skips air check for spawners near geode blocks to reduce false positives.")
+            .defaultValue(true)
+            .visible(airChecker::get)
             .build()
     );
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
@@ -331,170 +340,185 @@ public class ActivatedSpawnerDetector extends Module {
         closestSpawnerZ = 2000000000;
         SpawnerDistance = 2000000000;
     }
+    private static final Set<Block> GEODE_BLOCKS = Set.of(
+            Blocks.AMETHYST_BLOCK,
+            Blocks.BUDDING_AMETHYST,
+            Blocks.CALCITE,
+            Blocks.SMOOTH_BASALT,
+            Blocks.AMETHYST_CLUSTER,
+            Blocks.LARGE_AMETHYST_BUD,
+            Blocks.MEDIUM_AMETHYST_BUD,
+            Blocks.SMALL_AMETHYST_BUD
+    );
+    private boolean chunkContainsGeodeBlocks(WorldChunk chunk, int sectionsToCheck) {
+        ChunkSection[] sections = chunk.getSectionArray();
+        for (int i = 0; i < sectionsToCheck; i++) {
+            ChunkSection section = sections[i];
+            if (!section.isEmpty()) {
+                var blockStatesContainer = section.getBlockStateContainer();
+                Palette<BlockState> blockStatePalette = blockStatesContainer.data.palette();
+                int blockPaletteLength = blockStatePalette.getSize();
+                for (int i2 = 0; i2 < blockPaletteLength; i2++) {
+                    BlockState blockPaletteEntry = blockStatePalette.get(i2);
+                    if (GEODE_BLOCKS.contains(blockPaletteEntry.getBlock())) return true;
+                }
+            }
+        }
+        return false;
+    }
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         if (mc.world == null || mc.player == null) return;
+        AtomicReferenceArray<WorldChunk> chunks = mc.world.getChunkManager().chunks.chunks;
+        Set<WorldChunk> chunkSet = new HashSet<>();
 
-        int renderdistance = mc.options.getViewDistance().getValue();
-        ChunkPos playerChunkPos = new ChunkPos(mc.player.getBlockPos());
-        for (int chunkX = playerChunkPos.x - renderdistance; chunkX <= playerChunkPos.x + renderdistance; chunkX++) {
-            for (int chunkZ = playerChunkPos.z - renderdistance; chunkZ <= playerChunkPos.z + renderdistance; chunkZ++) {
-                WorldChunk chunk = mc.world.getChunk(chunkX, chunkZ);
-                List<BlockEntity> blockEntities = new ArrayList<>(chunk.getBlockEntities().values());
+        for (int i = 0; i < chunks.length(); i++) {
+            WorldChunk chunk = chunks.get(i);
+            if (chunk != null) {
+                chunkSet.add(chunk);
+            }
+        }
+        chunkSet.forEach(chunk -> {
+            List<BlockEntity> blockEntities = new ArrayList<>(chunk.getBlockEntities().values());
 
-                for (BlockEntity blockEntity : blockEntities) {
-                    if (blockEntity instanceof MobSpawnerBlockEntity){
-                        activatedSpawnerFound = false;
-                        MobSpawnerBlockEntity spawner = (MobSpawnerBlockEntity) blockEntity;
-                        BlockPos pos = spawner.getPos();
-                        BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
-                        String monster = null;
-                        if (spawner.getLogic().spawnEntry != null && spawner.getLogic().spawnEntry.getNbt().get("id") != null) monster = spawner.getLogic().spawnEntry.getNbt().get("id").toString();
-                        if (playerPos.isWithinDistance(pos, renderDistance.get() * 16) && !trialspawnerPositions.contains(pos) && !noRenderPositions.contains(pos) && !deactivatedSpawnerPositions.contains(pos) && !spawnerPositions.contains(pos)) {
-                            if (airChecker.get() && (spawner.getLogic().spawnDelay == 20 || spawner.getLogic().spawnDelay == 0)) {
-                                boolean airFound = false;
-                                boolean caveAirFound = false;
-                                if (monster != null && !scannedPositions.contains(pos)) {
-                                    if (monster.contains("zombie") || monster.contains("skeleton") || monster.contains(":spider")) {
-                                        for (int x = -2; x < 2; x++) {
-                                            for (int y = -1; y < 3; y++) {
-                                                for (int z = -2; z < 2; z++) {
-                                                    BlockPos bpos = new BlockPos(pos.getX()+x,pos.getY()+y,pos.getZ()+z);
-                                                    if (mc.world.getBlockState(bpos).getBlock() == Blocks.AIR) airFound = true;
-                                                    if (mc.world.getBlockState(bpos).getBlock() == Blocks.CAVE_AIR) caveAirFound = true;
-                                                    if (caveAirFound && airFound) break;
-                                                }
+            for (BlockEntity blockEntity : blockEntities) {
+                if (blockEntity instanceof MobSpawnerBlockEntity) {
+                    activatedSpawnerFound = false;
+                    MobSpawnerBlockEntity spawner = (MobSpawnerBlockEntity) blockEntity;
+                    BlockPos pos = spawner.getPos();
+                    String monster = null;
+                    if (spawner.getLogic().spawnEntry != null && spawner.getLogic().spawnEntry.getNbt().get("id") != null)
+                        monster = spawner.getLogic().spawnEntry.getNbt().get("id").toString();
+                    if (!trialspawnerPositions.contains(pos) && !noRenderPositions.contains(pos) && !deactivatedSpawnerPositions.contains(pos) && !spawnerPositions.contains(pos)) {
+                        if (airChecker.get() && (spawner.getLogic().spawnDelay == 20 || spawner.getLogic().spawnDelay == 0)) {
+                            boolean airFound = false;
+                            boolean caveAirFound = false;
+                            boolean geodeNearby = false;
+                            if (ignoreGeodes.get() && chunkContainsGeodeBlocks(chunk, Math.min(chunk.getSectionArray().length, 20))) { //thank you to FaxHack for this block https://github.com/FaxHack/PathSeeker/commit/a424a743297350147754ec3f90f1a5ee5643b7e7
+                                for (int x = -5; x <= 5; x++) {
+                                    for (int y = -5; y <= 5; y++) {
+                                        for (int z = -5; z <= 5; z++) {
+                                            BlockPos bpos = pos.add(x, y, z);
+                                            if (GEODE_BLOCKS.contains(mc.world.getBlockState(bpos).getBlock())) {
+                                                geodeNearby = true;
+                                                break;
                                             }
                                         }
-                                        if (caveAirFound && airFound) {
-                                            if (monster == ":spider") displayMessage("dungeon", pos, ":spider");
-                                            else displayMessage("dungeon", pos, "null");
-                                        }
-                                    } else if (monster.contains("cave_spider")) {
-                                        for (int x = -1; x < 2; x++) {
-                                            for (int y = 0; y < 2; y++) {
-                                                for (int z = -1; z < 2; z++) {
-                                                    BlockPos bpos = new BlockPos(pos.getX()+x,pos.getY()+y,pos.getZ()+z);
-                                                    if (mc.world.getBlockState(bpos).getBlock() == Blocks.AIR) airFound = true;
-                                                    if (mc.world.getBlockState(bpos).getBlock() == Blocks.CAVE_AIR) caveAirFound = true;
-                                                    if (caveAirFound && airFound) break;
-                                                }
+                                        if (geodeNearby) break;
+                                    }
+                                    if (geodeNearby) break;
+                                }
+                            }
+                            if (monster != null && !scannedPositions.contains(pos)) {
+                                if (monster.contains("zombie") || monster.contains("skeleton") || monster.contains(":spider")) {
+                                    for (int x = -2; x < 2; x++) {
+                                        for (int y = -1; y < 3; y++) {
+                                            for (int z = -2; z < 2; z++) {
+                                                BlockPos bpos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
+                                                if (mc.world.getBlockState(bpos).getBlock() == Blocks.AIR)
+                                                    airFound = true;
+                                                if (mc.world.getBlockState(bpos).getBlock() == Blocks.CAVE_AIR)
+                                                    caveAirFound = true;
+                                                if (caveAirFound && airFound) break;
                                             }
-                                        }
-                                        if (caveAirFound && airFound) {
-                                            displayMessage("cave_spider", pos, "null");
-                                        }
-                                    } else if (monster.contains("silverfish")) {
-                                        for (int x = -3; x < 3+1; x++) {
-                                            for (int y = -2; y < 3+1; y++) {
-                                                for (int z = -3; z < 3+1; z++) {
-                                                    BlockPos bpos = new BlockPos(pos.getX()+x,pos.getY()+y,pos.getZ()+z);
-                                                    if (mc.world.getBlockState(bpos).getBlock() == Blocks.AIR) airFound = true;
-                                                    if (mc.world.getBlockState(bpos).getBlock() == Blocks.CAVE_AIR) caveAirFound = true;
-                                                    if (caveAirFound && airFound) break;
-                                                }
-                                            }
-                                        }
-                                        if (caveAirFound && airFound) {
-                                            displayMessage("silverfish", pos, "null");
                                         }
                                     }
-                                }
-                                scannedPositions.add(pos);
-                            } else if (spawner.getLogic().spawnDelay != 20) {
-                                if (mc.world.getRegistryKey() == World.NETHER && spawner.getLogic().spawnDelay == 0) return;
-                                if (chatFeedback.get()) {
-                                    if (monster != null){
-                                        if (monster.contains("zombie") || monster.contains("skeleton") || monster.contains(":spider")) {
-                                            if (monster == ":spider") displayMessage("dungeon", pos, ":spider");
-                                            else displayMessage("dungeon", pos, "null");
-                                        } else if (monster.contains("cave_spider")) {
-                                            displayMessage("cave_spider", pos, "null");
-                                        } else if (monster.contains("silverfish")) {
-                                            displayMessage("silverfish", pos, "null");
-                                        } else if (monster.contains("blaze")) {
-                                            displayMessage("blaze", pos, "null");
-                                        } else if (monster.contains("magma")) {
-                                            displayMessage("magma", pos, "null");
-                                        } else {
-                                            if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated Spawner! Block Position: " + pos));
-                                            else ChatUtils.sendMsg(Text.of("Detected Activated Spawner!"));
-                                            spawnerPositions.add(pos);
-                                            activatedSpawnerFound = true;
-                                            if (locLogging.get())logSpawner(pos);
+                                    if (caveAirFound && airFound) {
+                                        if (monster == ":spider") displayMessage("dungeon", pos, ":spider");
+                                        else displayMessage("dungeon", pos, "null");
+                                    }
+                                } else if (monster.contains("cave_spider")) {
+                                    for (int x = -1; x < 2; x++) {
+                                        for (int y = 0; y < 2; y++) {
+                                            for (int z = -1; z < 2; z++) {
+                                                BlockPos bpos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
+                                                if (mc.world.getBlockState(bpos).getBlock() == Blocks.AIR)
+                                                    airFound = true;
+                                                if (mc.world.getBlockState(bpos).getBlock() == Blocks.CAVE_AIR)
+                                                    caveAirFound = true;
+                                                if (caveAirFound && airFound) break;
+                                            }
                                         }
-                                    } else {
-                                        if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated Spawner! Block Position: " + pos));
-                                        else ChatUtils.sendMsg(Text.of("Detected Activated Spawner!"));
-                                        spawnerPositions.add(pos);
-                                        activatedSpawnerFound = true;
-                                        if (locLogging.get())logSpawner(pos);
+                                    }
+                                    if (caveAirFound && airFound) {
+                                        displayMessage("cave_spider", pos, "null");
+                                    }
+                                } else if (monster.contains("silverfish")) {
+                                    for (int x = -3; x < 3 + 1; x++) {
+                                        for (int y = -2; y < 3 + 1; y++) {
+                                            for (int z = -3; z < 3 + 1; z++) {
+                                                BlockPos bpos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
+                                                if (mc.world.getBlockState(bpos).getBlock() == Blocks.AIR)
+                                                    airFound = true;
+                                                if (mc.world.getBlockState(bpos).getBlock() == Blocks.CAVE_AIR)
+                                                    caveAirFound = true;
+                                                if (caveAirFound && airFound) break;
+                                            }
+                                        }
+                                    }
+                                    if (caveAirFound && airFound) {
+                                        displayMessage("silverfish", pos, "null");
                                     }
                                 }
                             }
-                            if (activatedSpawnerFound == true) {
-                                if (deactivatedSpawner.get()){
-                                    boolean lightsFound = false;
-                                    for (int x = -deactivatedSpawnerdistance.get(); x < deactivatedSpawnerdistance.get()+1; x++) {
-                                        for (int y = -deactivatedSpawnerdistance.get(); y < deactivatedSpawnerdistance.get()+1; y++) {
-                                            for (int z = -deactivatedSpawnerdistance.get(); z < deactivatedSpawnerdistance.get()+1; z++) {
-                                                BlockPos bpos = new BlockPos(pos.getX()+x,pos.getY()+y,pos.getZ()+z);
-                                                if (mc.world.getBlockState(bpos).getBlock() == Blocks.TORCH || mc.world.getBlockState(bpos).getBlock() == Blocks.SOUL_TORCH || mc.world.getBlockState(bpos).getBlock() == Blocks.REDSTONE_TORCH || mc.world.getBlockState(bpos).getBlock() == Blocks.JACK_O_LANTERN || mc.world.getBlockState(bpos).getBlock() == Blocks.GLOWSTONE || mc.world.getBlockState(bpos).getBlock() == Blocks.SHROOMLIGHT || mc.world.getBlockState(bpos).getBlock() == Blocks.OCHRE_FROGLIGHT || mc.world.getBlockState(bpos).getBlock() == Blocks.PEARLESCENT_FROGLIGHT || mc.world.getBlockState(bpos).getBlock() == Blocks.PEARLESCENT_FROGLIGHT || mc.world.getBlockState(bpos).getBlock() == Blocks.SEA_LANTERN || mc.world.getBlockState(bpos).getBlock() == Blocks.LANTERN || mc.world.getBlockState(bpos).getBlock() == Blocks.SOUL_LANTERN || mc.world.getBlockState(bpos).getBlock() == Blocks.CAMPFIRE || mc.world.getBlockState(bpos).getBlock() == Blocks.SOUL_CAMPFIRE){
-                                                    lightsFound = true;
-                                                    deactivatedSpawnerPositions.add(pos);
-                                                    break;
-                                                }
-                                            }
-                                        }
+                            scannedPositions.add(pos);
+                        } else if (spawner.getLogic().spawnDelay != 20) {
+                            if (mc.world.getRegistryKey() == World.NETHER && spawner.getLogic().spawnDelay == 0) return;
+                            if (chatFeedback.get()) {
+                                if (monster != null) {
+                                    if (monster.contains("zombie") || monster.contains("skeleton") || monster.contains(":spider")) {
+                                        if (monster == ":spider") displayMessage("dungeon", pos, ":spider");
+                                        else displayMessage("dungeon", pos, "null");
+                                    } else if (monster.contains("cave_spider")) {
+                                        displayMessage("cave_spider", pos, "null");
+                                    } else if (monster.contains("silverfish")) {
+                                        displayMessage("silverfish", pos, "null");
+                                    } else if (monster.contains("blaze")) {
+                                        displayMessage("blaze", pos, "null");
+                                    } else if (monster.contains("magma")) {
+                                        displayMessage("magma", pos, "null");
+                                    } else {
+                                        if (displaycoords.get())
+                                            ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated Spawner! Block Position: " + pos));
+                                        else ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated Spawner!"));
+                                        spawnerPositions.add(pos);
+                                        activatedSpawnerFound = true;
+                                        if (locLogging.get()) logSpawner(pos);
                                     }
-                                    if (chatFeedback.get() && lightsFound == true) ChatUtils.sendMsg(Text.of("The Spawner has torches or other light blocks!"));
-                                }
-
-                                boolean chestfound = false;
-                                for (int x = -16; x < 17; x++) {
-                                    for (int y = -16; y < 17; y++) {
-                                        for (int z = -16; z < 17; z++) {
-                                            BlockPos bpos = new BlockPos(pos.getX()+x, pos.getY()+y, pos.getZ()+z);
-                                            if (blocks.get().contains(mc.world.getBlockState(bpos).getBlock())) {
-                                                chestfound = true;
-                                                break;
-                                            }
-                                            Box box = new Box(bpos);
-                                            List<ChestMinecartEntity> minecarts = mc.world.getEntitiesByClass(ChestMinecartEntity.class, box, entity -> true);
-                                            if (!minecarts.isEmpty()) {
-                                                chestfound = true;
-                                                break;
-                                            }
-                                        }
-                                        if (chestfound) break;
-                                    }
-                                    if (chestfound) break;
-                                }
-                                if (!chestfound && lessRenderSpam.get()){
-                                    noRenderPositions.add(pos);
-                                }
-                                if (chatFeedback.get()) {
-                                    if (lessSpam.get() && chestfound && extramessage.get()) error("There may be stashed items in the storage near the spawners!");
-                                    else if (!lessSpam.get() && extramessage.get()) error("There may be stashed items in the storage near the spawners!");
+                                } else {
+                                    if (displaycoords.get())
+                                        ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated Spawner! Block Position: " + pos));
+                                    else ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated Spawner!"));
+                                    spawnerPositions.add(pos);
+                                    activatedSpawnerFound = true;
+                                    if (locLogging.get()) logSpawner(pos);
                                 }
                             }
                         }
-                    }
-                    if (blockEntity instanceof TrialSpawnerBlockEntity) {
-                        TrialSpawnerBlockEntity trialspawner = (TrialSpawnerBlockEntity) blockEntity;
-                        BlockPos tPos = trialspawner.getPos();
-                        BlockPos playerPos = new BlockPos(mc.player.getBlockX(), tPos.getY(), mc.player.getBlockZ());
-                        if (playerPos.isWithinDistance(tPos, renderDistance.get() * 16) && trialSpawner.get() && !trialspawnerPositions.contains(tPos) && !noRenderPositions.contains(tPos) && !deactivatedSpawnerPositions.contains(tPos) && !spawnerPositions.contains(tPos) && trialspawner.getSpawnerState() != TrialSpawnerState.WAITING_FOR_PLAYERS) {
-                            if (chatFeedback.get()) {
-                                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated §cTRIAL§r Spawner! Block Position: " + tPos));
-                                else ChatUtils.sendMsg(Text.of("Detected Activated §cTRIAL§r Spawner!"));
+                        if (activatedSpawnerFound == true) {
+                            if (deactivatedSpawner.get()) {
+                                boolean lightsFound = false;
+                                for (int x = -deactivatedSpawnerdistance.get(); x < deactivatedSpawnerdistance.get() + 1; x++) {
+                                    for (int y = -deactivatedSpawnerdistance.get(); y < deactivatedSpawnerdistance.get() + 1; y++) {
+                                        for (int z = -deactivatedSpawnerdistance.get(); z < deactivatedSpawnerdistance.get() + 1; z++) {
+                                            BlockPos bpos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
+                                            if (mc.world.getBlockState(bpos).getBlock() == Blocks.TORCH || mc.world.getBlockState(bpos).getBlock() == Blocks.SOUL_TORCH || mc.world.getBlockState(bpos).getBlock() == Blocks.REDSTONE_TORCH || mc.world.getBlockState(bpos).getBlock() == Blocks.JACK_O_LANTERN || mc.world.getBlockState(bpos).getBlock() == Blocks.GLOWSTONE || mc.world.getBlockState(bpos).getBlock() == Blocks.SHROOMLIGHT || mc.world.getBlockState(bpos).getBlock() == Blocks.OCHRE_FROGLIGHT || mc.world.getBlockState(bpos).getBlock() == Blocks.PEARLESCENT_FROGLIGHT || mc.world.getBlockState(bpos).getBlock() == Blocks.PEARLESCENT_FROGLIGHT || mc.world.getBlockState(bpos).getBlock() == Blocks.SEA_LANTERN || mc.world.getBlockState(bpos).getBlock() == Blocks.LANTERN || mc.world.getBlockState(bpos).getBlock() == Blocks.SOUL_LANTERN || mc.world.getBlockState(bpos).getBlock() == Blocks.CAMPFIRE || mc.world.getBlockState(bpos).getBlock() == Blocks.SOUL_CAMPFIRE) {
+                                                lightsFound = true;
+                                                deactivatedSpawnerPositions.add(pos);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                if (chatFeedback.get() && lightsFound == true)
+                                    ChatUtils.sendMsg(Text.of("The Spawner has torches or other light blocks!"));
                             }
-                            trialspawnerPositions.add(tPos);
+
                             boolean chestfound = false;
-                            for (int x = -14; x < 15; x++) {
-                                for (int y = -14; y < 15; y++) {
-                                    for (int z = -14; z < 15; z++) {
-                                        BlockPos bpos = new BlockPos(tPos.getX() + x, tPos.getY() + y, tPos.getZ() + z);
+                            for (int x = -16; x < 17; x++) {
+                                for (int y = -16; y < 17; y++) {
+                                    for (int z = -16; z < 17; z++) {
+                                        BlockPos bpos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
                                         if (blocks.get().contains(mc.world.getBlockState(bpos).getBlock())) {
                                             chestfound = true;
                                             break;
@@ -511,18 +535,61 @@ public class ActivatedSpawnerDetector extends Module {
                                 if (chestfound) break;
                             }
                             if (!chestfound && lessRenderSpam.get()) {
-                                noRenderPositions.add(tPos);
+                                noRenderPositions.add(pos);
                             }
                             if (chatFeedback.get()) {
-                                if (lessSpam.get() && chestfound && extramessage.get()) error("There may be stashed items in the storage near the spawners!");
-                                else if (!lessSpam.get() && extramessage.get()) error("There may be stashed items in the storage near the spawners!");
+                                if (lessSpam.get() && chestfound && extramessage.get())
+                                    error("There may be stashed items in the storage near the spawners!");
+                                else if (!lessSpam.get() && extramessage.get())
+                                    error("There may be stashed items in the storage near the spawners!");
                             }
-                            if (locLogging.get())logSpawner(tPos);
                         }
                     }
                 }
+                if (blockEntity instanceof TrialSpawnerBlockEntity) {
+                    TrialSpawnerBlockEntity trialspawner = (TrialSpawnerBlockEntity) blockEntity;
+                    BlockPos tPos = trialspawner.getPos();
+                    if (trialSpawner.get() && !trialspawnerPositions.contains(tPos) && !noRenderPositions.contains(tPos) && !deactivatedSpawnerPositions.contains(tPos) && !spawnerPositions.contains(tPos) && trialspawner.getSpawnerState() != TrialSpawnerState.WAITING_FOR_PLAYERS) {
+                        if (chatFeedback.get()) {
+                            if (displaycoords.get())
+                                ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cTRIAL§r Spawner! Block Position: " + tPos));
+                            else ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cTRIAL§r Spawner!"));
+                        }
+                        trialspawnerPositions.add(tPos);
+                        boolean chestfound = false;
+                        for (int x = -14; x < 15; x++) {
+                            for (int y = -14; y < 15; y++) {
+                                for (int z = -14; z < 15; z++) {
+                                    BlockPos bpos = new BlockPos(tPos.getX() + x, tPos.getY() + y, tPos.getZ() + z);
+                                    if (blocks.get().contains(mc.world.getBlockState(bpos).getBlock())) {
+                                        chestfound = true;
+                                        break;
+                                    }
+                                    Box box = new Box(bpos);
+                                    List<ChestMinecartEntity> minecarts = mc.world.getEntitiesByClass(ChestMinecartEntity.class, box, entity -> true);
+                                    if (!minecarts.isEmpty()) {
+                                        chestfound = true;
+                                        break;
+                                    }
+                                }
+                                if (chestfound) break;
+                            }
+                            if (chestfound) break;
+                        }
+                        if (!chestfound && lessRenderSpam.get()) {
+                            noRenderPositions.add(tPos);
+                        }
+                        if (chatFeedback.get()) {
+                            if (lessSpam.get() && chestfound && extramessage.get())
+                                error("There may be stashed items in the storage near the spawners!");
+                            else if (!lessSpam.get() && extramessage.get())
+                                error("There may be stashed items in the storage near the spawners!");
+                        }
+                        if (locLogging.get()) logSpawner(tPos);
+                    }
+                }
             }
-        }
+        });
         if (nearesttrcr.get()){
             try {
                 Set<BlockPos> CombinedPositions = Collections.synchronizedSet(new HashSet<>());
@@ -545,7 +612,7 @@ public class ActivatedSpawnerDetector extends Module {
                 e.printStackTrace();
             }
         }
-        if (removerenderdist.get()) removeChunksOutsideRenderDistance();
+        if (removerenderdist.get()) removeChunksOutsideRenderDistance(chunkSet);
     }
     @EventHandler
     private void onRender(Render3DEvent event) {
@@ -609,80 +676,79 @@ public class ActivatedSpawnerDetector extends Module {
                     if (mc.world.getBlockState(pos.down()).getBlock() == Blocks.BIRCH_PLANKS && enableWoodlandMansion.get()) {
                         activatedSpawnerFound = true;
                         spawnerPositions.add(pos);
-                        if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated §cWOODLAND MANSION§r Spawner! Block Position: " + pos));
-                        else ChatUtils.sendMsg(Text.of("Detected Activated §cWOODLAND MANSION§r Spawner!"));
+                        if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cWOODLAND MANSION§r Spawner! Block Position: " + pos));
+                        else ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cWOODLAND MANSION§r Spawner!"));
                     } else {
                         if (enableDungeon.get()) {
                             activatedSpawnerFound = true;
                             spawnerPositions.add(pos);
-                            if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated §cDUNGEON§r Spawner! Block Position: " + pos));
-                            else ChatUtils.sendMsg(Text.of("Detected Activated §cDUNGEON§r Spawner!"));
+                            if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cDUNGEON§r Spawner! Block Position: " + pos));
+                            else ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cDUNGEON§r Spawner!"));
                         }
                     }
                 } else {
                     if (enableDungeon.get()) {
                         activatedSpawnerFound = true;
                         spawnerPositions.add(pos);
-                        if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated §cDUNGEON§r Spawner! Block Position: " + pos));
-                        else ChatUtils.sendMsg(Text.of("Detected Activated §cDUNGEON§r Spawner!"));
+                        if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cDUNGEON§r Spawner! Block Position: " + pos));
+                        else ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cDUNGEON§r Spawner!"));
                     }
                 }
             } else if (key=="cave_spider" && enableMineshaft.get()) {
                 activatedSpawnerFound = true;
                 spawnerPositions.add(pos);
-                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated §cMINESHAFT§r Spawner! Block Position: " + pos));
-                else ChatUtils.sendMsg(Text.of("Detected Activated §cMINESHAFT§r Spawner!"));
+                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cMINESHAFT§r Spawner! Block Position: " + pos));
+                else ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cMINESHAFT§r Spawner!"));
             } else if (key=="silverfish" && enableStronghold.get()) {
                 activatedSpawnerFound = true;
                 spawnerPositions.add(pos);
-                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated §cSTRONGHOLD§r Spawner! Block Position: " + pos));
-                else ChatUtils.sendMsg(Text.of("Detected Activated §cSTRONGHOLD§r Spawner!"));
+                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cSTRONGHOLD§r Spawner! Block Position: " + pos));
+                else ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cSTRONGHOLD§r Spawner!"));
             } else if (key=="blaze" && enableFortress.get()) {
                 activatedSpawnerFound = true;
                 spawnerPositions.add(pos);
-                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated §cFORTRESS§r Spawner! Block Position: " + pos));
-                else ChatUtils.sendMsg(Text.of("Detected Activated §cFORTRESS§r Spawner!"));
+                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cFORTRESS§r Spawner! Block Position: " + pos));
+                else ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cFORTRESS§r Spawner!"));
             } else if (key=="magma" && enableBastion.get()) {
                 activatedSpawnerFound = true;
                 spawnerPositions.add(pos);
-                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated §cBASTION§r Spawner! Block Position: " + pos));
-                else ChatUtils.sendMsg(Text.of("Detected Activated §cBASTION§r Spawner!"));
+                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cBASTION§r Spawner! Block Position: " + pos));
+                else ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cBASTION§r Spawner!"));
             } else {
                 activatedSpawnerFound = true;
                 spawnerPositions.add(pos);
-                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("Detected Activated Spawner! Block Position: " + pos));
-                else ChatUtils.sendMsg(Text.of("Detected Activated Spawner!"));
+                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated Spawner! Block Position: " + pos));
+                else ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated Spawner!"));
             }
             if (locLogging.get())logSpawner(pos);
         }
     }
     private void render(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
-        if (trcr.get() && Math.abs(box.minX- RenderUtils.center.x)<=renderDistance.get()*16 && Math.abs(box.minZ-RenderUtils.center.z)<=renderDistance.get()*16)
+        if (trcr.get())
             if (!nearesttrcr.get())
                 event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
         event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
     }
     private void render2(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
-        if (trcr.get() && Math.abs(box.minX-RenderUtils.center.x)<=renderDistance.get()*16 && Math.abs(box.minZ-RenderUtils.center.z)<=renderDistance.get()*16)
+        if (trcr.get())
             event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
         event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
     }
     private void renderRange(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
         event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, lines, shapeMode, 0);
     }
-    private void removeChunksOutsideRenderDistance() {
-        double renderDistanceBlocks = renderDistance.get() * 16;
-
-        removeChunksOutsideRenderDistance(scannedPositions, renderDistanceBlocks);
-        removeChunksOutsideRenderDistance(spawnerPositions, renderDistanceBlocks);
-        removeChunksOutsideRenderDistance(deactivatedSpawnerPositions, renderDistanceBlocks);
-        removeChunksOutsideRenderDistance(trialspawnerPositions, renderDistanceBlocks);
-        removeChunksOutsideRenderDistance(noRenderPositions, renderDistanceBlocks);
+    private void removeChunksOutsideRenderDistance(Set<WorldChunk> chunks) {
+        removeBlockPosOutsideRenderDistance(scannedPositions, chunks);
+        removeBlockPosOutsideRenderDistance(spawnerPositions, chunks);
+        removeBlockPosOutsideRenderDistance(deactivatedSpawnerPositions, chunks);
+        removeBlockPosOutsideRenderDistance(trialspawnerPositions, chunks);
+        removeBlockPosOutsideRenderDistance(noRenderPositions, chunks);
     }
-    private void removeChunksOutsideRenderDistance(Set<BlockPos> chunkSet, double renderDistanceBlocks) {
-        chunkSet.removeIf(blockPos -> {
-            BlockPos playerPos = new BlockPos(mc.player.getBlockX(), blockPos.getY(), mc.player.getBlockZ());
-            return !playerPos.isWithinDistance(blockPos, renderDistanceBlocks);
+    private void removeBlockPosOutsideRenderDistance(Set<BlockPos> blockSet, Set<WorldChunk> worldChunks) {
+        blockSet.removeIf(blockpos -> {
+            BlockPos boxPos = new BlockPos((int)Math.floor(blockpos.getX()), (int)Math.floor(blockpos.getY()), (int)Math.floor(blockpos.getZ()));
+            assert mc.world != null;
+            return !worldChunks.contains(mc.world.getChunk(boxPos));
         });
     }
 
