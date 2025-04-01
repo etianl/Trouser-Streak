@@ -42,6 +42,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new InstaMineNuker());
                 Modules.get().add(new BetterScaffold());
                 Modules.get().add(new RedstoneNuker());
+                Modules.get().add(new VanityESP());
 
                 //Modules.get().add(new -----> Create Illegal things with Creative mode! <-----());
                 Modules.get().add(new ForceOPSign());

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>net.minecraft</groupId>
+	<artifactId>minecraft-merged-4d1e0c68a7</artifactId>
+	<version>1.21.1-net.fabricmc.yarn.1_21_1.1.21.1+build.3-v2</version>
+</project>

@@ -1,0 +1,21 @@
+{
+  "required": true,
+  "package": "pwn.noobs.trouserstreak.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "mixins": [
+    "InventoryScreenMixin",
+    "InventoryScreenMixinBow",
+    "ClientPlayerInteractionManagerMixin",
+    "LecternScreenMixin",
+    "accessor.ClientConnectionAccessor",
+    "ShulkerBoxScreenMixin",
+    "PlayerEntityMixin",
+    "TrouserSplashTextMixin",
+    "TrouserHandshakeC2SMixin"
+  ]
+}

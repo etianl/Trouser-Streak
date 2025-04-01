@@ -1,0 +1,56 @@
+{
+  "mappings": {
+    "pwn/noobs/trouserstreak/mixin/ClientPlayerInteractionManagerMixin": {
+      "stopUsingItem": "Lnet/minecraft/class_636;method_2897(Lnet/minecraft/class_1657;)V"
+    },
+    "pwn/noobs/trouserstreak/mixin/InventoryScreenMixin": {
+      "init": "Lnet/minecraft/class_490;method_25426()V"
+    },
+    "pwn/noobs/trouserstreak/mixin/InventoryScreenMixinBow": {
+      "init": "Lnet/minecraft/class_490;method_25426()V"
+    },
+    "pwn/noobs/trouserstreak/mixin/LecternScreenMixin": {
+      "init": "Lnet/minecraft/class_3935;method_25426()V"
+    },
+    "pwn/noobs/trouserstreak/mixin/PlayerEntityMixin": {
+      "getOffGroundSpeed": "Lnet/minecraft/class_1657;method_49484()F"
+    },
+    "pwn/noobs/trouserstreak/mixin/TrouserHandshakeC2SMixin": {
+      "<init>(ILjava/lang/String;ILnet/minecraft/network/packet/c2s/handshake/ConnectionIntent;)V": "Lnet/minecraft/class_2889;<init>(ILjava/lang/String;ILnet/minecraft/class_8592;)V"
+    },
+    "pwn/noobs/trouserstreak/mixin/TrouserSplashTextMixin": {
+      "get": "Lnet/minecraft/class_4008;method_18174()Lnet/minecraft/class_8519;"
+    },
+    "pwn/noobs/trouserstreak/mixin/accessor/ClientConnectionAccessor": {
+      "channel": "field_11651:Lio/netty/channel/Channel;"
+    }
+  },
+  "data": {
+    "named:intermediary": {
+      "pwn/noobs/trouserstreak/mixin/ClientPlayerInteractionManagerMixin": {
+        "stopUsingItem": "Lnet/minecraft/class_636;method_2897(Lnet/minecraft/class_1657;)V"
+      },
+      "pwn/noobs/trouserstreak/mixin/InventoryScreenMixin": {
+        "init": "Lnet/minecraft/class_490;method_25426()V"
+      },
+      "pwn/noobs/trouserstreak/mixin/InventoryScreenMixinBow": {
+        "init": "Lnet/minecraft/class_490;method_25426()V"
+      },
+      "pwn/noobs/trouserstreak/mixin/LecternScreenMixin": {
+        "init": "Lnet/minecraft/class_3935;method_25426()V"
+      },
+      "pwn/noobs/trouserstreak/mixin/PlayerEntityMixin": {
+        "getOffGroundSpeed": "Lnet/minecraft/class_1657;method_49484()F"
+      },
+      "pwn/noobs/trouserstreak/mixin/TrouserHandshakeC2SMixin": {
+        "<init>(ILjava/lang/String;ILnet/minecraft/network/packet/c2s/handshake/ConnectionIntent;)V": "Lnet/minecraft/class_2889;<init>(ILjava/lang/String;ILnet/minecraft/class_8592;)V"
+      },
+      "pwn/noobs/trouserstreak/mixin/TrouserSplashTextMixin": {
+        "get": "Lnet/minecraft/class_4008;method_18174()Lnet/minecraft/class_8519;"
+      },
+      "pwn/noobs/trouserstreak/mixin/accessor/ClientConnectionAccessor": {
+        "channel": "field_11651:Lio/netty/channel/Channel;"
+      }
+    }
+  }
+}
