@@ -1,3 +1,0 @@
-v1	named	intermediary
-FIELD	pwn/noobs/trouserstreak/mixin/TrouserHandshakeC2SMixin	Ljava/lang/String;	address	comp_1564
-METHOD	pwn/noobs/trouserstreak/mixin/TrouserHandshakeC2SMixin	()Lnet/minecraft/network/packet/c2s/handshake/ConnectionIntent;	intendedState	comp_1566
