@@ -183,8 +183,6 @@ public class BoomPlus extends Module {
         super(Trouser.Main, "boom+", "shoots something where you click");
     }
     private int aticks=0;
-    private String namecolour = nomcolor.get().toString();
-    private String customName = nom.get();
 
     @EventHandler
     public void onTick(TickEvent.Post event) {
@@ -197,14 +195,12 @@ public class BoomPlus extends Module {
             if (aticks<=atickdelay.get()){
                 aticks++;
             } else if (aticks>atickdelay.get()) {
-                customName = nom.get();
-                namecolour = nomcolor.get().toString();
                 ItemStack rst = mc.player.getMainHandStack();
                 BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
                 ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
                 var changes = ComponentChanges.builder()
-                        .add(DataComponentTypes.CUSTOM_NAME, Text.literal(customName).formatted(Formatting.valueOf(namecolour.toUpperCase())))
-                        .add(DataComponentTypes.ITEM_NAME, Text.literal(customName).formatted(Formatting.valueOf(namecolour.toUpperCase())))
+                        .add(DataComponentTypes.CUSTOM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().name().toUpperCase())))
+                        .add(DataComponentTypes.ITEM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().name().toUpperCase())))
                         .add(DataComponentTypes.ENTITY_DATA, createEntityData())
                         .build();
                 item.applyChanges(changes);
@@ -219,14 +215,12 @@ public class BoomPlus extends Module {
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if (mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player.getAbilities().creativeMode) {
-            customName = nom.get();
-            namecolour = nomcolor.get().toString();
             ItemStack rst = mc.player.getMainHandStack();
             BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
             ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
             var changes = ComponentChanges.builder()
-                    .add(DataComponentTypes.CUSTOM_NAME, Text.literal(customName).formatted(Formatting.valueOf(namecolour.toUpperCase())))
-                    .add(DataComponentTypes.ITEM_NAME, Text.literal(customName).formatted(Formatting.valueOf(namecolour.toUpperCase())))
+                    .add(DataComponentTypes.CUSTOM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().name().toUpperCase())))
+                    .add(DataComponentTypes.ITEM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().name().toUpperCase())))
                     .add(DataComponentTypes.ENTITY_DATA, createEntityData())
                     .build();
             item.applyChanges(changes);
@@ -247,6 +241,10 @@ public class BoomPlus extends Module {
         BlockPos pos = BlockPos.ofFloored(owo);
         Vec3d sex = mc.player.getRotationVector().multiply(speed.get());
         String entityName = entity.get().trim().replace(" ", "_");
+
+        NbtCompound customName = new NbtCompound();
+        customName.putString("text", nom.get());
+        customName.putString("color", nomcolor.get().name());
 
         NbtCompound entityTag = new NbtCompound();
         if (target.get()) {
@@ -281,7 +279,7 @@ public class BoomPlus extends Module {
         entityTag.putInt("Fuse", fuse.get());
         entityTag.putInt("Size", size.get());
         if(customname.get())entityTag.putBoolean("CustomNameVisible", customname.get());
-        entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
+        entityTag.put("CustomName", customName);
         return NbtComponent.of(entityTag);
     }
 }
