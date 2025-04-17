@@ -180,7 +180,7 @@ public class BoomPlus extends Module {
     );
 
     public BoomPlus() {
-        super(Trouser.Main, "boom+", "shoots something where you click");
+        super(Trouser.operator, "boom+", "shoots something where you click");
     }
     private int aticks=0;
     private String namecolour = nomcolor.get().toString();
@@ -281,7 +281,7 @@ public class BoomPlus extends Module {
         entityTag.putInt("Fuse", fuse.get());
         entityTag.putInt("Size", size.get());
         if(customname.get())entityTag.putBoolean("CustomNameVisible", customname.get());
-        entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
+        entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
         return NbtComponent.of(entityTag);
     }
 }

@@ -78,7 +78,7 @@ public class AutoScoreboard extends Module {
     private Queue<String> commandQueue = new LinkedList<>();
 
     public AutoScoreboard() {
-        super(Trouser.Main, "auto-scoreboard", "Automatically create a scoreboard using Starscript. Requires operator access.");
+        super(Trouser.operator, "auto-scoreboard", "Automatically create a scoreboard using Starscript. Requires operator access.");
     }
 
     @Override

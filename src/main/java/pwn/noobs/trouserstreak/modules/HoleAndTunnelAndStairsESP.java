@@ -21,10 +21,12 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.world.chunk.WorldChunk;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 
 public class HoleAndTunnelAndStairsESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -163,14 +165,6 @@ public class HoleAndTunnelAndStairsESP extends Module {
             .defaultValue(ShapeMode.Both)
             .build()
     );
-    public final Setting<Integer> renderDistance = sgRender.add(new IntSetting.Builder()
-            .name("Render-Distance(Chunks)")
-            .description("How many chunks from the character to render the detected holes/tunnels.")
-            .defaultValue(128)
-            .min(6)
-            .sliderRange(6,1024)
-            .build()
-    );
     private final Setting<SettingColor> holeLineColor = sgRender.add(new ColorSetting.Builder()
             .name("hole-line-color")
             .description("The color of the lines for the holes being rendered.")
@@ -215,7 +209,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
     private final Set<Box> tunnels = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final Set<Box> staircases = Collections.newSetFromMap(new ConcurrentHashMap<>());
     public HoleAndTunnelAndStairsESP() {
-        super(Trouser.Main, "Hole/Tunnel/StairsESP", "Finds and highlights holes and tunnels and stairs.");
+        super(Trouser.baseHunting, "Hole/Tunnel/StairsESP", "Finds and highlights holes and tunnels and stairs.");
     }
 
     @Override
@@ -246,16 +240,24 @@ public class HoleAndTunnelAndStairsESP extends Module {
         removeBoxesOutsideRenderDistance();
     }
     private void removeBoxesOutsideRenderDistance() {
-        double renderDistanceBlocks = renderDistance.get() * 16;
+        AtomicReferenceArray<WorldChunk> chunks = mc.world.getChunkManager().chunks.chunks;
+        Set<WorldChunk> chunkSet = new HashSet<>();
 
-        removeBoxesOutsideRenderDistance(holes, renderDistanceBlocks);
-        removeBoxesOutsideRenderDistance(tunnels, renderDistanceBlocks);
-        removeBoxesOutsideRenderDistance(staircases, renderDistanceBlocks);
+        for (int i = 0; i < chunks.length(); i++) {
+            WorldChunk chunk = chunks.get(i);
+            if (chunk != null) {
+                chunkSet.add(chunk);
+            }
+        }
+        removeBoxesOutsideRenderDistance(holes, chunkSet);
+        removeBoxesOutsideRenderDistance(tunnels, chunkSet);
+        removeBoxesOutsideRenderDistance(staircases, chunkSet);
     }
-    private void removeBoxesOutsideRenderDistance(Set<Box> chunkSet, double renderDistanceBlocks) {
-        chunkSet.removeIf(box -> {
-            BlockPos playerPos = new BlockPos(mc.player.getBlockX(), Math.round((float)box.getCenter().getY()), mc.player.getBlockZ());
-            return !playerPos.isWithinDistance(new BlockPos(Math.round((float)box.getCenter().getX()), Math.round((float)box.getCenter().getY()), Math.round((float)box.getCenter().getZ())), renderDistanceBlocks);
+    private void removeBoxesOutsideRenderDistance(Set<Box> boxSet, Set<WorldChunk> worldChunks) {
+        boxSet.removeIf(box -> {
+            BlockPos boxPos = new BlockPos((int)Math.floor(box.getCenter().getX()), (int)Math.floor(box.getCenter().getY()), (int)Math.floor(box.getCenter().getZ()));
+            assert mc.world != null;
+            return !worldChunks.contains(mc.world.getChunk(boxPos));
         });
     }
     @EventHandler

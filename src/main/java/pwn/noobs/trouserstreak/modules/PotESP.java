@@ -116,7 +116,7 @@ public class PotESP extends Module {
     private int closestPotZ=2000000000;
     private double PotDistance=2000000000;
     public PotESP() {
-        super(Trouser.Main,"PotESP", "Finds the dank pots... In Minecraft (Locates decorated pots with un-natural items in them)");
+        super(Trouser.baseHunting,"PotESP", "Finds the dank pots... In Minecraft (Locates decorated pots with un-natural items in them)");
     }
     @Override
     public void onActivate() {
@@ -195,7 +195,7 @@ public class PotESP extends Module {
             synchronized (potLocations) {
                 if (!nearesttrcr.get()) {
                     for (BlockPos pos : potLocations) {
-                        BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
+                    BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
                         if (pos != null && playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
                             int startX = pos.getX();
                             int startY = pos.getY();

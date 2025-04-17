@@ -1,14 +1,24 @@
 //made by etianl :D
 package pwn.noobs.trouserstreak.modules;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
-import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
+import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -18,25 +28,26 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.c2s.play.AcknowledgeChunksC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.*;
 import pwn.noobs.trouserstreak.Trouser;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 
 public class PortalPatternFinder extends Module {
 	private final SettingGroup sgGeneral = settings.getDefaultGroup();
 	private final SettingGroup sgRender = settings.createGroup("Render");
+	private final SettingGroup locationLogs = settings.createGroup("Location Logs");
 	private final Setting<Boolean> displaycoords = sgGeneral.add(new BoolSetting.Builder()
 			.name("DisplayCoords")
 			.description("Displays coords of portal patterns in chat.")
@@ -89,7 +100,7 @@ public class PortalPatternFinder extends Module {
 	);
 	private final Setting<Boolean> removerenderdist = sgRender.add(new BoolSetting.Builder()
 			.name("RemoveOutsideRenderDistance")
-			.description("Removes the cached portal patterns when they leave the defined render distance.")
+			.description("Removes the cached portal patterns when they leave render distance.")
 			.defaultValue(true)
 			.build()
 	);
@@ -133,38 +144,43 @@ public class PortalPatternFinder extends Module {
 			.visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both || trcr.get()))
 			.build()
 	);
-	private static final ExecutorService taskExecutor = Executors.newCachedThreadPool();
-	private final Set<ChunkPos> scannedChunks = Collections.synchronizedSet(new HashSet<>());
-	private final Set<Box> possiblePortalLocations = Collections.synchronizedSet(new HashSet<>());
+	private final Setting<Boolean> locLogging = locationLogs.add(new BoolSetting.Builder()
+			.name("Enable Location Logging")
+			.description("Logs the locations of detected spawners to a csv file as well as a table in this options menu.")
+			.defaultValue(false)
+			.build()
+	);
+	private final Set<ChunkPos> scannedChunks = new CopyOnWriteArraySet<>();
+	private final Set<Box> possiblePortalLocations = new CopyOnWriteArraySet<>();
+	private final Set<BlockPos> loggedPortalPositions = new CopyOnWriteArraySet<>();
 	private int closestPortalX=2000000000;
 	private int closestPortalY=2000000000;
 	private int closestPortalZ=2000000000;
 	private double PortalDistance=2000000000;
 
+	private final List<PortalPattern> portalPatterns = new ArrayList<>();
+	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+
 	public PortalPatternFinder() {
-		super(Trouser.Main,"PortalPatternFinder", "Scans for the shapes of broken/removed Nether Portals within the cave air blocks found in caves and underground structures in 1.13+ chunks. **May be useful for finding portal skips in the Nether**");
+		super(Trouser.baseHunting,"PortalPatternFinder", "Scans for the shapes of broken/removed Nether Portals within the cave air blocks found in caves and underground structures in 1.13+ chunks. **May be useful for finding portal skips in the Nether**");
 	}
 
 	@Override
 	public void onActivate() {
 		clearChunkData();
-		scanTheAir();
+		loadPortalPatterns();
 	}
-	private void scanTheAir() {
-		if (mc.world == null) return;
-		int renderdistance = renderDistance.get();
-		ChunkPos playerChunkPos = new ChunkPos(mc.player.getBlockPos());
+	private void scanTheAir(AtomicReferenceArray<WorldChunk> chunks) {
 		List<ChunkPos> chunksToProcess = new ArrayList<>();
-
-		for (int chunkX = playerChunkPos.x - renderdistance; chunkX <= playerChunkPos.x + renderdistance; chunkX++) {
-			for (int chunkZ = playerChunkPos.z - renderdistance; chunkZ <= playerChunkPos.z + renderdistance; chunkZ++) {
-				chunksToProcess.add(new ChunkPos(chunkX, chunkZ));
+		for (int i = 0; i < chunks.length(); i++) {
+			WorldChunk chunk = chunks.get(i);
+			if (chunk != null && !chunk.isEmpty()) {
+				chunksToProcess.add(chunk.getPos());
 			}
 		}
-
-		chunksToProcess.parallelStream().forEach(chunkPos -> {
+		chunksToProcess.stream().forEach(chunkPos -> {
 			WorldChunk chunk = mc.world.getChunk(chunkPos.x, chunkPos.z);
-			if (chunk != null && !scannedChunks.contains(chunk.getPos())) {
+			if (chunk != null && !chunk.isEmpty() && !scannedChunks.contains(chunk.getPos())) {
 				processChunk(chunk);
 				scannedChunks.add(chunk.getPos());
 			}
@@ -173,6 +189,8 @@ public class PortalPatternFinder extends Module {
 	@Override
 	public void onDeactivate() {
 		clearChunkData();
+		portalPatterns.clear();
+		loggedPortalPositions.clear();
 	}
 	@EventHandler
 	private void onScreenOpen(OpenScreenEvent event) {
@@ -192,6 +210,17 @@ public class PortalPatternFinder extends Module {
 	}
 	@EventHandler
 	private void onPreTick(TickEvent.Pre event) {
+		if (mc.world == null) return;
+		AtomicReferenceArray<WorldChunk> chunks = mc.world.getChunkManager().chunks.chunks;
+		Set<WorldChunk> chunkSet = new HashSet<>();
+
+		for (int i = 0; i < chunks.length(); i++) {
+			WorldChunk chunk = chunks.get(i);
+			if (chunk != null) {
+				chunkSet.add(chunk);
+			}
+		}
+		scanTheAir(chunks);
 		if (nearesttrcr.get()){
 			try {
 				if (possiblePortalLocations.stream().toList().size() > 0) {
@@ -209,29 +238,7 @@ public class PortalPatternFinder extends Module {
 				e.printStackTrace();
 			}
 		}
-		if (removerenderdist.get())removeChunksOutsideRenderDistance();
-	}
-	@EventHandler
-	private void onReadPacket(PacketEvent.Receive event) {
-		if (event.packet instanceof AcknowledgeChunksC2SPacket)return; //for some reason this packet keeps getting cast to other packets
-		if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && !(event.packet instanceof PlayerMoveC2SPacket) && event.packet instanceof ChunkDataS2CPacket packet && mc.world != null) {
-			ChunkPos playerActivityPos = new ChunkPos(packet.getChunkX(), packet.getChunkZ());
-
-			if (mc.world.getChunkManager().getChunk(packet.getChunkX(), packet.getChunkZ()) == null) {
-				WorldChunk chunk = new WorldChunk(mc.world, playerActivityPos);
-				try {
-					CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-						chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), new NbtCompound(),
-								packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ()));
-					}, taskExecutor);
-					future.join();
-				} catch (CompletionException e) {}
-				if (chunk != null && !scannedChunks.contains(chunk.getPos())) {
-					processChunk(chunk);
-					scannedChunks.add(chunk.getPos());
-				}
-			}
-		}
+		if (removerenderdist.get())removeChunksOutsideRenderDistance(chunkSet);
 	}
 
 	private void processChunk(WorldChunk chunk) {
@@ -377,7 +384,10 @@ public class PortalPatternFinder extends Module {
 								}
 							}
 
-							if (!intersects) portalFound(portalBox);
+							if (!intersects) {
+								portalFound(portalBox);
+								break;
+							}
 						}
 					}
 				}
@@ -428,10 +438,21 @@ public class PortalPatternFinder extends Module {
 		}
 	}
 	private void portalFound(Box portalBox){
-		possiblePortalLocations.add(portalBox);
-		if (displaycoords.get())
-			ChatUtils.sendMsg(Text.of("Possible portal found: " + portalBox.getCenter()));
-		else if (!displaycoords.get()) ChatUtils.sendMsg(Text.of("Possible portal found!"));
+		if (!possiblePortalLocations.contains(portalBox)){
+			possiblePortalLocations.add(portalBox);
+			mc.execute(() -> {
+				if (displaycoords.get())
+					ChatUtils.sendMsg(Text.of("Possible portal found: " + portalBox.getCenter()));
+				else if (!displaycoords.get()) ChatUtils.sendMsg(Text.of("Possible portal found!"));
+			});
+			BlockPos cp = new BlockPos(Math.round((float)portalBox.getCenter().x),Math.round((float)portalBox.getCenter().y),Math.round((float)portalBox.getCenter().z));
+			if(!loggedPortalPositions.contains(cp) && locLogging.get()){
+				loggedPortalPositions.add(cp);
+				portalPatterns.add(new PortalPattern(cp.getX(),cp.getY(),cp.getZ()));
+				saveJson();
+				saveCsv();
+			}
+		}
 	}
 
 	private boolean isValidWEastPortalShape(List<BlockPos> portalBlocks, BlockPos startBlock, Integer squareWidth, Integer squareHeight) {
@@ -524,19 +545,156 @@ public class PortalPatternFinder extends Module {
 			event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
 		event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
 	}
-	private void removeChunksOutsideRenderDistance() {
-		double renderDistanceBlocks = renderDistance.get() * 16;
-
-		removechunksOutsideRenderDistance(scannedChunks, mc.player.getBlockPos(), renderDistanceBlocks);
-		removeChunksOutsideRenderDistance(possiblePortalLocations, renderDistanceBlocks);
+	private void removeChunksOutsideRenderDistance(Set<WorldChunk> worldChunks) {
+		removechunksOutsideRenderDistance(scannedChunks, worldChunks);
+		removeChunksOutsideRenderDistance(possiblePortalLocations, worldChunks);
 	}
-	private void removeChunksOutsideRenderDistance(Set<Box> boxSet, double renderDistanceBlocks) {
+	private void removeChunksOutsideRenderDistance(Set<Box> boxSet, Set<WorldChunk> worldChunks) {
 		boxSet.removeIf(box -> {
-			BlockPos playerPos = new BlockPos(mc.player.getBlockX(), Math.round((float)box.getCenter().getY()), mc.player.getBlockZ());
-			return !playerPos.isWithinDistance(box.getCenter(), renderDistanceBlocks);
+			BlockPos boxPos = new BlockPos((int)Math.floor(box.getCenter().getX()), (int)Math.floor(box.getCenter().getY()), (int)Math.floor(box.getCenter().getZ()));
+			assert mc.world != null;
+			return !worldChunks.contains(mc.world.getChunk(boxPos));
 		});
 	}
-	private void removechunksOutsideRenderDistance(Set<ChunkPos> chunkSet, BlockPos playerPos, double renderDistanceBlocks) {
-		chunkSet.removeIf(c -> !playerPos.isWithinDistance(new BlockPos(c.getCenterX(), mc.player.getBlockY(), c.getCenterZ()), renderDistanceBlocks));
+	private void removechunksOutsideRenderDistance(Set<ChunkPos> chunkSet, Set<WorldChunk> worldChunks) {
+		chunkSet.removeIf(c -> {
+			assert mc.world != null;
+			return !worldChunks.contains(mc.world.getChunk(c.x, c.z));
+		});
+	}
+
+	@Override
+	public WWidget getWidget(GuiTheme theme) {
+		portalPatterns.sort(Comparator.comparingInt(a -> a.y));
+		WVerticalList list = theme.verticalList();
+		WButton clear = list.add(theme.button("Clear Logged Positions")).widget();
+		WTable table = new WTable();
+		if (!portalPatterns.isEmpty()) list.add(table);
+		clear.action = () -> {
+			portalPatterns.clear();
+			loggedPortalPositions.clear();
+			possiblePortalLocations.clear();
+			table.clear();
+			saveJson();
+			saveCsv();
+		};
+		fillTable(theme, table);
+		return list;
+	}
+	private void fillTable(GuiTheme theme, WTable table) {
+		List<PortalPattern> portalCoords = new ArrayList<>();
+		for (PortalPattern p : portalPatterns) {
+			if (!portalCoords.contains(p)) {
+				portalCoords.add(p);
+				table.add(theme.label("Pos: " + p.x + ", " + p.y + ", " + p.z));
+				WButton gotoBtn = table.add(theme.button("Goto")).widget();
+				gotoBtn.action = () -> PathManagers.get().moveTo(new BlockPos(p.x, p.y, p.z), true);
+				WMinus delete = table.add(theme.minus()).widget();
+				delete.action = () -> {
+					portalPatterns.remove(p);
+					loggedPortalPositions.remove(new BlockPos(p.x, p.y, p.z));
+					possiblePortalLocations.removeIf(box -> {
+						BlockPos cp = new BlockPos(Math.round((float) box.getCenter().x), Math.round((float) box.getCenter().y), Math.round((float) box.getCenter().z));
+						return cp.equals(new BlockPos(p.x, p.y, p.z));
+					});
+					table.clear();
+					fillTable(theme, table);
+					saveJson();
+					saveCsv();
+				};
+				table.row();
+			}
+		}
+	}
+	private void loadPortalPatterns() {
+		File file = getJsonFile();
+		boolean loaded = false;
+		if(file.exists()){
+			try{
+				FileReader reader = new FileReader(file);
+				List<PortalPattern> data = GSON.fromJson(reader, new TypeToken<List<PortalPattern>>() {}.getType());
+				reader.close();
+				if(data != null){
+					portalPatterns.addAll(data);
+					for(PortalPattern p : data){
+						loggedPortalPositions.add(new BlockPos(p.x, p.y, p.z));
+					}
+					loaded = true;
+				}
+			}catch(Exception ignored){}
+		}
+		if(!loaded){
+			file = getCsvFile();
+			if(file.exists()){
+				try{
+					BufferedReader reader = new BufferedReader(new FileReader(file));
+					reader.readLine();
+					String line;
+					while((line = reader.readLine()) != null){
+						String[] values = line.split(",");
+						PortalPattern p = new PortalPattern(
+								Integer.parseInt(values[0]),
+								Integer.parseInt(values[1]),
+								Integer.parseInt(values[2])
+						);
+						portalPatterns.add(p);
+						loggedPortalPositions.add(new BlockPos(p.x, p.y, p.z));
+					}
+					reader.close();
+				}catch(Exception ignored){}
+			}
+		}
+	}
+	private void saveCsv() {
+		try{
+			File file = getCsvFile();
+			file.getParentFile().mkdirs();
+			Writer writer = new FileWriter(file);
+			writer.write("X,Y,Z\n");
+			for(PortalPattern p : portalPatterns){
+				p.write(writer);
+			}
+			writer.close();
+		}catch(IOException ignored){}
+	}
+	private void saveJson() {
+		try{
+			File file = getJsonFile();
+			file.getParentFile().mkdirs();
+			Writer writer = new FileWriter(file);
+			GSON.toJson(portalPatterns, writer);
+			writer.close();
+		}catch(IOException ignored){}
+	}
+	private File getJsonFile() {
+		return new File(new File(new File("TrouserStreak", "PortalPatterns"), Utils.getFileWorldName()), "portalpatterns.json");
+	}
+	private File getCsvFile() {
+		return new File(new File(new File("TrouserStreak", "PortalPatterns"), Utils.getFileWorldName()), "portalpatterns.csv");
+	}
+	private static class PortalPattern {
+		private static final StringBuilder sb = new StringBuilder();
+		public int x, y, z;
+		public PortalPattern(int x, int y, int z) {
+			this.x = x;
+			this.y = y;
+			this.z = z;
+		}
+		public void write(Writer writer) throws IOException {
+			sb.setLength(0);
+			sb.append(x).append(',').append(y).append(',').append(z).append('\n');
+			writer.write(sb.toString());
+		}
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			PortalPattern pattern = (PortalPattern) o;
+			return x == pattern.x && y == pattern.y && z == pattern.z;
+		}
+		@Override
+		public int hashCode() {
+			return Objects.hash(x, y, z);
+		}
 	}
 }

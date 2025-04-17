@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -51,16 +52,16 @@ import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.WorldChunk;
 import pwn.noobs.trouserstreak.Trouser;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
@@ -82,6 +83,7 @@ public class BaseFinder extends Module {
     private final SettingGroup sgCdata = settings.createGroup("Saved Base Data");
     private final SettingGroup sgcacheCdata = settings.createGroup("Cached Base Data");
     private final SettingGroup sgRender = settings.createGroup("Render");
+    private final SettingGroup locationLogs = settings.createGroup("Location Logs");
 
     // general
     private final Setting<Boolean> chatFeedback = sgGeneral.add(new BoolSetting.Builder()
@@ -92,7 +94,7 @@ public class BaseFinder extends Module {
     );
     private final Setting<Boolean> displaycoords = sgGeneral.add(new BoolSetting.Builder()
             .name("DisplayCoords")
-            .description("Displays coords of air disturbances in chat.")
+            .description("Displays coords of bases in chat.")
             .defaultValue(true)
             .build()
     );
@@ -218,7 +220,7 @@ public class BaseFinder extends Module {
             .description("Once this many entities are found in a chunk trigger it as being a base.")
             .min(1)
             .sliderRange(1,100)
-            .defaultValue(12)
+            .defaultValue(14)
             .build());
     private final Setting<Integer> bsefndtickdelay = sgGeneral.add(new IntSetting.Builder()
             .name("Base Found Message Tick Delay")
@@ -236,8 +238,7 @@ public class BaseFinder extends Module {
             .name("Block List #1 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
             .defaultValue(
-                    Blocks.CRAFTER, Blocks.BLACK_BED, Blocks.GRAY_BED, Blocks.LIGHT_BLUE_BED, Blocks.LIGHT_GRAY_BED, Blocks.PINK_BED,
-                    Blocks.SPRUCE_SAPLING, Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING, Blocks.JUNGLE_SAPLING, Blocks.CHERRY_SAPLING, Blocks.BAMBOO_SAPLING,
+                    Blocks.CRAFTER, Blocks.SPRUCE_SAPLING, Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING, Blocks.JUNGLE_SAPLING, Blocks.CHERRY_SAPLING, Blocks.BAMBOO_SAPLING,
                     Blocks.CHERRY_BUTTON, Blocks.CHERRY_DOOR, Blocks.CHERRY_FENCE, Blocks.CHERRY_FENCE_GATE, Blocks.CHERRY_PLANKS, Blocks.CHERRY_PRESSURE_PLATE, Blocks.CHERRY_STAIRS, Blocks.CHERRY_WOOD, Blocks.CHERRY_TRAPDOOR, Blocks.CHERRY_SLAB,
                     Blocks.MANGROVE_PLANKS, Blocks.MANGROVE_BUTTON, Blocks.MANGROVE_DOOR, Blocks.MANGROVE_FENCE, Blocks.MANGROVE_FENCE_GATE, Blocks.MANGROVE_STAIRS, Blocks.MANGROVE_SLAB, Blocks.MANGROVE_TRAPDOOR,
                     Blocks.BIRCH_DOOR, Blocks.BIRCH_FENCE_GATE, Blocks.BIRCH_BUTTON, Blocks.ACACIA_BUTTON, Blocks.DARK_OAK_BUTTON, Blocks.POLISHED_BLACKSTONE_BUTTON, Blocks.SPRUCE_BUTTON,
@@ -264,7 +265,7 @@ public class BaseFinder extends Module {
                     Blocks.SHULKER_BOX, Blocks.BLACK_SHULKER_BOX, Blocks.BLUE_SHULKER_BOX, Blocks.BROWN_SHULKER_BOX, Blocks.CYAN_SHULKER_BOX, Blocks.GRAY_SHULKER_BOX, Blocks.GREEN_SHULKER_BOX, Blocks.LIGHT_BLUE_SHULKER_BOX, Blocks.LIGHT_GRAY_SHULKER_BOX, Blocks.LIME_SHULKER_BOX, Blocks.MAGENTA_SHULKER_BOX, Blocks.ORANGE_SHULKER_BOX, Blocks.PINK_SHULKER_BOX, Blocks.PURPLE_SHULKER_BOX, Blocks.RED_SHULKER_BOX, Blocks.WHITE_SHULKER_BOX, Blocks.YELLOW_SHULKER_BOX,
                     Blocks.LAVA_CAULDRON, Blocks.POWDER_SNOW_CAULDRON, Blocks.ACTIVATOR_RAIL, Blocks.BEACON, Blocks.BEEHIVE, Blocks.REPEATING_COMMAND_BLOCK, Blocks.COMMAND_BLOCK, Blocks.CHAIN_COMMAND_BLOCK, Blocks.EMERALD_BLOCK, Blocks.IRON_BLOCK, Blocks.NETHERITE_BLOCK, Blocks.RAW_GOLD_BLOCK, Blocks.CONDUIT, Blocks.DAYLIGHT_DETECTOR, Blocks.DETECTOR_RAIL, Blocks.DRIED_KELP_BLOCK, Blocks.DROPPER, Blocks.ENCHANTING_TABLE,
                     Blocks.PIGLIN_HEAD, Blocks.PIGLIN_WALL_HEAD, Blocks.CREEPER_HEAD, Blocks.CREEPER_WALL_HEAD, Blocks.DRAGON_WALL_HEAD, Blocks.DRAGON_HEAD, Blocks.PLAYER_HEAD, Blocks.PLAYER_WALL_HEAD, Blocks.ZOMBIE_HEAD, Blocks.ZOMBIE_WALL_HEAD, Blocks.SKELETON_WALL_SKULL, Blocks.WITHER_SKELETON_SKULL, Blocks.WITHER_SKELETON_WALL_SKULL, Blocks.HEAVY_CORE,
-                    Blocks.HONEY_BLOCK, Blocks.HONEYCOMB_BLOCK, Blocks.HOPPER, Blocks.JUKEBOX, Blocks.LIGHTNING_ROD, Blocks.LODESTONE, Blocks.OBSERVER, Blocks.POWERED_RAIL, Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE, Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE, Blocks.BIRCH_PRESSURE_PLATE, Blocks.JUNGLE_PRESSURE_PLATE, Blocks.DARK_OAK_PRESSURE_PLATE, Blocks.MANGROVE_PRESSURE_PLATE, Blocks.CRIMSON_PRESSURE_PLATE, Blocks.WARPED_PRESSURE_PLATE, Blocks.RESPAWN_ANCHOR, Blocks.CALIBRATED_SCULK_SENSOR, Blocks.SNIFFER_EGG
+                    Blocks.HONEY_BLOCK, Blocks.HONEYCOMB_BLOCK, Blocks.JUKEBOX, Blocks.LIGHTNING_ROD, Blocks.LODESTONE, Blocks.OBSERVER, Blocks.POWERED_RAIL, Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE, Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE, Blocks.BIRCH_PRESSURE_PLATE, Blocks.JUNGLE_PRESSURE_PLATE, Blocks.DARK_OAK_PRESSURE_PLATE, Blocks.MANGROVE_PRESSURE_PLATE, Blocks.CRIMSON_PRESSURE_PLATE, Blocks.WARPED_PRESSURE_PLATE, Blocks.RESPAWN_ANCHOR, Blocks.CALIBRATED_SCULK_SENSOR, Blocks.SNIFFER_EGG
             )
             .visible(list1Activar::get)
             .filter(this::filterBlocks)
@@ -291,7 +292,7 @@ public class BaseFinder extends Module {
     private final Setting<List<Block>> Blawcks3 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #3 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
-            .defaultValue(Blocks.CRAFTING_TABLE, Blocks.BREWING_STAND, Blocks.ENDER_CHEST, Blocks.SMOOTH_QUARTZ, Blocks.REDSTONE_BLOCK, Blocks.DIAMOND_BLOCK, Blocks.BROWN_STAINED_GLASS, Blocks.MAGENTA_BED, Blocks.BROWN_BED)
+            .defaultValue(Blocks.CRAFTING_TABLE, Blocks.BREWING_STAND, Blocks.ENDER_CHEST, Blocks.SMOOTH_QUARTZ, Blocks.REDSTONE_BLOCK, Blocks.DIAMOND_BLOCK, Blocks.BROWN_STAINED_GLASS)
             .visible(list3Activar::get)
             .filter(this::filterBlocks)
             .build()
@@ -317,7 +318,7 @@ public class BaseFinder extends Module {
     private final Setting<List<Block>> Blawcks5 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #5 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
-            .defaultValue(Blocks.QUARTZ_BLOCK, Blocks.RED_BED, Blocks.WHITE_BED, Blocks.YELLOW_BED, Blocks.ORANGE_BED, Blocks.BLUE_BED, Blocks.CYAN_BED, Blocks.GREEN_BED, Blocks.LIME_BED, Blocks.PURPLE_BED, Blocks.WHITE_CONCRETE)
+            .defaultValue(Blocks.QUARTZ_BLOCK, Blocks.FURNACE, Blocks.BLACK_BED, Blocks.GRAY_BED, Blocks.LIGHT_BLUE_BED, Blocks.LIGHT_GRAY_BED, Blocks.PINK_BED, Blocks.RED_BED, Blocks.WHITE_BED, Blocks.YELLOW_BED, Blocks.ORANGE_BED, Blocks.BLUE_BED, Blocks.CYAN_BED, Blocks.GREEN_BED, Blocks.LIME_BED, Blocks.PURPLE_BED, Blocks.MAGENTA_BED, Blocks.BROWN_BED, Blocks.WHITE_CONCRETE)
             .visible(list5Activar::get)
             .filter(this::filterBlocks)
             .build()
@@ -330,7 +331,7 @@ public class BaseFinder extends Module {
     private final Setting<List<Block>> Blawcks6 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #6 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
-            .defaultValue(Blocks.REDSTONE_TORCH, Blocks.REDSTONE_WALL_TORCH, Blocks.FURNACE)
+            .defaultValue(Blocks.REDSTONE_TORCH, Blocks.HOPPER)
             .visible(list6Activar::get)
             .filter(this::filterBlocks)
             .build()
@@ -448,10 +449,12 @@ public class BaseFinder extends Module {
             .defaultValue(60)
             .visible(() -> autoreload.get() && load.get())
             .build());
+
     @Override
     public WWidget getWidget(GuiTheme theme) {
+        WTable table1 = theme.table();
         WTable table = theme.table();
-        WButton nearestB = table.add(theme.button("NearestBase")).expandX().minWidth(100).widget();
+        WButton nearestB = table1.add(theme.button("NearestBase")).expandX().minWidth(100).widget();
         nearestB.action = () -> {
             if(isBaseFinderModuleOn==0){
                 error("Please turn on BaseFinder module and push the button again.");
@@ -459,8 +462,8 @@ public class BaseFinder extends Module {
                 findnearestbaseticks=1;
             }
         };
-        table.row();
-        WButton adddata = table.add(theme.button("AddBase")).expandX().minWidth(100).widget();
+        table1.row();
+        WButton adddata = table1.add(theme.button("AddBase")).expandX().minWidth(100).widget();
         adddata.action = () -> {
             if(isBaseFinderModuleOn==0){
                 error("Please turn on BaseFinder module and push the button again.");
@@ -481,13 +484,12 @@ public class BaseFinder extends Module {
                     } catch (IOException e) {
                         //e.printStackTrace();
                     }
-
                 }
                 ChatUtils.sendMsg(Text.of("Base near X"+mc.player.getChunkPos().getCenterX()+", Z"+mc.player.getChunkPos().getCenterZ()+" added to the BaseFinder."));
             }
         };
-        table.row();
-        WButton deldata = table.add(theme.button("RemoveBase")).expandX().minWidth(100).widget();
+        table1.row();
+        WButton deldata = table1.add(theme.button("RemoveBase")).expandX().minWidth(100).widget();
         deldata.action = () -> {
             if(isBaseFinderModuleOn==0){
                 error("Please turn on BaseFinder module and push the button again.");
@@ -512,8 +514,8 @@ public class BaseFinder extends Module {
                 ChatUtils.sendMsg(Text.of("Base near X"+mc.player.getChunkPos().getCenterX()+", Z"+mc.player.getChunkPos().getCenterZ()+" removed from the BaseFinder."));
             }
         };
-        table.row();
-        WButton dellastdata = table.add(theme.button("RemoveLastBase")).expandX().minWidth(100).widget();
+        table1.row();
+        WButton dellastdata = table1.add(theme.button("RemoveLastBase")).expandX().minWidth(100).widget();
         dellastdata.action = () -> {
             if(isBaseFinderModuleOn==0){
                 error("Please turn on BaseFinder module and push the button again.");
@@ -541,8 +543,8 @@ public class BaseFinder extends Module {
                 LastBaseFound= new ChunkPos(2000000000, 2000000000);
             }
         };
-        table.row();
-        WButton deletedata = table.add(theme.button("**DELETE ALL BASE DATA**")).expandX().minWidth(100).widget();
+        table1.row();
+        WButton deletedata = table1.add(theme.button("**DELETE ALL BASE DATA**")).expandX().minWidth(100).widget();
         deletedata.action = () -> {
             if (!(mc.world==null) && mc.world.isChunkLoaded(mc.player.getChunkPos().x,mc.player.getChunkPos().z)){
                 if (deletewarning==0) error("PRESS AGAIN WITHIN 5s TO DELETE ALL BASE DATA FOR THIS DIMENSION.");
@@ -550,8 +552,60 @@ public class BaseFinder extends Module {
                 deletewarning++;
             }
         };
-        table.row();
-        return table;
+        table1.row();
+        java.util.List<LoggedBase> sortedBases = new java.util.ArrayList<>(loggedBases);
+        sortedBases.sort(Comparator.comparingInt(a -> a.y));
+        var list = theme.verticalList();
+        list.add(table1);
+        var clear = list.add(theme.button("Clear Logged Positions")).widget();
+        if(!sortedBases.isEmpty()) list.add(table);
+        clear.action = () -> {
+            loggedBases.clear();
+            loggedBasePositions.clear();
+            table.clear();
+            saveJsonLog();
+            saveCsvLog();
+        };
+        for(LoggedBase lb : sortedBases) {
+            table.add(theme.label("Pos: " + lb.x + ", " + lb.y + ", " + lb.z));
+            WButton gotoBtn = table.add(theme.button("Goto")).widget();
+            gotoBtn.action = () -> { meteordevelopment.meteorclient.pathing.PathManagers.get().moveTo(new BlockPos(lb.x, lb.y, lb.z), true); };
+            var delete = table.add(theme.button("-")).widget();
+            delete.action = () -> {
+                loggedBases.remove(lb);
+                loggedBasePositions.remove(new ChunkPos((lb.x - 8) / 16, (lb.z - 8) / 16));
+                table.clear();
+                for(LoggedBase l : loggedBases) {
+                    table.add(theme.label("Pos: " + l.x + ", " + l.y + ", " + l.z));
+                    WButton gotoBtn2 = table.add(theme.button("Goto")).widget();
+                    gotoBtn2.action = () -> { meteordevelopment.meteorclient.pathing.PathManagers.get().moveTo(new BlockPos(l.x, l.y, l.z), true); };
+                    var delete2 = table.add(theme.button("-")).widget();
+                    delete2.action = () -> {
+                        loggedBases.remove(l);
+                        loggedBasePositions.remove(new ChunkPos((l.x - 8) / 16, (l.z - 8) / 16));
+                        table.clear();
+                        for(LoggedBase l2 : loggedBases) {
+                            table.add(theme.label("Pos: " + l2.x + ", " + l2.y + ", " + l2.z));
+                            WButton gotoBtn3 = table.add(theme.button("Goto")).widget();
+                            gotoBtn3.action = () -> { meteordevelopment.meteorclient.pathing.PathManagers.get().moveTo(new BlockPos(l2.x, l2.y, l2.z), true); };
+                            var delete3 = table.add(theme.button("-")).widget();
+                            delete3.action = () -> {
+                                loggedBases.remove(l2);
+                                loggedBasePositions.remove(new ChunkPos((l2.x - 8) / 16, (l2.z - 8) / 16));
+                            };
+                            table.row();
+                        }
+                        saveJsonLog();
+                        saveCsvLog();
+                    };
+                    table.row();
+                }
+                saveJsonLog();
+                saveCsvLog();
+            };
+            table.row();
+        }
+        return list;
     }
 
     // render
@@ -610,6 +664,12 @@ public class BaseFinder extends Module {
             .visible(trcr::get)
             .build()
     );
+    private final Setting<Boolean> locLogging = locationLogs.add(new BoolSetting.Builder()
+            .name("Enable Location Logging")
+            .description("Logs the locations of detected spawners to a csv file as well as a table in this options menu.")
+            .defaultValue(false)
+            .build()
+    );
     private static final ExecutorService taskExecutor = Executors.newCachedThreadPool();
     private int basefoundspamTicks=0;
     private boolean basefound=false;
@@ -630,8 +690,7 @@ public class BaseFinder extends Module {
     private boolean checkingchunk7=false;
     private int found7 = 0;
     private ChunkPos LastBaseFound = new ChunkPos(2000000000, 2000000000);
-    private int closestbaseX=2000000000;
-    private int closestbaseZ=2000000000;
+    private ChunkPos closestBase = new ChunkPos(2000000000, 2000000000);
     private double basedistance=2000000000;
     private String serverip;
     private String world;
@@ -656,15 +715,15 @@ public class BaseFinder extends Module {
     private String lastblockfound6;
     private String lastblockfound7;
     private int entityScanTicks;
+
     public BaseFinder() {
-        super(Trouser.Main,"BaseFinder", "Estimates if a build or base may be in the chunk based on the blocks it contains.");
+        super(Trouser.baseHunting,"BaseFinder", "Estimates if a build or base may be in the chunk based on the blocks it contains.");
     }
     private void clearChunkData() {
         baseChunks.clear();
-        closestbaseX=2000000000;
-        closestbaseZ=2000000000;
         basedistance=2000000000;
-        LastBaseFound= new ChunkPos(2000000000, 2000000000);
+        closestBase = new ChunkPos(2000000000, 2000000000);
+        LastBaseFound = new ChunkPos(2000000000, 2000000000);
     }
     @Override
     public void onActivate() {
@@ -767,8 +826,7 @@ public class BaseFinder extends Module {
             if (baseChunks.stream().toList().size() > 0) {
                 for (int b = 0; b < baseChunks.stream().toList().size(); b++) {
                     if (basedistance > Math.sqrt(Math.pow(baseChunks.stream().toList().get(b).x - mc.player.getChunkPos().x, 2) + Math.pow(baseChunks.stream().toList().get(b).z - mc.player.getChunkPos().z, 2))) {
-                        closestbaseX = baseChunks.stream().toList().get(b).x;
-                        closestbaseZ = baseChunks.stream().toList().get(b).z;
+                        closestBase = new ChunkPos(baseChunks.stream().toList().get(b).x, baseChunks.stream().toList().get(b).z);
                         basedistance = Math.sqrt(Math.pow(baseChunks.stream().toList().get(b).x - mc.player.getChunkPos().x, 2) + Math.pow(baseChunks.stream().toList().get(b).z - mc.player.getChunkPos().z, 2));
                     }
                 }
@@ -779,9 +837,9 @@ public class BaseFinder extends Module {
         }
 
         if (findnearestbaseticks == 1) {
-            if (closestbaseX < 1000000000 && closestbaseZ < 1000000000)
-                ChatUtils.sendMsg(Text.of("#Nearest possible base at X" + closestbaseX * 16 + " x Z" + closestbaseZ * 16));
-            if (!(closestbaseX < 1000000000 && closestbaseZ < 1000000000))
+            if (closestBase.x < 1000000000 && closestBase.z < 1000000000)
+                ChatUtils.sendMsg(Text.of("#Nearest possible base at X" + closestBase.x * 16 + " x Z" + closestBase.z * 16));
+            if (!(closestBase.x < 1000000000 && closestBase.z < 1000000000))
                 error("No Bases Logged Yet.");
             findnearestbaseticks = 0;
         }
@@ -827,7 +885,6 @@ public class BaseFinder extends Module {
                 }
             }
         }
-        if (removerenderdist.get()) removeChunksOutsideRenderDistance();
 
         if (entityScanTicks < entityScanDelay.get()) entityScanTicks++;
         if (entityScanTicks >= entityScanDelay.get() && (pearlFinder.get() || frameFinder.get() || villagerFinder.get() || nameFinder.get() || boatFinder.get() || entityClusterFinder.get())) {
@@ -941,6 +998,7 @@ public class BaseFinder extends Module {
             }
             entityScanTicks = 0;
         }
+        if (removerenderdist.get()) removeChunksOutsideRenderDistance();
     }
     @EventHandler
     private void onRender(Render3DEvent event) {
@@ -965,7 +1023,7 @@ public class BaseFinder extends Module {
                         }
                     }
                 }
-                render2(new Box(new Vec3d(new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getX()+7, new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getY()+renderHeightYbottom.get(), new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getZ()+7), new Vec3d (new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getX()+8, new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getY()+renderHeightY.get(), new ChunkPos(closestbaseX,closestbaseZ).getStartPos().getZ()+8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
+                render2(new Box(new Vec3d(closestBase.getStartPos().getX()+7, closestBase.getStartPos().getY()+renderHeightYbottom.get(), closestBase.getStartPos().getZ()+7), new Vec3d (closestBase.getStartPos().getX()+8, closestBase.getStartPos().getY()+renderHeightY.get(), closestBase.getStartPos().getZ()+8)), baseChunksSideColor.get(), baseChunksLineColor.get(),ShapeMode.Sides, event);
             }
         }
     }
@@ -1247,7 +1305,7 @@ public class BaseFinder extends Module {
                                     if (basefoundspamTicks== 0) {
                                         if (chatFeedback.get()){
                                             if (displaycoords.get())ChatUtils.sendMsg(Text.of("(List1)Possible build located near X" + basepos.getCenterX() + ", Y" + blockpositions1.stream().toList().get(0).getY() + ", Z" + basepos.getCenterZ() + " (" + lastblockfound1 + ")"));
-                                            else ChatUtils.sendMsg(Text.of("(List1)Possible build located!"));
+                                            else ChatUtils.sendMsg(Text.of("(List1)Possible build located!"+" ("+lastblockfound1+")"));
                                         }
                                         LastBaseFound= new ChunkPos(basepos.x, basepos.z);
                                         basefound=true;
@@ -1274,7 +1332,7 @@ public class BaseFinder extends Module {
                                     if (basefoundspamTicks== 0) {
                                         if (chatFeedback.get()){
                                             if (displaycoords.get())ChatUtils.sendMsg(Text.of("(List2)Possible build located near X" + basepos.getCenterX() + ", Y" + blockpositions2.stream().toList().get(0).getY() + ", Z" + basepos.getCenterZ() + " (" + lastblockfound2 + ")"));
-                                            else ChatUtils.sendMsg(Text.of("(List2)Possible build located!"));
+                                            else ChatUtils.sendMsg(Text.of("(List2)Possible build located!"+" ("+lastblockfound2+")"));
                                         }
                                         LastBaseFound= new ChunkPos(basepos.x, basepos.z);
                                         basefound=true;
@@ -1301,7 +1359,7 @@ public class BaseFinder extends Module {
                                     if (basefoundspamTicks== 0) {
                                         if (chatFeedback.get()){
                                             if (displaycoords.get())ChatUtils.sendMsg(Text.of("(List3)Possible build located near X" + basepos.getCenterX() + ", Y" + blockpositions3.stream().toList().get(0).getY() + ", Z" + basepos.getCenterZ() + " (" + lastblockfound3 + ")"));
-                                            else ChatUtils.sendMsg(Text.of("(List3)Possible build located!"));
+                                            else ChatUtils.sendMsg(Text.of("(List3)Possible build located!"+" ("+lastblockfound3+")"));
                                         }
                                         LastBaseFound= new ChunkPos(basepos.x, basepos.z);
                                         basefound=true;
@@ -1328,7 +1386,7 @@ public class BaseFinder extends Module {
                                     if (basefoundspamTicks== 0) {
                                         if (chatFeedback.get()){
                                             if (displaycoords.get())ChatUtils.sendMsg(Text.of("(List4)Possible build located near X" + basepos.getCenterX() + ", Y" + blockpositions4.stream().toList().get(0).getY() + ", Z" + basepos.getCenterZ() + " (" + lastblockfound4 + ")"));
-                                            else ChatUtils.sendMsg(Text.of("(List4)Possible build located!"));
+                                            else ChatUtils.sendMsg(Text.of("(List4)Possible build located!"+" ("+lastblockfound4+")"));
                                         }
                                         LastBaseFound= new ChunkPos(basepos.x, basepos.z);
                                         basefound=true;
@@ -1355,7 +1413,7 @@ public class BaseFinder extends Module {
                                     if (basefoundspamTicks== 0) {
                                         if (chatFeedback.get()){
                                             if (displaycoords.get())ChatUtils.sendMsg(Text.of("(List5)Possible build located near X"+basepos.getCenterX()+", Y"+blockpositions5.stream().toList().get(0).getY()+", Z"+basepos.getCenterZ()+" ("+lastblockfound5+")"));
-                                            else ChatUtils.sendMsg(Text.of("(List5)Possible build located!"));
+                                            else ChatUtils.sendMsg(Text.of("(List5)Possible build located!"+" ("+lastblockfound5+")"));
                                         }
                                         LastBaseFound= new ChunkPos(basepos.x, basepos.z);
                                         basefound=true;
@@ -1382,7 +1440,7 @@ public class BaseFinder extends Module {
                                     if (basefoundspamTicks== 0) {
                                         if (chatFeedback.get()){
                                             if (displaycoords.get())ChatUtils.sendMsg(Text.of("(List6)Possible build located near X"+basepos.getCenterX()+", Y"+blockpositions6.stream().toList().get(0).getY()+", Z"+basepos.getCenterZ()+" ("+lastblockfound6+")"));
-                                            else ChatUtils.sendMsg(Text.of("(List6)Possible build located!"));
+                                            else ChatUtils.sendMsg(Text.of("(List6)Possible build located!"+" ("+lastblockfound6+")"));
                                         }
                                         LastBaseFound= new ChunkPos(basepos.x, basepos.z);
                                         basefound=true;
@@ -1409,7 +1467,7 @@ public class BaseFinder extends Module {
                                     if (basefoundspamTicks== 0) {
                                         if (chatFeedback.get()){
                                             if (displaycoords.get())ChatUtils.sendMsg(Text.of("(List7)Possible build located near X"+basepos.getCenterX()+", Y"+blockpositions7.stream().toList().get(0).getY()+", Z"+basepos.getCenterZ()+" ("+lastblockfound7+")"));
-                                            else ChatUtils.sendMsg(Text.of("(List7)Possible build located!"));
+                                            else ChatUtils.sendMsg(Text.of("(List7)Possible build located!"+" ("+lastblockfound7+")"));
                                         }
                                         LastBaseFound= new ChunkPos(basepos.x, basepos.z);
                                         basefound=true;
@@ -1507,8 +1565,84 @@ public class BaseFinder extends Module {
         double renderDistanceBlocks = renderDistance.get() * 16;
 
         removeChunksOutsideRenderDistance(baseChunks, playerPos, renderDistanceBlocks, midpoint);
+        if (!playerPos.isWithinDistance(new BlockPos(closestBase.getCenterX(), midpoint, closestBase.getCenterZ()), renderDistanceBlocks))
+            closestBase = new ChunkPos(2000000000, 2000000000);
     }
     private void removeChunksOutsideRenderDistance(Set<ChunkPos> chunkSet, BlockPos playerPos, double renderDistanceBlocks, int midpoint) {
         chunkSet.removeIf(c -> !playerPos.isWithinDistance(new BlockPos(c.getCenterX(), midpoint, c.getCenterZ()), renderDistanceBlocks));
+    }
+
+    private final java.util.List<LoggedBase> loggedBases = new java.util.ArrayList<>();
+    private final java.util.Set<ChunkPos> loggedBasePositions = new java.util.HashSet<>();
+    private static final com.google.gson.Gson gson = new com.google.gson.GsonBuilder().setPrettyPrinting().create();
+
+    @EventHandler
+    private void onPostTick(TickEvent.Post event) {
+        for(ChunkPos pos : baseChunks) {
+            if(!loggedBasePositions.contains(pos) && locLogging.get()) {
+                loggedBasePositions.add(pos);
+                int x = pos.getCenterX();
+                int z = pos.getCenterZ();
+                int y = (renderHeightY.get() + renderHeightYbottom.get()) / 2;
+                loggedBases.add(new LoggedBase(x, y, z));
+                saveJsonLog();
+                saveCsvLog();
+            }
+        }
+    }
+
+    private void saveCsvLog() {
+        try {
+            File file = getCsvFile();
+            file.getParentFile().mkdirs();
+            Writer writer = new FileWriter(file);
+            writer.write("X,Y,Z\n");
+            for(LoggedBase lb : loggedBases) {
+                lb.write(writer);
+            }
+            writer.close();
+        } catch (IOException ignored) {}
+    }
+
+    private void saveJsonLog() {
+        try {
+            File file = getJsonFile();
+            file.getParentFile().mkdirs();
+            Writer writer = new FileWriter(file);
+            gson.toJson(loggedBases, writer);
+            writer.close();
+        } catch (IOException ignored) {}
+    }
+    private File getJsonFile() {
+        return new File(new File(new File("TrouserStreak", "BaseChunks"), Utils.getFileWorldName()), "bases.json");
+    }
+
+    private File getCsvFile() {
+        return new File(new File(new File("TrouserStreak", "BaseChunks"), Utils.getFileWorldName()), "bases.csv");
+    }
+
+    private static class LoggedBase {
+        public int x;
+        public int y;
+        public int z;
+        public LoggedBase(int x, int y, int z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+        public void write(java.io.Writer writer) throws java.io.IOException {
+            writer.write(x + "," + y + "," + z + "\n");
+        }
+        @Override
+        public boolean equals(Object o) {
+            if(this == o) return true;
+            if(o == null || getClass() != o.getClass()) return false;
+            LoggedBase that = (LoggedBase) o;
+            return x == that.x && y == that.y && z == that.z;
+        }
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(x, y, z);
+        }
     }
 }

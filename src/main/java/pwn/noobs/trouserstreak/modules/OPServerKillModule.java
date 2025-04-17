@@ -69,7 +69,7 @@ public class OPServerKillModule extends Module {
             .build()
     );
     public OPServerKillModule() {
-        super(Trouser.Main, "OPServerKillModule", "Runs a set of commands to disable a server. Requires OP. (ONLY USE IF YOU'RE 100% SURE)");
+        super(Trouser.operator, "OPServerKillModule", "Runs a set of commands to disable a server. Requires OP. (ONLY USE IF YOU'RE 100% SURE)");
     }
 
     private int ticks=0;

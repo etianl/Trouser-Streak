@@ -115,7 +115,7 @@ public class AutoTexts extends Module {
     private String namecolour;
 
     public AutoTexts() {
-        super(Trouser.Main, "auto-texts", "Spawns invisible armor stands with custom text. Requires creative mode.");
+        super(Trouser.operator, "auto-texts", "Spawns invisible armor stands with custom text. Requires creative mode.");
     }
 
     @Override

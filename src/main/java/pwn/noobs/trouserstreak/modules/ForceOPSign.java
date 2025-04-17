@@ -16,6 +16,7 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.screen.slot.SlotActionType;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.ArrayList;
@@ -192,7 +193,7 @@ public class ForceOPSign extends Module {
             .build()
     );
     public ForceOPSign() {
-        super(Trouser.Main, "ForceOPSign", "Requires Creative mode! Creates a ClickEvent sign in your inventory. Give it to someone with OP who is also in creative mode and have them place then click the sign.");
+        super(Trouser.operator, "ForceOPSign", "Requires Creative mode! Creates a ClickEvent sign in your inventory. Give it to someone with OP who is also in creative mode and have them place then click the sign.");
     }
 
     @Override
@@ -335,6 +336,9 @@ public class ForceOPSign extends Module {
         stack.applyChanges(changes);
 
         mc.interactionManager.clickCreativeStack(stack, 36 + mc.player.getInventory().selectedSlot);
+        //clickSlot twice to make the item actually appear clientside
+        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 36 + mc.player.getInventory().selectedSlot, 0, SlotActionType.PICKUP, mc.player);
+        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 36 + mc.player.getInventory().selectedSlot, 0, SlotActionType.PICKUP, mc.player);
         info("OP Sign created. Give it to an operator who is in creative mode and have them click it to execute the command.");
 
         toggle();

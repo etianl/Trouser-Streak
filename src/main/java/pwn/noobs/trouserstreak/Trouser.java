@@ -2,17 +2,22 @@ package pwn.noobs.trouserstreak;
 
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.commands.Commands;
+import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pwn.noobs.trouserstreak.commands.*;
+import pwn.noobs.trouserstreak.hud.*;
 import pwn.noobs.trouserstreak.modules.*;
 
 
 public class Trouser extends MeteorAddon {
         public static final Logger LOG = LoggerFactory.getLogger(Trouser.class);
         public static final Category Main = new Category("TrouserStreak");
+        public static final Category baseHunting = new Category("TrouserHunting");
+        public static final Category operator = new Category("TrouserOP/Creative");
+
         //false commented out modules to categorize modules when displayed on the anticope page
         @Override
         public void onInitialize() {
@@ -30,8 +35,11 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new NewerNewChunks());
                 Modules.get().add(new BaseFinder());
                 Modules.get().add(new ActivatedSpawnerDetector());
+                Modules.get().add(new NoSpawnerDetector());
                 Modules.get().add(new PortalPatternFinder());
                 Modules.get().add(new CaveDisturbanceDetector());
+                Modules.get().add(new AdvancedItemESP());
+                Modules.get().add(new MobGearESP());
                 Modules.get().add(new PotESP());
                 Modules.get().add(new OnlinePlayerActivityDetector());
                 Modules.get().add(new HoleAndTunnelAndStairsESP());
@@ -65,8 +73,10 @@ public class Trouser extends MeteorAddon {
                 Commands.add(new TextCommand());
                 Modules.get().add(new AutoNames());
                 Modules.get().add(new OPplayerTPmodule());
+                Modules.get().add(new MultiverseAnnihilator());
 
                 //Modules.get().add(new -----> Exploits for old versions! <-----());
+                Modules.get().add(new BookAndQuillDupe());
                 Modules.get().add(new ShulkerDupe());
                 Modules.get().add(new InvDupeModule());
                 Modules.get().add(new BoatKill());
@@ -74,9 +84,11 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new LecternCrash());
 
                 //Modules.get().add(new -----> And much more <-----());
-                Modules.get().add(new BookAndQuillDupe());
                 Modules.get().add(new AttributeSwap());
                 Modules.get().add(new Teleport());
+                Modules.get().add(new PortalGodMode());
+                Modules.get().add(new ItemTractorBeam());
+                Modules.get().add(new CollectibleESP());
                 Modules.get().add(new TPFly());
                 Modules.get().add(new FlightAntikick());
                 Modules.get().add(new BetterAutoSign());
@@ -86,17 +98,23 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new MultiUse());
                 Modules.get().add(new AutoDrop());
                 Modules.get().add(new AnHero());
+                Modules.get().add(new PlayerJoinedAlarm());
                 Commands.add(new WorldInfoCommand());
                 Commands.add(new ViewNbtCommand());
                 Commands.add(new AutoVclipCommand());
                 Commands.add(new AutoVaultClipCommand());
                 Modules.get().add(new BlockListMineCommand());
                 Commands.add(new GarbageCleanerCommand());
+
+                //Modules.get().add(new -----> Additions to the HUD module! <-----());
+                Hud.get().register(ElytraCount.INFO);
         }
 
         @Override
         public void onRegisterCategories() {
                 Modules.registerCategory(Main);
+                Modules.registerCategory(baseHunting);
+                Modules.registerCategory(operator);
         }
 
         public String getPackage() {

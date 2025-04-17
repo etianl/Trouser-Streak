@@ -3,7 +3,6 @@ package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
-import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
@@ -18,10 +17,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.c2s.play.AcknowledgeChunksC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -32,10 +27,7 @@ import net.minecraft.world.chunk.WorldChunk;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 
 public class CaveDisturbanceDetector extends Module {
 	private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -62,7 +54,7 @@ public class CaveDisturbanceDetector extends Module {
 	);
 	private final Setting<Boolean> removerenderdist = sgRender.add(new BoolSetting.Builder()
 			.name("RemoveOutsideRenderDistance")
-			.description("Removes the cached disturbances when they leave the defined render distance.")
+			.description("Removes the cached disturbances when they leave render distance.")
 			.defaultValue(true)
 			.build()
 	);
@@ -106,9 +98,8 @@ public class CaveDisturbanceDetector extends Module {
 			.visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both || trcr.get()))
 			.build()
 	);
-	private static final ExecutorService taskExecutor = Executors.newCachedThreadPool();
 	private final Set<ChunkPos> scannedChunks = Collections.synchronizedSet(new HashSet<>());
-	private final Set<BlockPos> scannedAir = Collections.synchronizedSet(new HashSet<>());
+	private Set<BlockPos> scannedAir = Collections.synchronizedSet(new HashSet<>());
 	private final Set<BlockPos> disturbanceLocations = Collections.synchronizedSet(new HashSet<>());
 	private int closestX=2000000000;
 	private int closestY=2000000000;
@@ -116,29 +107,26 @@ public class CaveDisturbanceDetector extends Module {
 	private double distance=2000000000;
 
 	public CaveDisturbanceDetector() {
-		super(Trouser.Main,"CaveDisturbanceDetector", "Scans for single air blocks within the cave air blocks found in caves and underground structures in 1.13+ chunks. There are several false positives.");
+		super(Trouser.baseHunting,"CaveDisturbanceDetector", "Scans for single air blocks within the cave air blocks found in caves and underground structures in 1.13+ chunks. There are several false positives.");
 	}
 
 	@Override
 	public void onActivate() {
 		clearChunkData();
-		scanTheAir();
 	}
 	private void scanTheAir() {
 		if (mc.world == null) return;
-		int renderdistance = renderDistance.get();
-		ChunkPos playerChunkPos = new ChunkPos(mc.player.getBlockPos());
 		List<ChunkPos> chunksToProcess = new ArrayList<>();
-
-		for (int chunkX = playerChunkPos.x - renderdistance; chunkX <= playerChunkPos.x + renderdistance; chunkX++) {
-			for (int chunkZ = playerChunkPos.z - renderdistance; chunkZ <= playerChunkPos.z + renderdistance; chunkZ++) {
-				chunksToProcess.add(new ChunkPos(chunkX, chunkZ));
+		AtomicReferenceArray<WorldChunk> chunks = mc.world.getChunkManager().chunks.chunks;
+		for (int i = 0; i < chunks.length(); i++) {
+			WorldChunk chunk = chunks.get(i);
+			if (chunk != null && !chunk.isEmpty()) {
+				chunksToProcess.add(chunk.getPos());
 			}
 		}
-
 		chunksToProcess.parallelStream().forEach(chunkPos -> {
 			WorldChunk chunk = mc.world.getChunk(chunkPos.x, chunkPos.z);
-			if (chunk != null && !scannedChunks.contains(chunk.getPos())) {
+			if (chunk != null && !chunk.isEmpty() && !scannedChunks.contains(chunk.getPos())) {
 				processChunk(chunk);
 				scannedChunks.add(chunk.getPos());
 			}
@@ -167,6 +155,7 @@ public class CaveDisturbanceDetector extends Module {
 	}
 	@EventHandler
 	private void onPreTick(TickEvent.Pre event) {
+		scanTheAir();
 		if (nearesttrcr.get()){
 			try {
 				if (disturbanceLocations.stream().toList().size() > 0) {
@@ -185,29 +174,6 @@ public class CaveDisturbanceDetector extends Module {
 			}
 		}
 		if (removerenderdist.get())removeChunksOutsideRenderDistance();
-	}
-
-	@EventHandler
-	private void onReadPacket(PacketEvent.Receive event) {
-		if (event.packet instanceof AcknowledgeChunksC2SPacket)return; //for some reason this packet keeps getting cast to other packets
-		if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && !(event.packet instanceof PlayerMoveC2SPacket) && event.packet instanceof ChunkDataS2CPacket packet && mc.world != null) {
-			ChunkPos playerActivityPos = new ChunkPos(packet.getChunkX(), packet.getChunkZ());
-
-			if (mc.world.getChunkManager().getChunk(packet.getChunkX(), packet.getChunkZ()) == null) {
-				WorldChunk chunk = new WorldChunk(mc.world, playerActivityPos);
-				try {
-					CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-						chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), new NbtCompound(),
-								packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ()));
-					}, taskExecutor);
-					future.join();
-				} catch (CompletionException e) {}
-				if (chunk != null && !scannedChunks.contains(chunk.getPos())) {
-					processChunk(chunk);
-					scannedChunks.add(chunk.getPos());
-				}
-			}
-		}
 	}
 
 	private void processChunk(WorldChunk chunk) {
@@ -230,6 +196,7 @@ public class CaveDisturbanceDetector extends Module {
 	}
 
 	private void isSurroundingBlockRegAir(BlockPos bPos) {
+		scannedAir = Collections.synchronizedSet(new HashSet<>());
 		for (int dir = 1; dir < 6; dir++) {
 			switch (dir){
 				case 1 -> {
@@ -405,19 +372,28 @@ public class CaveDisturbanceDetector extends Module {
 		event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
 	}
 	private void removeChunksOutsideRenderDistance() {
-		double renderDistanceBlocks = renderDistance.get() * 16;
+		AtomicReferenceArray<WorldChunk> chunks = mc.world.getChunkManager().chunks.chunks;
+		Set<WorldChunk> chunkSet = new HashSet<>();
 
-		removechunksOutsideRenderDistance(scannedChunks, mc.player.getBlockPos(), renderDistanceBlocks);
-		removeChunksOutsideRenderDistance(disturbanceLocations, renderDistanceBlocks);
-		removeChunksOutsideRenderDistance(scannedAir, renderDistanceBlocks);
+		for (int i = 0; i < chunks.length(); i++) {
+			WorldChunk chunk = chunks.get(i);
+			if (chunk != null) {
+				chunkSet.add(chunk);
+			}
+		}
+		removechunksOutsideRenderDistance(scannedChunks, chunkSet);
+		removeChunksOutsideRenderDistance(disturbanceLocations, chunkSet);
 	}
-	private void removeChunksOutsideRenderDistance(Set<BlockPos> chunkSet, double renderDistanceBlocks) {
-		chunkSet.removeIf(blockPos -> {
-			BlockPos playerPos = new BlockPos(mc.player.getBlockX(), blockPos.getY(), mc.player.getBlockZ());
-			return !playerPos.isWithinDistance(blockPos, renderDistanceBlocks);
+	private void removeChunksOutsideRenderDistance(Set<BlockPos> boxSet, Set<WorldChunk> worldChunks) {
+		boxSet.removeIf(box -> {
+			assert mc.world != null;
+			return !worldChunks.contains(mc.world.getChunk(box));
 		});
 	}
-	private void removechunksOutsideRenderDistance(Set<ChunkPos> chunkSet, BlockPos playerPos, double renderDistanceBlocks) {
-		chunkSet.removeIf(c -> !playerPos.isWithinDistance(new BlockPos(c.getCenterX(), mc.player.getBlockY(), c.getCenterZ()), renderDistanceBlocks));
+	private void removechunksOutsideRenderDistance(Set<ChunkPos> chunkSet, Set<WorldChunk> worldChunks) {
+		chunkSet.removeIf(c -> {
+			assert mc.world != null;
+			return !worldChunks.contains(mc.world.getChunk(c.x, c.z));
+		});
 	}
 }

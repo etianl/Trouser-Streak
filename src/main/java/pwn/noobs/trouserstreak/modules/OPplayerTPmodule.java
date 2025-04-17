@@ -44,7 +44,7 @@ public class OPplayerTPmodule extends Module {
         return table;
     }
     public OPplayerTPmodule() {
-        super(Trouser.Main, "OPplayerTPmodule", "**REQUIRES OP** Teleports you to each player on the server with a button press if keybound, or teleport people to you.");
+        super(Trouser.operator, "OPplayerTPmodule", "**REQUIRES OP** Teleports you to each player on the server with a button press if keybound, or teleport people to you.");
     }
 
     public static int currentplayer = 0;

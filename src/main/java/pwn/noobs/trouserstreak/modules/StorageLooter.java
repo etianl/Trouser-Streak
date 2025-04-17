@@ -16,6 +16,8 @@ import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.vehicle.ChestMinecartEntity;
 import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
@@ -24,6 +26,7 @@ import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.screen.*;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
@@ -807,7 +810,34 @@ public class StorageLooter extends Module {
 
         return Integer.compare(score2, score1); // Reverse the order to sort in descending order
     }
-
+    public static ArrayList<ItemStack> getArmorItems(LivingEntity livingEntity) {
+        ArrayList<ItemStack> armorItems = new ArrayList<>();
+        armorItems.add(livingEntity.getEquippedStack(EquipmentSlot.HEAD));
+        armorItems.add(livingEntity.getEquippedStack(EquipmentSlot.CHEST));
+        armorItems.add(livingEntity.getEquippedStack(EquipmentSlot.LEGS));
+        armorItems.add(livingEntity.getEquippedStack(EquipmentSlot.FEET));
+        return armorItems;
+    }
+    public static ArrayList<ItemStack> getHandItems(LivingEntity livingEntity) {
+        ArrayList<ItemStack> handItems = new ArrayList<>();
+        handItems.add(livingEntity.getEquippedStack(EquipmentSlot.MAINHAND));
+        handItems.add(livingEntity.getEquippedStack(EquipmentSlot.OFFHAND));
+        return handItems;
+    }
+    public static boolean isArmor(ItemStack itemStack) {
+        return itemStack.isIn(ItemTags.HEAD_ARMOR) ||
+                itemStack.isIn(ItemTags.CHEST_ARMOR) ||
+                itemStack.isIn(ItemTags.LEG_ARMOR) ||
+                itemStack.isIn(ItemTags.FOOT_ARMOR);
+    }
+    public static boolean isTool(ItemStack itemStack) {
+        return itemStack.isIn(ItemTags.AXES) ||
+                itemStack.isIn(ItemTags.HOES) ||
+                itemStack.isIn(ItemTags.PICKAXES) ||
+                itemStack.isIn(ItemTags.SHOVELS) ||
+                itemStack.getItem() instanceof ShearsItem ||
+                itemStack.getItem() instanceof FlintAndSteelItem;
+    }
     private int getItemScore(ItemStack stack) {
         assert mc.player != null;
         String itemName = stack.getItem().getTranslationKey().toLowerCase();
@@ -912,7 +942,6 @@ public class StorageLooter extends Module {
             if (!sourceStack.isEmpty() && Math.round(((double)sourceStack.getCount() / sourceStack.getItem().getMaxCount()) * 100) >= minLootableStackSize.get()) {
                 amountToMove = Math.min(amountToMove, sourceStack.getCount());
 
-                // Calculate the number of clicks needed
                 int clicksNeeded = (int) Math.ceil((double) amountToMove / sourceStack.getMaxCount());
 
                 for (int i = 0; i < clicksNeeded; i++) {
@@ -937,7 +966,7 @@ public class StorageLooter extends Module {
         if (isSameItem(mc.player.getOffHandStack().getItem(), item, itemName)) {
             count += mc.player.getOffHandStack().getCount();
         }
-        for (ItemStack armorStack : mc.player.getArmorItems()) {
+        for (ItemStack armorStack : getArmorItems(mc.player)) {
             if (isSameItem(armorStack.getItem(), item, itemName)) {
                 count += armorStack.getCount();
             }
@@ -1036,7 +1065,7 @@ public class StorageLooter extends Module {
                 }
             }
         }
-        for (ItemStack stack : mc.player.getArmorItems()) {
+        for (ItemStack stack : getArmorItems(mc.player)) {
             Item stackItem = stack.getItem();
             if (isSameItem(stackItem, item, itemName)) {
                 if (stack.isStackable()) {
@@ -1150,7 +1179,7 @@ public class StorageLooter extends Module {
                 Items.DIAMOND_BOOTS
         );
 
-        if (item instanceof MiningToolItem || item instanceof ArmorItem) {
+        if (isTool(item.getDefaultStack()) || isArmor(item.getDefaultStack())) {
             return diamondItems.contains(item);
         }
 

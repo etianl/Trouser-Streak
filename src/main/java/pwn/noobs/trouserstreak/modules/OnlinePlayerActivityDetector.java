@@ -135,7 +135,7 @@ public class OnlinePlayerActivityDetector extends Module {
         ORE_BLOCKS.add(Blocks.GILDED_BLACKSTONE);
     }
     public OnlinePlayerActivityDetector() {
-        super(Trouser.Main,"OnlinePlayerActivityDetector", "Detects if an online player is still nearby if there are blocks missing from a BlockState palette and your render distances are overlapping.");
+        super(Trouser.baseHunting,"OnlinePlayerActivityDetector", "Detects if an online player is still nearby if there are blocks missing from a BlockState palette and your render distances are overlapping.");
     }
     @Override
     public void onActivate() {

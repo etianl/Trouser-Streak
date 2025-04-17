@@ -16,6 +16,7 @@ In no particular order
 - [DAMcraft (ServerSeeker)](https://github.com/DAMcraft/MeteorServerSeeker)
 - [Meteor Client](https://github.com/meteordevelopment/meteor-client)
 - [Allah-Hack](https://github.com/TaxEvasiqn/allah-hack)
+- [Meteor-Tweaks](https://github.com/Declipsonator/Meteor-Tweaks)
 - [Meteor-Rejects](https://github.com/AntiCope/meteor-rejects)
 - [Frostburn Client](https://github.com/evaan/FrostBurn)
 - [Banana](https://github.com/Bennooo/banana-for-everyone) Credits for checkbox array from AutoBuild, and the idea for TrouserBuild
@@ -30,7 +31,8 @@ In no particular order
  </p>
 
 ## Features:
-- **ActivatedSpawnerDetector** Detects if a player was ever near a spawner or trial spawner block. The intended use for this module would be on anarchy servers where people try to hide their items within chests in dungeons, mineshafts, and trial chambers. (Credits to etianl :D)
+- **ActivatedSpawnerDetector:** Detects if a player was ever near a spawner or trial spawner block. The intended use for this module would be on anarchy servers where people try to hide their items within chests in dungeons, mineshafts, and trial chambers. (Credits to etianl :D)
+- **AdvancedItemESP:** An ESP module which detects any individual item you are searching for. By default it looks for valuable player dropped items. Just like **MobGearESP** there is an option to only detect enchanted Tools and Armors (Thank you to [windoid](https://github.com/windoid) for writing the MobGearESP which I modified to make this!)
 - **Airstrike+:** Rains down whatever entities you desire. It used to only rain fireballs, and I also changed the positioning of the spawning. (Credits to Allah-Hack for the original)
 - **AnHero:** Become An Hero! (A quick way back to spawn.) (Credits to etianl :D)
 - **Attribute Swap:** Swaps the current main hand item with another item on the hotbar for a single tick when you attack an entity. This cause the attributes from the target item you are swapping to be applied to the first item.Thank you to [DonKisser](https://github.com/DonKisser) for making this module for us!
@@ -78,6 +80,7 @@ In no particular order
 - The saved presets for the .text command will be saved in the .minecraft/TrouserStreak/TextPresets folder.
 - Some example commands would be ".text load mountains" or ".text save mountains #green [ #dark_red Trolled! #green ]|#gold Mountains of Lava Inc.|#red Youtube: #blue www.youtube.com/@mountainsoflavainc.6913"
 - Individual lines are seperated by a | (pipe character) and you can also use #red "wordhere" to format the color of the text.
+- You can obfuscate words by using #obfuscated
 - **AutoTitles:** Displays text (such as advertisements) across the screen of all the individuals who are online on a server at the time. Requires OP status. Credits to [ogmur](https://www.youtube.com/@Ogmur) for figuring out these commands, and to etianl for writing a module for it.
 - **AutoVclipCommand** Automatically selects the nearest two block gap going either up or down to vclip into. (Credits to etianl, and credits to the original [AutoVclip](https://github.com/kittenvr/AutoVclip) for minecraft 1.19.2 which inspired me to make this one. :D)
 - **BaseFinder:** Automatically detects if a Base or Build could be in a chunk by checking every block and entity in each chunk to see if there are "Un-natural" things within them. (Credits to etianl :D, and to Meteor-Rejects for some code from newchunks.)
@@ -99,6 +102,7 @@ In no particular order
 - **Boom+:** Throws entities or spawns them on the targeted block when you click (Credits to Allah-Hack for the original) I just added more fun things you might want to throw as well as included the option for height based on player Y level.
 - **BungeeSpoofer:** Allows you to join servers with an exposed bungeecord backend. (Credits to DAMcraft of ServerSeeker!)
 - **CaveDisturbanceDetector:** Scans for single air blocks within the cave air blocks found in caves and underground structures in 1.13+ chunks. (Credits to etianl :D)
+- **CollectibleESP:** Highlights collectible items in item frames and banners! (Credits to [xqyet](https://github.com/xqyet) PR: **[108](https://github.com/etianl/Trouser-Streak/pull/108)**, modified by etianl)
 - **CrashCommand:** Crashes other players out using a nasty particle effect. Requires OP status. Credits to [aaaasdfghjkllll](https://github.com/aaaasdfghjkllll)
 - **ExplosionAura:** Spawns creepers at your position as you move that explode instantly. Like a bigger, more laggy Nuker module for creative mode. The use of the module Velocity is recommended to avoid being thrown around. (Credits to etianl :D)
 - **FlightAntikick:** Moves you down on a tick-based timer. Added in to substitute the lack of a "Normal" mode antikick for velocity flight in MeteorClient (not a great antikick it's just something). Bind it to the same key as Flight. (Credits to etianl :D)
@@ -111,11 +115,14 @@ In no particular order
 - **InstaKill:** Shoots arrows and tridents with incredible power and velocity. Enabling multiple buttons causes the amount of packets to add up. (Credits to Saturn5Vfive)
 - **InstaMineNuker:** Sends packets to instantly mine the blocks around you until they are gone. There is an option in it to make it only target instamineable blocks such as crops, grass, slimeblocks, and more.. (Credits to etianl and to Meteor Client, as well as Meteor Rejects for some borrowed code)
 - **InstaSafetyBox:** Places a box around you for safety using the hardest blocks available in your hotbar. Also with adjustable range for thic box. (Credits to etianl :D)
+- **ItemTractorBeam:** Sucks up items from a very far distance using hunger points. Only works well for items on the same Y level. The code for this module is based off of the InstaKill code by Saturn5Vfive!
 - **LavaAura:** Automatically places and picks up lava buckets at an entity's position on a tick delay, or sets the entity on fire using flint and steel or fire charges. Also has the option of placing lavabuckets or fire on every block face which may be useful in creative mode. (Credits to etianl :D)
 - **LecternCrash:** Crash 1.18.X vanilla servers and possibly below. (Credits to Coderx-Gamer)
 - **MaceKill:** Exploits Mace mechanics to make the Mace super OP everytime you swing it instead of just when you drop from a height. (Credits to etianl :D)
+- **MobGearESP:** ESP Module that highlights mobs likely wearing player gear. (Thank you to [windoid](https://github.com/windoid) for writing this!)
 - **MultiUse:** Allows you to do the item use action more than once per item use. Essentially a strange form of the FastUse module and may work well combined with it. Initially created by [maytrixc](https://github.com/maytrixc), modified by etianl to use doItemUse.
-- **NbtEditor:** Requires Creative mode. Generates custom entities in the form of a custom spawn egg, generate items with custom enchantments (Only in Minecraft 1.20.4 and below), and potions with custom effects all based on the settings you configure. It can also copy the Nbt data from one item to another.  (Credits to etianl :D)
+- **MultiverseAnnihilator:** With the press of a single button you can quickly delete every world listed on a server that has the Multiverse plugin installed. OP status is required. (credits to [ogmur](https://www.youtube.com/@Ogmur) for writing this)
+- **NbtEditor:** Requires Creative mode. Generates custom entities in the form of a custom spawn egg, generate items with custom enchantments, and potions with custom effects all based on the settings you configure. It can also copy the Nbt data from one item to another.  (Credits to etianl :D)
 - **NewerNewChunks:** NewChunks module with new newchunk estimation exploits, and the ability to save chunk data for later! Comes with several new homebrewed newchunks methods made by yours truly. (Credits to Meteor Rejects, and BleachHack from where it was ported, and etianl for updating :D.)
 
 -------------------------------------------------------------------------------------
@@ -160,9 +167,12 @@ In no particular order
 - The **"IgnoreBlockExploit"** will render BlockExploit chunks as an oldchunk instead of a newchunk.
 
 -------------------------------------------------------------------------------------
+- **NoSpawnerDetector:** Uses block checks to detect Dungeons and Mineshafts which have had their spawners removed. (Credits to etianl :D)
 - **OnlinePlayerActivityDetector:** Detects if an online player is nearby if there are blocks missing from a BlockState palette and your render distances are overlapping. It can detect players that are outside of render distance. (Credits to etianl :D)
 - **OPplayerTPmodule:** Uses operator commands to teleport you to each player online one by one at the push of a button, or those players to you one by one. There is a button in the options for it to reset the current player to zero. Thank you to [ogmur](https://www.youtube.com/@Ogmur) for the module suggestion (Credits to etianl for writing :D). REQUIRES OP STATUS
-- **OPServerKillModule:** Runs a set of operator commands to disable a server and cover up the tracks of the kill command. REQUIRES OP STATUS (Credits to etianl :D)
+- **OPServerKillModule:** Runs a set of operator commands to disable a server and cover up the tracks of the kill command. REQUIRES OP STATUS! (Credits to etianl :D)
+- **PlayerJoinedAlarm:** Makes noise when a player is added to the playerlist (if they join the server for example). (Credits to etianl :D)
+- **PortalGodMode:** Makes you invincible after you walk through a portal. You will not be able to move while invincible until you disable the god mode.
 - **PortalPatternFinder:** Scans for the shapes of broken/removed Nether Portals within the cave air blocks found in caves and underground structures in 1.13+ chunks. **May be useful for finding portal skips in the Nether**. (Credits to etianl :D)
 - **PotESP:** Detects Decorated Pots with un-natural contents, and also tells you what item it is and the location of the pot. (Credits to etianl :D)
 - **RedstoneNuker:** It's just the regular Nuker module from Meteor client, customized for only breaking things that generate redstone signals. Also with included AutoTool. To keep you safer when placing lots of TNT. (Credits to Meteor Client for Nuker code, and AutoTool code inthere.)
@@ -193,9 +203,7 @@ In no particular order
 - Joining a server with HandOfGod or Voider already on causes the module to be turned off due to "Not being OP" even if you are an operator
 
 ## Requirements:
-- If you are using Minecraft version **1.21.3**, then use the latest **MeteorClient Dev Build of v0.5.9**
-- If you are using Minecraft version **1.21.1**, then use **MeteorClient "Full Release" v0.5.8**
+- Meteor Client https://meteorclient.com/
 - Please try [ViaFabricPlus](https://github.com/FlorianMichael/ViaFabricPlus), which will let you connect to almost any version from a new version client.
-- Don't forget to try updating any other mods you are using if your game is crashing.
 
 plz give me star on githoob kthx
