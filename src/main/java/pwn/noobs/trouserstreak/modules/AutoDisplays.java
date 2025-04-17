@@ -166,10 +166,10 @@ public class AutoDisplays extends Module {
     public void onDeactivate() {
         switch (displayMode.get()) {
             case BLOCK -> {
-                if (killEntities.get())ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:block_display,tag=MOL] run kill @s");
+                if (killEntities.get())ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:block_display,tag=MOL] run minecraft:kill @s");
             }
             case TEXT -> {
-                if (killEntities.get())ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:text_display,tag=MOL] run kill @s");
+                if (killEntities.get())ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:text_display,tag=MOL] run minecraft:kill @s");
             }
         }
     }
@@ -184,11 +184,11 @@ public class AutoDisplays extends Module {
 
             switch (displayMode.get()) {
                 case BLOCK -> {
-                    if (killEntities.get())ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:block_display,tag=MOL] run kill @s");
+                    if (killEntities.get())ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:block_display,tag=MOL] run minecraft:kill @s");
                 }
 
                 case TEXT -> {
-                    if (killEntities.get())ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:text_display,tag=MOL] run kill @s");
+                    if (killEntities.get())ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:text_display,tag=MOL] run minecraft:kill @s");
                 }
             }
         } else {
