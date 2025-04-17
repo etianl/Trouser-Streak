@@ -18,10 +18,11 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Box;
 import meteordevelopment.meteorclient.settings.*;
@@ -29,8 +30,6 @@ import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.*;
@@ -86,7 +85,7 @@ public class MobGearESP extends Module {
     ));
 
     public MobGearESP() {
-        super(Trouser.Main, "MobGearESP", "ESP Module that highlights mobs likely wearing player gear.");
+        super(Trouser.baseHunting, "MobGearESP", "ESP Module that highlights mobs likely wearing player gear.");
     }
 
     public final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
@@ -285,9 +284,9 @@ public class MobGearESP extends Module {
             baseColor = getOpposingColor(baseColor, entity);
         }
 
-        double x = entity.prevX + (entity.getX() - entity.prevX) * event.tickDelta;
-        double y = entity.prevY + (entity.getY() - entity.prevY) * event.tickDelta;
-        double z = entity.prevZ + (entity.getZ() - entity.prevZ) * event.tickDelta;
+        double x = entity.lastX + (entity.getX() - entity.lastX) * event.tickDelta;
+        double y = entity.lastY + (entity.getY() - entity.lastY) * event.tickDelta;
+        double z = entity.lastZ + (entity.getZ() - entity.lastZ) * event.tickDelta;
         double height = entity.getBoundingBox().maxY - entity.getBoundingBox().minY;
         y += height / 2;
 
@@ -310,31 +309,58 @@ public class MobGearESP extends Module {
         interpolatedColor = new Color(r, g, b, a);
         return interpolatedColor;
     }
-
+    public static ArrayList<ItemStack> getArmorItems(LivingEntity livingEntity) {
+        ArrayList<ItemStack> armorItems = new ArrayList<>();
+        armorItems.add(livingEntity.getEquippedStack(EquipmentSlot.HEAD));
+        armorItems.add(livingEntity.getEquippedStack(EquipmentSlot.CHEST));
+        armorItems.add(livingEntity.getEquippedStack(EquipmentSlot.LEGS));
+        armorItems.add(livingEntity.getEquippedStack(EquipmentSlot.FEET));
+        return armorItems;
+    }
+    public static ArrayList<ItemStack> getHandItems(LivingEntity livingEntity) {
+        ArrayList<ItemStack> handItems = new ArrayList<>();
+        handItems.add(livingEntity.getEquippedStack(EquipmentSlot.MAINHAND));
+        handItems.add(livingEntity.getEquippedStack(EquipmentSlot.OFFHAND));
+        return handItems;
+    }
+    public static boolean isArmor(ItemStack itemStack) {
+        return itemStack.isIn(ItemTags.HEAD_ARMOR) ||
+                itemStack.isIn(ItemTags.CHEST_ARMOR) ||
+                itemStack.isIn(ItemTags.LEG_ARMOR) ||
+                itemStack.isIn(ItemTags.FOOT_ARMOR);
+    }
+    public static boolean isTool(ItemStack itemStack) {
+        return itemStack.isIn(ItemTags.AXES) ||
+                itemStack.isIn(ItemTags.HOES) ||
+                itemStack.isIn(ItemTags.PICKAXES) ||
+                itemStack.isIn(ItemTags.SHOVELS) ||
+                itemStack.getItem() instanceof ShearsItem ||
+                itemStack.getItem() instanceof FlintAndSteelItem;
+    }
     private ArrayList<Item> getPlayerItems(LivingEntity livingEntity) {
         ArrayList<Item> playerItems = new ArrayList<>();
-        for (ItemStack item  : livingEntity.getArmorItems()) {
+        for (ItemStack item  : getArmorItems(livingEntity)) {
             boolean skip = false;
             if (enchants.get()) {
-                if (!certainenchants.get() && item.getItem() instanceof ArmorItem && item.isEnchantable() && item.getEnchantments().isEmpty()) skip = true;
+                if (!certainenchants.get() && isArmor(item) && item.isEnchantable() && item.getEnchantments().isEmpty()) skip = true;
                 else if (certainenchants.get()){
-                    if (item.getItem() instanceof ArmorItem) skip = compareEnchants(item, armorenchants);
+                    if (isArmor(item)) skip = compareEnchants(item, armorenchants);
                 }
             }
             if (skip) continue;
             if (items.get().contains(item.getItem())) playerItems.add(item.getItem());
 
         }
-        for (ItemStack item : livingEntity.getHandItems()) {
+        for (ItemStack item : getHandItems(livingEntity)) {
             boolean skip = false;
             if (enchants.get()) {
-                if (!certainenchants.get() && (item.getItem() instanceof MiningToolItem || item.getItem() instanceof ArmorItem || item.getItem() instanceof SwordItem || item.getItem() instanceof FishingRodItem || item.getItem() instanceof FlintAndSteelItem || item.getItem() instanceof MaceItem || item.getItem() instanceof ShearsItem || item.getItem() instanceof ShieldItem || item.getItem() instanceof TridentItem) && item.isEnchantable() && item.getEnchantments().isEmpty()) skip = true;
+                if (!certainenchants.get() && (isTool(item) || isArmor(item) || item.isIn(ItemTags.SWORDS) || item.getItem() instanceof FishingRodItem || item.getItem() instanceof FlintAndSteelItem || item.getItem() instanceof MaceItem || item.getItem() instanceof ShearsItem || item.getItem() instanceof ShieldItem || item.getItem() instanceof TridentItem) && item.isEnchantable() && item.getEnchantments().isEmpty()) skip = true;
                 else if (certainenchants.get()){
-                    if (item.getItem() instanceof MiningToolItem){
+                    if (isTool(item)){
                         skip = compareEnchants(item, toolenchants);
-                    } else if (item.getItem() instanceof SwordItem){
+                    } else if (item.isIn(ItemTags.SWORDS)){
                         skip = compareEnchants(item, swordenchants);
-                    } else if (item.getItem() instanceof ArmorItem){
+                    } else if (isArmor(item)){
                         skip = compareEnchants(item, armorenchants);
                     } else if (item.getItem() instanceof MaceItem){
                         skip = compareEnchants(item, maceenchants);

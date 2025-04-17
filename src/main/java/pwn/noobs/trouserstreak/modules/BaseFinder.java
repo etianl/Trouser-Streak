@@ -36,17 +36,16 @@ import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.entity.vehicle.ChestBoatEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.ChunkStatus;
@@ -719,7 +718,7 @@ public class BaseFinder extends Module {
     private int entityScanTicks;
 
     public BaseFinder() {
-        super(Trouser.Main,"BaseFinder", "Estimates if a build or base may be in the chunk based on the blocks it contains.");
+        super(Trouser.baseHunting,"BaseFinder", "Estimates if a build or base may be in the chunk based on the blocks it contains.");
     }
     private void clearChunkData() {
         baseChunks.clear();
@@ -936,7 +935,7 @@ public class BaseFinder extends Module {
                                         basefound = true;
                                     }
                                 } else if (entity instanceof VillagerEntity && villagerFinder.get()) {
-                                    if (((VillagerEntity) entity).getVillagerData().getLevel() > 1) {
+                                    if (((VillagerEntity) entity).getVillagerData().level() > 1) {
                                         baseChunks.add(chunk.getPos());
                                         if (save.get()) {
                                             saveBaseChunkData(chunk.getPos());
@@ -1052,8 +1051,14 @@ public class BaseFinder extends Module {
             if (mc.world.getChunkManager().getChunk(packet.getChunkX(), packet.getChunkZ()) == null) {
                 WorldChunk chunk = new WorldChunk(mc.world, basepos);
                 try {
+                    Map<Heightmap.Type, long[]> heightmaps = new EnumMap<>(Heightmap.Type.class);
+
+                    Heightmap.Type type = Heightmap.Type.MOTION_BLOCKING;
+                    long[] emptyHeightmapData = new long[37];
+                    heightmaps.put(type, emptyHeightmapData);
+
                     CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-                        chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), new NbtCompound(),
+                        chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), heightmaps,
                                 packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ()));
                     }, taskExecutor);
                     future.join();

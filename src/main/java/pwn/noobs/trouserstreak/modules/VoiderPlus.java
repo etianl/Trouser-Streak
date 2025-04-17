@@ -82,7 +82,7 @@ public class VoiderPlus extends Module {
     );
 
     public VoiderPlus() {
-        super(Trouser.Main, "voider+", "Runs /fill on the world from the top down (Must have OP status)");
+        super(Trouser.operator, "voider+", "Runs /fill on the world from the top down (Must have OP status)");
     }
     int i;
     private int passes=0;

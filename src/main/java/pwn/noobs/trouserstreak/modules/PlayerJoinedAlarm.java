@@ -95,7 +95,7 @@ public class PlayerJoinedAlarm extends Module {
             float volumeSetting = volume.get().floatValue();
             float pitchSetting = pitch.get().floatValue();
 
-            mc.world.playSound(pos.x, pos.y, pos.z, sound, mc.player.getSoundCategory(), volumeSetting, pitchSetting, false);
+            mc.world.playSoundClient(pos.x, pos.y, pos.z, sound, mc.player.getSoundCategory(), volumeSetting, pitchSetting, false);
         }
     }
 

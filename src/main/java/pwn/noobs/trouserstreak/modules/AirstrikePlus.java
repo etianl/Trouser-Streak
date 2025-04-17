@@ -385,7 +385,7 @@ public class AirstrikePlus extends Module {
             .build());
 
     public AirstrikePlus() {
-        super(Trouser.Main, "Airstrike+", "Rains things down from the sky");
+        super(Trouser.operator, "Airstrike+", "Rains things down from the sky");
     }
 
     final Random r = new Random();
@@ -511,7 +511,7 @@ public class AirstrikePlus extends Module {
         NbtCompound CustomNameNBT = new NbtCompound();
         CustomNameNBT.putString("text", customName);
         CustomNameNBT.putString("color", namecolour);
-        
+
         if (invincible.get()) entityTag.putBoolean("Invulnerable", invincible.get());
         if (silence.get()) entityTag.putBoolean("Silent", silence.get());
         if (glow.get()) entityTag.putBoolean("Glowing", glow.get());

@@ -20,8 +20,6 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import pwn.noobs.trouserstreak.Trouser;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -38,12 +36,6 @@ public class TextCommand extends Command {
     private static final double LINE_SPACING = 0.3;
     private static final double INITIAL_HEIGHT_OFFSET = 1.0;
     private static final String PRESETS_DIRECTORY = "TrouserStreak/TextPresets";
-
-    public enum ColorModes {
-        aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green,
-        dark_purple, dark_red, gold, gray, green, italic, light_purple,
-        red, white, yellow
-    }
 
     public TextCommand() {
         super("text", "Spawns a text hologram with custom text in front of you. Use | for new lines and #color for text color.");
@@ -126,7 +118,7 @@ public class TextCommand extends Command {
         NbtList nbt = new NbtList();
         String currentColor = "white";
         boolean wasObfuscated = false;
-        
+
         Pattern pattern = Pattern.compile("#([a-zA-Z_]+) ");
         Matcher matcher = pattern.matcher(line);
 
@@ -135,14 +127,14 @@ public class TextCommand extends Command {
         while (matcher.find()) {
             if (offset != matcher.start())
                 nbt.add(makePart(line.substring(offset, matcher.start()), currentColor, false, wasObfuscated));
-            
+
             String word = matcher.group(1);
             if (word.equalsIgnoreCase("obfuscated")) {
                 offset = matcher.end();
 
                 int end = line.substring(offset).indexOf(" ") + 1;
                 nbt.add(makePart(line.substring(offset, offset + end), currentColor, true, wasObfuscated));
-                
+
                 wasObfuscated = true;
                 offset += end;
             } else {
@@ -153,8 +145,6 @@ public class TextCommand extends Command {
 
         if (offset != line.length())
             nbt.add(makePart(line.substring(offset), currentColor, false, wasObfuscated));
-        
-        Trouser.LOG.info(nbt.asString());
 
         return nbt;
     }
@@ -273,8 +263,8 @@ public class TextCommand extends Command {
         Vec3d pos = mc.player.getPos().add(mc.player.getRotationVector().multiply(2)).add(0, yOffset, 0);
 
         var changes = ComponentChanges.builder()
-            .add(DataComponentTypes.ENTITY_DATA, createEntityData(pos, nbt))
-            .build();
+                .add(DataComponentTypes.ENTITY_DATA, createEntityData(pos, nbt))
+                .build();
 
         armorStand.applyChanges(changes);
 
@@ -286,7 +276,7 @@ public class TextCommand extends Command {
 
     private NbtComponent createEntityData(Vec3d pos, NbtList nbt) {
         NbtCompound entityTag = new NbtCompound();
-        
+
         NbtList position = new NbtList();
         position.add(NbtDouble.of(pos.x));
         position.add(NbtDouble.of(pos.y));

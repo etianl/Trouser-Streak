@@ -180,7 +180,7 @@ public class BoomPlus extends Module {
     );
 
     public BoomPlus() {
-        super(Trouser.Main, "boom+", "shoots something where you click");
+        super(Trouser.operator, "boom+", "shoots something where you click");
     }
     private int aticks=0;
 
@@ -207,8 +207,8 @@ public class BoomPlus extends Module {
                 mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                 mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-            aticks=0;
-        }
+                aticks=0;
+            }
         }
     }
 

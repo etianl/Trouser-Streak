@@ -16,8 +16,6 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtDouble;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -75,7 +73,7 @@ public class ExplosionAura extends Module {
     );
 
     public ExplosionAura() {
-        super(Trouser.Main, "ExplosionAura", "You explode as you move. Must be in creative.");
+        super(Trouser.operator, "ExplosionAura", "You explode as you move. Must be in creative.");
     }
 
     private int ticks=0;
