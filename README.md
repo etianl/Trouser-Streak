@@ -102,6 +102,7 @@ In no particular order
 - **Boom+:** Throws entities or spawns them on the targeted block when you click (Credits to Allah-Hack for the original) I just added more fun things you might want to throw as well as included the option for height based on player Y level.
 - **BungeeSpoofer:** Allows you to join servers with an exposed bungeecord backend. (Credits to DAMcraft of ServerSeeker!)
 - **CaveDisturbanceDetector:** Scans for single air blocks within the cave air blocks found in caves and underground structures in 1.13+ chunks. (Credits to etianl :D)
+- **CollectibleESP:** Highlights collectible items in item frames and banners! (Credits to [xqyet](https://github.com/xqyet) PR: **[108](https://github.com/etianl/Trouser-Streak/pull/108)**, modified by etianl)
 - **CrashCommand:** Crashes other players out using a nasty particle effect. Requires OP status. Credits to [aaaasdfghjkllll](https://github.com/aaaasdfghjkllll)
 - **ExplosionAura:** Spawns creepers at your position as you move that explode instantly. Like a bigger, more laggy Nuker module for creative mode. The use of the module Velocity is recommended to avoid being thrown around. (Credits to etianl :D)
 - **FlightAntikick:** Moves you down on a tick-based timer. Added in to substitute the lack of a "Normal" mode antikick for velocity flight in MeteorClient (not a great antikick it's just something). Bind it to the same key as Flight. (Credits to etianl :D)
@@ -202,8 +203,7 @@ In no particular order
 - Joining a server with HandOfGod or Voider already on causes the module to be turned off due to "Not being OP" even if you are an operator
 
 ## Requirements:
-- If you are using Minecraft version **1.21.4**, then use the latest **MeteorClient Build for Minecraft 1.21.4**
-- If you are using Minecraft version **1.21.3**, then use **MeteorClient "Full Release" v0.5.9** (Not available for download anymore)
+- Meteor Client https://meteorclient.com/
 - Please try [ViaFabricPlus](https://github.com/FlorianMichael/ViaFabricPlus), which will let you connect to almost any version from a new version client.
 
 plz give me star on githoob kthx

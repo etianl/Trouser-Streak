@@ -439,7 +439,7 @@ public class HandOfGod extends Module {
             .build()
     );
     public HandOfGod() {
-        super(Trouser.Main, "HandOfGod", "Modify the world and troll players with automated /fill commands. (Must have OP status)");
+        super(Trouser.operator, "HandOfGod", "Modify the world and troll players with automated /fill commands. (Must have OP status)");
     }
     private CopyOnWriteArrayList<PlayerListEntry> players;
     private int ticks=0;

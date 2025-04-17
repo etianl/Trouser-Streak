@@ -13,6 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.*;
 import net.minecraft.potion.PotionUtil;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import pwn.noobs.trouserstreak.Trouser;
 
@@ -254,7 +255,7 @@ public class NbtEditor extends Module {
             .build());
 
     public NbtEditor() {
-        super(Trouser.Main, "NbtEditor", " CREATIVE MODE REQUIRED. Creates custom entities (spawn eggs) and enchanted items based on your specified options.");
+        super(Trouser.operator, "NbtEditor", " CREATIVE MODE REQUIRED. Creates custom entities (spawn eggs) and enchanted items based on your specified options.");
     }
     @Override
     public void onActivate() {
@@ -294,7 +295,7 @@ public class NbtEditor extends Module {
 
                     tag.put("EntityTag", entityTag);
                     item.setNbt(tag);
-                    mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
+                    createItem(item);
                 }
 
                 case Item -> {
@@ -335,7 +336,7 @@ public class NbtEditor extends Module {
                         }
                     }
                     item.setNbt(tag);
-                    mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
+                    createItem(item);
                 }
 
                 case Potion -> {
@@ -358,7 +359,7 @@ public class NbtEditor extends Module {
                         NbtCompound display = new NbtCompound();
                         display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
                         item.getOrCreateNbt().put("display", display);
-                        mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
+                        createItem(item);
                     }
                     else switch (potionmode.get()) {
                         case Normal -> {
@@ -375,7 +376,7 @@ public class NbtEditor extends Module {
                             NbtCompound display = new NbtCompound();
                             display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
                             item.getOrCreateNbt().put("display", display);
-                            mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
+                            createItem(item);
                         }
                         case Splash -> {
                             item =  new ItemStack(Items.SPLASH_POTION);
@@ -391,7 +392,7 @@ public class NbtEditor extends Module {
                             NbtCompound display = new NbtCompound();
                             display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
                             item.getOrCreateNbt().put("display", display);
-                            mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
+                            createItem(item);
                         }
                         case Lingering -> {
                             item =  new ItemStack(Items.LINGERING_POTION);
@@ -407,7 +408,7 @@ public class NbtEditor extends Module {
                             NbtCompound display = new NbtCompound();
                             display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
                             item.getOrCreateNbt().put("display", display);
-                            mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
+                            createItem(item);
                         }
                     }
                 }
@@ -435,6 +436,9 @@ public class NbtEditor extends Module {
                     offHandStack.setNbt(mainHandNbt);
 
                     mc.interactionManager.clickCreativeStack(offHandStack, 45); // 45 is the offhand slot
+                    //clickSlot twice to make the item actually appear clientside
+                    mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 45, 0, SlotActionType.PICKUP, mc.player);
+                    mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 45, 0, SlotActionType.PICKUP, mc.player);
                 }
             }
             ChatUtils.sendMsg(Text.of("Modified item created."));
@@ -444,7 +448,12 @@ public class NbtEditor extends Module {
             toggle();
         }
     }
-
+    private void createItem(ItemStack item){
+        mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
+        //clickSlot twice to make the item actually appear clientside
+        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 36 + mc.player.getInventory().selectedSlot, 0, SlotActionType.PICKUP, mc.player);
+        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 36 + mc.player.getInventory().selectedSlot, 0, SlotActionType.PICKUP, mc.player);
+    }
     public enum Modes {
         Entity, Item, Potion, Copy
     }

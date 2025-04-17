@@ -70,7 +70,7 @@ public class ExplosionAura extends Module {
     );
 
     public ExplosionAura() {
-        super(Trouser.Main, "ExplosionAura", "You explode as you move. Must be in creative.");
+        super(Trouser.operator, "ExplosionAura", "You explode as you move. Must be in creative.");
     }
 
     private int ticks=0;

@@ -36,12 +36,6 @@ public class TextCommand extends Command {
     private static final double INITIAL_HEIGHT_OFFSET = 1.0;
     private static final String PRESETS_DIRECTORY = "TrouserStreak/TextPresets";
 
-    public enum ColorModes {
-        aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green,
-        dark_purple, dark_red, gold, gray, green, italic, light_purple,
-        red, white, yellow
-    }
-
     public TextCommand() {
         super("text", "Spawns a text hologram with custom text in front of you. Use | for new lines and #color for text color.");
         createDefaultPresets();
@@ -127,7 +121,6 @@ public class TextCommand extends Command {
         for (String word : words) {
             if (word.startsWith("#")) {
                 try {
-                    ColorModes.valueOf(word.substring(1).toLowerCase());
                     currentColor = word.substring(1).toLowerCase();
                 } catch (IllegalArgumentException ignored) {
                     formattedText.append(word).append(" ");

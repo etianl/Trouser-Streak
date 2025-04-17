@@ -15,6 +15,9 @@ import pwn.noobs.trouserstreak.modules.*;
 public class Trouser extends MeteorAddon {
         public static final Logger LOG = LoggerFactory.getLogger(Trouser.class);
         public static final Category Main = new Category("TrouserStreak");
+        public static final Category baseHunting = new Category("TrouserHunting");
+        public static final Category operator = new Category("TrouserOP/Creative");
+
         //false commented out modules to categorize modules when displayed on the anticope page
         @Override
         public void onInitialize() {
@@ -84,6 +87,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new Teleport());
                 Modules.get().add(new PortalGodMode());
                 Modules.get().add(new ItemTractorBeam());
+                Modules.get().add(new CollectibleESP());
                 Modules.get().add(new TPFly());
                 Modules.get().add(new FlightAntikick());
                 Modules.get().add(new BetterAutoSign());
@@ -108,6 +112,8 @@ public class Trouser extends MeteorAddon {
         @Override
         public void onRegisterCategories() {
                 Modules.registerCategory(Main);
+                Modules.registerCategory(baseHunting);
+                Modules.registerCategory(operator);
         }
 
         public String getPackage() {

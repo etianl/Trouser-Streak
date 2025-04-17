@@ -13,6 +13,7 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.screen.slot.SlotActionType;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.ArrayList;
@@ -23,18 +24,23 @@ public class ForceOPSign extends Module {
     private final SettingGroup commandModes = settings.createGroup("Command Modes");
     private final SettingGroup commandlines = settings.createGroup("Commands");
     private final SettingGroup commandParameters = settings.createGroup("Command Parameters");
-    public final Setting<Boolean> oldformat = commandModes.add(new BoolSetting.Builder()
-            .name("Old Sign Format <v1.20")
-            .description("Formats signs for Minecraft versions less than 1.20.")
-            .defaultValue(true)
-            .build()
-    );
     public final Setting<Boolean> versionwarning = commandModes.add(new BoolSetting.Builder()
             .name("Version Warning")
             .description("Warns you about the module not working in MC server versions greater than 1.20.4.")
             .defaultValue(true)
             .build()
     );
+    public final Setting<Boolean> autoCompat = commandModes.add(new BoolSetting.Builder()
+            .name("AutomatedCompatibility")
+            .description("Makes NBT data compatible for different server versions automatically.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<compatModes> compatmode = commandModes.add(new EnumSetting.Builder<compatModes>()
+            .name("Version Compatibility")
+            .description("Makes NBT data compatible for different server versions.")
+            .defaultValue(compatModes.LatestVersion)
+            .build());
     private final Setting<Modes> mode = commandModes.add(new EnumSetting.Builder<Modes>()
             .name("First Line Mode")
             .description("the mode")
@@ -195,7 +201,7 @@ public class ForceOPSign extends Module {
             .build()
     );
     public ForceOPSign() {
-        super(Trouser.Main, "ForceOPSign", "Requires Creative mode! Creates a ClickEvent sign in your inventory. Give it to someone with OP who is also in creative mode and have them place then click the sign.");
+        super(Trouser.operator, "ForceOPSign", "Requires Creative mode! Creates a ClickEvent sign in your inventory. Give it to someone with OP who is also in creative mode and have them place then click the sign.");
     }
 
     @Override
@@ -306,29 +312,76 @@ public class ForceOPSign extends Module {
         for (String message : messages) {
             messageList.add(NbtString.of(message));
         }
-        if (!oldformat.get()) {
-            blockEntityTag.put("front_text", new NbtCompound());
-            blockEntityTag.getCompound("front_text").put("messages", messageList);
-            blockEntityTag.put("back_text", new NbtCompound());
-            blockEntityTag.getCompound("back_text").put("messages", messageList);
 
-            tag.put("BlockEntityTag", blockEntityTag);
+        if (autoCompat.get()){
+            String serverVersion;
+            if (mc.isIntegratedServerRunning()) {
+                serverVersion = mc.getServer().getVersion();
+            } else {
+                serverVersion = mc.getCurrentServerEntry().version.getLiteralString();
+            }
+            if (serverVersion == null) {
+                error("Version could not be read. Using Version Compatibility setting instead...");
+                if (compatmode.get() == compatModes.lessThan1_20) {
+                    blockEntityTag.put("front_text", new NbtCompound());
+                    blockEntityTag.getCompound("front_text").put("messages", messageList);
+                    blockEntityTag.put("back_text", new NbtCompound());
+                    blockEntityTag.getCompound("back_text").put("messages", messageList);
+
+                    tag.put("BlockEntityTag", blockEntityTag);
+                } else {
+                    tag.put("BlockEntityTag", new NbtCompound());
+
+                    for (int i = 0; i < messages.length; i++) {
+                        tag.getCompound("BlockEntityTag").putString("Text" + (i + 1), messages[i]);
+                    }
+                }
+            } else {
+                if (!serverVersion.contains("1.20.")) {
+                    blockEntityTag.put("front_text", new NbtCompound());
+                    blockEntityTag.getCompound("front_text").put("messages", messageList);
+                    blockEntityTag.put("back_text", new NbtCompound());
+                    blockEntityTag.getCompound("back_text").put("messages", messageList);
+
+                    tag.put("BlockEntityTag", blockEntityTag);
+                } else {
+                    tag.put("BlockEntityTag", new NbtCompound());
+
+                    for (int i = 0; i < messages.length; i++) {
+                        tag.getCompound("BlockEntityTag").putString("Text" + (i + 1), messages[i]);
+                    }
+                }
+            }
         } else {
-            tag.put("BlockEntityTag", new NbtCompound());
+            if (compatmode.get() == compatModes.lessThan1_20) {
+                blockEntityTag.put("front_text", new NbtCompound());
+                blockEntityTag.getCompound("front_text").put("messages", messageList);
+                blockEntityTag.put("back_text", new NbtCompound());
+                blockEntityTag.getCompound("back_text").put("messages", messageList);
 
-            for (int i = 0; i < messages.length; i++) {
-                tag.getCompound("BlockEntityTag").putString("Text" + (i + 1), messages[i]);
+                tag.put("BlockEntityTag", blockEntityTag);
+            } else {
+                tag.put("BlockEntityTag", new NbtCompound());
+
+                for (int i = 0; i < messages.length; i++) {
+                    tag.getCompound("BlockEntityTag").putString("Text" + (i + 1), messages[i]);
+                }
             }
         }
         stack.setNbt(tag);
 
         mc.interactionManager.clickCreativeStack(stack, 36 + mc.player.getInventory().selectedSlot);
-
+        //clickSlot twice to make the item actually appear clientside
+        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 36 + mc.player.getInventory().selectedSlot, 0, SlotActionType.PICKUP, mc.player);
+        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 36 + mc.player.getInventory().selectedSlot, 0, SlotActionType.PICKUP, mc.player);
         info("OP Sign created. Give it to an operator who is in creative mode and have them click it to execute the command.");
 
         toggle();
     }
     public enum Modes {
         ForceOP, CloneSign, AnyCommand
+    }
+    public enum compatModes {
+        LatestVersion, lessThan1_20
     }
 }

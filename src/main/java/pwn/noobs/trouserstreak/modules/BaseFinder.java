@@ -41,7 +41,6 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -718,7 +717,7 @@ public class BaseFinder extends Module {
     private int entityScanTicks;
 
     public BaseFinder() {
-        super(Trouser.Main,"BaseFinder", "Estimates if a build or base may be in the chunk based on the blocks it contains.");
+        super(Trouser.baseHunting,"BaseFinder", "Estimates if a build or base may be in the chunk based on the blocks it contains.");
     }
     private void clearChunkData() {
         baseChunks.clear();

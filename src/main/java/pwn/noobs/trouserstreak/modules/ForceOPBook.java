@@ -7,6 +7,7 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.screen.slot.SlotActionType;
 import pwn.noobs.trouserstreak.Trouser;
 
 public class ForceOPBook extends Module {
@@ -43,7 +44,7 @@ public class ForceOPBook extends Module {
     );
 
     public ForceOPBook() {
-        super(Trouser.Main, "ForceOPBook", "Requires Creative mode! Creates a Book that can run commands in your inventory. Give it to someone with OP and have them click on the page in the book.");
+        super(Trouser.operator, "ForceOPBook", "Requires Creative mode! Creates a Book that can run commands in your inventory. Give it to someone with OP and have them click on the page in the book.");
     }
 
     @Override
@@ -75,6 +76,9 @@ public class ForceOPBook extends Module {
         stack.setNbt(nbt);
 
         mc.interactionManager.clickCreativeStack(stack, 36 + mc.player.getInventory().selectedSlot);
+        //clickSlot twice to make the item actually appear clientside
+        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 36 + mc.player.getInventory().selectedSlot, 0, SlotActionType.PICKUP, mc.player);
+        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 36 + mc.player.getInventory().selectedSlot, 0, SlotActionType.PICKUP, mc.player);
         info("Book created.");
 
         toggle();

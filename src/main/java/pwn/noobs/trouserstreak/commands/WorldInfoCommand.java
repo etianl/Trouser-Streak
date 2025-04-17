@@ -11,6 +11,7 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.text.Text;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.GlobalPos;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.WorldChunk;
@@ -22,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -104,11 +106,22 @@ public class WorldInfoCommand extends Command {
             }
             ChatUtils.sendMsg(Text.of("East World Border X: "+(int) mc.world.getWorldBorder().getBoundEast()+", West World Border X: "+(int) mc.world.getWorldBorder().getBoundWest()+", South World Border Z: "+(int) mc.world.getWorldBorder().getBoundSouth()+", North World Border Z: "+(int) mc.world.getWorldBorder().getBoundNorth()));
             ChatUtils.sendMsg(Text.of("WorldSpawn Location: x"+mc.world.getLevelProperties().getSpawnX()+" y"+mc.world.getLevelProperties().getSpawnY()+" z"+mc.world.getLevelProperties().getSpawnZ()));
+            Optional<GlobalPos> deathPos = mc.player.getLastDeathPos();
+            if (deathPos.isPresent()) {
+                GlobalPos pos = deathPos.get();
+                ChatUtils.sendMsg(Text.of(
+                        "Last Death Location: x" + pos.getPos().getX() +
+                                " y" + pos.getPos().getY() +
+                                " z" + pos.getPos().getZ() +
+                                " | Dimension: " + pos.getDimension().getValue()
+                ));
+            } else {
+                ChatUtils.sendMsg(Text.of("No recorded death location"));
+            }
             ChatUtils.sendMsg(Text.of("Difficulty: "+mc.world.getDifficulty().toString()));
             ChatUtils.sendMsg(Text.of("Permission Level: "+mc.player.getPermissionLevel()));
             ChatUtils.sendMsg(Text.of("Simulation Distance (chunks): "+mc.world.getSimulationDistance()));
             ChatUtils.sendMsg(Text.of("Day Count: "+Math.floor(mc.world.getTime()/24000)));
-            ChatUtils.sendMsg(Text.of("DO_DAYLIGHT_CYCLE: "+mc.world.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE)));
             ChatUtils.sendMsg(Text.of("KnownPlayers (Names with a period are bedrock players): "+getKnownPlayers));
             return SINGLE_SUCCESS;
         });
@@ -152,7 +165,6 @@ public class WorldInfoCommand extends Command {
                 ChatUtils.sendMsg(Text.of("Permission Level: "+mc.player.getPermissionLevel()));
                 ChatUtils.sendMsg(Text.of("Simulation Distance (chunks): "+mc.world.getSimulationDistance()));
                 ChatUtils.sendMsg(Text.of("Day Count: "+Math.floor(mc.world.getTime()/24000)));
-                ChatUtils.sendMsg(Text.of("DO_DAYLIGHT_CYCLE: "+mc.world.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE)));
                 ChatUtils.sendMsg(Text.of("KnownPlayers (Names with a period are bedrock players): "+getKnownPlayers));
 
                 String serverip;
@@ -190,8 +202,6 @@ public class WorldInfoCommand extends Command {
                     writer.write("Simulation Distance (chunks): "+mc.world.getSimulationDistance());
                     writer.write("\r\n");   // write new line
                     writer.write("Day Count: "+Math.floor(mc.world.getTime()/24000));
-                    writer.write("\r\n");   // write new line
-                    writer.write("DO_DAYLIGHT_CYCLE: "+mc.world.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE));
                     writer.write("\r\n");   // write new line
                     writer.write("KnownPlayers (Names with a period are bedrock players): "+getKnownPlayers);
                     writer.write("\r\n");   // write new line

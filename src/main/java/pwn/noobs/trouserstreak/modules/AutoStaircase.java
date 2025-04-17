@@ -36,12 +36,12 @@ import pwn.noobs.trouserstreak.Trouser;
 public class AutoStaircase extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final Setting<Double> view = sgGeneral.add(new DoubleSetting.Builder()
-        .name("ViewAngle")
-        .description("Angle of your view")
-        .defaultValue(1)
-        .min(0.1)
-        .sliderMax(30)
-        .build());
+            .name("ViewAngle")
+            .description("Angle of your view")
+            .defaultValue(1)
+            .min(0.1)
+            .sliderMax(30)
+            .build());
     private final Setting<Integer> limit = sgGeneral.add(new IntSetting.Builder()
             .name("Build Limit")
             .description("sets the height at which the stairs stop")
@@ -68,7 +68,7 @@ public class AutoStaircase extends Module {
         mc.player.setVelocity(0,0,0);
         resetTimer = false;
         PlayerUtils.centerPlayer();
-        if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
+        if (!(mc.player.getMainHandStack().getItem() instanceof BlockItem)) return;
         BlockPos pos = mc.player.getBlockPos().add(0,-1,0);
         if (mc.world.getBlockState(pos).isReplaceable()) {;
             mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
@@ -95,12 +95,12 @@ public class AutoStaircase extends Module {
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         if (mc.player == null || mc.world == null) {toggle(); return;}
-            if (mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem) {
-                resetTimer = false;
-                Modules.get().get(Timer.class).setOverride(StairTimer.get());
-            } else if (!resetTimer) {
-                resetTimer = true;
-                Modules.get().get(Timer.class).setOverride(Timer.OFF);
+        if (mc.player.getMainHandStack().getItem() instanceof BlockItem) {
+            resetTimer = false;
+            Modules.get().get(Timer.class).setOverride(StairTimer.get());
+        } else if (!resetTimer) {
+            resetTimer = true;
+            Modules.get().get(Timer.class).setOverride(Timer.OFF);
         }
         if (mc.player.getMainHandStack().isEmpty()) {
             mc.options.forwardKey.setPressed(false);
@@ -114,7 +114,7 @@ public class AutoStaircase extends Module {
             mc.options.rightKey.setPressed(false);
         if (mc.options.leftKey.isPressed())
             mc.options.leftKey.setPressed(false);
-        if (!(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
+        if (!(mc.player.getMainHandStack().getItem() instanceof BlockItem)) return;
         switch (mc.player.getMovementDirection()) {
             case NORTH ->
                     mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(mc.player.getX(), mc.player.getY(), mc.player.getZ() - view.get()));
@@ -148,7 +148,7 @@ public class AutoStaircase extends Module {
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent playerMoveEvent) {
         if (mc.player == null || mc.world == null) {toggle(); return;}
-        if (!mc.player.isOnGround() || !(mc.player.getInventory().getMainHandStack().getItem() instanceof BlockItem)) return;
+        if (!mc.player.isOnGround() || !(mc.player.getMainHandStack().getItem() instanceof BlockItem)) return;
         BlockPos pos = mc.player.getBlockPos().offset(mc.player.getMovementDirection());
         if (mc.world.getBlockState(pos).isReplaceable()) {
             mc.options.forwardKey.setPressed(false);

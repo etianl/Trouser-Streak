@@ -381,7 +381,7 @@ public class AirstrikePlus extends Module {
             .build());
 
     public AirstrikePlus() {
-        super(Trouser.Main, "Airstrike+", "Rains things down from the sky");
+        super(Trouser.operator, "Airstrike+", "Rains things down from the sky");
     }
 
     final Random r = new Random();

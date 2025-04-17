@@ -209,7 +209,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
     private final Set<Box> tunnels = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final Set<Box> staircases = Collections.newSetFromMap(new ConcurrentHashMap<>());
     public HoleAndTunnelAndStairsESP() {
-        super(Trouser.Main, "Hole/Tunnel/StairsESP", "Finds and highlights holes and tunnels and stairs.");
+        super(Trouser.baseHunting, "Hole/Tunnel/StairsESP", "Finds and highlights holes and tunnels and stairs.");
     }
 
     @Override

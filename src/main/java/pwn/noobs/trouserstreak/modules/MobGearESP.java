@@ -18,12 +18,10 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
@@ -32,8 +30,6 @@ import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.*;
@@ -88,7 +84,7 @@ public class MobGearESP extends Module {
     ));
 
     public MobGearESP() {
-        super(Trouser.Main, "MobGearESP", "ESP Module that highlights mobs likely wearing player gear.");
+        super(Trouser.baseHunting, "MobGearESP", "ESP Module that highlights mobs likely wearing player gear.");
     }
 
     public final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()

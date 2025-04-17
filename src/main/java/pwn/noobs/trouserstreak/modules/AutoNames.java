@@ -105,7 +105,7 @@ public class AutoNames extends Module {
     private String teamName;
 
     public AutoNames() {
-        super(Trouser.Main, "auto-names", "Automatically change player name colors, prefix, suffix in tab and chat. Requires operator access.");
+        super(Trouser.operator, "auto-names", "Automatically change player name colors, prefix, suffix in tab and chat. Requires operator access.");
     }
 
     @Override

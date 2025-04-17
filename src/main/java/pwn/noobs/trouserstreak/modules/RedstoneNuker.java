@@ -29,6 +29,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShearsItem;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolItem;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -566,7 +567,7 @@ public class RedstoneNuker extends Module {
     }
 
     public static boolean isTool(ItemStack itemStack) {
-        return itemStack.getItem() instanceof ToolItem || itemStack.getItem() instanceof ShearsItem;
+        return itemStack.isIn(ItemTags.AXES) || itemStack.isIn(ItemTags.HOES) || itemStack.isIn(ItemTags.PICKAXES) || itemStack.isIn(ItemTags.SHOVELS) || itemStack.getItem() instanceof ShearsItem;
     }
     private boolean filterBlocks(Block block) {
         return isRedstoneBlock(block);

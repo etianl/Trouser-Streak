@@ -228,7 +228,7 @@ public class AutoMountain extends Module {
     private final Setting<Boolean> rendertopbottomblock = sgRender.add(new BoolSetting.Builder()
             .name("render highest/lowest block")
             .description("Renders a block overlay where the highest and lowest blocks are. These positions are used for AutoLavacaster timing calculations.")
-            .defaultValue(true)
+            .defaultValue(false)
             .build()
     );
     private final Setting<SettingColor> topbottomsideColor = sgRender.add(new ColorSetting.Builder()
@@ -333,7 +333,7 @@ public class AutoMountain extends Module {
         resetTimer = false;
         playerPos = mc.player.getBlockPos();
         renderplayerPos = mc.player.getBlockPos();
-        if (startPaused.get() || isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack())) return;
+        if (startPaused.get() || isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack())) return;
         BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
         if (mc.world.getBlockState(pos).isReplaceable()) {
             mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
@@ -361,7 +361,7 @@ public class AutoMountain extends Module {
         speed=0;
         resetTimer = true;
         Modules.get().get(Timer.class).setOverride(Timer.OFF);
-        if (isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack())) return;
+        if (isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack())) return;
         if (!startPaused.get() && !pause){
             BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
             if (mc.world.getBlockState(pos).isReplaceable()) {
@@ -519,7 +519,7 @@ public class AutoMountain extends Module {
             speed=0;
             resetTimer = true;
             Modules.get().get(Timer.class).setOverride(Timer.OFF);
-            if (isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack())) return;
+            if (isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack())) return;
             if (isthisfirstblock){
                 highestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
                 lowestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
@@ -547,7 +547,7 @@ public class AutoMountain extends Module {
                 if (mouseT.get())mc.player.setPitch(75);
                 if (!mouseT.get())prevPitch=75;
             }
-            if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack()) || !pause) return;
+            if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack()) || !pause) return;
             if (mc.options.leftKey.isPressed() && !mc.options.sneakKey.isPressed()){
                 if (mouseT.get())mc.player.setYaw(mc.player.getYaw()-90);
                 if (!mouseT.get()){
@@ -660,7 +660,7 @@ public class AutoMountain extends Module {
             resetTimer = true;
             Modules.get().get(Timer.class).setOverride(Timer.OFF);
         }
-        if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack()) || !pause || !go) return;
+        if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack()) || !pause || !go) return;
         if (mc.options.sneakKey.isPressed() && mc.options.rightKey.isPressed() && delayLeft <= 0 && offLeft > 0 && !autolavamountain.get()){
             cookie++;
             if (cookie==munscher.get()){
@@ -774,7 +774,7 @@ public class AutoMountain extends Module {
             else if ((!lagpause.get() || timeSinceLastTick < lag.get()) && delayLeft <= 0 && offLeft > 0 && (mc.player.getY() <= limit.get() &&  mc.player.getY() >= downlimit.get() && !autolavamountain.get() || mc.player.getY() <= limit.get()-4 && mc.player.getY() <= lowestblock.getY()+botlimit.get()+1 && autolavamountain.get())) {
                 offLeft--;
                 if (mc.player == null || mc.world == null) {toggle(); return;}
-                if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack()) || !pause || !go) return;
+                if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack()) || !pause || !go) return;
                 if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {            //UP
                     if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
                         BlockPos un1 = playerPos.add(new Vec3i(0,spcoffset.get()+2,0));
@@ -944,7 +944,7 @@ public class AutoMountain extends Module {
             else if ((!lagpause.get() || timeSinceLastTick < lag.get()) && delayLeft <= 0 && offLeft > 0 && mc.player.getY() <= limit.get() && mc.player.getY() >= downlimit.get()) {
                 offLeft--;
                 if (mc.player == null || mc.world == null) {toggle(); return;}
-                if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack()) || !pause || !go) return;
+                if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack()) || !pause || !go) return;
                 if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {            //DOWN
                     if (mc.options.jumpKey.isPressed()){
                         BlockPos dn1 = playerPos.add(new Vec3i(0,-spcoffset.get()-1,-1));
