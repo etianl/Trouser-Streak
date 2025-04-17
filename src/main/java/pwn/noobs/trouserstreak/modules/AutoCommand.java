@@ -100,7 +100,7 @@ public class AutoCommand extends Module {
     private Queue<String> commandQueue = new LinkedList<>();
 
     public AutoCommand() {
-        super(Trouser.Main, "auto-command", "Automatically runs commands when player has/gets operator access");
+        super(Trouser.operator, "auto-command", "Automatically runs commands when player has/gets operator access");
     }
 
     @Override

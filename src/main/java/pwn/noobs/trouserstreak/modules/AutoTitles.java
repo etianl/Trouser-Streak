@@ -229,7 +229,7 @@ public class AutoTitles extends Module {
             .build()
     );
     public AutoTitles() {
-        super(Trouser.Main, "AutoTitles", "Creates text across the screens for online players. Requires OP.");
+        super(Trouser.operator, "AutoTitles", "Creates text across the screens for online players. Requires OP.");
     }
 
     private CopyOnWriteArrayList<PlayerListEntry> players;

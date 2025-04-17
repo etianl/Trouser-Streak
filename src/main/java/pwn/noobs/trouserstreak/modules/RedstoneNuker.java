@@ -27,12 +27,12 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.MiningToolItem;
 import net.minecraft.item.ShearsItem;
-import net.minecraft.item.SwordItem;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -569,15 +569,15 @@ public class RedstoneNuker extends Module {
             if (enchantPreference == EnchantPreference.SilkTouch)
                 score += EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.SILK_TOUCH), itemStack);
         }
-
-        if (itemStack.getItem() instanceof SwordItem item && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooShootBlock))
+        Item item = itemStack.getItem();
+        if (itemStack.isIn(ItemTags.SWORDS) && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooShootBlock))
             score += 9000 + (item.getComponents().get(DataComponentTypes.TOOL).getSpeed(state) * 1000);
 
         return score;
     }
 
     public static boolean isTool(ItemStack itemStack) {
-        return itemStack.getItem() instanceof MiningToolItem || itemStack.getItem() instanceof ShearsItem;
+        return itemStack.isIn(ItemTags.AXES) || itemStack.isIn(ItemTags.HOES) || itemStack.isIn(ItemTags.PICKAXES) || itemStack.isIn(ItemTags.SHOVELS) || itemStack.getItem() instanceof ShearsItem;
     }
     private boolean filterBlocks(Block block) {
         return isRedstoneBlock(block);

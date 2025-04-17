@@ -21,6 +21,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
@@ -79,7 +80,7 @@ public class AdvancedItemESP extends Module {
     ));
 
     public AdvancedItemESP() {
-        super(Trouser.Main, "AdvancedItemESP", "ESP Module that highlights only certain items.");
+        super(Trouser.baseHunting, "AdvancedItemESP", "ESP Module that highlights only certain items.");
     }
 
     public final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
@@ -291,17 +292,30 @@ public class AdvancedItemESP extends Module {
         interpolatedColor = new Color(r, g, b, a);
         return interpolatedColor;
     }
-
+    public static boolean isTool(ItemStack itemStack) {
+        return itemStack.isIn(ItemTags.AXES) ||
+                itemStack.isIn(ItemTags.HOES) ||
+                itemStack.isIn(ItemTags.PICKAXES) ||
+                itemStack.isIn(ItemTags.SHOVELS) ||
+                itemStack.getItem() instanceof ShearsItem ||
+                itemStack.getItem() instanceof FlintAndSteelItem;
+    }
+    public static boolean isArmor(ItemStack itemStack) {
+        return itemStack.isIn(ItemTags.HEAD_ARMOR) ||
+                itemStack.isIn(ItemTags.CHEST_ARMOR) ||
+                itemStack.isIn(ItemTags.LEG_ARMOR) ||
+                itemStack.isIn(ItemTags.FOOT_ARMOR);
+    }
     public boolean shouldSkip(ItemEntity entity) {
         boolean skip = false;
         if (enchants.get()) {
-            if (!certainenchants.get() && (entity.getStack().getItem() instanceof MiningToolItem || entity.getStack().getItem() instanceof ArmorItem || entity.getStack().getItem() instanceof SwordItem || entity.getStack().getItem() instanceof FishingRodItem || entity.getStack().getItem() instanceof FlintAndSteelItem || entity.getStack().getItem() instanceof MaceItem || entity.getStack().getItem() instanceof ShearsItem || entity.getStack().getItem() instanceof ShieldItem || entity.getStack().getItem() instanceof TridentItem) && entity.getStack().isEnchantable() && entity.getStack().getEnchantments().isEmpty()) skip = true;
+            if (!certainenchants.get() && (isTool(entity.getStack()) || isArmor(entity.getStack()) || entity.getStack().isIn(ItemTags.SWORDS) || entity.getStack().getItem() instanceof FishingRodItem || entity.getStack().getItem() instanceof FlintAndSteelItem || entity.getStack().getItem() instanceof MaceItem || entity.getStack().getItem() instanceof ShearsItem || entity.getStack().getItem() instanceof ShieldItem || entity.getStack().getItem() instanceof TridentItem) && entity.getStack().isEnchantable() && entity.getStack().getEnchantments().isEmpty()) skip = true;
             else if (certainenchants.get()){
-                if (entity.getStack().getItem() instanceof MiningToolItem){
+                if (isTool(entity.getStack())){
                     skip = compareEnchants(entity, toolenchants);
-                } else if (entity.getStack().getItem() instanceof SwordItem){
+                } else if ( entity.getStack().isIn(ItemTags.SWORDS)){
                     skip = compareEnchants(entity, swordenchants);
-                } else if (entity.getStack().getItem() instanceof ArmorItem){
+                } else if (isArmor(entity.getStack())){
                     skip = compareEnchants(entity, armorenchants);
                 } else if (entity.getStack().getItem() instanceof MaceItem){
                     skip = compareEnchants(entity, maceenchants);

@@ -5,6 +5,6 @@ import pwn.noobs.trouserstreak.Trouser;
 
 public class LecternCrash extends Module {
     public LecternCrash() {
-        super(Trouser.Main, "LecternCrash", "Enable/Disable LecternCrash button");
+        super(Trouser.Main, "LecternCrash", "Enable/Disable LecternCrash button. Crashes 1.18.X vanilla servers and possibly below");
     }
 }

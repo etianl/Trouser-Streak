@@ -11,8 +11,8 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
-import net.minecraft.item.PickaxeItem;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -60,7 +60,7 @@ public class ShulkerDupe extends Module {
                 Modules.get().get(Timer.class).toggle();
             }
             for (int i = 0; i < 8; i++) {
-                if (autoT.get() && (mc.player.getInventory().getStack(0).getItem() instanceof PickaxeItem || mc.player.getInventory().getStack(1).getItem() instanceof PickaxeItem ||mc.player.getInventory().getStack(2).getItem() instanceof PickaxeItem ||mc.player.getInventory().getStack(3).getItem() instanceof PickaxeItem ||mc.player.getInventory().getStack(4).getItem() instanceof PickaxeItem ||mc.player.getInventory().getStack(5).getItem() instanceof PickaxeItem ||mc.player.getInventory().getStack(6).getItem() instanceof PickaxeItem ||mc.player.getInventory().getStack(7).getItem() instanceof PickaxeItem ||mc.player.getInventory().getStack(8).getItem() instanceof PickaxeItem) && !(mc.player.getInventory().getMainHandStack().getItem() instanceof PickaxeItem)){
+                if (autoT.get() && (mc.player.getInventory().getStack(0).isIn(ItemTags.PICKAXES) || mc.player.getInventory().getStack(1).isIn(ItemTags.PICKAXES) ||mc.player.getInventory().getStack(2).isIn(ItemTags.PICKAXES) ||mc.player.getInventory().getStack(3).isIn(ItemTags.PICKAXES) ||mc.player.getInventory().getStack(4).isIn(ItemTags.PICKAXES) ||mc.player.getInventory().getStack(5).isIn(ItemTags.PICKAXES) ||mc.player.getInventory().getStack(6).isIn(ItemTags.PICKAXES) ||mc.player.getInventory().getStack(7).isIn(ItemTags.PICKAXES) ||mc.player.getInventory().getStack(8).isIn(ItemTags.PICKAXES)) && !(mc.player.getMainHandStack().isIn(ItemTags.PICKAXES))){
                     mc.player.getInventory().selectedSlot++;
                     if (mc.player.getInventory().selectedSlot>8) mc.player.getInventory().selectedSlot=0;
                 }

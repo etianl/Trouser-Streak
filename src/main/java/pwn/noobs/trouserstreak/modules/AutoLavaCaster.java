@@ -354,7 +354,7 @@ public class AutoLavaCaster extends Module {
         BlockPos ceiling = new BlockPos(mc.player.getBlockX(),mc.player.getBlockY()+2,mc.player.getBlockZ());
         BlockPos hover = new BlockPos(mc.player.getBlockX(),mc.player.getBlockY()-1,mc.player.getBlockZ());
         lavamountainticks++;
-        if (incY.get() && isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack())) {
+        if (incY.get() && isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack())) {
             cascadingpileof();
         }
         PlayerUtils.centerPlayer();
@@ -495,7 +495,7 @@ public class AutoLavaCaster extends Module {
                         return;
                     }
                     cascadingpileof();
-                    if (incY.get() && isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack())) {
+                    if (incY.get() && isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack())) {
                         error("Not Enough Suitable Blocks in Hand.");
                         lavamountainticks = 0;
                         mc.player.setNoGravity(false);
@@ -646,7 +646,7 @@ public class AutoLavaCaster extends Module {
                         return;
                     }
                     cascadingpileof();
-                    if (bstyle.get() && incY.get() && isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack())) {
+                    if (bstyle.get() && incY.get() && isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack())) {
                         error("Not Enough Suitable Blocks in Hand.");
                         lavamountainticks = 0;
                         mc.player.setNoGravity(false);
@@ -827,7 +827,7 @@ public class AutoLavaCaster extends Module {
                         return;
                     }
                     cascadingpileof();
-                    if (bstyle.get() && incY.get() && isInvalidBlock(mc.player.getInventory().getMainHandStack().getItem().getDefaultStack())) {
+                    if (bstyle.get() && incY.get() && isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack())) {
                         error("Not Enough Suitable Blocks in Hand.");
                         lavamountainticks = 0;
                         mc.player.setNoGravity(false);

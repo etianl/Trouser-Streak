@@ -16,13 +16,13 @@ public class ClientPlayerInteractionManagerMixin {
     @Inject(at = @At("HEAD"), method = "stopUsingItem")
     public void onStopUsingItem(PlayerEntity player, CallbackInfo ci){
         if(Modules.get().isActive(InstantKill.class)){
-            if(player.getInventory().getMainHandStack().getItem().equals(Items.BOW)){
+            if(player.getMainHandStack().getItem().equals(Items.BOW)){
                 if (Modules.get().get(AntiHunger.class).isActive()) {
                     Modules.get().get(AntiHunger.class).toggle();
                 }
                 InstantKill.addVelocityToPlayer();
             }
-            if(player.getInventory().getMainHandStack().getItem().equals(Items.TRIDENT)){
+            if(player.getMainHandStack().getItem().equals(Items.TRIDENT)){
                 if (Modules.get().get(AntiHunger.class).isActive()) {
                     Modules.get().get(AntiHunger.class).toggle();
                 }

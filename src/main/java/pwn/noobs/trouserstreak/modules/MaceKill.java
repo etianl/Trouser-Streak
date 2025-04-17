@@ -47,12 +47,12 @@ public class MaceKill extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (mc.player != null && mc.player.getInventory().getMainHandStack().getItem() == Items.MACE && event.packet instanceof IPlayerInteractEntityC2SPacket packet && packet.meteor$getType() == PlayerInteractEntityC2SPacket.InteractType.ATTACK) {
+        if (mc.player != null && mc.player.getMainHandStack().getItem() == Items.MACE && event.packet instanceof IPlayerInteractEntityC2SPacket packet && packet.meteor$getType() == PlayerInteractEntityC2SPacket.InteractType.ATTACK) {
             try {
                 if (packet.meteor$getEntity() instanceof LivingEntity) {
                     LivingEntity targetEntity = (LivingEntity) packet.meteor$getEntity();
 
-                    if (packetDisable.get() && ((targetEntity.isBlocking() && targetEntity.blockedByShield(targetEntity.getRecentDamageSource())) || targetEntity.isInvulnerable() || targetEntity.isInCreativeMode())) return;
+                    if (packetDisable.get() && (targetEntity.isBlocking() || targetEntity.isInvulnerable() || targetEntity.isInCreativeMode())) return;
                     previouspos = mc.player.getPos();
                     int blocks = getMaxHeightAbovePlayer();
 

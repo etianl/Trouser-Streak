@@ -162,7 +162,7 @@ public class PortalPatternFinder extends Module {
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
 	public PortalPatternFinder() {
-		super(Trouser.Main,"PortalPatternFinder", "Scans for the shapes of broken/removed Nether Portals within the cave air blocks found in caves and underground structures in 1.13+ chunks. **May be useful for finding portal skips in the Nether**");
+		super(Trouser.baseHunting,"PortalPatternFinder", "Scans for the shapes of broken/removed Nether Portals within the cave air blocks found in caves and underground structures in 1.13+ chunks. **May be useful for finding portal skips in the Nether**");
 	}
 
 	@Override

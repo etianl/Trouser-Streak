@@ -136,7 +136,7 @@ public class AutoDisplays extends Module {
             .visible(() -> displayMode.get() == Modes.TEXT)
             .build());
     public AutoDisplays() {
-        super(Trouser.Main, "auto-displays", "Automatically spam block or text displays around players. Requires operator access.");
+        super(Trouser.operator, "auto-displays", "Automatically spam block or text displays around players. Requires operator access.");
     }
     private CopyOnWriteArrayList<PlayerListEntry> players;
     private int tickTimer = 0;
