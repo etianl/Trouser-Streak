@@ -180,7 +180,7 @@ public class BoomPlus extends Module {
     );
 
     public BoomPlus() {
-        super(Trouser.Main, "boom+", "shoots something where you click");
+        super(Trouser.operator, "boom+", "shoots something where you click");
     }
     private int aticks=0;
     private String namecolour = nomcolor.get().toString();

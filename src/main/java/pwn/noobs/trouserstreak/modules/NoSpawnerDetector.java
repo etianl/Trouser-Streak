@@ -155,7 +155,7 @@ public class NoSpawnerDetector extends Module {
     private double StructureDistance = 2000000000;
 
     public NoSpawnerDetector() {
-        super(Trouser.Main, "NoSpawnerDetector", "Detects Structures and also their lack of mob spawner.");
+        super(Trouser.baseHunting, "NoSpawnerDetector", "Detects Structures and also their lack of mob spawner.");
     }
     @Override
     public void onActivate() {

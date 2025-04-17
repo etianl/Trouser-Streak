@@ -116,7 +116,7 @@ public class PotESP extends Module {
     private int closestPotZ=2000000000;
     private double PotDistance=2000000000;
     public PotESP() {
-        super(Trouser.Main,"PotESP", "Finds the dank pots... In Minecraft (Locates decorated pots with un-natural items in them)");
+        super(Trouser.baseHunting,"PotESP", "Finds the dank pots... In Minecraft (Locates decorated pots with un-natural items in them)");
     }
     @Override
     public void onActivate() {

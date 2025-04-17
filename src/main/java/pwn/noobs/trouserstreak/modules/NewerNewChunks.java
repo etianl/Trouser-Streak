@@ -378,7 +378,7 @@ public class NewerNewChunks extends Module {
 			Paths.get("BlockExploitChunkData.txt")
 	));
 	public NewerNewChunks() {
-		super(Trouser.Main,"NewerNewChunks", "Detects new chunks by scanning the order of chunk section palettes. Can also check liquid flow, and block ticking packets.");
+		super(Trouser.baseHunting,"NewerNewChunks", "Detects new chunks by scanning the order of chunk section palettes. Can also check liquid flow, and block ticking packets.");
 	}
 	private void clearChunkData() {
 		newChunks.clear();
