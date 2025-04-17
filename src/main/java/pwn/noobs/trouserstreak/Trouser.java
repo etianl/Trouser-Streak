@@ -5,6 +5,7 @@ import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import net.minecraft.item.Items;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pwn.noobs.trouserstreak.commands.*;
@@ -14,9 +15,9 @@ import pwn.noobs.trouserstreak.modules.*;
 
 public class Trouser extends MeteorAddon {
         public static final Logger LOG = LoggerFactory.getLogger(Trouser.class);
-        public static final Category Main = new Category("TrouserStreak");
-        public static final Category baseHunting = new Category("TrouserHunting");
-        public static final Category operator = new Category("TrouserOP/Creative");
+        public static final Category Main = new Category("TrouserStreak", Items.LEATHER_LEGGINGS.getDefaultStack());
+        public static final Category baseHunting = new Category("TrouserHunting", Items.SPYGLASS.getDefaultStack());
+        public static final Category operator = new Category("TrouserOP/Creative", Items.NETHER_STAR.getDefaultStack());
 
         //false commented out modules to categorize modules when displayed on the anticope page
         @Override
