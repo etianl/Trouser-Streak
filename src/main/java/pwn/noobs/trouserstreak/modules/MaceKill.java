@@ -135,7 +135,7 @@ public class MaceKill extends Module {
             BlockPos up2 = up1.up(1);
             if (isSafeBlock(up1) && isSafeBlock(up2)) return i - playerPos.getY();
         }
-        return 0;
+        return 0; // Return 0 if no suitable position is found
     }
 
     private boolean isSafeBlock(BlockPos pos) {
