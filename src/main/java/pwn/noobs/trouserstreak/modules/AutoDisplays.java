@@ -3,6 +3,7 @@ package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
+import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
@@ -23,6 +24,7 @@ import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class AutoDisplays extends Module {
+    private boolean isIncorrectArgumentError = false;  // Flag to track if error occurred
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgBlock = settings.createGroup("Block Display Options");
     private final SettingGroup sgText = settings.createGroup("Text Display Options");
@@ -34,7 +36,7 @@ public class AutoDisplays extends Module {
     public final Setting<Boolean> notOP = sgGeneral.add(new BoolSetting.Builder()
             .name("Toggle Module if not OP")
             .description("Turn this off to prevent the bug of module always being turned off when you join server.")
-            .defaultValue(false)
+            .defaultValue(true)
             .build()
     );
     public final Setting<Boolean> allAloneToggle = sgGeneral.add(new BoolSetting.Builder()
@@ -162,20 +164,48 @@ public class AutoDisplays extends Module {
             error("Must have permission level 2 or higher");
         }
     }
-    @Override
-    public void onDeactivate() {
-        switch (displayMode.get()) {
-            case BLOCK -> {
-                if (killEntities.get())ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:block_display,tag=MOL] run kill @s");
-            }
-            case TEXT -> {
-                if (killEntities.get())ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:text_display,tag=MOL] run kill @s");
+    @EventHandler
+    public void onMessageReceive(ReceiveMessageEvent event) {
+        if (event.getMessage() != null && mc.player != null) {
+            String message = event.getMessage().getString(); // Convert Text object to string
+
+            // Check for the specific error message
+            if (message.contains("Incorrect argument for command")) {
+                isIncorrectArgumentError = true;  // Flag the error
             }
         }
     }
+    @Override
+    public void onDeactivate() {
+        // Only run the command if the player is OP
+        if (mc.player.hasPermissionLevel(2)) {
+            switch (displayMode.get()) {
+                case BLOCK -> {
+                    if (killEntities.get()) {
+                        if (isIncorrectArgumentError) {
+                            ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:block_display,tag=MOL] run kill @s");
+                        } else {
+                            ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:block_display,tag=MOL] run minecraft:kill @s");
+                        }
+                    }
+                }
+                case TEXT -> {
+                    if (killEntities.get()) {
+                        if (isIncorrectArgumentError) {
+                            ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:text_display,tag=MOL] run kill @s");
+                        } else {
+                            ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:text_display,tag=MOL] run minecraft:kill @s");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Event handler for handling periodic ticks (for commands)
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (mc.getNetworkHandler().getPlayerList().toArray().length == 1 && allAloneToggle.get()){
+        if (mc.getNetworkHandler().getPlayerList().toArray().length == 1 && allAloneToggle.get()) {
             toggle();
             error("No other players online.");
         }
@@ -184,11 +214,22 @@ public class AutoDisplays extends Module {
 
             switch (displayMode.get()) {
                 case BLOCK -> {
-                    if (killEntities.get())ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:block_display,tag=MOL] run kill @s");
+                    if (killEntities.get()) {
+                        if (isIncorrectArgumentError) {
+                            ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:block_display,tag=MOL] run kill @s");
+                        } else {
+                            ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:block_display,tag=MOL] run minecraft:kill @s");
+                        }
+                    }
                 }
-
                 case TEXT -> {
-                    if (killEntities.get())ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:text_display,tag=MOL] run kill @s");
+                    if (killEntities.get()) {
+                        if (isIncorrectArgumentError) {
+                            ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:text_display,tag=MOL] run kill @s");
+                        } else {
+                            ChatUtils.sendPlayerMsg("/execute as @e[type=minecraft:text_display,tag=MOL] run minecraft:kill @s");
+                        }
+                    }
                 }
             }
         } else {
