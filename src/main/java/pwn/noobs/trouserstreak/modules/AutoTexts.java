@@ -215,7 +215,21 @@ public class AutoTexts extends Module {
         entityTag.putBoolean("Marker", true);
         entityTag.putBoolean("NoGravity", true);
         entityTag.putBoolean("CustomNameVisible", true);
-        entityTag.putString("CustomName", "{\"text\":\"" + selectedText + "\",\"color\":\"" + namecolour + "\"}");
+        NbtCompound CustomNameNBT = new NbtCompound();
+        CustomNameNBT.putString("text", selectedText);
+        CustomNameNBT.putString("color", namecolour);
+        String serverVersion;
+        if (mc.isIntegratedServerRunning()) {
+            serverVersion = mc.getServer().getVersion();
+        } else {
+            serverVersion = mc.getCurrentServerEntry().version.getLiteralString();
+        }
+        if (serverVersion == null) {
+            entityTag.putString("CustomName", "{\"text\":\"" + selectedText + "\",\"color\":\"" + namecolour + "\"}");
+        } else {
+            if (!serverVersion.contains("1.21.5")) entityTag.putString("CustomName", "{\"text\":\"" + selectedText + "\",\"color\":\"" + namecolour + "\"}");
+            else  entityTag.put("CustomName", CustomNameNBT);
+        }
 
         return NbtComponent.of(entityTag);
     }

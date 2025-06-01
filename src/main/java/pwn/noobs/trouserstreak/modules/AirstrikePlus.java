@@ -124,7 +124,7 @@ public class AirstrikePlus extends Module {
             .name("CustomNameVisible")
             .description("CustomNameVisible or not.")
             .defaultValue(true)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> !airstrikeEveryone.get())
             .build()
     );
     private final Setting<Integer> health = sgnormal.add(new IntSetting.Builder()
@@ -133,7 +133,7 @@ public class AirstrikePlus extends Module {
             .defaultValue(1000)
             .min(0)
             .sliderRange(0, 10000)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> !airstrikeEveryone.get())
             .build());
     private final Setting<Integer> absorption = sgnormal.add(new IntSetting.Builder()
             .name("Absorption Points")
@@ -141,77 +141,84 @@ public class AirstrikePlus extends Module {
             .defaultValue(1000)
             .min(0)
             .sliderRange(0, 10000)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> !airstrikeEveryone.get())
             .build());
+    public final Setting<Boolean> ageSpecify = sgnormal.add(new BoolSetting.Builder()
+            .name("Specify Age")
+            .description("Add an Age NBT tag.")
+            .defaultValue(false)
+            .visible(() -> !airstrikeEveryone.get())
+            .build()
+    );
     private final Setting<Integer> age = sgnormal.add(new IntSetting.Builder()
             .name("Age")
             .description("It's age, 0 is baby.")
             .defaultValue(1)
             .min(0)
             .sliderRange(0, 100)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> !airstrikeEveryone.get() && ageSpecify.get())
             .build());
     public final Setting<Boolean> invincible = sgnormal.add(new BoolSetting.Builder()
             .name("Invulnerable")
             .description("Invulnerable or not")
             .defaultValue(true)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> !airstrikeEveryone.get())
             .build()
     );
     public final Setting<Boolean> persist = sgnormal.add(new BoolSetting.Builder()
             .name("Never Despawn")
             .description("adds PersistenceRequired tag.")
             .defaultValue(true)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> !airstrikeEveryone.get())
             .build()
     );
     public final Setting<Boolean> noAI = sgnormal.add(new BoolSetting.Builder()
             .name("NoAI")
             .description("NoAI")
             .defaultValue(false)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> !airstrikeEveryone.get())
             .build()
     );
     public final Setting<Boolean> falsefire = sgnormal.add(new BoolSetting.Builder()
             .name("HasVisualFire")
             .description("HasVisualFire or not")
             .defaultValue(false)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> !airstrikeEveryone.get())
             .build()
     );
     public final Setting<Boolean> nograv = sgnormal.add(new BoolSetting.Builder()
             .name("NoGravity")
             .description("NoGravity or not")
             .defaultValue(false)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> !airstrikeEveryone.get())
             .build()
     );
     public final Setting<Boolean> silence = sgnormal.add(new BoolSetting.Builder()
             .name("Silent")
             .description("adds Silent tag.")
             .defaultValue(false)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> !airstrikeEveryone.get())
             .build()
     );
     public final Setting<Boolean> glow = sgnormal.add(new BoolSetting.Builder()
             .name("Glowing")
             .description("Glowing or not")
             .defaultValue(false)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> !airstrikeEveryone.get())
             .build()
     );
     public final Setting<Boolean> ignite = sgnormal.add(new BoolSetting.Builder()
             .name("Ignited")
             .description("Pre-ignite creeper or not.")
             .defaultValue(true)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> !airstrikeEveryone.get())
             .build()
     );
     public final Setting<Boolean> powah = sgnormal.add(new BoolSetting.Builder()
             .name("Charged Creeper")
             .description("powered creeper or not.")
             .defaultValue(false)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> !airstrikeEveryone.get())
             .build()
     );
     private final Setting<Integer> fuse = sgnormal.add(new IntSetting.Builder()
@@ -220,7 +227,7 @@ public class AirstrikePlus extends Module {
             .defaultValue(20)
             .min(0)
             .sliderRange(0, 120)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> !airstrikeEveryone.get())
             .build());
     private final Setting<Integer> exppower = sgnormal.add(new IntSetting.Builder()
             .name("ExplosionPower/Radius")
@@ -228,7 +235,7 @@ public class AirstrikePlus extends Module {
             .defaultValue(10)
             .min(1)
             .sliderMax(127)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> !airstrikeEveryone.get())
             .build());
     private final Setting<Integer> size = sgnormal.add(new IntSetting.Builder()
             .name("Slime/Magma Cube Size")
@@ -236,13 +243,20 @@ public class AirstrikePlus extends Module {
             .defaultValue(1)
             .min(0)
             .sliderRange(0, 100)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> !airstrikeEveryone.get())
             .build());
+    public final Setting<Boolean> blockstateSpecify = sgnormal.add(new BoolSetting.Builder()
+            .name("Specify falling_block")
+            .description("Add an NBT tag defining what is the falling block.")
+            .defaultValue(false)
+            .visible(() -> !airstrikeEveryone.get())
+            .build()
+    );
     private final Setting<Block> blockstate = sgnormal.add(new BlockSetting.Builder()
             .name("falling_block entity block")
             .description("What is created when specifying falling_block as the entity.")
             .defaultValue(Blocks.BEDROCK)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> !airstrikeEveryone.get() && blockstateSpecify.get())
             .build());
     public final Setting<Boolean> Ecustomname = sgeveryone.add(new BoolSetting.Builder()
             .name("CustomNameVisible")
@@ -434,7 +448,6 @@ public class AirstrikePlus extends Module {
         if (randomPrefix.get()) {
             String randomPrefix = prefixes[new Random().nextInt(prefixes.length)];
             customName = randomPrefix + nom.get();
-            // Use modifiedName for further processing or assignment
         } else {
             customName = nom.get();
         }
@@ -500,12 +513,15 @@ public class AirstrikePlus extends Module {
         entityTag.put("Pos", pos);
         entityTag.putInt("Health", health.get());
         entityTag.putInt("AbsorptionAmount", absorption.get());
-        entityTag.putInt("Age", age.get());
+        if (ageSpecify.get()) entityTag.putInt("Age", age.get());
         entityTag.putInt("ExplosionPower", exppower.get());
         entityTag.putInt("ExplosionRadius", exppower.get());
         NbtCompound blockState = new NbtCompound();
         blockState.putString("Name", "minecraft:" + blockName);
-        entityTag.put("BlockState", blockState);
+        if (blockstateSpecify.get()) entityTag.put("BlockState", blockState);
+        NbtCompound CustomNameNBT = new NbtCompound();
+        CustomNameNBT.putString("text", customName);
+        CustomNameNBT.putString("color", namecolour);
 
         if (invincible.get()) entityTag.putBoolean("Invulnerable", invincible.get());
         if (silence.get()) entityTag.putBoolean("Silent", silence.get());
@@ -519,7 +535,19 @@ public class AirstrikePlus extends Module {
         entityTag.putInt("Fuse", fuse.get());
         entityTag.putInt("Size", size.get());
         if (customname.get()) entityTag.putBoolean("CustomNameVisible", customname.get());
-        entityTag.putString("CustomName", "{\"text\":\"" + customName + "\",\"color\":\"" + namecolour + "\"}");
+        String serverVersion;
+        if (mc.isIntegratedServerRunning()) {
+            serverVersion = mc.getServer().getVersion();
+        } else {
+            serverVersion = mc.getCurrentServerEntry().version.getLiteralString();
+        }
+        if (serverVersion == null) {
+            entityTag.putString("CustomName", "{\"text\":\"" + customName + "\",\"color\":\"" + namecolour + "\"}");
+        } else {
+            if (!serverVersion.contains("1.21.5")) entityTag.putString("CustomName", "{\"text\":\"" + customName + "\",\"color\":\"" + namecolour + "\"}");
+            else  entityTag.put("CustomName", CustomNameNBT);
+        }
+
         return NbtComponent.of(entityTag);
     }
 

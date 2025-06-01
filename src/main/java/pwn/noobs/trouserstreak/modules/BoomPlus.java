@@ -281,7 +281,21 @@ public class BoomPlus extends Module {
         entityTag.putInt("Fuse", fuse.get());
         entityTag.putInt("Size", size.get());
         if(customname.get())entityTag.putBoolean("CustomNameVisible", customname.get());
-        entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get() + "\"}");
+        NbtCompound customName = new NbtCompound();
+        customName.putString("text", nom.get());
+        customName.putString("color", nomcolor.get().name());
+        String serverVersion;
+        if (mc.isIntegratedServerRunning()) {
+            serverVersion = mc.getServer().getVersion();
+        } else {
+            serverVersion = mc.getCurrentServerEntry().version.getLiteralString();
+        }
+        if (serverVersion == null) {
+            entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().name() + "\"}");
+        } else {
+            if (!serverVersion.contains("1.21.5")) entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().name() + "\"}");
+            else  entityTag.put("CustomName", customName);
+        }
         return NbtComponent.of(entityTag);
     }
 }
