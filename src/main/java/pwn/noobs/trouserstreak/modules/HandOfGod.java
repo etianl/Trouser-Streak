@@ -50,9 +50,9 @@ public class HandOfGod extends Module {
             .defaultValue(false)
             .build());
     public final Setting<Boolean> notOP = sgGeneral.add(new BoolSetting.Builder()
-            .name("Toggle Module if not OP")
-            .description("Turn this off to prevent the bug of module always being turned off when you join server.")
-            .defaultValue(false)
+            .name("Permission Level Hold")
+            .description("Prevents the code running until you get the correct permission level.")
+            .defaultValue(true)
             .build()
     );
     public final Setting<Boolean> autosave = sgGeneral.add(new BoolSetting.Builder()
@@ -486,21 +486,7 @@ public class HandOfGod extends Module {
     }
     @Override
     public void onActivate() {
-        if (mc.player == null || mc.world == null) return;
-        if (notOP.get() && !(mc.player.hasPermissionLevel(2)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
-            toggle();
-            error("Must have permission level 2 or higher");
-        }
         roofticks=0;
-        if (roofer.get()){
-            pX=mc.player.getBlockPos().getX();
-            pZ=mc.player.getBlockPos().getZ();
-            String rfullString = roofblock.get().toString();
-            String[] rparts = rfullString.split(":");
-            String rblock = rparts[1];
-            String rblockName = rblock.replace("}", "");
-            ChatUtils.sendPlayerMsg("/fill " + (pX - roofradius.get()) + " " + adjustYValue(roofheight.get()) +" "+ (pZ - roofradius.get()) +" "+ (pX + roofradius.get()) + " " + adjustYValue(roofheight.get()) +" "+ (pZ + roofradius.get()) + " "+rblockName);
-        }
         aticks=0;
         ticks=0;
         trollticks=0;
@@ -512,7 +498,11 @@ public class HandOfGod extends Module {
 
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
-        if (mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player != null && mc.world != null && mc.interactionManager != null) {
+        if (mc.player == null || mc.world == null) return;
+        if (notOP.get() && !(mc.player.hasPermissionLevel(2)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+            return;
+        }
+        if (mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.interactionManager != null) {
             HitResult hr = mc.cameraEntity.raycast(900, 0, fluids.get());
             Vec3d god = hr.getPos();
             BlockPos pos = BlockPos.ofFloored(god);
@@ -563,7 +553,10 @@ public class HandOfGod extends Module {
 
     @EventHandler
     public void onTick(TickEvent.Pre event) {
-        if (mc.player == null) return;
+        if (mc.player == null || mc.world == null) return;
+        if (notOP.get() && !(mc.player.hasPermissionLevel(2)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+            return;
+        }
         pX=mc.player.getBlockPos().getX();
         pY=mc.player.getBlockPos().getY();
         pZ=mc.player.getBlockPos().getZ();
@@ -821,15 +814,15 @@ public class HandOfGod extends Module {
 
         }
         if (roofer.get()){
-            if (roofticks<=rooftickdelay.get()){
-                roofticks++;
-            } else if (roofticks>rooftickdelay.get()) {
+            if (roofticks>0){
+                roofticks--;
+            } else if (roofticks<=0) {
                 String rfullString = roofblock.get().toString();
                 String[] rparts = rfullString.split(":");
                 String rblock = rparts[1];
                 String rblockName = rblock.replace("}", "");
                 ChatUtils.sendPlayerMsg("/fill " + (pX - roofradius.get()) + " " + adjustYValue(roofheight.get()) +" "+ (pZ - roofradius.get()) +" "+ (pX + roofradius.get()) + " " + adjustYValue(roofheight.get()) +" "+ (pZ + roofradius.get()) + " "+rblockName);
-                roofticks=0;
+                roofticks=rooftickdelay.get();
             }
         }
         if (troll.get()) {
@@ -916,10 +909,10 @@ public class HandOfGod extends Module {
                 String tRepblockName = trepblock.replace("}", "");
                 if (!terminaterenderdist.get()) {
                     //every entity that is within render distance in server, default
-                        if (!terminatereplace.get())
-                            ChatUtils.sendPlayerMsg("/execute at @e[type=!player] run fill " + "~" + terminatewidth.get() + " " + "~" + terminateheight.get() + " " + "~" + terminatedepth.get() + " " + "~-" + terminatewidth.get() + " " + "~-" + terminateheight.get() + " " + "~-" + terminatedepth.get() + " " + tBlockName);
-                        else if (terminatereplace.get())
-                            ChatUtils.sendPlayerMsg("/execute at @e[type=!player] run fill " + "~" + terminatewidth.get() + " " + "~" + terminateheight.get() + " " + "~" + terminatedepth.get() + " " + "~-" + terminatewidth.get() + " " + "~-" + terminateheight.get() + " " + "~-" + terminatedepth.get() + " " + tBlockName + " replace " + tRepblockName);
+                    if (!terminatereplace.get())
+                        ChatUtils.sendPlayerMsg("/execute at @e[type=!player] run fill " + "~" + terminatewidth.get() + " " + "~" + terminateheight.get() + " " + "~" + terminatedepth.get() + " " + "~-" + terminatewidth.get() + " " + "~-" + terminateheight.get() + " " + "~-" + terminatedepth.get() + " " + tBlockName);
+                    else if (terminatereplace.get())
+                        ChatUtils.sendPlayerMsg("/execute at @e[type=!player] run fill " + "~" + terminatewidth.get() + " " + "~" + terminateheight.get() + " " + "~" + terminatedepth.get() + " " + "~-" + terminatewidth.get() + " " + "~-" + terminateheight.get() + " " + "~-" + terminatedepth.get() + " " + tBlockName + " replace " + tRepblockName);
                 } else if (terminaterenderdist.get()){
                     //every entity in just your render distance
                     for (Entity entity : mc.world.getEntities()) {
