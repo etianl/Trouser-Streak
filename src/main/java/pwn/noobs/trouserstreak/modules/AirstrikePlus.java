@@ -15,8 +15,6 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtDouble;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -140,13 +138,20 @@ public class AirstrikePlus extends Module {
             .sliderRange(0, 10000)
             .visible(() -> !airstrikeEveryone.get())
             .build());
+    public final Setting<Boolean> ageSpecify = sgnormal.add(new BoolSetting.Builder()
+            .name("Specify Age")
+            .description("Add an Age NBT tag.")
+            .defaultValue(false)
+            .visible(() -> !airstrikeEveryone.get())
+            .build()
+    );
     private final Setting<Integer> age = sgnormal.add(new IntSetting.Builder()
             .name("Age")
             .description("It's age, 0 is baby.")
             .defaultValue(1)
             .min(0)
             .sliderRange(0, 100)
-            .visible(() -> !airstrikeEveryone.get())
+            .visible(() -> !airstrikeEveryone.get() && ageSpecify.get())
             .build());
     public final Setting<Boolean> invincible = sgnormal.add(new BoolSetting.Builder()
             .name("Invulnerable")
@@ -235,17 +240,24 @@ public class AirstrikePlus extends Module {
             .sliderRange(0, 100)
             .visible(() -> !airstrikeEveryone.get())
             .build());
+    public final Setting<Boolean> blockstateSpecify = sgnormal.add(new BoolSetting.Builder()
+            .name("Specify falling_block")
+            .description("Add an NBT tag defining what is the falling block.")
+            .defaultValue(false)
+            .visible(() -> !airstrikeEveryone.get())
+            .build()
+    );
     private final Setting<Block> blockstate = sgnormal.add(new BlockSetting.Builder()
             .name("falling_block entity block")
             .description("What is created when specifying falling_block as the entity.")
             .defaultValue(Blocks.BEDROCK)
-            .visible(() -> !airstrikeEveryone.get())
+            .visible(() -> !airstrikeEveryone.get() && blockstateSpecify.get())
             .build());
     public final Setting<Boolean> Ecustomname = sgeveryone.add(new BoolSetting.Builder()
             .name("CustomNameVisible")
             .description("CustomNameVisible or not.")
             .defaultValue(false)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> airstrikeEveryone.get())
             .build()
     );
     private final Setting<Integer> Ehealth = sgeveryone.add(new IntSetting.Builder()
@@ -254,7 +266,7 @@ public class AirstrikePlus extends Module {
             .defaultValue(100)
             .min(0)
             .sliderRange(0, 10000)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> airstrikeEveryone.get())
             .build());
     private final Setting<Integer> Eabsorption = sgeveryone.add(new IntSetting.Builder()
             .name("Absorption Points")
@@ -262,13 +274,13 @@ public class AirstrikePlus extends Module {
             .defaultValue(0)
             .min(0)
             .sliderRange(0, 10000)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> airstrikeEveryone.get())
             .build());
     public final Setting<Boolean> EageSpecify = sgeveryone.add(new BoolSetting.Builder()
             .name("Specify Age")
             .description("Add an Age NBT tag.")
             .defaultValue(false)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> airstrikeEveryone.get())
             .build()
     );
     private final Setting<Integer> Eage = sgeveryone.add(new IntSetting.Builder()
@@ -283,63 +295,63 @@ public class AirstrikePlus extends Module {
             .name("Invulnerable")
             .description("Invulnerable or not")
             .defaultValue(true)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> airstrikeEveryone.get())
             .build()
     );
     public final Setting<Boolean> Epersist = sgeveryone.add(new BoolSetting.Builder()
             .name("Never Despawn")
             .description("adds PersistenceRequired tag.")
             .defaultValue(false)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> airstrikeEveryone.get())
             .build()
     );
     public final Setting<Boolean> EnoAI = sgeveryone.add(new BoolSetting.Builder()
             .name("NoAI")
             .description("NoAI")
             .defaultValue(false)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> airstrikeEveryone.get())
             .build()
     );
     public final Setting<Boolean> Efalsefire = sgeveryone.add(new BoolSetting.Builder()
             .name("HasVisualFire")
             .description("HasVisualFire or not")
             .defaultValue(false)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> airstrikeEveryone.get())
             .build()
     );
     public final Setting<Boolean> Enograv = sgeveryone.add(new BoolSetting.Builder()
             .name("NoGravity")
             .description("NoGravity or not")
             .defaultValue(false)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> airstrikeEveryone.get())
             .build()
     );
     public final Setting<Boolean> Esilence = sgeveryone.add(new BoolSetting.Builder()
             .name("Silent")
             .description("adds Silent tag.")
             .defaultValue(false)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> airstrikeEveryone.get())
             .build()
     );
     public final Setting<Boolean> Eglow = sgeveryone.add(new BoolSetting.Builder()
             .name("Glowing")
             .description("Glowing or not")
             .defaultValue(false)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> airstrikeEveryone.get())
             .build()
     );
     public final Setting<Boolean> Eignite = sgeveryone.add(new BoolSetting.Builder()
             .name("Ignited")
             .description("Pre-ignite creeper or not.")
             .defaultValue(true)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> airstrikeEveryone.get())
             .build()
     );
     public final Setting<Boolean> Epowah = sgeveryone.add(new BoolSetting.Builder()
             .name("Charged Creeper")
             .description("powered creeper or not.")
             .defaultValue(false)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> airstrikeEveryone.get())
             .build()
     );
     private final Setting<Integer> Efuse = sgeveryone.add(new IntSetting.Builder()
@@ -348,7 +360,7 @@ public class AirstrikePlus extends Module {
             .defaultValue(20)
             .min(0)
             .sliderRange(0, 120)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> airstrikeEveryone.get())
             .build());
     private final Setting<Integer> Eexppower = sgeveryone.add(new IntSetting.Builder()
             .name("ExplosionPower/Radius")
@@ -356,7 +368,7 @@ public class AirstrikePlus extends Module {
             .defaultValue(10)
             .min(1)
             .sliderMax(127)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> airstrikeEveryone.get())
             .build());
     private final Setting<Integer> Esize = sgeveryone.add(new IntSetting.Builder()
             .name("Slime/Magma Cube Size")
@@ -364,13 +376,13 @@ public class AirstrikePlus extends Module {
             .defaultValue(1)
             .min(0)
             .sliderRange(0, 100)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> airstrikeEveryone.get())
             .build());
     public final Setting<Boolean> EblockstateSpecify = sgeveryone.add(new BoolSetting.Builder()
             .name("Specify falling_block")
             .description("Add an NBT tag defining what is the falling block.")
             .defaultValue(false)
-            .visible(airstrikeEveryone::get)
+            .visible(() -> airstrikeEveryone.get())
             .build()
     );
     private final Setting<Block> Eblockstate = sgeveryone.add(new BlockSetting.Builder()
@@ -431,7 +443,6 @@ public class AirstrikePlus extends Module {
         if (randomPrefix.get()) {
             String randomPrefix = prefixes[new Random().nextInt(prefixes.length)];
             customName = randomPrefix + nom.get();
-            // Use modifiedName for further processing or assignment
         } else {
             customName = nom.get();
         }
@@ -482,7 +493,7 @@ public class AirstrikePlus extends Module {
                         entityTag.put("Pos", pos);
                         entityTag.putInt("Health", health.get());
                         entityTag.putInt("AbsorptionAmount", absorption.get());
-                        entityTag.putInt("Age", age.get());
+                        if (ageSpecify.get()) entityTag.putInt("Age", age.get());
                         entityTag.putInt("ExplosionPower", exppower.get());
                         entityTag.putInt("ExplosionRadius", exppower.get());
                         NbtCompound blockState = new NbtCompound();
