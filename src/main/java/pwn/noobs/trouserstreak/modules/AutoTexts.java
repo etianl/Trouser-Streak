@@ -202,13 +202,9 @@ public class AutoTexts extends Module {
 
     private NbtComponent createEntityData(Vec3d pos) {
         NbtCompound entityTag = new NbtCompound();
-
-        String selectedText = texts.get().get(random.nextInt(texts.get().size()));
-        NbtCompound customName = new NbtCompound();
-        customName.putString("text", selectedText);
-        customName.putString("color", namecolour);
-
         NbtList position = new NbtList();
+        String selectedText = texts.get().get(random.nextInt(texts.get().size()));
+
         position.add(NbtDouble.of(pos.x));
         position.add(NbtDouble.of(pos.y));
         position.add(NbtDouble.of(pos.z));
@@ -219,7 +215,21 @@ public class AutoTexts extends Module {
         entityTag.putBoolean("Marker", true);
         entityTag.putBoolean("NoGravity", true);
         entityTag.putBoolean("CustomNameVisible", true);
-        entityTag.put("CustomName", customName);
+        NbtCompound CustomNameNBT = new NbtCompound();
+        CustomNameNBT.putString("text", selectedText);
+        CustomNameNBT.putString("color", namecolour);
+        String serverVersion;
+        if (mc.isIntegratedServerRunning()) {
+            serverVersion = mc.getServer().getVersion();
+        } else {
+            serverVersion = mc.getCurrentServerEntry().version.getLiteralString();
+        }
+        if (serverVersion == null) {
+            entityTag.put("CustomName", CustomNameNBT);
+        } else {
+            if (!serverVersion.contains("1.21.5")) entityTag.putString("CustomName", "{\"text\":\"" + selectedText + "\",\"color\":\"" + namecolour + "\"}");
+            else  entityTag.put("CustomName", CustomNameNBT);
+        }
 
         return NbtComponent.of(entityTag);
     }

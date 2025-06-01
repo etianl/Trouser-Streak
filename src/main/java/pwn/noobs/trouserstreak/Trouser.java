@@ -99,7 +99,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new MultiUse());
                 Modules.get().add(new AutoDrop());
                 Modules.get().add(new AnHero());
-                Modules.get().add(new PlayerJoinedAlarm());
+                Modules.get().add(new PlayerAlarms());
                 Commands.add(new WorldInfoCommand());
                 Commands.add(new ViewNbtCommand());
                 Commands.add(new AutoVclipCommand());

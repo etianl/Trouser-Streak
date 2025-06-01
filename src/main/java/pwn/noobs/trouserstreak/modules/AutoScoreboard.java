@@ -19,7 +19,12 @@ public class AutoScoreboard extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgTitle = settings.createGroup("Title Options");
     private final SettingGroup sgContent = settings.createGroup("Content Options");
-
+    public final Setting<Boolean> notOP = sgGeneral.add(new BoolSetting.Builder()
+            .name("Permission Level Hold")
+            .description("Prevents the code running until you get the correct permission level.")
+            .defaultValue(true)
+            .build()
+    );
     private final Setting<String> title = sgTitle.add(new StringSetting.Builder()
             .name("title")
             .description("Title of the scoreboard to create. Supports Starscript.")
@@ -83,13 +88,6 @@ public class AutoScoreboard extends Module {
 
     @Override
     public void onActivate() {
-        assert mc.player != null;
-        if(!mc.player.hasPermissionLevel(2)) {
-            toggle();
-            error("No permission!");
-            return;
-        }
-
         String scoreboardName = RandomStringUtils.randomAlphabetic(10).toLowerCase();
         String thecommand = "/scoreboard objectives add " + scoreboardName + " dummy {\"text\":\"" + MeteorStarscript.run(MeteorStarscript.compile(title.get())) + "\",\"color\":\"" + titleColor.get() + "\"}";
 
@@ -100,63 +98,40 @@ public class AutoScoreboard extends Module {
             return;
         }
 
-        if (useDelay.get()) {
-            commandQueue.add(thecommand);
-            commandQueue.add("/scoreboard objectives setdisplay sidebar " + scoreboardName);
+        commandQueue.add(thecommand);
+        commandQueue.add("/scoreboard objectives setdisplay sidebar " + scoreboardName);
 
-            int i = content.get().size();
-            for(String string : content.get()) {
-                String randomName = RandomStringUtils.randomAlphabetic(10).toLowerCase();
-                commandQueue.add("/team add " + randomName);
+        int i = content.get().size();
+        for(String string : content.get()) {
+            String randomName = RandomStringUtils.randomAlphabetic(10).toLowerCase();
+            commandQueue.add("/team add " + randomName);
 
-                String thecommand2 = "/team modify " + randomName + " suffix {\"text\":\" " + MeteorStarscript.run(MeteorStarscript.compile(string)) + "\"}";
-                if (thecommand2.length() <= 256) {
-                    commandQueue.add(thecommand2);
-                    commandQueue.add("/team modify " + randomName + " color " + contentColor);
-                    commandQueue.add("/team join " + randomName + " " + i);
-                    commandQueue.add("/scoreboard players set " + i + " " + scoreboardName + " " + i);
-                } else {
-                    int characterstodelete = thecommand2.length()-256;
-                    error("This content line is too long ("+MeteorStarscript.run(MeteorStarscript.compile(string))+"). Shorten it by "+characterstodelete+" characters.");
-                    toggle();
-                    return;
-                }
-                i--;
+            String thecommand2 = "/team modify " + randomName + " suffix {\"text\":\" " + MeteorStarscript.run(MeteorStarscript.compile(string)) + "\"}";
+            if (thecommand2.length() <= 256) {
+                commandQueue.add(thecommand2);
+                commandQueue.add("/team modify " + randomName + " color " + contentColor);
+                commandQueue.add("/team join " + randomName + " " + i);
+                commandQueue.add("/scoreboard players set " + i + " " + scoreboardName + " " + i);
+            } else {
+                int characterstodelete = thecommand2.length()-256;
+                error("This content line is too long ("+MeteorStarscript.run(MeteorStarscript.compile(string))+"). Shorten it by "+characterstodelete+" characters.");
+                toggle();
+                return;
             }
-        } else {
-            ChatUtils.sendPlayerMsg(thecommand);
-            ChatUtils.sendPlayerMsg("/scoreboard objectives setdisplay sidebar " + scoreboardName);
-
-            int i = content.get().size();
-            for(String string : content.get()) {
-                String randomName = RandomStringUtils.randomAlphabetic(10).toLowerCase();
-                ChatUtils.sendPlayerMsg("/team add " + randomName);
-
-                String thecommand2 = "/team modify " + randomName + " suffix {\"text\":\" " + MeteorStarscript.run(MeteorStarscript.compile(string)) + "\"}";
-                if (thecommand2.length() <= 256) {
-                    ChatUtils.sendPlayerMsg(thecommand2);
-                    ChatUtils.sendPlayerMsg("/team modify " + randomName + " color " + contentColor);
-                    ChatUtils.sendPlayerMsg("/team join " + randomName + " " + i);
-                    ChatUtils.sendPlayerMsg("/scoreboard players set " + i + " " + scoreboardName + " " + i);
-                } else {
-                    int characterstodelete = thecommand2.length()-256;
-                    error("This content line is too long ("+MeteorStarscript.run(MeteorStarscript.compile(string))+"). Shorten it by "+characterstodelete+" characters.");
-                    toggle();
-                    return;
-                }
-                i--;
-            }
-            toggle();
-            info("Created scoreboard.");
+            i--;
         }
     }
 
     @EventHandler
     public void onTick(TickEvent.Post event) {
-        if (!useDelay.get()) return;
-
+        if (mc.player == null || mc.world == null) return;
+        if (notOP.get() && !(mc.player.hasPermissionLevel(2)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+            return;
+        }
+        int delay = commandDelay.get();
+        if (!useDelay.get()) delay = 0;
         if (!commandQueue.isEmpty()) {
-            if (tickCounter >= commandDelay.get()) {
+            if (tickCounter >= delay) {
                 ChatUtils.sendPlayerMsg(commandQueue.poll());
                 tickCounter = 0;
             } else {
