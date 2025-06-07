@@ -5,7 +5,7 @@
   <p><strong>Official Griefing Utilities of <a href="https://www.youtube.com/@mountainsoflavainc.6913">Mountains of Lava Inc.</a></strong></p>
   <p><strong>Trouser-Streak</strong> is a compilation of modules for <strong><a href="https://meteorclient.com/">Meteor Client</a></strong>.</p> 
   <p><strong><em>Updated to the latest version and optimized for maximum grief!</em></strong></p>
-    <p><strong>Customer Service Discord: <a href="https://discord.gg/Az3G3p4ZCj">https://discord.gg/Az3G3p4ZCj</a></strong></p>
+    <p><strong>Customer Service Discord: <a href="https://discord.gg/3RUjaRzdKv">https://discord.gg/3RUjaRzdKv</a></strong></p>
   <img src="src/main/resources/assets/icon/icon.png" alt="Trouser-Streak Logo" width="28%"/>
 </div>
 
