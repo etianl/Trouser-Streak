@@ -33,6 +33,7 @@ public class Trouser extends MeteorAddon {
                 Commands.add(new CasterTimer());
 
                 //Modules.get().add(new -----> Find and Grief noobs! <-----());
+                Modules.get().add(new WaypointCoordExploit());
                 Modules.get().add(new NewerNewChunks());
                 Modules.get().add(new BaseFinder());
                 Modules.get().add(new ActivatedSpawnerDetector());
@@ -108,6 +109,7 @@ public class Trouser extends MeteorAddon {
                 Commands.add(new GarbageCleanerCommand());
 
                 //Modules.get().add(new -----> Additions to the HUD module! <-----());
+                Hud.get().register(WaypointTriangulationHud.INFO);
                 Hud.get().register(ElytraCount.INFO);
         }
 

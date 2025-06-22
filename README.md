@@ -185,6 +185,7 @@ In no particular order
 - **TrouserBuild:** It can build either horizontally or vertically according to a 5x5 grid centered on the block you are aiming at. Right click to build at the targeted location. (Credits to etianl, and to Banana for the checkboxes and idea. :D)
 - **ViewNbtCommand:** Returns the nbt data for the item in your hand in the chat box. There is also a Save option for the command that saves the data to a text file in your .minecraft folder in the "SavedNBT" folder.
 - **Voider+:** Replaces the world from the top down. (Credits to Allah-Hack) I added a 3x3 voiding script, a TP foward option for deleting strips, as well as options to set max and minimum height for voiding, and instead of just air it can do whatever block you want now too.
+- **WaypointCoordExploit** Triangulate player locations with the new waypoint system introduced in Minecraft 1.21.6. Walk perpendicular to the waypoint a little bit to get the player's location. There is also a hud element that you can use to display the coordinates instead of chat feedback. (Credits to etianl :D) 
 - **WorldInfoCommand** Type .world in chat to tell you some info about the server like world border coordinates and other things, and sometimes the players that have played there (players does not work on all servers). (Credits to etianl :D)
 
 ## Known Bugs:
