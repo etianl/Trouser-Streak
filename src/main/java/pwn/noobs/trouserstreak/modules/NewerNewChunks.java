@@ -28,6 +28,7 @@ import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.*;
+import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeKeys;
@@ -561,7 +562,8 @@ public class NewerNewChunks extends Module {
 	}
 	@EventHandler
 	private void onRender(Render3DEvent event) {
-		if (mc.player == null) return;
+		if (mc.world == null || mc.player == null) return;
+		if (event.renderer == null) return;
 		BlockPos playerPos = new BlockPos(mc.player.getBlockX(), renderHeight.get(), mc.player.getBlockZ());
 		if (newChunksLineColor.get().a > 5 || newChunksSideColor.get().a > 5) {
 			synchronized (newChunks) {
@@ -619,7 +621,9 @@ public class NewerNewChunks extends Module {
 	}
 
 	private void render(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
-		event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, lines, shapeMode, 0);
+		try {
+			event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, lines, shapeMode, 0);
+		} catch (Exception e) {}
 	}
 
 	@EventHandler

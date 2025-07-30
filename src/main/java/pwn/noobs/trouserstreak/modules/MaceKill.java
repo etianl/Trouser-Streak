@@ -57,6 +57,7 @@ public class MaceKill extends Module {
         if (!(event.packet instanceof IPlayerInteractEntityC2SPacket packet)) return;
         if (packet.getType() != PlayerInteractEntityC2SPacket.InteractType.ATTACK) return;
 
+        if (!(packet.getEntity() instanceof LivingEntity)) return;
         LivingEntity targetEntity = (LivingEntity) packet.getEntity();
         if (packetDisable.get() && (targetEntity.isBlocking() || targetEntity.isInvulnerable() || targetEntity.isInCreativeMode()))
             return;
