@@ -594,7 +594,7 @@ public class AutoMountain extends Module {
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
         if (event.packet instanceof PlayerMoveC2SPacket)
-            ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
+            ((PlayerMoveC2SPacketAccessor) event.packet).meteor$setOnGround(true);
     }
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {

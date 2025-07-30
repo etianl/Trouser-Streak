@@ -173,7 +173,7 @@ public class TPFly extends Module {
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
         if (event.packet instanceof PlayerMoveC2SPacket && mc.player != null){
-            ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
+            ((PlayerMoveC2SPacketAccessor) event.packet).meteor$setOnGround(true);
             mc.player.setVelocity(0,0,0);
             mc.player.setMovementSpeed(0);
         }

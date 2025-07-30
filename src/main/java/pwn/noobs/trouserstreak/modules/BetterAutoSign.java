@@ -260,7 +260,7 @@ public class BetterAutoSign extends Module {
     private void onOpenScreen(OpenScreenEvent event) {
         if(!(event.screen instanceof SignEditScreen) && !(event.screen instanceof HangingSignEditScreen)) return;
 
-        SignBlockEntity sign = ((AbstractSignEditScreenAccessor) event.screen).getSign();
+        SignBlockEntity sign = ((AbstractSignEditScreenAccessor) event.screen).meteor$getSign();
         if (!(mc.world.getBlockState(sign.getPos()).getBlock().asItem() instanceof HangingSignItem) && mc.world.getBlockState(sign.getPos()).getBlock().asItem() instanceof SignItem){
         mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(),true,
                 lineOne.get(),
