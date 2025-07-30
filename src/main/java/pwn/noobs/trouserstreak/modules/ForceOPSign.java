@@ -354,20 +354,7 @@ public class ForceOPSign extends Module {
                     fourthLine.put("clickEvent", clickEvent4);
                 }
             } else {
-                if (serverVersion.contains("1.21.5")){
-                    clickEvent1.putString("action", "run_command");
-                    clickEvent1.putString("command", commandValue1);
-                    clickEvent2.putString("action", "run_command");
-                    clickEvent2.putString("command", commandValue2);
-                    clickEvent3.putString("action", "run_command");
-                    clickEvent3.putString("command", commandValue3);
-                    clickEvent4.putString("action", "run_command");
-                    clickEvent4.putString("command", commandValue4);
-                    firstLine.put("click_event", clickEvent1);
-                    secondLine.put("click_event", clickEvent2);
-                    thirdLine.put("click_event", clickEvent3);
-                    fourthLine.put("click_event", clickEvent4);
-                } else {
+                if (isVersionLessThan(serverVersion, 1, 21, 5)) {
                     clickEvent1.putString("action", "run_command");
                     clickEvent1.putString("value", commandValue1);
                     clickEvent2.putString("action", "run_command");
@@ -380,6 +367,19 @@ public class ForceOPSign extends Module {
                     secondLine.put("clickEvent", clickEvent2);
                     thirdLine.put("clickEvent", clickEvent3);
                     fourthLine.put("clickEvent", clickEvent4);
+                } else {
+                    clickEvent1.putString("action", "run_command");
+                    clickEvent1.putString("command", commandValue1);
+                    clickEvent2.putString("action", "run_command");
+                    clickEvent2.putString("command", commandValue2);
+                    clickEvent3.putString("action", "run_command");
+                    clickEvent3.putString("command", commandValue3);
+                    clickEvent4.putString("action", "run_command");
+                    clickEvent4.putString("command", commandValue4);
+                    firstLine.put("click_event", clickEvent1);
+                    secondLine.put("click_event", clickEvent2);
+                    thirdLine.put("click_event", clickEvent3);
+                    fourthLine.put("click_event", clickEvent4);
                 }
             }
         } else {
@@ -426,8 +426,11 @@ public class ForceOPSign extends Module {
                 if (compatmode.get() == compatModes.LatestVersion || compatmode.get() == compatModes.v1_21_4)blockEntityTag.putString("id", "minecraft:sign");
                 else blockEntityTag.putString("id", "minecraft:oak_sign");
             } else {
-                if (serverVersion.contains("1.21.5") || serverVersion.contains("1.21.4"))blockEntityTag.putString("id", "minecraft:sign");
-                else blockEntityTag.putString("id", "minecraft:oak_sign");
+                if (isVersionLessThan(serverVersion, 1, 21, 4)) {
+                    blockEntityTag.putString("id", "minecraft:oak_sign");
+                } else {
+                    blockEntityTag.putString("id", "minecraft:sign");
+                }
             }
         } else {
             if (compatmode.get() == compatModes.LatestVersion || compatmode.get() == compatModes.v1_21_4)blockEntityTag.putString("id", "minecraft:sign");
@@ -447,6 +450,32 @@ public class ForceOPSign extends Module {
         info("OP Sign created. Give it to an operator who is in creative mode and have them click it to execute the command.");
 
         toggle();
+    }
+    private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
+        if (serverVersion == null) return false;
+
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)");
+        java.util.regex.Matcher matcher = pattern.matcher(serverVersion);
+
+        if (matcher.find()) {
+            try {
+                int serverMajor = Integer.parseInt(matcher.group(1));
+                int serverMinor = Integer.parseInt(matcher.group(2));
+                int serverPatch = Integer.parseInt(matcher.group(3));
+
+                if (serverMajor < major) return true;
+                if (serverMajor > major) return false;
+
+                if (serverMinor < minor) return true;
+                if (serverMinor > minor) return false;
+
+                return serverPatch < patch;
+
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+        return false;
     }
     public enum Modes {
         ForceOP, CloneSign, AnyCommand
