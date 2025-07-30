@@ -5,7 +5,7 @@
   <p><strong>Official Griefing Utilities of <a href="https://www.youtube.com/@mountainsoflavainc.6913">Mountains of Lava Inc.</a></strong></p>
   <p><strong>Trouser-Streak</strong> is a compilation of modules for <strong><a href="https://meteorclient.com/">Meteor Client</a></strong>.</p> 
   <p><strong><em>Updated to the latest version and optimized for maximum grief!</em></strong></p>
-    <p><strong>Customer Service Discord: <a href="https://discord.gg/Az3G3p4ZCj">https://discord.gg/Az3G3p4ZCj</a></strong></p>
+    <p><strong>Customer Service Discord: <a href="https://discord.gg/3RUjaRzdKv">https://discord.gg/3RUjaRzdKv</a></strong></p>
   <img src="src/main/resources/assets/icon/icon.png" alt="Trouser-Streak Logo" width="28%"/>
 </div>
 
@@ -111,6 +111,7 @@ In no particular order
 - **GarbageCleanerCommand:** Accessable by typing ".cleanram". It cleans the RAM of useless junk and may be very handy for improving performance after chunk tracing for a while and can be used to clear other lag. (credits to [ogmur](https://www.youtube.com/@Ogmur) for writing this)
 - **HandOfGod:** Runs the "/fill" command on the world around you or around everyone else in different ways as you move around, and as you click. Destroy and modify the world with ease! Operator status required. (Credits to etianl :D)
 - **Hole/Tunnel/StairsESP:** Detects 1x1 holes going straight down, horizontal tunnels of any height, and staircase tunnels. It by default ignores passable blocks such as torches or water but there is an option to have it only detect Air for holes and tunnels. (Thank you to Meteor Client for some code from TunnelESP, and credits to etianl for this version of it)
+- **InfiniteElytra:** Automatically toggles Elytra on/off to conserve durability and auto-uses rockets maintaining flight. (Module written by etianl with inspiration from this Youtube video by AlexOinks https://www.youtube.com/watch?v=WYIMsWBxIhI)
 - **Inventory Dupe (1.17):** Duplicates things in your crafting slots when the module is enabled and the Dupe button is pressed in your inventory. Only works on Minecraft servers on the version 1.17, not any version before or after.(Credit to ItsVen and Da0neDatGotAway for original creation of the dupe, and to B2H990 for making the fabric mod. Credits to etianl for porting to Meteor.)
 - **InstaKill:** Shoots arrows and tridents with incredible power and velocity. Enabling multiple buttons causes the amount of packets to add up. (Credits to Saturn5Vfive)
 - **InstaMineNuker:** Sends packets to instantly mine the blocks around you until they are gone. There is an option in it to make it only target instamineable blocks such as crops, grass, slimeblocks, and more.. (Credits to etianl and to Meteor Client, as well as Meteor Rejects for some borrowed code)
@@ -185,6 +186,7 @@ In no particular order
 - **TrouserBuild:** It can build either horizontally or vertically according to a 5x5 grid centered on the block you are aiming at. Right click to build at the targeted location. (Credits to etianl, and to Banana for the checkboxes and idea. :D)
 - **ViewNbtCommand:** Returns the nbt data for the item in your hand in the chat box. There is also a Save option for the command that saves the data to a text file in your .minecraft folder in the "SavedNBT" folder.
 - **Voider+:** Replaces the world from the top down. (Credits to Allah-Hack) I added a 3x3 voiding script, a TP foward option for deleting strips, as well as options to set max and minimum height for voiding, and instead of just air it can do whatever block you want now too.
+- **WaypointCoordExploit** Triangulate player locations with the new waypoint system introduced in Minecraft 1.21.6. Walk perpendicular to the waypoint a little bit to get the player's location. There is also a hud element that you can use to display the coordinates instead of chat feedback. (Credits to etianl :D)
 - **WorldInfoCommand** Type .world in chat to tell you some info about the server like world border coordinates and other things, and sometimes the players that have played there (players does not work on all servers). (Credits to etianl :D)
 
 ## Known Bugs:

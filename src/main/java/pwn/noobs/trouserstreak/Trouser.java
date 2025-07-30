@@ -35,6 +35,7 @@ public class Trouser extends MeteorAddon {
                 //Modules.get().add(new -----> Find and Grief noobs! <-----());
                 Modules.get().add(new NewerNewChunks());
                 Modules.get().add(new BaseFinder());
+                Modules.get().add(new InfiniteElytra());
                 Modules.get().add(new ActivatedSpawnerDetector());
                 Modules.get().add(new NoSpawnerDetector());
                 Modules.get().add(new PortalPatternFinder());

@@ -420,10 +420,13 @@ public class NbtEditor extends Module {
             serverVersion = mc.getCurrentServerEntry().version.getLiteralString();
         }
         if (serverVersion == null) {
-            entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().name() + "\"}");
+            entityTag.put("CustomName", customName);
         } else {
-            if (!serverVersion.contains("1.21.5")) entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().name() + "\"}");
-            else  entityTag.put("CustomName", customName);
+            if (isVersionLessThan(serverVersion, 1, 21, 5)) {
+                entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().name() + "\"}");
+            } else {
+                entityTag.put("CustomName", customName);
+            }
         }
         entityTag.putInt("Radius", cloudradius.get());
         entityTag.putInt("Duration", cloudduration.get());
@@ -431,6 +434,33 @@ public class NbtEditor extends Module {
         entityTag.putString("Potion", ceffect.get());
         return NbtComponent.of(entityTag);
     }
+    private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
+        if (serverVersion == null) return false;
+
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)");
+        java.util.regex.Matcher matcher = pattern.matcher(serverVersion);
+
+        if (matcher.find()) {
+            try {
+                int serverMajor = Integer.parseInt(matcher.group(1));
+                int serverMinor = Integer.parseInt(matcher.group(2));
+                int serverPatch = Integer.parseInt(matcher.group(3));
+
+                if (serverMajor < major) return true;
+                if (serverMajor > major) return false;
+
+                if (serverMinor < minor) return true;
+                if (serverMinor > minor) return false;
+
+                return serverPatch < patch;
+
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+        return false;
+    }
+
     public enum Modes {
         Entity, Item, Potion, Copy
     }
