@@ -435,14 +435,20 @@ public class NewerNewChunks extends Module {
 		.build()
 	);
 
-	private final Setting<Integer> searchRadius = sgFollow.add(new IntSetting.Builder()
-		.name("search-radius-chunks")
-		.description("Max chunk distance to search for next target when no adjacent candidate exists.")
-		.defaultValue(8)
-		.min(1)
-		.sliderRange(1, 64)
-		.build()
-	);
+    private final Setting<Integer> searchRadius = sgFollow.add(new IntSetting.Builder()
+        .name("search-radius-chunks")
+        .description("Max chunk distance to search for next target when no adjacent candidate exists.")
+        .defaultValue(8)
+        .min(1)
+        .sliderRange(1, 64)
+        .build()
+    );
+    private final Setting<Boolean> followLogging = sgFollow.add(new BoolSetting.Builder()
+        .name("chat-logging")
+        .description("Log auto-follow decisions and Baritone calls in chat.")
+        .defaultValue(true)
+        .build()
+    );
 	private void clearChunkData() {
 		newChunks.clear();
 		oldChunks.clear();
@@ -1048,39 +1054,45 @@ public class NewerNewChunks extends Module {
 		removeChunksOutsideRenderDistance(OldGenerationOldChunks, playerPos, renderDistanceBlocks);
 		removeChunksOutsideRenderDistance(tickexploitChunks, playerPos, renderDistanceBlocks);
 	}
-	private void removeChunksOutsideRenderDistance(Set<ChunkPos> chunkSet, BlockPos playerPos, double renderDistanceBlocks) {
-		chunkSet.removeIf(c -> !playerPos.isWithinDistance(new BlockPos(c.getCenterX(), renderHeight.get(), c.getCenterZ()), renderDistanceBlocks));
-	}
+    private void removeChunksOutsideRenderDistance(Set<ChunkPos> chunkSet, BlockPos playerPos, double renderDistanceBlocks) {
+        chunkSet.removeIf(c -> !playerPos.isWithinDistance(new BlockPos(c.getCenterX(), renderHeight.get(), c.getCenterZ()), renderDistanceBlocks));
+    }
 
-	// --- Auto-follow implementation ---
-	private void updateAutoFollow() {
-		if (mc == null || mc.player == null || mc.world == null) return;
-		// Resolve candidate set
-		Set<ChunkPos> poolRef = getPoolForFollowType();
-		if (poolRef == null || poolRef.isEmpty()) return;
-		Set<ChunkPos> pool;
-		// Create a snapshot to avoid concurrent modification
-		synchronized (poolRef) {
-			pool = new HashSet<>(poolRef);
-		}
+    // --- Auto-follow implementation ---
+    private void updateAutoFollow() {
+        if (mc == null || mc.player == null || mc.world == null) return;
+        // Resolve candidate set
+        Set<ChunkPos> poolRef = getPoolForFollowType();
+        if (poolRef == null || poolRef.isEmpty()) {
+            logFollowOnce("No chunks available to follow for " + followType.get() + ".");
+            return;
+        }
+        Set<ChunkPos> pool;
+        // Create a snapshot to avoid concurrent modification
+        synchronized (poolRef) {
+            pool = new HashSet<>(poolRef);
+        }
 
-		ChunkPos playerChunk = new ChunkPos(mc.player.getBlockX() >> 4, mc.player.getBlockZ() >> 4);
+        ChunkPos playerChunk = new ChunkPos(mc.player.getBlockX() >> 4, mc.player.getBlockZ() >> 4);
 
-		// If in current target, clear it to pick next
-		if (currentTarget != null && isWithinChunk(currentTarget, mc.player.getBlockPos())) {
-			currentTarget = null;
-		}
+        // If in current target, clear it to pick next
+        if (currentTarget != null && isWithinChunk(currentTarget, mc.player.getBlockPos())) {
+            logFollow("Reached target chunk " + currentTarget.x + "," + currentTarget.z + ", selecting next.");
+            currentTarget = null;
+        }
 
-		// Pick or refresh target periodically
-		if (currentTarget == null || System.currentTimeMillis() - lastSetGoalTime > 2000) {
-			ChunkPos next = pickNextTarget(playerChunk, pool, lookAhead.get(), searchRadius.get());
-			if (next != null && !next.equals(currentTarget)) {
-				currentTarget = next;
-				setGoalForChunk(next);
-				lastSetGoalTime = System.currentTimeMillis();
-			}
-		}
-	}
+        // Pick or refresh target periodically
+        if (currentTarget == null || System.currentTimeMillis() - lastSetGoalTime > 2000) {
+            ChunkPos next = pickNextTarget(playerChunk, pool, lookAhead.get(), searchRadius.get());
+            if (next != null && !next.equals(currentTarget)) {
+                currentTarget = next;
+                logFollow("New target chunk " + next.x + "," + next.z +
+                    " (ahead=" + lookAhead.get() + ", radius=" + searchRadius.get() + ").");
+                setGoalForChunk(next);
+                lastSetGoalTime = System.currentTimeMillis();
+            }
+        }
+    }
 
 	private Set<ChunkPos> getPoolForFollowType() {
 		switch (followType.get()) {
@@ -1137,20 +1149,21 @@ public class NewerNewChunks extends Module {
 		return (pos.getX() >> 4) == chunk.x && (pos.getZ() >> 4) == chunk.z;
 	}
 
-	private void setGoalForChunk(ChunkPos cp) {
-		if (mc.world == null) return;
-		int cx = cp.getCenterX();
-		int cz = cp.getCenterZ();
-		int y;
-		if (pathingMode.get() == PathingMode.Elytra) {
-			// Aim high to encourage elytra traversal; enable normal path fallback if needed
-			y = Math.min(300, getTopYAt(cx, cz) + 32);
-		} else {
-			y = getTopYAt(cx, cz);
-		}
-		BlockPos goalPos = new BlockPos(cx, y, cz);
-		try { baritoneSetGoal(goalPos); } catch (Throwable ignored) {}
-	}
+    private void setGoalForChunk(ChunkPos cp) {
+        if (mc.world == null) return;
+        int cx = cp.getCenterX();
+        int cz = cp.getCenterZ();
+        int y;
+        if (pathingMode.get() == PathingMode.Elytra) {
+            // Aim high to encourage elytra traversal; enable normal path fallback if needed
+            y = Math.min(300, getTopYAt(cx, cz) + 32);
+        } else {
+            y = getTopYAt(cx, cz);
+        }
+        BlockPos goalPos = new BlockPos(cx, y, cz);
+        logFollow("Setting Baritone goal to (" + goalPos.getX() + "," + goalPos.getY() + "," + goalPos.getZ() + ") via " + pathingMode.get() + ".");
+        try { baritoneSetGoal(goalPos); } catch (Throwable t) { logFollow("Failed to set goal: " + t.getClass().getSimpleName() + (t.getMessage() != null ? (" - " + t.getMessage()) : "")); }
+    }
 
 	private int getTopYAt(int x, int z) {
 		try {
@@ -1160,36 +1173,102 @@ public class NewerNewChunks extends Module {
 		}
 	}
 
-	private void baritoneSetGoal(BlockPos goalPos) throws Exception {
-		Class<?> api = Class.forName("baritone.api.BaritoneAPI");
-		Object provider = api.getMethod("getProvider").invoke(null);
-		Object baritone = provider.getClass().getMethod("getPrimaryBaritone").invoke(provider);
-		if (baritone == null) return;
-		Object custom = baritone.getClass().getMethod("getCustomGoalProcess").invoke(baritone);
-		Class<?> goalIface = Class.forName("baritone.api.pathing.goals.IGoal");
-		Class<?> goalBlock = Class.forName("baritone.api.pathing.goals.GoalBlock");
-		Object goal = goalBlock.getConstructor(BlockPos.class).newInstance(goalPos);
-		custom.getClass().getMethod("setGoalAndPath", goalIface).invoke(custom, goal);
-	}
+    private void baritoneSetGoal(BlockPos goalPos) throws Exception {
+        Class<?> api = Class.forName("baritone.api.BaritoneAPI");
+        Object provider = api.getMethod("getProvider").invoke(null);
+        Object baritone = provider.getClass().getMethod("getPrimaryBaritone").invoke(provider);
+        if (baritone == null) return;
 
-	private void baritoneCancel() throws Exception {
-		Class<?> api = Class.forName("baritone.api.BaritoneAPI");
-		Object provider = api.getMethod("getProvider").invoke(null);
-		Object baritone = provider.getClass().getMethod("getPrimaryBaritone").invoke(provider);
-		if (baritone == null) return;
-		Object pathing = baritone.getClass().getMethod("getPathingBehavior").invoke(baritone);
-		pathing.getClass().getMethod("cancelEverything").invoke(pathing);
-	}
+        // Use CustomGoalProcess per API; do not fall back to PathingBehavior for goal-setting
+        Object goalProcess;
+        try {
+            goalProcess = baritone.getClass().getMethod("getCustomGoalProcess").invoke(baritone);
+            logFollow("Using CustomGoalProcess.");
+        } catch (NoSuchMethodException e) {
+            logFollow("Baritone getCustomGoalProcess() not found; cannot set goals via IPathingBehavior per API.");
+            return;
+        }
 
-	private boolean baritoneAvailable() {
-		try {
-			Class<?> api = Class.forName("baritone.api.BaritoneAPI");
-			Object provider = api.getMethod("getProvider").invoke(null);
-			Object baritone = provider.getClass().getMethod("getPrimaryBaritone").invoke(provider);
-			return baritone != null;
-		} catch (Throwable t) {
-			return false;
-		}
-	}
+        // Support both Baritone interface names: Goal (modern) and IGoal (older)
+        Class<?> goalIface;
+        try {
+            goalIface = Class.forName("baritone.api.pathing.goals.Goal");
+            logFollow("Using Goal interface.");
+        } catch (ClassNotFoundException e) {
+            goalIface = Class.forName("baritone.api.pathing.goals.IGoal");
+            logFollow("Using IGoal interface.");
+        }
+        Class<?> goalBlock = Class.forName("baritone.api.pathing.goals.GoalBlock");
+
+        // Support both GoalBlock(BlockPos) and GoalBlock(int,int,int)
+        Object goal;
+        try {
+            goal = goalBlock.getConstructor(BlockPos.class).newInstance(goalPos);
+            logFollow("Constructed GoalBlock via BlockPos constructor.");
+        } catch (NoSuchMethodException ex) {
+            goal = goalBlock.getConstructor(int.class, int.class, int.class)
+                .newInstance(goalPos.getX(), goalPos.getY(), goalPos.getZ());
+            logFollow("Constructed GoalBlock via int,int,int constructor.");
+        }
+
+        // Prefer setGoalAndPath if present; otherwise try setGoal + path
+        try {
+            goalProcess.getClass().getMethod("setGoalAndPath", goalIface).invoke(goalProcess, goal);
+            logFollow("Called setGoalAndPath.");
+        } catch (NoSuchMethodException e) {
+            // setGoal(...) then path() on PathingBehavior
+            goalProcess.getClass().getMethod("setGoal", goalIface).invoke(goalProcess, goal);
+            logFollow("Called setGoal(...) as fallback.");
+            try {
+                goalProcess.getClass().getMethod("path").invoke(goalProcess);
+                logFollow("Called path() after setGoal.");
+            } catch (NoSuchMethodException ignored) {
+                // Some versions path automatically on setGoal
+                logFollow("No path() method; assuming automatic pathing.");
+            }
+        }
+    }
+
+    private void baritoneCancel() throws Exception {
+        Class<?> api = Class.forName("baritone.api.BaritoneAPI");
+        Object provider = api.getMethod("getProvider").invoke(null);
+        Object baritone = provider.getClass().getMethod("getPrimaryBaritone").invoke(provider);
+        if (baritone == null) return;
+        Object pathing = baritone.getClass().getMethod("getPathingBehavior").invoke(baritone);
+        try {
+            pathing.getClass().getMethod("cancelEverything").invoke(pathing);
+            logFollow("Cancelled Baritone pathing (cancelEverything).");
+        } catch (NoSuchMethodException e) {
+            // Older/newer variants
+            try { pathing.getClass().getMethod("forceCancel").invoke(pathing); logFollow("Cancelled Baritone pathing (forceCancel)."); } catch (NoSuchMethodException ignored) {}
+        }
+    }
+
+    private boolean baritoneAvailable() {
+        try {
+            Class<?> api = Class.forName("baritone.api.BaritoneAPI");
+            Object provider = api.getMethod("getProvider").invoke(null);
+            Object baritone = provider.getClass().getMethod("getPrimaryBaritone").invoke(provider);
+            return baritone != null;
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
+    // --- Logging helpers ---
+    private boolean lastPoolEmptyLogged = false;
+    private void logFollowOnce(String msg) {
+        if (!followLogging.get()) return;
+        if (!lastPoolEmptyLogged) {
+            info("[Follow] " + msg);
+            lastPoolEmptyLogged = true;
+        }
+    }
+    private void logFollow(String msg) {
+        if (!followLogging.get()) return;
+        // reset the one-time flag on any positive event
+        lastPoolEmptyLogged = false;
+        info("[Follow] " + msg);
+    }
 
 }
