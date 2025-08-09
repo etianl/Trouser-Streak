@@ -38,3 +38,14 @@ Tip: Use Java 21 (matches `sourceCompatibility`/`targetCompatibility`).
 - Commit CI change: edit `.github/workflows/build.yml` to build `1.21.5`, then `git add -A && git commit -m "ci: add GitHub Actions build for 1.21.5"`.
 - Push branch: `git push -u origin ci/1.21.5-build`
 - Open PR: `gh pr create --base 1.21.5 --head ci/1.21.5-build --title "ci: build for 1.21.5" --body "Builds 1.21.5 and uploads artifacts."`
+
+### GitHub CLI PR Troubleshooting
+- Symptom: `GraphQL: Head sha can't be blank`, `Base sha can't be blank`, `No commits between <base> and <head>`, or `Head ref must be a branch`.
+- Cause: `gh pr create` is targeting the wrong repository when both `origin` (fork) and `upstream` (main) remotes exist. Your branch is pushed to `origin`, but `gh` is defaulting to `upstream` for the PR, so the head ref doesn’t exist there.
+- Fix: Explicitly set the target repository and, for cross‑repo PRs, qualify the head with the fork owner.
+  - PR within fork repo (branch and base both on `origin`):
+    - `gh pr create --repo runningbird2/Trouser-Streak --base 1.21.5 --head fix/1.21.5-baratone-goal-interface --title "..." --body "..."`
+  - PR from fork to upstream (base on upstream, head on your fork):
+    - `gh pr create --repo etianl/Trouser-Streak --base 1.21.5 --head runningbird2:fix/1.21.5-baratone-goal-interface --title "..." --body "..."`
+- Ensure the branch is pushed: `git push -u origin <branch>`.
+- Verify auth and default repo if needed: `gh auth status`; set default: `gh repo set-default runningbird2/Trouser-Streak`.
