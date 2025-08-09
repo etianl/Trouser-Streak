@@ -1,0 +1,17 @@
+accessWidener v2 named
+
+accessible class net/minecraft/world/chunk/PalettedContainer$Data
+accessible field net/minecraft/world/chunk/PalettedContainer data Lnet/minecraft/world/chunk/PalettedContainer$Data;
+accessible method net/minecraft/world/chunk/PalettedContainer$Data palette ()Lnet/minecraft/world/chunk/Palette;
+accessible method net/minecraft/client/network/ClientPlayerEntity getPermissionLevel ()I
+accessible class net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractType
+accessible class net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractAtHandler
+accessible class net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractTypeHandler
+accessible field net/minecraft/block/spawner/MobSpawnerLogic spawnDelay I
+accessible field net/minecraft/block/spawner/MobSpawnerLogic spawnEntry Lnet/minecraft/block/spawner/MobSpawnerEntry;
+accessible field net/minecraft/block/entity/DecoratedPotBlockEntity stack Lnet/minecraft/item/ItemStack;
+accessible method net/minecraft/client/MinecraftClient doItemUse ()V
+accessible field net/minecraft/client/world/ClientChunkManager chunks Lnet/minecraft/client/world/ClientChunkManager$ClientChunkMap;
+accessible field net/minecraft/client/world/ClientChunkManager$ClientChunkMap chunks Ljava/util/concurrent/atomic/AtomicReferenceArray;
+accessible field net/minecraft/entity/player/PlayerInventory selectedSlot I
+accessible field net/minecraft/client/network/ClientPlayNetworkHandler componentHasher Lnet/minecraft/screen/sync/ComponentChangesHash$ComponentHasher;

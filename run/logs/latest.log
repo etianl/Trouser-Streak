@@ -1,0 +1,156 @@
+[13:46:13] [main/INFO] (FabricLoader/GameProvider) Loading Minecraft 1.21.5 with Fabric Loader 0.16.12
+[13:46:13] [main/INFO] (FabricLoader) Loading 8 mods:
+	- fabric-api-base 0.4.62+73a52b4b49
+	- fabric-resource-loader-v0 3.1.6+02ca679649
+	- fabricloader 0.16.12
+	- java 21
+	- meteor-client 1.21.5-54
+	- minecraft 1.21.5
+	- mixinextras 0.4.1
+	- streak-addon 1.5.1
+[13:46:13] [main/INFO] (FabricLoader/Mixin) SpongePowered MIXIN Subsystem Version=0.8.7 Source=file:/home/bob/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.4+mixin.0.8.7/6a12aacc794f1078458433116e9ed42c1cc98096/sponge-mixin-0.15.4+mixin.0.8.7.jar Service=Knot/Fabric Env=CLIENT
+[13:46:13] [main/INFO] (FabricLoader/Mixin) Loaded Fabric development mappings for mixin remapper!
+[13:46:14] [main/INFO] (FabricLoader/Mixin) Compatibility level set to JAVA_21
+[13:46:14] [main/WARN] (FabricLoader/Mixin) Error loading class: baritone/command/defaults/ComeCommand (java.lang.ClassNotFoundException: baritone/command/defaults/ComeCommand)
+[13:46:14] [main/WARN] (FabricLoader/Mixin) @Mixin target baritone.command.defaults.ComeCommand was not found meteor-client-baritone.mixins.json:ComeCommandMixin from mod meteor-client
+[13:46:14] [main/INFO] (FabricLoader/MixinExtras|Service) Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.4.1).
+[13:46:15] [Datafixer Bootstrap/INFO] (Minecraft) 263 Datafixer optimizations took 1138 milliseconds
+[13:46:18] [Render thread/INFO] (Minecraft) Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[13:46:18] [Render thread/INFO] (Minecraft) Setting user: Player307
+[13:46:18] [Render thread/INFO] (Minecraft) Backend library: LWJGL version 3.3.3-snapshot
+[13:46:19] [Render thread/INFO] (Minecraft) Using optional rendering extensions: GL_KHR_debug, GL_ARB_vertex_attrib_binding, GL_ARB_direct_state_access
+[13:46:19] [Render thread/INFO] (Minecraft) Reloading ResourceManager: vanilla, fabric, fabric-api-base, fabric-resource-loader-v0, fabricloader, meteor-client, streak-addon
+[13:46:19] [Render thread/INFO] (Meteor Client) Force loading mixins
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.render.block.entity.AbstractSignBlockEntityRenderer
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.render.entity.EndCrystalEntityRenderer
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.particle.FireworksSparkParticle$FireworkParticle
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.util.StringHelper
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.render.BackgroundRenderer
+[13:46:19] [Worker-Main-1/INFO] (Minecraft) Found unifont_all_no_pua-16.0.01.hex, loading
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.server.network.SynchronizeRegistriesTask
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.render.entity.feature.ElytraFeatureRenderer
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.render.block.entity.EnchantingTableBlockEntityRenderer
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.resource.ClientDataPackManager
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.render.entity.model.EndCrystalEntityModel
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.gui.screen.DisconnectedScreen
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.world.ClientChunkManager$ClientChunkMap
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.world.entity.SectionedEntityCache
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.render.block.entity.BannerBlockEntityRenderer
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.gui.hud.ChatHudLine
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.gui.screen.ingame.AbstractFurnaceScreen
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.render.model.BakedQuad
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.network.ClientPlayNetworkHandler
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.gui.screen.ingame.BookEditScreen
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.render.entity.feature.CapeFeatureRenderer
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.server.network.ServerConfigurationNetworkHandler
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.gui.screen.world.CreateWorldScreen
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.server.function.FunctionLoader
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.screen.HorseScreenHandler
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.render.entity.PlayerEntityRenderer
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.gui.hud.InGameOverlayRenderer
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.render.entity.feature.ArmorFeatureRenderer
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.network.ClientConnection
+[13:46:19] [Worker-Main-1/INFO] (Minecraft) Found unifont_jp_patch-16.0.01.hex, loading
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.recipe.ServerRecipeManager
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.gui.screen.pack.ResourcePackOrganizer
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.render.entity.EntityRenderer
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.render.entity.feature.HeadFeatureRenderer
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.world.chunk.light.ChunkSkyLightProvider
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.color.world.BiomeColors
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.world.BlockCollisionSpliterator
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.network.packet.s2c.play.ExplosionS2CPacket
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.gui.hud.ChatHudLine$Visible
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.network.packet.c2s.config.SelectKnownPacksC2SPacket
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.gui.screen.ChatInputSuggestor
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.world.entity.EntityTrackingSection
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.world.ClientChunkManager
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.render.entity.ItemEntityRenderer
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.render.entity.state.EntityRenderState
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.render.RenderLayers
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.world.entity.SimpleEntityLookup
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen$CreativeSlot
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.gui.screen.ingame.BookScreen
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.test.TestServer
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.world.RaycastContext
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.server.command.DatapackCommand
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.util.DefaultSkinHelper
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.server.dedicated.ServerPropertiesHandler
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.network.encoding.StringEncoding
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.gui.screen.ingame.LecternScreen
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.render.chunk.ChunkOcclusionDataBuilder
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.render.entity.LivingEntityRenderer
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.network.ClientPlayerInteractionManager
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.input.KeyboardInput
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.font.TextRenderer$Drawer
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.gui.screen.ingame.BeaconScreen
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.gui.screen.multiplayer.ConnectScreen
+[13:46:19] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.gui.screen.ingame.AbstractSignEditScreen
+[13:46:20] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.gui.screen.ingame.BrewingStandScreen
+[13:46:20] [Download-1/INFO] (Minecraft) Could not authorize you against Realms server: java.lang.RuntimeException: Failed to parse into SignedJWT: FabricMC
+[13:46:20] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.server.ServerAdvancementLoader
+[13:46:20] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.gui.tooltip.TooltipComponent
+[13:46:20] [Download-1/ERROR] (Minecraft) Failed to fetch Realms feature flags
+net.minecraft.client.realms.exception.RealmsServiceException: Realms authentication error with message 'java.lang.RuntimeException: Failed to parse into SignedJWT: FabricMC'
+	at knot/net.minecraft.client.realms.RealmsClient.execute(RealmsClient.java:495) ~[minecraft-merged-4dbf4025e3-1.21.5-net.fabricmc.yarn.1_21_5.1.21.5+build.1-v2.jar:?]
+	at knot/net.minecraft.client.realms.RealmsClient.fetchFeatureFlags(RealmsClient.java:177) ~[minecraft-merged-4dbf4025e3-1.21.5-net.fabricmc.yarn.1_21_5.1.21.5+build.1-v2.jar:?]
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768) ~[?:?]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) ~[?:?]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) ~[?:?]
+	at java.base/java.lang.Thread.run(Thread.java:1583) [?:?]
+[13:46:20] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.network.packet.c2s.handshake.HandshakeC2SPacket
+[13:46:20] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.render.block.entity.MobSpawnerBlockEntityRenderer
+[13:46:20] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.render.WorldRenderer$BrightnessGetter
+[13:46:20] [Render thread/INFO] (FabricLoader/Mixin/audit) Force-loading class net.minecraft.client.render.entity.LightningEntityRenderer
+[13:46:20] [Render thread/INFO] (Meteor Client) Initializing Meteor Client
+[13:46:20] [Render thread/INFO] (Reflections) Reflections took 138 ms to scan 1 urls, producing 24 keys and 947 values
+[13:46:20] [Render thread/INFO] (Reflections) Reflections took 32 ms to scan 1 urls, producing 5 keys and 172 values
+[13:46:20] [Render thread/WARN] (Meteor Client) Failed to load system font Caladea Italic (/usr/share/fonts/google-crosextra-caladea-fonts/Caladea-Italic.ttf)
+[13:46:20] [Render thread/INFO] (Meteor Client) Found 83 font families.
+[13:46:20] [Render thread/INFO] (Meteor Client) Path Manager: none
+[13:46:20] [Render thread/INFO] (Trouser) Initializing PantsMod!
+[13:46:20] [Render thread/INFO] (Meteor Client) Loading
+[13:46:20] [Render thread/INFO] (Meteor Client) Loaded in 29 milliseconds
+[13:46:21] [Render thread/WARN] (Minecraft) minecraft:pipeline/entity_translucent_emissive shader program does not use sampler Sampler2 defined in the pipeline. This might be a bug.
+[13:46:21] [Render thread/INFO] (Minecraft) OpenAL initialized on device ES1371/ES1373 / Creative Labs CT2518 (Audio PCI 64V/128/5200 / Creative CT4810/CT5803/CT5806 [Sound Blaster PCI]) Analog Stereo
+[13:46:21] [Render thread/INFO] (Minecraft) Sound engine started
+[13:46:21] [Render thread/INFO] (Minecraft) Created: 1024x512x4 minecraft:textures/atlas/blocks.png-atlas
+[13:46:21] [Render thread/INFO] (Minecraft) Created: 256x256x4 minecraft:textures/atlas/signs.png-atlas
+[13:46:21] [Render thread/INFO] (Minecraft) Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
+[13:46:21] [Render thread/INFO] (Minecraft) Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
+[13:46:21] [Render thread/INFO] (Minecraft) Created: 2048x1024x4 minecraft:textures/atlas/armor_trims.png-atlas
+[13:46:21] [Render thread/INFO] (Minecraft) Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas
+[13:46:21] [Render thread/INFO] (Minecraft) Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas
+[13:46:21] [Render thread/INFO] (Minecraft) Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
+[13:46:21] [Render thread/INFO] (Minecraft) Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
+[13:46:21] [Render thread/INFO] (Minecraft) Created: 64x64x0 minecraft:textures/atlas/map_decorations.png-atlas
+[13:46:21] [Render thread/INFO] (Minecraft) Created: 512x256x0 minecraft:textures/atlas/particles.png-atlas
+[13:46:21] [Render thread/INFO] (Minecraft) Created: 512x256x0 minecraft:textures/atlas/paintings.png-atlas
+[13:46:21] [Render thread/INFO] (Minecraft) Created: 256x128x0 minecraft:textures/atlas/mob_effects.png-atlas
+[13:46:21] [Render thread/INFO] (Minecraft) Created: 1024x512x0 minecraft:textures/atlas/gui.png-atlas
+[13:46:28] [Render thread/INFO] (Minecraft) Loaded 1373 recipes
+[13:46:28] [Render thread/INFO] (Minecraft) Loaded 1484 advancements
+[13:46:44] [Render thread/INFO] (Minecraft) Loaded 1373 recipes
+[13:46:44] [Render thread/INFO] (Minecraft) Loaded 1484 advancements
+[13:46:49] [Server thread/INFO] (Minecraft) Starting integrated minecraft server version 1.21.5
+[13:46:49] [Server thread/INFO] (Minecraft) Generating keypair
+[13:46:51] [Server thread/INFO] (Minecraft) Preparing start region for dimension minecraft:overworld
+[13:46:51] [Render thread/INFO] (Minecraft) Preparing spawn area: 2%
+[13:46:52] [Render thread/INFO] (Minecraft) Preparing spawn area: 2%
+[13:46:52] [Render thread/INFO] (Minecraft) Preparing spawn area: 18%
+[13:46:53] [Render thread/INFO] (Minecraft) Preparing spawn area: 51%
+[13:46:53] [Render thread/INFO] (Minecraft) Time elapsed: 1917 ms
+[13:46:53] [Server thread/INFO] (Minecraft) Changing view distance to 12, from 10
+[13:46:53] [Server thread/INFO] (Minecraft) Changing simulation distance to 12, from 0
+[13:46:53] [Server thread/INFO] (Minecraft) Player307[local:E:a672e022] logged in with entity id 32 at (5.5, 67.0, -5.5)
+[13:46:53] [Server thread/INFO] (Minecraft) Player307 joined the game
+[13:46:53] [Render thread/INFO] (Minecraft) Loaded 2 advancements
+[13:47:33] [Server thread/INFO] (Minecraft) Saving and pausing game...
+[13:47:33] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:overworld
+[13:47:33] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
+[13:47:33] [Server thread/INFO] (Minecraft) Saving chunks for level 'ServerLevel[New World]'/minecraft:the_end

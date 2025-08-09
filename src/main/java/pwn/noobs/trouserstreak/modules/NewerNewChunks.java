@@ -302,6 +302,7 @@ public class NewerNewChunks extends Module {
 	// Auto-follow state
 	private ChunkPos currentTarget = null;
 	private long lastSetGoalTime = 0L;
+	private boolean baritoneWarned = false;
 	private static final Set<Block> ORE_BLOCKS = new HashSet<>();
 	static {
 		ORE_BLOCKS.add(Blocks.COAL_ORE);
@@ -507,6 +508,7 @@ public class NewerNewChunks extends Module {
 		// Stop Baritone pathing if active (reflection)
 		try { baritoneCancel(); } catch (Throwable ignored) {}
 		currentTarget = null;
+		baritoneWarned = false;
 		super.onDeactivate();
 	}
 	@EventHandler
@@ -626,6 +628,11 @@ public class NewerNewChunks extends Module {
 
 		// Auto-follow tick
 		if (autoFollow.get()) {
+			if (!baritoneAvailable()) {
+				if (!baritoneWarned) { info("Baritone not found. Auto-follow will not path."); baritoneWarned = true; }
+				return;
+			}
+			baritoneWarned = false;
 			try { updateAutoFollow(); } catch (Throwable ignored) {}
 		}
 	}
@@ -1173,4 +1180,16 @@ public class NewerNewChunks extends Module {
 		Object pathing = baritone.getClass().getMethod("getPathingBehavior").invoke(baritone);
 		pathing.getClass().getMethod("cancelEverything").invoke(pathing);
 	}
+
+	private boolean baritoneAvailable() {
+		try {
+			Class<?> api = Class.forName("baritone.api.BaritoneAPI");
+			Object provider = api.getMethod("getProvider").invoke(null);
+			Object baritone = provider.getClass().getMethod("getPrimaryBaritone").invoke(provider);
+			return baritone != null;
+		} catch (Throwable t) {
+			return false;
+		}
+	}
+
 }
