@@ -27,9 +27,6 @@ dependencies {
 
     // Meteor
     modImplementation "meteordevelopment:meteor-client:${project.minecraft_version}-SNAPSHOT"
-
-    // Local Baritone for dev runtime (drop jar into libs/baritone-fabric.jar)
-    modRuntimeOnly files('libs/baritone-fabric.jar')
 }
 
 processResources {
