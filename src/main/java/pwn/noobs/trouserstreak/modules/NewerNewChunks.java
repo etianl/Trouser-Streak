@@ -43,6 +43,9 @@ import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.*;
 
+// Baritone
+// Baritone accessed reflectively to avoid hard dependency
+
 /*
     Ported from: https://github.com/BleachDrinker420/BleachHack/blob/master/BleachHack-Fabric-1.16/src/main/java/bleach/hack/module/mods/NewChunks.java
     updated by etianl :D
@@ -53,12 +56,27 @@ public class NewerNewChunks extends Module {
 		IgnoreBlockExploit,
 		BlockExploitMode
 	}
+
+	// Auto-follow configuration
+	public enum FollowType {
+		New,
+		Old,
+		BeingUpdated,
+		OldGeneration,
+		BlockExploit
+	}
+
+	public enum PathingMode {
+		Regular,
+		Elytra
+	}
 	private final SettingGroup specialGroup = settings.createGroup("Disable PaletteExploit if server version <1.18");
 	private final SettingGroup specialGroup2 = settings.createGroup("Detection for chunks that were generated in old versions.");
 	private final SettingGroup sgGeneral = settings.getDefaultGroup();
 	private final SettingGroup sgCdata = settings.createGroup("Saved Chunk Data");
 	private final SettingGroup sgcacheCdata = settings.createGroup("Cached Chunk Data");
 	private final SettingGroup sgRender = settings.createGroup("Render");
+	private final SettingGroup sgFollow = settings.createGroup("Auto Follow");
 
 	private final Setting<Boolean> PaletteExploit = specialGroup.add(new BoolSetting.Builder()
 			.name("PaletteExploit")
@@ -280,6 +298,10 @@ public class NewerNewChunks extends Module {
 	private boolean worldchange=false;
 	private int justenabledsavedata=0;
 	private boolean saveDataWasOn = false;
+
+	// Auto-follow state
+	private ChunkPos currentTarget = null;
+	private long lastSetGoalTime = 0L;
 	private static final Set<Block> ORE_BLOCKS = new HashSet<>();
 	static {
 		ORE_BLOCKS.add(Blocks.COAL_ORE);
@@ -380,6 +402,46 @@ public class NewerNewChunks extends Module {
 	public NewerNewChunks() {
 		super(Trouser.baseHunting,"NewerNewChunks", "Detects new chunks by scanning the order of chunk section palettes. Can also check liquid flow, and block ticking packets.");
 	}
+
+	// Auto-follow settings
+	private final Setting<Boolean> autoFollow = sgFollow.add(new BoolSetting.Builder()
+		.name("auto-follow")
+		.description("Automatically path to adjacent chunks of a chosen type using Baritone.")
+		.defaultValue(false)
+		.build()
+	);
+
+	private final Setting<FollowType> followType = sgFollow.add(new EnumSetting.Builder<FollowType>()
+		.name("follow-type")
+		.description("Which detected chunk type to follow.")
+		.defaultValue(FollowType.New)
+		.build()
+	);
+
+	private final Setting<PathingMode> pathingMode = sgFollow.add(new EnumSetting.Builder<PathingMode>()
+		.name("pathing-mode")
+		.description("Choose Regular walking pathing or Elytra-oriented pathing.")
+		.defaultValue(PathingMode.Regular)
+		.build()
+	);
+
+	private final Setting<Integer> lookAhead = sgFollow.add(new IntSetting.Builder()
+		.name("look-ahead-chunks")
+		.description("How many chunks ahead to consider for a continuous path.")
+		.defaultValue(2)
+		.min(1)
+		.sliderRange(1, 8)
+		.build()
+	);
+
+	private final Setting<Integer> searchRadius = sgFollow.add(new IntSetting.Builder()
+		.name("search-radius-chunks")
+		.description("Max chunk distance to search for next target when no adjacent candidate exists.")
+		.defaultValue(8)
+		.min(1)
+		.sliderRange(1, 64)
+		.build()
+	);
 	private void clearChunkData() {
 		newChunks.clear();
 		oldChunks.clear();
@@ -442,6 +504,9 @@ public class NewerNewChunks extends Module {
 		if (remove.get()|autoreload.get()) {
 			clearChunkData();
 		}
+		// Stop Baritone pathing if active (reflection)
+		try { baritoneCancel(); } catch (Throwable ignored) {}
+		currentTarget = null;
 		super.onDeactivate();
 	}
 	@EventHandler
@@ -558,6 +623,11 @@ public class NewerNewChunks extends Module {
 		}
 
 		if (removerenderdist.get())removeChunksOutsideRenderDistance();
+
+		// Auto-follow tick
+		if (autoFollow.get()) {
+			try { updateAutoFollow(); } catch (Throwable ignored) {}
+		}
 	}
 	@EventHandler
 	private void onRender(Render3DEvent event) {
@@ -973,5 +1043,134 @@ public class NewerNewChunks extends Module {
 	}
 	private void removeChunksOutsideRenderDistance(Set<ChunkPos> chunkSet, BlockPos playerPos, double renderDistanceBlocks) {
 		chunkSet.removeIf(c -> !playerPos.isWithinDistance(new BlockPos(c.getCenterX(), renderHeight.get(), c.getCenterZ()), renderDistanceBlocks));
+	}
+
+	// --- Auto-follow implementation ---
+	private void updateAutoFollow() {
+		if (mc == null || mc.player == null || mc.world == null) return;
+		// Resolve candidate set
+		Set<ChunkPos> poolRef = getPoolForFollowType();
+		if (poolRef == null || poolRef.isEmpty()) return;
+		Set<ChunkPos> pool;
+		// Create a snapshot to avoid concurrent modification
+		synchronized (poolRef) {
+			pool = new HashSet<>(poolRef);
+		}
+
+		ChunkPos playerChunk = new ChunkPos(mc.player.getBlockX() >> 4, mc.player.getBlockZ() >> 4);
+
+		// If in current target, clear it to pick next
+		if (currentTarget != null && isWithinChunk(currentTarget, mc.player.getBlockPos())) {
+			currentTarget = null;
+		}
+
+		// Pick or refresh target periodically
+		if (currentTarget == null || System.currentTimeMillis() - lastSetGoalTime > 2000) {
+			ChunkPos next = pickNextTarget(playerChunk, pool, lookAhead.get(), searchRadius.get());
+			if (next != null && !next.equals(currentTarget)) {
+				currentTarget = next;
+				setGoalForChunk(next);
+				lastSetGoalTime = System.currentTimeMillis();
+			}
+		}
+	}
+
+	private Set<ChunkPos> getPoolForFollowType() {
+		switch (followType.get()) {
+			case New: return newChunks;
+			case Old: return oldChunks;
+			case BeingUpdated: return beingUpdatedOldChunks;
+			case OldGeneration: return OldGenerationOldChunks;
+			case BlockExploit: return tickexploitChunks;
+		}
+		return null;
+	}
+
+	private ChunkPos pickNextTarget(ChunkPos start, Set<ChunkPos> pool, int ahead, int radius) {
+		// Prefer immediate neighbors (with look-ahead chain)
+		for (Direction dir : new Direction[]{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST}) {
+			ChunkPos n = new ChunkPos(start.x + dir.getOffsetX(), start.z + dir.getOffsetZ());
+			if (pool.contains(n)) {
+				if (ahead <= 1 || hasChain(n, pool, ahead - 1, start)) return n;
+			}
+		}
+
+		// Fallback: nearest in radius
+		ChunkPos best = null;
+		double bestDist = Double.MAX_VALUE;
+		int minX = start.x - radius, maxX = start.x + radius;
+		int minZ = start.z - radius, maxZ = start.z + radius;
+		for (ChunkPos cp : pool) {
+			if (cp == null) continue;
+			if (cp.x < minX || cp.x > maxX || cp.z < minZ || cp.z > maxZ) continue;
+			double dx = (cp.x - start.x);
+			double dz = (cp.z - start.z);
+			double d2 = dx * dx + dz * dz;
+			if (d2 < bestDist) {
+				bestDist = d2;
+				best = cp;
+			}
+		}
+		return best;
+	}
+
+	private boolean hasChain(ChunkPos from, Set<ChunkPos> pool, int remaining, ChunkPos avoid) {
+		if (remaining <= 0) return true;
+		for (Direction dir : new Direction[]{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST}) {
+			ChunkPos n = new ChunkPos(from.x + dir.getOffsetX(), from.z + dir.getOffsetZ());
+			if (avoid != null && n.equals(avoid)) continue;
+			if (pool.contains(n)) {
+				if (hasChain(n, pool, remaining - 1, from)) return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean isWithinChunk(ChunkPos chunk, BlockPos pos) {
+		return (pos.getX() >> 4) == chunk.x && (pos.getZ() >> 4) == chunk.z;
+	}
+
+	private void setGoalForChunk(ChunkPos cp) {
+		if (mc.world == null) return;
+		int cx = cp.getCenterX();
+		int cz = cp.getCenterZ();
+		int y;
+		if (pathingMode.get() == PathingMode.Elytra) {
+			// Aim high to encourage elytra traversal; enable normal path fallback if needed
+			y = Math.min(300, getTopYAt(cx, cz) + 32);
+		} else {
+			y = getTopYAt(cx, cz);
+		}
+		BlockPos goalPos = new BlockPos(cx, y, cz);
+		try { baritoneSetGoal(goalPos); } catch (Throwable ignored) {}
+	}
+
+	private int getTopYAt(int x, int z) {
+		try {
+			return mc.world.getTopY(Heightmap.Type.MOTION_BLOCKING, x, z);
+		} catch (Throwable t) {
+			return Math.max(mc.world.getBottomY(), mc.player != null ? mc.player.getBlockY() : 64);
+		}
+	}
+
+	private void baritoneSetGoal(BlockPos goalPos) throws Exception {
+		Class<?> api = Class.forName("baritone.api.BaritoneAPI");
+		Object provider = api.getMethod("getProvider").invoke(null);
+		Object baritone = provider.getClass().getMethod("getPrimaryBaritone").invoke(provider);
+		if (baritone == null) return;
+		Object custom = baritone.getClass().getMethod("getCustomGoalProcess").invoke(baritone);
+		Class<?> goalIface = Class.forName("baritone.api.pathing.goals.IGoal");
+		Class<?> goalBlock = Class.forName("baritone.api.pathing.goals.GoalBlock");
+		Object goal = goalBlock.getConstructor(BlockPos.class).newInstance(goalPos);
+		custom.getClass().getMethod("setGoalAndPath", goalIface).invoke(custom, goal);
+	}
+
+	private void baritoneCancel() throws Exception {
+		Class<?> api = Class.forName("baritone.api.BaritoneAPI");
+		Object provider = api.getMethod("getProvider").invoke(null);
+		Object baritone = provider.getClass().getMethod("getPrimaryBaritone").invoke(provider);
+		if (baritone == null) return;
+		Object pathing = baritone.getClass().getMethod("getPathingBehavior").invoke(baritone);
+		pathing.getClass().getMethod("cancelEverything").invoke(pathing);
 	}
 }
