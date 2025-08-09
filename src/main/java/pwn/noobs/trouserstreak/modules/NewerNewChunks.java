@@ -309,6 +309,9 @@ public class NewerNewChunks extends Module {
     private ChunkPos lastCompletedTarget = null;
     private long lastCompletedAt = 0L;
     private static final long BACKTRACK_COOLDOWN_MS = 4000L;
+    // Direction lock: only use player's look to lock once at start
+    private Direction[] lockedDirOrder = null;
+    private Direction initialForwardDir = null;
 	private static final Set<Block> ORE_BLOCKS = new HashSet<>();
 	static {
 		ORE_BLOCKS.add(Blocks.COAL_ORE);
@@ -529,7 +532,7 @@ public class NewerNewChunks extends Module {
 		justenabledsavedata=0;
 	}
 	@Override
-	public void onDeactivate() {
+    public void onDeactivate() {
 		autoreloadticks=0;
 		loadingticks=0;
 		worldchange=false;
@@ -538,11 +541,13 @@ public class NewerNewChunks extends Module {
 			clearChunkData();
 		}
 		// Stop Baritone pathing if active (reflection)
-		try { baritoneCancel(); } catch (Throwable ignored) {}
-		currentTarget = null;
-		baritoneWarned = false;
-		super.onDeactivate();
-	}
+        try { baritoneCancel(); } catch (Throwable ignored) {}
+        currentTarget = null;
+        baritoneWarned = false;
+        lockedDirOrder = null;
+        initialForwardDir = null;
+        super.onDeactivate();
+    }
 	@EventHandler
 	private void onScreenOpen(OpenScreenEvent event) {
 		if (event.screen instanceof DisconnectedScreen) {
@@ -1130,8 +1135,14 @@ public class NewerNewChunks extends Module {
 
         // Pick or refresh target periodically
         if (currentTarget == null || System.currentTimeMillis() - lastSetGoalTime > 2000) {
-            Direction[] dirOrder = getLookOrderedDirs();
-            ChunkPos next = pickNextTarget(playerChunk, pool, lookAhead.get(), searchRadius.get(), maxGap.get(), dirOrder);
+            Direction[] dirOrder = lockedDirOrder;
+            if (dirOrder == null) {
+                dirOrder = getLookOrderedDirs();
+                lockedDirOrder = dirOrder;
+                initialForwardDir = dirOrder[0];
+                logFollow("Direction locked to " + initialForwardDir + ".");
+            }
+            ChunkPos next = pickNextTarget(playerChunk, pool, lookAhead.get(), searchRadius.get(), maxGap.get(), dirOrder, initialForwardDir);
             if (next != null && !next.equals(currentTarget)) {
                 currentTarget = next;
                 logFollow("New target chunk " + next.x + "," + next.z +
@@ -1153,7 +1164,7 @@ public class NewerNewChunks extends Module {
 		return null;
 	}
 
-    private ChunkPos pickNextTarget(ChunkPos start, Set<ChunkPos> pool, int ahead, int radius, int maxGap, Direction[] dirOrder) {
+    private ChunkPos pickNextTarget(ChunkPos start, Set<ChunkPos> pool, int ahead, int radius, int maxGap, Direction[] dirOrder, Direction forward) {
         // Prefer forward direction based on look; allow skipping up to maxGap non-target chunks
         for (Direction dir : dirOrder) {
             for (int step = 1; step <= Math.max(1, maxGap + 1); step++) {
@@ -1161,9 +1172,13 @@ public class NewerNewChunks extends Module {
                 // Skip immediate backtrack candidate during cooldown window
                 if (lastCompletedTarget != null && System.currentTimeMillis() - lastCompletedAt < BACKTRACK_COOLDOWN_MS && candidate.equals(lastCompletedTarget))
                     continue;
+                // Never go backwards relative to initial forward direction
+                if (forward != null && !isForwardOrLateral(start, candidate, forward)) continue;
                 if (pool.contains(candidate)) {
-                    // Accept if straight chain continues OR if a valid chain exists allowing turns
-                    if (ahead <= 1 || hasChainLinear(candidate, pool, ahead - 1, dir) || hasChain(candidate, pool, ahead - 1, start))
+                    // Accept if straight chain continues OR if a valid chain exists allowing turns (but not backwards)
+                    if (ahead <= 1
+                        || hasChainLinear(candidate, pool, ahead - 1, dir, forward, start)
+                        || hasChain(candidate, pool, ahead - 1, start, forward, start))
                         return candidate;
                 }
             }
@@ -1178,35 +1193,38 @@ public class NewerNewChunks extends Module {
             if (cp == null) continue;
             if (lastCompletedTarget != null && System.currentTimeMillis() - lastCompletedAt < BACKTRACK_COOLDOWN_MS && cp.equals(lastCompletedTarget))
                 continue;
+            if (forward != null && !isForwardOrLateral(start, cp, forward)) continue;
             if (cp.x < minX || cp.x > maxX || cp.z < minZ || cp.z > maxZ) continue;
             double dx = (cp.x - start.x);
             double dz = (cp.z - start.z);
             double d2 = dx * dx + dz * dz;
             if (d2 < bestDist) {
-				bestDist = d2;
-				best = cp;
-			}
-		}
+                bestDist = d2;
+                best = cp;
+            }
+        }
         return best;
     }
 
-    private boolean hasChain(ChunkPos from, Set<ChunkPos> pool, int remaining, ChunkPos avoid) {
+    private boolean hasChain(ChunkPos from, Set<ChunkPos> pool, int remaining, ChunkPos avoid, Direction forward, ChunkPos originStart) {
         if (remaining <= 0) return true;
         for (Direction dir : new Direction[]{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST}) {
             ChunkPos n = new ChunkPos(from.x + dir.getOffsetX(), from.z + dir.getOffsetZ());
             if (avoid != null && n.equals(avoid)) continue;
+            if (forward != null && !isForwardOrLateral(originStart, n, forward)) continue;
             if (pool.contains(n)) {
-                if (hasChain(n, pool, remaining - 1, from)) return true;
+                if (hasChain(n, pool, remaining - 1, from, forward, originStart)) return true;
             }
         }
         return false;
     }
 
-    private boolean hasChainLinear(ChunkPos from, Set<ChunkPos> pool, int remaining, Direction dir) {
+    private boolean hasChainLinear(ChunkPos from, Set<ChunkPos> pool, int remaining, Direction dir, Direction forward, ChunkPos originStart) {
         if (remaining <= 0) return true;
         ChunkPos next = new ChunkPos(from.x + dir.getOffsetX(), from.z + dir.getOffsetZ());
         if (!pool.contains(next)) return false;
-        return hasChainLinear(next, pool, remaining - 1, dir);
+        if (forward != null && !isForwardOrLateral(originStart, next, forward)) return false;
+        return hasChainLinear(next, pool, remaining - 1, dir, forward, originStart);
     }
 
 	private boolean isWithinChunk(ChunkPos chunk, BlockPos pos) {
@@ -1256,6 +1274,12 @@ public class NewerNewChunks extends Module {
         int dx = d.getOffsetX();
         int dz = d.getOffsetZ();
         return v.x * dx + v.z * dz;
+    }
+
+    // True if candidate is forward or lateral relative to start when projected onto the locked forward dir
+    private boolean isForwardOrLateral(ChunkPos start, ChunkPos candidate, Direction forward) {
+        int proj = (candidate.x - start.x) * forward.getOffsetX() + (candidate.z - start.z) * forward.getOffsetZ();
+        return proj >= 0; // disallow negative (backwards)
     }
 
     private boolean isUserInputActive() {
