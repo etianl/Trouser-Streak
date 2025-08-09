@@ -1162,7 +1162,9 @@ public class NewerNewChunks extends Module {
                 if (lastCompletedTarget != null && System.currentTimeMillis() - lastCompletedAt < BACKTRACK_COOLDOWN_MS && candidate.equals(lastCompletedTarget))
                     continue;
                 if (pool.contains(candidate)) {
-                    if (ahead <= 1 || hasChainLinear(candidate, pool, ahead - 1, dir)) return candidate;
+                    // Accept if straight chain continues OR if a valid chain exists allowing turns
+                    if (ahead <= 1 || hasChainLinear(candidate, pool, ahead - 1, dir) || hasChain(candidate, pool, ahead - 1, start))
+                        return candidate;
                 }
             }
         }
