@@ -5,6 +5,7 @@ import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
@@ -32,6 +33,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeKeys;
 import net.minecraft.world.chunk.*;
+import net.minecraft.text.Text;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.io.IOException;
@@ -299,10 +301,17 @@ public class NewerNewChunks extends Module {
 	private int justenabledsavedata=0;
 	private boolean saveDataWasOn = false;
 
-	// Auto-follow state
-	private ChunkPos currentTarget = null;
-	private long lastSetGoalTime = 0L;
-	private boolean baritoneWarned = false;
+    // Auto-follow state
+    private ChunkPos currentTarget = null;
+    private long lastSetGoalTime = 0L;
+    private boolean baritoneWarned = false;
+    // Anti-oscillation: remember last completed target for a short cooldown window
+    private ChunkPos lastCompletedTarget = null;
+    private long lastCompletedAt = 0L;
+    private static final long BACKTRACK_COOLDOWN_MS = 4000L;
+    // Direction lock: only use player's look to lock once at start
+    private Direction[] lockedDirOrder = null;
+    private Direction initialForwardDir = null;
 	private static final Set<Block> ORE_BLOCKS = new HashSet<>();
 	static {
 		ORE_BLOCKS.add(Blocks.COAL_ORE);
@@ -419,12 +428,12 @@ public class NewerNewChunks extends Module {
 		.build()
 	);
 
-	private final Setting<PathingMode> pathingMode = sgFollow.add(new EnumSetting.Builder<PathingMode>()
-		.name("pathing-mode")
-		.description("Choose Regular walking pathing or Elytra-oriented pathing.")
-		.defaultValue(PathingMode.Regular)
-		.build()
-	);
+    private final Setting<PathingMode> pathingMode = sgFollow.add(new EnumSetting.Builder<PathingMode>()
+        .name("pathing-mode")
+        .description("Choose Regular walking pathing or Elytra-oriented pathing.")
+        .defaultValue(PathingMode.Regular)
+        .build()
+    );
 
 	private final Setting<Integer> lookAhead = sgFollow.add(new IntSetting.Builder()
 		.name("look-ahead-chunks")
@@ -446,6 +455,26 @@ public class NewerNewChunks extends Module {
     private final Setting<Boolean> followLogging = sgFollow.add(new BoolSetting.Builder()
         .name("chat-logging")
         .description("Log auto-follow decisions and Baritone calls in chat.")
+        .defaultValue(true)
+        .build()
+    );
+    private final Setting<Integer> maxGap = sgFollow.add(new IntSetting.Builder()
+        .name("gap-allowance-chunks")
+        .description("Allow skipping this many non-target chunks straight ahead to keep direction.")
+        .defaultValue(2)
+        .min(0)
+        .sliderRange(0, 8)
+        .build()
+    );
+    private final Setting<Boolean> pauseOnInput = sgFollow.add(new BoolSetting.Builder()
+        .name("pause-on-input")
+        .description("Pause auto-follow while you press movement/interaction keys.")
+        .defaultValue(true)
+        .build()
+    );
+    private final Setting<Boolean> logoutOnNoTargets = sgFollow.add(new BoolSetting.Builder()
+        .name("logout-when-empty")
+        .description("Logout when no chunks of the chosen type are detected.")
         .defaultValue(true)
         .build()
     );
@@ -503,7 +532,7 @@ public class NewerNewChunks extends Module {
 		justenabledsavedata=0;
 	}
 	@Override
-	public void onDeactivate() {
+    public void onDeactivate() {
 		autoreloadticks=0;
 		loadingticks=0;
 		worldchange=false;
@@ -512,11 +541,13 @@ public class NewerNewChunks extends Module {
 			clearChunkData();
 		}
 		// Stop Baritone pathing if active (reflection)
-		try { baritoneCancel(); } catch (Throwable ignored) {}
-		currentTarget = null;
-		baritoneWarned = false;
-		super.onDeactivate();
-	}
+        try { baritoneCancel(); } catch (Throwable ignored) {}
+        currentTarget = null;
+        baritoneWarned = false;
+        lockedDirOrder = null;
+        initialForwardDir = null;
+        super.onDeactivate();
+    }
 	@EventHandler
 	private void onScreenOpen(OpenScreenEvent event) {
 		if (event.screen instanceof DisconnectedScreen) {
@@ -633,15 +664,25 @@ public class NewerNewChunks extends Module {
 		if (removerenderdist.get())removeChunksOutsideRenderDistance();
 
 		// Auto-follow tick
-		if (autoFollow.get()) {
-			if (!baritoneAvailable()) {
-				if (!baritoneWarned) { info("Baritone not found. Auto-follow will not path."); baritoneWarned = true; }
-				return;
-			}
-			baritoneWarned = false;
-			try { updateAutoFollow(); } catch (Throwable ignored) {}
-		}
-	}
+        if (autoFollow.get()) {
+            if (!baritoneAvailable()) {
+                if (!baritoneWarned) { info("Baritone not found. Auto-follow will not path."); baritoneWarned = true; }
+                return;
+            }
+            baritoneWarned = false;
+            try { updateAutoFollow(); } catch (Throwable ignored) {}
+        }
+    }
+
+    @EventHandler
+    private void onKeyEvent(KeyEvent event) {
+        // If user provides input and pauseOnInput is enabled, cancel baritone pathing.
+        if (!autoFollow.get() || !pauseOnInput.get()) return;
+        if (mc == null || mc.player == null) return;
+        if (isUserInputActive()) {
+            try { baritoneCancel(); } catch (Throwable ignored) {}
+        }
+    }
 	@EventHandler
 	private void onRender(Render3DEvent event) {
 		if (mc.world == null || mc.player == null) return;
@@ -1006,7 +1047,7 @@ public class NewerNewChunks extends Module {
 		loadChunkData(Paths.get("BeingUpdatedChunkData.txt"), beingUpdatedOldChunks);
 		loadChunkData(Paths.get("OldGenerationChunkData.txt"), OldGenerationOldChunks);
 	}
-	private void loadChunkData(Path savedDataLocation, Set<ChunkPos> chunkSet) {
+    private void loadChunkData(Path savedDataLocation, Set<ChunkPos> chunkSet) {
 		try {
 			Path filePath = Paths.get("TrouserStreak/NewChunks", serverip, world).resolve(savedDataLocation);
 			List<String> allLines = Files.readAllLines(filePath);
@@ -1061,10 +1102,18 @@ public class NewerNewChunks extends Module {
     // --- Auto-follow implementation ---
     private void updateAutoFollow() {
         if (mc == null || mc.player == null || mc.world == null) return;
+        // Pause on user input
+        if (pauseOnInput.get() && isUserInputActive()) {
+            logFollow("Paused due to user input.");
+            return;
+        }
         // Resolve candidate set
         Set<ChunkPos> poolRef = getPoolForFollowType();
         if (poolRef == null || poolRef.isEmpty()) {
             logFollowOnce("No chunks available to follow for " + followType.get() + ".");
+            // Stop navigating and logout if configured
+            try { baritoneCancel(); } catch (Throwable ignored) {}
+            if (logoutOnNoTargets.get()) try { logoutClient("No target chunks detected for " + followType.get()); } catch (Throwable ignored) {}
             return;
         }
         Set<ChunkPos> pool;
@@ -1078,12 +1127,22 @@ public class NewerNewChunks extends Module {
         // If in current target, clear it to pick next
         if (currentTarget != null && isWithinChunk(currentTarget, mc.player.getBlockPos())) {
             logFollow("Reached target chunk " + currentTarget.x + "," + currentTarget.z + ", selecting next.");
+            // Mark last completed to avoid immediate backtracking/ping-pong
+            lastCompletedTarget = currentTarget;
+            lastCompletedAt = System.currentTimeMillis();
             currentTarget = null;
         }
 
         // Pick or refresh target periodically
         if (currentTarget == null || System.currentTimeMillis() - lastSetGoalTime > 2000) {
-            ChunkPos next = pickNextTarget(playerChunk, pool, lookAhead.get(), searchRadius.get());
+            Direction[] dirOrder = lockedDirOrder;
+            if (dirOrder == null) {
+                dirOrder = getLookOrderedDirs();
+                lockedDirOrder = dirOrder;
+                initialForwardDir = dirOrder[0];
+                logFollow("Direction locked to " + initialForwardDir + ".");
+            }
+            ChunkPos next = pickNextTarget(playerChunk, pool, lookAhead.get(), searchRadius.get(), maxGap.get(), dirOrder, initialForwardDir);
             if (next != null && !next.equals(currentTarget)) {
                 currentTarget = next;
                 logFollow("New target chunk " + next.x + "," + next.z +
@@ -1105,45 +1164,68 @@ public class NewerNewChunks extends Module {
 		return null;
 	}
 
-	private ChunkPos pickNextTarget(ChunkPos start, Set<ChunkPos> pool, int ahead, int radius) {
-		// Prefer immediate neighbors (with look-ahead chain)
-		for (Direction dir : new Direction[]{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST}) {
-			ChunkPos n = new ChunkPos(start.x + dir.getOffsetX(), start.z + dir.getOffsetZ());
-			if (pool.contains(n)) {
-				if (ahead <= 1 || hasChain(n, pool, ahead - 1, start)) return n;
-			}
-		}
+    private ChunkPos pickNextTarget(ChunkPos start, Set<ChunkPos> pool, int ahead, int radius, int maxGap, Direction[] dirOrder, Direction forward) {
+        // Prefer forward direction based on look; allow skipping up to maxGap non-target chunks
+        for (Direction dir : dirOrder) {
+            for (int step = 1; step <= Math.max(1, maxGap + 1); step++) {
+                ChunkPos candidate = new ChunkPos(start.x + dir.getOffsetX() * step, start.z + dir.getOffsetZ() * step);
+                // Skip immediate backtrack candidate during cooldown window
+                if (lastCompletedTarget != null && System.currentTimeMillis() - lastCompletedAt < BACKTRACK_COOLDOWN_MS && candidate.equals(lastCompletedTarget))
+                    continue;
+                // Never go backwards relative to initial forward direction
+                if (forward != null && !isForwardOrLateral(start, candidate, forward)) continue;
+                if (pool.contains(candidate)) {
+                    // Accept if straight chain continues OR if a valid chain exists allowing turns (but not backwards)
+                    if (ahead <= 1
+                        || hasChainLinear(candidate, pool, ahead - 1, dir, forward, start)
+                        || hasChain(candidate, pool, ahead - 1, start, forward, start))
+                        return candidate;
+                }
+            }
+        }
 
-		// Fallback: nearest in radius
-		ChunkPos best = null;
-		double bestDist = Double.MAX_VALUE;
-		int minX = start.x - radius, maxX = start.x + radius;
-		int minZ = start.z - radius, maxZ = start.z + radius;
-		for (ChunkPos cp : pool) {
-			if (cp == null) continue;
-			if (cp.x < minX || cp.x > maxX || cp.z < minZ || cp.z > maxZ) continue;
-			double dx = (cp.x - start.x);
-			double dz = (cp.z - start.z);
-			double d2 = dx * dx + dz * dz;
-			if (d2 < bestDist) {
-				bestDist = d2;
-				best = cp;
-			}
-		}
-		return best;
-	}
+        // Fallback: nearest in radius
+        ChunkPos best = null;
+        double bestDist = Double.MAX_VALUE;
+        int minX = start.x - radius, maxX = start.x + radius;
+        int minZ = start.z - radius, maxZ = start.z + radius;
+        for (ChunkPos cp : pool) {
+            if (cp == null) continue;
+            if (lastCompletedTarget != null && System.currentTimeMillis() - lastCompletedAt < BACKTRACK_COOLDOWN_MS && cp.equals(lastCompletedTarget))
+                continue;
+            if (forward != null && !isForwardOrLateral(start, cp, forward)) continue;
+            if (cp.x < minX || cp.x > maxX || cp.z < minZ || cp.z > maxZ) continue;
+            double dx = (cp.x - start.x);
+            double dz = (cp.z - start.z);
+            double d2 = dx * dx + dz * dz;
+            if (d2 < bestDist) {
+                bestDist = d2;
+                best = cp;
+            }
+        }
+        return best;
+    }
 
-	private boolean hasChain(ChunkPos from, Set<ChunkPos> pool, int remaining, ChunkPos avoid) {
-		if (remaining <= 0) return true;
-		for (Direction dir : new Direction[]{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST}) {
-			ChunkPos n = new ChunkPos(from.x + dir.getOffsetX(), from.z + dir.getOffsetZ());
-			if (avoid != null && n.equals(avoid)) continue;
-			if (pool.contains(n)) {
-				if (hasChain(n, pool, remaining - 1, from)) return true;
-			}
-		}
-		return false;
-	}
+    private boolean hasChain(ChunkPos from, Set<ChunkPos> pool, int remaining, ChunkPos avoid, Direction forward, ChunkPos originStart) {
+        if (remaining <= 0) return true;
+        for (Direction dir : new Direction[]{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST}) {
+            ChunkPos n = new ChunkPos(from.x + dir.getOffsetX(), from.z + dir.getOffsetZ());
+            if (avoid != null && n.equals(avoid)) continue;
+            if (forward != null && !isForwardOrLateral(originStart, n, forward)) continue;
+            if (pool.contains(n)) {
+                if (hasChain(n, pool, remaining - 1, from, forward, originStart)) return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasChainLinear(ChunkPos from, Set<ChunkPos> pool, int remaining, Direction dir, Direction forward, ChunkPos originStart) {
+        if (remaining <= 0) return true;
+        ChunkPos next = new ChunkPos(from.x + dir.getOffsetX(), from.z + dir.getOffsetZ());
+        if (!pool.contains(next)) return false;
+        if (forward != null && !isForwardOrLateral(originStart, next, forward)) return false;
+        return hasChainLinear(next, pool, remaining - 1, dir, forward, originStart);
+    }
 
 	private boolean isWithinChunk(ChunkPos chunk, BlockPos pos) {
 		return (pos.getX() >> 4) == chunk.x && (pos.getZ() >> 4) == chunk.z;
@@ -1165,13 +1247,68 @@ public class NewerNewChunks extends Module {
         try { baritoneSetGoal(goalPos); } catch (Throwable t) { logFollow("Failed to set goal: " + t.getClass().getSimpleName() + (t.getMessage() != null ? (" - " + t.getMessage()) : "")); }
     }
 
-	private int getTopYAt(int x, int z) {
-		try {
-			return mc.world.getTopY(Heightmap.Type.MOTION_BLOCKING, x, z);
-		} catch (Throwable t) {
-			return Math.max(mc.world.getBottomY(), mc.player != null ? mc.player.getBlockY() : 64);
-		}
-	}
+    private int getTopYAt(int x, int z) {
+        try {
+            return mc.world.getTopY(Heightmap.Type.MOTION_BLOCKING, x, z);
+        } catch (Throwable t) {
+            return Math.max(mc.world.getBottomY(), mc.player != null ? mc.player.getBlockY() : 64);
+        }
+    }
+
+    private Direction[] getLookOrderedDirs() {
+        // Order the 4 horizontal directions by alignment with player's look vector
+        Vec3d look = mc.player.getRotationVec(1.0f);
+        Vec3d flat = new Vec3d(look.x, 0, look.z);
+        if (flat.lengthSquared() < 1e-6) flat = new Vec3d(0, 0, 1);
+        final Vec3d dirVec = flat.normalize();
+        Direction[] dirs = new Direction[]{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
+        Arrays.sort(dirs, (a, b) -> {
+            double da = dot(dirVec, a);
+            double db = dot(dirVec, b);
+            return Double.compare(db, da); // descending
+        });
+        return dirs;
+    }
+
+    private double dot(Vec3d v, Direction d) {
+        int dx = d.getOffsetX();
+        int dz = d.getOffsetZ();
+        return v.x * dx + v.z * dz;
+    }
+
+    // True if candidate is forward or lateral relative to start when projected onto the locked forward dir
+    private boolean isForwardOrLateral(ChunkPos start, ChunkPos candidate, Direction forward) {
+        int proj = (candidate.x - start.x) * forward.getOffsetX() + (candidate.z - start.z) * forward.getOffsetZ();
+        return proj >= 0; // disallow negative (backwards)
+    }
+
+    private boolean isUserInputActive() {
+        return mc.options.forwardKey.isPressed()
+            || mc.options.backKey.isPressed()
+            || mc.options.leftKey.isPressed()
+            || mc.options.rightKey.isPressed()
+            || mc.options.jumpKey.isPressed()
+            || mc.options.sneakKey.isPressed()
+            || mc.options.sprintKey.isPressed()
+            || mc.options.attackKey.isPressed()
+            || mc.options.useKey.isPressed();
+    }
+
+    private void logoutClient(String reason) {
+        // Multiplayer: disconnect via network connection
+        try {
+            if (mc.getNetworkHandler() != null && mc.getNetworkHandler().getConnection() != null) {
+                mc.getNetworkHandler().getConnection().disconnect(Text.of("[NewerNewChunks] " + reason));
+                return;
+            }
+        } catch (Throwable ignored) {}
+        // Singleplayer or unknown: try world disconnect
+        try {
+            if (mc.world != null) {
+                mc.world.disconnect();
+            }
+        } catch (Throwable ignored) {}
+    }
 
     private void baritoneSetGoal(BlockPos goalPos) throws Exception {
         Class<?> api = Class.forName("baritone.api.BaritoneAPI");
