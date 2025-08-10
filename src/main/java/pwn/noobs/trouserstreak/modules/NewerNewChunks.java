@@ -319,6 +319,7 @@ public class NewerNewChunks extends Module {
     // Pause-on-input state (event-driven)
     private long pausedUntilMs = 0L;
     private long lastPauseLogMs = 0L;
+    private boolean userDriving = false; // true while movement/interaction inputs are held
 	private static final Set<Block> ORE_BLOCKS = new HashSet<>();
 	static {
 		ORE_BLOCKS.add(Blocks.COAL_ORE);
@@ -685,16 +686,24 @@ public class NewerNewChunks extends Module {
     private void onKeyEvent(KeyEvent event) {
         if (!autoFollow.get() || !pauseOnInput.get()) return;
         if (mc == null || mc.player == null) return;
-        if (event.action != KeyAction.Press) return;
-        if (isMovementKey(event.key)) onUserMovement();
+        if (!isMovementKey(event.key)) return;
+        if (event.action == KeyAction.Press || event.action == KeyAction.Repeat) {
+            onUserMovementPress();
+        } else if (event.action == KeyAction.Release) {
+            onUserMovementRelease();
+        }
     }
 
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if (!autoFollow.get() || !pauseOnInput.get()) return;
         if (mc == null || mc.player == null) return;
-        if (event.action != KeyAction.Press) return;
-        if (isMovementButton(event.button)) onUserMovement();
+        if (!isMovementButton(event.button)) return;
+        if (event.action == KeyAction.Press) {
+            onUserMovementPress();
+        } else if (event.action == KeyAction.Release) {
+            onUserMovementRelease();
+        }
     }
 	@EventHandler
 	private void onRender(Render3DEvent event) {
@@ -1126,8 +1135,8 @@ public class NewerNewChunks extends Module {
             // Reset once Baritone is detected again
             baritoneWarned = false;
         }
-        // Pause on user input (event-driven window)
-        if (pauseOnInput.get() && System.currentTimeMillis() < pausedUntilMs) {
+        // Pause on user input (while held, plus debounce window)
+        if (pauseOnInput.get() && (userDriving || System.currentTimeMillis() < pausedUntilMs)) {
             if (System.currentTimeMillis() - lastPauseLogMs > 500) {
                 logFollow("Paused due to user input.");
                 lastPauseLogMs = System.currentTimeMillis();
@@ -1160,8 +1169,8 @@ public class NewerNewChunks extends Module {
             currentTarget = null;
         }
 
-        // Pick or refresh target periodically
-        if (currentTarget == null || System.currentTimeMillis() - lastSetGoalTime > 2000) {
+        // Pick a new target only when none is active
+        if (currentTarget == null) {
             Direction[] dirOrder = lockedDirOrder;
             if (dirOrder == null) {
                 dirOrder = getLookOrderedDirs();
@@ -1180,6 +1189,8 @@ public class NewerNewChunks extends Module {
                 double best = Double.MAX_VALUE;
                 for (ChunkPos cp : pool) {
                     if (cp == null) continue;
+                    // Never pick the player's current chunk
+                    if (cp.equals(playerChunk)) continue;
                     if (lastCompletedTarget != null && System.currentTimeMillis() - lastCompletedAt < BACKTRACK_COOLDOWN_MS && cp.equals(lastCompletedTarget))
                         continue;
                     double dx = (cp.x - playerChunk.x);
@@ -1229,13 +1240,14 @@ public class NewerNewChunks extends Module {
             }
         }
 
-        // Fallback: nearest in radius
+        // Fallback: nearest in radius (excluding current chunk)
         ChunkPos best = null;
         double bestDist = Double.MAX_VALUE;
         int minX = start.x - radius, maxX = start.x + radius;
         int minZ = start.z - radius, maxZ = start.z + radius;
         for (ChunkPos cp : pool) {
             if (cp == null) continue;
+            if (cp.equals(start)) continue;
             if (lastCompletedTarget != null && System.currentTimeMillis() - lastCompletedAt < BACKTRACK_COOLDOWN_MS && cp.equals(lastCompletedTarget))
                 continue;
             if (forward != null && !isForwardOrLateral(start, cp, forward)) continue;
@@ -1310,6 +1322,7 @@ public class NewerNewChunks extends Module {
         int minZ = start.z - radius, maxZ = start.z + radius;
         for (ChunkPos cp : pool) {
             if (cp == null) continue;
+            if (cp.equals(start)) continue;
             if (lastCompletedTarget != null && System.currentTimeMillis() - lastCompletedAt < BACKTRACK_COOLDOWN_MS && cp.equals(lastCompletedTarget))
                 continue;
             if (forward != null && !isForwardOrLateral(originStart, cp, forward)) continue;
@@ -1393,15 +1406,24 @@ public class NewerNewChunks extends Module {
         );
     }
 
-    private void onUserMovement() {
+    private void onUserMovementPress() {
         // If a GUI is open, only treat as movement if GUIMove allows it
         if (mc.currentScreen != null) {
             GUIMove guiMove = Modules.get().get(GUIMove.class);
             if (guiMove == null || !guiMove.isActive() || guiMove.skip()) return;
         }
-        // Pause for a short window and cancel current path
-        pausedUntilMs = System.currentTimeMillis() + 500; // debounce window
+        // Enter user-driving mode, cancel path, and add a debounce window
+        userDriving = true;
+        pausedUntilMs = System.currentTimeMillis() + 500; // debounce window after release
         try { baritoneCancel(); } catch (Throwable ignored) {}
+    }
+
+    private void onUserMovementRelease() {
+        // Exit user-driving mode only when all movement/interaction keys are released
+        if (!anyMovementInputPressed()) {
+            userDriving = false;
+            pausedUntilMs = System.currentTimeMillis() + 250; // small grace before resuming
+        }
     }
 
     private boolean isMovementKey(int key) {
@@ -1426,6 +1448,19 @@ public class NewerNewChunks extends Module {
             || mc.options.sprintKey.matchesMouse(button)
             || mc.options.attackKey.matchesMouse(button)
             || mc.options.useKey.matchesMouse(button);
+    }
+
+    private boolean anyMovementInputPressed() {
+        // KeyBinding#isPressed covers both keyboard and mapped mouse buttons for attack/use
+        return mc.options.forwardKey.isPressed()
+            || mc.options.backKey.isPressed()
+            || mc.options.leftKey.isPressed()
+            || mc.options.rightKey.isPressed()
+            || mc.options.sneakKey.isPressed()
+            || mc.options.jumpKey.isPressed()
+            || mc.options.sprintKey.isPressed()
+            || mc.options.attackKey.isPressed()
+            || mc.options.useKey.isPressed();
     }
 
     private void logoutClient(String reason) {
