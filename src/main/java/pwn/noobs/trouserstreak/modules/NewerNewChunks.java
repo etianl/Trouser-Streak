@@ -315,6 +315,11 @@ public class NewerNewChunks extends Module {
     private static final long BACKTRACK_COOLDOWN_MS = 4000L;
     // Dynamic heading that updates as we progress; used to forbid backwards moves
     private Direction lastHeading = null;
+    // Recent chunk history for trend + oscillation detection
+    private static final int CHUNK_HISTORY_SIZE = 8;
+    private static final long OSCILLATION_WINDOW_MS = 15_000L;
+    private final Deque<ChunkVisit> chunkHistory = new ArrayDeque<>();
+    private ChunkPos lastPlayerChunk = null;
 	private static final Set<Block> ORE_BLOCKS = new HashSet<>();
 	static {
 		ORE_BLOCKS.add(Blocks.COAL_ORE);
@@ -574,8 +579,8 @@ public class NewerNewChunks extends Module {
 		}
 	}
 	@EventHandler
-	private void onPreTick(TickEvent.Pre event) {
-		world= mc.world.getRegistryKey().getValue().toString().replace(':', '_');
+    private void onPreTick(TickEvent.Pre event) {
+        world= mc.world.getRegistryKey().getValue().toString().replace(':', '_');
 
 		if (deletewarningTicks<=100) deletewarningTicks++;
 		else deletewarning=0;
@@ -669,7 +674,22 @@ public class NewerNewChunks extends Module {
 			}
 		}
 
-		if (removerenderdist.get())removeChunksOutsideRenderDistance();
+        if (removerenderdist.get())removeChunksOutsideRenderDistance();
+
+        // Track player's chunk history for trend + oscillation detection
+        if (mc.player != null) {
+            ChunkPos now = new ChunkPos(mc.player.getBlockX() >> 4, mc.player.getBlockZ() >> 4);
+            if (!now.equals(lastPlayerChunk)) {
+                lastPlayerChunk = now;
+                pushChunkVisit(now);
+                // Check for ABAB oscillation within a short window
+                if (detectOscillation()) {
+                    logFollow("Detected oscillation between chunks. Cancelling and logging out.");
+                    try { baritoneCancel(); } catch (Throwable ignored) {}
+                    if (logoutOnTrailEnd.get()) try { logoutClient("Oscillation detected at trail end"); } catch (Throwable ignored) {}
+                }
+            }
+        }
 
 		// Auto-follow tick
         if (autoFollow.get()) {
@@ -1153,13 +1173,22 @@ public class NewerNewChunks extends Module {
             currentTarget = null;
         }
 
-        // Pick a new target only when none is active; never go backwards relative to lastHeading
+        // Pick a new target only when none is active; guided by recent trend and never backtrack
         if (currentTarget == null) {
-            NextChoice choice = chooseNextAlongTrail(playerChunk, pool, lookAhead.get(), lastHeading);
+            Direction trend = trendHeadingFromHistory();
+            NextChoice choice = chooseNextAlongTrail(playerChunk, pool, lookAhead.get(), trend != null ? trend : lastHeading);
             if (choice == null) {
                 logFollow("Trail ended in allowed direction(s). Cancelling and logging out.");
                 try { baritoneCancel(); } catch (Throwable ignored) {}
                 if (logoutOnTrailEnd.get()) try { logoutClient("Trail ended for " + followType.get()); } catch (Throwable ignored) {}
+                return;
+            }
+            // If the choice would immediately backtrack to the previous chunk, treat as oscillation/trail end
+            ChunkPos prev = previousVisitedChunk();
+            if (prev != null && lastPlayerChunk != null && choice.chunk.equals(prev)) {
+                logFollow("Backtracking detected towards previous chunk. Cancelling and logging out.");
+                try { baritoneCancel(); } catch (Throwable ignored) {}
+                if (logoutOnTrailEnd.get()) try { logoutClient("Backtracking detected at trail end"); } catch (Throwable ignored) {}
                 return;
             }
             currentTarget = choice.chunk;
@@ -1335,6 +1364,70 @@ public class NewerNewChunks extends Module {
         currentTarget = null;
         lastHeading = null;
         lastCompletedTarget = null;
+    }
+
+    // --- Chunk history utilities ---
+    private static final class ChunkVisit { final ChunkPos pos; final long time; ChunkVisit(ChunkPos p, long t) { pos = p; time = t; } }
+
+    private void pushChunkVisit(ChunkPos pos) {
+        long now = System.currentTimeMillis();
+        // Avoid duplicates when player jitters within same chunk
+        if (!chunkHistory.isEmpty() && chunkHistory.getLast().pos.equals(pos)) return;
+        chunkHistory.addLast(new ChunkVisit(pos, now));
+        while (chunkHistory.size() > CHUNK_HISTORY_SIZE) chunkHistory.removeFirst();
+        // Prune by time window for oscillation checks
+        while (!chunkHistory.isEmpty() && (now - chunkHistory.getFirst().time) > (OSCILLATION_WINDOW_MS * 2)) {
+            chunkHistory.removeFirst();
+        }
+    }
+
+    private ChunkPos previousVisitedChunk() {
+        if (chunkHistory.size() < 2) return null;
+        Iterator<ChunkVisit> it = chunkHistory.descendingIterator();
+        if (!it.hasNext()) return null; // last = current
+        ChunkVisit last = it.next();
+        if (!it.hasNext()) return null;
+        return it.next().pos;
+    }
+
+    // Detect ABAB oscillation pattern within a recent window
+    private boolean detectOscillation() {
+        if (chunkHistory.size() < 4) return false;
+        ChunkVisit[] last4 = new ChunkVisit[4];
+        int i = 0;
+        for (Iterator<ChunkVisit> it = chunkHistory.descendingIterator(); it.hasNext() && i < 4; i++) {
+            last4[i] = it.next();
+        }
+        // most recent first: last4[0], last4[1], last4[2], last4[3]
+        if (i < 4) return false;
+        long window = last4[0].time - last4[3].time;
+        if (window > OSCILLATION_WINDOW_MS) return false;
+        ChunkPos A = last4[0].pos; // current
+        ChunkPos B = last4[1].pos;
+        ChunkPos C = last4[2].pos;
+        ChunkPos D = last4[3].pos;
+        // Pattern ABAB where A==C and B==D and A!=B
+        return A.equals(C) && B.equals(D) && !A.equals(B);
+    }
+
+    // Compute a coarse trend heading (cardinal) from recent moves
+    private Direction trendHeadingFromHistory() {
+        if (chunkHistory.size() < 2) return lastHeading; // fallback to last known heading
+        int samples = 0, sx = 0, sz = 0;
+        ChunkVisit prev = null;
+        for (ChunkVisit cv : chunkHistory) {
+            if (prev != null) {
+                int dx = cv.pos.x - prev.pos.x;
+                int dz = cv.pos.z - prev.pos.z;
+                if (dx != 0 || dz != 0) { sx += Integer.signum(dx); sz += Integer.signum(dz); samples++; }
+            }
+            prev = cv;
+        }
+        if (samples == 0) return lastHeading;
+        // Decide dominant axis & sign
+        if (Math.abs(sx) > Math.abs(sz)) return sx >= 0 ? Direction.EAST : Direction.WEST;
+        if (Math.abs(sz) > 0) return sz >= 0 ? Direction.SOUTH : Direction.NORTH;
+        return lastHeading;
     }
 
     private boolean isMovementKey(int key) {
