@@ -481,6 +481,12 @@ public class NewerNewChunks extends Module {
         .defaultValue(true)
         .build()
     );
+    private final Setting<Boolean> logoutOnTrailEnd = sgFollow.add(new BoolSetting.Builder()
+        .name("logout-on-trail-end")
+        .description("Logout when forward progress ends due to a trail ending (prevents ping-pong backtracking).")
+        .defaultValue(true)
+        .build()
+    );
 	private void clearChunkData() {
 		newChunks.clear();
 		oldChunks.clear();
@@ -1153,7 +1159,7 @@ public class NewerNewChunks extends Module {
             if (choice == null) {
                 logFollow("Trail ended in allowed direction(s). Cancelling and logging out.");
                 try { baritoneCancel(); } catch (Throwable ignored) {}
-                if (logoutOnNoTargets.get()) try { logoutClient("Trail ended for " + followType.get()); } catch (Throwable ignored) {}
+                if (logoutOnTrailEnd.get()) try { logoutClient("Trail ended for " + followType.get()); } catch (Throwable ignored) {}
                 return;
             }
             currentTarget = choice.chunk;
