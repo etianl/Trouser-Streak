@@ -309,17 +309,12 @@ public class NewerNewChunks extends Module {
     private ChunkPos currentTarget = null;
     private long lastSetGoalTime = 0L;
     private boolean baritoneWarned = false;
-    // Anti-oscillation: remember last completed target for a short cooldown window
+    // Anti-oscillation: remember last completed target for a short cooldown window (still used lightly)
     private ChunkPos lastCompletedTarget = null;
     private long lastCompletedAt = 0L;
     private static final long BACKTRACK_COOLDOWN_MS = 4000L;
-    // Direction lock: only use player's look to lock once at start
-    private Direction[] lockedDirOrder = null;
-    private Direction initialForwardDir = null;
-    // Pause-on-input state (event-driven)
-    private long pausedUntilMs = 0L;
-    private long lastPauseLogMs = 0L;
-    private boolean userDriving = false; // true while movement/interaction inputs are held
+    // Dynamic heading that updates as we progress; used to forbid backwards moves
+    private Direction lastHeading = null;
 	private static final Set<Block> ORE_BLOCKS = new HashSet<>();
 	static {
 		ORE_BLOCKS.add(Blocks.COAL_ORE);
@@ -552,8 +547,7 @@ public class NewerNewChunks extends Module {
         try { baritoneCancel(); } catch (Throwable ignored) {}
         currentTarget = null;
         baritoneWarned = false;
-        lockedDirOrder = null;
-        initialForwardDir = null;
+        lastHeading = null;
         super.onDeactivate();
     }
 	@EventHandler
@@ -684,26 +678,18 @@ public class NewerNewChunks extends Module {
 
     @EventHandler
     private void onKeyEvent(KeyEvent event) {
-        if (!autoFollow.get() || !pauseOnInput.get()) return;
+        if (!pauseOnInput.get()) return;
         if (mc == null || mc.player == null) return;
         if (!isMovementKey(event.key)) return;
-        if (event.action == KeyAction.Press || event.action == KeyAction.Repeat) {
-            onUserMovementPress();
-        } else if (event.action == KeyAction.Release) {
-            onUserMovementRelease();
-        }
+        if (event.action == KeyAction.Press || event.action == KeyAction.Repeat) disableAutoFollowDueToInput();
     }
 
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
-        if (!autoFollow.get() || !pauseOnInput.get()) return;
+        if (!pauseOnInput.get()) return;
         if (mc == null || mc.player == null) return;
         if (!isMovementButton(event.button)) return;
-        if (event.action == KeyAction.Press) {
-            onUserMovementPress();
-        } else if (event.action == KeyAction.Release) {
-            onUserMovementRelease();
-        }
+        if (event.action == KeyAction.Press) disableAutoFollowDueToInput();
     }
 	@EventHandler
 	private void onRender(Render3DEvent event) {
@@ -1135,14 +1121,6 @@ public class NewerNewChunks extends Module {
             // Reset once Baritone is detected again
             baritoneWarned = false;
         }
-        // Pause on user input (while held, plus debounce window)
-        if (pauseOnInput.get() && (userDriving || System.currentTimeMillis() < pausedUntilMs)) {
-            if (System.currentTimeMillis() - lastPauseLogMs > 500) {
-                logFollow("Paused due to user input.");
-                lastPauseLogMs = System.currentTimeMillis();
-            }
-            return;
-        }
         // Resolve candidate set
         Set<ChunkPos> poolRef = getPoolForFollowType();
         if (poolRef == null || poolRef.isEmpty()) {
@@ -1169,43 +1147,20 @@ public class NewerNewChunks extends Module {
             currentTarget = null;
         }
 
-        // Pick a new target only when none is active
+        // Pick a new target only when none is active; never go backwards relative to lastHeading
         if (currentTarget == null) {
-            Direction[] dirOrder = lockedDirOrder;
-            if (dirOrder == null) {
-                dirOrder = getLookOrderedDirs();
-                lockedDirOrder = dirOrder;
-                initialForwardDir = dirOrder[0];
-                logFollow("Direction locked to " + initialForwardDir + ".");
+            NextChoice choice = chooseNextAlongTrail(playerChunk, pool, lookAhead.get(), lastHeading);
+            if (choice == null) {
+                logFollow("Trail ended in allowed direction(s). Cancelling and logging out.");
+                try { baritoneCancel(); } catch (Throwable ignored) {}
+                if (logoutOnNoTargets.get()) try { logoutClient("Trail ended for " + followType.get()); } catch (Throwable ignored) {}
+                return;
             }
-            // Primary selection: prefer forward-biased trail picking
-            ChunkPos next = pickNextTarget(playerChunk, pool, lookAhead.get(), searchRadius.get(), maxGap.get(), dirOrder, initialForwardDir);
-            // Fallback A: allow any direction within radius if forward-only filter found nothing
-            if (next == null) {
-                next = nearestInRadius(playerChunk, pool, searchRadius.get(), null, playerChunk);
-            }
-            // Fallback B: pick absolute nearest target (no radius limit) to ensure we always start pathing
-            if (next == null) {
-                double best = Double.MAX_VALUE;
-                for (ChunkPos cp : pool) {
-                    if (cp == null) continue;
-                    // Never pick the player's current chunk
-                    if (cp.equals(playerChunk)) continue;
-                    if (lastCompletedTarget != null && System.currentTimeMillis() - lastCompletedAt < BACKTRACK_COOLDOWN_MS && cp.equals(lastCompletedTarget))
-                        continue;
-                    double dx = (cp.x - playerChunk.x);
-                    double dz = (cp.z - playerChunk.z);
-                    double d2 = dx * dx + dz * dz;
-                    if (d2 < best) { best = d2; next = cp; }
-                }
-            }
-            if (next != null && !next.equals(currentTarget)) {
-                currentTarget = next;
-                logFollow("New target chunk " + next.x + "," + next.z +
-                    " (ahead=" + lookAhead.get() + ", radius=" + searchRadius.get() + ").");
-                setGoalForChunk(next);
-                lastSetGoalTime = System.currentTimeMillis();
-            }
+            currentTarget = choice.chunk;
+            lastHeading = choice.heading; // update our heading to the chosen first step
+            logFollow("New target chunk " + currentTarget.x + "," + currentTarget.z + " heading=" + lastHeading + ".");
+            setGoalForChunk(currentTarget);
+            lastSetGoalTime = System.currentTimeMillis();
         }
     }
 
@@ -1220,77 +1175,44 @@ public class NewerNewChunks extends Module {
 		return null;
 	}
 
-    private ChunkPos pickNextTarget(ChunkPos start, Set<ChunkPos> pool, int ahead, int radius, int maxGap, Direction[] dirOrder, Direction forward) {
-        // Prefer forward direction based on look; allow skipping up to maxGap non-target chunks
+    // Choose next along trail using relative heading, never going backwards; allows left/right turns
+    private NextChoice chooseNextAlongTrail(ChunkPos start, Set<ChunkPos> pool, int ahead, Direction heading) {
         int need = Math.max(1, ahead);
-        for (Direction dir : dirOrder) {
-            for (int step = 1; step <= Math.max(1, maxGap + 1); step++) {
-                ChunkPos candidate = new ChunkPos(start.x + dir.getOffsetX() * step, start.z + dir.getOffsetZ() * step);
-                // Skip immediate backtrack candidate during cooldown window
-                if (lastCompletedTarget != null && System.currentTimeMillis() - lastCompletedAt < BACKTRACK_COOLDOWN_MS && candidate.equals(lastCompletedTarget))
-                    continue;
-                // Never go backwards relative to initial forward direction
-                if (forward != null && !isForwardOrLateral(start, candidate, forward)) continue;
-                if (pool.contains(candidate)) {
-                    // If ahead == 1 just take this candidate, otherwise try to walk the trail and return the end chunk
-                    if (need <= 1) return candidate;
-                    ChunkPos trailEnd = walkTrail(candidate, pool, need - 1, dir, forward, start);
-                    if (trailEnd != null) return trailEnd;
-                }
-            }
+        // Build ordered directions to try: current heading, then left, then right. If unknown, use look direction order.
+        Direction[] tryDirs;
+        if (heading != null) {
+            tryDirs = new Direction[]{heading, leftOf(heading), rightOf(heading)};
+        } else {
+            tryDirs = getLookOrderedDirs();
         }
-
-        // Fallback: nearest in radius (excluding current chunk)
-        ChunkPos best = null;
-        double bestDist = Double.MAX_VALUE;
-        int minX = start.x - radius, maxX = start.x + radius;
-        int minZ = start.z - radius, maxZ = start.z + radius;
-        for (ChunkPos cp : pool) {
-            if (cp == null) continue;
-            if (cp.equals(start)) continue;
-            if (lastCompletedTarget != null && System.currentTimeMillis() - lastCompletedAt < BACKTRACK_COOLDOWN_MS && cp.equals(lastCompletedTarget))
-                continue;
-            if (forward != null && !isForwardOrLateral(start, cp, forward)) continue;
-            if (cp.x < minX || cp.x > maxX || cp.z < minZ || cp.z > maxZ) continue;
-            double dx = (cp.x - start.x);
-            double dz = (cp.z - start.z);
-            double d2 = dx * dx + dz * dz;
-            if (d2 < bestDist) { bestDist = d2; best = cp; }
+        for (Direction dir : tryDirs) {
+            if (dir == null) continue;
+            ChunkPos first = new ChunkPos(start.x + dir.getOffsetX(), start.z + dir.getOffsetZ());
+            if (!pool.contains(first)) continue;
+            if (need <= 1) return new NextChoice(first, dir);
+            ChunkPos end = walkTrailRelative(first, pool, need - 1, dir);
+            if (end != null) return new NextChoice(end, dir);
         }
-        return best;
+        return null;
     }
 
-    // Walk along a contiguous trail of target chunks, prioritizing the initial direction, then lateral turns, never backwards.
-    // Returns the end chunk if we can advance exactly steps steps; if not possible, returns the farthest reached if >=1, else null.
-    private ChunkPos walkTrail(ChunkPos start, Set<ChunkPos> pool, int steps, Direction initialDir, Direction forward, ChunkPos originStart) {
+    // Walk forward up to steps steps, allowing left/right turns but never the opposite of current heading
+    private ChunkPos walkTrailRelative(ChunkPos start, Set<ChunkPos> pool, int steps, Direction heading) {
         ChunkPos current = start;
-        Direction dir = initialDir;
+        Direction dir = heading;
         int advanced = 0;
         while (advanced < steps) {
-            // Try continue straight
+            // straight
             ChunkPos straight = new ChunkPos(current.x + dir.getOffsetX(), current.z + dir.getOffsetZ());
-            if (pool.contains(straight) && (forward == null || isForwardOrLateral(originStart, straight, forward))) {
-                current = straight;
-                advanced++;
-                continue;
-            }
-            // Try lateral turns (left/right): order based on locked dirOrder preference relative to player's look
+            if (pool.contains(straight)) { current = straight; advanced++; continue; }
+            // try lateral (left then right)
             boolean moved = false;
-            for (Direction turn : new Direction[]{
-                // left and right relative to dir
-                leftOf(dir), rightOf(dir)
-            }) {
+            for (Direction turn : new Direction[]{leftOf(dir), rightOf(dir)}) {
                 if (turn == null) continue;
                 ChunkPos next = new ChunkPos(current.x + turn.getOffsetX(), current.z + turn.getOffsetZ());
-                if (pool.contains(next) && (forward == null || isForwardOrLateral(originStart, next, forward))) {
-                    current = next;
-                    dir = turn; // follow new heading
-                    advanced++;
-                    moved = true;
-                    break;
-                }
+                if (pool.contains(next)) { current = next; dir = turn; advanced++; moved = true; break; }
             }
-            if (!moved) break; // cannot advance further
+            if (!moved) break;
         }
         return advanced > 0 ? current : null;
     }
@@ -1315,25 +1237,7 @@ public class NewerNewChunks extends Module {
         };
     }
 
-    private ChunkPos nearestInRadius(ChunkPos start, Set<ChunkPos> pool, int radius, Direction forward, ChunkPos originStart) {
-        ChunkPos best = null;
-        double bestDist = Double.MAX_VALUE;
-        int minX = start.x - radius, maxX = start.x + radius;
-        int minZ = start.z - radius, maxZ = start.z + radius;
-        for (ChunkPos cp : pool) {
-            if (cp == null) continue;
-            if (cp.equals(start)) continue;
-            if (lastCompletedTarget != null && System.currentTimeMillis() - lastCompletedAt < BACKTRACK_COOLDOWN_MS && cp.equals(lastCompletedTarget))
-                continue;
-            if (forward != null && !isForwardOrLateral(originStart, cp, forward)) continue;
-            if (cp.x < minX || cp.x > maxX || cp.z < minZ || cp.z > maxZ) continue;
-            double dx = (cp.x - start.x);
-            double dz = (cp.z - start.z);
-            double d2 = dx * dx + dz * dz;
-            if (d2 < bestDist) { bestDist = d2; best = cp; }
-        }
-        return best;
-    }
+    // removed radius-based nearest; we only follow the contiguous trail now
 
     private boolean hasChain(ChunkPos from, Set<ChunkPos> pool, int remaining, ChunkPos avoid, Direction forward, ChunkPos originStart) {
         if (remaining <= 0) return true;
@@ -1412,18 +1316,19 @@ public class NewerNewChunks extends Module {
             GUIMove guiMove = Modules.get().get(GUIMove.class);
             if (guiMove == null || !guiMove.isActive() || guiMove.skip()) return;
         }
-        // Enter user-driving mode, cancel path, and add a debounce window
-        userDriving = true;
-        pausedUntilMs = System.currentTimeMillis() + 500; // debounce window after release
-        try { baritoneCancel(); } catch (Throwable ignored) {}
+        disableAutoFollowDueToInput();
     }
 
-    private void onUserMovementRelease() {
-        // Exit user-driving mode only when all movement/interaction keys are released
-        if (!anyMovementInputPressed()) {
-            userDriving = false;
-            pausedUntilMs = System.currentTimeMillis() + 250; // small grace before resuming
+    private void disableAutoFollowDueToInput() {
+        // Disable the option exactly like toggling it off and cancel navigation
+        if (autoFollow.get()) {
+            autoFollow.set(false);
+            logFollow("Input detected: auto-follow disabled.");
         }
+        try { baritoneCancel(); } catch (Throwable ignored) {}
+        currentTarget = null;
+        lastHeading = null;
+        lastCompletedTarget = null;
     }
 
     private boolean isMovementKey(int key) {
@@ -1450,17 +1355,12 @@ public class NewerNewChunks extends Module {
             || mc.options.useKey.matchesMouse(button);
     }
 
-    private boolean anyMovementInputPressed() {
-        // KeyBinding#isPressed covers both keyboard and mapped mouse buttons for attack/use
-        return mc.options.forwardKey.isPressed()
-            || mc.options.backKey.isPressed()
-            || mc.options.leftKey.isPressed()
-            || mc.options.rightKey.isPressed()
-            || mc.options.sneakKey.isPressed()
-            || mc.options.jumpKey.isPressed()
-            || mc.options.sprintKey.isPressed()
-            || mc.options.attackKey.isPressed()
-            || mc.options.useKey.isPressed();
+    // no longer needed: anyMovementInputPressed removed; input disables setting immediately
+
+    // Helper to carry both next chunk and chosen heading
+    private static final class NextChoice {
+        final ChunkPos chunk; final Direction heading;
+        NextChoice(ChunkPos c, Direction h) { this.chunk = c; this.heading = h; }
     }
 
     private void logoutClient(String reason) {
