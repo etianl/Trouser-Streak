@@ -1211,6 +1211,7 @@ public class NewerNewChunks extends Module {
 	}
 
     // Choose next along trail using relative heading, never going backwards; allows left/right turns
+    // Enforces that every intermediate step stays forward-or-lateral relative to the initial heading from 'start'.
     private NextChoice chooseNextAlongTrail(ChunkPos start, Set<ChunkPos> pool, int ahead, Direction heading) {
         int need = Math.max(1, ahead);
         // Build ordered directions to try: current heading, then left, then right.
@@ -1226,29 +1227,32 @@ public class NewerNewChunks extends Module {
         for (Direction dir : tryDirs) {
             if (dir == null) continue;
             ChunkPos first = new ChunkPos(start.x + dir.getOffsetX(), start.z + dir.getOffsetZ());
+            // Require candidate to be in pool and not behind relative to the initial heading from 'start'
             if (!pool.contains(first)) continue;
+            if (!isForwardOrLateral(start, first, dir)) continue;
             if (need <= 1) return new NextChoice(first, dir);
-            ChunkPos end = walkTrailRelative(first, pool, need - 1, dir);
+            ChunkPos end = walkTrailRelative(start, first, pool, need - 1, dir);
             if (end != null) return new NextChoice(end, dir);
         }
         return null;
     }
 
-    // Walk forward up to steps steps, allowing left/right turns but never the opposite of current heading
-    private ChunkPos walkTrailRelative(ChunkPos start, Set<ChunkPos> pool, int steps, Direction heading) {
+    // Walk forward up to 'steps' steps, allowing left/right turns, but never moving behind relative to the initial heading from 'originStart'.
+    private ChunkPos walkTrailRelative(ChunkPos originStart, ChunkPos start, Set<ChunkPos> pool, int steps, Direction heading) {
         ChunkPos current = start;
         Direction dir = heading;
         int advanced = 0;
         while (advanced < steps) {
             // straight
             ChunkPos straight = new ChunkPos(current.x + dir.getOffsetX(), current.z + dir.getOffsetZ());
-            if (pool.contains(straight)) { current = straight; advanced++; continue; }
+            if (pool.contains(straight) && isForwardOrLateral(originStart, straight, heading)) { current = straight; advanced++; continue; }
             // try lateral (left then right)
             boolean moved = false;
             for (Direction turn : new Direction[]{leftOf(dir), rightOf(dir)}) {
                 if (turn == null) continue;
                 ChunkPos next = new ChunkPos(current.x + turn.getOffsetX(), current.z + turn.getOffsetZ());
-                if (pool.contains(next)) { current = next; dir = turn; advanced++; moved = true; break; }
+                // Keep projection non-negative along the original heading from originStart
+                if (pool.contains(next) && isForwardOrLateral(originStart, next, heading)) { current = next; dir = turn; advanced++; moved = true; break; }
             }
             if (!moved) break;
         }
