@@ -1211,6 +1211,7 @@ public class NewerNewChunks extends Module {
 
     private ChunkPos pickNextTarget(ChunkPos start, Set<ChunkPos> pool, int ahead, int radius, int maxGap, Direction[] dirOrder, Direction forward) {
         // Prefer forward direction based on look; allow skipping up to maxGap non-target chunks
+        int need = Math.max(1, ahead);
         for (Direction dir : dirOrder) {
             for (int step = 1; step <= Math.max(1, maxGap + 1); step++) {
                 ChunkPos candidate = new ChunkPos(start.x + dir.getOffsetX() * step, start.z + dir.getOffsetZ() * step);
@@ -1220,11 +1221,10 @@ public class NewerNewChunks extends Module {
                 // Never go backwards relative to initial forward direction
                 if (forward != null && !isForwardOrLateral(start, candidate, forward)) continue;
                 if (pool.contains(candidate)) {
-                    // Accept if straight chain continues OR if a valid chain exists allowing turns (but not backwards)
-                    if (ahead <= 1
-                        || hasChainLinear(candidate, pool, ahead - 1, dir, forward, start)
-                        || hasChain(candidate, pool, ahead - 1, start, forward, start))
-                        return candidate;
+                    // If ahead == 1 just take this candidate, otherwise try to walk the trail and return the end chunk
+                    if (need <= 1) return candidate;
+                    ChunkPos trailEnd = walkTrail(candidate, pool, need - 1, dir, forward, start);
+                    if (trailEnd != null) return trailEnd;
                 }
             }
         }
@@ -1243,12 +1243,64 @@ public class NewerNewChunks extends Module {
             double dx = (cp.x - start.x);
             double dz = (cp.z - start.z);
             double d2 = dx * dx + dz * dz;
-            if (d2 < bestDist) {
-                bestDist = d2;
-                best = cp;
-            }
+            if (d2 < bestDist) { bestDist = d2; best = cp; }
         }
         return best;
+    }
+
+    // Walk along a contiguous trail of target chunks, prioritizing the initial direction, then lateral turns, never backwards.
+    // Returns the end chunk if we can advance exactly steps steps; if not possible, returns the farthest reached if >=1, else null.
+    private ChunkPos walkTrail(ChunkPos start, Set<ChunkPos> pool, int steps, Direction initialDir, Direction forward, ChunkPos originStart) {
+        ChunkPos current = start;
+        Direction dir = initialDir;
+        int advanced = 0;
+        while (advanced < steps) {
+            // Try continue straight
+            ChunkPos straight = new ChunkPos(current.x + dir.getOffsetX(), current.z + dir.getOffsetZ());
+            if (pool.contains(straight) && (forward == null || isForwardOrLateral(originStart, straight, forward))) {
+                current = straight;
+                advanced++;
+                continue;
+            }
+            // Try lateral turns (left/right): order based on locked dirOrder preference relative to player's look
+            boolean moved = false;
+            for (Direction turn : new Direction[]{
+                // left and right relative to dir
+                leftOf(dir), rightOf(dir)
+            }) {
+                if (turn == null) continue;
+                ChunkPos next = new ChunkPos(current.x + turn.getOffsetX(), current.z + turn.getOffsetZ());
+                if (pool.contains(next) && (forward == null || isForwardOrLateral(originStart, next, forward))) {
+                    current = next;
+                    dir = turn; // follow new heading
+                    advanced++;
+                    moved = true;
+                    break;
+                }
+            }
+            if (!moved) break; // cannot advance further
+        }
+        return advanced > 0 ? current : null;
+    }
+
+    private Direction leftOf(Direction d) {
+        return switch (d) {
+            case NORTH -> Direction.WEST;
+            case SOUTH -> Direction.EAST;
+            case EAST  -> Direction.NORTH;
+            case WEST  -> Direction.SOUTH;
+            default -> null;
+        };
+    }
+
+    private Direction rightOf(Direction d) {
+        return switch (d) {
+            case NORTH -> Direction.EAST;
+            case SOUTH -> Direction.WEST;
+            case EAST  -> Direction.SOUTH;
+            case WEST  -> Direction.NORTH;
+            default -> null;
+        };
     }
 
     private ChunkPos nearestInRadius(ChunkPos start, Set<ChunkPos> pool, int radius, Direction forward, ChunkPos originStart) {
