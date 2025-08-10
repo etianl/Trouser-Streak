@@ -32,6 +32,8 @@ dependencies {
     testImplementation platform("org.junit:junit-bom:5.10.2")
     testImplementation "org.junit.jupiter:junit-jupiter"
 
+    // Dev runtime: load local mods from libs/ (e.g., Baritone)
+    modLocalRuntime fileTree(dir: 'libs', include: ['*.jar'])
 }
 
 processResources {
