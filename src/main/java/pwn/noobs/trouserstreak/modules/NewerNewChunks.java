@@ -1213,12 +1213,15 @@ public class NewerNewChunks extends Module {
     // Choose next along trail using relative heading, never going backwards; allows left/right turns
     private NextChoice chooseNextAlongTrail(ChunkPos start, Set<ChunkPos> pool, int ahead, Direction heading) {
         int need = Math.max(1, ahead);
-        // Build ordered directions to try: current heading, then left, then right. If unknown, use look direction order.
+        // Build ordered directions to try: current heading, then left, then right.
+        // If unknown, derive from player's look and EXCLUDE the opposite/backwards direction.
         Direction[] tryDirs;
         if (heading != null) {
             tryDirs = new Direction[]{heading, leftOf(heading), rightOf(heading)};
         } else {
-            tryDirs = getLookOrderedDirs();
+            Direction[] lookOrder = getLookOrderedDirs();
+            Direction seed = lookOrder.length > 0 ? lookOrder[0] : Direction.NORTH;
+            tryDirs = new Direction[]{seed, leftOf(seed), rightOf(seed)};
         }
         for (Direction dir : tryDirs) {
             if (dir == null) continue;
