@@ -307,9 +307,8 @@ public class NewerNewChunks extends Module {
 
     // Auto-follow state
     private ChunkPos currentTarget = null;
+    private long lastSetGoalTime = 0L;
     private boolean baritoneWarned = false;
-    // Route planning: maintain a queue of chunks to traverse in order. Only recompute when route is exhausted.
-    private final Deque<ChunkPos> routeQueue = new ArrayDeque<>();
     // Anti-oscillation: remember last completed target for a short cooldown window
     private ChunkPos lastCompletedTarget = null;
     private long lastCompletedAt = 0L;
@@ -671,7 +670,7 @@ public class NewerNewChunks extends Module {
 
 		if (removerenderdist.get())removeChunksOutsideRenderDistance();
 
-        // Auto-follow tick
+		// Auto-follow tick
         if (autoFollow.get()) {
             if (!baritoneAvailable()) {
                 if (!baritoneWarned) { info("Baritone not found. Auto-follow will not path."); baritoneWarned = true; }
@@ -1116,6 +1115,17 @@ public class NewerNewChunks extends Module {
     // --- Auto-follow implementation ---
     private void updateAutoFollow() {
         if (mc == null || mc.player == null || mc.world == null) return;
+        // Ensure Baritone is available before doing any goal work
+        if (!baritoneAvailable()) {
+            if (!baritoneWarned) {
+                logFollow("Baritone not detected. Enable Baritone to use auto-follow.");
+                baritoneWarned = true;
+            }
+            return;
+        } else if (baritoneWarned) {
+            // Reset once Baritone is detected again
+            baritoneWarned = false;
+        }
         // Pause on user input (event-driven window)
         if (pauseOnInput.get() && System.currentTimeMillis() < pausedUntilMs) {
             if (System.currentTimeMillis() - lastPauseLogMs > 500) {
@@ -1141,27 +1151,17 @@ public class NewerNewChunks extends Module {
 
         ChunkPos playerChunk = new ChunkPos(mc.player.getBlockX() >> 4, mc.player.getBlockZ() >> 4);
 
-        // If standing in current target, advance to next waypoint on the precomputed route
+        // If in current target, clear it to pick next
         if (currentTarget != null && isWithinChunk(currentTarget, mc.player.getBlockPos())) {
-            logFollow("Reached waypoint chunk " + currentTarget.x + "," + currentTarget.z + ".");
+            logFollow("Reached target chunk " + currentTarget.x + "," + currentTarget.z + ", selecting next.");
+            // Mark last completed to avoid immediate backtracking/ping-pong
             lastCompletedTarget = currentTarget;
             lastCompletedAt = System.currentTimeMillis();
-            // consume current waypoint
-            if (!routeQueue.isEmpty() && routeQueue.peekFirst().equals(currentTarget)) routeQueue.pollFirst();
             currentTarget = null;
         }
 
-        // If no active waypoint, either continue with next in route or compute a new route
-        if (currentTarget == null) {
-            if (!routeQueue.isEmpty()) {
-                ChunkPos next = routeQueue.peekFirst();
-                currentTarget = next;
-                logFollow("Next waypoint chunk " + next.x + "," + next.z + ".");
-                setGoalForChunk(next);
-                return;
-            }
-
-            // Build a new route from the player's current chunk
+        // Pick or refresh target periodically
+        if (currentTarget == null || System.currentTimeMillis() - lastSetGoalTime > 2000) {
             Direction[] dirOrder = lockedDirOrder;
             if (dirOrder == null) {
                 dirOrder = getLookOrderedDirs();
@@ -1169,18 +1169,31 @@ public class NewerNewChunks extends Module {
                 initialForwardDir = dirOrder[0];
                 logFollow("Direction locked to " + initialForwardDir + ".");
             }
-            List<ChunkPos> route = buildRoute(playerChunk, pool, lookAhead.get(), searchRadius.get(), maxGap.get(), dirOrder, initialForwardDir);
-            if (!route.isEmpty()) {
-                // If route starts at current chunk, drop it
-                if (route.get(0).equals(playerChunk)) route.remove(0);
-                routeQueue.clear();
-                routeQueue.addAll(route);
-                ChunkPos next = routeQueue.peekFirst();
-                if (next != null) {
-                    currentTarget = next;
-                    logFollow("New route with " + routeQueue.size() + " waypoints. Heading to " + next.x + "," + next.z + ".");
-                    setGoalForChunk(next);
+            // Primary selection: prefer forward-biased trail picking
+            ChunkPos next = pickNextTarget(playerChunk, pool, lookAhead.get(), searchRadius.get(), maxGap.get(), dirOrder, initialForwardDir);
+            // Fallback A: allow any direction within radius if forward-only filter found nothing
+            if (next == null) {
+                next = nearestInRadius(playerChunk, pool, searchRadius.get(), null, playerChunk);
+            }
+            // Fallback B: pick absolute nearest target (no radius limit) to ensure we always start pathing
+            if (next == null) {
+                double best = Double.MAX_VALUE;
+                for (ChunkPos cp : pool) {
+                    if (cp == null) continue;
+                    if (lastCompletedTarget != null && System.currentTimeMillis() - lastCompletedAt < BACKTRACK_COOLDOWN_MS && cp.equals(lastCompletedTarget))
+                        continue;
+                    double dx = (cp.x - playerChunk.x);
+                    double dz = (cp.z - playerChunk.z);
+                    double d2 = dx * dx + dz * dz;
+                    if (d2 < best) { best = d2; next = cp; }
                 }
+            }
+            if (next != null && !next.equals(currentTarget)) {
+                currentTarget = next;
+                logFollow("New target chunk " + next.x + "," + next.z +
+                    " (ahead=" + lookAhead.get() + ", radius=" + searchRadius.get() + ").");
+                setGoalForChunk(next);
+                lastSetGoalTime = System.currentTimeMillis();
             }
         }
     }
@@ -1196,53 +1209,46 @@ public class NewerNewChunks extends Module {
 		return null;
 	}
 
-    private List<ChunkPos> buildRoute(ChunkPos start, Set<ChunkPos> pool, int maxSteps, int radius, int maxGap, Direction[] dirOrder, Direction forward) {
-        List<ChunkPos> route = new ArrayList<>(Math.max(4, maxSteps));
-        ChunkPos cur = start;
-        int steps = 0;
-
-        // Greedy route: prefer forward, allow small gaps (but only target-chunk waypoints), then lateral; avoid backtracking
-        while (steps < maxSteps) {
-            ChunkPos next = null;
-
-            // 1) Try straight ahead with gap allowance
-            for (Direction dir : dirOrder) {
-                // Do not go backwards relative to initial forward
-                if (forward != null && !isForwardOrLateral(start, new ChunkPos(cur.x + dir.getOffsetX(), cur.z + dir.getOffsetZ()), forward))
+    private ChunkPos pickNextTarget(ChunkPos start, Set<ChunkPos> pool, int ahead, int radius, int maxGap, Direction[] dirOrder, Direction forward) {
+        // Prefer forward direction based on look; allow skipping up to maxGap non-target chunks
+        for (Direction dir : dirOrder) {
+            for (int step = 1; step <= Math.max(1, maxGap + 1); step++) {
+                ChunkPos candidate = new ChunkPos(start.x + dir.getOffsetX() * step, start.z + dir.getOffsetZ() * step);
+                // Skip immediate backtrack candidate during cooldown window
+                if (lastCompletedTarget != null && System.currentTimeMillis() - lastCompletedAt < BACKTRACK_COOLDOWN_MS && candidate.equals(lastCompletedTarget))
                     continue;
-
-                // exact neighbor
-                ChunkPos candidate = new ChunkPos(cur.x + dir.getOffsetX(), cur.z + dir.getOffsetZ());
-                if (pool.contains(candidate)) { next = candidate; break; }
-
-                // gap-bridge: allow stepping over non-target chunks to reach a farther TARGET chunk
-                for (int gap = 1; gap <= maxGap; gap++) {
-                    ChunkPos far = new ChunkPos(cur.x + dir.getOffsetX() * (gap + 1), cur.z + dir.getOffsetZ() * (gap + 1));
-                    if (pool.contains(far)) { next = far; break; }
+                // Never go backwards relative to initial forward direction
+                if (forward != null && !isForwardOrLateral(start, candidate, forward)) continue;
+                if (pool.contains(candidate)) {
+                    // Accept if straight chain continues OR if a valid chain exists allowing turns (but not backwards)
+                    if (ahead <= 1
+                        || hasChainLinear(candidate, pool, ahead - 1, dir, forward, start)
+                        || hasChain(candidate, pool, ahead - 1, start, forward, start))
+                        return candidate;
                 }
-                if (next != null) break;
             }
-
-            if (next == null) {
-                // 2) Fallback to nearest in radius that is forward/lateral
-                ChunkPos nearest = nearestInRadius(cur, pool, radius, forward, start);
-                if (nearest == null) break;
-                next = nearest;
-            }
-
-            // Avoid immediate backtracking
-            if (lastCompletedTarget != null && System.currentTimeMillis() - lastCompletedAt < BACKTRACK_COOLDOWN_MS && next.equals(lastCompletedTarget))
-                break;
-
-            // Append TARGET waypoint and move on
-            if (steps < maxSteps) {
-                route.add(next);
-                steps++;
-                cur = next;
-            } else break;
         }
 
-        return route;
+        // Fallback: nearest in radius
+        ChunkPos best = null;
+        double bestDist = Double.MAX_VALUE;
+        int minX = start.x - radius, maxX = start.x + radius;
+        int minZ = start.z - radius, maxZ = start.z + radius;
+        for (ChunkPos cp : pool) {
+            if (cp == null) continue;
+            if (lastCompletedTarget != null && System.currentTimeMillis() - lastCompletedAt < BACKTRACK_COOLDOWN_MS && cp.equals(lastCompletedTarget))
+                continue;
+            if (forward != null && !isForwardOrLateral(start, cp, forward)) continue;
+            if (cp.x < minX || cp.x > maxX || cp.z < minZ || cp.z > maxZ) continue;
+            double dx = (cp.x - start.x);
+            double dz = (cp.z - start.z);
+            double d2 = dx * dx + dz * dz;
+            if (d2 < bestDist) {
+                bestDist = d2;
+                best = cp;
+            }
+        }
+        return best;
     }
 
     private ChunkPos nearestInRadius(ChunkPos start, Set<ChunkPos> pool, int radius, Direction forward, ChunkPos originStart) {
@@ -1293,17 +1299,10 @@ public class NewerNewChunks extends Module {
         if (mc.world == null) return;
         int cx = cp.getCenterX();
         int cz = cp.getCenterZ();
-        // Ignore Y axis: prefer Baritone GoalXZ if available
-        logFollow("Setting Baritone goal (XZ only) to (" + cx + "," + cz + ").");
-        try {
-            baritoneSetGoalXZ(cx, cz);
-        } catch (Throwable t) {
-            // Fallback to GoalBlock at terrain height if GoalXZ unavailable
-            int y = (pathingMode.get() == PathingMode.Elytra) ? Math.min(300, getTopYAt(cx, cz) + 32) : getTopYAt(cx, cz);
-            BlockPos goalPos = new BlockPos(cx, y, cz);
-            logFollow("GoalXZ unavailable; falling back to GoalBlock at Y=" + y + ".");
-            try { baritoneSetGoal(goalPos); } catch (Throwable t2) { logFollow("Failed to set fallback goal: " + t2.getClass().getSimpleName() + (t2.getMessage() != null ? (" - " + t2.getMessage()) : "")); }
-        }
+        // Use GoalXZ only to ignore Y axis completely
+        logFollow("Setting Baritone GoalXZ to (" + cx + "," + cz + ")");
+        try { baritoneSetGoalXZ(cx, cz); }
+        catch (Throwable t) { logFollow("Failed to set GoalXZ: " + t.getClass().getSimpleName() + (t.getMessage() != null ? (" - " + t.getMessage()) : "")); }
     }
 
     private int getTopYAt(int x, int z) {
@@ -1337,8 +1336,9 @@ public class NewerNewChunks extends Module {
 
     // True if candidate is forward or lateral relative to start when projected onto the locked forward dir
     private boolean isForwardOrLateral(ChunkPos start, ChunkPos candidate, Direction forward) {
-        int proj = (candidate.x - start.x) * forward.getOffsetX() + (candidate.z - start.z) * forward.getOffsetZ();
-        return proj >= 0; // disallow negative (backwards)
+        return pwn.noobs.trouserstreak.modules.follow.RouteMath.isForwardOrLateralInt(
+            start.x, start.z, candidate.x, candidate.z, forward.getOffsetX(), forward.getOffsetZ()
+        );
     }
 
     private void onUserMovement() {
@@ -1392,62 +1392,6 @@ public class NewerNewChunks extends Module {
         } catch (Throwable ignored) {}
     }
 
-    private void baritoneSetGoal(BlockPos goalPos) throws Exception {
-        Class<?> api = Class.forName("baritone.api.BaritoneAPI");
-        Object provider = api.getMethod("getProvider").invoke(null);
-        Object baritone = provider.getClass().getMethod("getPrimaryBaritone").invoke(provider);
-        if (baritone == null) return;
-
-        // Use CustomGoalProcess per API; do not fall back to PathingBehavior for goal-setting
-        Object goalProcess;
-        try {
-            goalProcess = baritone.getClass().getMethod("getCustomGoalProcess").invoke(baritone);
-            logFollow("Using CustomGoalProcess.");
-        } catch (NoSuchMethodException e) {
-            logFollow("Baritone getCustomGoalProcess() not found; cannot set goals via IPathingBehavior per API.");
-            return;
-        }
-
-        // Support both Baritone interface names: Goal (modern) and IGoal (older)
-        Class<?> goalIface;
-        try {
-            goalIface = Class.forName("baritone.api.pathing.goals.Goal");
-            logFollow("Using Goal interface.");
-        } catch (ClassNotFoundException e) {
-            goalIface = Class.forName("baritone.api.pathing.goals.IGoal");
-            logFollow("Using IGoal interface.");
-        }
-        Class<?> goalBlock = Class.forName("baritone.api.pathing.goals.GoalBlock");
-
-        // Support both GoalBlock(BlockPos) and GoalBlock(int,int,int)
-        Object goal;
-        try {
-            goal = goalBlock.getConstructor(BlockPos.class).newInstance(goalPos);
-            logFollow("Constructed GoalBlock via BlockPos constructor.");
-        } catch (NoSuchMethodException ex) {
-            goal = goalBlock.getConstructor(int.class, int.class, int.class)
-                .newInstance(goalPos.getX(), goalPos.getY(), goalPos.getZ());
-            logFollow("Constructed GoalBlock via int,int,int constructor.");
-        }
-
-        // Prefer setGoalAndPath if present; otherwise try setGoal + path
-        try {
-            goalProcess.getClass().getMethod("setGoalAndPath", goalIface).invoke(goalProcess, goal);
-            logFollow("Called setGoalAndPath.");
-        } catch (NoSuchMethodException e) {
-            // setGoal(...) then path() on PathingBehavior
-            goalProcess.getClass().getMethod("setGoal", goalIface).invoke(goalProcess, goal);
-            logFollow("Called setGoal(...) as fallback.");
-            try {
-                goalProcess.getClass().getMethod("path").invoke(goalProcess);
-                logFollow("Called path() after setGoal.");
-            } catch (NoSuchMethodException ignored) {
-                // Some versions path automatically on setGoal
-                logFollow("No path() method; assuming automatic pathing.");
-            }
-        }
-    }
-
     private void baritoneSetGoalXZ(int x, int z) throws Exception {
         Class<?> api = Class.forName("baritone.api.BaritoneAPI");
         Object provider = api.getMethod("getProvider").invoke(null);
@@ -1460,7 +1404,7 @@ public class NewerNewChunks extends Module {
         try { goalIface = Class.forName("baritone.api.pathing.goals.Goal"); }
         catch (ClassNotFoundException e) { goalIface = Class.forName("baritone.api.pathing.goals.IGoal"); }
 
-        // Prefer GoalXZ if present
+        // Prefer GoalXZ
         Class<?> goalXZ = Class.forName("baritone.api.pathing.goals.GoalXZ");
         Object goal = goalXZ.getConstructor(int.class, int.class).newInstance(x, z);
         try {
