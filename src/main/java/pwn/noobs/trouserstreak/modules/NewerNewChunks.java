@@ -1201,7 +1201,7 @@ public class NewerNewChunks extends Module {
         ChunkPos cur = start;
         int steps = 0;
 
-        // Greedy route: prefer forward, allow small gaps, then lateral directions; avoid backtracking
+        // Greedy route: prefer forward, allow small gaps (but only target-chunk waypoints), then lateral; avoid backtracking
         while (steps < maxSteps) {
             ChunkPos next = null;
 
@@ -1215,24 +1215,10 @@ public class NewerNewChunks extends Module {
                 ChunkPos candidate = new ChunkPos(cur.x + dir.getOffsetX(), cur.z + dir.getOffsetZ());
                 if (pool.contains(candidate)) { next = candidate; break; }
 
-                // gap-bridge: allow stepping over non-pool chunks to reach a pool chunk
+                // gap-bridge: allow stepping over non-target chunks to reach a farther TARGET chunk
                 for (int gap = 1; gap <= maxGap; gap++) {
                     ChunkPos far = new ChunkPos(cur.x + dir.getOffsetX() * (gap + 1), cur.z + dir.getOffsetZ() * (gap + 1));
-                    if (pool.contains(far)) {
-                        // Add intermediates to encourage staying aligned to chunk grid
-                        for (int i = 1; i <= gap + 1 && steps < maxSteps; i++) {
-                            ChunkPos mid = new ChunkPos(cur.x + dir.getOffsetX() * i, cur.z + dir.getOffsetZ() * i);
-                            // Avoid duplicates and backtracking to the just-completed target
-                            if (lastCompletedTarget != null && System.currentTimeMillis() - lastCompletedAt < BACKTRACK_COOLDOWN_MS && mid.equals(lastCompletedTarget))
-                                continue;
-                            route.add(mid);
-                            steps++;
-                            if (steps >= maxSteps) break;
-                        }
-                        cur = route.get(route.size() - 1);
-                        next = null; // Already appended intermediates up to far; loop will continue
-                        break;
-                    }
+                    if (pool.contains(far)) { next = far; break; }
                 }
                 if (next != null) break;
             }
@@ -1248,7 +1234,7 @@ public class NewerNewChunks extends Module {
             if (lastCompletedTarget != null && System.currentTimeMillis() - lastCompletedAt < BACKTRACK_COOLDOWN_MS && next.equals(lastCompletedTarget))
                 break;
 
-            // Append and move on
+            // Append TARGET waypoint and move on
             if (steps < maxSteps) {
                 route.add(next);
                 steps++;
