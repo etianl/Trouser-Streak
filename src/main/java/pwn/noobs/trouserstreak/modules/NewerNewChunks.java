@@ -6,6 +6,7 @@ import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
@@ -13,9 +14,12 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.movement.GUIMove;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -312,6 +316,9 @@ public class NewerNewChunks extends Module {
     // Direction lock: only use player's look to lock once at start
     private Direction[] lockedDirOrder = null;
     private Direction initialForwardDir = null;
+    // Pause-on-input state (event-driven)
+    private long pausedUntilMs = 0L;
+    private long lastPauseLogMs = 0L;
 	private static final Set<Block> ORE_BLOCKS = new HashSet<>();
 	static {
 		ORE_BLOCKS.add(Blocks.COAL_ORE);
@@ -676,12 +683,18 @@ public class NewerNewChunks extends Module {
 
     @EventHandler
     private void onKeyEvent(KeyEvent event) {
-        // If user provides input and pauseOnInput is enabled, cancel baritone pathing.
         if (!autoFollow.get() || !pauseOnInput.get()) return;
         if (mc == null || mc.player == null) return;
-        if (isUserInputActive()) {
-            try { baritoneCancel(); } catch (Throwable ignored) {}
-        }
+        if (event.action != KeyAction.Press) return;
+        if (isMovementKey(event.key)) onUserMovement();
+    }
+
+    @EventHandler
+    private void onMouseButton(MouseButtonEvent event) {
+        if (!autoFollow.get() || !pauseOnInput.get()) return;
+        if (mc == null || mc.player == null) return;
+        if (event.action != KeyAction.Press) return;
+        if (isMovementButton(event.button)) onUserMovement();
     }
 	@EventHandler
 	private void onRender(Render3DEvent event) {
@@ -1102,9 +1115,12 @@ public class NewerNewChunks extends Module {
     // --- Auto-follow implementation ---
     private void updateAutoFollow() {
         if (mc == null || mc.player == null || mc.world == null) return;
-        // Pause on user input
-        if (pauseOnInput.get() && isUserInputActive()) {
-            logFollow("Paused due to user input.");
+        // Pause on user input (event-driven window)
+        if (pauseOnInput.get() && System.currentTimeMillis() < pausedUntilMs) {
+            if (System.currentTimeMillis() - lastPauseLogMs > 500) {
+                logFollow("Paused due to user input.");
+                lastPauseLogMs = System.currentTimeMillis();
+            }
             return;
         }
         // Resolve candidate set
@@ -1282,16 +1298,39 @@ public class NewerNewChunks extends Module {
         return proj >= 0; // disallow negative (backwards)
     }
 
-    private boolean isUserInputActive() {
-        return mc.options.forwardKey.isPressed()
-            || mc.options.backKey.isPressed()
-            || mc.options.leftKey.isPressed()
-            || mc.options.rightKey.isPressed()
-            || mc.options.jumpKey.isPressed()
-            || mc.options.sneakKey.isPressed()
-            || mc.options.sprintKey.isPressed()
-            || mc.options.attackKey.isPressed()
-            || mc.options.useKey.isPressed();
+    private void onUserMovement() {
+        // If a GUI is open, only treat as movement if GUIMove allows it
+        if (mc.currentScreen != null) {
+            GUIMove guiMove = Modules.get().get(GUIMove.class);
+            if (guiMove == null || !guiMove.isActive() || guiMove.skip()) return;
+        }
+        // Pause for a short window and cancel current path
+        pausedUntilMs = System.currentTimeMillis() + 500; // debounce window
+        try { baritoneCancel(); } catch (Throwable ignored) {}
+    }
+
+    private boolean isMovementKey(int key) {
+        return mc.options.forwardKey.matchesKey(key, 0)
+            || mc.options.backKey.matchesKey(key, 0)
+            || mc.options.leftKey.matchesKey(key, 0)
+            || mc.options.rightKey.matchesKey(key, 0)
+            || mc.options.sneakKey.matchesKey(key, 0)
+            || mc.options.jumpKey.matchesKey(key, 0)
+            || mc.options.sprintKey.matchesKey(key, 0)
+            || mc.options.attackKey.matchesKey(key, 0)
+            || mc.options.useKey.matchesKey(key, 0);
+    }
+
+    private boolean isMovementButton(int button) {
+        return mc.options.forwardKey.matchesMouse(button)
+            || mc.options.backKey.matchesMouse(button)
+            || mc.options.leftKey.matchesMouse(button)
+            || mc.options.rightKey.matchesMouse(button)
+            || mc.options.sneakKey.matchesMouse(button)
+            || mc.options.jumpKey.matchesMouse(button)
+            || mc.options.sprintKey.matchesMouse(button)
+            || mc.options.attackKey.matchesMouse(button)
+            || mc.options.useKey.matchesMouse(button);
     }
 
     private void logoutClient(String reason) {
