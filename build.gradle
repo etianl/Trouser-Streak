@@ -27,6 +27,7 @@ dependencies {
 
     // Meteor
     modImplementation "meteordevelopment:meteor-client:${project.minecraft_version}-SNAPSHOT"
+
 }
 
 processResources {

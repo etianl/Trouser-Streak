@@ -3,3 +3,28 @@ build/*
 run/*
 libs/*
 *.log
+# Runtime and local data
+TrouserStreak/
+
+# Dev/docs outputs not for VCS
+docs/baritone-javadocs/
+docs/*.html
+docs/*.css
+docs/*.js
+# IDE and editor files
+.idea/
+.vscode/
+*.iml
+
+# OS / misc
+.DS_Store
+Thumbs.db
+
+# Build outputs
+out/
+bin/
+
+# Eclipse/STS
+.classpath
+.project
+.settings/
