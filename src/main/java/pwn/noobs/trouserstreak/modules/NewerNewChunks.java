@@ -61,13 +61,14 @@ public class NewerNewChunks extends Module {
 	}
 
 	// Auto-follow configuration
-	public enum FollowType {
-		New,
-		Old,
-		BeingUpdated,
-		OldGeneration,
-		BlockExploit
-	}
+    public enum FollowType {
+        New,
+        Old,
+        BeingUpdated,
+        OldGeneration,
+        BlockExploit,
+        NotNew // all chunks except New
+    }
 
 	public enum PathingMode {
 		Regular,
@@ -703,6 +704,8 @@ public class NewerNewChunks extends Module {
     private void onKeyEvent(KeyEvent event) {
         if (!pauseOnInput.get()) return;
         if (mc == null || mc.player == null) return;
+        // Ignore UI/screens (including Meteor ClickGUI and HUD editor)
+        if (mc.currentScreen != null) return;
         // If any movement/interaction key is currently pressed, pause auto-follow
         if (mc.options.forwardKey.isPressed() || mc.options.backKey.isPressed() ||
             mc.options.leftKey.isPressed() || mc.options.rightKey.isPressed() ||
@@ -717,6 +720,8 @@ public class NewerNewChunks extends Module {
     private void onMouseButton(MouseButtonEvent event) {
         if (!pauseOnInput.get()) return;
         if (mc == null || mc.player == null) return;
+        // Ignore UI/screens (including Meteor ClickGUI and HUD editor)
+        if (mc.currentScreen != null) return;
         // If attack/use are currently pressed, pause auto-follow
         if (mc.options.attackKey.isPressed() || mc.options.useKey.isPressed()) {
             disableAutoFollowDueToInput();
@@ -1204,16 +1209,25 @@ public class NewerNewChunks extends Module {
         }
     }
 
-	private Set<ChunkPos> getPoolForFollowType() {
-		switch (followType.get()) {
-			case New: return newChunks;
-			case Old: return oldChunks;
-			case BeingUpdated: return beingUpdatedOldChunks;
-			case OldGeneration: return OldGenerationOldChunks;
-			case BlockExploit: return tickexploitChunks;
-		}
-		return null;
-	}
+    private Set<ChunkPos> getPoolForFollowType() {
+        switch (followType.get()) {
+            case New: return newChunks;
+            case Old: return oldChunks;
+            case BeingUpdated: return beingUpdatedOldChunks;
+            case OldGeneration: return OldGenerationOldChunks;
+            case BlockExploit: return tickexploitChunks;
+            case NotNew: {
+                // Union of all non-new sets
+                HashSet<ChunkPos> union = new HashSet<>();
+                synchronized (oldChunks) { union.addAll(oldChunks); }
+                synchronized (beingUpdatedOldChunks) { union.addAll(beingUpdatedOldChunks); }
+                synchronized (OldGenerationOldChunks) { union.addAll(OldGenerationOldChunks); }
+                synchronized (tickexploitChunks) { union.addAll(tickexploitChunks); }
+                return union;
+            }
+        }
+        return null;
+    }
 
     // Choose next along trail using relative heading, never going backwards; allows left/right turns
     // Enforces that every intermediate step stays forward-or-lateral relative to the initial heading from 'start'.

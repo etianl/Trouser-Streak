@@ -57,7 +57,7 @@ public class ChunkFollowStatsHud extends HudElement {
     private final Setting<Boolean> hideWhenDisabled = sgGeneral.add(new BoolSetting.Builder()
         .name("hide-when-disabled")
         .description("Hide all lines when auto-follow is disabled.")
-        .defaultValue(true)
+        .defaultValue(false)
         .build()
     );
 
@@ -100,7 +100,7 @@ public class ChunkFollowStatsHud extends HudElement {
         int pool = mod.hudPoolSize();
 
         List<HUDLine> lines = new ArrayList<>();
-        lines.add(new HUDLine("Follow: " + followType + " (pool=" + pool + ")", Color.WHITE));
+        lines.add(new HUDLine("Follow: " + followType + (mod.hudAutoFollowEnabled() ? "" : " [OFF]") + " (pool=" + pool + ")", Color.WHITE));
         lines.add(new HUDLine("Target: " + targetStr, Color.WHITE));
         lines.add(new HUDLine("Heading: " + headStr, Color.WHITE));
         lines.add(new HUDLine("Apex: " + apexStr, Color.WHITE));
@@ -143,4 +143,3 @@ public class ChunkFollowStatsHud extends HudElement {
         HUDLine(String t, Color c) { text = t; color = c; }
     }
 }
-
