@@ -110,6 +110,7 @@ public class Trouser extends MeteorAddon {
 
                 //Modules.get().add(new -----> Additions to the HUD module! <-----());
                 Hud.get().register(ElytraCount.INFO);
+                Hud.get().register(ChunkFollowStatsHud.INFO);
         }
 
         @Override
