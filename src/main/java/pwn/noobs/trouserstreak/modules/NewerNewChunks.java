@@ -1534,6 +1534,22 @@ public class NewerNewChunks extends Module {
         }
     }
 
+    // --- HUD getters (for ChunkFollowStatsHud) ---
+    public FollowType hudFollowType() { return followType.get(); }
+    public ChunkPos hudCurrentTarget() { return currentTarget; }
+    public Direction hudHeading() { return lastHeading; }
+    public ChunkPos hudBacktrackApex() { return null; }
+    public int hudGapAllowance() { return maxGap.get(); }
+    public int hudBacktrackLimit() { return 65; }
+    public int hudRetracedChunks() { return 0; }
+    public int hudPoolSize() {
+        Set<ChunkPos> poolRef = getPoolForFollowType();
+        if (poolRef == null) return 0;
+        synchronized (poolRef) { return poolRef.size(); }
+    }
+    public boolean hudOscillating() { return false; }
+    public boolean hudAutoFollowEnabled() { return autoFollow.get(); }
+
     private boolean baritoneAvailable() {
         try {
             Class<?> api = Class.forName("baritone.api.BaritoneAPI");
