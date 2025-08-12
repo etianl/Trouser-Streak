@@ -3,10 +3,10 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
-import meteordevelopment.meteorclient.events.render.Render3DEvent;
-import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.render.Render3DEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
@@ -14,12 +14,9 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.movement.GUIMove;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -30,6 +27,7 @@ import net.minecraft.network.packet.c2s.play.AcknowledgeChunksC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.text.Text;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.*;
 import net.minecraft.world.Heightmap;
@@ -37,7 +35,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeKeys;
 import net.minecraft.world.chunk.*;
-import net.minecraft.text.Text;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.io.IOException;
@@ -706,16 +703,24 @@ public class NewerNewChunks extends Module {
     private void onKeyEvent(KeyEvent event) {
         if (!pauseOnInput.get()) return;
         if (mc == null || mc.player == null) return;
-        if (!isMovementKey(event.key)) return;
-        if (event.action == KeyAction.Press || event.action == KeyAction.Repeat) disableAutoFollowDueToInput();
+        // If any movement/interaction key is currently pressed, pause auto-follow
+        if (mc.options.forwardKey.isPressed() || mc.options.backKey.isPressed() ||
+            mc.options.leftKey.isPressed() || mc.options.rightKey.isPressed() ||
+            mc.options.sneakKey.isPressed() || mc.options.jumpKey.isPressed() ||
+            mc.options.sprintKey.isPressed() || mc.options.attackKey.isPressed() ||
+            mc.options.useKey.isPressed()) {
+            disableAutoFollowDueToInput();
+        }
     }
 
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if (!pauseOnInput.get()) return;
         if (mc == null || mc.player == null) return;
-        if (!isMovementButton(event.button)) return;
-        if (event.action == KeyAction.Press) disableAutoFollowDueToInput();
+        // If attack/use are currently pressed, pause auto-follow
+        if (mc.options.attackKey.isPressed() || mc.options.useKey.isPressed()) {
+            disableAutoFollowDueToInput();
+        }
     }
 	@EventHandler
 	private void onRender(Render3DEvent event) {
@@ -1347,17 +1352,16 @@ public class NewerNewChunks extends Module {
 
     // True if candidate is forward or lateral relative to start when projected onto the locked forward dir
     private boolean isForwardOrLateral(ChunkPos start, ChunkPos candidate, Direction forward) {
-        return pwn.noobs.trouserstreak.modules.follow.RouteMath.isForwardOrLateralInt(
-            start.x, start.z, candidate.x, candidate.z, forward.getOffsetX(), forward.getOffsetZ()
-        );
+        int hx = forward.getOffsetX();
+        int hz = forward.getOffsetZ();
+        int dx = candidate.x - start.x;
+        int dz = candidate.z - start.z;
+        int projection = dx * hx + dz * hz;
+        return projection >= 0;
     }
 
     private void onUserMovementPress() {
-        // If a GUI is open, only treat as movement if GUIMove allows it
-        if (mc.currentScreen != null) {
-            GUIMove guiMove = Modules.get().get(GUIMove.class);
-            if (guiMove == null || !guiMove.isActive() || guiMove.skip()) return;
-        }
+        // Any user movement input should pause auto-follow
         disableAutoFollowDueToInput();
     }
 
@@ -1477,10 +1481,17 @@ public class NewerNewChunks extends Module {
                 return;
             }
         } catch (Throwable ignored) {}
-        // Singleplayer or unknown: try world disconnect
+        // Singleplayer or unknown: try world disconnect (handle signature differences across versions)
         try {
             if (mc.world != null) {
-                mc.world.disconnect();
+                try {
+                    // Newer mappings: disconnect(Text) via reflection
+                    mc.world.getClass().getMethod("disconnect", Text.class)
+                        .invoke(mc.world, Text.of("[NewerNewChunks] " + reason));
+                } catch (Throwable t) {
+                    // Older mappings: disconnect() via reflection
+                    try { mc.world.getClass().getMethod("disconnect").invoke(mc.world); } catch (Throwable ignored2) {}
+                }
             }
         } catch (Throwable ignored) {}
     }

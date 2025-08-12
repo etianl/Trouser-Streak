@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 build/*
 .gradle/*
 run/*
@@ -28,3 +29,21 @@ bin/
 .classpath
 .project
 .settings/
+=======
+# Gradle
+.gradle/
+build/
+
+# Local run outputs
+run/
+logs/
+libs/
+
+# OS/editor
+.DS_Store
+*.iml
+.idea/
+
+# Logs
+*.log
+>>>>>>> d466798 (NewerNewChunks: fix compile + input handling\n\n- Add sgFollow setting group\n- Import KeyEvent/MouseButtonEvent and Text; remove KeyAction\n- Pause auto-follow on pressed movement keys/buttons (version-agnostic)\n- Inline forward/lateral projection check; drop RouteMath\n- Remove GUIMove/Modules references in input path\n- Pass Text to world.disconnect\n\nAdd .gitignore to exclude Gradle/build artifacts.)
