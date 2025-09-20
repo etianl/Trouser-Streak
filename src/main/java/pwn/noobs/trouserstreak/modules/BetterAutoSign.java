@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.mixin.AbstractSignEditScreenAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
@@ -263,10 +264,10 @@ public class BetterAutoSign extends Module {
         SignBlockEntity sign = ((AbstractSignEditScreenAccessor) event.screen).meteor$getSign();
         if (!(mc.world.getBlockState(sign.getPos()).getBlock().asItem() instanceof HangingSignItem) && mc.world.getBlockState(sign.getPos()).getBlock().asItem() instanceof SignItem){
         mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(),true,
-                lineOne.get(),
-                lineTwo.get(),
-                lineThree.get(),
-                lineFour.get()
+                MeteorStarscript.run(MeteorStarscript.compile(lineOne.get())),
+                MeteorStarscript.run(MeteorStarscript.compile(lineTwo.get())),
+                MeteorStarscript.run(MeteorStarscript.compile(lineThree.get())),
+                MeteorStarscript.run(MeteorStarscript.compile(lineFour.get()))
         ));
         if (bothside.get()){
             editrear = true;
@@ -274,10 +275,10 @@ public class BetterAutoSign extends Module {
         }
         } else if (mc.world.getBlockState(sign.getPos()).getBlock().asItem() instanceof HangingSignItem){
             mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(),true,
-                    HlineOne.get(),
-                    HlineTwo.get(),
-                    HlineThree.get(),
-                    HlineFour.get()
+                    MeteorStarscript.run(MeteorStarscript.compile(HlineOne.get())),
+                    MeteorStarscript.run(MeteorStarscript.compile(HlineTwo.get())),
+                    MeteorStarscript.run(MeteorStarscript.compile(HlineThree.get())),
+                    MeteorStarscript.run(MeteorStarscript.compile(HlineFour.get()))
             ));
             if (bothside.get()){
                 editrear = true;
@@ -340,17 +341,17 @@ public class BetterAutoSign extends Module {
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(signPos.getX(), signPos.getY(), signPos.getZ()), Direction.DOWN, signPos, false));
                 if (differentText.get())
                     mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
-                        lineOnedif.get(),
-                        lineTwodif.get(),
-                        lineThreedif.get(),
-                        lineFourdif.get()
+                            MeteorStarscript.run(MeteorStarscript.compile(lineOnedif.get())),
+                            MeteorStarscript.run(MeteorStarscript.compile(lineTwodif.get())),
+                            MeteorStarscript.run(MeteorStarscript.compile(lineThreedif.get())),
+                            MeteorStarscript.run(MeteorStarscript.compile(lineFourdif.get()))
                     ));
                 else
                     mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
-                        lineOne.get(),
-                        lineTwo.get(),
-                        lineThree.get(),
-                        lineFour.get()
+                            MeteorStarscript.run(MeteorStarscript.compile(lineOne.get())),
+                            MeteorStarscript.run(MeteorStarscript.compile(lineTwo.get())),
+                            MeteorStarscript.run(MeteorStarscript.compile(lineThree.get())),
+                            MeteorStarscript.run(MeteorStarscript.compile(lineFour.get()))
                     ));
             prevsignPos = signPos;
 
@@ -367,17 +368,17 @@ public class BetterAutoSign extends Module {
             }
             if (differentText.get())
                 mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
-                        HlineOnedif.get(),
-                        HlineTwodif.get(),
-                        HlineThreedif.get(),
-                        HlineFourdif.get()
+                        MeteorStarscript.run(MeteorStarscript.compile(HlineOnedif.get())),
+                        MeteorStarscript.run(MeteorStarscript.compile(HlineTwodif.get())),
+                        MeteorStarscript.run(MeteorStarscript.compile(HlineThreedif.get())),
+                        MeteorStarscript.run(MeteorStarscript.compile(HlineFourdif.get()))
                 ));
             else
                 mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
-                        HlineOne.get(),
-                        HlineTwo.get(),
-                        HlineThree.get(),
-                        HlineFour.get()
+                        MeteorStarscript.run(MeteorStarscript.compile(HlineOne.get())),
+                        MeteorStarscript.run(MeteorStarscript.compile(HlineTwo.get())),
+                        MeteorStarscript.run(MeteorStarscript.compile(HlineThree.get())),
+                        MeteorStarscript.run(MeteorStarscript.compile(HlineFour.get()))
                 ));
             prevsignPos = signPos;
             editrear=false;
