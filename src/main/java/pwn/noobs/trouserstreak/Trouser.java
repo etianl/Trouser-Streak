@@ -86,6 +86,7 @@ public class Trouser extends MeteorAddon {
 
                 //Modules.get().add(new -----> And much more <-----());
                 Modules.get().add(new AttributeSwap());
+                Modules.get().add(new InfiniteTools());
                 Modules.get().add(new Teleport());
                 Modules.get().add(new PortalGodMode());
                 Modules.get().add(new ItemTractorBeam());
