@@ -8,7 +8,6 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.client.network.ServerInfo;
 import net.minecraft.component.ComponentChanges;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
@@ -16,9 +15,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.server.integrated.IntegratedServer;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.ArrayList;

@@ -5,7 +5,7 @@
   <p><strong>Official Griefing Utilities of <a href="https://www.youtube.com/@mountainsoflavainc.6913">Mountains of Lava Inc.</a></strong></p>
   <p><strong>Trouser-Streak</strong> is a compilation of modules for <strong><a href="https://meteorclient.com/">Meteor Client</a></strong>.</p> 
   <p><strong><em>Updated to the latest version and optimized for maximum grief!</em></strong></p>
-    <p><strong>Customer Service Discord: <a href="https://discord.gg/3RUjaRzdKv">https://discord.gg/3RUjaRzdKv</a></strong></p>
+    <p><strong>Customer Service Discord: <a href="https://www.breakblocks.com/discord">https://www.breakblocks.com/discord</a></strong></p>
   <img src="src/main/resources/assets/icon/icon.png" alt="Trouser-Streak Logo" width="28%"/>
 </div>
 
@@ -112,6 +112,7 @@ In no particular order
 - **HandOfGod:** Runs the "/fill" command on the world around you or around everyone else in different ways as you move around, and as you click. Destroy and modify the world with ease! Operator status required. (Credits to etianl :D)
 - **Hole/Tunnel/StairsESP:** Detects 1x1 holes going straight down, horizontal tunnels of any height, and staircase tunnels. It by default ignores passable blocks such as torches or water but there is an option to have it only detect Air for holes and tunnels. (Thank you to Meteor Client for some code from TunnelESP, and credits to etianl for this version of it)
 - **InfiniteElytra:** Automatically toggles Elytra on/off to conserve durability and auto-uses rockets maintaining flight. (Module written by etianl with inspiration from this Youtube video by AlexOinks https://www.youtube.com/watch?v=WYIMsWBxIhI)
+- **InfiniteTools:** Swaps to a junk version of the same tool you are using to conserve durability of the good tool. Stone is recommended for junk tools. (This was written based on the AttributeSwap module by [DonKisser](https://github.com/DonKisser). Thank you to therandomdude for suggesting applying it to block breaking. https://github.com/etianl/Trouser-Streak/issues/134)
 - **Inventory Dupe (1.17):** Duplicates things in your crafting slots when the module is enabled and the Dupe button is pressed in your inventory. Only works on Minecraft servers on the version 1.17, not any version before or after.(Credit to ItsVen and Da0neDatGotAway for original creation of the dupe, and to B2H990 for making the fabric mod. Credits to etianl for porting to Meteor.)
 - **InstaKill:** Shoots arrows and tridents with incredible power and velocity. Enabling multiple buttons causes the amount of packets to add up. (Credits to Saturn5Vfive)
 - **InstaMineNuker:** Sends packets to instantly mine the blocks around you until they are gone. There is an option in it to make it only target instamineable blocks such as crops, grass, slimeblocks, and more.. (Credits to etianl and to Meteor Client, as well as Meteor Rejects for some borrowed code)
