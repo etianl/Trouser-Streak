@@ -19,12 +19,14 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
+import net.minecraft.client.gui.screen.world.LevelLoadingScreen;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.network.packet.c2s.play.AcknowledgeChunksC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.*;
 import net.minecraft.world.Heightmap;
@@ -59,6 +61,7 @@ public class NewerNewChunks extends Module {
 	private final SettingGroup sgCdata = settings.createGroup("Saved Chunk Data");
 	private final SettingGroup sgcacheCdata = settings.createGroup("Cached Chunk Data");
 	private final SettingGroup sgRender = settings.createGroup("Render");
+	private final SettingGroup sgAlarm = settings.createGroup("NewChunk Alarm");
 
 	private final Setting<Boolean> PaletteExploit = specialGroup.add(new BoolSetting.Builder()
 			.name("PaletteExploit")
@@ -152,6 +155,56 @@ public class NewerNewChunks extends Module {
 			.sliderRange(1,300)
 			.defaultValue(60)
 			.visible(() -> autoreload.get() && load.get())
+			.build()
+	);
+	private final Setting<Boolean> alarms = sgAlarm.add(new BoolSetting.Builder()
+			.name("Enable Alarms for NewChunks")
+			.description("rings alarms when newchunks detected")
+			.defaultValue(false)
+			.build()
+	);
+	public final Setting<Integer> amountofrings = sgAlarm.add(new IntSetting.Builder()
+			.name("Amount Of Rings")
+			.description("How many times the alarm will ring when newchunk detected.")
+			.defaultValue(1)
+			.sliderRange(1, 10)
+			.min(1)
+			.visible(() -> alarms.get())
+			.build()
+	);
+
+	public final Setting<Integer> ringdelay = sgAlarm.add(new IntSetting.Builder()
+			.name("Delay Between Rings (ticks)")
+			.description("The delay between rings (in ticks).")
+			.defaultValue(20)
+			.sliderRange(1, 100)
+			.min(1)
+			.visible(() -> alarms.get())
+			.build()
+	);
+	public final Setting<Double> volume = sgAlarm.add(new DoubleSetting.Builder()
+			.name("Volume")
+			.description("The volume of the sound.")
+			.defaultValue(1.0)
+			.sliderRange(0.0, 1.0)
+			.visible(() -> alarms.get())
+			.build()
+	);
+
+	public final Setting<Double> pitch = sgAlarm.add(new DoubleSetting.Builder()
+			.name("Pitch")
+			.description("The pitch of the sound.")
+			.defaultValue(1.0)
+			.sliderRange(0.5, 2.0)
+			.visible(() -> alarms.get())
+			.build()
+	);
+
+	public final Setting<List<SoundEvent>> soundtouse = sgAlarm.add(new SoundEventListSetting.Builder()
+			.name("Sound to play (pick one)")
+			.description("The sound to play when a player joins. Just pick one.")
+			.defaultValue(SoundEvents.BLOCK_BELL_USE)
+			.visible(() -> alarms.get())
 			.build()
 	);
 
@@ -265,6 +318,10 @@ public class NewerNewChunks extends Module {
 	);
 	private static final ExecutorService taskExecutor = Executors.newCachedThreadPool();
 	private int deletewarningTicks=666;
+	private int ticks = 0;
+	private int ringsLeft = 0;
+	private int cooldownticks=0;
+	private boolean ringring = false;
 	private int deletewarning=0;
 	private String serverip;
 	private String world;
@@ -428,6 +485,10 @@ public class NewerNewChunks extends Module {
 		if (load.get()){
 			loadData();
 		}
+		ringring = false;
+		cooldownticks = 0;
+		ticks = 0;
+		ringsLeft = 0;
 		autoreloadticks=0;
 		loadingticks=0;
 		worldchange=false;
@@ -435,6 +496,10 @@ public class NewerNewChunks extends Module {
 	}
 	@Override
 	public void onDeactivate() {
+		ringring = false;
+		cooldownticks = 0;
+		ticks = 0;
+		ringsLeft = 0;
 		autoreloadticks=0;
 		loadingticks=0;
 		worldchange=false;
@@ -451,7 +516,7 @@ public class NewerNewChunks extends Module {
 				clearChunkData();
 			}
 		}
-		if (event.screen instanceof DownloadingTerrainScreen) {
+		if (event.screen instanceof LevelLoadingScreen) {
 			worldchange=true;
 		}
 	}
@@ -495,7 +560,20 @@ public class NewerNewChunks extends Module {
 				error("BlockExploitMode RECOMMENDED. Required to determine false positives from the Block Exploit from the OldChunks.");
 			}
 		} else errticks=0;
-
+		if (alarms.get()){
+			if (ringring && ringsLeft > 0) {
+				if (ticks <= 0) {
+					playSound();
+					ticks = ringdelay.get();
+					ringsLeft--;
+					if (ringsLeft <= 0) {
+						ringring = false;
+					}
+				} else {
+					ticks--;
+				}
+			}
+		}
 		if (load.get()){
 			if (loadingticks<1){
 				loadData();
@@ -638,6 +716,10 @@ public class NewerNewChunks extends Module {
 							if (mc.world != null && mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!OldGenerationOldChunks.contains(chunkPos) && !beingUpdatedOldChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 								tickexploitChunks.remove(chunkPos);
 								newChunks.add(chunkPos);
+								if (alarms.get()) {
+									ringring = true;
+									ringsLeft = amountofrings.get();
+								}
 								if (save.get()){
 									saveData(Paths.get("NewChunkData.txt"), chunkPos);
 								}
@@ -667,6 +749,10 @@ public class NewerNewChunks extends Module {
 						if (mc.world != null && mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!OldGenerationOldChunks.contains(chunkPos) && !beingUpdatedOldChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 							tickexploitChunks.remove(chunkPos);
 							newChunks.add(chunkPos);
+							if (alarms.get()) {
+								ringring = true;
+								ringsLeft = amountofrings.get();
+							}
 							if (save.get()){
 								saveData(Paths.get("NewChunkData.txt"), chunkPos);
 							}
@@ -849,6 +935,10 @@ public class NewerNewChunks extends Module {
 						try {
 							if (!OldGenerationOldChunks.contains(oldpos) && !beingUpdatedOldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
 								newChunks.add(oldpos);
+								if (alarms.get()) {
+									ringring = true;
+									ringsLeft = amountofrings.get();
+								}
 								if (save.get()) {
 									saveData(Paths.get("NewChunkData.txt"), oldpos);
 								}
@@ -973,5 +1063,15 @@ public class NewerNewChunks extends Module {
 	}
 	private void removeChunksOutsideRenderDistance(Set<ChunkPos> chunkSet, BlockPos playerPos, double renderDistanceBlocks) {
 		chunkSet.removeIf(c -> !playerPos.isWithinDistance(new BlockPos(c.getCenterX(), renderHeight.get(), c.getCenterZ()), renderDistanceBlocks));
+	}
+	private void playSound() {
+		if (mc.player != null) {
+			Vec3d pos = mc.player.getPos();
+			SoundEvent sound = soundtouse.get().get(0);
+			float volumeSetting = volume.get().floatValue();
+			float pitchSetting = pitch.get().floatValue();
+
+			mc.world.playSoundClient(pos.x, pos.y, pos.z, sound, mc.player.getSoundCategory(), volumeSetting, pitchSetting, false);
+		}
 	}
 }
