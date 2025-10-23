@@ -320,7 +320,7 @@ public class AutoTitles extends Module {
             List<String> friendNames = new ArrayList<>();
             if (notitleself.get())friendNames.add("name=!" + mc.player.getName().getLiteralString());
             for(PlayerListEntry player : players) {
-                if(Friends.get().isFriend(player) && notitlefrend.get()) friendNames.add("name=!" + player.getProfile().getName());
+                if(Friends.get().isFriend(player) && notitlefrend.get()) friendNames.add("name=!" + player.getProfile().name());
             }
             String friendsString = String.join(",", friendNames);
             if (messageLengthExceedsLimit("/title @a[" + friendsString + "] title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}", "Title")) {

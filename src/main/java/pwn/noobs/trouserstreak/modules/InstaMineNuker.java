@@ -128,8 +128,8 @@ public class InstaMineNuker extends Module {
     );
     private Direction direction;
     private int ticks;
-    private final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
-    private final List<RenderBlock> renderBlocks = new ArrayList<>();
+    private Pool<RenderBlock> renderBlockPool;
+    private List<RenderBlock> renderBlocks;
     private double reach = 0;
 
     public InstaMineNuker() {
@@ -139,6 +139,10 @@ public class InstaMineNuker extends Module {
     @Override
     public void onActivate() {
         if (mc.player == null) return;
+
+        renderBlockPool = new Pool<>(RenderBlock::new);
+        renderBlocks = new ArrayList<>();
+
         direction=mc.player.getHorizontalFacing();
         ticks = 0;
         for (RenderBlock renderBlock : renderBlocks) renderBlockPool.free(renderBlock);
@@ -196,7 +200,7 @@ public class InstaMineNuker extends Module {
             }
 
             // Sort the blocks by distance from the player
-            blocks.sort(Comparator.comparingDouble(pos -> pos.getSquaredDistance(mc.player.getPos())));
+            blocks.sort(Comparator.comparingDouble(pos -> pos.getSquaredDistance(mc.player.getEntityPos())));
 
             for (BlockPos blockPos : blocks) {
                 assert mc.world != null;

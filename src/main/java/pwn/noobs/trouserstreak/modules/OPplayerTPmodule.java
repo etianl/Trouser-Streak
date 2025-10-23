@@ -59,7 +59,7 @@ public class OPplayerTPmodule extends Module {
         }
         players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
         for(PlayerListEntry player : players) {
-            if(player.getProfile().getName().equals(mc.player.getName().getLiteralString())) players.remove(player);
+            if(player.getProfile().name().equals(mc.player.getName().getLiteralString())) players.remove(player);
             if(Friends.get().isFriend(player) && ignoreFriends.get()) players.remove(player);
         }
         if(currentplayer < players.size()) currentplayer++;
@@ -70,8 +70,8 @@ public class OPplayerTPmodule extends Module {
             return;
         }
         if(currentplayer >= players.size()) currentplayer = players.size();
-        if(tp2u.get()) ChatUtils.sendPlayerMsg("/tp " + players.get(currentplayer - 1).getProfile().getName() + " " + mc.player.getName().getLiteralString());
-        if(!tp2u.get()) ChatUtils.sendPlayerMsg("/tp " + mc.player.getName().getLiteralString() + " " + players.get(currentplayer - 1).getProfile().getName());
+        if(tp2u.get()) ChatUtils.sendPlayerMsg("/tp " + players.get(currentplayer - 1).getProfile().name() + " " + mc.player.getName().getLiteralString());
+        if(!tp2u.get()) ChatUtils.sendPlayerMsg("/tp " + mc.player.getName().getLiteralString() + " " + players.get(currentplayer - 1).getProfile().name());
         if(currentplayer >= players.size()) currentplayer = 0;
         toggle();
     }

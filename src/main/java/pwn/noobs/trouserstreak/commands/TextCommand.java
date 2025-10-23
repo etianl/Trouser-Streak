@@ -10,12 +10,16 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.component.ComponentChanges;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.TypedEntityData;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtDouble;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -260,10 +264,10 @@ public class TextCommand extends Command {
 
         ItemStack armorStand = new ItemStack(Items.ARMOR_STAND);
         ItemStack current = mc.player.getMainHandStack();
-        Vec3d pos = mc.player.getPos().add(mc.player.getRotationVector().multiply(2)).add(0, yOffset, 0);
+        Vec3d pos = mc.player.getEntityPos().add(mc.player.getRotationVector().multiply(2)).add(0, yOffset, 0);
 
         var changes = ComponentChanges.builder()
-                .add(DataComponentTypes.ENTITY_DATA, createEntityData(pos, nbt))
+                .add(DataComponentTypes.ENTITY_DATA, createEntityData(yOffset, nbt))
                 .build();
 
         armorStand.applyChanges(changes);
@@ -274,7 +278,8 @@ public class TextCommand extends Command {
         mc.interactionManager.clickCreativeStack(current, 36 + mc.player.getInventory().selectedSlot);
     }
 
-    private NbtComponent createEntityData(Vec3d pos, NbtList nbt) {
+    private TypedEntityData<EntityType<?>> createEntityData(double yOffset, NbtList nbt) {
+        Vec3d pos = mc.player.getEntityPos().add(mc.player.getRotationVector().multiply(2)).add(0, yOffset, 0);
         NbtCompound entityTag = new NbtCompound();
 
         NbtList position = new NbtList();
@@ -290,6 +295,6 @@ public class TextCommand extends Command {
         entityTag.putBoolean("CustomNameVisible", true);
         entityTag.put("CustomName", nbt);
 
-        return NbtComponent.of(entityTag);
+        return TypedEntityData.create(EntityType.ARMOR_STAND, entityTag);
     }
 }

@@ -967,7 +967,7 @@ public class AutoLavaCaster extends Module {
     }
 
     private BlockPos cast() {
-        HitResult blockHit = mc.cameraEntity.raycast(reach.get(), 0, false);
+        HitResult blockHit = mc.getCameraEntity().raycast(reach.get(), 0, false);
         if (((BlockHitResult) blockHit).getSide() == Direction.UP){
             return ((BlockHitResult) blockHit).getBlockPos();}
         else{

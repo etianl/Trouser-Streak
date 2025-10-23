@@ -221,7 +221,7 @@ public class LavaAura extends Module {
         List<Entity> sortedEntities = targetedEntities.stream()
                 .filter(entity -> entity instanceof Entity && entity != mc.player
                         && (entities.get().contains(entity.getType()) || (trollfriends.get() && entity instanceof PlayerEntity && !Friends.get().isFriend((PlayerEntity) entity))))
-                .sorted(Comparator.comparingDouble(entity -> mc.player.getPos().distanceTo(entity.getPos())))
+                .sorted(Comparator.comparingDouble(entity -> mc.player.getEntityPos().distanceTo(entity.getEntityPos())))
                 .collect(Collectors.toList());
 
         // Limit the number of targets based on the maxtargets setting
@@ -235,9 +235,9 @@ public class LavaAura extends Module {
                     if (!entities.get().contains(entity.getType()) || (!trollfriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)))
                         continue;
                     Entity targetEntity = entity;
-                    Vec3d targetPos = targetEntity.getPos();
+                    Vec3d targetPos = targetEntity.getEntityPos();
 
-                    double distance = mc.player.getPos().distanceTo(entity.getPos());
+                    double distance = mc.player.getEntityPos().distanceTo(entity.getEntityPos());
 
                     if (mode.get() == Mode.LAVA || (mode.get() == Mode.FIRE && !ignorewalls.get())) {
                         BlockHitResult blockHitResult = mc.world.raycast(new RaycastContext(
@@ -410,7 +410,7 @@ public class LavaAura extends Module {
                     for (int z = (int) -Math.round(range.get()+1); z <= range.get()+1; z++) {
 
                         BlockPos blockPos = playerPos.add(x, y, z);
-                        double distance = mc.player.getPos().distanceTo(blockPos.toCenterPos());
+                        double distance = mc.player.getEntityPos().distanceTo(blockPos.toCenterPos());
                         if (distance <= range.get() && distance > noburnrange.get()) {
                             if (mc.world.getBlockState(blockPos).getBlock() != Blocks.AIR && mc.world.getBlockState(blockPos).getBlock() != Blocks.WATER && mc.world.getBlockState(blockPos).getBlock() != Blocks.LAVA) {
 
@@ -558,7 +558,7 @@ public class LavaAura extends Module {
                 for (int z = (int) -Math.round(range.get()+1); z <= range.get()+1; z++) {
                     BlockPos blockPos = playerPos.add(x, y, z);
                     BlockState blockState = mc.world.getBlockState(blockPos);
-                    double distance = mc.player.getPos().distanceTo(blockPos.toCenterPos());
+                    double distance = mc.player.getEntityPos().distanceTo(blockPos.toCenterPos());
                     if (distance <= range.get()) {
                         if (blockState.getFluidState().isOf(Fluids.LAVA)) {
                             // Perform a raycast to check for obstructions
@@ -588,7 +588,7 @@ public class LavaAura extends Module {
                 for (int z = (int) -Math.round(range.get()+1); z <= range.get()+1; z++) {
                     BlockPos blockPos = playerPos.add(x, y, z);
                     BlockState blockState = mc.world.getBlockState(blockPos);
-                    double distance = mc.player.getPos().distanceTo(blockPos.toCenterPos());
+                    double distance = mc.player.getEntityPos().distanceTo(blockPos.toCenterPos());
                     if (distance <= range.get()) {
                         if (blockState.getBlock() == Blocks.FIRE) {
                             if (!ignorewalls.get()){

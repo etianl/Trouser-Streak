@@ -62,7 +62,7 @@ public class MaceKill extends Module {
         if (packetDisable.get() && (targetEntity.isBlocking() || targetEntity.isInvulnerable() || targetEntity.isInCreativeMode()))
             return;
 
-        previouspos = mc.player.getPos();
+        previouspos = mc.player.getEntityPos();
         int blocks = getMaxHeightAbovePlayer();
         int packetsRequired = (int) Math.ceil(Math.abs(blocks / 10.0));
         if (packetsRequired > 20) packetsRequired = 1;

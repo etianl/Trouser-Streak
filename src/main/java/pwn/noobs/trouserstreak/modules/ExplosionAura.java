@@ -2,7 +2,7 @@ package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -11,6 +11,8 @@ import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.component.ComponentChanges;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.TypedEntityData;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -92,7 +94,7 @@ public class ExplosionAura extends Module {
     }
 
     @EventHandler
-    private void onMouseButton(MouseButtonEvent event) {
+    private void onMouseButton(MouseClickEvent event) {
         if (mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player.getAbilities().creativeMode) {
             if (click.get()) {
                 ItemStack rst = mc.player.getMainHandStack();
@@ -137,7 +139,7 @@ public class ExplosionAura extends Module {
                     ticks++;
                 } else if (ticks>tickdelay.get()){
                     ItemStack rst = mc.player.getMainHandStack();
-                    BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getPos()), false);
+                    BlockHitResult bhr = new BlockHitResult(mc.player.getEntityPos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEntityPos()), false);
                     ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
                     var changes = ComponentChanges.builder()
                             .add(DataComponentTypes.ENTITY_DATA, createEntityData(false))
@@ -155,11 +157,11 @@ public class ExplosionAura extends Module {
             toggle();
         }
     }
-    private NbtComponent createEntityData(boolean click) {
+    private TypedEntityData<EntityType<?>> createEntityData(boolean click) {
         NbtCompound entityTag = new NbtCompound();
         entityTag.putString("id", "minecraft:creeper");
         if (click) {
-            HitResult hr = mc.cameraEntity.raycast(600, 0, true);
+            HitResult hr = mc.getCameraEntity().raycast(600, 0, true);
             Vec3d owo = hr.getPos();
             BlockPos pos = BlockPos.ofFloored(owo);
             NbtList Pos = new NbtList();
@@ -173,6 +175,6 @@ public class ExplosionAura extends Module {
         entityTag.putInt("Fuse", 0);
         entityTag.putBoolean("NoGravity", true);
         entityTag.putInt("ExplosionRadius", cpower.get());
-        return NbtComponent.of(entityTag);
+        return TypedEntityData.create(EntityType.CREEPER, entityTag);
     }
 }

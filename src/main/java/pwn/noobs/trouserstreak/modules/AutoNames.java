@@ -180,7 +180,7 @@ public class AutoNames extends Module {
         if (!trollfriends.get()) {
             players.stream()
                     .filter(Friends.get()::isFriend)
-                    .forEach(player -> excluded.add("name=!" + player.getProfile().getName()));
+                    .forEach(player -> excluded.add("name=!" + player.getProfile().name()));
         }
         return excluded;
     }

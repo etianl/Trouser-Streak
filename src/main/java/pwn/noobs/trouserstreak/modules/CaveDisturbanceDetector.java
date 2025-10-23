@@ -16,7 +16,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
+import net.minecraft.client.gui.screen.world.LevelLoadingScreen;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -138,7 +138,7 @@ public class CaveDisturbanceDetector extends Module {
 	}
 	@EventHandler
 	private void onScreenOpen(OpenScreenEvent event) {
-		if (event.screen instanceof DisconnectedScreen || event.screen instanceof DownloadingTerrainScreen) clearChunkData();
+		if (event.screen instanceof DisconnectedScreen || event.screen instanceof LevelLoadingScreen) clearChunkData();
 	}
 	@EventHandler
 	private void onGameLeft(GameLeftEvent event) {

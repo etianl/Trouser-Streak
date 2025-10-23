@@ -2,7 +2,7 @@ package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
@@ -19,6 +19,8 @@ import net.minecraft.component.ComponentChanges;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.TypedEntityData;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -497,13 +499,13 @@ public class HandOfGod extends Module {
     }
 
     @EventHandler
-    private void onMouseButton(MouseButtonEvent event) {
+    private void onMouseButton(MouseClickEvent event) {
         if (mc.player == null || mc.world == null) return;
         if (notOP.get() && !(mc.player.hasPermissionLevel(2)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
             return;
         }
         if (mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.interactionManager != null) {
-            HitResult hr = mc.cameraEntity.raycast(900, 0, fluids.get());
+            HitResult hr = mc.getCameraEntity().raycast(900, 0, fluids.get());
             Vec3d god = hr.getPos();
             BlockPos pos = BlockPos.ofFloored(god);
             if (lightning.get()) {
@@ -575,7 +577,7 @@ public class HandOfGod extends Module {
             if (aticks<=atickdelay.get()){
                 aticks++;
             } else if (aticks>atickdelay.get()){
-                HitResult hr = mc.cameraEntity.raycast(900, 0, fluids.get());
+                HitResult hr = mc.getCameraEntity().raycast(900, 0, fluids.get());
                 Vec3d god = hr.getPos();
                 BlockPos pos = BlockPos.ofFloored(god);
                 if (lightning.get()) {
@@ -850,7 +852,7 @@ public class HandOfGod extends Module {
                         friendNames.add("name=!" + mc.player.getName().getLiteralString());
                         for (PlayerListEntry player : players) {
                             if (Friends.get().isFriend(player) && !trollfriends.get())
-                                friendNames.add("name=!" + player.getProfile().getName());
+                                friendNames.add("name=!" + player.getProfile().name());
                         }
                         String friendsString = String.join(",", friendNames);
                         if (!trollreplace.get()){
@@ -934,7 +936,7 @@ public class HandOfGod extends Module {
             }
         }
     }
-    private NbtComponent createEntityData(BlockPos pos) {
+    private TypedEntityData<EntityType<?>> createEntityData(BlockPos pos) {
         NbtCompound entityTag = new NbtCompound();
         NbtList Pos = new NbtList();
         Pos.add(NbtDouble.of(pos.getX()));
@@ -942,6 +944,6 @@ public class HandOfGod extends Module {
         Pos.add(NbtDouble.of(pos.getZ()));
         entityTag.put("Pos", Pos);
         entityTag.putString("id", "minecraft:lightning_bolt");
-        return NbtComponent.of(entityTag);
+        return TypedEntityData.create(EntityType.LIGHTNING_BOLT, entityTag);
     }
 }

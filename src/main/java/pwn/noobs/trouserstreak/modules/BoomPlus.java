@@ -1,6 +1,6 @@
 package pwn.noobs.trouserstreak.modules;
 
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -10,12 +10,16 @@ import net.minecraft.block.Blocks;
 import net.minecraft.component.ComponentChanges;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.TypedEntityData;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.*;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
@@ -217,7 +221,7 @@ public class BoomPlus extends Module {
     }
 
     @EventHandler
-    private void onMouseButton(MouseButtonEvent event) {
+    private void onMouseButton(MouseClickEvent event) {
         if (mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player.getAbilities().creativeMode) {
             customName = nom.get();
             namecolour = nomcolor.get().toString();
@@ -235,14 +239,14 @@ public class BoomPlus extends Module {
             mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
         }
     }
-    private NbtComponent createEntityData() {
+    private TypedEntityData<EntityType<?>> createEntityData() {
         String fullString = blockstate.get().toString();
         String[] parts = fullString.split(":");
         String block = parts[1];
         String blockName = block.replace("}", "");
         NbtList motion = new NbtList();
         NbtList Pos = new NbtList();
-        HitResult hr = mc.cameraEntity.raycast(900, 0, true);
+        HitResult hr = mc.getCameraEntity().raycast(900, 0, true);
         Vec3d owo = hr.getPos();
         BlockPos pos = BlockPos.ofFloored(owo);
         Vec3d sex = mc.player.getRotationVector().multiply(speed.get());
@@ -260,6 +264,7 @@ public class BoomPlus extends Module {
             motion.add(NbtDouble.of(sex.z));
             entityTag.put("Motion", motion);
         }
+
         entityTag.putString("id", "minecraft:" + entityName);
         entityTag.putInt("Health", health.get());
         entityTag.putInt("AbsorptionAmount", absorption.get());
@@ -269,21 +274,22 @@ public class BoomPlus extends Module {
         NbtCompound blockState = new NbtCompound();
         blockState.putString("Name", "minecraft:" + blockName);
         entityTag.put("BlockState", blockState);
-        if (invincible.get())entityTag.putBoolean("Invulnerable", invincible.get());
-        if (silence.get())entityTag.putBoolean("Silent", silence.get());
-        if (glow.get())entityTag.putBoolean("Glowing", glow.get());
-        if (persist.get())entityTag.putBoolean("PersistenceRequired", persist.get());
-        if (nograv.get())entityTag.putBoolean("NoGravity", nograv.get());
-        if(noAI.get())entityTag.putBoolean("NoAI", noAI.get());
-        if(falsefire.get())entityTag.putBoolean("HasVisualFire", falsefire.get());
-        if(powah.get())entityTag.putBoolean("powered", powah.get());
-        if(ignite.get())entityTag.putBoolean("ignited", ignite.get());
+        NbtCompound CustomNameNBT = new NbtCompound();
+        CustomNameNBT.putString("text", customName);
+        CustomNameNBT.putString("color", namecolour);
+
+        if (invincible.get()) entityTag.putBoolean("Invulnerable", invincible.get());
+        if (silence.get()) entityTag.putBoolean("Silent", silence.get());
+        if (glow.get()) entityTag.putBoolean("Glowing", glow.get());
+        if (persist.get()) entityTag.putBoolean("PersistenceRequired", persist.get());
+        if (nograv.get()) entityTag.putBoolean("NoGravity", nograv.get());
+        if (noAI.get()) entityTag.putBoolean("NoAI", noAI.get());
+        if (falsefire.get()) entityTag.putBoolean("HasVisualFire", falsefire.get());
+        if (powah.get()) entityTag.putBoolean("powered", powah.get());
+        if (ignite.get()) entityTag.putBoolean("ignited", ignite.get());
         entityTag.putInt("Fuse", fuse.get());
         entityTag.putInt("Size", size.get());
-        if(customname.get())entityTag.putBoolean("CustomNameVisible", customname.get());
-        NbtCompound customName = new NbtCompound();
-        customName.putString("text", nom.get());
-        customName.putString("color", nomcolor.get().name());
+        if (customname.get()) entityTag.putBoolean("CustomNameVisible", customname.get());
         String serverVersion;
         if (mc.isIntegratedServerRunning()) {
             serverVersion = mc.getServer().getVersion();
@@ -291,15 +297,22 @@ public class BoomPlus extends Module {
             serverVersion = mc.getCurrentServerEntry().version.getLiteralString();
         }
         if (serverVersion == null) {
-            entityTag.put("CustomName", customName);
+            entityTag.put("CustomName", CustomNameNBT);
         } else {
             if (isVersionLessThan(serverVersion, 1, 21, 5)) {
                 entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().name() + "\"}");
             } else {
-                entityTag.put("CustomName", customName);
+                entityTag.put("CustomName", CustomNameNBT);
             }
         }
-        return NbtComponent.of(entityTag);
+
+        Identifier entityId = Identifier.tryParse("minecraft:" + entityName);
+        EntityType<?> entityType = Registries.ENTITY_TYPE.get(entityId);
+        if (entityType == null) {
+            entityType = EntityType.PIG;
+        }
+
+        return TypedEntityData.create(entityType, entityTag);
     }
     private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
         if (serverVersion == null) return false;

@@ -157,7 +157,7 @@ public class InstaSafetyBox extends Module {
             }
 
             // Sort the blocks by distance from the player
-            blocks.sort(Comparator.comparingDouble(pos -> pos.getSquaredDistance(mc.player.getPos())));
+            blocks.sort(Comparator.comparingDouble(pos -> pos.getSquaredDistance(mc.player.getEntityPos())));
 
             int count = 0;
             for (BlockPos blockPos : blocks) {

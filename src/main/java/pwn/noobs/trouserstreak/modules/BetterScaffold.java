@@ -217,7 +217,7 @@ public class BetterScaffold extends Module {
         renderBlocks.removeIf(renderBlock -> renderBlock.ticks <= 0);
         if (airPlace.get()) {
             assert mc.player != null;
-            Vec3d vec = mc.player.getPos().add(mc.player.getVelocity()).add(0, -0.5f, 0);
+            Vec3d vec = mc.player.getEntityPos().add(mc.player.getVelocity()).add(0, -0.5f, 0);
             bp.set(vec.getX(), vec.getY(), vec.getZ());
 
         } else {
@@ -226,7 +226,7 @@ public class BetterScaffold extends Module {
                 bp.set(mc.player.getBlockPos().down());
 
             } else {
-                Vec3d pos = mc.player.getPos();
+                Vec3d pos = mc.player.getEntityPos();
                 pos = pos.add(0, -0.98f, 0);
                 pos.add(mc.player.getVelocity());
 
@@ -270,7 +270,7 @@ public class BetterScaffold extends Module {
         if (keepY.get()) {
             bp.setY(initialY);
             // Skip placing blocks if the distance exceeds keepYreach
-            if (bp.getSquaredDistance(mc.player.getPos()) > keepYreach.get()) {
+            if (bp.getSquaredDistance(mc.player.getEntityPos()) > keepYreach.get()) {
                 return;
             }
         }

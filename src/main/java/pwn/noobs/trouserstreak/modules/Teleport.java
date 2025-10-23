@@ -3,7 +3,7 @@ package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
@@ -111,7 +111,7 @@ public class Teleport extends Module {
         Modules.get().get(Timer.class).setOverride(Timer.OFF);
     }
     @EventHandler
-    private void onMouseButton(MouseButtonEvent event) {
+    private void onMouseButton(MouseClickEvent event) {
         if (mc.options.attackKey.isPressed()){
             notponactivateplz=false;
             TPnow=true;
@@ -125,7 +125,7 @@ public class Teleport extends Module {
             ticks++;
             if (ticks == 1 && !notponactivateplz){
                 location=target();
-                startpos = mc.player.getPos();}
+                startpos = mc.player.getEntityPos();}
             if (location.getX()+0.5-startpos.getX() <= 8 && location.getX()+0.5-startpos.getX()>=-8 && location.getY()+0.5-startpos.getY()<=8 && location.getY()+0.5-startpos.getY()>=-8 && location.getZ()+0.5-startpos.getZ()<=8 && location.getZ()+0.5-startpos.getZ()>=-8 ){
                 BlockPos tptarget= new BlockPos(location.getX(), location.getY()+1, location.getZ());
                 if (!mc.world.getBlockState(location).isReplaceable() && !mc.world.getBlockState(tptarget).isReplaceable() && ticks==2 && !notponactivateplz){
@@ -390,7 +390,7 @@ public class Teleport extends Module {
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {toggle();}
     private BlockPos target() {
-        HitResult blockHit = mc.cameraEntity.raycast(reach.get(), 0, liquids.get());
+        HitResult blockHit = mc.getCameraEntity().raycast(reach.get(), 0, liquids.get());
         return ((BlockHitResult) blockHit).getBlockPos();
     }
 }

@@ -7,18 +7,16 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.client.network.ServerInfo;
 import net.minecraft.component.ComponentChanges;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
+import net.minecraft.entity.TypedEntityData;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.server.integrated.IntegratedServer;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.ArrayList;
@@ -219,6 +217,23 @@ public class ForceOPSign extends Module {
             return;
         }
         ItemStack stack = new ItemStack(Items.OAK_SIGN);
+
+
+        var changes = ComponentChanges.builder()
+                .add(DataComponentTypes.BLOCK_ENTITY_DATA, createEntityData())
+                .build();
+
+        stack.applyChanges(changes);
+
+        mc.interactionManager.clickCreativeStack(stack, 36 + mc.player.getInventory().selectedSlot);
+        //clickSlot twice to make the item actually appear clientside
+        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 36 + mc.player.getInventory().selectedSlot, 0, SlotActionType.PICKUP, mc.player);
+        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 36 + mc.player.getInventory().selectedSlot, 0, SlotActionType.PICKUP, mc.player);
+        info("OP Sign created. Give it to an operator who is in creative mode and have them click it to execute the command.");
+
+        toggle();
+    }
+    private TypedEntityData<BlockEntityType<?>> createEntityData() {
         NbtCompound blockEntityTag = new NbtCompound();
         NbtCompound text = new NbtCompound();
         NbtCompound text2 = new NbtCompound();
@@ -259,7 +274,7 @@ public class ForceOPSign extends Module {
             List<String> friendNames = new ArrayList<>();
             friendNames.add("name=!" + mc.player.getName().getLiteralString());
             for(PlayerListEntry player : players) {
-                if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().getName());
+                if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().name());
             }
             String friendsString = String.join(",", friendNames);
             theCommand = "execute as @a[" + friendsString + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @s[" + friendsString + "]";
@@ -282,7 +297,7 @@ public class ForceOPSign extends Module {
             List<String> friendNames = new ArrayList<>();
             friendNames.add("name=!" + mc.player.getName().getLiteralString());
             for(PlayerListEntry player : players) {
-                if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().getName());
+                if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().name());
             }
             String friendsString = String.join(",", friendNames);
             theCommand2 = ("execute as @e at @s[" + friendsString + ", type=!minecraft:player, type=!minecraft:wither, type=!minecraft:item] run fill " + "~" + eterminatewidth.get() + " " + "~" + eterminateheight1.get() + " " + "~" + eterminatedepth.get() + " " + "~-" + eterminatewidth.get() + " " + "~-" + eterminateheight2.get() + " " + "~-" + eterminatedepth.get() + " " + tBlockName);
@@ -305,7 +320,7 @@ public class ForceOPSign extends Module {
             List<String> friendNames = new ArrayList<>();
             friendNames.add("name=!" + mc.player.getName().getLiteralString());
             for(PlayerListEntry player : players) {
-                if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().getName());
+                if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().name());
             }
             String friendsString = String.join(",", friendNames);
             theCommand3 = ("execute as @a at @s[" + friendsString + "] run fill " + "~" + terminatewidth.get() + " " + "~" + terminateheight1.get() + " " + "~" + terminatedepth.get() + " " + "~-" + terminatewidth.get() + " " + "~-" + terminateheight2.get() + " " + "~-" + terminatedepth.get() + " " + tBlockName2);
@@ -437,19 +452,7 @@ public class ForceOPSign extends Module {
             else blockEntityTag.putString("id", "minecraft:oak_sign");
         }
 
-        var changes = ComponentChanges.builder()
-                .add(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.of(blockEntityTag))
-                .build();
-
-        stack.applyChanges(changes);
-
-        mc.interactionManager.clickCreativeStack(stack, 36 + mc.player.getInventory().selectedSlot);
-        //clickSlot twice to make the item actually appear clientside
-        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 36 + mc.player.getInventory().selectedSlot, 0, SlotActionType.PICKUP, mc.player);
-        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 36 + mc.player.getInventory().selectedSlot, 0, SlotActionType.PICKUP, mc.player);
-        info("OP Sign created. Give it to an operator who is in creative mode and have them click it to execute the command.");
-
-        toggle();
+        return TypedEntityData.create(BlockEntityType.SIGN, blockEntityTag);
     }
     private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
         if (serverVersion == null) return false;

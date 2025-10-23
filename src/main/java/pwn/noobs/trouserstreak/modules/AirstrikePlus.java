@@ -13,14 +13,18 @@ import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.component.ComponentChanges;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.TypedEntityData;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtDouble;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -440,7 +444,7 @@ public class AirstrikePlus extends Module {
 
     @EventHandler
     public void onTick(TickEvent.Pre event) {
-        origin = mc.player.getPos();
+        origin = mc.player.getEntityPos();
     }
 
     @EventHandler
@@ -468,7 +472,7 @@ public class AirstrikePlus extends Module {
                 } else namecolour = nomcolor.get().toString();
                 ItemStack bomb = new ItemStack(Items.SALMON_SPAWN_EGG);
                 ItemStack bfr = mc.player.getMainHandStack();
-                BlockHitResult bhr = new BlockHitResult(mc.player.getPos().add(0, 1, 0), Direction.UP, new BlockPos(mc.player.getBlockPos().add(0, 1, 0)), false);
+                BlockHitResult bhr = new BlockHitResult(mc.player.getEntityPos().add(0, 1, 0), Direction.UP, new BlockPos(mc.player.getBlockPos().add(0, 1, 0)), false);
                 i++;
                 if (mc.player.getAbilities().creativeMode) {
                     if (i >= delay.get()) {
@@ -490,7 +494,7 @@ public class AirstrikePlus extends Module {
             }
         }
     }
-    private NbtComponent createEntityData() {
+    private TypedEntityData<EntityType<?>> createEntityData() {
         String fullString = blockstate.get().toString();
         String[] parts = fullString.split(":");
         String block = parts[1];
@@ -551,7 +555,13 @@ public class AirstrikePlus extends Module {
             }
         }
 
-        return NbtComponent.of(entityTag);
+        Identifier entityId = Identifier.tryParse("minecraft:" + entityName);
+        EntityType<?> entityType = Registries.ENTITY_TYPE.get(entityId);
+        if (entityType == null) {
+            entityType = EntityType.PIG;
+        }
+
+        return TypedEntityData.create(entityType, entityTag);
     }
     private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
         if (serverVersion == null) return false;

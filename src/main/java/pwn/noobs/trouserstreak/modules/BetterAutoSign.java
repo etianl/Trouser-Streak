@@ -263,16 +263,16 @@ public class BetterAutoSign extends Module {
 
         SignBlockEntity sign = ((AbstractSignEditScreenAccessor) event.screen).meteor$getSign();
         if (!(mc.world.getBlockState(sign.getPos()).getBlock().asItem() instanceof HangingSignItem) && mc.world.getBlockState(sign.getPos()).getBlock().asItem() instanceof SignItem){
-        mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(),true,
-                MeteorStarscript.run(MeteorStarscript.compile(lineOne.get())),
-                MeteorStarscript.run(MeteorStarscript.compile(lineTwo.get())),
-                MeteorStarscript.run(MeteorStarscript.compile(lineThree.get())),
-                MeteorStarscript.run(MeteorStarscript.compile(lineFour.get()))
-        ));
-        if (bothside.get()){
-            editrear = true;
-            if (prevsignPos != sign.getPos())signPos = sign.getPos();
-        }
+            mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(),true,
+                    MeteorStarscript.run(MeteorStarscript.compile(lineOne.get())),
+                    MeteorStarscript.run(MeteorStarscript.compile(lineTwo.get())),
+                    MeteorStarscript.run(MeteorStarscript.compile(lineThree.get())),
+                    MeteorStarscript.run(MeteorStarscript.compile(lineFour.get()))
+            ));
+            if (bothside.get()){
+                editrear = true;
+                if (prevsignPos != sign.getPos())signPos = sign.getPos();
+            }
         } else if (mc.world.getBlockState(sign.getPos()).getBlock().asItem() instanceof HangingSignItem){
             mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(),true,
                     MeteorStarscript.run(MeteorStarscript.compile(HlineOne.get())),
@@ -338,21 +338,21 @@ public class BetterAutoSign extends Module {
     private void onPostTick(TickEvent.Post event) {
         if (!editrear || !bothside.get() || prevsignPos == signPos) return;
         if (!(mc.world.getBlockState(signPos).getBlock().asItem() instanceof HangingSignItem) && mc.world.getBlockState(signPos).getBlock().asItem() instanceof SignItem){
-                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(signPos.getX(), signPos.getY(), signPos.getZ()), Direction.DOWN, signPos, false));
-                if (differentText.get())
-                    mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
-                            MeteorStarscript.run(MeteorStarscript.compile(lineOnedif.get())),
-                            MeteorStarscript.run(MeteorStarscript.compile(lineTwodif.get())),
-                            MeteorStarscript.run(MeteorStarscript.compile(lineThreedif.get())),
-                            MeteorStarscript.run(MeteorStarscript.compile(lineFourdif.get()))
-                    ));
-                else
-                    mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
-                            MeteorStarscript.run(MeteorStarscript.compile(lineOne.get())),
-                            MeteorStarscript.run(MeteorStarscript.compile(lineTwo.get())),
-                            MeteorStarscript.run(MeteorStarscript.compile(lineThree.get())),
-                            MeteorStarscript.run(MeteorStarscript.compile(lineFour.get()))
-                    ));
+            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(signPos.getX(), signPos.getY(), signPos.getZ()), Direction.DOWN, signPos, false));
+            if (differentText.get())
+                mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
+                        MeteorStarscript.run(MeteorStarscript.compile(lineOnedif.get())),
+                        MeteorStarscript.run(MeteorStarscript.compile(lineTwodif.get())),
+                        MeteorStarscript.run(MeteorStarscript.compile(lineThreedif.get())),
+                        MeteorStarscript.run(MeteorStarscript.compile(lineFourdif.get()))
+                ));
+            else
+                mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
+                        MeteorStarscript.run(MeteorStarscript.compile(lineOne.get())),
+                        MeteorStarscript.run(MeteorStarscript.compile(lineTwo.get())),
+                        MeteorStarscript.run(MeteorStarscript.compile(lineThree.get())),
+                        MeteorStarscript.run(MeteorStarscript.compile(lineFour.get()))
+                ));
             prevsignPos = signPos;
 
             editrear=false;

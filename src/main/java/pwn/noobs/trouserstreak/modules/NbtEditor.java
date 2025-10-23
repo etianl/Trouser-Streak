@@ -7,6 +7,8 @@ import net.minecraft.component.*;
 import net.minecraft.component.type.*;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.TypedEntityData;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -388,7 +390,7 @@ public class NbtEditor extends Module {
         return effectInstances;
     }
 
-    private NbtComponent createEntityData() {
+    private TypedEntityData<EntityType<?>> createEntityData() {
         String entityName = entity.get().trim().replace(" ", "_");
 
         NbtCompound entityTag = new NbtCompound();
@@ -432,7 +434,13 @@ public class NbtEditor extends Module {
         entityTag.putInt("Duration", cloudduration.get());
         entityTag.putString("Particle", particle.get());
         entityTag.putString("Potion", ceffect.get());
-        return NbtComponent.of(entityTag);
+        Identifier entityId = Identifier.tryParse("minecraft:" + entityName);
+        EntityType<?> entityType = Registries.ENTITY_TYPE.get(entityId);
+        if (entityType == null) {
+            entityType = EntityType.PIG;
+        }
+
+        return TypedEntityData.create(entityType, entityTag);
     }
     private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
         if (serverVersion == null) return false;

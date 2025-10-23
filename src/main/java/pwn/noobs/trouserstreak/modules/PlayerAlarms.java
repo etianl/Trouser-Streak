@@ -246,7 +246,7 @@ public class PlayerAlarms extends Module {
 
     private void playSound() {
         if (mc.player != null) {
-            Vec3d pos = mc.player.getPos();
+            Vec3d pos = mc.player.getEntityPos();
             SoundEvent sound = soundtouse.get().get(0);
             float volumeSetting = volume.get().floatValue();
             float pitchSetting = pitch.get().floatValue();
@@ -256,7 +256,7 @@ public class PlayerAlarms extends Module {
     }
     private void playSoundRD() {
         if (mc.player != null) {
-            Vec3d pos = mc.player.getPos();
+            Vec3d pos = mc.player.getEntityPos();
             SoundEvent sound = soundtouseRD.get().get(0);
             float volumeSetting = volumeRD.get().floatValue();
             float pitchSetting = pitchRD.get().floatValue();
@@ -272,7 +272,7 @@ public class PlayerAlarms extends Module {
             if (packet.getActions().contains(PlayerListS2CPacket.Action.ADD_PLAYER)) {
                 if (useListJ.get()) {
                     for (PlayerListS2CPacket.Entry entry : packet.getPlayerAdditionEntries()) {
-                        String playerName = entry.profile().getName();
+                        String playerName = entry.profile().name();
                         if (namesJ.get().contains(playerName)){
                             ringring = true;
                             ringsLeft = amountofrings.get();

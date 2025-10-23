@@ -148,7 +148,7 @@ public class OPServerKillModule extends Module {
                     List<String> friendNames = new ArrayList<>();
                     friendNames.add("name=!" + mc.player.getName().getLiteralString());
                     for(PlayerListEntry player : players) {
-                        if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().getName());
+                        if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().name());
                     }
                     String friendsString = String.join(",", friendNames);
                     String thecommand = "/execute at @a[" + friendsString + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[" + friendsString + "]";
@@ -179,7 +179,7 @@ public class OPServerKillModule extends Module {
                     List<String> friendNames = new ArrayList<>();
                     friendNames.add("name=!" + mc.player.getName().getLiteralString());
                     for(PlayerListEntry player : players) {
-                        if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().getName());
+                        if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().name());
                     }
                     String friendsString = String.join(",", friendNames);
                     String thecommand2 = "/execute at @a[" + friendsString + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[" + friendsString + "]";
@@ -213,7 +213,7 @@ public class OPServerKillModule extends Module {
                     List<String> friendNames = new ArrayList<>();
                     friendNames.add("name=!" + mc.player.getName().getLiteralString());
                     for(PlayerListEntry player : players) {
-                        if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().getName());
+                        if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().name());
                     }
                     String friendsString = String.join(",", friendNames);
                     String thecommand2 = "/execute at @a[" + friendsString + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[" + friendsString + "]";

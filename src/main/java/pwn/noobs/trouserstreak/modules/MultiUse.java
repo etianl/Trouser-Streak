@@ -1,7 +1,7 @@
 //Thank you maytrixc for your pull request: https://github.com/etianl/Trouser-Streak/pull/69 I (etianl) just made it work good.
 package pwn.noobs.trouserstreak.modules;
 
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -24,7 +24,7 @@ public class MultiUse extends Module {
         super(Trouser.Main, "multi-use", "Uses an item multiple times per item use");
     }
     @EventHandler
-    private void onMouseButton(MouseButtonEvent event) {
+    private void onMouseButton(MouseClickEvent event) {
         if (mc.options.useKey.isPressed()) {
             for (int i = 0; i < uses.get(); i++) {
                 mc.doItemUse();

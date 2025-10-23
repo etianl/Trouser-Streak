@@ -3,7 +3,7 @@ package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
@@ -216,7 +216,7 @@ public class TrouserBuild extends Module {
         event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     }
     @EventHandler
-    private void onMouseButton(MouseButtonEvent event) {
+    private void onMouseButton(MouseClickEvent event) {
         if (mc.player == null) return;
         if (mc.options.useKey.isPressed()){
             lava = cast();
@@ -1570,7 +1570,7 @@ public class TrouserBuild extends Module {
     }
 
     private BlockPos cast() {
-        HitResult blockHit = mc.cameraEntity.raycast(reach.get(), 0, false);
+        HitResult blockHit = mc.getCameraEntity().raycast(reach.get(), 0, false);
         return ((BlockHitResult) blockHit).getBlockPos();
     }
     private void cascadingpileof() {

@@ -273,7 +273,7 @@ public class AutoDisplays extends Module {
                     if (!trollyourself.get())friendNames.add("name=!" + mc.player.getName().getLiteralString());
                     for (PlayerListEntry player : players) {
                         if (Friends.get().isFriend(player) && !trollfriends.get())
-                            friendNames.add("name=!" + player.getProfile().getName());
+                            friendNames.add("name=!" + player.getProfile().name());
                     }
                     String friendsString = String.join(",", friendNames);
                     String thecommand = "/execute at @a[" + friendsString + "] run summon minecraft:block_display ~" + (x - 0.5) + " ~" + y + " ~" + (z - 0.5) + " {block_state:{Name:\"minecraft:"+blockName+"\"},brightness:{sky:"+blockbrightness.get()+",block:"+blockbrightness.get()+"},Tags:[\"MOL\"]}";
@@ -296,7 +296,7 @@ public class AutoDisplays extends Module {
         if (!trollyourself.get())friendNames.add("name=!" + mc.player.getName().getLiteralString());
         for (PlayerListEntry player : players) {
             if (Friends.get().isFriend(player) && !trollfriends.get())
-                friendNames.add("name=!" + player.getProfile().getName());
+                friendNames.add("name=!" + player.getProfile().name());
         }
         String friendsString = String.join(",", friendNames);
         String thecommand1 = "/execute at @a[" + friendsString + "] run summon text_display ~ ~1 ~-"+distance.get()+" {brightness:{sky:"+textbrightness.get()+",block:"+textbrightness.get()+"},background:" + color + ",text:'\"" + text.get() + "\"',Tags:[\"MOL\"],Rotation:[0f, 0f]}";

@@ -12,14 +12,18 @@ import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.component.ComponentChanges;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.TypedEntityData;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtDouble;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -150,7 +154,7 @@ public class AutoTexts extends Module {
 
     @EventHandler
     public void onTick(TickEvent.Pre event) {
-        origin = mc.player.getPos();
+        origin = mc.player.getEntityPos();
     }
 
     @EventHandler
@@ -200,7 +204,7 @@ public class AutoTexts extends Module {
         mc.interactionManager.clickCreativeStack(current, 36 + mc.player.getInventory().selectedSlot);
     }
 
-    private NbtComponent createEntityData(Vec3d pos) {
+    private TypedEntityData<EntityType<?>> createEntityData(Vec3d pos) {
         NbtCompound entityTag = new NbtCompound();
         NbtList position = new NbtList();
         String selectedText = texts.get().get(random.nextInt(texts.get().size()));
@@ -234,7 +238,7 @@ public class AutoTexts extends Module {
             }
         }
 
-        return NbtComponent.of(entityTag);
+        return TypedEntityData.create(EntityType.ARMOR_STAND, entityTag);
     }
     private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
         if (serverVersion == null) return false;

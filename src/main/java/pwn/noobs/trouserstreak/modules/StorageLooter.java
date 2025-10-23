@@ -433,7 +433,7 @@ public class StorageLooter extends Module {
         if (mc.interactionManager == null) return;
         if (ticks >= delay.get() && autoloot.get()) {
             List<BlockPos> blocks = getBlocksInRange(bottomlimit);
-            blocks.sort(Comparator.comparingDouble(pos -> pos.getSquaredDistance(mc.player.getPos())));
+            blocks.sort(Comparator.comparingDouble(pos -> pos.getSquaredDistance(mc.player.getEntityPos())));
 
             for (BlockPos blockPos : blocks) {
                 BlockState blockState = mc.world.getBlockState(blockPos);

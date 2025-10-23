@@ -391,7 +391,7 @@ public class MobGearESP extends Module {
     public boolean shouldSkip(LivingEntity entity) {
         if (entity.isPlayer()) return true;
         ArrayList<Item> playerItems = getPlayerItems(entity);
-        if (entity == mc.cameraEntity && mc.options.getPerspective().isFirstPerson()) return true;
+        if (entity == mc.getCameraEntity() && mc.options.getPerspective().isFirstPerson()) return true;
         return playerItems.isEmpty() || !EntityUtils.isInRenderDistance(entity);
     }
 

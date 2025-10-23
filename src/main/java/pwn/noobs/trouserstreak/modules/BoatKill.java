@@ -38,7 +38,7 @@ public class BoatKill extends Module {
             return;
         }
 
-        Vec3d oPos = boat.getPos();
+        Vec3d oPos = boat.getEntityPos();
 
         // cba calculating the actual packets for this. 15 should be more than enough
         for (int i = 0; i < 15; i++) {
