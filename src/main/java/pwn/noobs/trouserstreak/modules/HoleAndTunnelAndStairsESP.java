@@ -16,12 +16,14 @@ import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.WorldChunk;
@@ -38,6 +40,8 @@ public class HoleAndTunnelAndStairsESP extends Module {
 	private final SettingGroup sgTParams = settings.createGroup("Tunnel Parameters");
 	private final SettingGroup sgSParams = settings.createGroup("Stairs Parameters");
 	private final SettingGroup sgRender = settings.createGroup("Rendering");
+	private final SettingGroup sgWorld = settings.createGroup("World Toggle");
+
 	private final Setting<DetectionMode> detectionMode = sgGeneral.add(new EnumSetting.Builder<DetectionMode>()
 		.name("Detection Mode")
 		.description("Choose what to detect: holes, tunnels, stairs, or all.")
@@ -205,6 +209,28 @@ public class HoleAndTunnelAndStairsESP extends Module {
 		.defaultValue(new SettingColor(255, 0, 255, 30))
 		.build()
 	);
+
+	private final Setting<Boolean> overworld = sgWorld.add(new BoolSetting.Builder()
+		.name("Overworld")
+		.description("Detect in the Overworld.")
+		.defaultValue(true)
+		.build()
+	);
+
+	private final Setting<Boolean> nether = sgWorld.add(new BoolSetting.Builder()
+		.name("Nether")
+		.description("Detect in the Nether.")
+		.defaultValue(true)
+		.build()
+	);
+
+	private final Setting<Boolean> end = sgWorld.add(new BoolSetting.Builder()
+		.name("End")
+		.description("Detect in the End.")
+		.defaultValue(true)
+		.build()
+	);
+
 	private final Long2ObjectMap<TChunk> chunks = new Long2ObjectOpenHashMap<>();
 	private final Queue<Chunk> chunkQueue = new LinkedList<>();
 	private final Set<Box> holes = Collections.newSetFromMap(new ConcurrentHashMap<>());
@@ -217,6 +243,10 @@ public class HoleAndTunnelAndStairsESP extends Module {
 
 	@Override
 	public void onDeactivate() {
+		this.clearData();
+	}
+
+	private void clearData() {
 		chunks.clear();
 		chunkQueue.clear();
 		holes.clear();
@@ -226,6 +256,19 @@ public class HoleAndTunnelAndStairsESP extends Module {
 
 	@EventHandler
 	private void onTick(TickEvent.Post event) {
+		if (mc.world != null) {
+			RegistryKey<World> dim = mc.world.getRegistryKey();
+
+			if (
+				(dim == World.OVERWORLD && !overworld.get()) ||
+				(dim == World.NETHER && !nether.get()) ||
+				(dim == World.END && !end.get())
+			) {
+				this.clearData();
+				return;
+			}
+		}
+
 		synchronized (chunks) {
 			for (TChunk tChunk : chunks.values()) tChunk.marked = false;
 
