@@ -49,7 +49,6 @@ public class MobGearESP extends Module {
             Items.NETHERITE_BOOTS,
             Items.ELYTRA,
             Items.MACE,
-            Items.TRIDENT,
             Items.DIAMOND_SWORD,
             Items.DIAMOND_AXE,
             Items.DIAMOND_PICKAXE,
@@ -429,4 +428,5 @@ public class MobGearESP extends Module {
                 });
             }
         }
+
 }
