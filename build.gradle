@@ -1,0 +1,45 @@
+plugins {
+    id 'fabric-loom' version '1.14-SNAPSHOT'
+}
+
+//sourceCompatibility = JavaVersion.VERSION_21
+//targetCompatibility = JavaVersion.VERSION_21
+
+//archivesBaseName = project.archives_base_name
+version = project.mod_version
+group = project.maven_group
+
+repositories {
+    mavenCentral()
+    maven { url "https://maven.meteordev.org/releases"}
+    maven { url "https://maven.meteordev.org/snapshots" }
+}
+
+loom {
+    accessWidenerPath = file("src/main/resources/streak-addon.accesswidener")
+}
+
+dependencies {
+    // Fabric
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+    // Meteor
+    modImplementation "meteordevelopment:meteor-client:${project.minecraft_version}-SNAPSHOT"
+}
+
+processResources {
+    inputs.properties([
+            "version": project.version,
+            "mc_version": project.minecraft_version
+    ])
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version, "mc_version": project.minecraft_version
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding("UTF-8")
+}
