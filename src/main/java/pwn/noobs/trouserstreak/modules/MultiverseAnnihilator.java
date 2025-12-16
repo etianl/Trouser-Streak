@@ -12,6 +12,7 @@ import net.minecraft.client.gui.screen.DisconnectedScreen;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.utils.PermissionUtils;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -50,7 +51,7 @@ public class MultiverseAnnihilator extends Module {
     public void onActivate() {
         resetState();
 
-        if (mc.player != null && !mc.player.hasPermissionLevel(2)) {
+        if (mc.player != null && PermissionUtils.getPermissionLevel(mc.player) < 2) {
             toggle();
             error("Operator status required!");
             return;

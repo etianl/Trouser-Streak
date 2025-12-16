@@ -96,7 +96,7 @@ public class AutoMountain extends Module {
     );
     private final Setting<Integer> spd = sgTimings.add(new IntSetting.Builder()
             .name("PlacementTickDelay")
-            .description("Delay block placement to slow down the builder and to help SwapStackOnRunOut option.")
+            .description("Delay block placement to slow down the builder.")
             .min(1)
             .sliderRange(1, 10)
             .defaultValue(1)
@@ -174,6 +174,14 @@ public class AutoMountain extends Module {
             .defaultValue(true)
             .build()
     );
+    private final Setting<Integer> swapPause = sgGeneral.add(new IntSetting.Builder()
+            .name("Pause On Swap (ticks)")
+            .description("Pause for this many ticks when a stack runs out of blocks and you are swapping to the next.")
+            .sliderRange(1, 60)
+            .min(1)
+            .defaultValue(3)
+            .visible(() -> swap.get())
+            .build());
     public final Setting<Boolean> disabledisconnect = sgGeneral.add(new BoolSetting.Builder()
             .name("Disable On Disconnect")
             .description("Toggles the Module off when you disconnect.")
@@ -292,7 +300,9 @@ public class AutoMountain extends Module {
     public static Direction wasfacingBOT;
     private Direction wasfacing;
     private int prevPitch;
-
+    private boolean justSwapped = false;
+    private int graceTicks = 0;
+    private int lastHotbarSlot = -1; // Track slot changes
     @EventHandler
     private void onScreenOpen(OpenScreenEvent event) {
         if (event.screen instanceof DisconnectedScreen && disabledisconnect.get()) toggle();
@@ -305,6 +315,7 @@ public class AutoMountain extends Module {
 
     @Override
     public void onActivate() {
+        lastHotbarSlot = mc.player.getInventory().selectedSlot;
         if (lowYrst.get() || autolavamountain.get())isthisfirstblock = true;
         groundY=0;
         groundY2=0;
@@ -604,14 +615,43 @@ public class AutoMountain extends Module {
         } else renderplayerPos = mc.player.getBlockPos();
         timeSinceLastTick = TickRate.INSTANCE.getTimeSinceLastTick();
 
-        if (speed<spd.get()){
-            go=false;
+        if (pause && swap.get()) {
+            int currentSlot = mc.player.getInventory().selectedSlot;
+            cascadingpileof();
+
+            int newSlot = mc.player.getInventory().selectedSlot;
+            if (newSlot != lastHotbarSlot && newSlot != currentSlot) {
+                justSwapped = true;
+                graceTicks = swapPause.get();
+                lastHotbarSlot = newSlot;
+            }
+        }
+
+        if (speed < spd.get()) {
+            go = false;
             speed++;
+        } else {
+            speed = 0;
         }
-        if (speed>=spd.get()){
-            go=true;
-            speed=0;
+
+        if (justSwapped) {
+            graceTicks--;
+            if (graceTicks > 0) {
+                go = false;
+                speed = 0;
+                mc.player.setVelocity(0,0,0);
+                PlayerUtils.centerPlayer();
+                mc.player.setPos(mc.player.getX(), Math.round(mc.player.getY())+0.25, mc.player.getZ());
+                return;
+            } else {
+                justSwapped = false;
+            }
         }
+
+        if (speed >= spd.get()) {
+            go = true;
+        }
+
         if (!pause){
             wasfacing=mc.player.getHorizontalFacing();
             prevPitch=Math.round(mc.player.getPitch());
@@ -625,9 +665,6 @@ public class AutoMountain extends Module {
             search2=true;
         }
         if (!pause) return;
-        if (swap.get()){
-            cascadingpileof();
-        }
         if (autolavamountain.get()){
             if (wasfacingBOT==Direction.NORTH) mc.player.setYaw(180);
             if (wasfacingBOT==Direction.SOUTH) mc.player.setYaw(0);

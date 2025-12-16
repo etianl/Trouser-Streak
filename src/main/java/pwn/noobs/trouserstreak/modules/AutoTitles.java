@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.PlayerListEntry;
 import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.utils.PermissionUtils;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -242,7 +243,7 @@ public class AutoTitles extends Module {
 
     @Override
     public void onActivate() {
-        if (notOP.get() && !(mc.player.hasPermissionLevel(2)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+        if (notOP.get() && PermissionUtils.getPermissionLevel(mc.player) < 2 && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
             toggle();
             error("Must have permission level 2 or higher");
         }

@@ -34,6 +34,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.utils.PermissionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -501,7 +502,7 @@ public class HandOfGod extends Module {
     @EventHandler
     private void onMouseButton(MouseClickEvent event) {
         if (mc.player == null || mc.world == null) return;
-        if (notOP.get() && !(mc.player.hasPermissionLevel(2)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+        if (notOP.get() && PermissionUtils.getPermissionLevel(mc.player) < 2 && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
             return;
         }
         if (mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.interactionManager != null) {
@@ -556,7 +557,7 @@ public class HandOfGod extends Module {
     @EventHandler
     public void onTick(TickEvent.Pre event) {
         if (mc.player == null || mc.world == null) return;
-        if (notOP.get() && !(mc.player.hasPermissionLevel(2)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+        if (notOP.get() && PermissionUtils.getPermissionLevel(mc.player) < 2 && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
             return;
         }
         pX=mc.player.getBlockPos().getX();

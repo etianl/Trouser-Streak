@@ -18,6 +18,8 @@
     "TrouserSplashTextMixin",
     "TrouserHandshakeC2SMixin",
     "PacketCodecsMixin",
-    "StringEncodingMixin"
+    "StringEncodingMixin",
+    "ScreenMixin",
+    "HandledScreenMixin"
   ]
 }

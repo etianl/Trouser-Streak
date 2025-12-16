@@ -10,6 +10,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.utils.PermissionUtils;
 
 public class VoiderPlus extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -108,7 +109,7 @@ public class VoiderPlus extends Module {
     @Override
     public void onActivate() {
         if (mc.player == null || mc.world == null) return;
-        if (notOP.get() && !(mc.player.hasPermissionLevel(2)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+        if (notOP.get() && PermissionUtils.getPermissionLevel(mc.player) < 2 && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
             toggle();
             error("Must have permission level 2 or higher");
         }

@@ -3,6 +3,7 @@ package pwn.noobs.trouserstreak.mixin;
 import meteordevelopment.meteorclient.systems.config.Config;
 import net.minecraft.client.gui.screen.SplashTextRenderer;
 import net.minecraft.client.resource.SplashTextResourceSupplier;
+import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -27,7 +28,7 @@ public class TrouserSplashTextMixin {
 
         if (override) {
             currentIndex = new Random().nextInt(TrouserSplashes.size());
-            cir.setReturnValue(new SplashTextRenderer(TrouserSplashes.get(currentIndex)));
+            cir.setReturnValue(new SplashTextRenderer(Text.of(TrouserSplashes.get(currentIndex))));
         }
         override = !override;
     }

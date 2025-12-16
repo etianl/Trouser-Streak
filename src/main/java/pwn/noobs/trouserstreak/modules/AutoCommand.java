@@ -10,6 +10,7 @@ import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.meteorclient.gui.utils.StarscriptTextBoxRenderer;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.utils.PermissionUtils;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -117,7 +118,7 @@ public class AutoCommand extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (mc.player == null || !mc.player.hasPermissionLevel(permissionLevel.get())) return;
+        if (mc.player == null || PermissionUtils.getPermissionLevel(mc.player) < (permissionLevel.get())) return;
 
         if (commandQueue.isEmpty()) {
             if (sent && !auto.get()) {

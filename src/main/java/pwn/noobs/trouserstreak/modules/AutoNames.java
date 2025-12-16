@@ -9,6 +9,7 @@ import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import net.minecraft.client.network.PlayerListEntry;
 import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.utils.PermissionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -136,7 +137,7 @@ public class AutoNames extends Module {
     }
 
     private boolean hasOperatorPermissions() {
-        return mc.player.hasPermissionLevel(2);
+        return PermissionUtils.getPermissionLevel(mc.player) >= 2;
     }
 
     private void updateTeamColors() {

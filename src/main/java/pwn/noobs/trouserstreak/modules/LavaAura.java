@@ -26,6 +26,7 @@ import net.minecraft.world.GameMode;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import pwn.noobs.trouserstreak.Trouser;
+import pwn.noobs.trouserstreak.utils.PermissionUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -281,7 +282,7 @@ public class LavaAura extends Module {
                                                     blockBelow instanceof CandleCakeBlock ||
                                                     blockBelow instanceof CartographyTableBlock ||
                                                     blockBelow instanceof ChestBlock ||
-                                                    (mc.player.hasPermissionLevel(2) && blockBelow instanceof CommandBlock) ||
+                                                    (PermissionUtils.getPermissionLevel(mc.player) >= 2 && blockBelow instanceof CommandBlock) ||
                                                     blockBelow instanceof ComparatorBlock ||
                                                     blockBelow instanceof CrafterBlock ||
                                                     blockBelow instanceof CraftingTableBlock ||
@@ -299,7 +300,7 @@ public class LavaAura extends Module {
                                                     blockBelow instanceof HopperBlock ||
                                                     blockBelow instanceof LecternBlock ||
                                                     blockBelow instanceof LeverBlock ||
-                                                    (mc.player.hasPermissionLevel(2) && blockBelow instanceof LightBlock) ||
+                                                    (PermissionUtils.getPermissionLevel(mc.player) >= 2 && blockBelow instanceof LightBlock) ||
                                                     blockBelow instanceof LoomBlock ||
                                                     blockBelow instanceof NoteBlock ||
                                                     blockBelow instanceof RedstoneOreBlock ||
@@ -349,7 +350,7 @@ public class LavaAura extends Module {
                                             blockBelow instanceof CandleCakeBlock ||
                                             blockBelow instanceof CartographyTableBlock ||
                                             blockBelow instanceof ChestBlock ||
-                                            (mc.player.hasPermissionLevel(2) && blockBelow instanceof CommandBlock) ||
+                                            (PermissionUtils.getPermissionLevel(mc.player) >= 2 && blockBelow instanceof CommandBlock) ||
                                             blockBelow instanceof ComparatorBlock ||
                                             blockBelow instanceof CrafterBlock ||
                                             blockBelow instanceof CraftingTableBlock ||
@@ -367,7 +368,7 @@ public class LavaAura extends Module {
                                             blockBelow instanceof HopperBlock ||
                                             blockBelow instanceof LecternBlock ||
                                             blockBelow instanceof LeverBlock ||
-                                            (mc.player.hasPermissionLevel(2) && blockBelow instanceof LightBlock) ||
+                                            (PermissionUtils.getPermissionLevel(mc.player) >= 2 && blockBelow instanceof LightBlock) ||
                                             blockBelow instanceof LoomBlock ||
                                             blockBelow instanceof NoteBlock ||
                                             blockBelow instanceof RedstoneOreBlock ||
@@ -443,7 +444,7 @@ public class LavaAura extends Module {
                                                         blockBelow instanceof CandleCakeBlock ||
                                                         blockBelow instanceof CartographyTableBlock ||
                                                         blockBelow instanceof ChestBlock ||
-                                                        (mc.player.hasPermissionLevel(2) && blockBelow instanceof CommandBlock) ||
+                                                        (PermissionUtils.getPermissionLevel(mc.player) >= 2 && blockBelow instanceof CommandBlock) ||
                                                         blockBelow instanceof ComparatorBlock ||
                                                         blockBelow instanceof CrafterBlock ||
                                                         blockBelow instanceof CraftingTableBlock ||
@@ -461,7 +462,7 @@ public class LavaAura extends Module {
                                                         blockBelow instanceof HopperBlock ||
                                                         blockBelow instanceof LecternBlock ||
                                                         blockBelow instanceof LeverBlock ||
-                                                        (mc.player.hasPermissionLevel(2) && blockBelow instanceof LightBlock) ||
+                                                        (PermissionUtils.getPermissionLevel(mc.player) >= 2 && blockBelow instanceof LightBlock) ||
                                                         blockBelow instanceof LoomBlock ||
                                                         blockBelow instanceof NoteBlock ||
                                                         blockBelow instanceof RedstoneOreBlock ||
