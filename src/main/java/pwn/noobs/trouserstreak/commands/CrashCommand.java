@@ -8,11 +8,9 @@ import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
+import pwn.noobs.trouserstreak.utils.PermissionUtils;
 
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class CrashCommand extends Command {
     public CrashCommand() {
@@ -28,7 +26,7 @@ public class CrashCommand extends Command {
                 error("No other players found on the server");
                 return SINGLE_SUCCESS;
             }
-            if(mc.player.hasPermissionLevel(2)) {
+            if(PermissionUtils.getPermissionLevel(mc.player) >= 2) {
                 ChatUtils.sendPlayerMsg("/execute at @a[name=!" + mc.player.getName().getLiteralString() + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[name=!" + mc.player.getName().getLiteralString() + "]");
                 StringBuilder playerNames = new StringBuilder("Crashing players: ");
                 for (PlayerListEntry player : players) {
@@ -39,17 +37,17 @@ public class CrashCommand extends Command {
                 playerNames.setLength(playerNames.length() - 2);  // Remove the extra comma and space at the end
                 ChatUtils.sendMsg(Text.of(playerNames.toString()));
                 return SINGLE_SUCCESS;
-            } else if (!(mc.player.hasPermissionLevel(2))) error("Must have permission level 2 or higher");
+            } else if (PermissionUtils.getPermissionLevel(mc.player) < 2) error("Must have permission level 2 or higher");
             return SINGLE_SUCCESS;
         });
         builder.then(argument("player", PlayerListEntryArgumentType.create()).executes(context -> {
             GameProfile profile = PlayerListEntryArgumentType.get(context).getProfile();
             if (profile != null) {
                 if (mc.getNetworkHandler().getPlayerList().stream().anyMatch(player -> player.getProfile().id().equals(profile.id()))) {
-                    if (mc.player.hasPermissionLevel(2)) {
+                    if (PermissionUtils.getPermissionLevel(mc.player) >= 2) {
                         ChatUtils.sendPlayerMsg("/execute at " + profile.name() + " run particle ash ~ ~ ~ 1 1 1 1 2147483647 force " + profile.name());
                         ChatUtils.sendMsg(Text.of("Crashing player: " + profile.name()));
-                    } else if (!mc.player.hasPermissionLevel(2)) error("Must have permission level 2 or higher");
+                    } else if (PermissionUtils.getPermissionLevel(mc.player) < 2) error("Must have permission level 2 or higher");
                 } else {
                     error("Player not found in the current server");
                 }
