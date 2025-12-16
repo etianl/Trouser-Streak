@@ -1,6 +1,9 @@
 //Written By etianll, using just a bit of code from banana's autobuild. Thanks to them for the idea and framework for the codes
 package pwn.noobs.trouserstreak.modules;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
@@ -30,6 +33,12 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import pwn.noobs.trouserstreak.Trouser;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 
 public class TrouserBuild extends Module {
@@ -109,20 +118,106 @@ public class TrouserBuild extends Module {
 
     public TrouserBuild() {
         super(Trouser.Main, "TrouserBuild", "Can build either horizontally and vertically according to a 5x5 grid centered on the block you are aiming at.");
+        configPath = Paths.get("TrouserStreak").resolve("trouserstreak-grid.json");
+        loadGridConfig();
     }
     boolean ett = false, tva = false, tree = false, fyra = false, fem = false;
     boolean ett1 = false,tva1 = true, tree1 = true, fyra1 = true, fem1 = false;
     boolean ett2 = false, tva2 = false, tree2 = true, fyra2 = false, fem2 = false;
     boolean ett3 = false, tva3 = false, tree3 = true, fyra3 = false, fem3 = false;
     boolean ett4 = false, tva4 = false, tree4 = false, fyra4 = false, fem4 = false;
-
+    private Path configPath;
+    private JsonObject gridConfig = new JsonObject();
     private boolean pause = true;
     private BlockPos lava;
     private Direction playerdir;
     private float playerpitch;
     private int loops=0;
     private int blockticks=0;
+    private void saveGridConfig() {
+        try {
+            Files.createDirectories(configPath.getParent());
 
+            gridConfig.addProperty("ett", ett);
+            gridConfig.addProperty("tva", tva);
+            gridConfig.addProperty("tree", tree);
+            gridConfig.addProperty("fyra", fyra);
+            gridConfig.addProperty("fem", fem);
+
+            gridConfig.addProperty("ett1", ett1);
+            gridConfig.addProperty("tva1", tva1);
+            gridConfig.addProperty("tree1", tree1);
+            gridConfig.addProperty("fyra1", fyra1);
+            gridConfig.addProperty("fem1", fem1);
+
+            gridConfig.addProperty("ett2", ett2);
+            gridConfig.addProperty("tva2", tva2);
+            gridConfig.addProperty("tree2", tree2);
+            gridConfig.addProperty("fyra2", fyra2);
+            gridConfig.addProperty("fem2", fem2);
+
+            gridConfig.addProperty("ett3", ett3);
+            gridConfig.addProperty("tva3", tva3);
+            gridConfig.addProperty("tree3", tree3);
+            gridConfig.addProperty("fyra3", fyra3);
+            gridConfig.addProperty("fem3", fem3);
+
+            gridConfig.addProperty("ett4", ett4);
+            gridConfig.addProperty("tva4", tva4);
+            gridConfig.addProperty("tree4", tree4);
+            gridConfig.addProperty("fyra4", fyra4);
+            gridConfig.addProperty("fem4", fem4);
+
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String jsonString = gson.toJson(gridConfig);
+
+            Files.write(configPath, jsonString.getBytes(StandardCharsets.UTF_8),
+                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    private void loadGridConfig() {
+        try {
+            if (Files.exists(configPath)) {
+                String jsonString = Files.readString(configPath);
+                gridConfig = new Gson().fromJson(jsonString, JsonObject.class);
+
+                ett = gridConfig.get("ett").getAsBoolean();
+                tva = gridConfig.get("tva").getAsBoolean();
+                tree = gridConfig.get("tree").getAsBoolean();
+                fyra = gridConfig.get("fyra").getAsBoolean();
+                fem = gridConfig.get("fem").getAsBoolean();
+
+                ett1 = gridConfig.get("ett1").getAsBoolean();
+                tva1 = gridConfig.get("tva1").getAsBoolean();
+                tree1 = gridConfig.get("tree1").getAsBoolean();
+                fyra1 = gridConfig.get("fyra1").getAsBoolean();
+                fem1 = gridConfig.get("fem1").getAsBoolean();
+
+                ett2 = gridConfig.get("ett2").getAsBoolean();
+                tva2 = gridConfig.get("tva2").getAsBoolean();
+                tree2 = gridConfig.get("tree2").getAsBoolean();
+                fyra2 = gridConfig.get("fyra2").getAsBoolean();
+                fem2 = gridConfig.get("fem2").getAsBoolean();
+
+                ett3 = gridConfig.get("ett3").getAsBoolean();
+                tva3 = gridConfig.get("tva3").getAsBoolean();
+                tree3 = gridConfig.get("tree3").getAsBoolean();
+                fyra3 = gridConfig.get("fyra3").getAsBoolean();
+                fem3 = gridConfig.get("fem3").getAsBoolean();
+
+                ett4 = gridConfig.get("ett4").getAsBoolean();
+                tva4 = gridConfig.get("tva4").getAsBoolean();
+                tree4 = gridConfig.get("tree4").getAsBoolean();
+                fyra4 = gridConfig.get("fyra4").getAsBoolean();
+                fem4 = gridConfig.get("fem4").getAsBoolean();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     @Override
     public WWidget getWidget(GuiTheme theme) {
         WVerticalList list = theme.verticalList();
@@ -198,6 +293,7 @@ public class TrouserBuild extends Module {
     }
     @Override
     public void onDeactivate() {
+        saveGridConfig();
         pause=true;
         blockticks=0;
         loops=0;
@@ -1570,7 +1666,7 @@ public class TrouserBuild extends Module {
     }
 
     private BlockPos cast() {
-        HitResult blockHit = mc.cameraEntity.raycast(reach.get(), 0, false);
+        HitResult blockHit = mc.getCameraEntity().raycast(reach.get(), 0, false);
         return ((BlockHitResult) blockHit).getBlockPos();
     }
     private void cascadingpileof() {

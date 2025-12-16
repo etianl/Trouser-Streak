@@ -148,8 +148,8 @@ public class BaseFinder extends Module {
     private final Setting<Integer> bedrockint = sgDetectors.add(new IntSetting.Builder()
             .name("Bedrock Y Threshold")
             .description("If bedrock higher than this many blocks above minimum build limit, flag chunk as possible build.")
-            .min(0)
-            .sliderRange(0, 384)
+            .min(-64)
+            .sliderRange(-64, 384)
             .defaultValue(4)
             .visible(bedrockfind::get)
             .build());
@@ -1570,7 +1570,13 @@ public class BaseFinder extends Module {
             closestBase = new ChunkPos(2000000000, 2000000000);
     }
     private void removeChunksOutsideRenderDistance(Set<ChunkPos> chunkSet, BlockPos playerPos, double renderDistanceBlocks, int midpoint) {
-        chunkSet.removeIf(c -> !playerPos.isWithinDistance(new BlockPos(c.getCenterX(), midpoint, c.getCenterZ()), renderDistanceBlocks));
+        List<ChunkPos> chunksToRemove = new ArrayList<>();
+        for (ChunkPos c : chunkSet) {
+            if (!playerPos.isWithinDistance(new BlockPos(c.getCenterX(), midpoint, c.getCenterZ()), renderDistanceBlocks)) {
+                chunksToRemove.add(c);
+            }
+        }
+        chunkSet.removeAll(chunksToRemove);
     }
 
     private final java.util.List<LoggedBase> loggedBases = new java.util.ArrayList<>();

@@ -247,7 +247,8 @@ public class PlayerAlarms extends Module {
     private void playSound() {
         if (mc.player != null) {
             Vec3d pos = mc.player.getPos();
-            SoundEvent sound = soundtouse.get().get(0);
+            SoundEvent sound = SoundEvents.BLOCK_BELL_USE;
+            if (!soundtouse.get().isEmpty()) sound = soundtouse.get().get(0);
             float volumeSetting = volume.get().floatValue();
             float pitchSetting = pitch.get().floatValue();
 
@@ -257,7 +258,8 @@ public class PlayerAlarms extends Module {
     private void playSoundRD() {
         if (mc.player != null) {
             Vec3d pos = mc.player.getPos();
-            SoundEvent sound = soundtouseRD.get().get(0);
+            SoundEvent sound = SoundEvents.BLOCK_ANVIL_DESTROY;
+            if (!soundtouseRD.get().isEmpty()) sound = soundtouseRD.get().get(0);
             float volumeSetting = volumeRD.get().floatValue();
             float pitchSetting = pitchRD.get().floatValue();
 

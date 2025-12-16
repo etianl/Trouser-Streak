@@ -13,3 +13,7 @@ accessible field net/minecraft/block/entity/DecoratedPotBlockEntity stack Lnet/m
 accessible method net/minecraft/client/MinecraftClient doItemUse ()V
 accessible field net/minecraft/client/world/ClientChunkManager chunks Lnet/minecraft/client/world/ClientChunkManager$ClientChunkMap;
 accessible field net/minecraft/client/world/ClientChunkManager$ClientChunkMap chunks Ljava/util/concurrent/atomic/AtomicReferenceArray;
+accessible field net/minecraft/client/gui/screen/ingame/HandledScreen x I
+accessible field net/minecraft/client/gui/screen/ingame/HandledScreen y I
+accessible field net/minecraft/client/option/KeyBinding boundKey Lnet/minecraft/client/util/InputUtil$Key;
+accessible field net/minecraft/client/Mouse cursorLocked Z
