@@ -178,7 +178,43 @@ In no particular order
 - **PortalPatternFinder:** Scans for the shapes of broken/removed Nether Portals within the cave air blocks found in caves and underground structures in 1.13+ chunks. **May be useful for finding portal skips in the Nether**. (Credits to etianl :D)
 - **PotESP:** Detects Decorated Pots with un-natural contents, and also tells you what item it is and the location of the pot. (Credits to etianl :D)
 - **RedstoneNuker:** It's just the regular Nuker module from Meteor client, customized for only breaking things that generate redstone signals. Also with included AutoTool. To keep you safer when placing lots of TNT. (Credits to Meteor Client for Nuker code, and AutoTool code inthere.)
+- **RemoteEnderChest:** This module allows you to "carry around" a ender chest GUI in your back pocket for as far as you want to travel.
+-------------------------------------------------------------------------------------
+This allows you to store or take things out of an ender chest at a long distance from the ender chest that you clicked on.
+
+You can even destroy the ender chest and still retain it's menu.
+
+**Trying to open your inventory or pressing the Escape key will close the GUI and break your link with the Ender Chest!!!**
+
+**Sometimes interacting with things (blocks/entities) too quickly can also break the link!!!**
+
+To allow normal player movement many controls had to be routed around this GUI.
+*This can make for some wacky behaviour sometimes*
+
+**Video demonstration: https://www.youtube.com/watch?v=Bv48zq_w58Y**
+
+**Keys that have been routed past the GUI currently:**
+- Meteor Module hotkeys
+- Attack/Mining
+- Use (kinda janky because we had to implement interactItem/Block/Entity)
+- Forward
+- Back
+- Left
+- Right
+- Jump
+- Sneak
+- Sprint
+- 1-9 keys for hotbar
+- Scroll Wheel up/down hotbar cycling
+  **Keys I would like to implement but HAVE NOT:**
+- SwapHand (default F)
+- DropItem (default Q)
+- Chat (default T)
+- Some of the F keys, I noticed F5 doesn't work.
+-------------------------------------------------------------------------------------
+
 - **ShulkerDupe:** Duplicates the contents of a shulker when pressing "Dupe" or "Dupe All" in the shulker menu. Only works on Vanilla, Forge, and Fabric servers 1.19 and below. Use multiconnect or viafabric (Credits to Allah-Hack, I just brought back the buttons, and make it dupe slot1 as well.)
+- **SpearKill:** Locks onto the target and lunges in their direction with a set velocity. Can one shot people in fully enchanted Netherite with a wooden stick. (Credits to etianl :D) 
 - **StorageLooter:** Automatically steals the best stuff from storage containers according to itemlists and a list of values that are set for amounts of those items to take, and also puts junk items in there too. It either automatically opens the containers within reach and steals the stuff automatically, or steals the stuff automatically when you manually open the container. (Credits to etianl :D)
 - **SuperInstaMine:** This SuperInstaMine originated from the Meteor Rejects Instamine. I added an option called "Break Modes (Range)" which allows you to break more than one block at a time with SuperInstaMine. This option works best against easy-breaking blocks. The option adjusts the positioning and range of the block breaking. (Credits to Meteor Rejects for the original code.) **ORIGINAL INSTAMINE FROM REJECTS CAN SOMETIMES WORK BETTER THAN THIS ONE, download meteor rejects for that!**
 - **Teleport:** Sets your position ontop of targeted block, within a possible reach of 64 blocks. Rarely can cause damage, be careful. ***EXPERIMENTAL*** (Credits to etianl :D)

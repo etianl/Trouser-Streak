@@ -49,7 +49,6 @@ public class MobGearESP extends Module {
             Items.NETHERITE_BOOTS,
             Items.ELYTRA,
             Items.MACE,
-            Items.TRIDENT,
             Items.DIAMOND_SWORD,
             Items.DIAMOND_AXE,
             Items.DIAMOND_PICKAXE,
@@ -418,15 +417,16 @@ public class MobGearESP extends Module {
     public String getInfoString() {
         return Integer.toString(count);
     }
-        @EventHandler
-        private void onPreTick(TickEvent.Pre event) {
-            if (mc.world != null){
-                Iterable<net.minecraft.entity.Entity> entities = mc.world.getEntities();
-                scannedEntities.removeIf(entity -> {
-                    Set<Entity> entitySet = new HashSet<>();
-                    entities.forEach(entity1 -> entitySet.add(entity1));
-                    return !entitySet.contains(entity);
-                });
-            }
+    @EventHandler
+    private void onPreTick(TickEvent.Pre event) {
+        if (mc.world != null){
+            Iterable<net.minecraft.entity.Entity> entities = mc.world.getEntities();
+            scannedEntities.removeIf(entity -> {
+                Set<Entity> entitySet = new HashSet<>();
+                entities.forEach(entity1 -> entitySet.add(entity1));
+                return !entitySet.contains(entity);
+            });
         }
+    }
+
 }
