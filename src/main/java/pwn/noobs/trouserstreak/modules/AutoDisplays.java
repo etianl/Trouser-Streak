@@ -15,6 +15,18 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtDouble;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.ArrayList;
@@ -76,7 +88,7 @@ public class AutoDisplays extends Module {
     private final Setting<Integer> tickDelay = sgGeneral.add(new IntSetting.Builder()
             .name("Tick Delay")
             .description("Delay in ticks before creating block and text displays.")
-            .defaultValue(0)
+            .defaultValue(3)
             .min(0)
             .sliderMax(100)
             .build());
@@ -107,6 +119,13 @@ public class AutoDisplays extends Module {
             .max(15)
             .visible(() -> displayMode.get() == Modes.BLOCK)
             .build());
+    private final Setting<Boolean> compatMode = sgGeneral.add(new BoolSetting.Builder()
+            .name("Compatibility Mode")
+            .description("Use spawn eggs instead of commands (creative only, no OP).")
+            .defaultValue(false)
+            .visible(() -> displayMode.get() == Modes.TEXT)
+            .build()
+    );
     private final Setting<String> text = sgText.add(new StringSetting.Builder()
             .name("Custom Text")
             .description("Too much text will get you kicked.")
@@ -159,7 +178,7 @@ public class AutoDisplays extends Module {
         if (mc.player == null) return;
         tickTimer = 0;
         killTimer = 0;
-        if (notOP.get() && !(mc.player.hasPermissionLevel(2)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+        if (notOP.get() && !mc.player.hasPermissionLevel(2) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
             toggle();
             error("Must have permission level 2 or higher");
         }
@@ -167,18 +186,16 @@ public class AutoDisplays extends Module {
     @EventHandler
     public void onMessageReceive(ReceiveMessageEvent event) {
         if (event.getMessage() != null && mc.player != null) {
-            String message = event.getMessage().getString(); // Convert Text object to string
+            String message = event.getMessage().getString();
 
-            // Check for the specific error message
             if (message.contains("Incorrect argument for command")) {
-                isIncorrectArgumentError = true;  // Flag the error
+                isIncorrectArgumentError = true;
             }
         }
     }
     @Override
     public void onDeactivate() {
-        // Only run the command if the player is OP
-        if (mc.player.hasPermissionLevel(2)) {
+        if (mc.player.hasPermissionLevel(2) && !compatMode.get()) {
             switch (displayMode.get()) {
                 case BLOCK -> {
                     if (killEntities.get()) {
@@ -201,10 +218,9 @@ public class AutoDisplays extends Module {
             }
         }
     }
-
-    // Event handler for handling periodic ticks (for commands)
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
+        if (compatMode.get() && displayMode.get() == Modes.TEXT) return;
         if (mc.getNetworkHandler().getPlayerList().toArray().length == 1 && allAloneToggle.get()) {
             toggle();
             error("No other players online.");
@@ -238,6 +254,17 @@ public class AutoDisplays extends Module {
     }
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
+        if (compatMode.get() && displayMode.get() == Modes.TEXT) {
+            if (tickTimer >= tickDelay.get()) {
+                tickTimer = 0;
+                if (displayMode.get() == Modes.TEXT) {
+                    createTextDisplaysCompat();
+                }
+            } else {
+                tickTimer++;
+            }
+            return;
+        }
         if (!commandQueue.isEmpty() && useDelay.get()) {
             if (tickTimer >= commandDelay.get()) {
                 ChatUtils.sendPlayerMsg(commandQueue.poll());
@@ -322,6 +349,76 @@ public class AutoDisplays extends Module {
             toggle();
         }
     }
+    private void createTextDisplaysCompat() {
+        if (!mc.player.getAbilities().creativeMode) {
+            error("You need to be in creative mode for compatibility mode.");
+            toggle();
+            return;
+        }
+
+        int color = (backgroundColor.get().a << 24) | (backgroundColor.get().r << 16)
+                | (backgroundColor.get().g << 8) | backgroundColor.get().b;
+
+        ItemStack previous = mc.player.getMainHandStack().copy();
+
+        List<PlayerEntity> nearbyPlayers = new ArrayList<>();
+        for (Entity entity : mc.world.getEntities()) {
+            if (entity instanceof PlayerEntity player) {
+
+                if (Friends.get().isFriend(player) && !trollfriends.get()) continue;
+                if (mc.player == player && !trollyourself.get()) continue;
+
+                nearbyPlayers.add(player);
+            }
+        }
+
+        for (PlayerEntity target : nearbyPlayers) {
+            ItemStack egg = createTextDisplayEgg(text.get(), textbrightness.get(), color, target.getBlockPos().up());
+
+            mc.interactionManager.clickCreativeStack(egg, 36 + mc.player.getInventory().selectedSlot);
+
+            BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
+
+            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
+
+            mc.interactionManager.clickCreativeStack(previous, 36 + mc.player.getInventory().selectedSlot);
+        }
+    }
+
+    private ItemStack createTextDisplayEgg(String text, int brightness, int argbColor, BlockPos pos) {
+        ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
+
+        NbtCompound mainTag = new NbtCompound();
+
+        NbtCompound entityTag = new NbtCompound();
+        entityTag.putString("id", "minecraft:text_display");
+
+        NbtList Pos = new NbtList();
+        Pos.add(NbtDouble.of(pos.getX()));
+        Pos.add(NbtDouble.of(pos.getY()));
+        Pos.add(NbtDouble.of(pos.getZ()));
+        entityTag.put("Pos", Pos);
+
+        entityTag.putInt("background", argbColor);
+
+        NbtCompound brightnessTag = new NbtCompound();
+        brightnessTag.putInt("sky", brightness);
+        brightnessTag.putInt("block", brightness);
+        entityTag.put("brightness", brightnessTag);
+
+        entityTag.putString("text", "{\"text\":\"" + text.replace("\"", "\\\"") + "\"}");
+
+        NbtList tags = new NbtList();
+        tags.add(NbtString.of("MOL"));
+        entityTag.put("Tags", tags);
+
+        mainTag.put("EntityTag", entityTag);
+
+        item.setNbt(mainTag);
+
+        return item;
+    }
+
     public enum Modes {
         BLOCK,
         TEXT

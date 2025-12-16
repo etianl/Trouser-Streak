@@ -48,7 +48,6 @@ public class MobGearESP extends Module {
             Items.NETHERITE_LEGGINGS,
             Items.NETHERITE_BOOTS,
             Items.ELYTRA,
-            Items.TRIDENT,
             Items.DIAMOND_SWORD,
             Items.DIAMOND_AXE,
             Items.DIAMOND_PICKAXE,
