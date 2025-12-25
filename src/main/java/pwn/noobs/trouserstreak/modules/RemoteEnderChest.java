@@ -3,6 +3,7 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseScrollEvent;
+import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -13,6 +14,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -29,6 +31,12 @@ public class RemoteEnderChest extends Module {
     private final Setting<Boolean> hide = sgGUI.add(new BoolSetting.Builder()
             .name("hide-screen")
             .description("Ender Chest gui is hidden unless holding GUI Key.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Boolean> packetcancel = sgGUI.add(new BoolSetting.Builder()
+            .name("cancel CloseScreenS2CPacket")
+            .description("Cancels CloseScreenS2CPacket when using ender chest. May make the GUI stay open more reliably.")
             .defaultValue(true)
             .build()
     );
@@ -80,6 +88,7 @@ public class RemoteEnderChest extends Module {
     public RemoteEnderChest() {
         super(Trouser.Main, "RemoteEnderChest", "Access your enderchest anywhere and move freely while it is open.");
     }
+    private boolean keepGuiOpen = false;
     private boolean mouseGrabbed = false;
     private boolean guiWasOpen = false;
     private int lmbCooldown = 0;
@@ -87,11 +96,16 @@ public class RemoteEnderChest extends Module {
     private int ticks = 0;
     @Override
     public void onDeactivate() {
+        keepGuiOpen = false;
         mouseGrabbed = false;
         guiWasOpen = false;
         rmbCooldown = 0;
         lmbCooldown = 0;
         ticks=0;
+    }
+    @EventHandler
+    private void onReceivePacket(PacketEvent.Receive event) {
+        if (packetcancel.get() && keepGuiOpen && event.packet instanceof CloseScreenS2CPacket) event.cancel();
     }
     @EventHandler
     private void onMouseScroll(MouseScrollEvent event) {
@@ -189,16 +203,17 @@ public class RemoteEnderChest extends Module {
                 guiWasOpen = false;
                 error("Ender Chest GUI closed.");
             }
+            if (keepGuiOpen) keepGuiOpen = false;
             mouseGrabbed = false;
             ticks = 0;
             rmbCooldown = 0;
             lmbCooldown = 0;
         }
-        BlockHitResult bhr = null;
         if (mc.crosshairTarget instanceof BlockHitResult){
-            bhr = (BlockHitResult) mc.crosshairTarget;
+            BlockHitResult bhr = (BlockHitResult) mc.crosshairTarget;
 
             if (mc.world.getBlockState(bhr.getBlockPos()).getBlock() == Blocks.ENDER_CHEST && mc.options.useKey.isPressed() && !(mc.currentScreen instanceof GenericContainerScreen screen && screen.getScreenHandler().getType() == ScreenHandlerType.GENERIC_9X3)) {
+                keepGuiOpen = true;
                 mc.doItemUse();
                 mc.doItemUse();
             }
