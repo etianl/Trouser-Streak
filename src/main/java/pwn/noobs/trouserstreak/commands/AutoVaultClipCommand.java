@@ -30,7 +30,7 @@ public class AutoVaultClipCommand extends Command {
                 BlockPos isopenair1 = (player.getBlockPos().add(0,i+2,0));
                 BlockPos isopenair2 = (player.getBlockPos().add(0,i+3,0));
                 if (mc.world.getBlockState(isopenair1).isReplaceable() && mc.world.getFluidState(isopenair1).isEmpty() && !mc.world.getBlockState(isopenair1).isOf(Blocks.POWDER_SNOW) && mc.world.getBlockState(isopenair2).isReplaceable() && mc.world.getFluidState(isopenair2).isEmpty() && !mc.world.getBlockState(isopenair2).isOf(Blocks.POWDER_SNOW)){
-                    int packetsRequired = 20;
+                    int packetsRequired = computePacketsRequired(mc.player.getY(), isopenair1.getY());
                     if (player.hasVehicle()) {
                         Entity vehicle = player.getVehicle();
                         for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
@@ -55,8 +55,7 @@ public class AutoVaultClipCommand extends Command {
                 BlockPos isopenair1 = (player.getBlockPos().add(0,i,0));
                 BlockPos isopenair2 = (player.getBlockPos().add(0,i-1,0));
                 if (mc.world.getBlockState(isopenair1).isReplaceable() && mc.world.getFluidState(isopenair1).isEmpty() && !mc.world.getBlockState(isopenair1).isOf(Blocks.POWDER_SNOW) && mc.world.getBlockState(isopenair2).isReplaceable() && mc.world.getFluidState(isopenair2).isEmpty() && !mc.world.getBlockState(isopenair2).isOf(Blocks.POWDER_SNOW)){
-                    double blocks = isopenair2.getY() - mc.player.getY();
-                    int packetsRequired = (int) Math.ceil(Math.abs(blocks / 10));
+                    int packetsRequired = computePacketsRequired(mc.player.getY(), isopenair2.getY());
                     if (player.hasVehicle()) {
                         Entity vehicle = player.getVehicle();
                         for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
@@ -86,7 +85,7 @@ public class AutoVaultClipCommand extends Command {
                 BlockPos isopenair1 = (player.getBlockPos().add(0,i,0));
                 BlockPos newopenair2 = isopenair1.up(1);
                 if (!mc.world.getBlockState(isopenair1).isReplaceable() || mc.world.getBlockState(isopenair1).isOf(Blocks.POWDER_SNOW) || !mc.world.getFluidState(isopenair1).isEmpty()) {
-                    int packetsRequired = 20;
+                    int packetsRequired = computePacketsRequired(mc.player.getY(), newopenair2.getY());
                     if (player.hasVehicle()) {
                         Entity vehicle = player.getVehicle();
                         for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
@@ -106,5 +105,9 @@ public class AutoVaultClipCommand extends Command {
             return SINGLE_SUCCESS;
         }));
     }
-
+    private int computePacketsRequired(double fromY, double toY) {
+        double blocks = toY - fromY;
+        int packets = (int) Math.ceil(Math.abs(blocks / 10.0));
+        return Math.max(packets, 1);
+    }
 }

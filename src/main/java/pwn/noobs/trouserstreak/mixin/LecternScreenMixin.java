@@ -45,7 +45,7 @@ public class LecternScreenMixin extends Screen {
             }
 
             Int2ObjectMap<ItemStackHash> int2ObjectMap = new Int2ObjectOpenHashMap<>();
-            ComponentChangesHash.ComponentHasher hasher = client.getNetworkHandler().componentHasher;
+            ComponentChangesHash.ComponentHasher hasher = client.getNetworkHandler().getComponentHasher();
 
             for(int slot = 0; slot < i; ++slot) {
                 ItemStack itemStack = list.get(slot);

@@ -17,6 +17,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class OPServerKillModule extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    public final Setting<Boolean> autoCompat = sgGeneral.add(new BoolSetting.Builder()
+            .name("AutomatedCompatibility")
+            .description("Makes the commands compatible for versions less than 1.21.11 automatically.")
+            .defaultValue(true)
+            .build()
+    );
     public final Setting<Boolean> dontBeStupid = sgGeneral.add(new BoolSetting.Builder()
             .name("Restrict Singleplayer Use")
             .description("Does not allow you to screw up your singleplayer worlds. Turn off for 'testing' purposes.")
@@ -72,7 +78,7 @@ public class OPServerKillModule extends Module {
     public OPServerKillModule() {
         super(Trouser.operator, "OPServerKillModule", "Runs a set of commands to disable a server. Requires OP. (ONLY USE IF YOU'RE 100% SURE)");
     }
-
+    String serverVersion;
     private int ticks=0;
     private CopyOnWriteArrayList<PlayerListEntry> players;
 
@@ -87,6 +93,13 @@ public class OPServerKillModule extends Module {
             toggle();
             error("Must have permission level 2 or higher");
         }
+        if (autoCompat.get()){
+            if (mc.isIntegratedServerRunning()) {
+                serverVersion = mc.getServer().getVersion();
+            } else {
+                serverVersion = mc.getCurrentServerEntry().version.getLiteralString();
+            }
+        }
         ticks=0;
     }
 
@@ -95,13 +108,13 @@ public class OPServerKillModule extends Module {
         ticks++;
         if (sendCommandFeedback.get() && logAdminCommands.get() && !crashOtherPlayers.get()){
             if (ticks == tickdelay.get()){ //prevent people from seeing the commands being executed
-                ChatUtils.sendPlayerMsg("/gamerule sendCommandFeedback false");
+                sendCommandFeedback();
             }
             if (ticks == 2*tickdelay.get()){ //prevent console logging the command to cover up tracks
-                ChatUtils.sendPlayerMsg("/gamerule logAdminCommands false");
+                logAdminCommands();
             }
             if (ticks == 3*tickdelay.get()){ //kill server
-                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
+                randomTickSpeed();
             }
             if (ticks > 3*tickdelay.get()){
                 toggle();
@@ -109,10 +122,10 @@ public class OPServerKillModule extends Module {
             }
         } else if (!sendCommandFeedback.get() && logAdminCommands.get() && !crashOtherPlayers.get()){
             if (ticks == tickdelay.get()){
-                ChatUtils.sendPlayerMsg("/gamerule logAdminCommands false");
+                logAdminCommands();
             }
             if (ticks == 2*tickdelay.get()){
-                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
+                randomTickSpeed();
             }
             if (ticks > 2*tickdelay.get()){
                 toggle();
@@ -120,10 +133,10 @@ public class OPServerKillModule extends Module {
             }
         } else if (sendCommandFeedback.get() && !logAdminCommands.get() && !crashOtherPlayers.get()){
             if (ticks == tickdelay.get()){
-                ChatUtils.sendPlayerMsg("/gamerule sendCommandFeedback false");
+                sendCommandFeedback();
             }
             if (ticks == 2*tickdelay.get()){
-                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
+                randomTickSpeed();
             }
             if (ticks > 2*tickdelay.get()){
                 toggle();
@@ -131,7 +144,7 @@ public class OPServerKillModule extends Module {
             }
         } else if (!sendCommandFeedback.get() && !logAdminCommands.get() && !crashOtherPlayers.get()){
             if (ticks == tickdelay.get()){
-                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
+                randomTickSpeed();
             }
             if (ticks > tickdelay.get()){
                 toggle();
@@ -139,7 +152,7 @@ public class OPServerKillModule extends Module {
             }
         } else if (!sendCommandFeedback.get() && logAdminCommands.get() && crashOtherPlayers.get()){
             if (ticks == tickdelay.get()){
-                ChatUtils.sendPlayerMsg("/gamerule logAdminCommands false");
+                logAdminCommands();
             }
             if (ticks == 2*tickdelay.get()){ //crash players
                 if (mc.player == null) return;
@@ -162,7 +175,7 @@ public class OPServerKillModule extends Module {
                 }
             }
             if (ticks == 3*tickdelay.get()){
-                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
+                randomTickSpeed();
             }
             if (ticks > 3*tickdelay.get()){
                 toggle();
@@ -170,7 +183,7 @@ public class OPServerKillModule extends Module {
             }
         } else if (sendCommandFeedback.get() && !logAdminCommands.get() && crashOtherPlayers.get()){
             if (ticks == tickdelay.get()){ //prevent people from seeing the commands being executed
-                ChatUtils.sendPlayerMsg("/gamerule sendCommandFeedback false");
+                sendCommandFeedback();
             }
             if (ticks == 2*tickdelay.get()){ //crash players
                 if (mc.player == null) return;
@@ -193,7 +206,7 @@ public class OPServerKillModule extends Module {
                 }
             }
             if (ticks == 3*tickdelay.get()){
-                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
+                randomTickSpeed();
             }
             if (ticks > 3*tickdelay.get()){
                 toggle();
@@ -201,10 +214,10 @@ public class OPServerKillModule extends Module {
             }
         } else if (sendCommandFeedback.get() && logAdminCommands.get() && crashOtherPlayers.get()){
             if (ticks == tickdelay.get()){ //prevent people from seeing the commands being executed
-                ChatUtils.sendPlayerMsg("/gamerule sendCommandFeedback false");
+                sendCommandFeedback();
             }
             if (ticks == 2*tickdelay.get()){ //prevent console logging the command to cover up tracks
-                ChatUtils.sendPlayerMsg("/gamerule logAdminCommands false");
+                logAdminCommands();
             }
             if (ticks == 3*tickdelay.get()){ //crash players
                 if (mc.player == null) return;
@@ -227,12 +240,59 @@ public class OPServerKillModule extends Module {
                 }
             }
             if (ticks == 4*tickdelay.get()){ //kill server
-                ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
+                randomTickSpeed();
             }
             if (ticks > 4*tickdelay.get()){ //kill server
                 toggle();
                 error("Server Killed.");
             }
         }
+    }
+    private void randomTickSpeed(){
+        if (isVersionLessThan(serverVersion, 1, 21, 11)) {
+            ChatUtils.sendPlayerMsg("/gamerule randomTickSpeed "+killvalue.get());
+        } else {
+            ChatUtils.sendPlayerMsg("/gamerule random_tick_speed "+killvalue.get());
+        }
+    }
+    private void sendCommandFeedback(){
+        if (isVersionLessThan(serverVersion, 1, 21, 11)) {
+            ChatUtils.sendPlayerMsg("/gamerule sendCommandFeedback false");
+        } else {
+            ChatUtils.sendPlayerMsg("/gamerule send_command_feedback false");
+        }
+    }
+    private void logAdminCommands(){
+        if (isVersionLessThan(serverVersion, 1, 21, 11)) {
+            ChatUtils.sendPlayerMsg("/gamerule logAdminCommands false");
+        } else {
+            ChatUtils.sendPlayerMsg("/gamerule log_admin_commands false");
+        }
+    }
+    private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
+        if (serverVersion == null) return false;
+
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)");
+        java.util.regex.Matcher matcher = pattern.matcher(serverVersion);
+
+        if (matcher.find()) {
+            try {
+                int serverMajor = Integer.parseInt(matcher.group(1));
+                int serverMinor = Integer.parseInt(matcher.group(2));
+                int serverPatch = Integer.parseInt(matcher.group(3));
+
+                if (serverMajor < major) return true;
+                if (serverMajor > major) return false;
+
+                if (serverMinor < minor) return true;
+                if (serverMinor > minor) return false;
+
+                return serverPatch < patch;
+
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+        return false;
     }
 }
