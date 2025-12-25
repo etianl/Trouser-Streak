@@ -137,7 +137,6 @@ public class SpearKill extends Module {
     private boolean isFlushing = false;
     private int blinkTimer = 0;
     private Vec3d startPos = null;
-    private double startY = 0;
     private boolean wasCharging = false;
     private Entity blinkTarget = null;
     private Entity crosshairTarget;
@@ -165,7 +164,6 @@ public class SpearKill extends Module {
         isFlushing = false;
         blinkTimer = 0;
         startPos = null;
-        startY = 0;
         wasCharging = false;
         blinkTarget = null;
         crosshairTarget = null;
@@ -342,7 +340,6 @@ public class SpearKill extends Module {
                 packets.clear();
             }
             startPos = mc.player.getEntityPos();
-            startY = mc.player.getY();
             blinkTimer = 0;
         }
     }
@@ -359,7 +356,6 @@ public class SpearKill extends Module {
         isBlinking = true;
         blinkTimer = 0;
         startPos = mc.player.getEntityPos();
-        startY = mc.player.getY();  // Remember starting Y for jump correction
         synchronized (packets) {
             packets.clear();
         }
@@ -372,7 +368,6 @@ public class SpearKill extends Module {
         isBlinking = false;
         blinkTimer = 0;
         startPos = null;
-        startY = 0;
     }
     private boolean isSamePacket(PlayerMoveC2SPacket a, PlayerMoveC2SPacket b) {
         return a.isOnGround() == b.isOnGround()
@@ -391,14 +386,13 @@ public class SpearKill extends Module {
             isFlushing = true;
 
             Vec3d currentPos = mc.player.getEntityPos();
-            double baseY = startY > 0 ? startY : mc.player.getY();
 
             // Blink mode: Send only the final position packet
             // Server sees: large movement from delayed position to current position
             // This creates high velocity = high damage
             PlayerMoveC2SPacket endPacket = new PlayerMoveC2SPacket.Full(
                     currentPos.x,
-                    baseY,
+                    currentPos.y,
                     currentPos.z,
                     mc.player.getYaw(),
                     mc.player.getPitch(),
