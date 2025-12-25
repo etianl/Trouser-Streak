@@ -33,14 +33,14 @@ public class InstantKill extends Module {
 	public static boolean shouldAddVelocity3 = false;
 	public static boolean shouldAddVelocity0 = false;
 	public InstantKill() {
-		super(Trouser.Main, "InstaKill", "Enable/Disable instakill");
+		super(Trouser.Main, "InstaKill", "Enable/Disable instakill buttons. Makes arrows go fast! Is patched in most recent versions.");
 	}
 	@EventHandler
 	public void onTick(TickEvent.Post event) {
 		if (mc.player != null && auto.get() && mc.player.getMainHandStack().getItem() == Items.BOW){
-		if (!mc.player.isUsingItem()) {
-		mc.options.useKey.setPressed(true);
-		}
+			if (!mc.player.isUsingItem()) {
+				mc.options.useKey.setPressed(true);
+			}
 		}
 	}
 	@Override

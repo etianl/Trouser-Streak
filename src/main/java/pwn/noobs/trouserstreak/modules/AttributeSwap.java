@@ -21,7 +21,7 @@ import meteordevelopment.orbit.EventHandler;
 public class AttributeSwap extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final Setting<Boolean> shieldBreaker = sgGeneral.add(new BoolSetting.Builder().name("shield-breaker").description("Swap to an axe from your hotbar when attacking to disable the shield of someone who is blocking.").defaultValue(false).build());
-    private final Setting<Boolean> noswap = sgGeneral.add(new BoolSetting.Builder().name("Shield Breaker No Swap").description("Do not attribute swap to another item after shield is broken").defaultValue(true).visible(shieldBreaker::get).build());
+    private final Setting<Boolean> noswap = sgGeneral.add(new BoolSetting.Builder().name("Shield Breaker No Swap").description("Do not attribute swap to another item after shield is broken").defaultValue(false).visible(shieldBreaker::get).build());
     private final Setting<Integer> targetSlot = sgGeneral.add(new IntSetting.Builder().name("target-slot").description("The hotbar slot to swap to when attacking.").sliderRange(1, 9).defaultValue(1).min(1).build());
     private final Setting<Boolean> swapBack = sgGeneral.add(new BoolSetting.Builder().name("swap-back").description("Swap back to the original slot after a short delay.").defaultValue(true).build());
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder().name("swap-back-delay").description("Delay in ticks before swapping back to the previous slot.").sliderRange(1, 20).defaultValue(1).min(1).visible(swapBack::get).build());
@@ -48,7 +48,7 @@ public class AttributeSwap extends Module {
                         }
                     }
                 } else if (!noswap.get()) InvUtils.swap(targetSlot.get()-1, false);
-            }
+            } else InvUtils.swap(targetSlot.get()-1, false);
         }
         else if (!shieldBreaker.get())InvUtils.swap(targetSlot.get()-1, false);
         if (swapBack.get() && prevSlot != -1) {
