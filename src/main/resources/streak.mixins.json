@@ -20,6 +20,8 @@
     "PacketCodecsMixin",
     "StringEncodingMixin",
     "ScreenMixin",
-    "HandledScreenMixin"
+    "HandledScreenMixin",
+    "AbstractBlockMixin",
+    "AbstractBoatEntityMixin"
   ]
 }
