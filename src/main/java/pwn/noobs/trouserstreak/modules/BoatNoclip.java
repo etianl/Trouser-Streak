@@ -90,7 +90,7 @@ public class BoatNoclip extends Module {
     private boolean insideBlock;
 
     public BoatNoclip() {
-        super(Trouser.Main, "boat-noclip", "Fly through anything using boats.");
+        super(Trouser.Main, "boat-noclip", "Fly through anything using boats | Tested on 1.21.11 paper, might not work on older versions.");
     }
 
     @Override
@@ -218,4 +218,5 @@ public class BoatNoclip extends Module {
 
         return false;
     }
+
 }
