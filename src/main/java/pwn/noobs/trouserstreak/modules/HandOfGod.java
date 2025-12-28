@@ -15,6 +15,9 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.component.ComponentChanges;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -461,7 +464,7 @@ public class HandOfGod extends Module {
     int i;
     public int adjustYValue(int yValue) {
         int bottomY = mc.world.getBottomY();
-        int topY = mc.world.getTopY();
+        int topY = mc.world.getTopYInclusive();
 
         if (yValue < bottomY) {
             return bottomY;
@@ -507,14 +510,10 @@ public class HandOfGod extends Module {
                 ItemStack rst = mc.player.getMainHandStack();
                 BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
                 ItemStack Lightning = new ItemStack(Items.SALMON_SPAWN_EGG);
-                NbtCompound tag = new NbtCompound();
-                NbtList Pos = new NbtList();
-                Pos.add(NbtDouble.of(pos.getX()));
-                Pos.add(NbtDouble.of(pos.getY()));
-                Pos.add(NbtDouble.of(pos.getZ()));
-                tag.put("Pos", Pos);
-                tag.putString("id", "minecraft:lightning_bolt");
-                Lightning.setSubNbt("EntityTag", tag);
+                var changes = ComponentChanges.builder()
+                        .add(DataComponentTypes.ENTITY_DATA, createEntityData(pos))
+                        .build();
+                Lightning.applyChanges(changes);
                 mc.interactionManager.clickCreativeStack(Lightning, 36 + mc.player.getInventory().selectedSlot);
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                 mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
@@ -583,14 +582,11 @@ public class HandOfGod extends Module {
                     ItemStack rst = mc.player.getMainHandStack();
                     BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
                     ItemStack Lightning = new ItemStack(Items.SALMON_SPAWN_EGG);
-                    NbtCompound tag = new NbtCompound();
-                    NbtList Pos = new NbtList();
-                    Pos.add(NbtDouble.of(pos.getX()));
-                    Pos.add(NbtDouble.of(pos.getY()));
-                    Pos.add(NbtDouble.of(pos.getZ()));
-                    tag.put("Pos", Pos);
-                    tag.putString("id", "minecraft:lightning_bolt");
-                    Lightning.setSubNbt("EntityTag", tag);
+                    var changes = ComponentChanges.builder()
+                            .add(DataComponentTypes.ENTITY_DATA, createEntityData(pos))
+                            .build();
+                    Lightning.applyChanges(changes);
+
                     mc.interactionManager.clickCreativeStack(Lightning, 36 + mc.player.getInventory().selectedSlot);
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                     mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
@@ -937,5 +933,15 @@ public class HandOfGod extends Module {
                 terminateticks=0;
             }
         }
+    }
+    private NbtComponent createEntityData(BlockPos pos) {
+        NbtCompound entityTag = new NbtCompound();
+        NbtList Pos = new NbtList();
+        Pos.add(NbtDouble.of(pos.getX()));
+        Pos.add(NbtDouble.of(pos.getY()));
+        Pos.add(NbtDouble.of(pos.getZ()));
+        entityTag.put("Pos", Pos);
+        entityTag.putString("id", "minecraft:lightning_bolt");
+        return NbtComponent.of(entityTag);
     }
 }

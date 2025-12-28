@@ -363,7 +363,7 @@ public class BetterAutoSign extends Module {
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(signPos.getX(), signPos.getY(), signPos.getZ()), facing, signPos, false));
             } else if (blockState.getBlock() instanceof HangingSignBlock) {
                 int rotation = blockState.get(HangingSignBlock.ROTATION);
-                Direction direction = Direction.fromHorizontal(rotation);
+                Direction direction = Direction.fromHorizontalDegrees(rotation);
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(signPos.getX(), signPos.getY(), signPos.getZ()), direction, signPos, false));
             }
             if (differentText.get())

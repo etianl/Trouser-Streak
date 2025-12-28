@@ -236,7 +236,7 @@ public class BetterScaffold extends Module {
                     for (int x = (int) (mc.player.getX() - placeRange.get()); x < mc.player.getX() + placeRange.get(); x++) {
                         for (int z = (int) (mc.player.getZ() - placeRange.get()); z < mc.player.getZ() + placeRange.get(); z++) {
                             assert mc.world != null;
-                            for (int y = (int) Math.max(mc.world.getBottomY(), mc.player.getY() - placeRange.get()); y < Math.min(mc.world.getTopY(), mc.player.getY() + placeRange.get()); y++) {
+                            for (int y = (int) Math.max(mc.world.getBottomY(), mc.player.getY() - placeRange.get()); y < Math.min(mc.world.getTopYInclusive(), mc.player.getY() + placeRange.get()); y++) {
                                 bp.set(x, y, z);
                                 if (!mc.world.getBlockState(bp).isAir()) blockPosArray.add(new BlockPos(bp));
                             }

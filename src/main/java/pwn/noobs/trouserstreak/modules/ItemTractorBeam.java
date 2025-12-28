@@ -43,7 +43,7 @@ public class ItemTractorBeam extends Module {
     }
     // 0.000000001
     private static void sendmovementpackets(){
-        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() - 0.00000000000001, mc.player.getZ(), true));
-        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 0.00000000000001, mc.player.getZ(), false));
+        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() - 0.00000000000001, mc.player.getZ(), true, mc.player.horizontalCollision));
+        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 0.00000000000001, mc.player.getZ(), false, mc.player.horizontalCollision));
     }
 }

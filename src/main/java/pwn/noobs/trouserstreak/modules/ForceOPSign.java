@@ -8,11 +8,13 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.component.ComponentChanges;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.screen.slot.SlotActionType;
 import pwn.noobs.trouserstreak.Trouser;
 
@@ -26,7 +28,7 @@ public class ForceOPSign extends Module {
     private final SettingGroup commandParameters = settings.createGroup("Command Parameters");
     public final Setting<Boolean> versionwarning = commandModes.add(new BoolSetting.Builder()
             .name("Version Warning")
-            .description("Warns you about the module not working in MC server versions greater than 1.20.4.")
+            .description("Warns you about the module not working in MC server versions less than 1.20.5.")
             .defaultValue(true)
             .build()
     );
@@ -203,11 +205,11 @@ public class ForceOPSign extends Module {
     public ForceOPSign() {
         super(Trouser.operator, "ForceOPSign", "Requires Creative mode! Creates a ClickEvent sign in your inventory. Give it to someone with OP who is also in creative mode and have them place then click the sign.");
     }
-
+    String serverVersion;
     @Override
     public void onActivate() {
         if (mc.player == null) return;
-        if (versionwarning.get()) error("!!!You need TrouserStreak for Minecraft 1.20.6 (or higher) to make it work on versions greater than 1.20.4!!!");
+        if (versionwarning.get()) error("!!!You need TrouserStreak for Minecraft 1.20.4 to make it work on versions less than 1.20.5!!!");
         if (!mc.player.getAbilities().creativeMode) {
             error("You need creative mode to make the sign.");
             toggle();
@@ -215,16 +217,33 @@ public class ForceOPSign extends Module {
         }
         ItemStack stack = new ItemStack(Items.OAK_SIGN);
         NbtCompound blockEntityTag = new NbtCompound();
-        NbtCompound tag = new NbtCompound();
+        NbtCompound text = new NbtCompound();
+        NbtCompound text2 = new NbtCompound();
+        NbtList messages = new NbtList();
+
+        NbtCompound firstLine = new NbtCompound();
+        NbtCompound secondLine = new NbtCompound();
+        NbtCompound thirdLine = new NbtCompound();
+        NbtCompound fourthLine = new NbtCompound();
+        //thank you to Rob https://github.com/xnite for figuring out to use a newline character to make a blank sign. sneak level 100 achieved
+        firstLine.putString("text", "\n");
+        secondLine.putString("text", "\n");
+        thirdLine.putString("text", "\n");
+        fourthLine.putString("text", "\n");
+
+        NbtCompound clickEvent1 = new NbtCompound();
+        NbtCompound clickEvent2 = new NbtCompound();
+        NbtCompound clickEvent3 = new NbtCompound();
+        NbtCompound clickEvent4 = new NbtCompound();
 
         String commandValue1 = thecommand1.get();
         String commandValue2 = thecommand2.get();
         String commandValue3 = thecommand3.get();
         String commandValue4 = thecommand4.get();
 
-        if (mode.get()==Modes.ForceOP) commandValue1 = "op "+mc.player.getName().getLiteralString();
-        else if (mode.get()==Modes.CloneSign) commandValue1 = "clone ~ ~ ~ ~ ~ ~ to minecraft:overworld ~ "+cloneSignYlevel.get()+" ~ replace force";
-        else if (mode.get()==Modes.AnyCommand) {
+        if (mode.get()== Modes.ForceOP) commandValue1 = "op "+mc.player.getName().getLiteralString();
+        else if (mode.get()== Modes.CloneSign) commandValue1 = "clone ~ ~ ~ ~ ~ ~ to minecraft:overworld ~ "+cloneSignYlevel.get()+" ~ replace force";
+        else if (mode.get()== Modes.AnyCommand) {
             if (commandValue1.startsWith("/")) {
                 commandValue1 = commandValue1.substring(1);
             } else commandValue1 = thecommand1.get();
@@ -295,80 +314,131 @@ public class ForceOPSign extends Module {
                 commandValue4 = commandValue4.substring(1);
             } else commandValue4 = thecommand4.get();
         }
-
-        //thank you to Rob https://github.com/xnite for figuring out to use a newline character to make a blank sign. sneak level 100 achieved
-        String commandText1 = "{\"text\":\"\\n\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"" + commandValue1 + "\"}}";
-        String commandText2 = "{\"text\":\"\\n\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"" + commandValue2 + "\"}}";
-        String commandText3 = "{\"text\":\"\\n\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"" + commandValue3 + "\"}}";
-        String commandText4 = "{\"text\":\"\\n\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"" + commandValue4 + "\"}}";
-
-        String[] messages = new String[4];
-        messages[0] = commandText1;
-        messages[1] = commandText2;
-        messages[2] = commandText3;
-        messages[3] = commandText4;
-
-        NbtList messageList = new NbtList();
-        for (String message : messages) {
-            messageList.add(NbtString.of(message));
-        }
-
         if (autoCompat.get()){
-            String serverVersion;
             if (mc.isIntegratedServerRunning()) {
                 serverVersion = mc.getServer().getVersion();
             } else {
                 serverVersion = mc.getCurrentServerEntry().version.getLiteralString();
             }
+
             if (serverVersion == null) {
                 error("Version could not be read. Using Version Compatibility setting instead...");
-                if (compatmode.get() == compatModes.lessThan1_20) {
-                    blockEntityTag.put("front_text", new NbtCompound());
-                    blockEntityTag.getCompound("front_text").put("messages", messageList);
-                    blockEntityTag.put("back_text", new NbtCompound());
-                    blockEntityTag.getCompound("back_text").put("messages", messageList);
-
-                    tag.put("BlockEntityTag", blockEntityTag);
+                if (compatmode.get() == compatModes.LatestVersion){
+                    clickEvent1.putString("action", "run_command");
+                    clickEvent1.putString("command", commandValue1);
+                    clickEvent2.putString("action", "run_command");
+                    clickEvent2.putString("command", commandValue2);
+                    clickEvent3.putString("action", "run_command");
+                    clickEvent3.putString("command", commandValue3);
+                    clickEvent4.putString("action", "run_command");
+                    clickEvent4.putString("command", commandValue4);
+                    firstLine.put("click_event", clickEvent1);
+                    secondLine.put("click_event", clickEvent2);
+                    thirdLine.put("click_event", clickEvent3);
+                    fourthLine.put("click_event", clickEvent4);
                 } else {
-                    tag.put("BlockEntityTag", new NbtCompound());
-
-                    for (int i = 0; i < messages.length; i++) {
-                        tag.getCompound("BlockEntityTag").putString("Text" + (i + 1), messages[i]);
-                    }
+                    clickEvent1.putString("action", "run_command");
+                    clickEvent1.putString("value", commandValue1);
+                    clickEvent2.putString("action", "run_command");
+                    clickEvent2.putString("value", commandValue2);
+                    clickEvent3.putString("action", "run_command");
+                    clickEvent3.putString("value", commandValue3);
+                    clickEvent4.putString("action", "run_command");
+                    clickEvent4.putString("value", commandValue4);
+                    firstLine.put("clickEvent", clickEvent1);
+                    secondLine.put("clickEvent", clickEvent2);
+                    thirdLine.put("clickEvent", clickEvent3);
+                    fourthLine.put("clickEvent", clickEvent4);
                 }
             } else {
-                if (!serverVersion.contains("1.20.")) {
-                    blockEntityTag.put("front_text", new NbtCompound());
-                    blockEntityTag.getCompound("front_text").put("messages", messageList);
-                    blockEntityTag.put("back_text", new NbtCompound());
-                    blockEntityTag.getCompound("back_text").put("messages", messageList);
-
-                    tag.put("BlockEntityTag", blockEntityTag);
+                if (isVersionLessThan(serverVersion, 1, 21, 5)) {
+                    clickEvent1.putString("action", "run_command");
+                    clickEvent1.putString("value", commandValue1);
+                    clickEvent2.putString("action", "run_command");
+                    clickEvent2.putString("value", commandValue2);
+                    clickEvent3.putString("action", "run_command");
+                    clickEvent3.putString("value", commandValue3);
+                    clickEvent4.putString("action", "run_command");
+                    clickEvent4.putString("value", commandValue4);
+                    firstLine.put("clickEvent", clickEvent1);
+                    secondLine.put("clickEvent", clickEvent2);
+                    thirdLine.put("clickEvent", clickEvent3);
+                    fourthLine.put("clickEvent", clickEvent4);
                 } else {
-                    tag.put("BlockEntityTag", new NbtCompound());
-
-                    for (int i = 0; i < messages.length; i++) {
-                        tag.getCompound("BlockEntityTag").putString("Text" + (i + 1), messages[i]);
-                    }
+                    clickEvent1.putString("action", "run_command");
+                    clickEvent1.putString("command", commandValue1);
+                    clickEvent2.putString("action", "run_command");
+                    clickEvent2.putString("command", commandValue2);
+                    clickEvent3.putString("action", "run_command");
+                    clickEvent3.putString("command", commandValue3);
+                    clickEvent4.putString("action", "run_command");
+                    clickEvent4.putString("command", commandValue4);
+                    firstLine.put("click_event", clickEvent1);
+                    secondLine.put("click_event", clickEvent2);
+                    thirdLine.put("click_event", clickEvent3);
+                    fourthLine.put("click_event", clickEvent4);
                 }
             }
         } else {
-            if (compatmode.get() == compatModes.lessThan1_20) {
-                blockEntityTag.put("front_text", new NbtCompound());
-                blockEntityTag.getCompound("front_text").put("messages", messageList);
-                blockEntityTag.put("back_text", new NbtCompound());
-                blockEntityTag.getCompound("back_text").put("messages", messageList);
-
-                tag.put("BlockEntityTag", blockEntityTag);
+            if (compatmode.get() == compatModes.LatestVersion){
+                clickEvent1.putString("action", "run_command");
+                clickEvent1.putString("command", commandValue1);
+                clickEvent2.putString("action", "run_command");
+                clickEvent2.putString("command", commandValue2);
+                clickEvent3.putString("action", "run_command");
+                clickEvent3.putString("command", commandValue3);
+                clickEvent4.putString("action", "run_command");
+                clickEvent4.putString("command", commandValue4);
+                firstLine.put("click_event", clickEvent1);
+                secondLine.put("click_event", clickEvent2);
+                thirdLine.put("click_event", clickEvent3);
+                fourthLine.put("click_event", clickEvent4);
             } else {
-                tag.put("BlockEntityTag", new NbtCompound());
-
-                for (int i = 0; i < messages.length; i++) {
-                    tag.getCompound("BlockEntityTag").putString("Text" + (i + 1), messages[i]);
-                }
+                clickEvent1.putString("action", "run_command");
+                clickEvent1.putString("value", commandValue1);
+                clickEvent2.putString("action", "run_command");
+                clickEvent2.putString("value", commandValue2);
+                clickEvent3.putString("action", "run_command");
+                clickEvent3.putString("value", commandValue3);
+                clickEvent4.putString("action", "run_command");
+                clickEvent4.putString("value", commandValue4);
+                firstLine.put("clickEvent", clickEvent1);
+                secondLine.put("clickEvent", clickEvent2);
+                thirdLine.put("clickEvent", clickEvent3);
+                fourthLine.put("clickEvent", clickEvent4);
             }
         }
-        stack.setNbt(tag);
+
+        messages.add(firstLine);
+        messages.add(secondLine);
+        messages.add(thirdLine);
+        messages.add(fourthLine);
+
+        text.put("messages", messages);
+        text2.put("messages", messages);
+        blockEntityTag.put("front_text", text);
+        blockEntityTag.put("back_text", text2);
+        if (autoCompat.get()){
+            if (serverVersion == null) {
+                if (compatmode.get() == compatModes.LatestVersion || compatmode.get() == compatModes.v1_21_4)blockEntityTag.putString("id", "minecraft:sign");
+                else blockEntityTag.putString("id", "minecraft:oak_sign");
+            } else {
+                if (isVersionLessThan(serverVersion, 1, 21, 4)) {
+                    blockEntityTag.putString("id", "minecraft:oak_sign");
+                } else {
+                    blockEntityTag.putString("id", "minecraft:sign");
+                }
+            }
+        } else {
+            if (compatmode.get() == compatModes.LatestVersion || compatmode.get() == compatModes.v1_21_4)blockEntityTag.putString("id", "minecraft:sign");
+            else blockEntityTag.putString("id", "minecraft:oak_sign");
+        }
+
+        var changes = ComponentChanges.builder()
+                .add(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.of(blockEntityTag))
+                .build();
+
+        stack.applyChanges(changes);
 
         mc.interactionManager.clickCreativeStack(stack, 36 + mc.player.getInventory().selectedSlot);
         //clickSlot twice to make the item actually appear clientside
@@ -378,10 +448,36 @@ public class ForceOPSign extends Module {
 
         toggle();
     }
+    private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
+        if (serverVersion == null) return false;
+
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)");
+        java.util.regex.Matcher matcher = pattern.matcher(serverVersion);
+
+        if (matcher.find()) {
+            try {
+                int serverMajor = Integer.parseInt(matcher.group(1));
+                int serverMinor = Integer.parseInt(matcher.group(2));
+                int serverPatch = Integer.parseInt(matcher.group(3));
+
+                if (serverMajor < major) return true;
+                if (serverMajor > major) return false;
+
+                if (serverMinor < minor) return true;
+                if (serverMinor > minor) return false;
+
+                return serverPatch < patch;
+
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+        return false;
+    }
     public enum Modes {
         ForceOP, CloneSign, AnyCommand
     }
     public enum compatModes {
-        LatestVersion, lessThan1_20
+        LatestVersion, v1_21_4, lessThan1_21_4
     }
 }

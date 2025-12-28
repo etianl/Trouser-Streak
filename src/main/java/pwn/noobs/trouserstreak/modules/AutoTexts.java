@@ -9,11 +9,16 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
+import net.minecraft.component.ComponentChanges;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtDouble;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -182,31 +187,79 @@ public class AutoTexts extends Module {
         Vec3d pos = pickRandomPos();
         String selectedText = texts.get().get(random.nextInt(texts.get().size()));
 
-        NbtCompound tag = new NbtCompound();
+        var changes = ComponentChanges.builder()
+                .add(DataComponentTypes.CUSTOM_NAME, Text.literal(selectedText).formatted(Formatting.valueOf(namecolour.toUpperCase())))
+                .add(DataComponentTypes.ENTITY_DATA, createEntityData(pos))
+                .build();
 
-        NbtCompound entityTag = new NbtCompound();
-
-        entityTag.putString("id", "minecraft:armor_stand");
-
-        NbtList positionList = new NbtList();
-        positionList.add(NbtDouble.of(pos.x));
-        positionList.add(NbtDouble.of(pos.y));
-        positionList.add(NbtDouble.of(pos.z));
-
-        entityTag.put("Pos", positionList);
-        entityTag.putBoolean("Invisible", true);
-        entityTag.putBoolean("Marker", true);
-        entityTag.putBoolean("NoGravity", true);
-        entityTag.putBoolean("CustomNameVisible",true);
-        entityTag.putString("CustomName", "{\"text\":\"" + selectedText + "\",\"color\":\"" + namecolour + "\"}");
-
-        tag.put("EntityTag", entityTag);
-
-        armorStand.setNbt(tag);
+        armorStand.applyChanges(changes);
 
         BlockHitResult bhr = new BlockHitResult(pos, Direction.UP, BlockPos.ofFloored(pos), false);
         mc.interactionManager.clickCreativeStack(armorStand, 36 + mc.player.getInventory().selectedSlot);
         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
         mc.interactionManager.clickCreativeStack(current, 36 + mc.player.getInventory().selectedSlot);
+    }
+
+    private NbtComponent createEntityData(Vec3d pos) {
+        NbtCompound entityTag = new NbtCompound();
+        NbtList position = new NbtList();
+        String selectedText = texts.get().get(random.nextInt(texts.get().size()));
+
+        position.add(NbtDouble.of(pos.x));
+        position.add(NbtDouble.of(pos.y));
+        position.add(NbtDouble.of(pos.z));
+
+        entityTag.putString("id", "minecraft:armor_stand");
+        entityTag.put("Pos", position);
+        entityTag.putBoolean("Invisible", true);
+        entityTag.putBoolean("Marker", true);
+        entityTag.putBoolean("NoGravity", true);
+        entityTag.putBoolean("CustomNameVisible", true);
+        NbtCompound CustomNameNBT = new NbtCompound();
+        CustomNameNBT.putString("text", selectedText);
+        CustomNameNBT.putString("color", namecolour);
+        String serverVersion;
+        if (mc.isIntegratedServerRunning()) {
+            serverVersion = mc.getServer().getVersion();
+        } else {
+            serverVersion = mc.getCurrentServerEntry().version.getLiteralString();
+        }
+        if (serverVersion == null) {
+            entityTag.put("CustomName", CustomNameNBT);
+        } else {
+            if (isVersionLessThan(serverVersion, 1, 21, 5)) {
+                entityTag.putString("CustomName", "{\"text\":\"" + selectedText + "\",\"color\":\"" + namecolour + "\"}");
+            } else {
+                entityTag.put("CustomName", CustomNameNBT);
+            }
+        }
+
+        return NbtComponent.of(entityTag);
+    }
+    private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
+        if (serverVersion == null) return false;
+
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)");
+        java.util.regex.Matcher matcher = pattern.matcher(serverVersion);
+
+        if (matcher.find()) {
+            try {
+                int serverMajor = Integer.parseInt(matcher.group(1));
+                int serverMinor = Integer.parseInt(matcher.group(2));
+                int serverPatch = Integer.parseInt(matcher.group(3));
+
+                if (serverMajor < major) return true;
+                if (serverMajor > major) return false;
+
+                if (serverMinor < minor) return true;
+                if (serverMinor > minor) return false;
+
+                return serverPatch < patch;
+
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+        return false;
     }
 }

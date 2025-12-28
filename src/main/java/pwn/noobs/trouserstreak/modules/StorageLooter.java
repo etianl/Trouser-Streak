@@ -2,6 +2,7 @@
 package pwn.noobs.trouserstreak.modules;
 
 import net.minecraft.command.argument.EntityAnchorArgumentType;
+import net.minecraft.component.type.FoodComponents;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
@@ -11,15 +12,21 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.*;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
+import net.minecraft.component.type.ItemEnchantmentsComponent;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.vehicle.ChestMinecartEntity;
 import net.minecraft.item.*;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.screen.*;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
@@ -66,11 +73,11 @@ public class StorageLooter extends Module {
             .name("Junk Items")
             .description("Select the items to get rid of.")
             .defaultValue(Arrays.asList(
-                    Items.ROTTEN_FLESH, Items.POISONOUS_POTATO, Items.BONE, Items.SPIDER_EYE, Items.FERMENTED_SPIDER_EYE, Items.PHANTOM_MEMBRANE, Items.NAUTILUS_SHELL, Items.STRING, Items.LILY_PAD, Items.BEETROOT, Items.BEETROOT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.WHEAT_SEEDS, Items.SUGAR,
+                    Items.ROTTEN_FLESH, Items.POISONOUS_POTATO, Items.BONE, Items.SPIDER_EYE, Items.FERMENTED_SPIDER_EYE, Items.PHANTOM_MEMBRANE, Items.BREEZE_ROD, Items.NAUTILUS_SHELL, Items.STRING, Items.LILY_PAD, Items.BEETROOT, Items.BEETROOT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.WHEAT_SEEDS, Items.SUGAR,
                     Items.SHORT_GRASS, Items.TALL_GRASS, Items.SEAGRASS, Items.SEA_PICKLE, Items.FERN, Items.DEAD_BUSH, Items.VINE, Items.BROWN_MUSHROOM, Items.RED_MUSHROOM, Items.WARPED_FUNGUS, Items.CRIMSON_FUNGUS, Items.NETHER_WART, Items.GHAST_TEAR,
                     Items.BOWL, Items.FEATHER, Items.SUGAR_CANE, Items.CACTUS, Items.COCOA_BEANS, Items.RABBIT_HIDE, Items.RABBIT_FOOT, Items.GLOW_LICHEN, Items.SCULK_VEIN,
                     Items.GLOW_ITEM_FRAME, Items.ITEM_FRAME, Items.PAINTING, Items.PAPER, Items.CLOCK, Items.COMPASS, Items.PUFFERFISH, Items.TROPICAL_FISH, Items.GLISTERING_MELON_SLICE, Items.MAGMA_CREAM,
-                    Items.LEAD, Items.SADDLE, Items.CARROT_ON_A_STICK, Items.WARPED_FUNGUS_ON_A_STICK, Items.FROGSPAWN, Items.TURTLE_EGG, Items.SNIFFER_EGG, Items.GOAT_HORN, Items.BOOK, Items.WRITABLE_BOOK, Items.WRITTEN_BOOK, Items.BRUSH
+                    Items.LEAD, Items.SADDLE, Items.CARROT_ON_A_STICK, Items.WARPED_FUNGUS_ON_A_STICK, Items.FROGSPAWN, Items.TURTLE_EGG, Items.TURTLE_SCUTE, Items.SNIFFER_EGG, Items.ARMADILLO_SCUTE, Items.GOAT_HORN, Items.BOOK, Items.WRITABLE_BOOK, Items.WRITTEN_BOOK, Items.BRUSH
             ))
             .visible(moveJunkToContainer::get)
             .build()
@@ -803,7 +810,34 @@ public class StorageLooter extends Module {
 
         return Integer.compare(score2, score1); // Reverse the order to sort in descending order
     }
-
+    public static ArrayList<ItemStack> getArmorItems(LivingEntity livingEntity) {
+        ArrayList<ItemStack> armorItems = new ArrayList<>();
+        armorItems.add(livingEntity.getEquippedStack(EquipmentSlot.HEAD));
+        armorItems.add(livingEntity.getEquippedStack(EquipmentSlot.CHEST));
+        armorItems.add(livingEntity.getEquippedStack(EquipmentSlot.LEGS));
+        armorItems.add(livingEntity.getEquippedStack(EquipmentSlot.FEET));
+        return armorItems;
+    }
+    public static ArrayList<ItemStack> getHandItems(LivingEntity livingEntity) {
+        ArrayList<ItemStack> handItems = new ArrayList<>();
+        handItems.add(livingEntity.getEquippedStack(EquipmentSlot.MAINHAND));
+        handItems.add(livingEntity.getEquippedStack(EquipmentSlot.OFFHAND));
+        return handItems;
+    }
+    public static boolean isArmor(ItemStack itemStack) {
+        return itemStack.isIn(ItemTags.HEAD_ARMOR) ||
+                itemStack.isIn(ItemTags.CHEST_ARMOR) ||
+                itemStack.isIn(ItemTags.LEG_ARMOR) ||
+                itemStack.isIn(ItemTags.FOOT_ARMOR);
+    }
+    public static boolean isTool(ItemStack itemStack) {
+        return itemStack.isIn(ItemTags.AXES) ||
+                itemStack.isIn(ItemTags.HOES) ||
+                itemStack.isIn(ItemTags.PICKAXES) ||
+                itemStack.isIn(ItemTags.SHOVELS) ||
+                itemStack.getItem() instanceof ShearsItem ||
+                itemStack.getItem() instanceof FlintAndSteelItem;
+    }
     private int getItemScore(ItemStack stack) {
         assert mc.player != null;
         String itemName = stack.getItem().getTranslationKey().toLowerCase();
@@ -829,52 +863,39 @@ public class StorageLooter extends Module {
         score += durabilityscore;
 
         //enchantments score
+        ItemEnchantmentsComponent enchantments = stack.getEnchantments();
         int enchantmentscore = 0;
-        if(stack.getNbt()!=null) {
-            NbtCompound nbtCompound = stack.getNbt();
-            if (nbtCompound == null || !nbtCompound.contains("Enchantments")) {
-                enchantmentscore = 0;
-            }
-
-            NbtList enchantmentsList = nbtCompound.getList("Enchantments", NbtElement.COMPOUND_TYPE);
-
-            if (stack.getItem() instanceof ArmorItem) {
-                enchantmentscore += getEnchantmentLevel(enchantmentsList, "protection") * 10;
-                enchantmentscore += getEnchantmentLevel(enchantmentsList, "blast_protection") * 10;
-                enchantmentscore += getEnchantmentLevel(enchantmentsList, "fire_protection") * 10;
-                enchantmentscore += getEnchantmentLevel(enchantmentsList, "projectile_protection") * 10;
-                enchantmentscore += getEnchantmentLevel(enchantmentsList, "unbreaking") * 9;
-                enchantmentscore += getEnchantmentLevel(enchantmentsList, "mending") * 8;
-                enchantmentscore += getEnchantmentLevel(enchantmentsList, "thorns") * 5;
-            } else if (stack.getItem() instanceof SwordItem) {
-                enchantmentscore += getEnchantmentLevel(enchantmentsList, "smite") * 10;
-                enchantmentscore += getEnchantmentLevel(enchantmentsList, "sharpness") * 10;
-                enchantmentscore += getEnchantmentLevel(enchantmentsList, "bane_of_arthropods") * 9;
-                enchantmentscore += getEnchantmentLevel(enchantmentsList, "fire_aspect") * 9;
-                enchantmentscore += getEnchantmentLevel(enchantmentsList, "unbreaking") * 9;
-                enchantmentscore += getEnchantmentLevel(enchantmentsList, "mending") * 8;
-                enchantmentscore += getEnchantmentLevel(enchantmentsList, "looting") * 5;
-            } else if (stack.getItem() instanceof ToolItem) {
-                enchantmentscore += getEnchantmentLevel(enchantmentsList, "efficiency") * 10;
-                enchantmentscore += getEnchantmentLevel(enchantmentsList, "unbreaking") * 9;
-                enchantmentscore += getEnchantmentLevel(enchantmentsList, "mending") * 8;
-                enchantmentscore += getEnchantmentLevel(enchantmentsList, "silk_touch") * 6;
-                enchantmentscore += getEnchantmentLevel(enchantmentsList, "fortune") * 5;
-            }
+        Registry<Enchantment> enchantmentRegistry = mc.world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
+        if (isArmor(stack)) {
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.PROTECTION)) * 10;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.BLAST_PROTECTION)) * 10;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.FIRE_PROTECTION)) * 10;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.PROJECTILE_PROTECTION)) * 10;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.UNBREAKING)) * 9;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.MENDING)) * 8;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.THORNS)) * 5;
+        } else if (stack.isIn(ItemTags.SWORDS)) {
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.SMITE)) * 10;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.SHARPNESS)) * 10;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.BANE_OF_ARTHROPODS)) * 9;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.FIRE_ASPECT)) * 9;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.UNBREAKING)) * 9;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.MENDING)) * 8;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.LOOTING)) * 5;
+        } else if (isTool(stack)) {
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.EFFICIENCY)) * 10;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.UNBREAKING)) * 9;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.MENDING)) * 8;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.SILK_TOUCH)) * 6;
+            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.FORTUNE)) * 5;
         }
         score += enchantmentscore;
 
         return score;
     }
 
-    private int getEnchantmentLevel(NbtList enchantmentsList, String enchantmentId) {
-        for (NbtElement element : enchantmentsList) {
-            NbtCompound enchantment = (NbtCompound) element;
-            if (enchantment.getString("id").endsWith(enchantmentId)) {
-                return enchantment.getInt("lvl");
-            }
-        }
-        return 0;
+    private int getEnchantmentLevel(ItemEnchantmentsComponent enchantments, RegistryEntry<Enchantment> enchantment) {
+        return enchantments.getLevel(enchantment);
     }
 
     private boolean isSameItemList(Item item1, Item item2) {
@@ -921,7 +942,6 @@ public class StorageLooter extends Module {
             if (!sourceStack.isEmpty() && Math.round(((double)sourceStack.getCount() / sourceStack.getItem().getMaxCount()) * 100) >= minLootableStackSize.get()) {
                 amountToMove = Math.min(amountToMove, sourceStack.getCount());
 
-                // Calculate the number of clicks needed
                 int clicksNeeded = (int) Math.ceil((double) amountToMove / sourceStack.getMaxCount());
 
                 for (int i = 0; i < clicksNeeded; i++) {
@@ -946,7 +966,7 @@ public class StorageLooter extends Module {
         if (isSameItem(mc.player.getOffHandStack().getItem(), item, itemName)) {
             count += mc.player.getOffHandStack().getCount();
         }
-        for (ItemStack armorStack : mc.player.getArmorItems()) {
+        for (ItemStack armorStack : getArmorItems(mc.player)) {
             if (isSameItem(armorStack.getItem(), item, itemName)) {
                 count += armorStack.getCount();
             }
@@ -1045,7 +1065,7 @@ public class StorageLooter extends Module {
                 }
             }
         }
-        for (ItemStack stack : mc.player.getArmorItems()) {
+        for (ItemStack stack : getArmorItems(mc.player)) {
             Item stackItem = stack.getItem();
             if (isSameItem(stackItem, item, itemName)) {
                 if (stack.isStackable()) {
@@ -1159,7 +1179,7 @@ public class StorageLooter extends Module {
                 Items.DIAMOND_BOOTS
         );
 
-        if (item instanceof MiningToolItem || item instanceof ArmorItem) {
+        if (isTool(item.getDefaultStack()) || isArmor(item.getDefaultStack())) {
             return diamondItems.contains(item);
         }
 

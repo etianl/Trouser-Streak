@@ -385,7 +385,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
     private void searchChunk(Chunk chunk, TChunk tChunk) {
         var sections = chunk.getSectionArray();
         int Ymin = mc.world.getBottomY() + minY.get();
-        int Ymax = mc.world.getTopY() - maxY.get();
+        int Ymax = mc.world.getTopYInclusive() - maxY.get();
         int Y = mc.world.getBottomY();
         for (ChunkSection section : sections) {
             if (section != null && !section.isEmpty()) {

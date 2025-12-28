@@ -34,12 +34,12 @@ public class AutoVaultClipCommand extends Command {
                     if (player.hasVehicle()) {
                         Entity vehicle = player.getVehicle();
                         for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
-                            mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(mc.player.getVehicle()));
+                            mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
                         }
                         vehicle.setPosition(vehicle.getX(), isopenair1.getY(), vehicle.getZ());
                     }
                     for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
-                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
+                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true, mc.player.horizontalCollision));
                     }
                     player.setPosition(player.getX(), isopenair1.getY(), player.getZ());
                     return SINGLE_SUCCESS;
@@ -59,17 +59,17 @@ public class AutoVaultClipCommand extends Command {
                     if (player.hasVehicle()) {
                         Entity vehicle = player.getVehicle();
                         for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
-                            mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(mc.player.getVehicle()));
+                            mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
                         }
                         vehicle.setPosition(vehicle.getX(), isopenair2.getY(), vehicle.getZ());
                     }
                     for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
-                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
+                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true, mc.player.horizontalCollision));
                     }
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), isopenair2.getY(), mc.player.getZ(), false));
+                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), isopenair2.getY(), mc.player.getZ(), false, mc.player.horizontalCollision));
                     mc.player.setPosition(mc.player.getX(), isopenair2.getY(), mc.player.getZ());
                     double y = isopenair2.getY() + 0.0000000001;
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), y, mc.player.getZ(), false)); // we are slightly higher, resets fall distance to 0
+                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), y, mc.player.getZ(), false, mc.player.horizontalCollision)); // we are slightly higher, resets fall distance to 0
                     mc.player.setPosition(mc.player.getX(), y, mc.player.getZ());
                     return SINGLE_SUCCESS;
                 }
@@ -89,13 +89,13 @@ public class AutoVaultClipCommand extends Command {
                     if (player.hasVehicle()) {
                         Entity vehicle = player.getVehicle();
                         for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
-                            mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(mc.player.getVehicle()));
+                            mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
                         }
 
                         vehicle.setPosition(vehicle.getX(), newopenair2.getY(), vehicle.getZ());
                     }
                     for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
-                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
+                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true, mc.player.horizontalCollision));
                     }
                     player.setPosition(player.getX(), newopenair2.getY(), player.getZ());
                     return SINGLE_SUCCESS;

@@ -7,9 +7,14 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.component.ComponentChanges;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.*;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -178,6 +183,8 @@ public class BoomPlus extends Module {
         super(Trouser.operator, "boom+", "shoots something where you click");
     }
     private int aticks=0;
+    private String namecolour = nomcolor.get().toString();
+    private String customName = nom.get();
 
     @EventHandler
     public void onTick(TickEvent.Post event) {
@@ -190,131 +197,134 @@ public class BoomPlus extends Module {
             if (aticks<=atickdelay.get()){
                 aticks++;
             } else if (aticks>atickdelay.get()) {
-                NbtCompound tag = new NbtCompound();
+                customName = nom.get();
+                namecolour = nomcolor.get().toString();
                 ItemStack rst = mc.player.getMainHandStack();
                 BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
                 ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
-                NbtCompound display = new NbtCompound();
-                display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
-                tag.put("display", display);
-                String fullString = blockstate.get().toString();
-                String[] parts = fullString.split(":");
-                String block = parts[1];
-                String blockName = block.replace("}", "");
-                NbtList motion = new NbtList();
-                NbtList Pos = new NbtList();
-                HitResult hr = mc.cameraEntity.raycast(900, 0, true);
-                Vec3d owo = hr.getPos();
-                BlockPos pos = BlockPos.ofFloored(owo);
-                Vec3d sex = mc.player.getRotationVector().multiply(speed.get());
-                String entityName = entity.get().trim().replace(" ", "_");
-
-                NbtCompound entityTag = new NbtCompound();
-                if (target.get()) {
-                    Pos.add(NbtDouble.of(pos.getX()));
-                    Pos.add(NbtDouble.of(pos.getY()));
-                    Pos.add(NbtDouble.of(pos.getZ()));
-                    entityTag.put("Pos", Pos);
-                } else {
-                    motion.add(NbtDouble.of(sex.x));
-                    motion.add(NbtDouble.of(sex.y));
-                    motion.add(NbtDouble.of(sex.z));
-                    entityTag.put("Motion", motion);
-                }
-                entityTag.putString("id", "minecraft:" + entityName);
-                entityTag.putInt("Health", health.get());
-                entityTag.putInt("AbsorptionAmount", absorption.get());
-                entityTag.putInt("Age", age.get());
-                entityTag.putInt("ExplosionPower", exppower.get());
-                entityTag.putInt("ExplosionRadius", exppower.get());
-                NbtCompound blockState = new NbtCompound();
-                blockState.putString("Name", "minecraft:" + blockName);
-                entityTag.put("BlockState", blockState);
-                if (invincible.get())entityTag.putBoolean("Invulnerable", invincible.get());
-                if (silence.get())entityTag.putBoolean("Silent", silence.get());
-                if (glow.get())entityTag.putBoolean("Glowing", glow.get());
-                if (persist.get())entityTag.putBoolean("PersistenceRequired", persist.get());
-                if (nograv.get())entityTag.putBoolean("NoGravity", nograv.get());
-                if(noAI.get())entityTag.putBoolean("NoAI", noAI.get());
-                if(falsefire.get())entityTag.putBoolean("HasVisualFire", falsefire.get());
-                if(powah.get())entityTag.putBoolean("powered", powah.get());
-                if(ignite.get())entityTag.putBoolean("ignited", ignite.get());
-                entityTag.putInt("Fuse", fuse.get());
-                entityTag.putInt("Size", size.get());
-                if(customname.get())entityTag.putBoolean("CustomNameVisible", customname.get());
-                entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
-                tag.put("EntityTag", entityTag);
-                item.setNbt(tag);
+                var changes = ComponentChanges.builder()
+                        .add(DataComponentTypes.CUSTOM_NAME, Text.literal(customName).formatted(Formatting.valueOf(namecolour.toUpperCase())))
+                        .add(DataComponentTypes.ITEM_NAME, Text.literal(customName).formatted(Formatting.valueOf(namecolour.toUpperCase())))
+                        .add(DataComponentTypes.ENTITY_DATA, createEntityData())
+                        .build();
+                item.applyChanges(changes);
                 mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                 mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
-            aticks=0;
-        }
+                aticks=0;
+            }
         }
     }
 
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if (mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player.getAbilities().creativeMode) {
-            NbtCompound tag = new NbtCompound();
+            customName = nom.get();
+            namecolour = nomcolor.get().toString();
             ItemStack rst = mc.player.getMainHandStack();
             BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
             ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
-            NbtCompound display = new NbtCompound();
-            display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
-            tag.put("display", display);
-            String fullString = blockstate.get().toString();
-            String[] parts = fullString.split(":");
-            String block = parts[1];
-            String blockName = block.replace("}", "");
-            NbtList motion = new NbtList();
-            NbtList Pos = new NbtList();
-            HitResult hr = mc.cameraEntity.raycast(900, 0, true);
-            Vec3d owo = hr.getPos();
-            BlockPos pos = BlockPos.ofFloored(owo);
-            Vec3d sex = mc.player.getRotationVector().multiply(speed.get());
-            String entityName = entity.get().trim().replace(" ", "_");
-
-            NbtCompound entityTag = new NbtCompound();
-            if (target.get()) {
-                Pos.add(NbtDouble.of(pos.getX()));
-                Pos.add(NbtDouble.of(pos.getY()));
-                Pos.add(NbtDouble.of(pos.getZ()));
-                entityTag.put("Pos", Pos);
-            } else {
-                motion.add(NbtDouble.of(sex.x));
-                motion.add(NbtDouble.of(sex.y));
-                motion.add(NbtDouble.of(sex.z));
-                entityTag.put("Motion", motion);
-            }
-            entityTag.putString("id", "minecraft:" + entityName);
-            entityTag.putInt("Health", health.get());
-            entityTag.putInt("AbsorptionAmount", absorption.get());
-            entityTag.putInt("Age", age.get());
-            entityTag.putInt("ExplosionPower", exppower.get());
-            entityTag.putInt("ExplosionRadius", exppower.get());
-            NbtCompound blockState = new NbtCompound();
-            blockState.putString("Name", "minecraft:" + blockName);
-            entityTag.put("BlockState", blockState);
-            if (invincible.get())entityTag.putBoolean("Invulnerable", invincible.get());
-            if (silence.get())entityTag.putBoolean("Silent", silence.get());
-            if (glow.get())entityTag.putBoolean("Glowing", glow.get());
-            if (persist.get())entityTag.putBoolean("PersistenceRequired", persist.get());
-            if (nograv.get())entityTag.putBoolean("NoGravity", nograv.get());
-            if(noAI.get())entityTag.putBoolean("NoAI", noAI.get());
-            if(falsefire.get())entityTag.putBoolean("HasVisualFire", falsefire.get());
-            if(powah.get())entityTag.putBoolean("powered", powah.get());
-            if(ignite.get())entityTag.putBoolean("ignited", ignite.get());
-            entityTag.putInt("Fuse", fuse.get());
-            entityTag.putInt("Size", size.get());
-            if(customname.get())entityTag.putBoolean("CustomNameVisible", customname.get());
-            entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
-            tag.put("EntityTag", entityTag);
-            item.setNbt(tag);
+            var changes = ComponentChanges.builder()
+                    .add(DataComponentTypes.CUSTOM_NAME, Text.literal(customName).formatted(Formatting.valueOf(namecolour.toUpperCase())))
+                    .add(DataComponentTypes.ITEM_NAME, Text.literal(customName).formatted(Formatting.valueOf(namecolour.toUpperCase())))
+                    .add(DataComponentTypes.ENTITY_DATA, createEntityData())
+                    .build();
+            item.applyChanges(changes);
             mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
             mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
             mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
         }
     }
+    private NbtComponent createEntityData() {
+        String fullString = blockstate.get().toString();
+        String[] parts = fullString.split(":");
+        String block = parts[1];
+        String blockName = block.replace("}", "");
+        NbtList motion = new NbtList();
+        NbtList Pos = new NbtList();
+        HitResult hr = mc.cameraEntity.raycast(900, 0, true);
+        Vec3d owo = hr.getPos();
+        BlockPos pos = BlockPos.ofFloored(owo);
+        Vec3d sex = mc.player.getRotationVector().multiply(speed.get());
+        String entityName = entity.get().trim().replace(" ", "_");
 
+        NbtCompound entityTag = new NbtCompound();
+        if (target.get()) {
+            Pos.add(NbtDouble.of(pos.getX()));
+            Pos.add(NbtDouble.of(pos.getY()));
+            Pos.add(NbtDouble.of(pos.getZ()));
+            entityTag.put("Pos", Pos);
+        } else {
+            motion.add(NbtDouble.of(sex.x));
+            motion.add(NbtDouble.of(sex.y));
+            motion.add(NbtDouble.of(sex.z));
+            entityTag.put("Motion", motion);
+        }
+        entityTag.putString("id", "minecraft:" + entityName);
+        entityTag.putInt("Health", health.get());
+        entityTag.putInt("AbsorptionAmount", absorption.get());
+        entityTag.putInt("Age", age.get());
+        entityTag.putInt("ExplosionPower", exppower.get());
+        entityTag.putInt("ExplosionRadius", exppower.get());
+        NbtCompound blockState = new NbtCompound();
+        blockState.putString("Name", "minecraft:" + blockName);
+        entityTag.put("BlockState", blockState);
+        if (invincible.get())entityTag.putBoolean("Invulnerable", invincible.get());
+        if (silence.get())entityTag.putBoolean("Silent", silence.get());
+        if (glow.get())entityTag.putBoolean("Glowing", glow.get());
+        if (persist.get())entityTag.putBoolean("PersistenceRequired", persist.get());
+        if (nograv.get())entityTag.putBoolean("NoGravity", nograv.get());
+        if(noAI.get())entityTag.putBoolean("NoAI", noAI.get());
+        if(falsefire.get())entityTag.putBoolean("HasVisualFire", falsefire.get());
+        if(powah.get())entityTag.putBoolean("powered", powah.get());
+        if(ignite.get())entityTag.putBoolean("ignited", ignite.get());
+        entityTag.putInt("Fuse", fuse.get());
+        entityTag.putInt("Size", size.get());
+        if(customname.get())entityTag.putBoolean("CustomNameVisible", customname.get());
+        NbtCompound customName = new NbtCompound();
+        customName.putString("text", nom.get());
+        customName.putString("color", nomcolor.get().name());
+        String serverVersion;
+        if (mc.isIntegratedServerRunning()) {
+            serverVersion = mc.getServer().getVersion();
+        } else {
+            serverVersion = mc.getCurrentServerEntry().version.getLiteralString();
+        }
+        if (serverVersion == null) {
+            entityTag.put("CustomName", customName);
+        } else {
+            if (isVersionLessThan(serverVersion, 1, 21, 5)) {
+                entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().name() + "\"}");
+            } else {
+                entityTag.put("CustomName", customName);
+            }
+        }
+        return NbtComponent.of(entityTag);
+    }
+    private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
+        if (serverVersion == null) return false;
+
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)");
+        java.util.regex.Matcher matcher = pattern.matcher(serverVersion);
+
+        if (matcher.find()) {
+            try {
+                int serverMajor = Integer.parseInt(matcher.group(1));
+                int serverMinor = Integer.parseInt(matcher.group(2));
+                int serverPatch = Integer.parseInt(matcher.group(3));
+
+                if (serverMajor < major) return true;
+                if (serverMajor > major) return false;
+
+                if (serverMinor < minor) return true;
+                if (serverMinor > minor) return false;
+
+                return serverPatch < patch;
+
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+        return false;
+    }
 }

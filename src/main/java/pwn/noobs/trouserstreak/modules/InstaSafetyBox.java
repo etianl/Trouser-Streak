@@ -267,6 +267,7 @@ public class InstaSafetyBox extends Module {
                 || ((BlockItem) stack.getItem()).getBlock() instanceof LadderBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof SlabBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof TrapdoorBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof HeavyCoreBlock
                 || skippableBlox.get().contains(((BlockItem) stack.getItem()).getBlock());
     }
     public enum Modes {

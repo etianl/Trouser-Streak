@@ -20,10 +20,9 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.*;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import pwn.noobs.trouserstreak.Trouser;
@@ -44,6 +43,7 @@ public class AdvancedItemESP extends Module {
             Items.NETHERITE_LEGGINGS,
             Items.NETHERITE_BOOTS,
             Items.ELYTRA,
+            Items.MACE,
             Items.TRIDENT,
             Items.DIAMOND_SWORD,
             Items.DIAMOND_AXE,
@@ -129,34 +129,36 @@ public class AdvancedItemESP extends Module {
             .visible(() -> enchants.get())
             .build()
     );
-    private final Setting<List<Enchantment>> toolenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+    private final Setting<Set<RegistryKey<Enchantment>>> toolenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("Mining Tool Enchants")
             .description("List of enchantments required.")
             .visible(() -> enchants.get() && certainenchants.get())
             .defaultValue(Enchantments.EFFICIENCY, Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build()
-    );
-    private final Setting<List<Enchantment>> swordenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+            .build());
+    private final Setting<Set<RegistryKey<Enchantment>>> swordenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("Sword Enchants")
             .description("List of enchantments required.")
             .visible(() -> enchants.get() && certainenchants.get())
             .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build()
-    );
-    private final Setting<List<Enchantment>> armorenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+            .build());
+    private final Setting<Set<RegistryKey<Enchantment>>> armorenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("Armor Enchants")
             .description("List of enchantments required.")
             .visible(() -> enchants.get() && certainenchants.get())
             .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build()
-    );
-    private final Setting<List<Enchantment>> tridentenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+            .build());
+    private final Setting<Set<RegistryKey<Enchantment>>> maceenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+            .name("Mace Enchants")
+            .description("List of enchantments required.")
+            .visible(() -> enchants.get() && certainenchants.get())
+            .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
+            .build());
+    private final Setting<Set<RegistryKey<Enchantment>>> tridentenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("Trident Enchants")
             .description("List of enchantments required.")
             .visible(() -> enchants.get() && certainenchants.get())
             .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build()
-    );
+            .build());
     private final Setting<Boolean> chatFeedback = sgGeneral.add(new BoolSetting.Builder()
             .name("Chat feedback")
             .description("Display info about items in chat")
@@ -290,18 +292,33 @@ public class AdvancedItemESP extends Module {
         interpolatedColor = new Color(r, g, b, a);
         return interpolatedColor;
     }
-
+    public static boolean isTool(ItemStack itemStack) {
+        return itemStack.isIn(ItemTags.AXES) ||
+                itemStack.isIn(ItemTags.HOES) ||
+                itemStack.isIn(ItemTags.PICKAXES) ||
+                itemStack.isIn(ItemTags.SHOVELS) ||
+                itemStack.getItem() instanceof ShearsItem ||
+                itemStack.getItem() instanceof FlintAndSteelItem;
+    }
+    public static boolean isArmor(ItemStack itemStack) {
+        return itemStack.isIn(ItemTags.HEAD_ARMOR) ||
+                itemStack.isIn(ItemTags.CHEST_ARMOR) ||
+                itemStack.isIn(ItemTags.LEG_ARMOR) ||
+                itemStack.isIn(ItemTags.FOOT_ARMOR);
+    }
     public boolean shouldSkip(ItemEntity entity) {
         boolean skip = false;
         if (enchants.get()) {
-            if (!certainenchants.get() && (entity.getStack().getItem() instanceof MiningToolItem || entity.getStack().getItem() instanceof ArmorItem || entity.getStack().getItem() instanceof SwordItem || entity.getStack().getItem() instanceof FishingRodItem || entity.getStack().getItem() instanceof FlintAndSteelItem || entity.getStack().getItem() instanceof ShearsItem || entity.getStack().getItem() instanceof ShieldItem || entity.getStack().getItem() instanceof TridentItem) && entity.getStack().isEnchantable() && entity.getStack().getEnchantments().isEmpty()) skip = true;
+            if (!certainenchants.get() && (isTool(entity.getStack()) || isArmor(entity.getStack()) || entity.getStack().isIn(ItemTags.SWORDS) || entity.getStack().getItem() instanceof FishingRodItem || entity.getStack().getItem() instanceof FlintAndSteelItem || entity.getStack().getItem() instanceof MaceItem || entity.getStack().getItem() instanceof ShearsItem || entity.getStack().getItem() instanceof ShieldItem || entity.getStack().getItem() instanceof TridentItem) && entity.getStack().isEnchantable() && entity.getStack().getEnchantments().isEmpty()) skip = true;
             else if (certainenchants.get()){
-                if (entity.getStack().getItem() instanceof ToolItem && !(entity.getStack().getItem() instanceof SwordItem)){
+                if (isTool(entity.getStack())){
                     skip = compareEnchants(entity, toolenchants);
-                } else if (entity.getStack().getItem() instanceof SwordItem){
+                } else if ( entity.getStack().isIn(ItemTags.SWORDS)){
                     skip = compareEnchants(entity, swordenchants);
-                } else if (entity.getStack().getItem() instanceof ArmorItem){
+                } else if (isArmor(entity.getStack())){
                     skip = compareEnchants(entity, armorenchants);
+                } else if (entity.getStack().getItem() instanceof MaceItem){
+                    skip = compareEnchants(entity, maceenchants);
                 } else if (entity.getStack().getItem() instanceof TridentItem){
                     skip = compareEnchants(entity, tridentenchants);
                 }
@@ -310,19 +327,13 @@ public class AdvancedItemESP extends Module {
         if (!items.get().contains(entity.getStack().getItem())) skip = true;
         return skip;
     }
-    private boolean compareEnchants(ItemEntity entity, Setting<List<Enchantment>> enchantsetting) {
+    private boolean compareEnchants(ItemEntity entity, Setting<Set<RegistryKey<Enchantment>>> enchantsetting) {
         boolean skip = false;
-        Set<Enchantment> itemenchants = new HashSet<>();
-        entity.getStack().getEnchantments().forEach(enchantmentNbt -> {
-            if (enchantmentNbt instanceof NbtCompound nbt) {
-                Identifier enchantmentId = new Identifier(nbt.getString("id"));
-                Enchantment enchantment = Registries.ENCHANTMENT.get(enchantmentId);
-                if (enchantment != null) {
-                    itemenchants.add(enchantment);
-                }
-            }
+        Set<RegistryKey<Enchantment>> itemenchants = new HashSet<>();
+        entity.getStack().getEnchantments().getEnchantments().forEach(enchantment -> {
+            itemenchants.add(enchantment.getKey().get());
         });
-        for (Enchantment enchantKey : enchantsetting.get()) {
+        for (RegistryKey<Enchantment> enchantKey : enchantsetting.get()) {
             if (!itemenchants.contains(enchantKey)) {
                 skip = true;
                 break;
