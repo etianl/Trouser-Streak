@@ -19,6 +19,8 @@ import pwn.noobs.trouserstreak.Trouser;
 public class MaceKill extends Module {
     private final SettingGroup specialGroup2 = settings.createGroup("Disable \"Smash Attack\" in the Criticals module to make this module work.");
     private final SettingGroup specialGroup = settings.createGroup("Values higher than 22 only work on Paper/Spigot");
+    private final SettingGroup totem = settings.createGroup("Totem Bypass");
+
     private final Setting<Boolean> preventDeath = specialGroup.add(new BoolSetting.Builder()
             .name("Prevent Fall damage")
             .description("Attempts to prevent fall damage even on packet hiccups.")
@@ -43,13 +45,27 @@ public class MaceKill extends Module {
             .description("Does not send movement packets if the attack was blocked. (prevents death)")
             .defaultValue(true)
             .build());
+    private final Setting<Boolean> randomizeHeight = totem.add(new BoolSetting.Builder()
+            .name("Randomize height")
+            .description("Randomizes the fall height below the set limit.")
+            .defaultValue(true)
+            .build());
+    private final Setting<Integer> deviation = totem.add(new IntSetting.Builder()
+            .name("Height deviation")
+            .description("Max blocks to subtract from max height (e.g. 40)")
+            .defaultValue(16)
+            .sliderRange(0, 169)
+            .min(0)
+            .max(169)
+            .visible(() -> randomizeHeight.get())
+            .build()
+    );
 
     public MaceKill() {
-        super(Trouser.Main, "MaceKill", "Makes the Mace powerful when swung.");
+        super(Trouser.Main, "MaceKill", "Makes the Mace powerful when swung. Can also bypass totem usage.");
     }
 
     private Vec3d previouspos;
-
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
         if (mc.player == null) return;
@@ -108,18 +124,15 @@ public class MaceKill extends Module {
                 previouspos.getX(), previouspos.getY(), previouspos.getZ(),
                 false, mc.player.horizontalCollision);
         if (preventDeath.get()) {
+            mc.player.fallDistance = 0;
             homepacket = new PlayerMoveC2SPacket.PositionAndOnGround(
-                    previouspos.getX(), previouspos.getY() + 0.25, previouspos.getZ(),
+                    previouspos.getX(), previouspos.getY() + 0.0000000001, previouspos.getZ(),
                     false, mc.player.horizontalCollision);
         }
         ((IPlayerMoveC2SPacket) homepacket).meteor$setTag(1337);
         ((IPlayerMoveC2SPacket) movepacket).meteor$setTag(1337);
         mc.player.networkHandler.sendPacket(movepacket);
         mc.player.networkHandler.sendPacket(homepacket);
-        if (preventDeath.get()) {
-            mc.player.setVelocity(mc.player.getVelocity().x, 0.1, mc.player.getVelocity().z);
-            mc.player.fallDistance = 0;
-        }
     }
     private void doVehicleTeleports(double height, int blocks) {
         mc.player.getVehicle().setPosition(mc.player.getVehicle().getX(), height + blocks, mc.player.getVehicle().getZ());
@@ -130,12 +143,19 @@ public class MaceKill extends Module {
     private int getMaxHeightAbovePlayer() {
         BlockPos playerPos = mc.player.getBlockPos();
         int maxHeight = playerPos.getY() + (maxPower.get() ? 170 : fallHeight.get());
-        for (int i = maxHeight; i > playerPos.getY(); i--) {
+
+        int scanStart = maxHeight;
+        if (randomizeHeight.get()) {
+            int randomSubtract = (int) (Math.random() * (deviation.get() + 1)); // 0 to deviation
+            scanStart = Math.max(playerPos.getY() + 1, maxHeight - randomSubtract);
+        }
+
+        for (int i = scanStart; i > playerPos.getY(); i--) {
             BlockPos up1 = new BlockPos(playerPos.getX(), i, playerPos.getZ());
             BlockPos up2 = up1.up(1);
             if (isSafeBlock(up1) && isSafeBlock(up2)) return i - playerPos.getY();
         }
-        return 0; // Return 0 if no suitable position is found
+        return 0;
     }
 
     private boolean isSafeBlock(BlockPos pos) {
