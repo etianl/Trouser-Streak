@@ -1,7 +1,6 @@
 package pwn.noobs.trouserstreak.mixin;
 
 import pwn.noobs.trouserstreak.modules.BoatNoclip;
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;

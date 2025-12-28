@@ -22,6 +22,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.item.consume.UseAction;
@@ -39,10 +40,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
-public class SpearKill extends Module {
+public class SpearKillorig extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgBlink = settings.createGroup("Blink Options");
     private final SettingGroup sgLunge = settings.createGroup("Lunge Options");
+    private final SettingGroup sgBlink = settings.createGroup("Blink Options");
 
     public enum Mode {
         Lunge,      // Set velocity directly
@@ -77,29 +78,6 @@ public class SpearKill extends Module {
             .description("Entities to whitelist/blacklist")
             .onlyAttackable()
             .build());
-    private final Setting<Double> flushRange = sgBlink.add(new DoubleSetting.Builder()
-            .name("Flush Range")
-            .description("Distance to target when flush occurs (blocks)")
-            .defaultValue(3.0)
-            .min(1.0)
-            .sliderRange(1.0, 10.0)
-            .visible(() -> mode.get() == Mode.Blink)
-            .build());
-    private final Setting<Double> maxflushRange = sgBlink.add(new DoubleSetting.Builder()
-            .name("Force Flush Distance")
-            .description("Distance to force a flush")
-            .defaultValue(9.5)
-            .min(1.0)
-            .sliderRange(1.0, 20.0)
-            .visible(() -> mode.get() == Mode.Blink)
-            .build());
-    private final Setting<Boolean> blinkAimbot = sgBlink.add(new BoolSetting.Builder()
-            .name("Aimbot")
-            .description("Lock on to target")
-            .defaultValue(true)
-            .visible(() -> mode.get() == Mode.Blink)
-            .build()
-    );
     public final Setting<Double> getLungeStrength = sgLunge.add(new DoubleSetting.Builder()
             .name("SpearVelocity")
             .description("The amount of velocity applied to the player, in the direction of the target.")
@@ -133,17 +111,68 @@ public class SpearKill extends Module {
             .sliderRange(0, 100)
             .visible(() -> mode.get() == Mode.Lunge)
             .build());
+    private final Setting<Double> flushRange = sgBlink.add(new DoubleSetting.Builder()
+            .name("Flush Range")
+            .description("Distance to target when flush occurs (blocks)")
+            .defaultValue(4.0)
+            .min(1.0)
+            .sliderRange(1.0, 10.0)
+            .visible(() -> mode.get() == Mode.Blink)
+            .build());
+
+    private final Setting<Boolean> blinkLunge = sgBlink.add(new BoolSetting.Builder()
+            .name("Lunge")
+            .description("Launch towards target like Lunge mode (works while flying)")
+            .defaultValue(false)
+            .visible(() -> mode.get() == Mode.Blink)
+            .build());
+
+    private final Setting<Double> blinkLungeStrength = sgBlink.add(new DoubleSetting.Builder()
+            .name("Lunge Strength")
+            .description("Velocity applied towards target")
+            .defaultValue(2.0)
+            .min(0.1)
+            .sliderRange(0.1, 8.0)
+            .visible(() -> mode.get() == Mode.Blink && blinkLunge.get())
+            .build());
+
+    private final Setting<Integer> blinkLungeTicks = sgBlink.add(new IntSetting.Builder()
+            .name("Lunge Delay")
+            .description("Ticks to charge before lunging")
+            .defaultValue(15)
+            .min(1)
+            .sliderRange(1, 30)
+            .visible(() -> mode.get() == Mode.Blink && blinkLunge.get())
+            .build());
+
+    private final Setting<Boolean> blinkAimbot = sgBlink.add(new BoolSetting.Builder()
+            .name("Aimbot")
+            .description("Automatically aim at nearest target")
+            .defaultValue(false)
+            .visible(() -> mode.get() == Mode.Blink)
+            .build());
+
+    private final Setting<Double> blinkAimRange = sgBlink.add(new DoubleSetting.Builder()
+            .name("Aim Range")
+            .description("Maximum range to search for targets")
+            .defaultValue(64.0)
+            .min(5.0)
+            .sliderRange(5.0, 256.0)
+            .visible(() -> mode.get() == Mode.Blink && blinkAimbot.get())
+            .build());
 
     private final List<PlayerMoveC2SPacket> packets = new ArrayList<>();
     private boolean isBlinking = false;
     private boolean isFlushing = false;
     private Vec3d startPos = null;
     private boolean wasCharging = false;
+    private Entity blinkTarget = null;
     private double lastTargetDistance = Double.MAX_VALUE;
     private boolean wasApproaching = false;
-    private Entity killtarget;
+    private int blinkChargeTicks = 0;
+    private Entity crosshairTarget;
 
-    public SpearKill() {
+    public SpearKillorig() {
         super(Trouser.Main, "SpearKill", "Increases spear damage! Lunge mode uses velocity and Blink mode delays packets allowing normal movement. Thank you to Kimtaeho for Blink mode!");
     }
 
@@ -166,47 +195,122 @@ public class SpearKill extends Module {
         isFlushing = false;
         startPos = null;
         wasCharging = false;
+        blinkTarget = null;
         lastTargetDistance = Double.MAX_VALUE;
         wasApproaching = false;
-        killtarget = null;
+        blinkChargeTicks = 0;
+        crosshairTarget = null;
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (mc.player == null || mc.world == null) return;
 
+        Item spearItem = mc.player.getActiveItem().getItem();
         boolean currentlyCharging = mc.player.getActiveItem().getUseAction() == UseAction.SPEAR;
-        //regular stabby lunge mode
+        int readyTicks = getReadyTicks(spearItem);
+
         if (mode.get() == Mode.Lunge) {
             if (currentlyCharging) {
-                if (killtarget == null) killtarget = target();
-                if (killtarget != null && !killtarget.isAlive()) killtarget = null;
-                if (killtarget == null || !(killtarget instanceof LivingEntity)) return;
-                if (!isValidTarget(killtarget)) return;
-                LUNGE();
+                if (crosshairTarget == null) crosshairTarget = target();
+                if (crosshairTarget != null && !crosshairTarget.isAlive()) crosshairTarget = null;
+                if (crosshairTarget == null || !(crosshairTarget instanceof LivingEntity)) return;
+                if (!isValidTarget(crosshairTarget)) return;
+
+                Vec3d playerPos = mc.player.getEyePos();
+                Vec3d targetPos = crosshairTarget.getBoundingBox().getCenter();
+                Vec3d toTarget = targetPos.subtract(playerPos).normalize();
+
+                float yaw = (float) (Math.toDegrees(Math.atan2(toTarget.z, toTarget.x)) - 90.0);
+                float pitch = (float) -Math.toDegrees(Math.asin(toTarget.y));
+
+                mc.player.setYaw(yaw);
+                mc.player.setHeadYaw(yaw);
+                mc.player.setPitch(pitch);
+                if (mc.player.getItemUseTime() > readyTicks) {
+                    if (stop.get()) {
+                        Box playerBox = mc.player.getBoundingBox().expand(stopDistance.get());
+                        Box targetBox = crosshairTarget.getBoundingBox();
+
+                        if (!playerBox.intersects(targetBox)) {
+                            double lungeSpeed = getLungeStrength.get();
+                            Vec3d viewDir = Vec3d.fromPolar(mc.player.getPitch(), mc.player.getYaw());
+                            mc.player.setSprinting(true);
+                            mc.player.setVelocity(viewDir.multiply(lungeSpeed));
+                        } else {
+                            crosshairTarget = null;
+                            mc.player.setVelocity(0,0,0);
+                            mc.player.setSprinting(false);
+                        }
+                    } else {
+                        double lungeSpeed = getLungeStrength.get();
+                        Vec3d viewDir = Vec3d.fromPolar(mc.player.getPitch(), mc.player.getYaw());
+                        mc.player.setSprinting(true);
+                        mc.player.setVelocity(viewDir.multiply(lungeSpeed));
+                    }
+                }
             } else {
-                killtarget = null;
+                crosshairTarget = null;
             }
             return;
         }
 
-        //blink mode
+        // Blink mode: Target-based flush with direction correction
+        // Track charge ticks
+        if (currentlyCharging) {
+            blinkChargeTicks++;
+        } else {
+            blinkChargeTicks = 0;
+        }
+
         // Find/update target (always needed for distance-based flush)
         if (currentlyCharging) {
-            if (killtarget == null || !killtarget.isAlive() || !canSeeTarget(killtarget)) {
-                killtarget = target();
-                lastTargetDistance = killtarget != null ? mc.player.distanceTo(killtarget) : Double.MAX_VALUE;
+            if (blinkTarget == null || !blinkTarget.isAlive() || !canSeeTarget(blinkTarget)) {
+                blinkTarget = target();
+                lastTargetDistance = blinkTarget != null ? mc.player.distanceTo(blinkTarget) : Double.MAX_VALUE;
                 wasApproaching = false;
             }
         } else {
-            killtarget = null;
+            blinkTarget = null;
             lastTargetDistance = Double.MAX_VALUE;
             wasApproaching = false;
         }
 
         // Aimbot functionality for Blink mode
-        if (currentlyCharging && blinkAimbot.get() && killtarget != null) {
-            rotateToTarget(killtarget);
+        if (currentlyCharging && blinkAimbot.get() && blinkTarget != null) {
+            // Aim at target (TrouserStreak style)
+            Vec3d playerPos = mc.player.getEyePos();
+            Vec3d targetPos = blinkTarget.getBoundingBox().getCenter();
+            Vec3d toTarget = targetPos.subtract(playerPos).normalize();
+
+            float yaw = (float) (Math.toDegrees(Math.atan2(toTarget.z, toTarget.x)) - 90.0);
+            float pitch = (float) -Math.toDegrees(Math.asin(toTarget.y));
+
+            mc.player.setYaw(yaw);
+            mc.player.setHeadYaw(yaw);
+            mc.player.setPitch(pitch);
+        }
+
+        // Blink Lunge: Launch towards target after charge delay (like Lunge mode)
+        if (currentlyCharging && blinkLunge.get() && blinkTarget != null) {
+            if (blinkChargeTicks >= blinkLungeTicks.get()) {
+                // Calculate direction to target
+                Vec3d playerPos = mc.player.getEyePos();
+                Vec3d targetPos = blinkTarget.getBoundingBox().getCenter();
+                Vec3d toTarget = targetPos.subtract(playerPos).normalize();
+
+                // Aim at target
+                float yaw = (float) (Math.toDegrees(Math.atan2(toTarget.z, toTarget.x)) - 90.0);
+                float pitch = (float) -Math.toDegrees(Math.asin(toTarget.y));
+                mc.player.setYaw(yaw);
+                mc.player.setHeadYaw(yaw);
+                mc.player.setPitch(pitch);
+
+                // Apply velocity towards target (like Lunge mode)
+                Vec3d viewDir = Vec3d.fromPolar(mc.player.getPitch(), mc.player.getYaw());
+                mc.player.setSprinting(true);
+                mc.player.setVelocity(viewDir.multiply(blinkLungeStrength.get()));
+            }
         }
 
         // Charge started
@@ -218,8 +322,8 @@ public class SpearKill extends Module {
         if (!currentlyCharging && wasCharging) {
             if (isBlinking) {
                 // Rotate towards target before flush for max damage
-                if (killtarget != null) {
-                    rotateToTarget(killtarget);
+                if (blinkTarget != null) {
+                    rotateToTarget(blinkTarget);
                 }
                 flushPackets();
                 isBlinking = false;
@@ -230,8 +334,8 @@ public class SpearKill extends Module {
         wasCharging = currentlyCharging;
 
         // Distance-based flush logic
-        if (isBlinking && killtarget != null && currentlyCharging) {
-            double currentDistance = mc.player.distanceTo(killtarget);
+        if (isBlinking && blinkTarget != null && currentlyCharging) {
+            double currentDistance = mc.player.distanceTo(blinkTarget);
             boolean isApproaching = currentDistance < lastTargetDistance;
 
             // Check flush conditions:
@@ -245,48 +349,26 @@ public class SpearKill extends Module {
             } else if (wasApproaching && !isApproaching) {
                 // Passed through/by target (was getting closer, now getting farther)
                 shouldFlush = true;
-            } else if (mc.player.getEntityPos().distanceTo(startPos) >= maxflushRange.get()){
-                flushPackets();
-                startBlink();
             }
 
             if (shouldFlush) {
                 // Rotate towards target for max damage
-                rotateToTarget(killtarget);
+                rotateToTarget(blinkTarget);
                 flushPackets();
 
                 // Restart blink for continuous damage
-                startBlink();
+                isBlinking = true;
+                startPos = mc.player.getEntityPos();
+                synchronized (packets) {
+                    packets.clear();
+                }
+
+                // Reset distance tracking
+                lastTargetDistance = mc.player.distanceTo(blinkTarget);
+                wasApproaching = false;
             } else {
                 lastTargetDistance = currentDistance;
                 wasApproaching = isApproaching;
-            }
-        }
-    }
-    private void LUNGE() {
-        int readyTicks = getReadyTicks(mc.player.getActiveItem().getItem());
-
-        rotateToTarget(killtarget);
-        if (mc.player.getItemUseTime() > readyTicks) {
-            if (stop.get()) {
-                Box playerBox = mc.player.getBoundingBox().expand(stopDistance.get());
-                Box targetBox = killtarget.getBoundingBox();
-
-                if (!playerBox.intersects(targetBox)) {
-                    double lungeSpeed = getLungeStrength.get();
-                    Vec3d viewDir = Vec3d.fromPolar(mc.player.getPitch(), mc.player.getYaw());
-                    mc.player.setSprinting(true);
-                    mc.player.setVelocity(viewDir.multiply(lungeSpeed));
-                } else {
-                    killtarget = null;
-                    mc.player.setVelocity(0,0,0);
-                    mc.player.setSprinting(false);
-                }
-            } else {
-                double lungeSpeed = getLungeStrength.get();
-                Vec3d viewDir = Vec3d.fromPolar(mc.player.getPitch(), mc.player.getYaw());
-                mc.player.setSprinting(true);
-                mc.player.setVelocity(viewDir.multiply(lungeSpeed));
             }
         }
     }
@@ -332,7 +414,7 @@ public class SpearKill extends Module {
                 packets.clear();
             }
             startPos = mc.player.getEntityPos();
-            lastTargetDistance = killtarget != null ? mc.player.distanceTo(killtarget) : Double.MAX_VALUE;
+            lastTargetDistance = blinkTarget != null ? mc.player.distanceTo(blinkTarget) : Double.MAX_VALUE;
             wasApproaching = false;
         }
     }
@@ -353,7 +435,7 @@ public class SpearKill extends Module {
         synchronized (packets) {
             packets.clear();
         }
-        lastTargetDistance = killtarget != null ? mc.player.distanceTo(killtarget) : Double.MAX_VALUE;
+        lastTargetDistance = blinkTarget != null ? mc.player.distanceTo(blinkTarget) : Double.MAX_VALUE;
         wasApproaching = false;
     }
     private boolean isSamePacket(PlayerMoveC2SPacket a, PlayerMoveC2SPacket b) {
@@ -377,6 +459,9 @@ public class SpearKill extends Module {
 
             // Ignore if distance is less than flush range (too close, not enough velocity)
             if (distance < flushRange.get()) {
+                if (chatFeedback) {
+                    info("Skipped: %.2f blocks (min: %.1f)", distance, flushRange.get());
+                }
                 packets.clear();
                 isFlushing = false;
                 return;
@@ -481,9 +566,54 @@ public class SpearKill extends Module {
         boolean inList = targetEntities.get().contains(type);
 
         if (targetListMode.get() == TargetListMode.Whitelist) {
+            // Whitelist: only target if in list (or list is empty = target all)
             return inList || targetEntities.get().isEmpty();
         } else {
+            // Blacklist: target if NOT in list
             return !inList;
         }
+    }
+    private Entity findBlinkTarget() {
+        if (mc.player == null || mc.world == null) return null;
+
+        double maxRange = blinkAimRange.get();
+        Vec3d eyePos = mc.player.getEyePos();
+        Vec3d lookVec = mc.player.getRotationVec(1.0f);
+
+        // Get all entities in range
+        List<Entity> candidates = mc.world.getOtherEntities(mc.player,
+                mc.player.getBoundingBox().expand(maxRange),
+                e -> e instanceof LivingEntity && e.isAlive() && e != mc.player);
+
+        // Sort by crosshair alignment (highest dot product = closest to crosshair)
+        candidates.sort((a, b) -> {
+            Vec3d toA = a.getBoundingBox().getCenter().subtract(eyePos).normalize();
+            Vec3d toB = b.getBoundingBox().getCenter().subtract(eyePos).normalize();
+            double dotA = lookVec.dotProduct(toA);
+            double dotB = lookVec.dotProduct(toB);
+            return Double.compare(dotB, dotA);  // Higher dot = more aligned = first
+        });
+
+        // Find first valid target that's within FOV
+        for (Entity e : candidates) {
+            double dist = eyePos.distanceTo(e.getBoundingBox().getCenter());
+            if (dist > maxRange) continue;
+
+            // Check target filter
+            if (!isValidTarget(e)) continue;
+
+            // Check if visible (no blocks in between)
+            if (!canSeeTarget(e)) continue;
+
+            Vec3d toEntity = e.getBoundingBox().getCenter().subtract(eyePos).normalize();
+            double dot = lookVec.dotProduct(toEntity);
+
+            // Must be in front of player (dot > 0 = less than 90 degrees)
+            if (dot > 0) {
+                return e;
+            }
+        }
+
+        return null;
     }
 }

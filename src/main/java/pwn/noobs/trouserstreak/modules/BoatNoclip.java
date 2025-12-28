@@ -218,5 +218,4 @@ public class BoatNoclip extends Module {
 
         return false;
     }
-
 }
