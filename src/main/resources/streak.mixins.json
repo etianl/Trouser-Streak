@@ -18,6 +18,8 @@
     "TrouserSplashTextMixin",
     "TrouserHandshakeC2SMixin",
     "ScreenMixin",
-    "HandledScreenMixin"
+    "HandledScreenMixin",
+    "AbstractBlockMixin",
+    "BoatEntityMixin"
   ]
 }
