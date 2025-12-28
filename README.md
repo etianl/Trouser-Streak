@@ -84,6 +84,8 @@ Give you more options for scaffolding such as bigger range. (Credits to Meteor-T
 Adds a custom Baritone #mine command to your message history containing all the blocks in a blocklist that are near you. Press T then up arrow, then ENTER key to execute the command. BETTER CHAT module is recommended for infinitely long commands. (Credits to etianl :D)
 ### **BoatKill:** 
 Kills passengers in a boat using funny packets. Is patched in Minecraft 1.21.2. (Credits to [filepile](https://github.com/not-filepile) for writing this and [Nxyi](https://github.com/Nxyi) for making it only kill the passenger!)
+### **BoatNoclip:**
+Allows you to disable clipping of blocks when you are in a boat. Currently only tested to be working in Paper servers of Minecraft version 1.21.11. It likely works in more servers too! (Credits to [aisiaiiad](https://github.com/aisiaiiad): [PR179](https://github.com/etianl/Trouser-Streak/pull/179)
 ### **Book And Quill Dupe:** 
 Overflows data in a book's title to cause dupes and chunk bans. (Credits to [Thorioum](https://github.com/Thorioum)!)
 ### **BungeeSpoofer:** 
