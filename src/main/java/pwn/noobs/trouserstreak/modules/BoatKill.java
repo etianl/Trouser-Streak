@@ -9,7 +9,6 @@ import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
 import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
 import net.minecraft.text.Text;
-import net.minecraft.util.PlayerInput;
 import net.minecraft.util.math.Vec3d;
 import pwn.noobs.trouserstreak.Trouser;
 
@@ -50,12 +49,12 @@ public class BoatKill extends Module {
         // floating point is what makes the boat break.
         moveTo(oPos.add(0,0.0001,0));
 
-        mc.player.networkHandler.sendPacket(new PlayerInputC2SPacket(new PlayerInput(false, false, false, false, false,true,false)));
+        mc.player.networkHandler.sendPacket(new PlayerInputC2SPacket(0,0,false,true));
         toggle();
     }
 
     public void moveTo(Vec3d pos){
         mc.player.getVehicle().setPosition(pos);
-        mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
+        mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(mc.player.getVehicle()));
     }
 }

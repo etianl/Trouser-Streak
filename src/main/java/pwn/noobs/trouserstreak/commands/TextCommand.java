@@ -7,9 +7,6 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import meteordevelopment.meteorclient.commands.Command;
 import net.minecraft.command.CommandSource;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -30,6 +27,9 @@ import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
+
+import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class TextCommand extends Command {
     private static final double LINE_SPACING = 0.3;
@@ -116,28 +116,18 @@ public class TextCommand extends Command {
     private String formatTextWithColors(String line) {
         StringBuilder formattedText = new StringBuilder();
         String currentColor = "white";
-        boolean isObfuscated = false;
         String[] words = line.split(" ");
 
         for (String word : words) {
             if (word.startsWith("#")) {
-                if (word.equalsIgnoreCase("#obfuscated")) {
-                    isObfuscated = true;
-                } else {
-                    try {
-                        currentColor = word.substring(1).toLowerCase();
-                    } catch (IllegalArgumentException ignored) {
-                        formattedText.append(word).append(" ");
-                    }
+                try {
+                    currentColor = word.substring(1).toLowerCase();
+                } catch (IllegalArgumentException ignored) {
+                    formattedText.append(word).append(" ");
                 }
             } else {
                 formattedText.append("{\"text\":\"").append(word).append(" \",\"color\":\"")
-                        .append(currentColor).append("\"");
-                if (isObfuscated) {
-                    formattedText.append(",\"obfuscated\":true");
-                }
-                formattedText.append("},");
-                isObfuscated = false; // Reset obfuscation after each word
+                        .append(currentColor).append("\"},");
             }
         }
 
@@ -248,34 +238,32 @@ public class TextCommand extends Command {
         ItemStack current = mc.player.getMainHandStack();
         Vec3d pos = mc.player.getPos().add(mc.player.getRotationVector().multiply(2)).add(0, yOffset, 0);
 
-        var changes = ComponentChanges.builder()
-                .add(DataComponentTypes.ENTITY_DATA, createEntityData(pos, message, isJson))
-                .build();
+        NbtCompound tag = new NbtCompound();
 
-        armorStand.applyChanges(changes);
+        NbtCompound entityTag = new NbtCompound();
+
+        entityTag.putString("id", "minecraft:armor_stand");
+
+        NbtList positionList = new NbtList();
+        positionList.add(NbtDouble.of(pos.x));
+        positionList.add(NbtDouble.of(pos.y));
+        positionList.add(NbtDouble.of(pos.z));
+
+        entityTag.put("Pos", positionList);
+        entityTag.putBoolean("Invisible", true);
+        entityTag.putBoolean("Marker", true);
+        entityTag.putBoolean("NoGravity", true);
+        entityTag.putBoolean("CustomNameVisible",true);
+        entityTag.putString("CustomName", message);
+
+        tag.put("EntityTag", entityTag);
+
+        armorStand.setNbt(tag);
+
 
         BlockHitResult bhr = new BlockHitResult(pos, Direction.UP, BlockPos.ofFloored(pos), false);
         mc.interactionManager.clickCreativeStack(armorStand, 36 + mc.player.getInventory().selectedSlot);
         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
         mc.interactionManager.clickCreativeStack(current, 36 + mc.player.getInventory().selectedSlot);
-    }
-
-    private NbtComponent createEntityData(Vec3d pos, String text, boolean isJson) {
-        NbtCompound entityTag = new NbtCompound();
-        NbtList position = new NbtList();
-
-        position.add(NbtDouble.of(pos.x));
-        position.add(NbtDouble.of(pos.y));
-        position.add(NbtDouble.of(pos.z));
-
-        entityTag.putString("id", "minecraft:armor_stand");
-        entityTag.put("Pos", position);
-        entityTag.putBoolean("Invisible", true);
-        entityTag.putBoolean("Marker", true);
-        entityTag.putBoolean("NoGravity", true);
-        entityTag.putBoolean("CustomNameVisible", true);
-        entityTag.putString("CustomName", isJson ? text : "{\"text\":\"" + text + "\"}");
-
-        return NbtComponent.of(entityTag);
     }
 }

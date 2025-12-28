@@ -3,26 +3,22 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.minecraft.component.*;
-import net.minecraft.component.type.*;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.*;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.*;
+import net.minecraft.potion.PotionUtil;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
-import net.minecraft.util.*;
 import pwn.noobs.trouserstreak.Trouser;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class NbtEditor extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -64,7 +60,8 @@ public class NbtEditor extends Module {
             .description("Pick one. If you aren't already holding an item this is what you get.")
             .defaultValue(Items.COD)
             .visible(() -> (mode.get() == Modes.Item))
-            .build());
+            .build()
+    );
     public final Setting<Boolean> customname = sgOptions.add(new BoolSetting.Builder()
             .name("CustomNameVisible")
             .description("CustomNameVisible or not.")
@@ -193,7 +190,7 @@ public class NbtEditor extends Module {
     private final Setting<List<StatusEffect>> effects = sgOptions.add(new StatusEffectListSetting.Builder()
             .name("Effects")
             .description("List of potion effects.")
-            .defaultValue(StatusEffects.INSTANT_HEALTH.value())
+            .defaultValue(StatusEffects.INSTANT_HEALTH)
             .visible(() -> mode.get() == Modes.Potion)
             .build()
     );
@@ -241,13 +238,13 @@ public class NbtEditor extends Module {
             .sliderRange(0, 255)
             .visible(() -> mode.get() == Modes.Potion)
             .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> enchants = sgOptions.add(new EnchantmentListSetting.Builder()
+    private final Setting<List<Enchantment>> enchants = sgOptions.add(new EnchantmentListSetting.Builder()
             .name("Enchants")
             .description("List of enchantments.")
             .defaultValue(Enchantments.KNOCKBACK)
             .visible(() -> mode.get() == Modes.Item)
-            .build());
-
+            .build()
+    );
     private final Setting<Integer> level = sgOptions.add(new IntSetting.Builder()
             .name("Enchantment Level")
             .description("Enchantment Level.")
@@ -265,34 +262,83 @@ public class NbtEditor extends Module {
         if (mc.player != null  && mc.interactionManager != null && mc.world != null && mc.player.getAbilities().creativeMode) {
             switch (mode.get()) {
                 case Entity -> {
+                    String entityName = entity.get().trim().replace(" ", "_");
+                    NbtCompound tag = new NbtCompound();
                     ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
-                    var changes = ComponentChanges.builder()
-                            .add(DataComponentTypes.CUSTOM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())))
-                            .add(DataComponentTypes.ITEM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())))
-                            .add(DataComponentTypes.ENTITY_DATA, createEntityData())
-                            .build();
-                    item.applyChanges(changes);
+                    NbtCompound display = new NbtCompound();
+                    display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
+                    tag.put("display", display);
+                    NbtCompound entityTag = new NbtCompound();
+                    entityTag.putString("id", "minecraft:" + entityName);
+                    entityTag.putInt("Health", health.get());
+                    entityTag.putInt("AbsorptionAmount", absorption.get());
+                    entityTag.putInt("Age", age.get());
+                    entityTag.putInt("ExplosionPower", exppower.get());
+                    entityTag.putInt("ExplosionRadius", exppower.get());
+                    if (invincible.get())entityTag.putBoolean("Invulnerable", invincible.get());
+                    if (silence.get())entityTag.putBoolean("Silent", silence.get());
+                    if (glow.get())entityTag.putBoolean("Glowing", glow.get());
+                    if (persist.get())entityTag.putBoolean("PersistenceRequired", persist.get());
+                    if (nograv.get())entityTag.putBoolean("NoGravity", nograv.get());
+                    if(noAI.get())entityTag.putBoolean("NoAI", noAI.get());
+                    if(falsefire.get())entityTag.putBoolean("HasVisualFire", falsefire.get());
+                    if(powah.get())entityTag.putBoolean("powered", powah.get());
+                    if(ignite.get())entityTag.putBoolean("ignited", ignite.get());
+                    entityTag.putInt("Fuse", fuse.get());
+                    entityTag.putInt("Size", size.get());
+                    if(customname.get())entityTag.putBoolean("CustomNameVisible", customname.get());
+                    entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
+                    entityTag.putInt("Radius", cloudradius.get());
+                    entityTag.putInt("Duration", cloudduration.get());
+                    entityTag.putString("Particle", particle.get());
+                    entityTag.putString("Potion", ceffect.get());
+
+                    tag.put("EntityTag", entityTag);
+                    item.setNbt(tag);
                     createItem(item);
                 }
-                case Item -> {
-                    ItemStack item;
 
-                    if (!mc.player.getMainHandStack().isEmpty()) {
-                        item = mc.player.getMainHandStack().copy();
-                    } else {
+                case Item -> {
+                    NbtCompound tag = new NbtCompound();
+                    ItemStack item = new ItemStack(Items.CARROT_ON_A_STICK);
+
+                    if (!mc.player.getMainHandStack().isEmpty()) item = mc.player.getMainHandStack().copy();
+                    else if (mc.player.getMainHandStack().isEmpty()) {
                         item = new ItemStack(itemlist.get());
                     }
 
-                    Registry<Enchantment> enchantmentRegistry = mc.world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
-
-                    for (RegistryKey<Enchantment> enchantKey : enchants.get()) {
-                        RegistryEntry<Enchantment> enchantEntry = enchantmentRegistry.getOrThrow(enchantKey);
-                        item.addEnchantment(enchantEntry, level.get());
+                    NbtList enchantments = new NbtList();
+                    NbtCompound itemNbt = item.getNbt();
+                    if (itemNbt != null) {
+                        NbtList itemEnchantments = itemNbt.getList("Enchantments", 10);
+                        for (int i = 0; i < itemEnchantments.size(); i++) {
+                            NbtCompound enchantment = itemEnchantments.getCompound(i);
+                            enchantments.add(enchantment);
+                        }
                     }
-
-                    item.set(DataComponentTypes.CUSTOM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())));
+                    for (Enchantment enchant : enchants.get()) {
+                        NbtCompound enchantment = new NbtCompound();
+                        String enchantmentKey = enchant.getTranslationKey();
+                        String enchantmentName = enchantmentKey.substring(enchantmentKey.lastIndexOf(".") + 1);
+                        enchantment.putString("id", "minecraft:"+enchantmentName);
+                        enchantment.putInt("lvl", level.get());
+                        enchantments.add(enchantment);
+                    }
+                    tag.put("Enchantments", enchantments);
+                    NbtCompound display = new NbtCompound();
+                    display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
+                    tag.put("display", display);
+                    if (itemNbt != null) {
+                        for (String key : itemNbt.getKeys()) {
+                            if (!tag.contains(key)) {
+                                tag.put(key, itemNbt.get(key));
+                            }
+                        }
+                    }
+                    item.setNbt(tag);
                     createItem(item);
                 }
+
                 case Potion -> {
                     ItemStack item;
 
@@ -301,39 +347,67 @@ public class NbtEditor extends Module {
                         else if (mc.player.getMainHandStack().getItem() != Items.LINGERING_POTION && potionmode.get() == pModes.Lingering) item =  new ItemStack(Items.LINGERING_POTION);
                         else if (mc.player.getMainHandStack().getItem() != Items.POTION && potionmode.get() == pModes.Normal) item =  new ItemStack(Items.POTION);
                         else item = mc.player.getMainHandStack().copy();
-                        var changes = ComponentChanges.builder()
-                                .add(DataComponentTypes.CUSTOM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())))
-                                .add(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.empty(), pileOfStatusEffects(), Optional.ofNullable(nom.get())))
-                                .build();
-                        item.applyChanges(changes);
+                        List<StatusEffectInstance> effectInstances = new ArrayList<>();
+                        NbtCompound itemNbt = item.getNbt();
+                        if (itemNbt != null) {
+                            effectInstances = PotionUtil.getPotionEffects(item);
+                        }
+                        for (StatusEffect effect : effects.get()) {
+                            effectInstances.add(new StatusEffectInstance(effect, duration.get(), amplifier.get()));
+                        }
+                        PotionUtil.setCustomPotionEffects(item, effectInstances);
+                        NbtCompound display = new NbtCompound();
+                        display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
+                        item.getOrCreateNbt().put("display", display);
                         createItem(item);
                     }
                     else switch (potionmode.get()) {
                         case Normal -> {
                             item =  new ItemStack(Items.POTION);
-                            var changes = ComponentChanges.builder()
-                                    .add(DataComponentTypes.CUSTOM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())))
-                                    .add(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.empty(), pileOfStatusEffects(), Optional.ofNullable(nom.get())))
-                                    .build();
-                            item.applyChanges(changes);
+                            List<StatusEffectInstance> effectInstances = new ArrayList<>();
+                            NbtCompound itemNbt = item.getNbt();
+                            if (itemNbt != null) {
+                                effectInstances = PotionUtil.getPotionEffects(item);
+                            }
+                            for (StatusEffect effect : effects.get()) {
+                                effectInstances.add(new StatusEffectInstance(effect, duration.get(), amplifier.get()));
+                            }
+                            PotionUtil.setCustomPotionEffects(item, effectInstances);
+                            NbtCompound display = new NbtCompound();
+                            display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
+                            item.getOrCreateNbt().put("display", display);
                             createItem(item);
                         }
                         case Splash -> {
                             item =  new ItemStack(Items.SPLASH_POTION);
-                            var changes = ComponentChanges.builder()
-                                    .add(DataComponentTypes.CUSTOM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())))
-                                    .add(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.empty(), pileOfStatusEffects(), Optional.ofNullable(nom.get())))
-                                    .build();
-                            item.applyChanges(changes);
+                            List<StatusEffectInstance> effectInstances = new ArrayList<>();
+                            NbtCompound itemNbt = item.getNbt();
+                            if (itemNbt != null) {
+                                effectInstances = PotionUtil.getPotionEffects(item);
+                            }
+                            for (StatusEffect effect : effects.get()) {
+                                effectInstances.add(new StatusEffectInstance(effect, duration.get(), amplifier.get()));
+                            }
+                            PotionUtil.setCustomPotionEffects(item, effectInstances);
+                            NbtCompound display = new NbtCompound();
+                            display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
+                            item.getOrCreateNbt().put("display", display);
                             createItem(item);
                         }
                         case Lingering -> {
                             item =  new ItemStack(Items.LINGERING_POTION);
-                            var changes = ComponentChanges.builder()
-                                    .add(DataComponentTypes.CUSTOM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())))
-                                    .add(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.empty(), pileOfStatusEffects(), Optional.ofNullable(nom.get())))
-                                    .build();
-                            item.applyChanges(changes);
+                            List<StatusEffectInstance> effectInstances = new ArrayList<>();
+                            NbtCompound itemNbt = item.getNbt();
+                            if (itemNbt != null) {
+                                effectInstances = PotionUtil.getPotionEffects(item);
+                            }
+                            for (StatusEffect effect : effects.get()) {
+                                effectInstances.add(new StatusEffectInstance(effect, duration.get(), amplifier.get()));
+                            }
+                            PotionUtil.setCustomPotionEffects(item, effectInstances);
+                            NbtCompound display = new NbtCompound();
+                            display.putString("Name", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().toString() + "\"}");
+                            item.getOrCreateNbt().put("display", display);
                             createItem(item);
                         }
                     }
@@ -346,7 +420,8 @@ public class NbtEditor extends Module {
                         return;
                     }
 
-                    ComponentMap mainHandComponents = mainHandStack.getComponents();
+                    NbtCompound mainHandNbt = mainHandStack.getNbt();
+
                     ItemStack offHandStack = mc.player.getOffHandStack();
 
                     if (copyStack.get()){
@@ -357,7 +432,9 @@ public class NbtEditor extends Module {
                             offHandStack = new ItemStack(Items.CARROT_ON_A_STICK);
                         }
                     }
-                    offHandStack.applyComponentsFrom(mainHandComponents);
+
+                    offHandStack.setNbt(mainHandNbt);
+
                     mc.interactionManager.clickCreativeStack(offHandStack, 45); // 45 is the offhand slot
                     //clickSlot twice to make the item actually appear clientside
                     mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 45, 0, SlotActionType.PICKUP, mc.player);
@@ -377,90 +454,6 @@ public class NbtEditor extends Module {
         mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 36 + mc.player.getInventory().selectedSlot, 0, SlotActionType.PICKUP, mc.player);
         mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 36 + mc.player.getInventory().selectedSlot, 0, SlotActionType.PICKUP, mc.player);
     }
-    private List<StatusEffectInstance> pileOfStatusEffects() {
-        List<StatusEffectInstance> effectInstances = new ArrayList<>();
-
-        for (StatusEffect effect : effects.get()) {
-            RegistryEntry<StatusEffect> registryEntry = Registries.STATUS_EFFECT.getEntry(effect);
-            effectInstances.add(new StatusEffectInstance(registryEntry, duration.get(), amplifier.get()));
-        }
-
-        return effectInstances;
-    }
-
-    private NbtComponent createEntityData() {
-        String entityName = entity.get().trim().replace(" ", "_");
-
-        NbtCompound entityTag = new NbtCompound();
-        entityTag.putString("id", "minecraft:" + entityName);
-        entityTag.putInt("Health", health.get());
-        entityTag.putInt("AbsorptionAmount", absorption.get());
-        entityTag.putInt("Age", age.get());
-        entityTag.putInt("ExplosionPower", exppower.get());
-        entityTag.putInt("ExplosionRadius", exppower.get());
-        if (invincible.get())entityTag.putBoolean("Invulnerable", invincible.get());
-        if (silence.get())entityTag.putBoolean("Silent", silence.get());
-        if (glow.get())entityTag.putBoolean("Glowing", glow.get());
-        if (persist.get())entityTag.putBoolean("PersistenceRequired", persist.get());
-        if (nograv.get())entityTag.putBoolean("NoGravity", nograv.get());
-        if(noAI.get())entityTag.putBoolean("NoAI", noAI.get());
-        if(falsefire.get())entityTag.putBoolean("HasVisualFire", falsefire.get());
-        if(powah.get())entityTag.putBoolean("powered", powah.get());
-        if(ignite.get())entityTag.putBoolean("ignited", ignite.get());
-        entityTag.putInt("Fuse", fuse.get());
-        entityTag.putInt("Size", size.get());
-        if(customname.get())entityTag.putBoolean("CustomNameVisible", customname.get());
-        NbtCompound customName = new NbtCompound();
-        customName.putString("text", nom.get());
-        customName.putString("color", nomcolor.get().name());
-        String serverVersion;
-        if (mc.isIntegratedServerRunning()) {
-            serverVersion = mc.getServer().getVersion();
-        } else {
-            serverVersion = mc.getCurrentServerEntry().version.getLiteralString();
-        }
-        if (serverVersion == null) {
-            entityTag.put("CustomName", customName);
-        } else {
-            if (isVersionLessThan(serverVersion, 1, 21, 5)) {
-                entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().name() + "\"}");
-            } else {
-                entityTag.put("CustomName", customName);
-            }
-        }
-        entityTag.putInt("Radius", cloudradius.get());
-        entityTag.putInt("Duration", cloudduration.get());
-        entityTag.putString("Particle", particle.get());
-        entityTag.putString("Potion", ceffect.get());
-        return NbtComponent.of(entityTag);
-    }
-    private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
-        if (serverVersion == null) return false;
-
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)");
-        java.util.regex.Matcher matcher = pattern.matcher(serverVersion);
-
-        if (matcher.find()) {
-            try {
-                int serverMajor = Integer.parseInt(matcher.group(1));
-                int serverMinor = Integer.parseInt(matcher.group(2));
-                int serverPatch = Integer.parseInt(matcher.group(3));
-
-                if (serverMajor < major) return true;
-                if (serverMajor > major) return false;
-
-                if (serverMinor < minor) return true;
-                if (serverMinor > minor) return false;
-
-                return serverPatch < patch;
-
-            } catch (NumberFormatException e) {
-                return false;
-            }
-        }
-        return false;
-    }
-
     public enum Modes {
         Entity, Item, Potion, Copy
     }

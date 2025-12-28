@@ -217,7 +217,7 @@ public class NoSpawnerDetector extends Module {
             if (!chunk.isEmpty() && !scannedChunks.contains(chunk.getPos())){
                 if ((enableDungeon.get() && mc.world.getRegistryKey() == World.OVERWORLD && chunkContainsBlock(chunk, Blocks.MOSSY_COBBLESTONE, Math.min(chunk.getSectionArray().length, 20))) || (enableMineshaft.get() && mc.world.getRegistryKey() == World.OVERWORLD && chunkContainsBlock(chunk, Blocks.COBWEB, Math.min(chunk.getSectionArray().length, 20)))) {
                     for (int x = 0; x < 16; x++) {
-                        for (int y = mc.world.getBottomY(); y < mc.world.getTopYInclusive(); y++) {
+                        for (int y = mc.world.getBottomY(); y < mc.world.getTopY(); y++) {
                             for (int z = 0; z < 16; z++) {
                                 BlockPos blockPos = new BlockPos(x + chunk.getPos().x * 16, y, z + chunk.getPos().z * 16);
                                 if (enableDungeon.get() && mc.world.getBlockState(blockPos).getBlock() == Blocks.MOSSY_COBBLESTONE) {
@@ -384,13 +384,13 @@ public class NoSpawnerDetector extends Module {
     private void displayMessage(String key, BlockPos pos) {
         if (chatFeedback.get()) {
             if (key=="dungeon") {
-                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§9NSD§r | Detected §9DUNGEON§r! Block Position: " + pos));
-                else ChatUtils.sendMsg(Text.of("§9NSD§r | Detected §9DUNGEON§r!"));
+                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§cNSD§b | Detected §cDUNGEON§b! Block Position: " + pos));
+                else ChatUtils.sendMsg(Text.of("§cNSD§b | Detected §cDUNGEON§b!"));
                 logStructure(pos);
             }
             if (key=="mineshaft") {
-                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§9NSD§r | Detected §9MINESHAFT§r! Block Position: " + pos));
-                else ChatUtils.sendMsg(Text.of("§9NSD§r | Detected §9MINESHAFT§r!"));
+                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§cNSD§b | Detected §cMINESHAFT§b! Block Position: " + pos));
+                else ChatUtils.sendMsg(Text.of("§cNSD§b | Detected §cMINESHAFT§b!"));
                 logStructure(pos);
             }
         }

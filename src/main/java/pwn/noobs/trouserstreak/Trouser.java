@@ -64,7 +64,6 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new ItemTractorBeam());
                 Modules.get().add(new LavaAura());
                 Modules.get().add(new LecternCrash());
-                Modules.get().add(new MaceKill());
                 Modules.get().add(new MobGearESP());
                 Modules.get().add(new MultiUse());
                 Modules.get().add(new MultiverseAnnihilator());

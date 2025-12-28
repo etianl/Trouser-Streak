@@ -109,7 +109,6 @@ public class PotESP extends Module {
         naturalPot.add(Items.TRIAL_KEY);
         naturalPot.add(Items.DIAMOND);
         naturalPot.add(Items.DIAMOND_BLOCK);
-        naturalPot.add(Items.MUSIC_DISC_CREATOR_MUSIC_BOX);
     }
     private int closestPotX=2000000000;
     private int closestPotY=2000000000;
@@ -195,7 +194,7 @@ public class PotESP extends Module {
             synchronized (potLocations) {
                 if (!nearesttrcr.get()) {
                     for (BlockPos pos : potLocations) {
-                    BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
+                        BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
                         if (pos != null && playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
                             int startX = pos.getX();
                             int startY = pos.getY();

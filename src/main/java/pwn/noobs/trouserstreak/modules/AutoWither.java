@@ -24,6 +24,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.GameMode;
 import org.lwjgl.glfw.GLFW;
 import pwn.noobs.trouserstreak.Trouser;
 
@@ -235,7 +236,7 @@ public class AutoWither extends Module {
             for (BlockPos pos : skullPositions) {
                 placeBlock(pos, Items.WITHER_SKELETON_SKULL);
             }
-            mc.player.getInventory().setSelectedSlot(originalSlot);
+            mc.player.getInventory().selectedSlot = originalSlot;
             onComplete.run();
         });
 
@@ -306,7 +307,7 @@ public class AutoWither extends Module {
         int slot = findHotbarSlot(item);
         if (slot == -1) return; // player doesn't have item
         assert mc.player != null;
-        mc.player.getInventory().setSelectedSlot(slot);
+        mc.player.getInventory().selectedSlot = slot;
         assert mc.interactionManager != null;
         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.ofCenter(pos), Direction.UP, pos, false));
         if(!swingHand.get()) return;
@@ -338,7 +339,7 @@ public class AutoWither extends Module {
             }
 
             // Stop if we have enough
-            if (mc.player.isInCreativeMode()){
+            if (mc.interactionManager.getCurrentGameMode() == GameMode.CREATIVE){
                 if (soulBlockCount >= 1 && skullCount >= 1) return true;
             } else {
                 if (soulBlockCount >= 4 && skullCount >= 3) return true;

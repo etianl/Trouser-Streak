@@ -23,15 +23,12 @@ import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.*;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShearsItem;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
+import net.minecraft.item.SwordItem;
+import net.minecraft.item.ToolItem;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -254,7 +251,7 @@ public class RedstoneNuker extends Module {
             .defaultValue(10)
             .range(1, 100)
             .sliderRange(1, 100)
-            .visible(antiBreak::get)
+            .visible(() -> antiBreak.get())
             .build()
     );
 
@@ -271,7 +268,6 @@ public class RedstoneNuker extends Module {
             .defaultValue(0)
             .build()
     ));
-    static Registry<Enchantment> enchantmentRegistry;
     private boolean silkTouchForEnderChest=false;
     private boolean wasPressed;
     private boolean shouldSwitch;
@@ -523,7 +519,6 @@ public class RedstoneNuker extends Module {
                 bestSlot = i;
             }
         }
-        enchantmentRegistry = mc.world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
 
         if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest, prefer.get(), itemStack -> !shouldStopUsing(itemStack))) || shouldStopUsing(currentStack) || !isTool(currentStack))) {
             ticks = switchDelay.get();
@@ -548,36 +543,31 @@ public class RedstoneNuker extends Module {
     public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, RedstoneNuker.EnchantPreference enchantPreference, Predicate<ItemStack> good) {
         if (!good.test(itemStack) || !isTool(itemStack)) return -1;
 
-        if (enchantmentRegistry != null) {
-            if (silkTouchEnderChest
-                    && state.getBlock() == Blocks.ENDER_CHEST
-                    && EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.SILK_TOUCH), itemStack) == 0) {
-                return -1;
-            }
+        if (silkTouchEnderChest
+                && state.getBlock() == Blocks.ENDER_CHEST
+                && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) == 0) {
+            return -1;
         }
 
         double score = 0;
 
         score += itemStack.getMiningSpeedMultiplier(state) * 1000;
-        if (enchantmentRegistry != null) {
-            score += EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.UNBREAKING), itemStack);
-            score += EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.EFFICIENCY), itemStack);
-            score += EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.MENDING), itemStack);
+        score += EnchantmentHelper.getLevel(Enchantments.UNBREAKING, itemStack);
+        score += EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, itemStack);
+        score += EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack);
 
-            if (enchantPreference == EnchantPreference.Fortune)
-                score += EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.FORTUNE), itemStack);
-            if (enchantPreference == EnchantPreference.SilkTouch)
-                score += EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.SILK_TOUCH), itemStack);
-        }
-        Item item = itemStack.getItem();
-        if (itemStack.isIn(ItemTags.SWORDS) && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooShootBlock))
-            score += 9000 + (item.getComponents().get(DataComponentTypes.TOOL).getSpeed(state) * 1000);
+        if (enchantPreference == EnchantPreference.Fortune) score += EnchantmentHelper.getLevel(Enchantments.FORTUNE, itemStack);
+        if (enchantPreference == EnchantPreference.SilkTouch) score += EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack);
+
+        if (itemStack.getItem() instanceof SwordItem item && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooShootBlock))
+            score += 9000 + (item.getMaterial().getMiningLevel() * 1000);
+
 
         return score;
     }
 
     public static boolean isTool(ItemStack itemStack) {
-        return itemStack.getComponents().contains(DataComponentTypes.TOOL) || itemStack.getItem() instanceof ShearsItem;
+        return itemStack.isIn(ItemTags.AXES) || itemStack.isIn(ItemTags.HOES) || itemStack.isIn(ItemTags.PICKAXES) || itemStack.isIn(ItemTags.SHOVELS) || itemStack.getItem() instanceof ShearsItem;
     }
     private boolean filterBlocks(Block block) {
         return isRedstoneBlock(block);

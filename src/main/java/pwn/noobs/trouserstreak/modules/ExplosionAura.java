@@ -8,9 +8,6 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -95,14 +92,24 @@ public class ExplosionAura extends Module {
     private void onMouseButton(MouseButtonEvent event) {
         if (mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player.getAbilities().creativeMode) {
             if (click.get()) {
+                HitResult hr = mc.cameraEntity.raycast(600, 0, true);
+                Vec3d owo = hr.getPos();
+                BlockPos pos = BlockPos.ofFloored(owo);
                 ItemStack rst = mc.player.getMainHandStack();
                 BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
                 ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
-                var changes = ComponentChanges.builder()
-                        .add(DataComponentTypes.ENTITY_DATA, createEntityData(true))
-                        .build();
-                Creeper.applyChanges(changes);
-
+                NbtCompound tag = new NbtCompound();
+                NbtList Pos = new NbtList();
+                Pos.add(NbtDouble.of(pos.getX()));
+                Pos.add(NbtDouble.of(pos.getY()));
+                Pos.add(NbtDouble.of(pos.getZ()));
+                tag.put("Pos", Pos);
+                tag.putInt("ignited", (1));
+                tag.putInt("Invulnerable", (1));
+                tag.putInt("Fuse", (0));
+                tag.putInt("NoGravity", (1));
+                tag.putInt("ExplosionRadius", cpower.get());
+                Creeper.setSubNbt("EntityTag", tag);
                 mc.interactionManager.clickCreativeStack(Creeper, 36 + mc.player.getInventory().selectedSlot);
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                 mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
@@ -117,14 +124,24 @@ public class ExplosionAura extends Module {
                     if (aticks<=atickdelay.get()){
                         aticks++;
                     } else if (aticks>atickdelay.get()) {
+                        HitResult hr = mc.cameraEntity.raycast(600, 0, true);
+                        Vec3d owo = hr.getPos();
+                        BlockPos pos = BlockPos.ofFloored(owo);
                         ItemStack rst = mc.player.getMainHandStack();
                         BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
                         ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
-                        var changes = ComponentChanges.builder()
-                                .add(DataComponentTypes.ENTITY_DATA, createEntityData(true))
-                                .build();
-                        Creeper.applyChanges(changes);
-
+                        NbtCompound tag = new NbtCompound();
+                        NbtList Pos = new NbtList();
+                        Pos.add(NbtDouble.of(pos.getX()));
+                        Pos.add(NbtDouble.of(pos.getY()));
+                        Pos.add(NbtDouble.of(pos.getZ()));
+                        tag.put("Pos", Pos);
+                        tag.putInt("ignited", (1));
+                        tag.putInt("Invulnerable", (1));
+                        tag.putInt("Fuse", (0));
+                        tag.putInt("NoGravity", (1));
+                        tag.putInt("ExplosionRadius", cpower.get());
+                        Creeper.setSubNbt("EntityTag", tag);
                         mc.interactionManager.clickCreativeStack(Creeper, 36 + mc.player.getInventory().selectedSlot);
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                         mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
@@ -139,11 +156,13 @@ public class ExplosionAura extends Module {
                     ItemStack rst = mc.player.getMainHandStack();
                     BlockHitResult bhr = new BlockHitResult(mc.player.getPos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getPos()), false);
                     ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
-                    var changes = ComponentChanges.builder()
-                            .add(DataComponentTypes.ENTITY_DATA, createEntityData(false))
-                            .build();
-                    Creeper.applyChanges(changes);
-
+                    NbtCompound tag = new NbtCompound();
+                    tag.putInt("ignited", (1));
+                    tag.putInt("Fuse", (0));
+                    tag.putInt("Invulnerable", (1));
+                    tag.putInt("NoGravity", (1));
+                    tag.putInt("ExplosionRadius", power.get());
+                    Creeper.setSubNbt("EntityTag", tag);
                     mc.interactionManager.clickCreativeStack(Creeper, 36 + mc.player.getInventory().selectedSlot);
                     mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                     mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
@@ -154,25 +173,5 @@ public class ExplosionAura extends Module {
             error("You need to be in creative mode.");
             toggle();
         }
-    }
-    private NbtComponent createEntityData(boolean click) {
-        NbtCompound entityTag = new NbtCompound();
-        entityTag.putString("id", "minecraft:creeper");
-        if (click) {
-            HitResult hr = mc.cameraEntity.raycast(600, 0, true);
-            Vec3d owo = hr.getPos();
-            BlockPos pos = BlockPos.ofFloored(owo);
-            NbtList Pos = new NbtList();
-            Pos.add(NbtDouble.of(pos.getX()));
-            Pos.add(NbtDouble.of(pos.getY()));
-            Pos.add(NbtDouble.of(pos.getZ()));
-            entityTag.put("Pos", Pos);
-        }
-        entityTag.putBoolean("ignited", true);
-        entityTag.putBoolean("Invulnerable", true);
-        entityTag.putInt("Fuse", 0);
-        entityTag.putBoolean("NoGravity", true);
-        entityTag.putInt("ExplosionRadius", cpower.get());
-        return NbtComponent.of(entityTag);
     }
 }

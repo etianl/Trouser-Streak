@@ -10,16 +10,11 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtDouble;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -472,12 +467,54 @@ public class AirstrikePlus extends Module {
                 i++;
                 if (mc.player.getAbilities().creativeMode) {
                     if (i >= delay.get()) {
-                        var changes = ComponentChanges.builder()
-                                .add(DataComponentTypes.CUSTOM_NAME, Text.literal(customName).formatted(Formatting.valueOf(namecolour.toUpperCase())))
-                                .add(DataComponentTypes.ITEM_NAME, Text.literal(customName).formatted(Formatting.valueOf(namecolour.toUpperCase())))
-                                .add(DataComponentTypes.ENTITY_DATA, createEntityData())
-                                .build();
-                        bomb.applyChanges(changes);
+                        NbtCompound tag = new NbtCompound();
+                        NbtCompound display = new NbtCompound();
+                        display.putString("Name", "{\"text\":\"" + customName + "\",\"color\":\"" + namecolour + "\"}");
+                        tag.put("display", display);
+                        String fullString = blockstate.get().toString();
+                        String[] parts = fullString.split(":");
+                        String block = parts[1];
+                        String blockName = block.replace("}", "");
+                        NbtCompound entityTag = new NbtCompound();
+                        NbtList pos = new NbtList();
+                        NbtList speedlist = new NbtList();
+                        Vec3d cpos = pickRandomPos();
+
+                        speedlist.add(NbtDouble.of(0));
+                        speedlist.add(NbtDouble.of(-speed.get()));
+                        speedlist.add(NbtDouble.of(0));
+                        pos.add(NbtDouble.of(cpos.x));
+                        pos.add(NbtDouble.of(mc.player.getY() + height.get()));
+                        pos.add(NbtDouble.of(cpos.z));
+
+                        entityTag.putString("id", "minecraft:" + entityName);
+                        entityTag.put("power", speedlist);
+                        entityTag.put("Motion", speedlist);
+                        entityTag.put("Pos", pos);
+                        entityTag.putInt("Health", health.get());
+                        entityTag.putInt("AbsorptionAmount", absorption.get());
+                        if (ageSpecify.get()) entityTag.putInt("Age", age.get());
+                        entityTag.putInt("ExplosionPower", exppower.get());
+                        entityTag.putInt("ExplosionRadius", exppower.get());
+                        NbtCompound blockState = new NbtCompound();
+                        blockState.putString("Name", "minecraft:" + blockName);
+                        entityTag.put("BlockState", blockState);
+
+                        if (invincible.get()) entityTag.putBoolean("Invulnerable", invincible.get());
+                        if (silence.get()) entityTag.putBoolean("Silent", silence.get());
+                        if (glow.get()) entityTag.putBoolean("Glowing", glow.get());
+                        if (persist.get()) entityTag.putBoolean("PersistenceRequired", persist.get());
+                        if (nograv.get()) entityTag.putBoolean("NoGravity", nograv.get());
+                        if (noAI.get()) entityTag.putBoolean("NoAI", noAI.get());
+                        if (falsefire.get()) entityTag.putBoolean("HasVisualFire", falsefire.get());
+                        if (powah.get()) entityTag.putBoolean("powered", powah.get());
+                        if (ignite.get()) entityTag.putBoolean("ignited", ignite.get());
+                        entityTag.putInt("Fuse", fuse.get());
+                        entityTag.putInt("Size", size.get());
+                        if (customname.get()) entityTag.putBoolean("CustomNameVisible", customname.get());
+                        entityTag.putString("CustomName", "{\"text\":\"" + customName + "\",\"color\":\"" + namecolour + "\"}");
+                        tag.put("EntityTag", entityTag);
+                        bomb.setNbt(tag);
                         mc.interactionManager.clickCreativeStack(bomb, 36 + mc.player.getInventory().selectedSlot);
                         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
                         mc.interactionManager.clickCreativeStack(bfr, 36 + mc.player.getInventory().selectedSlot);
@@ -490,95 +527,7 @@ public class AirstrikePlus extends Module {
             }
         }
     }
-    private NbtComponent createEntityData() {
-        String fullString = blockstate.get().toString();
-        String[] parts = fullString.split(":");
-        String block = parts[1];
-        String blockName = block.replace("}", "");
-        NbtCompound entityTag = new NbtCompound();
-        NbtList pos = new NbtList();
-        NbtList speedlist = new NbtList();
-        Vec3d cpos = pickRandomPos();
 
-        speedlist.add(NbtDouble.of(0));
-        speedlist.add(NbtDouble.of(-speed.get()));
-        speedlist.add(NbtDouble.of(0));
-        pos.add(NbtDouble.of(cpos.x));
-        pos.add(NbtDouble.of(mc.player.getY() + height.get()));
-        pos.add(NbtDouble.of(cpos.z));
-
-        entityTag.putString("id", "minecraft:" + entityName);
-        entityTag.put("power", speedlist);
-        entityTag.put("Motion", speedlist);
-        entityTag.put("Pos", pos);
-        entityTag.putInt("Health", health.get());
-        entityTag.putInt("AbsorptionAmount", absorption.get());
-        if (ageSpecify.get()) entityTag.putInt("Age", age.get());
-        entityTag.putInt("ExplosionPower", exppower.get());
-        entityTag.putInt("ExplosionRadius", exppower.get());
-        NbtCompound blockState = new NbtCompound();
-        blockState.putString("Name", "minecraft:" + blockName);
-        entityTag.put("BlockState", blockState);
-        NbtCompound CustomNameNBT = new NbtCompound();
-        CustomNameNBT.putString("text", customName);
-        CustomNameNBT.putString("color", namecolour);
-
-        if (invincible.get()) entityTag.putBoolean("Invulnerable", invincible.get());
-        if (silence.get()) entityTag.putBoolean("Silent", silence.get());
-        if (glow.get()) entityTag.putBoolean("Glowing", glow.get());
-        if (persist.get()) entityTag.putBoolean("PersistenceRequired", persist.get());
-        if (nograv.get()) entityTag.putBoolean("NoGravity", nograv.get());
-        if (noAI.get()) entityTag.putBoolean("NoAI", noAI.get());
-        if (falsefire.get()) entityTag.putBoolean("HasVisualFire", falsefire.get());
-        if (powah.get()) entityTag.putBoolean("powered", powah.get());
-        if (ignite.get()) entityTag.putBoolean("ignited", ignite.get());
-        entityTag.putInt("Fuse", fuse.get());
-        entityTag.putInt("Size", size.get());
-        if (customname.get()) entityTag.putBoolean("CustomNameVisible", customname.get());
-        String serverVersion;
-        if (mc.isIntegratedServerRunning()) {
-            serverVersion = mc.getServer().getVersion();
-        } else {
-            serverVersion = mc.getCurrentServerEntry().version.getLiteralString();
-        }
-        if (serverVersion == null) {
-            entityTag.put("CustomName", CustomNameNBT);
-        } else {
-            if (isVersionLessThan(serverVersion, 1, 21, 5)) {
-                entityTag.putString("CustomName", "{\"text\":\"" + nom.get() + "\",\"color\":\"" + nomcolor.get().name() + "\"}");
-            } else {
-                entityTag.put("CustomName", CustomNameNBT);
-            }
-        }
-
-        return NbtComponent.of(entityTag);
-    }
-    private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
-        if (serverVersion == null) return false;
-
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)");
-        java.util.regex.Matcher matcher = pattern.matcher(serverVersion);
-
-        if (matcher.find()) {
-            try {
-                int serverMajor = Integer.parseInt(matcher.group(1));
-                int serverMinor = Integer.parseInt(matcher.group(2));
-                int serverPatch = Integer.parseInt(matcher.group(3));
-
-                if (serverMajor < major) return true;
-                if (serverMajor > major) return false;
-
-                if (serverMinor < minor) return true;
-                if (serverMinor > minor) return false;
-
-                return serverPatch < patch;
-
-            } catch (NumberFormatException e) {
-                return false;
-            }
-        }
-        return false;
-    }
     private void executeCommandsToCreateEntities() {
         speedlist = new NbtList();
         if (randomnomcolor.get()){

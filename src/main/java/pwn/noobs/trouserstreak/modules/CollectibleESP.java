@@ -7,9 +7,9 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.BannerBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.WallBannerBlock;
-import net.minecraft.block.BannerBlock;
 import net.minecraft.block.entity.BannerBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.enchantment.Enchantment;
@@ -17,8 +17,9 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.item.*;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.Registries;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
@@ -44,7 +45,6 @@ public class CollectibleESP extends Module {
             Items.NETHERITE_LEGGINGS,
             Items.NETHERITE_BOOTS,
             Items.ELYTRA,
-            Items.MACE,
             Items.TRIDENT,
             Items.DIAMOND_SWORD,
             Items.DIAMOND_AXE,
@@ -118,37 +118,34 @@ public class CollectibleESP extends Module {
             .visible(() -> enchants.get())
             .build()
     );
-    private final Setting<Set<RegistryKey<Enchantment>>> toolenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+    private final Setting<List<Enchantment>> toolenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("Mining Tool Enchants")
             .description("List of enchantments required.")
             .visible(() -> enchants.get() && certainenchants.get())
             .defaultValue(Enchantments.EFFICIENCY, Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> swordenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+            .build()
+    );
+    private final Setting<List<Enchantment>> swordenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("Sword Enchants")
             .description("List of enchantments required.")
             .visible(() -> enchants.get() && certainenchants.get())
             .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> armorenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+            .build()
+    );
+    private final Setting<List<Enchantment>> armorenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("Armor Enchants")
             .description("List of enchantments required.")
             .visible(() -> enchants.get() && certainenchants.get())
             .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> maceenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
-            .name("Mace Enchants")
-            .description("List of enchantments required.")
-            .visible(() -> enchants.get() && certainenchants.get())
-            .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> tridentenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+            .build()
+    );
+    private final Setting<List<Enchantment>> tridentenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("Trident Enchants")
             .description("List of enchantments required.")
             .visible(() -> enchants.get() && certainenchants.get())
             .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build());
-
+            .build()
+    );
     private final Setting<SettingColor> mapColor = sgColors.add(new ColorSetting.Builder()
             .name("map-color")
             .description("fill color for item frames containing maps.")
@@ -347,33 +344,17 @@ public class CollectibleESP extends Module {
             }
         }
     }
-    public static boolean isTool(ItemStack itemStack) {
-        return itemStack.isIn(ItemTags.AXES) ||
-                itemStack.isIn(ItemTags.HOES) ||
-                itemStack.isIn(ItemTags.PICKAXES) ||
-                itemStack.isIn(ItemTags.SHOVELS) ||
-                itemStack.getItem() instanceof ShearsItem ||
-                itemStack.getItem() instanceof FlintAndSteelItem;
-    }
-    public static boolean isArmor(ItemStack itemStack) {
-        return itemStack.isIn(ItemTags.HEAD_ARMOR) ||
-                itemStack.isIn(ItemTags.CHEST_ARMOR) ||
-                itemStack.isIn(ItemTags.LEG_ARMOR) ||
-                itemStack.isIn(ItemTags.FOOT_ARMOR);
-    }
     public boolean shouldSkip(ItemStack stack) {
         boolean skip = false;
         if (enchants.get()) {
-            if (!certainenchants.get() && (isTool(stack) || isArmor(stack) || stack.isIn(ItemTags.SWORDS) || stack.getItem() instanceof FishingRodItem || stack.getItem() instanceof FlintAndSteelItem || stack.getItem() instanceof MaceItem || stack.getItem() instanceof ShearsItem || stack.getItem() instanceof ShieldItem || stack.getItem() instanceof TridentItem) && stack.isEnchantable() && stack.getEnchantments().isEmpty()) skip = true;
+            if (!certainenchants.get() && (stack.getItem() instanceof MiningToolItem || stack.getItem() instanceof ArmorItem || stack.getItem() instanceof SwordItem || stack.getItem() instanceof FishingRodItem || stack.getItem() instanceof FlintAndSteelItem || stack.getItem() instanceof ShearsItem || stack.getItem() instanceof ShieldItem || stack.getItem() instanceof TridentItem) && stack.isEnchantable() && stack.getEnchantments().isEmpty()) skip = true;
             else if (certainenchants.get()){
-                if (isTool(stack)){
+                if (stack.getItem() instanceof ToolItem && !(stack.getItem() instanceof SwordItem)){
                     skip = compareEnchants(stack, toolenchants);
-                } else if (stack.isIn(ItemTags.SWORDS)){
+                } else if (stack.getItem() instanceof SwordItem){
                     skip = compareEnchants(stack, swordenchants);
-                } else if (isArmor(stack)){
+                } else if (stack.getItem() instanceof ArmorItem){
                     skip = compareEnchants(stack, armorenchants);
-                } else if (stack.getItem() instanceof MaceItem){
-                    skip = compareEnchants(stack, maceenchants);
                 } else if (stack.getItem() instanceof TridentItem){
                     skip = compareEnchants(stack, tridentenchants);
                 }
@@ -382,13 +363,19 @@ public class CollectibleESP extends Module {
         if (!items.get().contains(stack.getItem())) skip = true;
         return skip;
     }
-    private boolean compareEnchants(ItemStack stack, Setting<Set<RegistryKey<Enchantment>>> enchantsetting) {
+    private boolean compareEnchants(ItemStack stack, Setting<List<Enchantment>> enchantsetting) {
         boolean skip = false;
-        Set<RegistryKey<Enchantment>> itemenchants = new HashSet<>();
-        stack.getEnchantments().getEnchantments().forEach(enchantment -> {
-            itemenchants.add(enchantment.getKey().get());
+        Set<Enchantment> itemenchants = new HashSet<>();
+        stack.getEnchantments().forEach(enchantmentNbt -> {
+            if (enchantmentNbt instanceof NbtCompound nbt) {
+                Identifier enchantmentId = new Identifier(nbt.getString("id"));
+                Enchantment enchantment = Registries.ENCHANTMENT.get(enchantmentId);
+                if (enchantment != null) {
+                    itemenchants.add(enchantment);
+                }
+            }
         });
-        for (RegistryKey<Enchantment> enchantKey : enchantsetting.get()) {
+        for (Enchantment enchantKey : enchantsetting.get()) {
             if (!itemenchants.contains(enchantKey)) {
                 skip = true;
                 break;

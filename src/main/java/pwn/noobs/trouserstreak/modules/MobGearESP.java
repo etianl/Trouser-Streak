@@ -18,12 +18,12 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.*;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
@@ -48,7 +48,6 @@ public class MobGearESP extends Module {
             Items.NETHERITE_LEGGINGS,
             Items.NETHERITE_BOOTS,
             Items.ELYTRA,
-            Items.MACE,
             Items.DIAMOND_SWORD,
             Items.DIAMOND_AXE,
             Items.DIAMOND_PICKAXE,
@@ -132,36 +131,34 @@ public class MobGearESP extends Module {
             .visible(() -> enchants.get())
             .build()
     );
-    private final Setting<Set<RegistryKey<Enchantment>>> toolenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+    private final Setting<List<Enchantment>> toolenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("Mining Tool Enchants")
             .description("List of enchantments required.")
             .visible(() -> enchants.get() && certainenchants.get())
             .defaultValue(Enchantments.EFFICIENCY, Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> swordenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+            .build()
+    );
+    private final Setting<List<Enchantment>> swordenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("Sword Enchants")
             .description("List of enchantments required.")
             .visible(() -> enchants.get() && certainenchants.get())
             .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> armorenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+            .build()
+    );
+    private final Setting<List<Enchantment>> armorenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("Armor Enchants")
             .description("List of enchantments required.")
             .visible(() -> enchants.get() && certainenchants.get())
             .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> maceenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
-            .name("Mace Enchants")
-            .description("List of enchantments required.")
-            .visible(() -> enchants.get() && certainenchants.get())
-            .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> tridentenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+            .build()
+    );
+    private final Setting<List<Enchantment>> tridentenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("Trident Enchants")
             .description("List of enchantments required.")
             .visible(() -> enchants.get() && certainenchants.get())
             .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build());
+            .build()
+    );
     private final Setting<Boolean> chatFeedback = sgGeneral.add(new BoolSetting.Builder()
             .name("Chat feedback")
             .description("Display info about mobs holding gear in chat")
@@ -308,61 +305,32 @@ public class MobGearESP extends Module {
         interpolatedColor = new Color(r, g, b, a);
         return interpolatedColor;
     }
-    public static ArrayList<ItemStack> getArmorItems(LivingEntity livingEntity) {
-        ArrayList<ItemStack> armorItems = new ArrayList<>();
-        armorItems.add(livingEntity.getEquippedStack(EquipmentSlot.HEAD));
-        armorItems.add(livingEntity.getEquippedStack(EquipmentSlot.CHEST));
-        armorItems.add(livingEntity.getEquippedStack(EquipmentSlot.LEGS));
-        armorItems.add(livingEntity.getEquippedStack(EquipmentSlot.FEET));
-        return armorItems;
-    }
-    public static ArrayList<ItemStack> getHandItems(LivingEntity livingEntity) {
-        ArrayList<ItemStack> handItems = new ArrayList<>();
-        handItems.add(livingEntity.getEquippedStack(EquipmentSlot.MAINHAND));
-        handItems.add(livingEntity.getEquippedStack(EquipmentSlot.OFFHAND));
-        return handItems;
-    }
-    public static boolean isArmor(ItemStack itemStack) {
-        return itemStack.isIn(ItemTags.HEAD_ARMOR) ||
-                itemStack.isIn(ItemTags.CHEST_ARMOR) ||
-                itemStack.isIn(ItemTags.LEG_ARMOR) ||
-                itemStack.isIn(ItemTags.FOOT_ARMOR);
-    }
-    public static boolean isTool(ItemStack itemStack) {
-        return itemStack.isIn(ItemTags.AXES) ||
-                itemStack.isIn(ItemTags.HOES) ||
-                itemStack.isIn(ItemTags.PICKAXES) ||
-                itemStack.isIn(ItemTags.SHOVELS) ||
-                itemStack.getItem() instanceof ShearsItem ||
-                itemStack.getItem() instanceof FlintAndSteelItem;
-    }
+
     private ArrayList<Item> getPlayerItems(LivingEntity livingEntity) {
         ArrayList<Item> playerItems = new ArrayList<>();
-        for (ItemStack item  : getArmorItems(livingEntity)) {
+        for (ItemStack item  : livingEntity.getArmorItems()) {
             boolean skip = false;
             if (enchants.get()) {
-                if (!certainenchants.get() && isArmor(item) && item.isEnchantable() && item.getEnchantments().isEmpty()) skip = true;
+                if (!certainenchants.get() && item.getItem() instanceof ArmorItem && item.isEnchantable() && item.getEnchantments().isEmpty()) skip = true;
                 else if (certainenchants.get()){
-                    if (isArmor(item)) skip = compareEnchants(item, armorenchants);
+                    if (item.getItem() instanceof ArmorItem) skip = compareEnchants(item, armorenchants);
                 }
             }
             if (skip) continue;
             if (items.get().contains(item.getItem())) playerItems.add(item.getItem());
 
         }
-        for (ItemStack item : getHandItems(livingEntity)) {
+        for (ItemStack item : livingEntity.getHandItems()) {
             boolean skip = false;
             if (enchants.get()) {
-                if (!certainenchants.get() && (isTool(item) || isArmor(item) || item.isIn(ItemTags.SWORDS) || item.getItem() instanceof FishingRodItem || item.getItem() instanceof FlintAndSteelItem || item.getItem() instanceof MaceItem || item.getItem() instanceof ShearsItem || item.getItem() instanceof ShieldItem || item.getItem() instanceof TridentItem) && item.isEnchantable() && item.getEnchantments().isEmpty()) skip = true;
+                if (!certainenchants.get() && (item.getItem() instanceof MiningToolItem || item.getItem() instanceof ArmorItem || item.getItem() instanceof SwordItem || item.getItem() instanceof FishingRodItem || item.getItem() instanceof FlintAndSteelItem || item.getItem() instanceof ShearsItem || item.getItem() instanceof ShieldItem || item.getItem() instanceof TridentItem) && item.isEnchantable() && item.getEnchantments().isEmpty()) skip = true;
                 else if (certainenchants.get()){
-                    if (isTool(item)){
+                    if (item.getItem() instanceof MiningToolItem){
                         skip = compareEnchants(item, toolenchants);
-                    } else if (item.isIn(ItemTags.SWORDS)){
+                    } else if (item.getItem() instanceof SwordItem){
                         skip = compareEnchants(item, swordenchants);
-                    } else if (isArmor(item)){
+                    } else if (item.getItem() instanceof ArmorItem){
                         skip = compareEnchants(item, armorenchants);
-                    } else if (item.getItem() instanceof MaceItem){
-                        skip = compareEnchants(item, maceenchants);
                     } else if (item.getItem() instanceof TridentItem){
                         skip = compareEnchants(item, tridentenchants);
                     }
@@ -373,13 +341,19 @@ public class MobGearESP extends Module {
         }
         return playerItems;
     }
-    private boolean compareEnchants(ItemStack stack, Setting<Set<RegistryKey<Enchantment>>> enchantsetting) {
+    private boolean compareEnchants(ItemStack stack, Setting<List<Enchantment>> enchantsetting) {
         boolean skip = false;
-        Set<RegistryKey<Enchantment>> itemenchants = new HashSet<>();
-        stack.getEnchantments().getEnchantments().forEach(enchantment -> {
-            itemenchants.add(enchantment.getKey().get());
+        Set<Enchantment> itemenchants = new HashSet<>();
+        stack.getEnchantments().forEach(enchantmentNbt -> {
+            if (enchantmentNbt instanceof NbtCompound nbt) {
+                Identifier enchantmentId = new Identifier(nbt.getString("id"));
+                Enchantment enchantment = Registries.ENCHANTMENT.get(enchantmentId);
+                if (enchantment != null) {
+                    itemenchants.add(enchantment);
+                }
+            }
         });
-        for (RegistryKey<Enchantment> enchantKey : enchantsetting.get()) {
+        for (Enchantment enchantKey : enchantsetting.get()) {
             if (!itemenchants.contains(enchantKey)) {
                 skip = true;
                 break;
@@ -390,7 +364,7 @@ public class MobGearESP extends Module {
     public boolean shouldSkip(LivingEntity entity) {
         if (entity.isPlayer()) return true;
         ArrayList<Item> playerItems = getPlayerItems(entity);
-        if (entity == mc.getCameraEntity() && mc.options.getPerspective().isFirstPerson()) return true;
+        if (entity == mc.cameraEntity && mc.options.getPerspective().isFirstPerson()) return true;
         return playerItems.isEmpty() || !EntityUtils.isInRenderDistance(entity);
     }
 
@@ -428,5 +402,4 @@ public class MobGearESP extends Module {
             });
         }
     }
-
 }

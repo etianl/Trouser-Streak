@@ -2,18 +2,23 @@
 
 package pwn.noobs.trouserstreak.modules;
 
-import pwn.noobs.trouserstreak.Trouser;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
+import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.settings.IntSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
+import pwn.noobs.trouserstreak.Trouser;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class MultiverseAnnihilator extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();

@@ -18,7 +18,6 @@ import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
@@ -34,8 +33,8 @@ public class ElytraCount extends HudElement {
             .name("min-durability")
             .description("Durability threshold to count elytras.")
             .defaultValue(300)
-            .range(1, Items.ELYTRA.getComponents().get(DataComponentTypes.MAX_DAMAGE) - 1)
-            .sliderRange(1, Items.ELYTRA.getComponents().get(DataComponentTypes.MAX_DAMAGE) - 1)
+            .range(1, Items.ELYTRA.getMaxDamage() - 1)
+            .sliderRange(1, Items.ELYTRA.getMaxDamage() - 1)
             .build()
     );
 

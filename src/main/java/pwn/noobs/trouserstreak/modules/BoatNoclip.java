@@ -1,5 +1,7 @@
 package pwn.noobs.trouserstreak.modules;
 
+import io.netty.buffer.Unpooled;
+import meteordevelopment.meteorclient.events.entity.BoatMoveEvent;
 import meteordevelopment.meteorclient.events.entity.LivingEntityMoveEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -14,6 +16,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.vehicle.BoatEntity;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.math.BlockPos;
@@ -105,20 +108,24 @@ public class BoatNoclip extends Module {
         if (mc.player != null && mc.player.getVehicle() instanceof BoatEntity boat) {
             insideBlock = isInsideBlock(boat);
             if (sentPacket) {
-                VehicleMoveC2SPacket packet = VehicleMoveC2SPacket.fromVehicle(boat);
-                ((IVec3d) packet.position()).meteor$setY(lastPacketY);
+                PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+                buf.writeDouble(boat.getX());
+                buf.writeDouble(lastPacketY);
+                buf.writeDouble(boat.getZ());
+                buf.writeFloat(boat.getYaw());
+                buf.writeFloat(boat.getPitch());
+
+                VehicleMoveC2SPacket packet = new VehicleMoveC2SPacket(buf);
                 mc.player.networkHandler.sendPacket(packet);
                 sentPacket = false;
             }
         }
-
         delayLeft--;
     }
 
     @EventHandler
-    private void onEntityMove(LivingEntityMoveEvent event) {
-        Entity entity = event.entity;
-        if (!(entity instanceof BoatEntity)) return;
+    private void onEntityMove(BoatMoveEvent event) {
+        BoatEntity entity = event.boat;
         if (entity.getControllingPassenger() != mc.player) return;
 
         double velX = entity.getVelocity().x;
@@ -142,7 +149,7 @@ public class BoatNoclip extends Module {
         else velY -= fallSpeed.get() / 20;
 
         entity.setYaw(mc.player.getYaw());
-        ((IVec3d) event.movement).meteor$set(velX, velY, velZ);
+        ((IVec3d) event.boat.getVelocity()).set(velX, velY, velZ);
     }
 
     @EventHandler
@@ -151,10 +158,19 @@ public class BoatNoclip extends Module {
         if (!antiKick.get()) return;
         if (!(mc.player.getVehicle() instanceof BoatEntity)) return;
 
-        double currentY = packet.position().y;
+        double currentY = packet.getY();
 
         if (delayLeft <= 0 && !sentPacket && shouldFlyDown(currentY) && isOnAir(mc.player.getVehicle())) {
-            ((IVec3d) packet.position()).meteor$setY(lastPacketY - 0.03130D);
+            BoatEntity boat = (BoatEntity) mc.player.getVehicle();
+            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+            buf.writeDouble(boat.getX());
+            buf.writeDouble(lastPacketY - 0.03130D);
+            buf.writeDouble(boat.getZ());
+            buf.writeFloat(boat.getYaw());
+            buf.writeFloat(boat.getPitch());
+
+            VehicleMoveC2SPacket spoofed = new VehicleMoveC2SPacket(buf);
+            mc.player.networkHandler.sendPacket(spoofed);
             sentPacket = true;
             delayLeft = delay.get();
         }

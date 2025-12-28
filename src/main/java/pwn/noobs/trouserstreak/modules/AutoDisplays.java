@@ -15,9 +15,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -391,8 +388,9 @@ public class AutoDisplays extends Module {
     private ItemStack createTextDisplayEgg(String text, int brightness, int argbColor, BlockPos pos) {
         ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
 
-        NbtCompound entityTag = new NbtCompound();
+        NbtCompound mainTag = new NbtCompound();
 
+        NbtCompound entityTag = new NbtCompound();
         entityTag.putString("id", "minecraft:text_display");
 
         NbtList Pos = new NbtList();
@@ -414,10 +412,9 @@ public class AutoDisplays extends Module {
         tags.add(NbtString.of("MOL"));
         entityTag.put("Tags", tags);
 
-        var changes = ComponentChanges.builder()
-                .add(DataComponentTypes.ENTITY_DATA, NbtComponent.of(entityTag))
-                .build();
-        item.applyChanges(changes);
+        mainTag.put("EntityTag", entityTag);
+
+        item.setNbt(mainTag);
 
         return item;
     }

@@ -64,7 +64,7 @@ public class InfiniteElytra extends Module {
     private void onTick(TickEvent.Post event) {
         if (mc.player == null || mc.world == null) return;
 
-        if (!playerWasFlying) playerWasFlying = mc.player.isGliding();
+        if (!playerWasFlying) playerWasFlying = mc.player.isFallFlying();
         if (!playerWasFlying) return;
 
         tickCounter++;
@@ -95,7 +95,7 @@ public class InfiniteElytra extends Module {
                 }
             }
 
-            if (chestStack.getItem() == Items.ELYTRA && !mc.player.isOnGround() && !mc.player.isGliding()) {
+            if (chestStack.getItem() == Items.ELYTRA && !mc.player.isOnGround() && !mc.player.isFallFlying()) {
                 mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
             }
         } else {
