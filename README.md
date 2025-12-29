@@ -85,7 +85,7 @@ Adds a custom Baritone #mine command to your message history containing all the 
 ### **BoatKill:** 
 Kills passengers in a boat using funny packets. Is patched in Minecraft 1.21.2. (Credits to [filepile](https://github.com/not-filepile) for writing this and [Nxyi](https://github.com/Nxyi) for making it only kill the passenger!)
 ### **BoatNoclip:**
-Allows you to disable clipping of blocks when you are in a boat. Currently only tested to be working in Paper servers of Minecraft version 1.21.11. It likely works in more servers too! (Credits to [aisiaiiad](https://github.com/aisiaiiad): [PR179](https://github.com/etianl/Trouser-Streak/pull/179)
+Allows you to disable clipping of blocks when you are in a boat. Currently only tested to be working in Paper servers of Minecraft version 1.21.11. It likely works in more servers too! (Credits to [agreed](https://github.com/aisiaiiad): [PR179](https://github.com/etianl/Trouser-Streak/pull/179)
 ### **Book And Quill Dupe:** 
 Overflows data in a book's title to cause dupes and chunk bans. (Credits to [Thorioum](https://github.com/Thorioum)!)
 ### **BungeeSpoofer:** 
@@ -94,6 +94,19 @@ Allows you to join servers with an exposed bungeecord backend. (Thank you [DAMcr
 Moves you down on a tick-based timer. Added in due to the lack of a "Normal" mode antikick for velocity Flight in MeteorClient. Bind it to the same key as Flight. (Credits to etianl :D)
 ### **InfiniteElytra:** 
 Automatically toggles Elytra on/off to conserve durability and auto-uses rockets maintaining flight. (Written by etianl with inspiration from this video https://www.youtube.com/watch?v=WYIMsWBxIhI)
+### **Infinite Reach:**
+Allows you to attack and Mace Smash things at a further distance than would normally be allowed. It relys on sending packets to allow you to blink to the target and back while attacking.
+(Thank you to [agreed](https://github.com/aisiaiiad) for this!!)
+
+**Important notes:**
+- If the player's onGround value is false (ex. using Flight module) while using this you may take fall damage.
+- If the "Clip up" option is true and theplayer's onGround value is false while using this you **will** take big fall damage
+- If MaceKill is enabled with this you will not blink back to the start position, or it may not work at all if you are attacking with a mace.
+- "Clip up" option is not available with vanilla mode because those servers do not allow enough movement packets.
+- If "Clip up" is enabled and "Home Teleport" is disabled and you are NOT using a Mace you will likely die to fall damage.
+
+**Fall damage while flying can be avoided if attacking with a Mace because it will always Mace Smash when you are flying above the target.**\
+***This allows you to do Mace Smashes from a long range on vanilla servers!***
 ### **InfiniteTools:** 
 Swaps to a junk version of the same tool you are using to conserve durability. (This was written based on the AttributeSwap module. Thank you to therandomdude for the idea! https://github.com/etianl/Trouser-Streak/issues/134)
 ###  **Inventory Dupe:** 
