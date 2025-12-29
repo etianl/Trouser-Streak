@@ -56,6 +56,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new HandOfGod());
                 Modules.get().add(new HoleAndTunnelAndStairsESP());
                 Modules.get().add(new InfiniteElytra());
+                Modules.get().add(new InfiniteReach());
                 Modules.get().add(new InfiniteTools());
                 Modules.get().add(new InstaMineNuker());
                 Modules.get().add(new InstaSafetyBox());

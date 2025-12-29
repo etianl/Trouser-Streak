@@ -37,9 +37,10 @@ public class AutoVaultClipCommand extends Command {
                             mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(mc.player.getVehicle()));
                         }
                         vehicle.setPosition(vehicle.getX(), isopenair1.getY(), vehicle.getZ());
-                    }
-                    for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
-                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
+                    } else {
+                        for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
+                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
+                        }
                     }
                     player.setPosition(player.getX(), isopenair1.getY(), player.getZ());
                     return SINGLE_SUCCESS;
@@ -62,9 +63,10 @@ public class AutoVaultClipCommand extends Command {
                             mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(mc.player.getVehicle()));
                         }
                         vehicle.setPosition(vehicle.getX(), isopenair2.getY(), vehicle.getZ());
-                    }
-                    for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
-                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
+                    } else {
+                        for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
+                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
+                        }
                     }
                     mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), isopenair2.getY(), mc.player.getZ(), false));
                     mc.player.setPosition(mc.player.getX(), isopenair2.getY(), mc.player.getZ());
@@ -93,9 +95,10 @@ public class AutoVaultClipCommand extends Command {
                         }
 
                         vehicle.setPosition(vehicle.getX(), newopenair2.getY(), vehicle.getZ());
-                    }
-                    for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
-                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
+                    } else {
+                        for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
+                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
+                        }
                     }
                     player.setPosition(player.getX(), newopenair2.getY(), player.getZ());
                     return SINGLE_SUCCESS;
