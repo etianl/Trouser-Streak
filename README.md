@@ -31,19 +31,19 @@ In no particular order
 # Modules:
 *Categorized like they are in the modules menu!*
 ## TrouserStreak
-### **Aim Bot:**
+### **Aim Bot:** 
 Locks your view onto the LivingEntity that you were aiming at when the module is activated. (requested by DXRK-0078 in [Issue: 169](https://github.com/etianl/Trouser-Streak/issues/169))
 ### **AnHero:**
 Become An Hero! (Credits to etianl :D)
-### **Attribute Swap:**
+### **Attribute Swap:** 
 Swaps the current main hand item with another item on the hotbar for a single tick when you attack an entity. The attributes from the target item you are swapping to will be applied to the item you are swapping from. (Credits to [DonKisser](https://github.com/DonKisser) for this module! Their inspiration was this video: https://www.youtube.com/watch?v=q99eqD_fBqo)
-### **AutoDrop:**
+### **AutoDrop:** 
 Drops the stack in your selected slot, or choose a slot to dump. (Credits to etianl :D)
 ### **AutoLavaCaster:**
-Timer based lavacasting bot. Aim at the top of the block you want to cast on and activate the module. (Credits to etianl :D)
+Timer based lavacasting bot. Aim at the top of the block you want to cast on and activate the module. (Credits to etianl :D) 
 
-It places lava, then after an amount of time removes the lava, places the water after a specified delay, removes it after a specified delay, it will build the mountain upward, tower you up and repeat.
-
+It places lava, then after an amount of time removes the lava, places the water after a specified delay, removes it after a specified delay, it will build the mountain upward, tower you up and repeat. 
+ 
 **AutoLavaCaster Notes:**\
 By default the timings are based on the last set of stairs made with AutoMountain! (UseLastMountain mode)
 - UseLastMountain timing mode calculates the flow rate correctly if the top of the mountain is a 45 degree angle and the rest is going straight down to the ground.
@@ -59,7 +59,7 @@ By default the timings are based on the last set of stairs made with AutoMountai
 - Rotating your character will break AutoLavaCaster. Disable rotate options in Freecam, Killaura, and any others that will rotate you when casting.
 - The timing will break if the server is under 15TPS.
 - If using AutoPosition and only slightly standing on a block (as far off the edge as you can get holdingshift) it will break.
-### **AutoMountain:**
+### **AutoMountain:** 
 Builds stairs for making lavacasts! (Credits to etianl :D)(Loosely based on the AutoStaircase from [Frostburn Client](https://github.com/evaan/FrostBurn))
 
 Includes a "MountainMakerBot" option! https://www.youtube.com/watch?v=EbZs6FZrNjg
@@ -71,58 +71,71 @@ Includes a "MountainMakerBot" option! https://www.youtube.com/watch?v=EbZs6FZrNj
 - ForwardKey makes stairs up, Back Key makes stairs down.
 - JumpKey adjusts spacing of stairs according to the OnDemandSpacing value.
 - Start building, then hold SneakKey and also hold Left or RightKey as well to build stairs diagonally. Release left or right key first to continue building in the direction you were prior.
-### **AutoStaircase:**
+### **AutoStaircase:** 
 Builds stairs upward in the direction you are facing by running forward and jumping. (Credits to [majorsopa](https://github.com/majorsopa) for writing the original in the [Frostburn Client](https://github.com/evaan/FrostBurn). I just made it work good)
 ### **Auto Wither:**
 This allows you to build withers with just one click! (Skidded the module from here [Source](https://github.com/Germanminer/MeteorServerUtils/blob/master/src/main/java/com/example/addon/modules/AutoWither.java). Made by [Germanminer](https://github.com/Germanminer)!
 Thank them for their efforts!)
-### **BetterAutoSign:**
+### **BetterAutoSign:** 
 Automatically writes signs with the text you specify. Includes a "Sign Aura" option which rewrites all the surrounding signs. (Credits to Meteor-Tweaks for BetterAutoSign, and to [stever9487](https://github.com/stever9487) for the Sign Aura based off of Meteor Rejects' Chest Aura.)
-### **BetterScaffold:**
+### **BetterScaffold:** 
 Give you more options for scaffolding such as bigger range. (Credits to Meteor-Tweaks)
-### **BlockListMineCommand:**
+### **BlockListMineCommand:** 
 Adds a custom Baritone #mine command to your message history containing all the blocks in a blocklist that are near you. Press T then up arrow, then ENTER key to execute the command. BETTER CHAT module is recommended for infinitely long commands. (Credits to etianl :D)
-### **BoatKill:**
+### **BoatKill:** 
 Kills passengers in a boat using funny packets. Is patched in Minecraft 1.21.2. (Credits to [filepile](https://github.com/not-filepile) for writing this and [Nxyi](https://github.com/Nxyi) for making it only kill the passenger!)
 ### **BoatNoclip:**
-Allows you to disable clipping of blocks when you are in a boat. Currently only tested to be working in Paper servers of Minecraft version 1.21.11. It likely works in more servers too! (Credits to [aisiaiiad](https://github.com/aisiaiiad): [PR179](https://github.com/etianl/Trouser-Streak/pull/179)
-### **Book And Quill Dupe:**
+Allows you to disable clipping of blocks when you are in a boat. Currently only tested to be working in Paper servers of Minecraft version 1.21.11. It likely works in more servers too! (Credits to [agreed](https://github.com/aisiaiiad): [PR179](https://github.com/etianl/Trouser-Streak/pull/179)
+### **Book And Quill Dupe:** 
 Overflows data in a book's title to cause dupes and chunk bans. (Credits to [Thorioum](https://github.com/Thorioum)!)
-### **BungeeSpoofer:**
+### **BungeeSpoofer:** 
 Allows you to join servers with an exposed bungeecord backend. (Thank you [DAMcraft](https://github.com/DAMcraft/MeteorServerSeeker))
-### **FlightAntikick:**
+### **FlightAntikick:** 
 Moves you down on a tick-based timer. Added in due to the lack of a "Normal" mode antikick for velocity Flight in MeteorClient. Bind it to the same key as Flight. (Credits to etianl :D)
-### **InfiniteElytra:**
+### **InfiniteElytra:** 
 Automatically toggles Elytra on/off to conserve durability and auto-uses rockets maintaining flight. (Written by etianl with inspiration from this video https://www.youtube.com/watch?v=WYIMsWBxIhI)
-### **InfiniteTools:**
+### **Infinite Reach:**
+Allows you to attack and Mace Smash things at a further distance than would normally be allowed. It relys on sending packets to allow you to blink to the target and back while attacking.
+(Thank you to [agreed](https://github.com/aisiaiiad) for this!!)
+
+**Important notes:**
+- If the player's onGround value is false (ex. using Flight module) while using this you may take fall damage.
+- If the "Clip up" option is true and theplayer's onGround value is false while using this you **will** take big fall damage
+- If MaceKill is enabled with this you will not blink back to the start position, or it may not work at all if you are attacking with a mace.
+- "Clip up" option is not available with vanilla mode because those servers do not allow enough movement packets.
+- If "Clip up" is enabled and "Home Teleport" is disabled and you are NOT using a Mace you will likely die to fall damage.
+
+**Fall damage while flying can be avoided if attacking with a Mace because it will always Mace Smash when you are flying above the target.**\
+***This allows you to do Mace Smashes from a long range on vanilla servers!***
+### **InfiniteTools:** 
 Swaps to a junk version of the same tool you are using to conserve durability. (This was written based on the AttributeSwap module. Thank you to therandomdude for the idea! https://github.com/etianl/Trouser-Streak/issues/134)
-###  **Inventory Dupe:**
+###  **Inventory Dupe:** 
 Enables a Dupe button which duplicates things in your crafting slots. **Only works on Minecraft servers on version 1.17.** (Credit to ItsVen and Da0neDatGotAway for creation of the dupe, and to B2H990 for making the fabric mod.)
-### **InstaKill:**
+### **InstaKill:** 
 Shoots arrows and tridents with incredible power and velocity. (Credits to Saturn5Vfive)
-### **InstaMineNuker:**
+### **InstaMineNuker:** 
 Sends packets to instantly mine the blocks around you until they are gone. There is an option in it to make it only target instamineable blocks. (Credits to etianl and to Meteor Client as well as Meteor Rejects for some borrowed code)
-### **InstaSafetyBox:**
+### **InstaSafetyBox:** 
 Places a box around you for safety using the hardest blocks available in your hotbar. (Credits to etianl :D)
-### **ItemTractorBeam:**
+### **ItemTractorBeam:** 
 Sucks up items from a very far distance using hunger points. Only works well for items on the same Y level. (Code based off of the InstaKill by Saturn5Vfive!)
-### **LavaAura:**
+### **LavaAura:** 
 Automatically lava buckets an entity's position on a tick delay, or sets the entity on fire. Also has the option of placing on every block face. (Credits to etianl :D)
-### **LecternCrash:**
+### **LecternCrash:** 
 Crash 1.18.X vanilla servers and possibly below using lecterns. (Credits to Coderx-Gamer)
-### **MaceKill:**
+### **MaceKill:** 
 Makes Maces do high damage by spoofing a teleport up then back down. (Credits to etianl :D)
-### **MultiUse:**
+### **MultiUse:** 
 Does the item use action more than once per item use. (Credits to [maytrixc](https://github.com/maytrixc))
 ### **Packet Delay:**
 Delays sent and received packets by a certain amount of ticks. Part of this code was skidded from Meteor Client's Packet Canceller module. (requested by DXRK-0078 in [Issue: 169](https://github.com/etianl/Trouser-Streak/issues/169))
-### **PlayerJoinedAlarm:**
+### **PlayerJoinedAlarm:** 
 Makes noise when a player joins the server or if they enter render distance. (Credits to etianl :D)
-### **PortalGodMode:**
+### **PortalGodMode:** 
 Makes you invincible after you walk through a portal. You will not be able to move while invincible until you disable the module.
-### **RedstoneNuker:**
+### **RedstoneNuker:** 
 It's just the regular Nuker module from Meteor client, customized to only break things that generate redstone signals. Also with included AutoTool. Keeps you safer when placing lots of TNT. (Credits to Meteor Client for the borrowed code.)
-### **RemoteEnderChest:**
+### **RemoteEnderChest:** 
 This module allows you to store an ender chest GUI far away from the original chest, allowing you to store or take things out wherever. (Thank you to Mr. Skills93 for the idea. Credits to etianl for the module. :D)
 
 You can even destroy the ender chest and still retain it's menu!
@@ -147,47 +160,47 @@ To allow normal player movement many controls had to be routed around this GUI.
 - Sprint
 - 1-9 keys for hotbar
 - Scroll Wheel up/down hotbar cycling
-
+  
 **Keys I would like to implement but HAVE NOT:**
 - SwapHand (default F)
 - DropItem (default Q)
 - Chat (default T)
 - Some of the F keys, I noticed F5 doesn't work.
-### **ShulkerDupe:**
+### **ShulkerDupe:** 
 Duplicate the contents of a shulker when pressing "Dupe" in the shulker menu. Only works on Vanilla, Forge, and Fabric servers 1.19 and below. (Credits to Allah-Hack, I just made the buttons, and make it dupe slot1 as well.)
-### **SpearKill:**
+### **SpearKill:** 
 Increases spear damage! Lunge mode uses increased velocity and Blink mode delays packets allowing normal movement. Thank you to [Kimtaeho](https://github.com/needitem) for Blink mode! Credits to etianl for the Lunge mode. :D
-### **StorageLooter:**
+### **StorageLooter:** 
 Automatically steals stuff from storage containers, and can put junk items in there too. (Credits to etianl :D)
-### **SuperInstaMine:**
+### **SuperInstaMine:** 
 Based on the Meteor Rejects Instamine. I added an option called "Break Modes (Range)" which allows you to break more than one block at a time. (Credits to Meteor Rejects for the original.)
-### **Teleport:**
+### **Teleport:** 
 Long range clickTP. (Credits to etianl :D)
-### **TPFly:**
+### **TPFly:** 
 A purely setPosition based flight. Does not use any added velocity. (Credits to etianl :D)
-### **TrailMaker:**
+### **TrailMaker:** 
 Leaves blocks behind you in a trail. (Credits to etianl :D)
-### **TrouserBuild:**
+### **TrouserBuild:** 
 Build according to a 5x5 grid centered on the block you are aiming at. Right click to build. (Credits to etianl, and to Banana for the checkboxes and idea. :D)
 
 ---
 ## TrouserHunting
-### **ActivatedSpawnerDetector:**
+### **ActivatedSpawnerDetector:** 
 Detects if a player was ever near a spawner or trial spawner block. (Credits to etianl :D)
-### **AdvancedItemESP:**
+### **AdvancedItemESP:** 
 Detects any individual item you are searching for. (Made based on the MobGearESP module made by [windoid](https://github.com/windoid))
-### **BaseFinder:**
+### **BaseFinder:** 
 Automatically detects if un-natural things are in a chunk by checking every block and entity. (Credits to etianl :D, and to Meteor-Rejects for some code from newchunks.)
 
 - The Blocks Lists have been tuned to reduce any false positives while throwing the maximum amount of "good" results for builds. Adjust if you feel you need to.
 - The Number of Blocks to Find options is the total amount any of the blocks from one of the lists to find before throwing a base coord.
-### **CaveDisturbanceDetector:**
+### **CaveDisturbanceDetector:** 
 Scans for single air blocks within the cave air blocks found in caves and underground structures in 1.13+ chunks. (Credits to etianl :D)
-### **CollectibleESP:**
+### **CollectibleESP:** 
 Highlights collectible items in item frames and banners! (Credits to [xqyet](https://github.com/xqyet), modified by etianl)
-### **Hole/Tunnel/StairsESP:**
+### **Hole/Tunnel/StairsESP:** 
 Detects 1x1 holes going straight down, horizontal tunnels, and staircase tunnels. (Thank you to Meteor Client for some code from TunnelESP)
-### **MobGearESP:**
+### **MobGearESP:** 
 ESP Module that highlights mobs likely wearing player gear. (Thank you to [windoid](https://github.com/windoid) for this!)
 ### **NewerNewChunks:**
 NewChunks module with new newchunk estimation exploits, and the ability to save chunk data for later! Comes with several new homebrewed newchunks methods made by yours truly. (Credits to Meteor Rejects, and BleachHack from where it was ported, and to etianl for updating it and adding new things! :D.)
@@ -199,7 +212,7 @@ NewChunks module with new newchunk estimation exploits, and the ability to save 
 **Palette Exploit Notes:**
 - The **PaletteExploit** option enabled by default detects new chunks by scanning the order of chunk section palettes.
 - It also highlights chunks that are being updated from an old version of minecraft.
-- Chunk are sometimes defined as "Old" by the server in an area a little larger than the render distance sent to the client.
+- Chunk are sometimes defined as "Old" by the server in an area a little larger than the render distance sent to the client. 
 - Chunks appear to be defined as new until the person who generated them has unrendered them.
 - The chunks that stay loaded due to the spawn chunk region always show up as new for some reason.
 - In the Overworld dimension there are rare false positives.
@@ -223,59 +236,59 @@ NewChunks module with new newchunk estimation exploits, and the ability to save 
 - The **"BlockExploitMode"** will render BlockExploit chunks as their own color instead of a newchunk (Normal mode rendering).
 - When using BlockExploitMode mode if the BlockUpdateExploit chunks appear infrequently and are combined with Old Chunks, then the chunks you are in are OLD. If there is alot of BlockUpdateExploit chunks appearing and/or they are mixed with NewChunks then the chunks are NEW.
 - The **"IgnoreBlockExploit"** will render BlockExploit chunks as an oldchunk instead of a newchunk.
-### **NoSpawnerDetector:**
+### **NoSpawnerDetector:** 
 Detect Dungeons and Mineshafts which have had their spawners removed. (Credits to etianl :D)
-### **OnlinePlayerActivityDetector:**
+### **OnlinePlayerActivityDetector:** 
 Detects if an online player is nearby if there are blocks missing from a BlockState palette and your render distances are overlapping. It can detect players that are outside of render distance. (Credits to etianl :D)
-### **PortalPatternFinder:**
+### **PortalPatternFinder:** 
 Scans for the imprints of Nether Portals within the cave air blocks found in caves and underground structures in 1.13+ chunks. **May be useful for finding portal skips in the Nether**. (Credits to etianl :D)
-### **PotESP:**
+### **PotESP:** 
 Detects Decorated Pots with un-natural contents. (Credits to etianl :D)
-### **WaypointCoordExploit:**
+### **WaypointCoordExploit:** 
 Triangulate player locations with the new waypoint system introduced in Minecraft 1.21.6. Walk perpendicular to the waypoint a bit to get the coordinate. There is also a hud element that you can use to display the coordinates. (Credits to etianl :D)
 
 ---
 ## TrouserOP/Creative
 *Everything here requires creative mode or operator status!*
-### **Airstrike+:**
+### **Airstrike+:** 
 Rains down entities from the sky. (Credits to Allah-Hack for the original, modified by etianl) **CREATIVEMODE**
-### **AutoCommand:**
+### **AutoCommand:** 
 Run a list of operator commands at the push of a button! (Credits to [aaaasdfghjkllll](https://github.com/aaaasdfghjkllll)) **OPERATOR**
-### **AutoDisplays:**
+### **AutoDisplays:** 
 Spams block displays around all player's heads to blind them or text displays around them for trolling and advertising. (Credits to etianl :D) **OPERATOR**
-### **AutoNames**
+### **AutoNames** 
 Change player name colors, prefix, suffix in tab and chat. Credits to [DedicateDev](https://github.com/DedicateDev) **OPERATOR**
-### **AutoScoreboard:**
+### **AutoScoreboard:** 
 Creates a custom scoreboard. Useful for advertising. Credits to [aaaasdfghjkllll](https://github.com/aaaasdfghjkllll) **OPERATOR**
-### **AutoTexts:**
+### **AutoTexts:** 
 Spawns text around you by creating invisible armor stands. Thank you to [DedicateDev](https://github.com/DedicateDev)! **CREATIVEMODE**
-### **AutoTitles:**
+### **AutoTitles:** 
 Displays text across the screen of all the individuals who are online on a server. Thank you [ogmur](https://www.youtube.com/@Ogmur) for figuring out the commands. **OPERATOR**
-### **Boom+:**
+### **Boom+:** 
 Throws entities or spawns them on the targeted block when you click (Credits to Allah-Hack for the original, modified by etianl) **CREATIVEMODE**
-### **ExplosionAura:**
+### **ExplosionAura:** 
 Spawns creepers at your position as you move that explode instantly. (Credits to etianl :D) **CREATIVEMODE**
-### **ForceOPBook:**
+### **ForceOPBook:** 
 Create malicious books that can execute commands when clicked. Requires creative mode for you to make them, and requires you to give it to an operator and have them click it. (This is an old method, but credits to etianl for writing this implementation.) **CREATIVEMODE**
-### **ForceOPSign:**
+### **ForceOPSign:** 
 Create malicious signs that can execute commands when clicked. Requires creative mode for you to make them, and requires you to give it to an operator and have them place and click it while they are also in creative mode. The signs placed appear blank and commands executed may not appear in the server chat response for commands.\
 (Credits to CrushedPixel for their first implementation of a ForceOP sign module https://www.youtube.com/watch?v=KofDNaPZWfg, and to etianl for writing this implementation.) **CREATIVEMODE**
-### **HandOfGod:**
+### **HandOfGod:** 
 Runs the "/fill" command in many different ways. Destroy worlds with ease! (Credits to etianl :D) **OPERATOR**
-### **MultiverseAnnihilator:**
+### **MultiverseAnnihilator:** 
 Deletes every world listed on a server that has the Multiverse plugin installed. (credits to [ogmur](https://www.youtube.com/@Ogmur) for writing this) **OPERATOR**
-### **NbtEditor:**
+### **NbtEditor:** 
 Generates items with modified NBT data.  (Credits to etianl :D) **CREATIVEMODE**
-### **OPplayerTPmodule:**
+### **OPplayerTPmodule:** 
 Uses operator commands to teleport you to each player online one by one at the push of a button, or those players to you one by one. (Thank you to [ogmur](https://www.youtube.com/@Ogmur) for the idea.) **OPERATOR**
-### **OPServerKillModule:**
+### **OPServerKillModule:** 
 Runs a set of operator commands to disable a server and cover up the tracks of the kill command. (Credits to etianl :D) **OPERATOR**
-### **Voider+:**
+### **Voider+:** 
 Runs /fill commands from the top down. (Credits to Allah-Hack for the original, modified by etianl) **OPERATOR**
 
 ---
 ## Commands
-### **.autovclip:**
+### **.autovclip:** 
 Automatically selects the nearest two block gap going either up or down to vclip into. (Credits to the original [AutoVclip](https://github.com/kittenvr/AutoVclip) for minecraft 1.19.2 which inspired me to make this one.)
 ### **.autovaultclip:**
 Same as .autovclip but it can teleport further vertical distances. For Paper servers only.
@@ -283,9 +296,9 @@ Same as .autovclip but it can teleport further vertical distances. For Paper ser
 Tells you how long each AutoLavaCaster cycle has been running for.
 ### **.cleanram:**
 Cleans the RAM of useless junk and may be handy for clearing lag. (credits to [ogmur](https://www.youtube.com/@Ogmur) for writing this)
-### **.crash:**
+### **.crash:** 
 Crashes the client of a single or all other players using a nasty particle effect. **Requires OP status.** Credits to [aaaasdfghjkllll](https://github.com/aaaasdfghjkllll)
-### **.lavacalc:**
+### **.lavacalc:** 
 Gives you an approximation of how long lava will take to flow from top to bottom across a 45 degree staircase at 20TPS (input numbers), or the last Mountain you made from your Y level.
 ### **.text:**
 Very similar to the **AutoTexts** module. The difference with this one is that it can display many lines one after the other. Thank you to [DedicateDev](https://github.com/DedicateDev)!
@@ -293,9 +306,9 @@ Very similar to the **AutoTexts** module. The difference with this one is that i
 - Some example commands would be ".text load mountains" or ".text save mountains #green [ #dark_red Trolled! #green ]|#gold Mountains of Lava Inc.|#red Youtube: #blue www.youtube.com/@mountainsoflavainc.6913"
 - Individual lines are seperated by a | (pipe character) and you can also use #red "wordhere" to format the color of the text.
 - You can obfuscate words by using #obfuscated
-### **.viewnbt:**
+### **.viewnbt:** 
 Returns the nbt data for the item in your hand. There is also a Save option that saves the data to a text file. (Credits to etianl :D)
-### **.world**
+### **.world** 
 Tells you some info about the server like world border coordinates, sometimes the players that have played there (does not work on all servers), and other things. (Credits to etianl :D)
 
 ## Requirements:
