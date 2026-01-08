@@ -73,6 +73,8 @@ Includes a "MountainMakerBot" option! https://www.youtube.com/watch?v=EbZs6FZrNj
 - Start building, then hold SneakKey and also hold Left or RightKey as well to build stairs diagonally. Release left or right key first to continue building in the direction you were prior.
 ### **AutoStaircase:** 
 Builds stairs upward in the direction you are facing by running forward and jumping. (Credits to [majorsopa](https://github.com/majorsopa) for writing the original in the [Frostburn Client](https://github.com/evaan/FrostBurn). I just made it work good)
+### **AutoTnt:**
+Automatically ignites tnt you placed. It will either be ignited immediately or after some ticks. (Credits to etianl :D) 
 ### **Auto Wither:**
 This allows you to build withers with just one click! (Skidded the module from here [Source](https://github.com/Germanminer/MeteorServerUtils/blob/master/src/main/java/com/example/addon/modules/AutoWither.java). Made by [Germanminer](https://github.com/Germanminer)!
 Thank them for their efforts!)
@@ -90,17 +92,18 @@ Allows you to disable clipping of blocks when you are in a boat. Currently only 
 Overflows data in a book's title to cause dupes and chunk bans. (Credits to [Thorioum](https://github.com/Thorioum)!)
 ### **BungeeSpoofer:** 
 Allows you to join servers with an exposed bungeecord backend. (Thank you [DAMcraft](https://github.com/DAMcraft/MeteorServerSeeker))
+### **Crossbow Machine Gun:**
+Turns your crossbow into a machine gun. Hold right click to activate! (Credits to [agreed](https://github.com/aisiaiiad) for making this!)
 ### **FlightAntikick:** 
 Moves you down on a tick-based timer. Added in due to the lack of a "Normal" mode antikick for velocity Flight in MeteorClient. Bind it to the same key as Flight. (Credits to etianl :D)
 ### **InfiniteElytra:** 
 Automatically toggles Elytra on/off to conserve durability and auto-uses rockets maintaining flight. (Written by etianl with inspiration from this video https://www.youtube.com/watch?v=WYIMsWBxIhI)
 ### **Infinite Reach:**
-Allows you to attack and Mace Smash things at a further distance than would normally be allowed. It relys on sending packets to allow you to blink to the target and back while attacking.
-(Thank you to [agreed](https://github.com/aisiaiiad) for this!!)
+Allows you to do things at a further distance than would normally be allowed. It relys on sending packets to allow you to blink to the target and back while attacking.
+(Thank you to [agreed](https://github.com/aisiaiiad) for the origina! I just added handling for things other than attacking)
 
 **Important notes:**
-- If the player's onGround value is false (ex. using Flight module) while using this you may take fall damage.
-- If the "Clip up" option is true and theplayer's onGround value is false while using this you **will** take big fall damage
+- While using this you may rarely take fall damage.
 - If MaceKill is enabled with this you will not blink back to the start position, or it may not work at all if you are attacking with a mace.
 - "Clip up" option is not available with vanilla mode because those servers do not allow enough movement packets.
 - If "Clip up" is enabled and "Home Teleport" is disabled and you are NOT using a Mace you will likely die to fall damage.
@@ -176,6 +179,8 @@ Automatically steals stuff from storage containers, and can put junk items in th
 Based on the Meteor Rejects Instamine. I added an option called "Break Modes (Range)" which allows you to break more than one block at a time. (Credits to Meteor Rejects for the original.)
 ### **Teleport:** 
 Long range clickTP. (Credits to etianl :D)
+### **TPAura:**
+Uses the logic from the InfiniteReach module to automatically attack or mace smash the nearest entity to you. (Credits to etianl, and to [agreed](https://github.com/aisiaiiad) for InfiniteReach :D)
 ### **TPFly:** 
 A purely setPosition based flight. Does not use any added velocity. (Credits to etianl :D)
 ### **TrailMaker:** 
@@ -292,6 +297,8 @@ Runs /fill commands from the top down. (Credits to Allah-Hack for the original, 
 Automatically selects the nearest two block gap going either up or down to vclip into. (Credits to the original [AutoVclip](https://github.com/kittenvr/AutoVclip) for minecraft 1.19.2 which inspired me to make this one.)
 ### **.autovaultclip:**
 Same as .autovclip but it can teleport further vertical distances. For Paper servers only.
+### **.autovault-hclip:**
+Automatically selects the nearest gap going horizontally to clip into. Made based on the .vault-hclip command by [agreed](https://github.com/aisiaiiad)
 ### **.castertimer:**
 Tells you how long each AutoLavaCaster cycle has been running for.
 ### **.cleanram:**
@@ -306,6 +313,8 @@ Very similar to the **AutoTexts** module. The difference with this one is that i
 - Some example commands would be ".text load mountains" or ".text save mountains #green [ #dark_red Trolled! #green ]|#gold Mountains of Lava Inc.|#red Youtube: #blue www.youtube.com/@mountainsoflavainc.6913"
 - Individual lines are seperated by a | (pipe character) and you can also use #red "wordhere" to format the color of the text.
 - You can obfuscate words by using #obfuscated
+### **.vault-hclip:**
+Selects a position horizontally to clip into. Made by [agreed](https://github.com/aisiaiiad)!
 ### **.viewnbt:** 
 Returns the nbt data for the item in your hand. There is also a Save option that saves the data to a text file. (Credits to etianl :D)
 ### **.world** 

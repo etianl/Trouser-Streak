@@ -22,8 +22,6 @@
     "ScreenMixin",
     "HandledScreenMixin",
     "AbstractBlockMixin",
-    "AbstractBoatEntityMixin",
-    "MinecraftClientMixin",
-    "ClientWorldAccessor"
+    "AbstractBoatEntityMixin"
   ]
 }

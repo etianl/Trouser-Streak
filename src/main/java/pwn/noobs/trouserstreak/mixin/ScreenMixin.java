@@ -18,7 +18,8 @@ public class ScreenMixin {
         Screen self = (Screen) (Object) this;
         if (self instanceof GenericContainerScreen s
                 && s.getScreenHandler().getType() == ScreenHandlerType.GENERIC_9X3
-                && Modules.get().get(RemoteEnderChest.class).isActive()) {
+                && Modules.get().get(RemoteEnderChest.class).isActive() &&
+                s.getTitle().getString().toLowerCase().contains("ender")) {
             ci.cancel();
         }
     }
