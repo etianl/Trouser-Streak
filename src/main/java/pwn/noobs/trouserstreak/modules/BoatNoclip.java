@@ -1,15 +1,15 @@
 package pwn.noobs.trouserstreak.modules;
 
-import meteordevelopment.meteorclient.events.entity.LivingEntityMoveEvent;
+import meteordevelopment.meteorclient.events.entity.EntityMoveEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.Entity;
@@ -116,7 +116,7 @@ public class BoatNoclip extends Module {
     }
 
     @EventHandler
-    private void onEntityMove(LivingEntityMoveEvent event) {
+    private void onEntityMove(EntityMoveEvent event) {
         Entity entity = event.entity;
         if (!(entity instanceof BoatEntity)) return;
         if (entity.getControllingPassenger() != mc.player) return;
@@ -153,7 +153,7 @@ public class BoatNoclip extends Module {
 
         double currentY = packet.position().y;
 
-        if (delayLeft <= 0 && !sentPacket && shouldFlyDown(currentY) && isOnAir(mc.player.getVehicle())) {
+        if (delayLeft <= 0 && !sentPacket && shouldFlyDown(currentY) && EntityUtils.isOnAir(mc.player.getVehicle())) {
             ((IVec3d) packet.position()).meteor$setY(lastPacketY - 0.03130D);
             sentPacket = true;
             delayLeft = delay.get();
@@ -161,9 +161,7 @@ public class BoatNoclip extends Module {
 
         lastPacketY = currentY;
     }
-    private static boolean isOnAir(Entity entity) {
-        return entity.getEntityWorld().getStatesInBox(entity.getBoundingBox().expand(0.0625).stretch(0.0, -0.55, 0.0)).allMatch(AbstractBlock.AbstractBlockState::isAir);
-    }
+
     private boolean shouldFlyDown(double currentY) {
         if (currentY >= lastPacketY) return true;
         return lastPacketY - currentY < 0.03130D;

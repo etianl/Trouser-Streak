@@ -1172,9 +1172,7 @@ public class AutoMountain extends Module {
     }
     private void cascadingpileof() {
         FindItemResult findResult = InvUtils.findInHotbar(block -> !isInvalidBlock(block));
-        if (!findResult.found()) {
-            return;
-        }
+        if (!findResult.found() || findResult.slot() < 0 || findResult.slot() > 8) return;
         mc.player.getInventory().selectedSlot = findResult.slot();
     }
 
