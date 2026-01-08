@@ -22,7 +22,7 @@ public class ItemTractorBeam extends Module {
             .build()
     );
     public ItemTractorBeam() {
-        super(Trouser.Main, "ItemTractorBeam", "Sucks up items from a very far distance using hunger points. Only works well for items on the same Y level. Only works in Vanilla.");
+        super(Trouser.Main, "ItemTractorBeam", "Sucks up items from a very far distance using hunger points. Only works well for items on the same Y level. Only works in Vanilla. Is patched in most recent versions.");
     }
 
     @Override

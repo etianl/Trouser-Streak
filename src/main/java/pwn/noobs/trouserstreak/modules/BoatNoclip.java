@@ -125,7 +125,7 @@ public class BoatNoclip extends Module {
 
     @EventHandler
     private void onEntityMove(BoatMoveEvent event) {
-        BoatEntity entity = event.boat;
+        Entity entity = event.boat;
         if (entity.getControllingPassenger() != mc.player) return;
 
         double velX = entity.getVelocity().x;
