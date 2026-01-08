@@ -6,15 +6,20 @@ import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import pwn.noobs.trouserstreak.Trouser;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 public class MaceKill extends Module {
     private final SettingGroup specialGroup2 = settings.createGroup("Disable \"Smash Attack\" in the Criticals module to make this module work.");
@@ -60,6 +65,22 @@ public class MaceKill extends Module {
             .visible(() -> randomizeHeight.get())
             .build()
     );
+    private final Setting<Double> offsethorizontal = specialGroup.add(new DoubleSetting.Builder()
+            .name("Horizontal Offset")
+            .description("How much to offset the player after teleports.")
+            .defaultValue(0.05)
+            .min(0.01)
+            .sliderMax(0.99)
+            .build()
+    );
+    private final Setting<Double> offsetY = specialGroup.add(new DoubleSetting.Builder()
+            .name("Y Offset")
+            .description("How much to offset the player after teleports.")
+            .defaultValue(0.01)
+            .min(0.01)
+            .sliderMax(0.99)
+            .build()
+    );
 
     public MaceKill() {
         super(Trouser.Main, "MaceKill", "Makes the Mace powerful when swung. Can also bypass totem usage.");
@@ -69,7 +90,7 @@ public class MaceKill extends Module {
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
         if (mc.player == null) return;
-        if (mc.player.getMainHandStack().getItem() != Items.MACE) return;
+        if (mc.player.hasVehicle() || mc.player.getMainHandStack().getItem() != Items.MACE) return;
         if (!(event.packet instanceof IPlayerInteractEntityC2SPacket packet)) return;
         if (packet.meteor$getType() != PlayerInteractEntityC2SPacket.InteractType.ATTACK) return;
 
@@ -83,50 +104,34 @@ public class MaceKill extends Module {
         int packetsRequired = (int) Math.ceil(Math.abs(blocks / 10.0));
         if (packetsRequired > 20) packetsRequired = 1;
 
-        BlockPos isopenair1 = mc.player.getBlockPos().add(0, blocks, 0);
-        BlockPos isopenair2 = mc.player.getBlockPos().add(0, blocks + 1, 0);
-        if (!isSafeBlock(isopenair1) || !isSafeBlock(isopenair2)) return;
+        Vec3d targetPos = new Vec3d(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ());
+        if (invalid(targetPos)) return;
 
         if (blocks <= 22) {
-            if (mc.player.hasVehicle()) {
-                for (int i = 0; i < 4; i++) {
-                    mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
-                }
-                double maxHeight = Math.min(mc.player.getVehicle().getY() + 22, mc.player.getVehicle().getY() + blocks);
-                doVehicleTeleports(maxHeight, blocks);
-            } else {
-                for (int i = 0; i < 4; i++) {
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false, mc.player.horizontalCollision));
-                }
-                double heightY = Math.min(mc.player.getY() + 22, mc.player.getY() + blocks);
-                doPlayerTeleports(heightY);
+            for (int i = 0; i < 4; i++) {
+                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false, mc.player.horizontalCollision));
             }
+            double heightY = Math.min(mc.player.getY() + 22, mc.player.getY() + blocks);
+            doPlayerTeleports(heightY);
         } else {
-            if (mc.player.hasVehicle()) {
-                for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
-                    mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
-                }
-                double maxHeight = mc.player.getVehicle().getY() + blocks;
-                doVehicleTeleports(maxHeight, blocks);
-            } else {
-                for (int i = 0; i < packetsRequired - 1; i++) {
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false, mc.player.horizontalCollision));
-                }
-                double heightY = mc.player.getY() + blocks;
-                doPlayerTeleports(heightY);
+            for (int i = 0; i < packetsRequired - 1; i++) {
+                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false, mc.player.horizontalCollision));
             }
+            double heightY = mc.player.getY() + blocks;
+            doPlayerTeleports(heightY);
         }
     }
     private void doPlayerTeleports(double height) {
+        Vec3d offsetHome = getOffset(previouspos);
         PlayerMoveC2SPacket movepacket = new PlayerMoveC2SPacket.PositionAndOnGround(
                 mc.player.getX(), height, mc.player.getZ(), false, mc.player.horizontalCollision);
         PlayerMoveC2SPacket homepacket = new PlayerMoveC2SPacket.PositionAndOnGround(
-                previouspos.getX(), previouspos.getY(), previouspos.getZ(),
+                offsetHome.getX(), offsetHome.getY(), offsetHome.getZ(),
                 false, mc.player.horizontalCollision);
         if (preventDeath.get()) {
             mc.player.fallDistance = 0;
             homepacket = new PlayerMoveC2SPacket.PositionAndOnGround(
-                    previouspos.getX(), previouspos.getY() + 0.0000000001, previouspos.getZ(),
+                    offsetHome.getX(), offsetHome.getY() + 0.0000000001, offsetHome.getZ(),
                     false, mc.player.horizontalCollision);
         }
         ((IPlayerMoveC2SPacket) homepacket).meteor$setTag(1337);
@@ -134,11 +139,58 @@ public class MaceKill extends Module {
         mc.player.networkHandler.sendPacket(movepacket);
         mc.player.networkHandler.sendPacket(homepacket);
     }
-    private void doVehicleTeleports(double height, int blocks) {
-        mc.player.getVehicle().setPosition(mc.player.getVehicle().getX(), height + blocks, mc.player.getVehicle().getZ());
-        mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
-        mc.player.getVehicle().setPosition(previouspos);
-        mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
+    private Vec3d getOffset(Vec3d base) {
+        double dx = offsethorizontal.get();
+        double dy = offsetY.get();
+
+        Vec3d[] shuffledOffsets = new Vec3d[] {
+                base.add( dx, dy,  0),
+                base.add(-dx, dy,  0),
+                base.add( 0, dy,  dx),
+                base.add( 0, dy, -dx),
+                base.add( dx, dy,  dx),
+                base.add(-dx, dy,  -dx),
+                base.add(-dx, dy,  dx),
+                base.add(dx, dy,  -dx)
+        };
+
+        Collections.shuffle(Arrays.asList(shuffledOffsets));
+
+        for (Vec3d pos : shuffledOffsets) {
+            if (!invalid(pos)) return pos;
+        }
+
+        Vec3d noHorizontal = base.add(0, dy, 0);
+        if (!invalid(noHorizontal)) return noHorizontal;
+
+        return base;
+    }
+    private boolean invalid(Vec3d pos) {
+        if (mc.world.getChunk(BlockPos.ofFloored(pos)) == null) return true;
+        Entity entity = mc.player;
+        Box box = entity.getBoundingBox().offset(
+                pos.x - entity.getX(),
+                pos.y - entity.getY(),
+                pos.z - entity.getZ()
+        );
+        BlockPos blockPos = BlockPos.ofFloored(pos);
+        for (int x = blockPos.getX() - 1; x <= blockPos.getX() + 1; x++) {
+            for (int y = blockPos.getY() - 1; y <= blockPos.getY() + 1; y++) {
+                for (int z = blockPos.getZ() - 1; z <= blockPos.getZ() + 1; z++) {
+                    BlockPos checkPos = new BlockPos(x, y, z);
+                    BlockState state = mc.world.getBlockState(checkPos);
+
+                    if (state.isOf(Blocks.LAVA)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        for (Entity e : mc.world.getOtherEntities(mc.player, box)) {
+            if (e.isCollidable()) return true;
+        }
+        Vec3d delta = pos.subtract(entity.getPos());
+        return mc.world.getBlockCollisions(entity, entity.getBoundingBox().offset(delta)).iterator().hasNext();
     }
     private int getMaxHeightAbovePlayer() {
         BlockPos playerPos = mc.player.getBlockPos();
@@ -151,16 +203,9 @@ public class MaceKill extends Module {
         }
 
         for (int i = scanStart; i > playerPos.getY(); i--) {
-            BlockPos up1 = new BlockPos(playerPos.getX(), i, playerPos.getZ());
-            BlockPos up2 = up1.up(1);
-            if (isSafeBlock(up1) && isSafeBlock(up2)) return i - playerPos.getY();
+            Vec3d testPos = new Vec3d(playerPos.getX(), playerPos.getY() + (i - playerPos.getY()), playerPos.getZ());
+            if (!invalid(testPos)) return i - playerPos.getY();
         }
         return 0;
-    }
-
-    private boolean isSafeBlock(BlockPos pos) {
-        return mc.world.getBlockState(pos).isReplaceable()
-                && mc.world.getFluidState(pos).isEmpty()
-                && !mc.world.getBlockState(pos).isOf(Blocks.POWDER_SNOW);
     }
 }

@@ -93,7 +93,6 @@ public class RemoteEnderChest extends Module {
     private boolean guiWasOpen = false;
     private int lmbCooldown = 0;
     private int rmbCooldown = 0;
-    private int ticks = 0;
     @Override
     public void onDeactivate() {
         keepGuiOpen = false;
@@ -101,7 +100,6 @@ public class RemoteEnderChest extends Module {
         guiWasOpen = false;
         rmbCooldown = 0;
         lmbCooldown = 0;
-        ticks=0;
     }
     @EventHandler
     private void onReceivePacket(PacketEvent.Receive event) {
@@ -109,7 +107,7 @@ public class RemoteEnderChest extends Module {
     }
     @EventHandler
     private void onMouseScroll(MouseScrollEvent event) {
-        if (mc.currentScreen instanceof GenericContainerScreen screen && screen.getScreenHandler().getType() == ScreenHandlerType.GENERIC_9X3) {
+        if (isEnderChestScreen()) {
             double scrollY = event.value;
             if (scrollY != 0) {
                 int current = mc.player.getInventory().selectedSlot;
@@ -121,23 +119,23 @@ public class RemoteEnderChest extends Module {
     }
     @EventHandler
     private void onKey(KeyEvent event) {
-        if (mc.currentScreen instanceof GenericContainerScreen screen && screen.getScreenHandler().getType() == ScreenHandlerType.GENERIC_9X3) {
+        if (isEnderChestScreen()) {
             handleMeteorHotkeys();
         }
     }
     @EventHandler
     private void onClick(MouseButtonEvent event) {
-        if (mc.currentScreen instanceof GenericContainerScreen screen && screen.getScreenHandler().getType() == ScreenHandlerType.GENERIC_9X3) {
+        if (isEnderChestScreen()) {
             handleMeteorHotkeys();
         }
     }
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (mc.currentScreen instanceof GenericContainerScreen screen && screen.getScreenHandler().getType() == ScreenHandlerType.GENERIC_9X3) {
+        if (isEnderChestScreen()) {
+            GenericContainerScreen screen = (GenericContainerScreen) mc.currentScreen;
             guiWasOpen = true;
             if (rmbCooldown < rmbcooldown.get()) rmbCooldown++;
             if (lmbCooldown < lmbcooldown.get()) lmbCooldown++;
-            if (ticks<=0)ticks++;
             if (hide.get()){
                 boolean altHeld = isKeyDown(toggleKey.get().getValue());
                 if (!altHeld){
@@ -166,8 +164,7 @@ public class RemoteEnderChest extends Module {
             handleInput(mc.options.sprintKey);
 
             boolean altHeld = isKeyDown(toggleKey.get().getValue());
-            boolean inEChest = mc.currentScreen instanceof GenericContainerScreen &&
-                    screen.getScreenHandler().getType() == ScreenHandlerType.GENERIC_9X3;
+            boolean inEChest = isEnderChestScreen();
 
             if (inEChest) {
                 if (!altHeld && !mouseGrabbed) {
@@ -205,21 +202,26 @@ public class RemoteEnderChest extends Module {
             }
             if (keepGuiOpen) keepGuiOpen = false;
             mouseGrabbed = false;
-            ticks = 0;
             rmbCooldown = 0;
             lmbCooldown = 0;
         }
         if (mc.crosshairTarget instanceof BlockHitResult){
             BlockHitResult bhr = (BlockHitResult) mc.crosshairTarget;
 
-            if (mc.world.getBlockState(bhr.getBlockPos()).getBlock() == Blocks.ENDER_CHEST && mc.options.useKey.isPressed() && !(mc.currentScreen instanceof GenericContainerScreen screen && screen.getScreenHandler().getType() == ScreenHandlerType.GENERIC_9X3)) {
-                keepGuiOpen = true;
-                mc.doItemUse();
-                mc.doItemUse();
+            if (mc.world.getBlockState(bhr.getBlockPos()).getBlock() == Blocks.ENDER_CHEST && mc.options.useKey.isPressed() && !isEnderChestScreen()) {
+                if (!keepGuiOpen) {
+                    keepGuiOpen = true;
+                    mc.doItemUse();
+                    mc.doItemUse();
+                }
             }
         }
     }
-
+    private boolean isEnderChestScreen() {
+        return mc.currentScreen instanceof GenericContainerScreen screen &&
+                screen.getScreenHandler().getType() == ScreenHandlerType.GENERIC_9X3 &&
+                screen.getTitle().getString().toLowerCase().contains("ender");
+    }
     private boolean isKeyDown(int key) {
         return GLFW.glfwGetKey(mc.getWindow().getHandle(), key) == GLFW_PRESS;
     }
