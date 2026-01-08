@@ -26,7 +26,7 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     // Meteor
-    modImplementation "meteordevelopment:meteor-client:${project.minecraft_version}-SNAPSHOT"
+    modImplementation "meteordevelopment:meteor-client:1.21.10-SNAPSHOT"
 }
 
 processResources {

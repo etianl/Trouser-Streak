@@ -10,7 +10,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pwn.noobs.trouserstreak.modules.RemoteEnderChest;
-
 @Mixin(Screen.class)
 public class ScreenMixin {
     @Inject(method = "renderBackground(Lnet/minecraft/client/gui/DrawContext;IIF)V",
@@ -19,7 +18,8 @@ public class ScreenMixin {
         Screen self = (Screen) (Object) this;
         if (self instanceof GenericContainerScreen s
                 && s.getScreenHandler().getType() == ScreenHandlerType.GENERIC_9X3
-                && Modules.get().get(RemoteEnderChest.class).isActive()) {
+                && Modules.get().get(RemoteEnderChest.class).isActive() &&
+                s.getTitle().getString().toLowerCase().contains("ender")) {
             ci.cancel();
         }
     }
