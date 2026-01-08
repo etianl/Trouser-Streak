@@ -36,6 +36,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new AutoScoreboard());
                 Modules.get().add(new AutoStaircase());
                 Modules.get().add(new AutoTexts());
+                Modules.get().add(new AutoTnt());
                 Modules.get().add(new AutoTitles());
                 Modules.get().add(new AutoWither());
                 Modules.get().add(new BaseFinder());
@@ -49,6 +50,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new BungeeSpoofer());
                 Modules.get().add(new CaveDisturbanceDetector());
                 Modules.get().add(new CollectibleESP());
+                Modules.get().add(new CrossbowMachineGun());
                 Modules.get().add(new ExplosionAura());
                 Modules.get().add(new FlightAntikick());
                 Modules.get().add(new ForceOPBook());
@@ -65,6 +67,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new ItemTractorBeam());
                 Modules.get().add(new LavaAura());
                 Modules.get().add(new LecternCrash());
+                Modules.get().add(new TPAura());
                 Modules.get().add(new MaceKill());
                 Modules.get().add(new MobGearESP());
                 Modules.get().add(new MultiUse());
@@ -97,6 +100,8 @@ public class Trouser extends MeteorAddon {
                 Commands.add(new GarbageCleanerCommand());
                 Commands.add(new LavaTimeCalculator());
                 Commands.add(new TextCommand());
+                Commands.add(new vaultHclipCommand());
+                Commands.add(new AutoVaultHclipCommand());
                 Commands.add(new ViewNbtCommand());
                 Commands.add(new WorldInfoCommand());
                 Hud.get().register(ElytraCount.INFO);
