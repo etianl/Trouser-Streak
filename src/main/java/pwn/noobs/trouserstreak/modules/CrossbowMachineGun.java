@@ -1,3 +1,4 @@
+//written by [agreed](https://github.com/aisiaiiad)
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -11,7 +12,6 @@ import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket;
 import net.minecraft.util.Hand;
 import pwn.noobs.trouserstreak.Trouser;
-import pwn.noobs.trouserstreak.mixin.ClientWorldAccessor;
 
 public class CrossbowMachineGun extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -35,7 +35,7 @@ public class CrossbowMachineGun extends Module {
     private int timer = 0;
 
     public CrossbowMachineGun() {
-        super(Trouser.Main, "crossbow-machine-gun", "Turns your crossbow into a machine gun. Hold right click to activate!");
+        super(Trouser.Main, "crossbow-machine-gun", "Turns your crossbow into a machine gun. Hold right click to activate! Thank you to agreed!");
     }
 
     @EventHandler
@@ -47,12 +47,12 @@ public class CrossbowMachineGun extends Module {
             timer = 0;
         }
 
-        if (mc.player.getMainHandStack().getItem() != Items.CROSSBOW) return;
+        if (mc.player.getMainHandStack().getItem() != Items.CROSSBOW || !mc.options.useKey.isPressed()) return;
 
         int sequence = 0;
 
         if (correctSequence.get()) {
-            sequence = ((ClientWorldAccessor) mc.world).getPendingUpdateManager().getSequence();
+            sequence = mc.world.pendingUpdateManager.getSequence();
         }
 
         mc.getNetworkHandler().sendPacket(new PlayerInteractItemC2SPacket(Hand.MAIN_HAND, sequence, mc.player.getYaw(), mc.player.getPitch()));
