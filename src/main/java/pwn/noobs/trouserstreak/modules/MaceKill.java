@@ -1,6 +1,7 @@
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixininterface.IPlayerInteractEntityC2SPacket;
 import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import meteordevelopment.meteorclient.settings.*;
@@ -13,6 +14,9 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -65,6 +69,29 @@ public class MaceKill extends Module {
             .visible(() -> randomizeHeight.get())
             .build()
     );
+    private final Setting<Boolean> attackFast = totem.add(new BoolSetting.Builder()
+            .name("Attack fast")
+            .description("Attacks very fast to increase the chance of bypass totem.")
+            .defaultValue(false)
+            .build());
+    private final Setting<Integer> attackdelay = totem.add(new IntSetting.Builder()
+            .name("Attack Delay")
+            .description("This many ticks per attack.")
+            .defaultValue(0)
+            .sliderRange(0, 20)
+            .min(0)
+            .visible(() -> attackFast.get())
+            .build()
+    );
+    private final Setting<Integer> attacks = totem.add(new IntSetting.Builder()
+            .name("# of Attacks")
+            .description("This many teleport attacks per delay.")
+            .defaultValue(1)
+            .sliderRange(1, 10)
+            .min(0)
+            .visible(() -> attackFast.get())
+            .build()
+    );
     private final Setting<Double> offsethorizontal = specialGroup.add(new DoubleSetting.Builder()
             .name("Horizontal Offset")
             .description("How much to offset the player after teleports.")
@@ -87,6 +114,21 @@ public class MaceKill extends Module {
     }
 
     private Vec3d previouspos;
+    private int attackDelay = 0;
+    @EventHandler
+    private void onTick(TickEvent.Pre event) {
+        if (!attackFast.get() || mc.player == null || mc.world == null || mc.getNetworkHandler() == null) return;
+        attackDelay++;
+        HitResult target = mc.crosshairTarget;
+        if (mc.options.attackKey.isPressed() && target instanceof EntityHitResult ehr && attackDelay>=attackdelay.get()){
+            PlayerInteractEntityC2SPacket attack = PlayerInteractEntityC2SPacket.attack(ehr.getEntity(), mc.player.isSneaking());
+            for (int i = 0; i < attacks.get(); i++) {
+                mc.player.swingHand(Hand.MAIN_HAND);
+                mc.player.networkHandler.sendPacket(attack);
+            }
+            attackDelay = 0;
+        }
+    }
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
         if (mc.player == null) return;
@@ -198,7 +240,7 @@ public class MaceKill extends Module {
 
         int scanStart = maxHeight;
         if (randomizeHeight.get()) {
-            int randomSubtract = (int) (Math.random() * (deviation.get() + 1)); // 0 to deviation
+            int randomSubtract = (int) (Math.random() * (deviation.get() + 1));
             scanStart = Math.max(playerPos.getY() + 1, maxHeight - randomSubtract);
         }
 

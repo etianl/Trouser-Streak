@@ -47,14 +47,18 @@ public class CrossbowMachineGun extends Module {
             timer = 0;
         }
 
-        if (mc.player.getMainHandStack().getItem() != Items.CROSSBOW || !mc.options.useKey.isPressed()) return;
+        if (mc.player.getOffHandStack().getItem() != Items.CROSSBOW
+                && mc.player.getMainHandStack().getItem() != Items.CROSSBOW
+                || !mc.options.useKey.isPressed()) return;
 
-        int sequence = 0;
+        Hand crossbowHand = mc.player.getMainHandStack().getItem() == Items.CROSSBOW
+                ? Hand.MAIN_HAND
+                : Hand.OFF_HAND;
 
-        if (correctSequence.get()) {
-            sequence = mc.world.pendingUpdateManager.getSequence();
-        }
+        int sequence = correctSequence.get() ? mc.world.pendingUpdateManager.getSequence() : 0;
 
-        mc.getNetworkHandler().sendPacket(new PlayerInteractItemC2SPacket(Hand.MAIN_HAND, sequence, mc.player.getYaw(), mc.player.getPitch()));
+        mc.getNetworkHandler().sendPacket(
+                new PlayerInteractItemC2SPacket(crossbowHand, sequence, mc.player.getYaw(), mc.player.getPitch())
+        );
     }
 }
