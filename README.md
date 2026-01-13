@@ -136,6 +136,17 @@ Delays sent and received packets by a certain amount of ticks. Part of this code
 Makes noise when a player joins the server or if they enter render distance. (Credits to etianl :D)
 ### **PortalGodMode:** 
 Makes you invincible after you walk through a portal. You will not be able to move while invincible until you disable the module.
+### **ProjectileLauncher:**
+Teleports you behind yourself then back to your original position to apply high velocity to the item you are using.\
+**This allows Bows to instakill once more!**
+You could also use this module to launch an ender pearl **very** far.\
+There is also a **"Bow Machinegun"** option which can turn your your bow into a machinegun for rapid firing of high velocity arrows like bullets!
+
+Thank you to [agreed](https://github.com/aisiaiiad) for demonstrating the increased velocity working and telling me about it which allowed me to recreate it. Also another small thanks to s1arvion from our Discord server for also confirming it's possible.
+### **Projectile Teleport:**
+Teleports you above the target's position to launch a projectile at high speed toward the top of their head. It can be used as an instakill aura for bows. Press and/or hold the useKey to launch things at people's positions. Works best on Paper servers.
+
+Thank you to [agreed](https://github.com/aisiaiiad) for making this! I only added a couple small things. 
 ### **RedstoneNuker:** 
 It's just the regular Nuker module from Meteor client, customized to only break things that generate redstone signals. Also with included AutoTool. Keeps you safer when placing lots of TNT. (Credits to Meteor Client for the borrowed code.)
 ### **RemoteEnderChest:** 

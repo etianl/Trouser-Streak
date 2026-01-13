@@ -83,6 +83,8 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new PortalGodMode());
                 Modules.get().add(new PortalPatternFinder());
                 Modules.get().add(new PotESP());
+                Modules.get().add(new ProjectileLauncher());
+                Modules.get().add(new ProjectileTeleport());
                 Modules.get().add(new RedstoneNuker());
                 Modules.get().add(new RemoteEnderChest());
                 Modules.get().add(new ShulkerDupe());
