@@ -2,12 +2,11 @@
 package pwn.noobs.trouserstreak.modules;
 
 import io.netty.buffer.Unpooled;
-import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -26,6 +25,8 @@ import java.util.Set;
 
 public class TPAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup totem = settings.createGroup("Totem Bypass (Mace)");
+
     private final Setting<Boolean> swing = sgGeneral.add(
             new BoolSetting.Builder()
                     .name("swing arm")
@@ -95,7 +96,7 @@ public class TPAura extends Module {
             new DoubleSetting.Builder()
                     .name("Max Distance (PAPER)")
                     .description("Maximum range.")
-                    .defaultValue(49.0)
+                    .defaultValue(59.0)
                     .min(1.0)
                     .sliderRange(1.0,99.0)
                     .visible(() -> mode.get() == Mode.Paper)
@@ -105,10 +106,18 @@ public class TPAura extends Module {
             new IntSetting.Builder()
                     .name("attack-delay")
                     .description("Ticks between entity attacks.")
-                    .defaultValue(3)
-                    .min(1)
+                    .defaultValue(0)
+                    .min(0)
                     .sliderMax(20)
                     .build()
+    );
+    private final Setting<Integer> attacks = sgGeneral.add(new IntSetting.Builder()
+            .name("# of Attacks")
+            .description("This many teleport attacks per delay.")
+            .defaultValue(1)
+            .sliderRange(1, 10)
+            .min(0)
+            .build()
     );
     private final Setting<Double> offsethorizontal = sgGeneral.add(
             new DoubleSetting.Builder()
@@ -128,14 +137,29 @@ public class TPAura extends Module {
                     .sliderMax(0.99)
                     .build()
     );
+    private final Setting<Boolean> skipCollisionCheck = sgGeneral.add(new BoolSetting.Builder()
+            .name("BoatNoclip skip collision check")
+            .description("If BoatNoclip is on and you are in a boat skip collision checks for blocks.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Boolean> randomizeHeight = totem.add(new BoolSetting.Builder()
+            .name("Randomize height")
+            .description("Randomizes the fall height below the set limit.")
+            .defaultValue(true)
+            .build());
+    private final Setting<Integer> deviation = totem.add(new IntSetting.Builder()
+            .name("Height deviation")
+            .description("Max blocks to subtract from max height (e.g. 40)")
+            .defaultValue(40)
+            .sliderRange(1, 99)
+            .min(1)
+            .max(99)
+            .visible(randomizeHeight::get)
+            .build()
+    );
     private double maxDistance;
     private int entityAttackTicks = 0;
-    private boolean canEntityAttack = true;
-    private Entity target = null;
-    private volatile Vec3d startPos = Vec3d.ZERO;
-    private volatile Vec3d finalPos = Vec3d.ZERO;
-    private volatile Vec3d aboveself = Vec3d.ZERO;
-    private volatile Vec3d abovetarget = Vec3d.ZERO;
 
     public TPAura() {
         super(Trouser.Main, "TPAura", "Teleport to entities to attack them.");
@@ -146,60 +170,17 @@ public class TPAura extends Module {
         else maxDistance = paperDistance.get();
     }
     @EventHandler
-    private void onRender3D(Render3DEvent event) {
-        if (mc.player == null || mc.world == null || mc.getNetworkHandler() == null) return;
-        target = findClosestTarget();
-        if (target == null) {
-            startPos = finalPos = aboveself = abovetarget = null;
-            entityAttackTicks = 0;
-            return;
-        }
-        startPos = mc.player.getVehicle() == null
-                ? mc.player.getPos()
-                : mc.player.getVehicle().getPos();
-        Vec3d targetPos = target.getPos();
-        Vec3d diff = startPos.subtract(targetPos);
-
-        double flatUp = Math.sqrt(maxDistance * maxDistance - (diff.x * diff.x + diff.z * diff.z));
-        double targetUp = flatUp + diff.y;
-
-        double yOffset = mc.player.getVehicle() != null
-                ? target.getBoundingBox().maxY + 0.3
-                : targetPos.y;
-
-        Vec3d insideTarget = new Vec3d(targetPos.x, yOffset, targetPos.z);
-
-        double actualDist = startPos.distanceTo(targetPos);
-        if (actualDist > maxDistance - 0.5) return;
-
-        finalPos = !invalid(insideTarget)
-                ? insideTarget
-                : findNearestPos(insideTarget);
-        if (finalPos == null) return;
-        aboveself = startPos.add(0, maxDistance, 0);
-        abovetarget = finalPos.add(0, targetUp, 0);
-    }
-    @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (mc.player == null || mc.world == null || mc.getNetworkHandler() == null) return;
 
         if (mode.get() == Mode.Vanilla) maxDistance = Distance.get();
         else maxDistance = paperDistance.get();
-
-        if (!canEntityAttack) {
-            entityAttackTicks++;
-            if (entityAttackTicks >= entityAttackDelay.get()) {
-                canEntityAttack = true;
-                entityAttackTicks = 0;
+        entityAttackTicks++;
+        if (entityAttackTicks>entityAttackDelay.get()){
+            for (int i = 0; i < attacks.get(); i++) {
+                hitEntity();
             }
-            return;
-        }
-
-        if (!friends.get() && target instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) target)) return;
-
-        if (target != null && isValidTarget(target)) {
-            hitEntity(target, true);
-            canEntityAttack = false;
+            entityAttackTicks = 0;
         }
     }
 
@@ -209,7 +190,7 @@ public class TPAura extends Module {
 
         for (Entity entity : mc.world.getEntities()) {
             if (!isValidListTarget(entity)) continue;
-
+            if (friends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) continue;
             double dist = entity.squaredDistanceTo(mc.player);
             if (dist < closestDist) {
                 closestDist = dist;
@@ -227,15 +208,53 @@ public class TPAura extends Module {
                 && entity != mc.player;
     }
     private boolean isValidTarget(Entity entity) {
+        Entity playerentity = mc.player.hasVehicle() ? mc.player.getVehicle() : mc.player;
         return entity.isAlive()
-                && mc.player.distanceTo(entity) <= maxDistance;
+                && playerentity.distanceTo(entity) <= maxDistance;
     }
 
-    public void hitEntity(Entity target, Boolean attackpressed) {
+    public void hitEntity() {
         if (mc.player == null || mc.getNetworkHandler() == null) return;
-        if (target instanceof PlayerEntity player && player.isBlocking()) return;
-        if (startPos == null || finalPos == null || aboveself == null || abovetarget == null) return;
         Entity entity = mc.player.hasVehicle() ? mc.player.getVehicle() : mc.player;
+        Entity target = findClosestTarget();
+        if (target instanceof PlayerEntity player && player.isBlocking()) return;
+        Vec3d startPos;
+        Vec3d finalPos;
+        Vec3d aboveself;
+        Vec3d abovetarget;
+        if (target == null || !isValidTarget(target)) {
+            entityAttackTicks = 0;
+            return;
+        }
+        startPos = entity.getPos();
+        Vec3d targetPos = target.getPos();
+        Vec3d diff = startPos.subtract(targetPos);
+
+        double flatUp = Math.sqrt(maxDistance * maxDistance - (diff.x * diff.x + diff.z * diff.z));
+        double targetUp = flatUp + diff.y;
+
+        double yOffset = mc.player.getVehicle() != null
+                ? target.getBoundingBox().maxY + 0.3
+                : targetPos.y;
+
+        Vec3d insideTarget = new Vec3d(targetPos.x, yOffset, targetPos.z);
+
+        double actualDist = startPos.distanceTo(targetPos);
+
+        finalPos = !invalid(insideTarget)
+                ? insideTarget
+                : findNearestPos(insideTarget);
+        if (finalPos == null) return;
+        aboveself = startPos.add(0, maxDistance, 0);
+        abovetarget = finalPos.add(0, targetUp, 0);
+        if (randomizeHeight.get()) {
+            int randomSubtract = (int) (Math.random() * (deviation.get() + 1));
+            aboveself = aboveself.add(0,-randomSubtract,0);
+            abovetarget = abovetarget.add(0,-randomSubtract,0);
+        }
+
+        if (startPos == null || finalPos == null || aboveself == null || abovetarget == null) return;
+        if (actualDist > maxDistance - 0.5) return;
 
         if (invalid(finalPos) ||
                 (mode.get() == Mode.Paper && goUp.get() && (!hasClearPath(aboveself, abovetarget) || invalid(aboveself) || invalid(abovetarget)))) {
@@ -260,8 +279,7 @@ public class TPAura extends Module {
         }
         sendMove(entity, finalPos);
 
-        if (attackpressed)mc.getNetworkHandler().sendPacket(PlayerInteractEntityC2SPacket.attack(target, mc.player.isSneaking()));
-        else mc.getNetworkHandler().sendPacket(PlayerInteractEntityC2SPacket.interact(target, mc.player.isSneaking(), mc.player.getActiveHand()));
+        mc.getNetworkHandler().sendPacket(PlayerInteractEntityC2SPacket.attack(target, mc.player.isSneaking()));
 
         if (swing.get()) {
             mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
@@ -303,14 +321,15 @@ public class TPAura extends Module {
     private void sendMove(Entity entity, Vec3d pos) {
         if (mc.getNetworkHandler() == null) return;
         if (entity == mc.player) {
-            mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(pos.x, pos.y, pos.z, false));
+            PlayerMoveC2SPacket movepacket = new PlayerMoveC2SPacket.PositionAndOnGround(pos.x, pos.y, pos.z, false);
+            mc.player.networkHandler.sendPacket(movepacket);
         } else {
             PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeDouble(pos.x);
             buf.writeDouble(pos.y);
             buf.writeDouble(pos.z);
-            buf.writeFloat(mc.player.getYaw());
-            buf.writeFloat(mc.player.getPitch());
+            buf.writeFloat(entity.getYaw());
+            buf.writeFloat(entity.getPitch());
 
             VehicleMoveC2SPacket packet = new VehicleMoveC2SPacket(buf);
             mc.getNetworkHandler().sendPacket(packet);
@@ -344,54 +363,56 @@ public class TPAura extends Module {
     }
 
     private boolean invalid(Vec3d pos) {
+        if (mc.world == null) return true;
         if (mc.world.getChunk(BlockPos.ofFloored(pos)) == null) return true;
-        Entity entity = mc.player.hasVehicle()
-                ? mc.player.getVehicle()
-                : mc.player;
-        Box box = entity.getBoundingBox().offset(
+
+        Entity entity = mc.player.hasVehicle() ? mc.player.getVehicle() : mc.player;
+
+        Box targetBox = entity.getBoundingBox().offset(
                 pos.x - entity.getX(),
                 pos.y - entity.getY(),
                 pos.z - entity.getZ()
         );
-        BlockPos blockPos = BlockPos.ofFloored(pos);
-        for (int x = blockPos.getX() - 1; x <= blockPos.getX() + 1; x++) {
-            for (int y = blockPos.getY() - 1; y <= blockPos.getY() + 1; y++) {
-                for (int z = blockPos.getZ() - 1; z <= blockPos.getZ() + 1; z++) {
-                    BlockPos checkPos = new BlockPos(x, y, z);
-                    BlockState state = mc.world.getBlockState(checkPos);
-
-                    if (state.isOf(Blocks.LAVA)) {
-                        return true;
-                    }
+        Module boatNoclip = Modules.get().get(BoatNoclip.class);
+        if (skipCollisionCheck.get() && entity != mc.player && boatNoclip != null && boatNoclip.isActive()) {
+            for (BlockPos bp : BlockPos.iterate(
+                    BlockPos.ofFloored(targetBox.minX, targetBox.minY, targetBox.minZ),
+                    BlockPos.ofFloored(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
+            )) {
+                BlockState state = mc.world.getBlockState(bp);
+                if (state.isOf(Blocks.LAVA)) {
+                    return true;
+                }
+            }
+        } else {
+            for (BlockPos bp : BlockPos.iterate(
+                    BlockPos.ofFloored(targetBox.minX, targetBox.minY, targetBox.minZ),
+                    BlockPos.ofFloored(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
+            )) {
+                BlockState state = mc.world.getBlockState(bp);
+                if (state.isOf(Blocks.LAVA) || !state.getCollisionShape(mc.world, bp).isEmpty()) {
+                    return true;
                 }
             }
         }
-        for (Entity e : mc.world.getOtherEntities(mc.player, box)) {
+
+        for (Entity e : mc.world.getOtherEntities(entity, targetBox)) {
             if (e.isCollidable()) return true;
         }
-        Vec3d delta = pos.subtract(entity.getPos());
-        return mc.world.getBlockCollisions(entity, entity.getBoundingBox().offset(delta)).iterator().hasNext();
+
+        return false;
     }
 
     private boolean hasClearPath(Vec3d start, Vec3d end) {
         if (invalid(start) || invalid(end)) return false;
-        Entity entity = mc.player.hasVehicle()
-                ? mc.player.getVehicle()
-                : mc.player;
-        Box playerBox = entity.getBoundingBox();
+
         int steps = Math.max(10, (int)(start.distanceTo(end) * 2.5));
 
         for (int i = 1; i < steps; i++) {
             double t = i / (double)steps;
             Vec3d sample = start.lerp(end, t);
 
-            Box sampleBox = playerBox.offset(sample.x - mc.player.getX(),
-                    sample.y - mc.player.getY(),
-                    sample.z - mc.player.getZ());
-
-            if (!mc.world.isSpaceEmpty(sampleBox)) return false;
-            if (mc.world.getOtherEntities(mc.player, sampleBox)
-                    .stream().anyMatch(e -> e.isCollidable())) return false;
+            if (invalid(sample)) return false;
         }
         return true;
     }
