@@ -1,5 +1,6 @@
 package pwn.noobs.trouserstreak.modules;
 
+import pwn.noobs.trouserstreak.Trouser;
 import meteordevelopment.meteorclient.events.entity.EntityMoveEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -15,14 +16,11 @@ import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
-import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import pwn.noobs.trouserstreak.Trouser;
 
 public class BoatNoclip extends Module {
     private final SettingGroup sgSpeed = settings.createGroup("Speed");
@@ -188,17 +186,12 @@ public class BoatNoclip extends Module {
                 for (int z = minZ; z <= maxZ; z++) {
                     pos.set(x, y, z);
                     BlockState state = mc.world.getBlockState(pos);
-
                     if (state.isAir()) continue;
 
-                    VoxelShape shape = state.getOutlineShape(mc.world, pos, ShapeContext.absent());
+                    VoxelShape shape = state.getCollisionShape(mc.world, pos, ShapeContext.absent());
                     if (shape.isEmpty()) continue;
 
-                    if (VoxelShapes.matchesAnywhere(
-                            shape,
-                            VoxelShapes.cuboid(box.offset(-x, -y, -z)),
-                            BooleanBiFunction.AND
-                    )) {
+                    if (entity.getBoundingBox().intersects(shape.getBoundingBox().offset(pos))) {
                         return true;
                     }
                 }
