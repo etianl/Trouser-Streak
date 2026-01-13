@@ -29,7 +29,7 @@ public class AttributeSwap extends Module {
     private int prevSlot = -1;
     private int dDelay = 0;
     public AttributeSwap() {
-        super(Trouser.Main, "attribute-swap", "Swaps attributes of the main hand item with the target slot on attack");
+        super(Trouser.Main, "AttributeSwap", "Swaps attributes of the main hand item with the target slot on attack");
     }
     @EventHandler
     private void onAttack(AttackEntityEvent event) {
