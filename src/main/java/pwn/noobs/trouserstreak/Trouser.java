@@ -52,6 +52,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new CollectibleESP());
                 Modules.get().add(new CrossbowMachineGun());
                 Modules.get().add(new ExplosionAura());
+                Modules.get().add(new FreeBoatRide());
                 Modules.get().add(new FlightAntikick());
                 Modules.get().add(new ForceOPBook());
                 Modules.get().add(new ForceOPSign());
@@ -62,7 +63,6 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new InfiniteTools());
                 Modules.get().add(new InstaMineNuker());
                 Modules.get().add(new InstaSafetyBox());
-                Modules.get().add(new InstantKill());
                 Modules.get().add(new InvDupeModule());
                 Modules.get().add(new ItemTractorBeam());
                 Modules.get().add(new LavaAura());
