@@ -9,6 +9,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -33,15 +34,17 @@ public class AutoVclipCommand extends Command {
                     if (player.hasVehicle()) {
                         Entity vehicle = player.getVehicle();
                         for (int packetNumber = 0; packetNumber < 4; packetNumber++) {
-                            mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
+                            player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(player.getVehicle()));
                         }
+                        mc.getNetworkHandler().sendPacket(new VehicleMoveC2SPacket(new Vec3d(vehicle.getX(), isopenair1.getY(), vehicle.getZ()), vehicle.getYaw(), vehicle.getPitch(), false));
                         vehicle.setPosition(vehicle.getX(), isopenair1.getY(), vehicle.getZ());
                     } else {
                         for (int packetNumber = 0; packetNumber < 4; packetNumber++) {
-                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true, mc.player.horizontalCollision));
+                            player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true, player.horizontalCollision));
                         }
+                        player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(player.getX(), isopenair1.getY(), player.getZ(), false, player.horizontalCollision));
+                        player.setPosition(player.getX(), isopenair1.getY(), player.getZ());
                     }
-                    player.setPosition(player.getX(), isopenair1.getY(), player.getZ());
                     return SINGLE_SUCCESS;
                 }
             }
@@ -58,19 +61,20 @@ public class AutoVclipCommand extends Command {
                     if (player.hasVehicle()) {
                         Entity vehicle = player.getVehicle();
                         for (int packetNumber = 0; packetNumber < 4; packetNumber++) {
-                            mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
+                            player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(player.getVehicle()));
                         }
+                        mc.getNetworkHandler().sendPacket(new VehicleMoveC2SPacket(new Vec3d(vehicle.getX(), isopenair2.getY(), vehicle.getZ()), vehicle.getYaw(), vehicle.getPitch(), false));
                         vehicle.setPosition(vehicle.getX(), isopenair2.getY(), vehicle.getZ());
                     } else {
                         for (int packetNumber = 0; packetNumber < 4; packetNumber++) {
-                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true, mc.player.horizontalCollision));
+                            player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true, player.horizontalCollision));
                         }
+                        player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(player.getX(), isopenair2.getY(), player.getZ(), false, player.horizontalCollision));
+                        player.setPosition(player.getX(), isopenair2.getY(), player.getZ());
+                        double y = isopenair2.getY() + 0.0000000001;
+                        player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(player.getX(), y, player.getZ(), false, player.horizontalCollision));
+                        player.setPosition(player.getX(), y, player.getZ());
                     }
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), isopenair2.getY(), mc.player.getZ(), false, mc.player.horizontalCollision));
-                    mc.player.setPosition(mc.player.getX(), isopenair2.getY(), mc.player.getZ());
-                    double y = isopenair2.getY() + 0.0000000001;
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), y, mc.player.getZ(), false, mc.player.horizontalCollision)); // we are slightly higher, resets fall distance to 0
-                    mc.player.setPosition(mc.player.getX(), y, mc.player.getZ());
                     return SINGLE_SUCCESS;
                 }
             }
@@ -80,7 +84,6 @@ public class AutoVclipCommand extends Command {
         builder.then(literal("highest").executes(ctx -> {
             ClientPlayerEntity player = mc.player;
             assert player != null;
-
             for (int i = 21; i > 0; i--) {
                 BlockPos isopenair1 = (player.getBlockPos().add(0,i,0));
                 BlockPos newopenair2 = isopenair1.up(1);
@@ -88,16 +91,17 @@ public class AutoVclipCommand extends Command {
                     if (player.hasVehicle()) {
                         Entity vehicle = player.getVehicle();
                         for (int packetNumber = 0; packetNumber < 4; packetNumber++) {
-                            mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
+                            player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(player.getVehicle()));
                         }
-
+                        mc.getNetworkHandler().sendPacket(new VehicleMoveC2SPacket(new Vec3d(vehicle.getX(), newopenair2.getY(), vehicle.getZ()), vehicle.getYaw(), vehicle.getPitch(), false));
                         vehicle.setPosition(vehicle.getX(), newopenair2.getY(), vehicle.getZ());
                     } else {
                         for (int packetNumber = 0; packetNumber < 4; packetNumber++) {
-                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true, mc.player.horizontalCollision));
+                            player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true, player.horizontalCollision));
                         }
+                        player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(player.getX(), newopenair2.getY(), player.getZ(), false, player.horizontalCollision));
+                        player.setPosition(player.getX(), newopenair2.getY(), player.getZ());
                     }
-                    player.setPosition(player.getX(), newopenair2.getY(), player.getZ());
                     return SINGLE_SUCCESS;
                 }
             }
