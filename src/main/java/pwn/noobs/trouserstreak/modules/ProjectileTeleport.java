@@ -14,7 +14,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.*;
@@ -34,6 +33,9 @@ public class ProjectileTeleport extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgTargeting = settings.createGroup("Targeting");
+    private final SettingGroup sgTP = settings.createGroup("Teleport Options");
+    private final SettingGroup sgArrowFire = settings.createGroup("Bow Options");
+
     private final ItemListSetting projectileItems = sgGeneral.add(new ItemListSetting.Builder()
             .name("projectile-items")
             .description("Which items to apply extra velocity to.")
@@ -68,15 +70,34 @@ public class ProjectileTeleport extends Module {
                     .sliderMax(15)
                     .build()
     );
-    private final Setting<Integer> prePackets = sgGeneral.add(
-            new IntSetting.Builder()
-                    .name("# spam packets")
-                    .defaultValue(5)
-                    .min(0)
-                    .sliderMax(100)
+    private final Setting<Boolean> skipCollisionCheck = sgGeneral.add(new BoolSetting.Builder()
+            .name("BoatNoclip skip collision check")
+            .description("If BoatNoclip is on and you are in a boat skip collision checks for blocks.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Set<EntityType<?>>> entities = sgTargeting.add(
+            new EntityTypeListSetting.Builder()
+                    .name("entities")
+                    .description("Entities to target.")
+                    .onlyAttackable()
+                    .defaultValue(EntityType.PLAYER)
                     .build()
     );
-    private final Setting<Double> teleportHeight = sgGeneral.add(
+    public final Setting<Boolean> friends = sgTargeting.add(new BoolSetting.Builder()
+            .name("Attack Friends")
+            .defaultValue(false)
+            .build()
+    );
+    private final Setting<Integer> prePackets = sgTP.add(
+            new IntSetting.Builder()
+                    .name("# spam packets")
+                    .defaultValue(8)
+                    .min(0)
+                    .sliderMax(20)
+                    .build()
+    );
+    private final Setting<Double> teleportHeight = sgTP.add(
         new DoubleSetting.Builder()
             .name("teleport-height")
                 .description("Teleport you up to this high for increased velocity for projectiles.")
@@ -86,16 +107,16 @@ public class ProjectileTeleport extends Module {
             .build()
     );
 
-    private final Setting<Double> maxDistance = sgGeneral.add(
+    private final Setting<Double> maxDistance = sgTP.add(
             new DoubleSetting.Builder()
                     .name("max-distance")
                     .description("Teleport you up to this far to targets.")
-                    .defaultValue(80.0)
+                    .defaultValue(60.0)
                     .min(5.0)
                     .sliderMax(120.0)
                     .build()
     );
-    private final Setting<Double> targetoffset = sgGeneral.add(
+    private final Setting<Double> targetoffset = sgTP.add(
             new DoubleSetting.Builder()
                     .name("Above target offset")
                     .description("Offset you this much above the target.")
@@ -104,42 +125,22 @@ public class ProjectileTeleport extends Module {
                     .sliderMax(10.0)
                     .build()
     );
-    private final Setting<Double> offsethorizontal = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> offsethorizontal = sgTP.add(new DoubleSetting.Builder()
             .name("Horizontal Offset")
             .description("Offset you this much from the start position.")
             .defaultValue(0.05)
-            .min(0)
+            .min(0.001)
             .sliderMax(0.99)
             .build()
     );
-    private final Setting<Double> offsetY = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> offsetY = sgTP.add(new DoubleSetting.Builder()
             .name("Y Offset")
             .description("Offset you this much from the start position.")
-            .defaultValue(0.001)
-            .min(0)
+            .defaultValue(0.01)
+            .min(0.001)
             .sliderMax(0.99)
             .build()
     );
-    private final Setting<Boolean> skipCollisionCheck = sgGeneral.add(new BoolSetting.Builder()
-            .name("BoatNoclip skip collision check")
-            .description("If BoatNoclip is on and you are in a boat skip collision checks for blocks.")
-            .defaultValue(true)
-            .build()
-    );
-    private final Setting<Set<EntityType<?>>> entities = sgTargeting.add(
-        new EntityTypeListSetting.Builder()
-            .name("entities")
-            .description("Entities to target.")
-            .onlyAttackable()
-            .defaultValue(EntityType.PLAYER)
-            .build()
-    );
-    public final Setting<Boolean> friends = sgTargeting.add(new BoolSetting.Builder()
-            .name("Attack Friends")
-            .defaultValue(false)
-            .build()
-    );
-    private final SettingGroup sgArrowFire = settings.createGroup("Arrow Fire");
     private final Setting<Boolean> arrowFire = sgArrowFire.add(new BoolSetting.Builder()
             .name("Bow Machinegun")
             .description("Automatically fires arrows while holding bow.")
@@ -218,6 +219,7 @@ public class ProjectileTeleport extends Module {
                 Direction.DOWN, mc.player.getInventory().selectedSlot
         ));
     }
+    private boolean executingInteract = false;
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onPacketSend(PacketEvent.Send event) {
         if (mc.player == null || mc.world == null || mc.getNetworkHandler() == null) return;
@@ -229,7 +231,14 @@ public class ProjectileTeleport extends Module {
             Item item = stack.getItem();
 
             if (isValidProjectile(item)) {
-                interact(packet.getHand());
+                if (executingInteract) return;
+                executingInteract = true;
+                event.cancel();
+                try {
+                    interact(packet.getHand());
+                } finally {
+                    executingInteract = false;
+                }
             } else if ((item instanceof BowItem && projectileItems.get().contains(Items.BOW))){
                 isChargingBow = true;
             }

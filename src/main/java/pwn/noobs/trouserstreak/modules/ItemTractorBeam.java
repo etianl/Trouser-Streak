@@ -22,7 +22,7 @@ public class ItemTractorBeam extends Module {
             .build()
     );
     public ItemTractorBeam() {
-        super(Trouser.Main, "ItemTractorBeam", "Sucks up items from a very far distance using hunger points. Only works well for items on the same Y level. Only works in Vanilla. Is patched in most recent versions.");
+        super(Trouser.Main, "ItemTractorBeam", "Sucks up items from a very far distance using hunger points. Only works well for items on the same Y level. Only works in Vanilla.");
     }
 
     @Override
@@ -37,11 +37,10 @@ public class ItemTractorBeam extends Module {
         for (int i = 0; i < multiply.get(); i++) {
             sendmovementpackets();
         }
-        mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.STOP_SPRINTING));
+        if (!mc.options.sprintKey.isPressed() || !mc.options.getSprintToggled().getValue()) mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.STOP_SPRINTING));
         if (antihungerWasEnabled) Modules.get().get(AntiHunger.class).toggle();
         toggle();
     }
-    // 0.000000001
     private static void sendmovementpackets(){
         mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() - 0.00000000000001, mc.player.getZ(), true, mc.player.horizontalCollision));
         mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 0.00000000000001, mc.player.getZ(), false, mc.player.horizontalCollision));
