@@ -24,12 +24,22 @@ import java.util.Set;
 
 public class TPAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup totem = settings.createGroup("Totem Bypass (Mace)");
+    private final SettingGroup sgTP = settings.createGroup("Teleport Options");
+    private final SettingGroup totem = settings.createGroup("Totem Bypass (PAPER ONLY)");
 
     private final Setting<Boolean> swing = sgGeneral.add(
             new BoolSetting.Builder()
                     .name("swing arm")
                     .defaultValue(true)
+                    .build()
+    );
+    private final Setting<Integer> entityAttackDelay = sgGeneral.add(
+            new IntSetting.Builder()
+                    .name("attack-delay")
+                    .description("Ticks between entity attacks.")
+                    .defaultValue(0)
+                    .min(0)
+                    .sliderMax(20)
                     .build()
     );
     private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
@@ -53,7 +63,13 @@ public class TPAura extends Module {
             .defaultValue(Mode.Vanilla)
             .build()
     );
-    private final Setting<Boolean> goUp = sgGeneral.add(
+    private final Setting<Boolean> skipCollisionCheck = sgGeneral.add(new BoolSetting.Builder()
+            .name("BoatNoclip skip collision check")
+            .description("If BoatNoclip is on and you are in a boat skip collision checks for blocks.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Boolean> goUp = sgTP.add(
             new BoolSetting.Builder()
                     .name("Clip up")
                     .description("Clips upward to do a Mace Smash and get around obstacles. There isn't enough packets for this in vanilla mode.")
@@ -61,7 +77,7 @@ public class TPAura extends Module {
                     .visible(() -> mode.get() == Mode.Paper)
                     .build()
     );
-    private final Setting<Integer> packets = sgGeneral.add(
+    private final Setting<Integer> packets = sgTP.add(
             new IntSetting.Builder()
                     .name("# spam packets to send (VANILLA)")
                     .description("How many packets to send before actual movements.")
@@ -71,7 +87,7 @@ public class TPAura extends Module {
                     .visible(() -> mode.get() == Mode.Vanilla)
                     .build()
     );
-    private final Setting<Double> Distance = sgGeneral.add(
+    private final Setting<Double> Distance = sgTP.add(
             new DoubleSetting.Builder()
                     .name("Max Distance (VANILLA)")
                     .description("Maximum range.")
@@ -81,82 +97,67 @@ public class TPAura extends Module {
                     .visible(() -> mode.get() == Mode.Vanilla)
                     .build()
     );
-    private final Setting<Integer> paperpackets = sgGeneral.add(
+    private final Setting<Integer> paperpackets = sgTP.add(
             new IntSetting.Builder()
                     .name("# spam packets to send (PAPER)")
                     .description("How many packets to send before actual movements.")
-                    .defaultValue(7)
+                    .defaultValue(8)
                     .min(1)
-                    .sliderRange(1,10)
+                    .sliderRange(1,20)
                     .visible(() -> mode.get() == Mode.Paper)
                     .build()
     );
-    private final Setting<Double> paperDistance = sgGeneral.add(
+    private final Setting<Double> paperDistance = sgTP.add(
             new DoubleSetting.Builder()
                     .name("Max Distance (PAPER)")
                     .description("Maximum range.")
-                    .defaultValue(59.0)
+                    .defaultValue(49.0)
                     .min(1.0)
                     .sliderRange(1.0,99.0)
                     .visible(() -> mode.get() == Mode.Paper)
                     .build()
     );
-    private final Setting<Integer> entityAttackDelay = sgGeneral.add(
-            new IntSetting.Builder()
-                    .name("attack-delay")
-                    .description("Ticks between entity attacks.")
-                    .defaultValue(0)
-                    .min(0)
-                    .sliderMax(20)
-                    .build()
-    );
-    private final Setting<Integer> attacks = sgGeneral.add(new IntSetting.Builder()
-            .name("# of Attacks")
-            .description("This many teleport attacks per delay.")
-            .defaultValue(1)
-            .sliderRange(1, 10)
-            .min(0)
-            .build()
-    );
-    private final Setting<Double> offsethorizontal = sgGeneral.add(
+    private final Setting<Double> offsethorizontal = sgTP.add(
             new DoubleSetting.Builder()
                     .name("Horizontal Offset")
                     .description("How much to offset the player after teleports.")
                     .defaultValue(0.05)
-                    .min(0.01)
+                    .min(0.001)
                     .sliderMax(0.99)
                     .build()
     );
-    private final Setting<Double> offsetY = sgGeneral.add(
+    private final Setting<Double> offsetY = sgTP.add(
             new DoubleSetting.Builder()
                     .name("Y Offset")
                     .description("How much to offset the player after teleports.")
                     .defaultValue(0.01)
-                    .min(0.01)
+                    .min(0.001)
                     .sliderMax(0.99)
                     .build()
     );
-    private final Setting<Boolean> skipCollisionCheck = sgGeneral.add(new BoolSetting.Builder()
-            .name("BoatNoclip skip collision check")
-            .description("If BoatNoclip is on and you are in a boat skip collision checks for blocks.")
-            .defaultValue(true)
-            .build()
-    );
-    private final Setting<Boolean> randomizeHeight = totem.add(new BoolSetting.Builder()
-            .name("Randomize height")
-            .description("Randomizes the fall height below the set limit.")
-            .defaultValue(true)
+    private final Setting<Boolean> attackSpam = totem.add(new BoolSetting.Builder()
+            .name("Bypass totems (Mace)")
+            .description("Teleport pathway is simplified for this to work. Settings example: 49 distance, 8 spam packet, 2 attack, 20 height increase.")
+            .defaultValue(false)
             .build());
-    private final Setting<Integer> deviation = totem.add(new IntSetting.Builder()
-            .name("Height deviation")
-            .description("Max blocks to subtract from max height (e.g. 40)")
-            .defaultValue(40)
-            .sliderRange(1, 99)
-            .min(1)
-            .max(99)
-            .visible(randomizeHeight::get)
+    private final Setting<Integer> attacks = totem.add(new IntSetting.Builder()
+            .name("# of Attacks")
+            .description("This many attacks. 3 attacks may not work due to packet limits")
+            .defaultValue(2)
+            .sliderRange(1, 3)
+            .min(0)
             .build()
     );
+    private final Setting<Integer> increase = totem.add(new IntSetting.Builder()
+            .name("Height Increase")
+            .description("Blocks distance to increase from the last attack")
+            .defaultValue(9)
+            .sliderRange(1, 100)
+            .min(1)
+            .max(100)
+            .build()
+    );
+
     private double maxDistance;
     private int entityAttackTicks = 0;
 
@@ -176,9 +177,7 @@ public class TPAura extends Module {
         else maxDistance = paperDistance.get();
         entityAttackTicks++;
         if (entityAttackTicks>entityAttackDelay.get()){
-            for (int i = 0; i < attacks.get(); i++) {
-                hitEntity();
-            }
+            hitEntity();
             entityAttackTicks = 0;
         }
     }
@@ -211,54 +210,39 @@ public class TPAura extends Module {
         return entity.isAlive()
                 && playerentity.distanceTo(entity) <= maxDistance;
     }
-
     public void hitEntity() {
         if (mc.player == null || mc.getNetworkHandler() == null) return;
         Entity entity = mc.player.hasVehicle() ? mc.player.getVehicle() : mc.player;
         Entity target = findClosestTarget();
         if (target instanceof PlayerEntity player && player.isBlocking()) return;
-        Vec3d startPos;
-        Vec3d finalPos;
-        Vec3d aboveself;
-        Vec3d abovetarget;
+
         if (target == null || !isValidTarget(target)) {
             entityAttackTicks = 0;
             return;
         }
-        startPos = entity.getEntityPos();
-        Vec3d targetPos = target.getEntityPos();
-        Vec3d diff = startPos.subtract(targetPos);
 
-        double flatUp = Math.sqrt(maxDistance * maxDistance - (diff.x * diff.x + diff.z * diff.z));
-        double targetUp = flatUp + diff.y;
+        Vec3d startPos = entity.getEntityPos();
+        Vec3d targetPos = target.getEntityPos();
 
         double yOffset = mc.player.getVehicle() != null
                 ? target.getBoundingBox().maxY + 0.3
                 : targetPos.y;
 
         Vec3d insideTarget = new Vec3d(targetPos.x, yOffset, targetPos.z);
-
         double actualDist = startPos.distanceTo(targetPos);
 
-        finalPos = !invalid(insideTarget)
+        Vec3d finalPos = !invalid(insideTarget)
                 ? insideTarget
                 : findNearestPos(insideTarget);
         if (finalPos == null) return;
-        aboveself = startPos.add(0, maxDistance, 0);
-        abovetarget = finalPos.add(0, targetUp, 0);
-        if (randomizeHeight.get()) {
-            int randomSubtract = (int) (Math.random() * (deviation.get() + 1));
-            aboveself = aboveself.add(0,-randomSubtract,0);
-            abovetarget = abovetarget.add(0,-randomSubtract,0);
-        }
 
-        if (startPos == null || finalPos == null || aboveself == null || abovetarget == null) return;
-        if (actualDist > maxDistance - 0.5) return;
+        Vec3d highPos = startPos.add(0, maxDistance, 0);
+        Vec3d abovetarget = finalPos.add(0, maxDistance, 0);
 
-        if (invalid(finalPos) ||
-                (mode.get() == Mode.Paper && goUp.get() && (!hasClearPath(aboveself, abovetarget) || invalid(aboveself) || invalid(abovetarget)))) {
+        if (invalid(finalPos) || invalid(highPos) || invalid(abovetarget) ||
+                (mode.get() == Mode.Paper && goUp.get() && !hasClearPath(highPos, abovetarget))) {
             if (chatFeedback) {
-                if (!hasClearPath(aboveself, abovetarget)) {
+                if (!attackSpam.get() && !hasClearPath(highPos, abovetarget)) {
                     error("Path blocked between clip positions.");
                 } else {
                     error("At least one of the teleports are invalid.");
@@ -266,35 +250,63 @@ public class TPAura extends Module {
             }
             return;
         }
+
+        if (actualDist > maxDistance - 0.5) return;
+
         int amountOfPackets = mode.get() == Mode.Vanilla ? packets.get() : paperpackets.get();
-        for (int i = 0; i < amountOfPackets; i++) {
+        for (int i2 = 0; i2 < amountOfPackets; i2++) {
             if (mc.player.hasVehicle()) mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
             else mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false, mc.player.horizontalCollision));
         }
 
-        if (mode.get() == Mode.Paper && goUp.get()){
-            sendMove(entity, aboveself);
-            sendMove(entity, abovetarget);
-        }
-        sendMove(entity, finalPos);
+        int attackCount = attacks.get();
+        if (!attackSpam.get() || mode.get() == Mode.Vanilla) attackCount = 1;
 
-        mc.getNetworkHandler().sendPacket(PlayerInteractEntityC2SPacket.attack(target, mc.player.isSneaking()));
+        int currentHeight = (int) maxDistance;
+        for (int i = 0; i < attackCount; i++) {
+            int blocks = (i == 0) ? (int)maxDistance : currentHeight;
 
-        if (swing.get()) {
-            mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
-            mc.player.swingHand(Hand.MAIN_HAND);
+            Vec3d progressiveAboveTarget = finalPos.add(0, blocks, 0);
+
+            if (mode.get() == Mode.Paper && goUp.get() && invalid(progressiveAboveTarget)) {
+                if (chatFeedback) error("Invalid progressive height positions at " + blocks + " blocks.");
+                break;
+            }
+
+            if (attackCount > 1 && chatFeedback && ((mode.get() == Mode.Paper && goUp.get() && !hasClearPath(progressiveAboveTarget, finalPos)) || !hasClearPath(startPos, finalPos))) {
+                error("Path blocked between clip positions.");
+                break;
+            }
+
+            if (attackCount == 1 && mode.get() == Mode.Paper && goUp.get()) {
+                sendMove(entity, highPos);
+            }
+
+            if (mode.get() == Mode.Paper && goUp.get()) {
+                sendMove(entity, progressiveAboveTarget);
+            }
+
+            sendMove(entity, finalPos);
+
+            if (swing.get()) {
+                mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+                mc.player.swingHand(Hand.MAIN_HAND);
+            }
+            mc.getNetworkHandler().sendPacket(PlayerInteractEntityC2SPacket.attack(target, mc.player.isSneaking()));
+            if (attackCount == 1 && mode.get() == Mode.Paper && goUp.get()) {
+                sendMove(entity, progressiveAboveTarget);
+                sendMove(entity, highPos);
+            }
+
+            sendMove(entity, startPos);
+
+            currentHeight += increase.get();
         }
 
-        if (mode.get() == Mode.Paper && goUp.get()){
-            sendMove(entity, abovetarget.add(0,  0.01, 0));
-            sendMove(entity, aboveself.add(0, 0.01, 0));
-        }
-        sendMove(entity, startPos);
         Vec3d offset = getOffset(startPos);
         sendMove(entity, offset);
         entity.setPosition(offset);
     }
-
     private Vec3d findNearestPos(Vec3d desired) {
         if (!invalid(desired)) return desired;
 
@@ -353,7 +365,6 @@ public class TPAura extends Module {
 
         return base;
     }
-
     private boolean invalid(Vec3d pos) {
         if (mc.world == null) return true;
         if (mc.world.getChunk(BlockPos.ofFloored(pos)) == null) return true;
@@ -394,7 +405,6 @@ public class TPAura extends Module {
 
         return false;
     }
-
     private boolean hasClearPath(Vec3d start, Vec3d end) {
         if (invalid(start) || invalid(end)) return false;
 
