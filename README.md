@@ -3,7 +3,8 @@
 <div align="center">
   <h1><strong>Trouser-Streak</strong></h1>
   <p><strong>Official Griefing Utilities of <a href="https://www.youtube.com/@mountainsoflavainc.6913">Mountains of Lava Inc.</a></strong></p>
-  <p><strong>Trouser-Streak</strong> is a compilation of modules for <strong><a href="https://meteorclient.com/">Meteor Client</a></strong>.</p> 
+    <p><strong>You can support our projects by becoming a Youtube Member: <a href="https://www.youtube.com/@mountainsoflavainc.6913/join">LINK</a></strong></p>
+<p><strong>Trouser-Streak</strong> is a compilation of modules for <strong><a href="https://meteorclient.com/">Meteor Client</a></strong>.</p> 
   <p><strong><em>Updated to the latest version and optimized for maximum grief!</em></strong></p>
     <p><strong>Customer Service Discord: <a href="https://www.breakblocks.com/discord">https://www.breakblocks.com/discord</a></strong></p>
   <img src="src/main/resources/assets/icon/icon.png" alt="Trouser-Streak Logo" width="28%"/>
@@ -94,6 +95,10 @@ Overflows data in a book's title to cause dupes and chunk bans. (Credits to [Tho
 Allows you to join servers with an exposed bungeecord backend. (Thank you [DAMcraft](https://github.com/DAMcraft/MeteorServerSeeker))
 ### **Crossbow Machine Gun:**
 Turns your crossbow into a machine gun. Hold right click to activate! (Credits to [agreed](https://github.com/aisiaiiad) for making this!)
+### **FreeBoatRide:**
+Gives fun boat rides to your passengers. It only works well on Paper servers with no anticheat.\
+**Try giving your friend a boat ride, it will be fun I promise.**
+
 ### **FlightAntikick:**
 Moves you down on a tick-based timer. Added in due to the lack of a "Normal" mode antikick for velocity Flight in MeteorClient. Bind it to the same key as Flight. (Credits to etianl :D)
 ### **InfiniteElytra:**
@@ -114,20 +119,19 @@ Allows you to do things at a further distance than would normally be allowed. It
 Swaps to a junk version of the same tool you are using to conserve durability. (This was written based on the AttributeSwap module. Thank you to therandomdude for the idea! https://github.com/etianl/Trouser-Streak/issues/134)
 ###  **Inventory Dupe:**
 Enables a Dupe button which duplicates things in your crafting slots. **Only works on Minecraft servers on version 1.17.** (Credit to ItsVen and Da0neDatGotAway for creation of the dupe, and to B2H990 for making the fabric mod.)
-### **InstaKill:**
-Shoots arrows and tridents with incredible power and velocity. (Credits to Saturn5Vfive)
 ### **InstaMineNuker:**
 Sends packets to instantly mine the blocks around you until they are gone. There is an option in it to make it only target instamineable blocks. (Credits to etianl and to Meteor Client as well as Meteor Rejects for some borrowed code)
 ### **InstaSafetyBox:**
 Places a box around you for safety using the hardest blocks available in your hotbar. (Credits to etianl :D)
 ### **ItemTractorBeam:**
-Sucks up items from a very far distance using hunger points. Only works well for items on the same Y level. (Code based off of the InstaKill by Saturn5Vfive!)
+Sucks up items from a very far distance using hunger points. Only works well for items on the same Y level. (Code based off of the InstaKill by Saturn5Vfive!)\
+**Use this to get your netherite that is floating in lava! You will not burn if lava position is your Y-1.**
 ### **LavaAura:**
 Automatically lava buckets an entity's position on a tick delay, or sets the entity on fire. Also has the option of placing on every block face. (Credits to etianl :D)
 ### **LecternCrash:**
 Crash 1.18.X vanilla servers and possibly below using lecterns. (Credits to Coderx-Gamer)
 ### **MaceKill:**
-Makes Maces do high damage by spoofing a teleport up then back down. (Credits to etianl :D)
+Makes Maces do high damage by spoofing a teleport up then back down. Can also bypass totems! (Credits to etianl :D)
 ### **MultiUse:**
 Does the item use action more than once per item use. (Credits to [maytrixc](https://github.com/maytrixc))
 ### **Packet Delay:**
@@ -143,6 +147,9 @@ You could also use this module to launch an ender pearl **very** far.\
 There is also a **"Bow Machinegun"** option which can turn your your bow into a machinegun for rapid firing of high velocity arrows like bullets!
 
 Thank you to [agreed](https://github.com/aisiaiiad) for demonstrating the increased velocity working and telling me about it which allowed me to recreate it. Also another small thanks to s1arvion from our Discord server for also confirming it's possible.
+
+Thank you to Saturn5Vfive the code for legacy mode. (The original BowInstaKill method)
+
 ### **Projectile Teleport:**
 Teleports you above the target's position to launch a projectile at high speed toward the top of their head. It can be used as an instakill aura for bows. Press and/or hold the useKey to launch things at people's positions. Works best on Paper servers.
 

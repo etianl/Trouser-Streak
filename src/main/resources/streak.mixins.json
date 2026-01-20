@@ -9,8 +9,6 @@
   },
   "mixins": [
     "InventoryScreenMixin",
-    "InventoryScreenMixinBow",
-    "ClientPlayerInteractionManagerMixin",
     "LecternScreenMixin",
     "accessor.ClientConnectionAccessor",
     "ShulkerBoxScreenMixin",

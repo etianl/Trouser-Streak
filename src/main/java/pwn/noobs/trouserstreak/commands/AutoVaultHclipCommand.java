@@ -13,10 +13,8 @@ import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
-
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class AutoVaultHclipCommand extends Command {
     public AutoVaultHclipCommand() {
         super("autovault-hclip", "Automatically finds closest open 2-block space ahead and vault-hclips to it");
@@ -43,7 +41,11 @@ public class AutoVaultHclipCommand extends Command {
             error("No open space found ahead");
             return;
         }
-
+        double distance = start.distanceTo(new Vec3d(closestSpace.getX() + 0.5, start.y, closestSpace.getZ() + 0.5));
+        if (distance > 80) {
+            error("Found space %.1f blocks away - too far (>80 unreliable).".formatted(distance));
+            return;
+        }
         Vec3d targetPos = new Vec3d(closestSpace.getX() + 0.5, closestSpace.getY(), closestSpace.getZ() + 0.5);
 
         executeVaultClip(entity, start, targetPos);
@@ -73,7 +75,7 @@ public class AutoVaultHclipCommand extends Command {
     }
 
     private boolean executeVaultClip(Entity entity, Vec3d start, Vec3d target) {
-        Vec3d upPos = start.add(0, 99.0, 0);
+        Vec3d upPos = start.add(0, 149.0, 0);
         Vec3d aboveTarget = upPos.add(target.x - start.x, 0, target.z - start.z);
         Vec3d downPos = new Vec3d(target.x, start.y, target.z);
         Vec3d downUp = downPos.add(0, 0.01, 0);
@@ -83,7 +85,7 @@ public class AutoVaultHclipCommand extends Command {
             return false;
         }
 
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 15; i++) {
             if (mc.player.hasVehicle()) mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(mc.player.getVehicle()));
             else mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
         }
