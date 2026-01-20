@@ -1,4 +1,4 @@
-//Made by etianl based upon suggestions from [agreed](https://github.com/aisiaiiad)
+//Made by etianl based upon some suggestions from [agreed](https://github.com/aisiaiiad)
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
@@ -7,10 +7,12 @@ import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.player.AntiHunger;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.*;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.*;
@@ -24,7 +26,35 @@ public class ProjectileLauncher extends Module {
     public static ProjectileLauncher INSTANCE;
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
+    private final SettingGroup sgTP = settings.createGroup("Teleport Options");
+    private final SettingGroup sgArrowFire = settings.createGroup("Bow Options");
+    private final SettingGroup sglegacy = settings.createGroup("Legacy Mode (Servers 1.20.6 and below)");
+    public final Setting<Boolean> legacyMode = sglegacy.add(new BoolSetting.Builder()
+            .name("Legacy Mode")
+            .description("Original jitter based BowInstaKill that consumes hunger. DOES NOT WORK ON ALL PAPER SERVERS. May work on super old Paper versions.")
+            .defaultValue(false)
+            .build()
+    );
+    public final Setting<Integer> multiplier = sglegacy.add(new IntSetting.Builder()
+            .name("Multiplier")
+            .description("Higher values make success more likely at the cost of more hunger.")
+            .defaultValue(90)
+            .sliderRange(1,300)
+            .min(1)
+            .visible(legacyMode::get)
+            .build()
+    );
+    public enum tpMode {
+        Reverse,
+        Forward
+    }
+    private final Setting<tpMode> tpmode = sgGeneral.add(new EnumSetting.Builder<tpMode>()
+            .name("TP Mode")
+            .description("Send you backwards or forward for the extra velocity.")
+            .defaultValue(tpMode.Reverse)
+            .visible(() -> !legacyMode.get())
+            .build()
+    );
     public enum Mode {
         Vanilla,
         Paper
@@ -33,6 +63,7 @@ public class ProjectileLauncher extends Module {
             .name("Compatibility Mode")
             .description("Vanilla = 22 blocks, Paper = more blocks")
             .defaultValue(Mode.Vanilla)
+            .visible(() -> !legacyMode.get())
             .build()
     );
     private final ItemListSetting projectileItems = (ItemListSetting) sgGeneral.add(new ItemListSetting.Builder()
@@ -61,73 +92,88 @@ public class ProjectileLauncher extends Module {
             )
             .build()
     );
-    private final Setting<Integer> packets = sgGeneral.add(new IntSetting.Builder()
-            .name("# spam packets (VANILLA)")
-            .defaultValue(4)
-            .min(1)
-            .sliderRange(1,5)
-            .visible(() -> mode.get() == Mode.Vanilla)
-            .build()
-    );
-    private final Setting<Double> Distance = sgGeneral.add(new DoubleSetting.Builder()
-            .name("Max Distance (VANILLA)")
-            .defaultValue(21.9)
-            .min(1.0)
-            .sliderRange(1.0,21.9)
-            .visible(() -> mode.get() == Mode.Vanilla)
-            .build()
-    );
-
-    private final Setting<Integer> paperpackets = sgGeneral.add(new IntSetting.Builder()
-            .name("# spam packets (PAPER)")
-            .defaultValue(7)
-            .min(1)
-            .sliderRange(1,20)
-            .visible(() -> mode.get() == Mode.Paper)
-            .build()
-    );
-    private final Setting<Double> paperDistance = sgGeneral.add(new DoubleSetting.Builder()
-            .name("Max Distance (PAPER)")
-            .defaultValue(59.0)
-            .min(1.0)
-            .sliderRange(1.0,169.0)
-            .visible(() -> mode.get() == Mode.Paper)
-            .build()
-    );
-
-    private final Setting<Double> offsethorizontal = sgGeneral.add(new DoubleSetting.Builder()
-            .name("Horizontal Offset")
-            .defaultValue(0.05)
-            .min(0)
-            .sliderMax(0.99)
-            .build()
-    );
-    private final Setting<Double> offsetY = sgGeneral.add(new DoubleSetting.Builder()
-            .name("Y Offset")
-            .defaultValue(0.001)
-            .min(0)
-            .sliderMax(0.99)
-            .build()
-    );
-    private final Setting<Boolean> fallbackDirections = sgGeneral.add(new BoolSetting.Builder()
-            .name("Horizontal Fallback Direction")
-            .description("Use flat horizontal reverse if angled fails (ceiling/floor scenarios).")
-            .defaultValue(true)
-            .build()
-    );
-    private final Setting<Boolean> preventfalldamage = sgGeneral.add(new BoolSetting.Builder()
-            .name("Prevent fall damage")
-            .description("If the amount of downward distance between teleports is greater than three use fallback direction instead. Unless in a boat.")
-            .defaultValue(true)
-            .build()
-    );
     private final Setting<Boolean> skipCollisionCheck = sgGeneral.add(new BoolSetting.Builder()
             .name("BoatNoclip skip collision check")
             .description("If BoatNoclip is on and you are in a boat skip collision checks for blocks.")
             .defaultValue(true)
+            .visible(() -> !legacyMode.get())
             .build()
     );
-    private final SettingGroup sgArrowFire = settings.createGroup("Arrow Fire");
+    private final Setting<Double> minDistance = sgTP.add(new DoubleSetting.Builder()
+            .name("Min Distance")
+            .description("The teleport is only valid if it's this far away.")
+            .defaultValue(2.0)
+            .min(0.5)
+            .sliderRange(0.5,21.9)
+            .visible(() -> !legacyMode.get())
+            .build()
+    );
+    private final Setting<Integer> packets = sgTP.add(new IntSetting.Builder()
+            .name("# spam packets (VANILLA)")
+            .defaultValue(4)
+            .min(1)
+            .sliderRange(1,5)
+            .visible(() -> mode.get() == Mode.Vanilla && !legacyMode.get())
+            .build()
+    );
+    private final Setting<Double> Distance = sgTP.add(new DoubleSetting.Builder()
+            .name("Max Distance (VANILLA)")
+            .defaultValue(21.9)
+            .min(1.0)
+            .sliderRange(1.0,21.9)
+            .visible(() -> mode.get() == Mode.Vanilla && !legacyMode.get())
+            .build()
+    );
+
+    private final Setting<Integer> paperpackets = sgTP.add(new IntSetting.Builder()
+            .name("# spam packets (PAPER)")
+            .defaultValue(15)
+            .min(1)
+            .sliderRange(1,17)
+            .visible(() -> mode.get() == Mode.Paper && !legacyMode.get())
+            .build()
+    );
+    private final Setting<Double> paperDistance = sgTP.add(new DoubleSetting.Builder()
+            .name("Max Distance (PAPER)")
+            .defaultValue(149.0)
+            .min(1.0)
+            .sliderRange(1.0,169.0)
+            .visible(() -> mode.get() == Mode.Paper && !legacyMode.get())
+            .build()
+    );
+
+    private final Setting<Double> offsethorizontal = sgTP.add(new DoubleSetting.Builder()
+            .name("Horizontal Offset")
+            .description("Offset you this much from the home position.")
+            .defaultValue(0.05)
+            .min(0)
+            .sliderMax(0.99)
+            .visible(() -> !legacyMode.get())
+            .build()
+    );
+    private final Setting<Double> offsetY = sgTP.add(new DoubleSetting.Builder()
+            .name("Y Offset")
+            .description("Offset you this much from the home position.")
+            .defaultValue(0.001)
+            .min(0)
+            .sliderMax(0.99)
+            .visible(() -> !legacyMode.get())
+            .build()
+    );
+    private final Setting<Boolean> fallbackDirections = sgTP.add(new BoolSetting.Builder()
+            .name("Horizontal Fallback Direction")
+            .description("Use flat horizontal reverse if angled fails (ceiling/floor scenarios). Use forward teleport if reverse fails and vice/versa.")
+            .defaultValue(true)
+            .visible(() -> !legacyMode.get())
+            .build()
+    );
+    private final Setting<Boolean> oppositeFallbackDirections = sgTP.add(new BoolSetting.Builder()
+            .name("Opposite Fallback Direction")
+            .description("Use forward teleport if reverse fails and vice/versa.")
+            .defaultValue(true)
+            .visible(() -> !legacyMode.get())
+            .build()
+    );
     private final Setting<Boolean> arrowFire = sgArrowFire.add(new BoolSetting.Builder()
             .name("Bow Machinegun")
             .description("Automatically fires arrows while holding bow.")
@@ -136,7 +182,7 @@ public class ProjectileLauncher extends Module {
     );
     private final Setting<Integer> chargeTicks = sgArrowFire.add(new IntSetting.Builder()
             .name("charge-ticks")
-            .description("Ticks to charge bow before firing.")
+            .description("Ticks to charge bow before firing. More ticks adds a little velocity.")
             .defaultValue(20)
             .min(4)
             .sliderRange(4,60)
@@ -146,7 +192,7 @@ public class ProjectileLauncher extends Module {
 
     private double maxDistance;
     private volatile Vec3d startPos = Vec3d.ZERO;
-    private volatile Vec3d reversePos = Vec3d.ZERO;
+    private volatile Vec3d teleportPos = Vec3d.ZERO;
 
     public ProjectileLauncher() {
         super(Trouser.Main, "ProjectileLauncher", "Teleports backward on item use (pearl/potion) to safe furthest position.");
@@ -163,6 +209,13 @@ public class ProjectileLauncher extends Module {
 
         boolean holdingBow = mc.player.getMainHandStack().getItem() instanceof BowItem
                 || mc.player.getOffHandStack().getItem() instanceof BowItem;
+
+        if (!holdingBow) {
+            isChargingBow = false;
+            bowChargeTimer = 0;
+            wasHoldingBow = false;
+            return;
+        }
 
         if (holdingBow && !wasHoldingBow) {
             bowChargeTimer = 0;
@@ -187,10 +240,12 @@ public class ProjectileLauncher extends Module {
                 Direction.DOWN, mc.player.getInventory().selectedSlot
         ));
     }
-
+    private boolean sendingPacketToSend;
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
+        if (sendingPacketToSend) return;
         if (mc.player == null) return;
+        Packet<?> packetToSend = event.packet;
 
         if (event.packet instanceof PlayerInteractItemC2SPacket packet) {
             ItemStack stack = packet.getHand() == Hand.MAIN_HAND
@@ -199,7 +254,12 @@ public class ProjectileLauncher extends Module {
 
             Item item = stack.getItem();
             if (isValidProjectile(item)) {
-                executeReverseTeleport();
+                if (!legacyMode.get()){
+                    event.cancel();
+                    executeTeleport(packetToSend);
+                } else {
+                    sendlegacypackets();
+                }
             } else if ((item instanceof BowItem && projectileItems.get().contains(Items.BOW)) || (item instanceof TridentItem && projectileItems.get().contains(Items.TRIDENT))){
                 isChargingBow = true;
             }
@@ -208,11 +268,29 @@ public class ProjectileLauncher extends Module {
 
         if (isChargingBow && event.packet instanceof PlayerActionC2SPacket packet &&
                 packet.getAction() == PlayerActionC2SPacket.Action.RELEASE_USE_ITEM) {
-            executeReverseTeleport();
+            if (!legacyMode.get()){
+                event.cancel();
+                executeTeleport(packetToSend);
+            } else {
+                sendlegacypackets();
+            }
             isChargingBow = false;
         }
     }
-
+    private void sendlegacypackets(){
+        boolean antihungerWasEnabled = false;
+        if (Modules.get().get(AntiHunger.class).isActive()){
+            Modules.get().get(AntiHunger.class).toggle();
+            antihungerWasEnabled = true;
+        }
+        mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_SPRINTING));
+        for (int i = 0; i < multiplier.get(); i++) {
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() - 0.000000001, mc.player.getZ(), true, mc.player.horizontalCollision));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 0.000000001, mc.player.getZ(), false, mc.player.horizontalCollision));
+        }
+        if (!mc.options.sprintKey.isPressed() || !mc.options.getSprintToggled().getValue()) mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.STOP_SPRINTING));
+        if (antihungerWasEnabled) Modules.get().get(AntiHunger.class).toggle();
+    }
     private boolean isValidProjectile(Item item) {
         return (item instanceof EnderPearlItem && projectileItems.get().contains(Items.ENDER_PEARL)) ||
                 (item instanceof SplashPotionItem && projectileItems.get().contains(Items.SPLASH_POTION)) ||
@@ -222,32 +300,55 @@ public class ProjectileLauncher extends Module {
                 (item instanceof WindChargeItem && projectileItems.get().contains(Items.WIND_CHARGE)) ||
                 (item instanceof EggItem && projectileItems.get().contains(Items.EGG));
     }
-
-    private void executeReverseTeleport() {
+    private void executeTeleport(Packet<?> packetToSend) {
         if (mc.player == null || mc.world == null) return;
         Entity entity = mc.player.hasVehicle() ? mc.player.getVehicle() : mc.player;
         maxDistance = mode.get() == Mode.Vanilla ? Distance.get() : paperDistance.get();
 
+        boolean isReverseTeleport = tpmode.get() == tpMode.Reverse;
+
         startPos = entity.getPos();
-        Vec3d lookDir = mc.player.getRotationVec(1.0f);
-        Vec3d reverseDir = new Vec3d(-lookDir.x, -lookDir.y, -lookDir.z).normalize();
+        Vec3d forwardDir = mc.player.getRotationVec(1.0f);
+        Vec3d reverseDir = new Vec3d(-forwardDir.x, -forwardDir.y, -forwardDir.z).normalize();
 
-        reversePos = findFurthestSafePos(startPos, reverseDir, maxDistance);
-        if (entity != mc.player.getVehicle() && preventfalldamage.get() && reversePos != null && (reversePos.y - startPos.y > 2.99)) {
-            if (chatFeedback)info("Blocked downward teleport (%.1f blocks) to prevent fall damage.", reversePos.y - startPos.y);
-            reversePos = null;
-        }
-        if (fallbackDirections.get() && reversePos == null) {
-            Vec3d horizontalDir = new Vec3d(reverseDir.x, 0, reverseDir.z).normalize();
-            reversePos = findFurthestSafePos(startPos, horizontalDir, maxDistance);
+        if (tpmode.get() == tpMode.Reverse) teleportPos = findFurthestSafePos(startPos, reverseDir, maxDistance, isReverseTeleport);
+        else if (tpmode.get() == tpMode.Forward) teleportPos = findFurthestSafePos(startPos, forwardDir, maxDistance, isReverseTeleport);
 
-            if (reversePos == null) {
-                Vec3d backwardDir = Vec3d.fromPolar(0, entity.getYaw() + 180).normalize();
-                backwardDir = new Vec3d(backwardDir.x, 0, backwardDir.z);
-                reversePos = findFurthestSafePos(startPos, backwardDir, maxDistance);
+        if (teleportPos == null) {
+            if (oppositeFallbackDirections.get() && tpmode.get() == tpMode.Reverse) {
+                isReverseTeleport = false;
+                teleportPos = findFurthestSafePos(startPos, forwardDir, maxDistance, isReverseTeleport);
+            }
+            else if (oppositeFallbackDirections.get() && tpmode.get() == tpMode.Forward) {
+                isReverseTeleport = true;
+                teleportPos = findFurthestSafePos(startPos, reverseDir, maxDistance, isReverseTeleport);
+            }
+            if (fallbackDirections.get() && teleportPos == null) {
+                Vec3d horizontalDir = null;
+                if (tpmode.get() == tpMode.Reverse){
+                    horizontalDir = new Vec3d(reverseDir.x, 0, reverseDir.z).normalize();
+                    isReverseTeleport = true;
+                } else if (tpmode.get() == tpMode.Forward) {
+                    horizontalDir = new Vec3d(forwardDir.x, 0, forwardDir.z).normalize();
+                    isReverseTeleport = false;
+                }
+                if (horizontalDir != null) teleportPos = findFurthestSafePos(startPos, horizontalDir, maxDistance, isReverseTeleport);
+                if (oppositeFallbackDirections.get() && teleportPos == null) {
+                    if (tpmode.get() == tpMode.Reverse){
+                        isReverseTeleport = false;
+                        horizontalDir = new Vec3d(forwardDir.x, 0, forwardDir.z).normalize();
+                    } else if (tpmode.get() == tpMode.Forward) {
+                        isReverseTeleport = true;
+                        horizontalDir = new Vec3d(reverseDir.x, 0, reverseDir.z).normalize();
+                    }
+                    if (horizontalDir != null) teleportPos = findFurthestSafePos(startPos, horizontalDir, maxDistance, isReverseTeleport);
+                }
             }
         }
-        if (reversePos == null) return;
+        if (teleportPos == null) {
+            if (chatFeedback) error("No possible teleport positions found.");
+            return;
+        }
 
         int packetCount = mode.get() == Mode.Vanilla ? packets.get() : paperpackets.get();
 
@@ -259,21 +360,34 @@ public class ProjectileLauncher extends Module {
             }
         }
 
-        sendMove(entity, reversePos);
+        sendMove(entity, teleportPos);
+        entity.setPosition(teleportPos);
+        if (!isReverseTeleport){
+            sendingPacketToSend = true;
+            mc.player.networkHandler.sendPacket(packetToSend);
+            sendingPacketToSend = false;
+        }
+        sendMove(entity, startPos);
+        entity.setPosition(startPos);
+        if (isReverseTeleport){
+            sendingPacketToSend = true;
+            mc.player.networkHandler.sendPacket(packetToSend);
+            sendingPacketToSend = false;
+        }
         Vec3d offset = getOffset(startPos);
         sendMove(entity, offset);
         entity.setPosition(offset);
 
-        if (chatFeedback)info("Reverse teleported %s blocks behind.", startPos.distanceTo(reversePos));
+        if (chatFeedback)info("Teleported %s (%.1f blocks)", isReverseTeleport ? "REVERSE" : "FORWARD", startPos.distanceTo(teleportPos));
     }
 
-    private Vec3d findFurthestSafePos(Vec3d start, Vec3d direction, double maxDist) {
+    private Vec3d findFurthestSafePos(Vec3d start, Vec3d direction, double maxDist, boolean isReverseTeleport) {
         Vec3d bestPos = null;
 
-        for (double dist = maxDist; dist >= 0.5; dist -= 0.5) {
+        for (double dist = maxDist; dist >= minDistance.get(); dist -= 0.5) {
             Vec3d testPos = start.add(direction.multiply(dist));
 
-            if (hasClearPath(start, testPos)) {
+            if (hasClearPath(start, testPos, isReverseTeleport)) {
                 bestPos = testPos;
                 break;
             }
@@ -281,7 +395,6 @@ public class ProjectileLauncher extends Module {
 
         return bestPos;
     }
-
     private void sendMove(Entity entity, Vec3d pos) {
         if (mc.getNetworkHandler() == null) return;
         if (entity == mc.player) {
@@ -361,16 +474,33 @@ public class ProjectileLauncher extends Module {
         return false;
     }
 
-    private boolean hasClearPath(Vec3d start, Vec3d end) {
+    private boolean hasClearPath(Vec3d start, Vec3d end, boolean isReverseTeleport) {
         if (invalid(start) || invalid(end)) return false;
 
         int steps = Math.max(10, (int)(start.distanceTo(end) * 2.5));
+
+        boolean checkLivingEntities = !isReverseTeleport;
 
         for (int i = 1; i < steps; i++) {
             double t = i / (double)steps;
             Vec3d sample = start.lerp(end, t);
 
             if (invalid(sample)) return false;
+
+            if (checkLivingEntities) {
+                Entity entity = mc.player.hasVehicle() ? mc.player.getVehicle() : mc.player;
+                Box sampleBox = entity.getBoundingBox().offset(
+                        sample.x - entity.getX(),
+                        sample.y - entity.getY(),
+                        sample.z - entity.getZ()
+                );
+
+                for (Entity other : mc.world.getOtherEntities(entity, sampleBox, e ->
+                        e.isAlive() && e.isLiving()
+                )) {
+                    return false;
+                }
+            }
         }
         return true;
     }
