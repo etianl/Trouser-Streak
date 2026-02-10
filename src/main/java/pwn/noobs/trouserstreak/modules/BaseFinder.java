@@ -1594,8 +1594,8 @@ public class BaseFinder extends Module {
 
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
-        for(ChunkPos pos : baseChunks) {
-            if(!loggedBasePositions.contains(pos) && locLogging.get()) {
+        for (ChunkPos pos : new java.util.ArrayList<>(baseChunks)) { 
+            if (!loggedBasePositions.contains(pos) && locLogging.get()) {
                 loggedBasePositions.add(pos);
                 int x = pos.getCenterX();
                 int z = pos.getCenterZ();
@@ -1661,4 +1661,5 @@ public class BaseFinder extends Module {
             return java.util.Objects.hash(x, y, z);
         }
     }
+
 }
