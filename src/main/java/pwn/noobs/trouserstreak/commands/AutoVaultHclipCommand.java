@@ -39,8 +39,8 @@ public class AutoVaultHclipCommand extends Command {
             return;
         }
         double distance = start.distanceTo(new Vec3d(closestSpace.getX() + 0.5, start.y, closestSpace.getZ() + 0.5));
-        if (distance > 80) {
-            error("Found space %.1f blocks away - too far (>80 unreliable).".formatted(distance));
+        if (distance > 69) {
+            error("Found space %.1f blocks away - too far (>69 unreliable).".formatted(distance));
             return;
         }
         Vec3d targetPos = new Vec3d(closestSpace.getX() + 0.5, closestSpace.getY(), closestSpace.getZ() + 0.5);
@@ -49,7 +49,7 @@ public class AutoVaultHclipCommand extends Command {
     }
 
     private BlockPos findClosestOpenSpace(Entity entity, Vec3d start, Vec3d forward) {
-        for (double dist = 1.0; dist <= 99.0; dist += 0.5) {
+        for (double dist = 1.0; dist <= 69.0; dist += 0.5) {
             Vec3d checkPos = start.add(forward.multiply(dist));
             BlockPos feetPos = BlockPos.ofFloored(checkPos.x, checkPos.y, checkPos.z);
 
@@ -72,7 +72,7 @@ public class AutoVaultHclipCommand extends Command {
     }
 
     private boolean executeVaultClip(Entity entity, Vec3d start, Vec3d target) {
-        Vec3d upPos = start.add(0, 149.0, 0);
+        Vec3d upPos = start.add(0, 129.0, 0);
         Vec3d aboveTarget = upPos.add(target.x - start.x, 0, target.z - start.z);
         Vec3d downPos = new Vec3d(target.x, start.y, target.z);
         Vec3d downUp = downPos.add(0, 0.01, 0);
@@ -82,7 +82,7 @@ public class AutoVaultHclipCommand extends Command {
             return false;
         }
 
-        for (int i = 0; i < 15; i++) {
+        for (int i = 0; i < 13; i++) {
             if (mc.player.hasVehicle()) mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
             else mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false, mc.player.horizontalCollision));
         }

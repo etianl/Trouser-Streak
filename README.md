@@ -126,6 +126,11 @@ Places a box around you for safety using the hardest blocks available in your ho
 ### **ItemTractorBeam:** 
 Sucks up items from a very far distance using hunger points. Only works well for items on the same Y level. (Code based off of the InstaKill by Saturn5Vfive!)\
 **Use this to get your netherite that is floating in lava! You will not burn if lava position is your Y-1.**
+### **KnockBackModifier:**
+Modifies the direction of the knockback that you inflict. Requires you to be sprinting or using a knockback enchanted item.
+This can be used to knock your target towards yourself, or to the side which would greatly affect their accuracy when pvping.
+
+Made by etianl based on the method described by Marlow here: https://www.youtube.com/watch?v=7t0PyqYsac8
 ### **LavaAura:** 
 Automatically lava buckets an entity's position on a tick delay, or sets the entity on fire. Also has the option of placing on every block face. (Credits to etianl :D)
 ### **LecternCrash:** 
@@ -191,6 +196,10 @@ To allow normal player movement many controls had to be routed around this GUI.
 Duplicate the contents of a shulker when pressing "Dupe" in the shulker menu. Only works on Vanilla, Forge, and Fabric servers 1.19 and below. (Credits to Allah-Hack, I just made the buttons, and make it dupe slot1 as well.)
 ### **SpearKill:** 
 Increases spear damage! Lunge mode uses increased velocity and Blink mode delays packets allowing normal movement. Thank you to [Kimtaeho](https://github.com/needitem) for Blink mode! Credits to etianl for the Lunge mode. :D
+### **StatsHud:**
+Adds a text display on screen detailing some things drawn from the Statistics page.
+
+The stats are pulled from the server you are playing on for the character you are playing, which ensures accuracy. (Credits to etianl :D)
 ### **StorageLooter:** 
 Automatically steals stuff from storage containers, and can put junk items in there too. (Credits to etianl :D)
 ### **SuperInstaMine:** 
@@ -275,6 +284,12 @@ Triangulate player locations with the new waypoint system introduced in Minecraf
 *Everything here requires creative mode or operator status!*
 ### **Airstrike+:** 
 Rains down entities from the sky. (Credits to Allah-Hack for the original, modified by etianl) **CREATIVEMODE**
+### **ArmorStandImages:**
+Summon images into your world!
+This module uses commands to summon invisible armor stands that have colored blocks on their head to form the image.
+The image is processed per pixel and similarly colored blocks will be used per pixel.
+
+Made based on code suggested by [Dylanvip2024](https://github.com/Dylanvip2024) **OPERATOR**
 ### **AutoCommand:** 
 Run a list of operator commands at the push of a button! (Credits to [aaaasdfghjkllll](https://github.com/aaaasdfghjkllll)) **OPERATOR**
 ### **AutoDisplays:** 
@@ -296,6 +311,10 @@ Create malicious books that can execute commands when clicked. Requires creative
 ### **ForceOPSign:** 
 Create malicious signs that can execute commands when clicked. Requires creative mode for you to make them, and requires you to give it to an operator and have them place and click it while they are also in creative mode. The signs placed appear blank and commands executed may not appear in the server chat response for commands.\
 (Credits to CrushedPixel for their first implementation of a ForceOP sign module https://www.youtube.com/watch?v=KofDNaPZWfg, and to etianl for writing this implementation.) **CREATIVEMODE**
+### **ForceTP:**
+Forcibly teleport any entity you desire.
+You can teleport them to wherever you click, to the void, or even to another player's location (if within render distance).
+You can also choose to teleport everyone on the server. (Credits to etianl :D) **CREATIVEMODE**
 ### **HandOfGod:** 
 Runs the "/fill" command in many different ways. Destroy worlds with ease! (Credits to etianl :D) **OPERATOR**
 ### **MultiverseAnnihilator:** 

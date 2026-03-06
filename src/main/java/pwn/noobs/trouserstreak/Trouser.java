@@ -26,6 +26,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new AimBot());
                 Modules.get().add(new AirstrikePlus());
                 Modules.get().add(new AnHero());
+                Modules.get().add(new ArmorStandImages());
                 Modules.get().add(new AttributeSwap());
                 Modules.get().add(new AutoCommand());
                 Modules.get().add(new AutoDisplays());
@@ -65,6 +66,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new InstaSafetyBox());
                 Modules.get().add(new InvDupeModule());
                 Modules.get().add(new ItemTractorBeam());
+                Modules.get().add(new KnockBackModifier());
                 Modules.get().add(new LavaAura());
                 Modules.get().add(new LecternCrash());
                 Modules.get().add(new TPAura());
@@ -88,7 +90,9 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new RedstoneNuker());
                 Modules.get().add(new RemoteEnderChest());
                 Modules.get().add(new ShulkerDupe());
+                Modules.get().add(new ForceTP());
                 Modules.get().add(new SpearKill());
+                Modules.get().add(new StatsHud());
                 Modules.get().add(new StorageLooter());
                 Modules.get().add(new SuperInstaMine());
                 Modules.get().add(new Teleport());
