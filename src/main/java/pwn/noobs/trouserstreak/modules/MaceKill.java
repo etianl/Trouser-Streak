@@ -17,25 +17,27 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MaceKill extends Module {
     private final SettingGroup specialGroup2 = settings.createGroup("Disable \"Smash Attack\" in Criticals to make this module work.");
     private final SettingGroup specialGroup = settings.createGroup("Values higher than 22fall/4spam only work on Paper/Spigot");
     private final SettingGroup totem = settings.createGroup("Totem Bypass (PAPER ONLY)");
-    private final Setting<Boolean> swing = specialGroup.add(
-            new BoolSetting.Builder()
-                    .name("swing arm")
-                    .defaultValue(true)
-                    .build()
+    private final Setting<Boolean> swing = specialGroup.add(new BoolSetting.Builder()
+            .name("swing arm")
+            .defaultValue(true)
+            .build()
     );
-    private final Setting<Boolean> preventDeath = specialGroup.add(new BoolSetting.Builder()
-            .name("Prevent Fall damage")
-            .description("Attempts to prevent fall damage even on packet hiccups.")
+    private final Setting<Boolean> packetDisable = specialGroup.add(new BoolSetting.Builder()
+            .name("Disable When Blocked")
+            .description("Does not send movement packets if the attack was blocked. (prevents death)")
             .defaultValue(true)
             .build());
     private final Setting<Integer> fallHeight = specialGroup.add(new IntSetting.Builder()
@@ -54,11 +56,6 @@ public class MaceKill extends Module {
             .sliderRange(1,17)
             .build()
     );
-    private final Setting<Boolean> packetDisable = specialGroup.add(new BoolSetting.Builder()
-            .name("Disable When Blocked")
-            .description("Does not send movement packets if the attack was blocked. (prevents death)")
-            .defaultValue(true)
-            .build());
     private final Setting<Boolean> attackSpam = totem.add(new BoolSetting.Builder()
             .name("Bypass totems")
             .description("Max ~9 spam packets for this to work. Settings example: 49 fall height, 8 spam packet, 3 attack, 20 height increase.")
@@ -81,21 +78,27 @@ public class MaceKill extends Module {
             .max(100)
             .build()
     );
-
+    private final Setting<Boolean> useOffset = specialGroup.add(new BoolSetting.Builder()
+            .name("Use Offset")
+            .description("Attempts to prevent fall damage even on packet hiccups.")
+            .defaultValue(true)
+            .build());
     private final Setting<Double> offsethorizontal = specialGroup.add(new DoubleSetting.Builder()
             .name("Horizontal Offset")
             .description("How much to offset the player after teleports.")
             .defaultValue(0.05)
-            .min(0.001)
+            .min(0)
             .sliderMax(0.99)
+            .visible(() -> useOffset.get())
             .build()
     );
     private final Setting<Double> offsetY = specialGroup.add(new DoubleSetting.Builder()
             .name("Y Offset")
-            .description("How much to offset the player after teleports.")
+            .description("You need some of this to prevent death.")
             .defaultValue(0.01)
-            .min(0.001)
+            .min(0)
             .sliderMax(0.99)
+            .visible(() -> useOffset.get())
             .build()
     );
 
@@ -117,24 +120,30 @@ public class MaceKill extends Module {
         LivingEntity targetEntity = (LivingEntity) packet.meteor$getEntity();
         if (packetDisable.get() && (targetEntity.isBlocking() || targetEntity.isInvulnerable() || targetEntity.isInCreativeMode())) return;
         if (!targetEntity.isAlive()) return;
+        int baseBlocks = getMaxHeightAbovePlayer();
+        Vec3d firstTargetPos = new Vec3d(mc.player.getX(), mc.player.getY() + baseBlocks, mc.player.getZ());
+        if (invalid(firstTargetPos)){
+            error("No valid space above you to attack from.");
+            return;
+        }
+
         event.cancel();
 
         previouspos = mc.player.getPos();
-        PlayerInteractEntityC2SPacket attack = PlayerInteractEntityC2SPacket.attack(targetEntity, mc.player.isSneaking());
-
-        int baseBlocks = getMaxHeightAbovePlayer();
         int currentHeight = baseBlocks;
         int attackCount = attacks.get();
         if (!attackSpam.get()) attackCount = 1;
-        Vec3d firstTargetPos = new Vec3d(mc.player.getX(), mc.player.getY() + baseBlocks, mc.player.getZ());
-        if (invalid(firstTargetPos)) return;
         for (int i2 = 0; i2 < paperpackets.get(); i2++) {
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false, mc.player.horizontalCollision));
         }
+        boolean targetposvalid = true;
         for (int i = 0; i < attackCount; i++) {
             int blocks = (i == 0) ? baseBlocks : currentHeight;
             Vec3d targetPos = new Vec3d(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ());
-            if (invalid(targetPos)) continue;
+            if (invalid(targetPos)) {
+                targetposvalid = false;
+                continue;
+            }
 
             PlayerMoveC2SPacket movepacket = new PlayerMoveC2SPacket.PositionAndOnGround(targetPos.getX(), targetPos.getY(), targetPos.getZ(), false, mc.player.horizontalCollision);
             PlayerMoveC2SPacket homepacket = new PlayerMoveC2SPacket.PositionAndOnGround(previouspos.getX(), previouspos.getY(), previouspos.getZ(), false, mc.player.horizontalCollision);
@@ -149,19 +158,23 @@ public class MaceKill extends Module {
                 mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
                 mc.player.swingHand(Hand.MAIN_HAND);
             }
-            mc.player.networkHandler.sendPacket(attack);
-            sendingAttacks = false;
+            mc.player.networkHandler.sendPacket(
+                    PlayerInteractEntityC2SPacket.attack(targetEntity, mc.player.isSneaking())
+            );
 
             currentHeight += increase.get();
         }
 
-        if (preventDeath.get()){
+        positionCache.clear();
+
+        if (targetposvalid && useOffset.get()){
             Vec3d offsetHome = getOffset(previouspos);
             PlayerMoveC2SPacket offsethomepacket = new PlayerMoveC2SPacket.PositionAndOnGround(offsetHome.getX(), offsetHome.getY(), offsetHome.getZ(), false, mc.player.horizontalCollision);
             ((IPlayerMoveC2SPacket) offsethomepacket).meteor$setTag(1337);
             mc.player.networkHandler.sendPacket(offsethomepacket);
             mc.player.setPosition(offsetHome);
         }
+        sendingAttacks = false;
     }
 
     private Vec3d getOffset(Vec3d base) {
@@ -190,40 +203,64 @@ public class MaceKill extends Module {
 
         return base;
     }
-    private boolean invalid(Vec3d pos) {
-        if (mc.world.getChunk(BlockPos.ofFloored(pos)) == null) return true;
-        Entity entity = mc.player;
-        Box box = entity.getBoundingBox().offset(
-                pos.x - entity.getX(),
-                pos.y - entity.getY(),
-                pos.z - entity.getZ()
-        );
-        BlockPos blockPos = BlockPos.ofFloored(pos);
-        for (int x = blockPos.getX() - 1; x <= blockPos.getX() + 1; x++) {
-            for (int y = blockPos.getY() - 1; y <= blockPos.getY() + 1; y++) {
-                for (int z = blockPos.getZ() - 1; z <= blockPos.getZ() + 1; z++) {
-                    BlockPos checkPos = new BlockPos(x, y, z);
-                    BlockState state = mc.world.getBlockState(checkPos);
+    private final BlockPos.Mutable mutablePos = new BlockPos.Mutable();
+    private final Map<Vec3d, Boolean> positionCache = new HashMap<>();
 
-                    if (state.isOf(Blocks.LAVA)) {
+    private boolean invalid(Vec3d pos) {
+        if (mc.world == null) return true;
+
+        double clampedY = MathHelper.clamp(pos.y, mc.world.getBottomY(), mc.world.getTopYInclusive() - 1);
+        if (clampedY != pos.y) return true;
+
+        BlockPos floored = BlockPos.ofFloored(pos);
+        int chunkX = floored.getX() >> 4;
+        int chunkZ = floored.getZ() >> 4;
+        if (mc.world.getChunkManager().getWorldChunk(chunkX, chunkZ) == null) return true;
+
+        if (positionCache.containsKey(pos)) return positionCache.get(pos);
+
+        Entity entity = mc.player;
+        Vec3d delta = pos.subtract(entity.getPos());
+        Box box = entity.getBoundingBox().offset(delta);
+
+        mutablePos.set(floored);
+        for (int x = -1; x <= 1; x++) {
+            mutablePos.setX(floored.getX() + x);
+            for (int y = -1; y <= 1; y++) {
+                mutablePos.setY(floored.getY() + y);
+                for (int z = -1; z <= 1; z++) {
+                    mutablePos.setZ(floored.getZ() + z);
+                    BlockState state = mc.world.getBlockState(mutablePos);
+                    if (state.isOf(Blocks.LAVA) || state.isOf(Blocks.FIRE) || state.isOf(Blocks.SOUL_FIRE)
+                            || state.isOf(Blocks.MAGMA_BLOCK) || state.isOf(Blocks.CAMPFIRE)
+                            || state.isOf(Blocks.SWEET_BERRY_BUSH) || state.isOf(Blocks.POWDER_SNOW)) {
+                        positionCache.put(pos, true);
                         return true;
                     }
                 }
             }
         }
-        for (Entity e : mc.world.getOtherEntities(mc.player, box)) {
-            if (e.isCollidable()) return true;
+
+        for (Entity e : mc.world.getOtherEntities(entity, box)) {
+            if (e.isCollidable()) {
+                positionCache.put(pos, true);
+                return true;
+            }
         }
-        Vec3d delta = pos.subtract(entity.getPos());
-        return mc.world.getBlockCollisions(entity, entity.getBoundingBox().offset(delta)).iterator().hasNext();
+
+        boolean collides = mc.world.getBlockCollisions(entity, box).iterator().hasNext();
+        positionCache.put(pos, collides);
+        return collides;
     }
+
     private int getMaxHeightAbovePlayer() {
         BlockPos playerPos = mc.player.getBlockPos();
+        int scanStart = (int) MathHelper.clamp(playerPos.getY() + fallHeight.get(),
+                playerPos.getY() + 1, mc.world.getTopYInclusive() - 1);
 
-        int scanStart = playerPos.getY() + fallHeight.get();
-
+        positionCache.clear();
         for (int i = scanStart; i > playerPos.getY(); i--) {
-            Vec3d testPos = new Vec3d(playerPos.getX(), playerPos.getY() + (i - playerPos.getY()), playerPos.getZ());
+            Vec3d testPos = new Vec3d(playerPos.getX(), i, playerPos.getZ());
             if (!invalid(testPos)) return i - playerPos.getY();
         }
         return 0;

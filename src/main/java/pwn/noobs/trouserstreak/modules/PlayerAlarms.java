@@ -173,7 +173,7 @@ public class PlayerAlarms extends Module {
     public PlayerAlarms() {
         super(Trouser.Main, "PlayerAlarms", "Plays an alarm sounds when a player joins or is now in render distance.");
     }
-    private Set playersSpottedRD = new HashSet<>();
+    private Set<String> playersSpottedRD = new HashSet<>();
     private int ticks = 0;
     private int ringsLeft = 0;
     private boolean ringring = false;
@@ -194,6 +194,7 @@ public class PlayerAlarms extends Module {
 
     @EventHandler
     public void onPreTick(TickEvent.Pre event) {
+        if (mc.world == null || mc.player == null) return;
         if (ringring && ringsLeft > 0) {
             if (ticks <= 0) {
                 playSound();
@@ -229,14 +230,20 @@ public class PlayerAlarms extends Module {
                                 ringsLeftRD = amountofringsRD.get();
                                 ticksRD = 0;
                                 playersSpottedRD.add(player.getDisplayName().getString());
-                                if (textmessage.get()) error(player.getDisplayName().getString() + " entered render distance!");
+                                if (textmessage.get()){
+                                    String name = player.getDisplayName().getString().replaceAll("[^a-zA-Z0-9_]", "");
+                                    error(name + " entered render distance!");
+                                }
                             }
                         } else {
                             ringringRD = true;
                             ringsLeftRD = amountofringsRD.get();
                             ticksRD = 0;
                             playersSpottedRD.add(player.getDisplayName().getString());
-                            if (textmessage.get()) error(player.getDisplayName().getString() + " entered render distance!");
+                            if (textmessage.get()){
+                                String name = player.getDisplayName().getString().replaceAll("[^a-zA-Z0-9_]", "");
+                                error(name + " entered render distance!");
+                            }
                         }
                     }
                 }

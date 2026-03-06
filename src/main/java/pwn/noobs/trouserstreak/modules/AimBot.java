@@ -1,11 +1,8 @@
 //skidded from SpearKill by etianl
 package pwn.noobs.trouserstreak.modules;
 
-import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.DoubleSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.events.render.Render3DEvent;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
@@ -56,7 +53,7 @@ public class AimBot extends Module {
         crosshairTarget = null;
     }
     @EventHandler
-    private void onPreTick(TickEvent.Pre event) {
+    private void onRender(Render3DEvent event) {
         if (seek.get() && crosshairTarget == null) crosshairTarget = target();
         if (crosshairTarget != null && !crosshairTarget.isAlive()) crosshairTarget = null;
         if (crosshairTarget == null || !(crosshairTarget instanceof LivingEntity)) return;

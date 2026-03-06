@@ -255,6 +255,10 @@ public class BoomPlus extends Module {
             Pos.add(NbtDouble.of(pos.getZ()));
             entityTag.put("Pos", Pos);
         } else {
+            Pos.add(NbtDouble.of(mc.player.getX()));
+            Pos.add(NbtDouble.of(mc.player.getY()+1));
+            Pos.add(NbtDouble.of(mc.player.getZ()));
+            entityTag.put("Pos", Pos);
             motion.add(NbtDouble.of(sex.x));
             motion.add(NbtDouble.of(sex.y));
             motion.add(NbtDouble.of(sex.z));
@@ -322,6 +326,7 @@ public class BoomPlus extends Module {
                 return serverPatch < patch;
 
             } catch (NumberFormatException e) {
+                e.printStackTrace();
                 return false;
             }
         }
