@@ -8,8 +8,6 @@ import net.minecraft.text.Text;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -38,18 +36,12 @@ public class ViewNbtCommand extends Command {
                     return SINGLE_SUCCESS;
                 }
                 ChatUtils.sendMsg(Text.of(mc.player.getMainHandStack().getNbt().toString()));
-                if (!Files.exists(Paths.get("TrouserStreak/SavedNBT/ViewedNBTData.txt"))){
-                    File file = new File("TrouserStreak/SavedNBT/ViewedNBTData.txt");
-                    try {
-                        file.createNewFile();
-                    } catch (IOException e) {}
-                }
                 try {
                     new File("TrouserStreak/SavedNBT/").mkdirs();
-                    FileWriter writer = new FileWriter("TrouserStreak/SavedNBT/ViewedNBTData.txt", true);
-                    writer.write(String.valueOf(mc.player.getMainHandStack().getNbt().toString()));
-                    writer.write("\r\n");   // write new line
-                    writer.close();
+                    try (FileWriter writer = new FileWriter("TrouserStreak/SavedNBT/ViewedNBTData.txt", true)) {
+                        writer.write(mc.player.getMainHandStack().getNbt().toString());
+                        writer.write("\r\n");
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

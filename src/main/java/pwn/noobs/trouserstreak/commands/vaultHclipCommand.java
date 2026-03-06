@@ -25,8 +25,8 @@ public class vaultHclipCommand extends Command {
             double blocks = ctx.getArgument("blocks", Double.class);
             assert mc.player != null;
             assert mc.world != null;
-            if (blocks > 80) {
-                error("Distances greater than 80 do not work well.");
+            if (blocks > 69) {
+                error("Distances greater than 69 do not work.");
                 return SINGLE_SUCCESS;
             }
             Entity entity = mc.player.hasVehicle()
@@ -40,7 +40,7 @@ public class vaultHclipCommand extends Command {
             Vec3d start = entity.getPos();
             Vec3d forward = Vec3d.fromPolar(0, mc.player.getYaw()).normalize();
 
-            Vec3d upPos = start.add(0, 149.0, 0);
+            Vec3d upPos = start.add(0, 129.0, 0);
             Vec3d aboveTarget = upPos.add(forward.x * blocks, 0, forward.z * blocks);
             Vec3d downPos = new Vec3d(aboveTarget.x, start.y, aboveTarget.z);
             Vec3d downUp = downPos.add(0, 0.01, 0);
@@ -53,7 +53,7 @@ public class vaultHclipCommand extends Command {
                 return SINGLE_SUCCESS;
             }
 
-            for (int i = 0; i < 15; i++) {
+            for (int i = 0; i < 13; i++) {
                 if (mc.player.hasVehicle()) mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(mc.player.getVehicle()));
                 else mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false));
             }
