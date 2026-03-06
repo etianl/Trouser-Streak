@@ -4,9 +4,12 @@
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.movement.NoFall;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
@@ -15,6 +18,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.util.Hand;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
@@ -33,6 +37,12 @@ public class SpearKill extends Module {
     private final SettingGroup sgLunge = settings.createGroup("Lunge Options");
     private final SettingGroup sgBlinkLunge = settings.createGroup("Blink Lunge Options");
 
+    private final Setting<Boolean> nonofall = sgGeneral.add(new BoolSetting.Builder()
+            .name("Disable NoFall While Charging")
+            .description("Prevents fall damage when lunging downward quickly.")
+            .defaultValue(true)
+            .build()
+    );
 
     public enum Mode {
         Lunge,
@@ -123,7 +133,6 @@ public class SpearKill extends Module {
             .visible(() -> mode.get() == Mode.Blink)
             .build()
     );
-
     private final Setting<Double> blinkDistanceBoost = sgBlink.add(new DoubleSetting.Builder()
             .name("Distance Boost")
             .description("Extra blocks to add to start position (extends the travel distance)")
@@ -133,7 +142,31 @@ public class SpearKill extends Module {
             .visible(() -> mode.get() == Mode.Blink)
             .build()
     );
-
+    private final Setting<Boolean> lungeFromAbove = sgLunge.add(new BoolSetting.Builder()
+            .name("Lunge From Above")
+            .description("Lunge to a point above target first, then to target.")
+            .defaultValue(false)
+            .visible(() -> mode.get() == Mode.Lunge)
+            .build()
+    );
+    private final Setting<Double> aboveHeight = sgLunge.add(new DoubleSetting.Builder()
+            .name("Above Height")
+            .description("Blocks above target center.")
+            .defaultValue(10.0)
+            .min(5)
+            .sliderRange(5, 50)
+            .visible(() -> mode.get() == Mode.Lunge && lungeFromAbove.get())
+            .build()
+    );
+    private final Setting<Double> aboveHeightdistance = sgLunge.add(new DoubleSetting.Builder()
+            .name("Above Height Trigger Distance")
+            .description("If within this distance of the above target position, start the lunge toward the target.")
+            .defaultValue(3.0)
+            .min(1)
+            .sliderRange(1, 10)
+            .visible(() -> mode.get() == Mode.Lunge && lungeFromAbove.get())
+            .build()
+    );
     public final Setting<Double> getLungeStrength = sgLunge.add(new DoubleSetting.Builder()
             .name("SpearVelocity")
             .description("The amount of velocity applied to the player, in the direction of the target.")
@@ -181,6 +214,10 @@ public class SpearKill extends Module {
     private Entity killtarget;
     private int blinkChargeTicks = 0;
     private int flushCooldown = 0;
+    private boolean firstPhase = false;
+    private Vec3d aboveTargetPos = null;
+    private boolean wasNoFallEnabled = false;
+    private boolean noFallToggled = false;
 
     public SpearKill() {
         super(Trouser.Main, "SpearKill", "Increases spear damage! Lunge mode uses velocity and Blink mode delays packets. Thank you to Kimtaeho for Blink mode!");
@@ -210,32 +247,44 @@ public class SpearKill extends Module {
         killtarget = null;
         blinkChargeTicks = 0;
         flushCooldown = 0;
+        firstPhase = false;
+        aboveTargetPos = null;
+        if (noFallToggled && wasNoFallEnabled) {
+            Modules.get().get(NoFall.class).toggle();
+        }
+        noFallToggled = false;
+        wasNoFallEnabled = false;
     }
 
-    private boolean isHoldingSpear() {
+    private boolean isUsingSpear() {
         if (mc.player == null) return false;
-        String itemName = mc.player.getMainHandStack().getItem().toString().toLowerCase();
+        String itemName = mc.player.getActiveItem().getItem().toString().toLowerCase();
         return itemName.contains("spear");
     }
 
+    private boolean currentlyCharging = false;
     @EventHandler
-    private void onTick(TickEvent.Pre event) {
+    private void onPreTick(TickEvent.Pre event) {
         if (mc.player == null || mc.world == null) return;
 
-        boolean currentlyCharging = isHoldingSpear() && mc.player.isUsingItem();
+        currentlyCharging = isUsingSpear();
 
-        if (mode.get() == Mode.Lunge) {
-            if (currentlyCharging) {
-                if (killtarget == null) killtarget = target();
-                if (killtarget != null && !killtarget.isAlive()) killtarget = null;
-                if (killtarget == null || !(killtarget instanceof LivingEntity)) return;
-                if (!isValidTarget(killtarget)) return;
-                LUNGE();
-            } else {
-                killtarget = null;
+        if (nonofall.get()){
+            if (currentlyCharging && !noFallToggled) {
+                wasNoFallEnabled = Modules.get().get(NoFall.class).isActive();
+                if (wasNoFallEnabled) {
+                    Modules.get().get(NoFall.class).toggle();
+                    noFallToggled = true;
+                }
+            } else if (!currentlyCharging && noFallToggled) {
+                if (wasNoFallEnabled) {
+                    Modules.get().get(NoFall.class).toggle();
+                }
+                noFallToggled = false;
             }
-            return;
         }
+
+        if (mode.get() == Mode.Lunge) return;
 
         if (currentlyCharging) {
             blinkChargeTicks++;
@@ -251,22 +300,6 @@ public class SpearKill extends Module {
             wasApproaching = false;
         }
 
-        if (currentlyCharging && blinkAimbot.get() && killtarget != null) {
-            rotateToTarget(killtarget);
-        }
-
-        // Blink Lunge: Launch towards target after charge delay
-        // Stop lunging after flush to allow re-approach for next hit
-        if (currentlyCharging && blinkLunge.get() && killtarget != null && flushCooldown == 0) {
-            if (blinkChargeTicks >= blinkLungeTicks.get()) {
-                rotateToTarget(killtarget);
-                Vec3d viewDir = Vec3d.fromPolar(mc.player.getPitch(), mc.player.getYaw());
-                mc.player.setSprinting(true);
-                mc.player.setVelocity(viewDir.multiply(blinkLungeStrength.get()));
-            }
-        }
-
-        // Decrease flush cooldown
         if (flushCooldown > 0) {
             flushCooldown--;
         }
@@ -326,30 +359,100 @@ public class SpearKill extends Module {
             }
         }
     }
+    @EventHandler
+    private void onRender(Render3DEvent event) {
+        if (mc.player == null || mc.world == null) return;
+
+        if (mode.get() == Mode.Lunge) {
+            if (currentlyCharging) {
+                if (killtarget == null) killtarget = target();
+                if (killtarget != null && !killtarget.isAlive()) {
+                    if (stop.get()) {
+                        mc.player.setVelocity(0, 0, 0);
+                        mc.player.setSprinting(false);
+                    }
+                    killtarget = null;
+                    firstPhase = false;
+                    aboveTargetPos = null;
+                }
+                if (killtarget == null || !(killtarget instanceof LivingEntity)) return;
+                if (!isValidTarget(killtarget)) return;
+                LUNGE();
+            } else {
+                killtarget = null;
+                firstPhase = false;
+                aboveTargetPos = null;
+            }
+            return;
+        }
+
+        if (currentlyCharging && blinkAimbot.get() && killtarget != null) {
+            rotateToTarget(killtarget);
+        }
+
+        // Blink Lunge: Launch towards target after charge delay
+        // Stop lunging after flush to allow re-approach for next hit
+        if (currentlyCharging && blinkLunge.get() && killtarget != null && flushCooldown == 0) {
+            if (blinkChargeTicks >= blinkLungeTicks.get()) {
+                rotateToTarget(killtarget);
+                Vec3d viewDir = Vec3d.fromPolar(mc.player.getPitch(), mc.player.getYaw());
+                mc.player.setSprinting(true);
+                mc.player.setVelocity(viewDir.multiply(blinkLungeStrength.get()));
+            }
+        }
+    }
 
     private void LUNGE() {
-        int readyTicks = getReadyTicks(mc.player.getMainHandStack().getItem());
+        int readyTicks = mc.player.getActiveHand() == Hand.MAIN_HAND
+                ? getReadyTicks(mc.player.getMainHandStack().getItem())
+                : getReadyTicks(mc.player.getOffHandStack().getItem());
+
         rotateToTarget(killtarget);
+
         if (mc.player.getItemUseTime() > readyTicks) {
-            if (stop.get()) {
-                Box playerBox = mc.player.getBoundingBox().expand(stopDistance.get());
-                Box targetBox = killtarget.getBoundingBox();
-                if (!playerBox.intersects(targetBox)) {
-                    double lungeSpeed = getLungeStrength.get();
-                    Vec3d viewDir = Vec3d.fromPolar(mc.player.getPitch(), mc.player.getYaw());
-                    mc.player.setSprinting(true);
-                    mc.player.setVelocity(viewDir.multiply(lungeSpeed));
-                } else {
+            Box playerBox = mc.player.getBoundingBox().expand(stopDistance.get());
+            Box targetBox = killtarget.getBoundingBox();
+            boolean atTarget = playerBox.intersects(targetBox);
+
+            if (atTarget) {
+                if (stop.get()) {
                     killtarget = null;
                     mc.player.setVelocity(0, 0, 0);
                     mc.player.setSprinting(false);
                 }
-            } else {
-                double lungeSpeed = getLungeStrength.get();
-                Vec3d viewDir = Vec3d.fromPolar(mc.player.getPitch(), mc.player.getYaw());
-                mc.player.setSprinting(true);
-                mc.player.setVelocity(viewDir.multiply(lungeSpeed));
+                firstPhase = false;
+                aboveTargetPos = null;
+                return;
             }
+
+            double lungeSpeed = getLungeStrength.get();
+            Vec3d viewDir;
+
+            if (lungeFromAbove.get() && killtarget != null) {
+                if (!firstPhase || aboveTargetPos == null) {
+                    Vec3d targetCenter = killtarget.getBoundingBox().getCenter();
+                    aboveTargetPos = new Vec3d(targetCenter.x, targetCenter.y + aboveHeight.get(), targetCenter.z);
+                    firstPhase = true;
+                }
+
+                Vec3d playerPos = mc.player.getEntityPos();
+                double distToAbove = playerPos.distanceTo(aboveTargetPos);
+
+                if (distToAbove < aboveHeightdistance.get()) {
+                    Vec3d targetDir = killtarget.getBoundingBox().getCenter().subtract(playerPos).normalize();
+                    viewDir = targetDir;
+                    firstPhase = false;
+                } else {
+                    Vec3d aboveDir = aboveTargetPos.subtract(playerPos).normalize();
+                    viewDir = aboveDir;
+                }
+            } else {
+                Vec3d targetDir = killtarget.getBoundingBox().getCenter().subtract(mc.player.getEntityPos()).normalize();
+                viewDir = targetDir;
+            }
+
+            mc.player.setSprinting(true);
+            mc.player.setVelocity(viewDir.multiply(lungeSpeed));
         }
     }
 
@@ -572,6 +675,4 @@ public class SpearKill extends Module {
             return !inList;
         }
     }
-
-    private boolean chatFeedback = true;
 }

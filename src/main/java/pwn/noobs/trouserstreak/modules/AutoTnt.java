@@ -72,12 +72,18 @@ public class AutoTnt extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (igniting) return;
+        if (mc.player == null || mc.world == null || igniting) return;
 
         if (event.packet instanceof PlayerInteractBlockC2SPacket packet) {
             BlockHitResult hit = packet.getBlockHitResult();
-            candidatePositions.add(hit.getBlockPos().offset(hit.getSide()));
-            candidatePositions.add(hit.getBlockPos());
+            BlockPos clicked = hit.getBlockPos();
+            BlockPos offset  = clicked.offset(hit.getSide());
+
+            boolean clickedIsTnt = mc.world.getBlockState(clicked).isOf(Blocks.TNT);
+            boolean offsetIsTnt  = mc.world.getBlockState(offset).isOf(Blocks.TNT);
+
+            if (clickedIsTnt) candidatePositions.add(clicked);
+            if (offsetIsTnt)  candidatePositions.add(offset);
         }
 
         if (!candidatePositions.isEmpty() && ignitePos == null && !igniting) {
@@ -85,12 +91,16 @@ public class AutoTnt extends Module {
             while (it.hasNext()) {
                 BlockPos pos = it.next();
                 if (mc.world.getBlockState(pos).getBlock() == Blocks.TNT) {
+                    if (ignitionQueue.stream().anyMatch(task -> task.pos().equals(pos))) {
+                        it.remove();
+                        continue;
+                    }
+
                     it.remove();
                     if (useTickDelay.get()) {
                         ignitionQueue.add(new IgnitionTask(pos, tickDelay.get()));
                     } else {
                         ignitePos = pos;
-                        originalSlot = mc.player.getInventory().selectedSlot;
                         candidatePositions.clear();
                         break;
                     }
@@ -103,14 +113,20 @@ public class AutoTnt extends Module {
         if (useTickDelay.get()) return;
 
         if (ignitePos != null && !igniting && flintSlot == -1) {
+            if (originalSlot == -1) {
+                originalSlot = mc.player.getInventory().selectedSlot;
+            }
+
             flintSlot = InvUtils.findInHotbar(Items.FLINT_AND_STEEL).slot();
-            if (flintSlot == -1) {
+            if (flintSlot == -1 || flintSlot == 40) {
                 error("No flint and steel found in hotbar!");
                 ignitePos = null;
+                originalSlot = -1;
+                flintSlot = -1;
                 return;
             }
+
             mc.player.getInventory().selectedSlot = flintSlot;
-            originalSlot = originalSlot == -1 ? mc.player.getInventory().selectedSlot : originalSlot;
             return;
         }
 
@@ -130,6 +146,7 @@ public class AutoTnt extends Module {
     }
     @EventHandler
     private void onTick(TickEvent.Post event) {
+        if (mc.player == null || mc.world == null) return;
         if (!useTickDelay.get()) return;
         if (igniting) return;
 
@@ -150,19 +167,18 @@ public class AutoTnt extends Module {
 
         ignitionQueue.addAll(updated);
 
-        for (IgnitionTask task : readyList) {
-            int flintSlot = InvUtils.findInHotbar(Items.FLINT_AND_STEEL).slot();
-            if (flintSlot == -1) {
-                error("No flint and steel found in hotbar!");
-                readyList.clear();
-                ignitionQueue.clear();
-                break;
-            } else igniteNow(task.pos(), flintSlot);
+        int flintSlot = InvUtils.findInHotbar(Items.FLINT_AND_STEEL).slot();
+        if (flintSlot == -1 || flintSlot == 40) {
+            error("No flint and steel found in hotbar!");
+            readyList.clear();
+            ignitionQueue.clear();
+            return;
         }
+        for (IgnitionTask task : readyList) igniteNow(task.pos(), flintSlot);
     }
 
     private void igniteNow(BlockPos pos, int flint) {
-        if (!mc.player.getBlockPos().isWithinDistance(pos, reach.get())) return;
+        if (mc.player.getEntityPos().distanceTo(Vec3d.ofCenter(pos)) > reach.get()) return;
         igniting = true;
         int prevSlot = mc.player.getInventory().selectedSlot;
         mc.player.getInventory().selectedSlot = flint;

@@ -211,18 +211,18 @@ public class AutoWither extends Module {
         if(direction == Direction.NORTH||direction == Direction.SOUTH){
             blockPositions.add(basePos.up().west());
             blockPositions.add(basePos.up().east());
-            skullPositions.add(basePos.up(2).west());
-            skullPositions.add(basePos.up(2).east());
+            skullPositions.add(basePos.up().west());
+            skullPositions.add(basePos.up().east());
         }else{
             blockPositions.add(basePos.up().south());
             blockPositions.add(basePos.up().north());
-            skullPositions.add(basePos.up(2).south());
-            skullPositions.add(basePos.up(2).north());
+            skullPositions.add(basePos.up().south());
+            skullPositions.add(basePos.up().north());
         }
         blockPositions.add(basePos);
         blockPositions.add(basePos.up());
         if(placeCenterSkull.get()){
-            skullPositions.add(basePos.up(2));
+            skullPositions.add(basePos.up());
         }
 
         mc.execute(() -> {

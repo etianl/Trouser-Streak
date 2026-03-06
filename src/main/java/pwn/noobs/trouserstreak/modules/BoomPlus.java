@@ -9,7 +9,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.component.ComponentChanges;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.TypedEntityData;
 import net.minecraft.item.ItemStack;
@@ -50,8 +49,7 @@ public class BoomPlus extends Module {
             .name("CustomNameVisible")
             .description("CustomNameVisible or not.")
             .defaultValue(true)
-            .build()
-    );
+            .build());
     private final Setting<Integer> health = sgOptions.add(new IntSetting.Builder()
             .name("Health Points")
             .description("How much health.")
@@ -77,56 +75,47 @@ public class BoomPlus extends Module {
             .name("Invulnerable")
             .description("Invulnerable or not")
             .defaultValue(true)
-            .build()
-    );
+            .build());
     public final Setting<Boolean> persist = sgOptions.add(new BoolSetting.Builder()
             .name("Never Despawn")
             .description("adds PersistenceRequired tag.")
             .defaultValue(true)
-            .build()
-    );
+            .build());
     public final Setting<Boolean> noAI = sgOptions.add(new BoolSetting.Builder()
             .name("NoAI")
             .description("NoAI")
             .defaultValue(false)
-            .build()
-    );
+            .build());
     public final Setting<Boolean> falsefire = sgOptions.add(new BoolSetting.Builder()
             .name("HasVisualFire")
             .description("HasVisualFire or not")
             .defaultValue(false)
-            .build()
-    );
+            .build());
     public final Setting<Boolean> nograv = sgOptions.add(new BoolSetting.Builder()
             .name("NoGravity")
             .description("NoGravity or not")
             .defaultValue(false)
-            .build()
-    );
+            .build());
     public final Setting<Boolean> silence = sgOptions.add(new BoolSetting.Builder()
             .name("Silent")
             .description("adds Silent tag.")
             .defaultValue(false)
-            .build()
-    );
+            .build());
     public final Setting<Boolean> glow = sgOptions.add(new BoolSetting.Builder()
             .name("Glowing")
             .description("Glowing or not")
             .defaultValue(false)
-            .build()
-    );
+            .build());
     public final Setting<Boolean> ignite = sgOptions.add(new BoolSetting.Builder()
             .name("Ignited")
             .description("Pre-ignite creeper or not.")
             .defaultValue(true)
-            .build()
-    );
+            .build());
     public final Setting<Boolean> powah = sgOptions.add(new BoolSetting.Builder()
             .name("Charged Creeper")
             .description("powered creeper or not.")
             .defaultValue(false)
-            .build()
-    );
+            .build());
     private final Setting<Integer> fuse = sgOptions.add(new IntSetting.Builder()
             .name("Creeper/TNT Fuse")
             .description("In ticks")
@@ -157,9 +146,7 @@ public class BoomPlus extends Module {
             .name("OnTarget")
             .description("spawns on target")
             .defaultValue(false)
-            .build()
-    );
-
+            .build());
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
             .description("fastness of thing")
@@ -171,8 +158,7 @@ public class BoomPlus extends Module {
             .name("FULLAUTO")
             .description("FULL AUTO BABY!")
             .defaultValue(false)
-            .build()
-    );
+            .build());
     public final Setting<Integer> atickdelay = sgGeneral.add(new IntSetting.Builder()
             .name("FULLAUTOTickDelay")
             .description("Tick Delay for FULLAUTO option.")
@@ -180,8 +166,7 @@ public class BoomPlus extends Module {
             .min(0)
             .sliderMax(20)
             .visible(auto::get)
-            .build()
-    );
+            .build());
 
     public BoomPlus() {
         super(Trouser.operator, "boom+", "shoots something where you click");
@@ -259,6 +244,10 @@ public class BoomPlus extends Module {
             Pos.add(NbtDouble.of(pos.getZ()));
             entityTag.put("Pos", Pos);
         } else {
+            Pos.add(NbtDouble.of(mc.player.getX()));
+            Pos.add(NbtDouble.of(mc.player.getY()+1));
+            Pos.add(NbtDouble.of(mc.player.getZ()));
+            entityTag.put("Pos", Pos);
             motion.add(NbtDouble.of(sex.x));
             motion.add(NbtDouble.of(sex.y));
             motion.add(NbtDouble.of(sex.z));
@@ -335,6 +324,7 @@ public class BoomPlus extends Module {
                 return serverPatch < patch;
 
             } catch (NumberFormatException e) {
+                e.printStackTrace();
                 return false;
             }
         }
