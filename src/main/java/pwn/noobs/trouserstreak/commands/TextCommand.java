@@ -104,7 +104,7 @@ public class TextCommand extends Command {
                             .forEach(builder::suggest);
                 }
             }
-        } catch (IOException ignored) {}
+        } catch (IOException e) {e.printStackTrace();}
         return builder.buildFuture();
     }
 
@@ -136,7 +136,8 @@ public class TextCommand extends Command {
             if (word.equalsIgnoreCase("obfuscated")) {
                 offset = matcher.end();
 
-                int end = line.substring(offset).indexOf(" ") + 1;
+                int spaceIdx = line.substring(offset).indexOf(" ");
+                int end = (spaceIdx == -1) ? line.length() - offset : spaceIdx + 1;
                 nbt.add(makePart(line.substring(offset, offset + end), currentColor, true, wasObfuscated));
 
                 wasObfuscated = true;
