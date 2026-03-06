@@ -74,13 +74,6 @@ public class SuperInstaMine extends Module {
             .sliderMax(20)
             .build()
     );
-
-    private final Setting<Boolean> pick = sgGeneral.add(new BoolSetting.Builder()
-            .name("only-pick")
-            .description("Only tries to mine the block if you are holding a pickaxe.")
-            .defaultValue(false)
-            .build()
-    );
     private final Setting<Boolean> swing = sgGeneral.add(new BoolSetting.Builder()
             .name("Swing Hand")
             .description("Do or Do Not swing hand when instamining.")
@@ -555,7 +548,7 @@ public class SuperInstaMine extends Module {
     private boolean shouldMine() {
         assert mc.player != null;
         if (blockPos.getY() == -128) return false;
-        return !pick.get() || (mc.player.getMainHandStack().getItem() == Items.DIAMOND_PICKAXE || mc.player.getMainHandStack().getItem() == Items.NETHERITE_PICKAXE);
+        return true;
     }
 
     @EventHandler

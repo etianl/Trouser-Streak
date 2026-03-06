@@ -18,13 +18,14 @@ import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.HangingSignBlockEntity;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.block.entity.SignText;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
+import net.minecraft.client.gui.screen.world.LevelLoadingScreen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
@@ -46,6 +47,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.ChunkStatus;
@@ -238,34 +240,34 @@ public class BaseFinder extends Module {
             .name("Block List #1 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
             .defaultValue(
-                    Blocks.BLACK_BED, Blocks.BROWN_BED, Blocks.GRAY_BED, Blocks.LIGHT_BLUE_BED, Blocks.LIGHT_GRAY_BED, Blocks.MAGENTA_BED, Blocks.PINK_BED,
-                    Blocks.SPRUCE_SAPLING, Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING, Blocks.JUNGLE_SAPLING, Blocks.CHERRY_SAPLING, Blocks.BAMBOO_SAPLING,
+                    Blocks.CRAFTER, Blocks.SPRUCE_SAPLING, Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING, Blocks.JUNGLE_SAPLING, Blocks.CHERRY_SAPLING, Blocks.BAMBOO_SAPLING,
                     Blocks.CHERRY_BUTTON, Blocks.CHERRY_DOOR, Blocks.CHERRY_FENCE, Blocks.CHERRY_FENCE_GATE, Blocks.CHERRY_PLANKS, Blocks.CHERRY_PRESSURE_PLATE, Blocks.CHERRY_STAIRS, Blocks.CHERRY_WOOD, Blocks.CHERRY_TRAPDOOR, Blocks.CHERRY_SLAB,
                     Blocks.MANGROVE_PLANKS, Blocks.MANGROVE_BUTTON, Blocks.MANGROVE_DOOR, Blocks.MANGROVE_FENCE, Blocks.MANGROVE_FENCE_GATE, Blocks.MANGROVE_STAIRS, Blocks.MANGROVE_SLAB, Blocks.MANGROVE_TRAPDOOR,
-                    Blocks.BIRCH_DOOR, Blocks.BIRCH_FENCE_GATE, Blocks.BIRCH_BUTTON, Blocks.OAK_BUTTON, Blocks.ACACIA_BUTTON, Blocks.DARK_OAK_BUTTON, Blocks.POLISHED_BLACKSTONE_BUTTON, Blocks.SPRUCE_BUTTON,
-                    Blocks.BAMBOO_BLOCK, Blocks.BAMBOO_BUTTON, Blocks.BAMBOO_DOOR, Blocks.BAMBOO_FENCE, Blocks.BAMBOO_FENCE_GATE, Blocks.BAMBOO_MOSAIC, Blocks.BAMBOO_MOSAIC_SLAB, Blocks.BAMBOO_MOSAIC_STAIRS, Blocks.BAMBOO_PLANKS, Blocks.BAMBOO_PRESSURE_PLATE, Blocks.BAMBOO_SLAB, Blocks.BAMBOO_STAIRS, Blocks.BAMBOO_TRAPDOOR, Blocks.DECORATED_POT, Blocks.CHISELED_BOOKSHELF,
-                    Blocks.BLACK_CONCRETE, Blocks.BLUE_CONCRETE, Blocks.CYAN_CONCRETE, Blocks.BROWN_CONCRETE, Blocks.WHITE_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.MAGENTA_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE, Blocks.PINK_CONCRETE, Blocks.GRAY_CONCRETE, Blocks.LIGHT_GRAY_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.GREEN_CONCRETE, Blocks.RED_CONCRETE,
+                    Blocks.BIRCH_DOOR, Blocks.BIRCH_FENCE_GATE, Blocks.BIRCH_BUTTON, Blocks.ACACIA_BUTTON, Blocks.DARK_OAK_BUTTON, Blocks.POLISHED_BLACKSTONE_BUTTON, Blocks.SPRUCE_BUTTON,
+                    Blocks.BAMBOO_BLOCK, Blocks.BAMBOO_BUTTON, Blocks.BAMBOO_DOOR, Blocks.BAMBOO_FENCE, Blocks.BAMBOO_FENCE_GATE, Blocks.BAMBOO_MOSAIC, Blocks.BAMBOO_MOSAIC_SLAB, Blocks.BAMBOO_MOSAIC_STAIRS, Blocks.BAMBOO_PLANKS, Blocks.BAMBOO_PRESSURE_PLATE, Blocks.BAMBOO_SLAB, Blocks.BAMBOO_STAIRS, Blocks.BAMBOO_TRAPDOOR, Blocks.CHISELED_BOOKSHELF,
+                    Blocks.BLACK_CONCRETE, Blocks.BLUE_CONCRETE, Blocks.CYAN_CONCRETE, Blocks.BROWN_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.MAGENTA_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE, Blocks.PINK_CONCRETE, Blocks.GRAY_CONCRETE, Blocks.LIGHT_GRAY_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.GREEN_CONCRETE,
                     Blocks.BLACK_CONCRETE_POWDER, Blocks.BLUE_CONCRETE_POWDER, Blocks.CYAN_CONCRETE_POWDER, Blocks.BROWN_CONCRETE_POWDER, Blocks.WHITE_CONCRETE_POWDER, Blocks.ORANGE_CONCRETE_POWDER, Blocks.MAGENTA_CONCRETE_POWDER, Blocks.LIGHT_BLUE_CONCRETE_POWDER, Blocks.YELLOW_CONCRETE_POWDER, Blocks.LIME_CONCRETE_POWDER, Blocks.PINK_CONCRETE_POWDER, Blocks.GRAY_CONCRETE_POWDER, Blocks.LIGHT_GRAY_CONCRETE_POWDER, Blocks.PURPLE_CONCRETE_POWDER, Blocks.GREEN_CONCRETE_POWDER, Blocks.RED_CONCRETE_POWDER,
                     Blocks.PURPLE_TERRACOTTA, Blocks.MAGENTA_TERRACOTTA, Blocks.PINK_TERRACOTTA, Blocks.MAGENTA_GLAZED_TERRACOTTA, Blocks.PINK_GLAZED_TERRACOTTA, Blocks.GRAY_GLAZED_TERRACOTTA, Blocks.BLUE_GLAZED_TERRACOTTA, Blocks.BROWN_GLAZED_TERRACOTTA, Blocks.GREEN_GLAZED_TERRACOTTA,
-                    Blocks.COPPER_BLOCK, Blocks.EXPOSED_COPPER, Blocks.WEATHERED_COPPER, Blocks.OXIDIZED_COPPER, Blocks.CUT_COPPER, Blocks.EXPOSED_CUT_COPPER, Blocks.WEATHERED_CUT_COPPER, Blocks.OXIDIZED_CUT_COPPER, Blocks.CUT_COPPER_SLAB, Blocks.CUT_COPPER_STAIRS, Blocks.EXPOSED_CUT_COPPER_SLAB, Blocks.EXPOSED_CUT_COPPER_STAIRS, Blocks.WEATHERED_CUT_COPPER_SLAB, Blocks.WEATHERED_CUT_COPPER_STAIRS, Blocks.OXIDIZED_CUT_COPPER_SLAB, Blocks.OXIDIZED_CUT_COPPER_STAIRS,
-                    Blocks.WAXED_COPPER_BLOCK, Blocks.WAXED_EXPOSED_COPPER, Blocks.WAXED_WEATHERED_COPPER, Blocks.WAXED_OXIDIZED_COPPER, Blocks.WAXED_CUT_COPPER, Blocks.WAXED_EXPOSED_CUT_COPPER, Blocks.WAXED_WEATHERED_CUT_COPPER, Blocks.WAXED_OXIDIZED_CUT_COPPER, Blocks.WAXED_CUT_COPPER_SLAB, Blocks.WAXED_CUT_COPPER_STAIRS, Blocks.WAXED_EXPOSED_CUT_COPPER_SLAB, Blocks.WAXED_EXPOSED_CUT_COPPER_STAIRS, Blocks.WAXED_WEATHERED_CUT_COPPER_SLAB, Blocks.WAXED_WEATHERED_CUT_COPPER_STAIRS, Blocks.WAXED_OXIDIZED_CUT_COPPER_SLAB, Blocks.WAXED_OXIDIZED_CUT_COPPER_STAIRS, Blocks.SOUL_TORCH, Blocks.SOUL_WALL_TORCH,
-                    Blocks.FLOWER_POT, Blocks.POTTED_MANGROVE_PROPAGULE, Blocks.POTTED_AZALEA_BUSH, Blocks.POTTED_CHERRY_SAPLING, Blocks.POTTED_FERN, Blocks.POTTED_ACACIA_SAPLING, Blocks.POTTED_WARPED_FUNGUS, Blocks.POTTED_WARPED_ROOTS, Blocks.POTTED_CRIMSON_FUNGUS, Blocks.POTTED_CRIMSON_ROOTS, Blocks.POTTED_OAK_SAPLING, Blocks.POTTED_WITHER_ROSE, Blocks.WITHER_ROSE,
+                    Blocks.OXIDIZED_COPPER, Blocks.CUT_COPPER, Blocks.EXPOSED_CUT_COPPER, Blocks.WEATHERED_CUT_COPPER, Blocks.CUT_COPPER_SLAB, Blocks.CUT_COPPER_STAIRS, Blocks.EXPOSED_CUT_COPPER_SLAB, Blocks.EXPOSED_CUT_COPPER_STAIRS, Blocks.WEATHERED_CUT_COPPER_SLAB, Blocks.WEATHERED_CUT_COPPER_STAIRS, Blocks.OXIDIZED_CUT_COPPER_SLAB, Blocks.OXIDIZED_CUT_COPPER_STAIRS, Blocks.COPPER_BULB, Blocks.EXPOSED_COPPER_BULB, Blocks.WEATHERED_COPPER_BULB, Blocks.OXIDIZED_COPPER_BULB, Blocks.CHISELED_COPPER, Blocks.EXPOSED_CHISELED_COPPER, Blocks.WEATHERED_CHISELED_COPPER, Blocks.OXIDIZED_CHISELED_COPPER, Blocks.COPPER_DOOR, Blocks.EXPOSED_COPPER_DOOR, Blocks.WEATHERED_COPPER_DOOR, Blocks.OXIDIZED_COPPER_DOOR, Blocks.COPPER_GRATE, Blocks.EXPOSED_COPPER_GRATE, Blocks.WEATHERED_COPPER_GRATE, Blocks.OXIDIZED_COPPER_GRATE, Blocks.COPPER_TRAPDOOR, Blocks.EXPOSED_COPPER_TRAPDOOR, Blocks.WEATHERED_COPPER_TRAPDOOR,
+                    Blocks.WAXED_EXPOSED_COPPER, Blocks.WAXED_WEATHERED_COPPER, Blocks.WAXED_EXPOSED_CUT_COPPER, Blocks.WAXED_WEATHERED_CUT_COPPER, Blocks.WAXED_EXPOSED_CUT_COPPER_SLAB, Blocks.WAXED_EXPOSED_CUT_COPPER_STAIRS, Blocks.WAXED_WEATHERED_CUT_COPPER_SLAB, Blocks.WAXED_WEATHERED_CUT_COPPER_STAIRS, Blocks.WAXED_EXPOSED_CHISELED_COPPER, Blocks.WAXED_WEATHERED_CHISELED_COPPER, Blocks.WAXED_EXPOSED_COPPER_DOOR, Blocks.WAXED_WEATHERED_COPPER_DOOR, Blocks.WAXED_EXPOSED_COPPER_GRATE, Blocks.WAXED_WEATHERED_COPPER_GRATE, Blocks.WAXED_COPPER_TRAPDOOR, Blocks.WAXED_EXPOSED_COPPER_TRAPDOOR, Blocks.WAXED_WEATHERED_COPPER_TRAPDOOR,
+                    Blocks.SOUL_TORCH, Blocks.SOUL_WALL_TORCH, Blocks.POTTED_MANGROVE_PROPAGULE, Blocks.POTTED_AZALEA_BUSH, Blocks.POTTED_CHERRY_SAPLING, Blocks.POTTED_FERN, Blocks.POTTED_ACACIA_SAPLING, Blocks.POTTED_WARPED_FUNGUS, Blocks.POTTED_WARPED_ROOTS, Blocks.POTTED_CRIMSON_FUNGUS, Blocks.POTTED_CRIMSON_ROOTS, Blocks.POTTED_OAK_SAPLING, Blocks.POTTED_WITHER_ROSE, Blocks.WITHER_ROSE,
                     Blocks.CAKE, Blocks.CANDLE_CAKE, Blocks.BLUE_CANDLE_CAKE, Blocks.BLACK_CANDLE_CAKE, Blocks.BROWN_CANDLE_CAKE, Blocks.CYAN_CANDLE_CAKE, Blocks.GRAY_CANDLE_CAKE, Blocks.GREEN_CANDLE_CAKE, Blocks.LIGHT_BLUE_CANDLE_CAKE, Blocks.LIGHT_GRAY_CANDLE_CAKE, Blocks.LIME_CANDLE_CAKE, Blocks.MAGENTA_CANDLE_CAKE, Blocks.ORANGE_CANDLE_CAKE, Blocks.PINK_CANDLE_CAKE, Blocks.PURPLE_CANDLE_CAKE, Blocks.RED_CANDLE_CAKE, Blocks.WHITE_CANDLE_CAKE, Blocks.YELLOW_CANDLE_CAKE,
-                    Blocks.BLUE_CANDLE, Blocks.BLACK_CANDLE, Blocks.BROWN_CANDLE, Blocks.CYAN_CANDLE, Blocks.GRAY_CANDLE, Blocks.GREEN_CANDLE, Blocks.LIGHT_BLUE_CANDLE, Blocks.LIGHT_GRAY_CANDLE, Blocks.LIME_CANDLE, Blocks.MAGENTA_CANDLE, Blocks.ORANGE_CANDLE, Blocks.PINK_CANDLE, Blocks.PURPLE_CANDLE, Blocks.RED_CANDLE, Blocks.YELLOW_CANDLE,
+                    Blocks.BLUE_CANDLE, Blocks.BLACK_CANDLE, Blocks.BROWN_CANDLE, Blocks.CYAN_CANDLE, Blocks.GRAY_CANDLE, Blocks.GREEN_CANDLE, Blocks.LIGHT_BLUE_CANDLE, Blocks.LIGHT_GRAY_CANDLE, Blocks.LIME_CANDLE, Blocks.MAGENTA_CANDLE, Blocks.ORANGE_CANDLE, Blocks.PINK_CANDLE, Blocks.PURPLE_CANDLE, Blocks.YELLOW_CANDLE,
                     Blocks.SMOOTH_RED_SANDSTONE, Blocks.CHISELED_RED_SANDSTONE, Blocks.CUT_RED_SANDSTONE, Blocks.SMOOTH_RED_SANDSTONE_SLAB, Blocks.SMOOTH_RED_SANDSTONE_STAIRS, Blocks.CUT_RED_SANDSTONE_SLAB, Blocks.RED_SANDSTONE_SLAB, Blocks.RED_SANDSTONE_STAIRS, Blocks.RED_SANDSTONE_WALL,
                     Blocks.ANDESITE_STAIRS, Blocks.ANDESITE_SLAB, Blocks.ANDESITE_WALL, Blocks.POLISHED_ANDESITE_SLAB, Blocks.POLISHED_ANDESITE_STAIRS, Blocks.POLISHED_GRANITE_SLAB, Blocks.POLISHED_GRANITE_STAIRS, Blocks.POLISHED_DIORITE_SLAB, Blocks.POLISHED_DIORITE_STAIRS,
+                    Blocks.TUFF_SLAB, Blocks.TUFF_STAIRS, Blocks.TUFF_WALL, Blocks.TUFF_BRICK_SLAB, Blocks.TUFF_BRICK_STAIRS, Blocks.TUFF_BRICK_WALL,
                     Blocks.CRACKED_NETHER_BRICKS, Blocks.CHISELED_NETHER_BRICKS, Blocks.RED_NETHER_BRICKS, Blocks.NETHER_BRICK_SLAB, Blocks.NETHER_BRICK_WALL, Blocks.RED_NETHER_BRICKS, Blocks.RED_NETHER_BRICK_SLAB, Blocks.RED_NETHER_BRICK_STAIRS, Blocks.RED_NETHER_BRICK_WALL,
-                    Blocks.WHITE_STAINED_GLASS, Blocks.ORANGE_STAINED_GLASS, Blocks.LIGHT_BLUE_STAINED_GLASS, Blocks.YELLOW_STAINED_GLASS, Blocks.LIME_STAINED_GLASS, Blocks.PINK_STAINED_GLASS, Blocks.GRAY_STAINED_GLASS, Blocks.LIGHT_GRAY_STAINED_GLASS, Blocks.CYAN_STAINED_GLASS, Blocks.PURPLE_STAINED_GLASS, Blocks.BLUE_STAINED_GLASS, Blocks.GREEN_STAINED_GLASS, Blocks.RED_STAINED_GLASS, Blocks.BLACK_STAINED_GLASS,
+                    Blocks.ORANGE_STAINED_GLASS, Blocks.LIGHT_BLUE_STAINED_GLASS, Blocks.YELLOW_STAINED_GLASS, Blocks.LIME_STAINED_GLASS, Blocks.PINK_STAINED_GLASS, Blocks.CYAN_STAINED_GLASS, Blocks.PURPLE_STAINED_GLASS, Blocks.BLUE_STAINED_GLASS, Blocks.GREEN_STAINED_GLASS, Blocks.RED_STAINED_GLASS,
                     Blocks.CRIMSON_PRESSURE_PLATE, Blocks.CRIMSON_BUTTON, Blocks.CRIMSON_DOOR, Blocks.CRIMSON_FENCE, Blocks.CRIMSON_FENCE_GATE, Blocks.CRIMSON_PLANKS, Blocks.CRIMSON_SIGN, Blocks.CRIMSON_WALL_SIGN, Blocks.CRIMSON_SLAB, Blocks.CRIMSON_STAIRS, Blocks.CRIMSON_TRAPDOOR,
                     Blocks.WARPED_PRESSURE_PLATE, Blocks.WARPED_BUTTON, Blocks.WARPED_DOOR, Blocks.WARPED_FENCE, Blocks.WARPED_FENCE_GATE, Blocks.WARPED_PLANKS, Blocks.WARPED_SIGN, Blocks.WARPED_WALL_SIGN, Blocks.WARPED_SLAB, Blocks.WARPED_STAIRS, Blocks.WARPED_TRAPDOOR,
                     Blocks.SCAFFOLDING, Blocks.CHERRY_SIGN, Blocks.CHERRY_WALL_SIGN, Blocks.OAK_SIGN, Blocks.SPRUCE_SIGN, Blocks.ACACIA_SIGN, Blocks.ACACIA_WALL_SIGN, Blocks.BIRCH_SIGN, Blocks.BIRCH_WALL_SIGN, Blocks.DARK_OAK_SIGN, Blocks.DARK_OAK_WALL_SIGN, Blocks.JUNGLE_SIGN, Blocks.JUNGLE_WALL_SIGN, Blocks.MANGROVE_SIGN, Blocks.MANGROVE_WALL_SIGN, Blocks.SLIME_BLOCK, Blocks.SPONGE, Blocks.TINTED_GLASS,
                     Blocks.ACACIA_HANGING_SIGN, Blocks.ACACIA_WALL_HANGING_SIGN, Blocks.BAMBOO_HANGING_SIGN, Blocks.BAMBOO_WALL_HANGING_SIGN, Blocks.BIRCH_HANGING_SIGN, Blocks.BIRCH_WALL_HANGING_SIGN, Blocks.CHERRY_HANGING_SIGN, Blocks.CHERRY_WALL_HANGING_SIGN, Blocks.CRIMSON_HANGING_SIGN, Blocks.CRIMSON_WALL_HANGING_SIGN, Blocks.DARK_OAK_HANGING_SIGN, Blocks.DARK_OAK_WALL_HANGING_SIGN, Blocks.JUNGLE_HANGING_SIGN, Blocks.JUNGLE_WALL_HANGING_SIGN, Blocks.MANGROVE_HANGING_SIGN, Blocks.MANGROVE_WALL_HANGING_SIGN, Blocks.OAK_HANGING_SIGN, Blocks.OAK_WALL_HANGING_SIGN, Blocks.SPRUCE_HANGING_SIGN, Blocks.SPRUCE_WALL_HANGING_SIGN, Blocks.WARPED_HANGING_SIGN, Blocks.WARPED_WALL_HANGING_SIGN,
                     Blocks.CHISELED_QUARTZ_BLOCK, Blocks.QUARTZ_PILLAR, Blocks.QUARTZ_BRICKS, Blocks.QUARTZ_STAIRS, Blocks.OCHRE_FROGLIGHT, Blocks.PEARLESCENT_FROGLIGHT, Blocks.VERDANT_FROGLIGHT, Blocks.PETRIFIED_OAK_SLAB,
-                    Blocks.STRIPPED_BAMBOO_BLOCK, Blocks.STRIPPED_CHERRY_LOG, Blocks.STRIPPED_CHERRY_WOOD, Blocks.STRIPPED_ACACIA_WOOD, Blocks.BIRCH_WOOD, Blocks.STRIPPED_BIRCH_LOG, Blocks.STRIPPED_BIRCH_WOOD, Blocks.CRIMSON_HYPHAE, Blocks.STRIPPED_CRIMSON_HYPHAE, Blocks.STRIPPED_CRIMSON_STEM, Blocks.DARK_OAK_WOOD, Blocks.STRIPPED_DARK_OAK_LOG, Blocks.STRIPPED_DARK_OAK_WOOD, Blocks.STRIPPED_JUNGLE_LOG, Blocks.STRIPPED_JUNGLE_WOOD, Blocks.MANGROVE_WOOD, Blocks.STRIPPED_MANGROVE_LOG, Blocks.STRIPPED_MANGROVE_WOOD, Blocks.WARPED_HYPHAE, Blocks.STRIPPED_WARPED_HYPHAE, Blocks.STRIPPED_WARPED_STEM,
+                    Blocks.STRIPPED_BAMBOO_BLOCK, Blocks.STRIPPED_CHERRY_LOG, Blocks.STRIPPED_CHERRY_WOOD, Blocks.STRIPPED_ACACIA_WOOD, Blocks.BIRCH_WOOD, Blocks.STRIPPED_BIRCH_LOG, Blocks.STRIPPED_BIRCH_WOOD, Blocks.CRIMSON_HYPHAE, Blocks.STRIPPED_CRIMSON_HYPHAE, Blocks.STRIPPED_CRIMSON_STEM, Blocks.DARK_OAK_WOOD, Blocks.STRIPPED_DARK_OAK_LOG, Blocks.STRIPPED_DARK_OAK_WOOD, Blocks.STRIPPED_JUNGLE_LOG, Blocks.STRIPPED_JUNGLE_WOOD, Blocks.STRIPPED_MANGROVE_LOG, Blocks.STRIPPED_MANGROVE_WOOD, Blocks.WARPED_HYPHAE, Blocks.STRIPPED_WARPED_HYPHAE, Blocks.STRIPPED_WARPED_STEM,
                     Blocks.SHULKER_BOX, Blocks.BLACK_SHULKER_BOX, Blocks.BLUE_SHULKER_BOX, Blocks.BROWN_SHULKER_BOX, Blocks.CYAN_SHULKER_BOX, Blocks.GRAY_SHULKER_BOX, Blocks.GREEN_SHULKER_BOX, Blocks.LIGHT_BLUE_SHULKER_BOX, Blocks.LIGHT_GRAY_SHULKER_BOX, Blocks.LIME_SHULKER_BOX, Blocks.MAGENTA_SHULKER_BOX, Blocks.ORANGE_SHULKER_BOX, Blocks.PINK_SHULKER_BOX, Blocks.PURPLE_SHULKER_BOX, Blocks.RED_SHULKER_BOX, Blocks.WHITE_SHULKER_BOX, Blocks.YELLOW_SHULKER_BOX,
                     Blocks.LAVA_CAULDRON, Blocks.POWDER_SNOW_CAULDRON, Blocks.ACTIVATOR_RAIL, Blocks.BEACON, Blocks.BEEHIVE, Blocks.REPEATING_COMMAND_BLOCK, Blocks.COMMAND_BLOCK, Blocks.CHAIN_COMMAND_BLOCK, Blocks.EMERALD_BLOCK, Blocks.IRON_BLOCK, Blocks.NETHERITE_BLOCK, Blocks.RAW_GOLD_BLOCK, Blocks.CONDUIT, Blocks.DAYLIGHT_DETECTOR, Blocks.DETECTOR_RAIL, Blocks.DRIED_KELP_BLOCK, Blocks.DROPPER, Blocks.ENCHANTING_TABLE,
                     Blocks.PIGLIN_HEAD, Blocks.PIGLIN_WALL_HEAD, Blocks.CREEPER_HEAD, Blocks.CREEPER_WALL_HEAD, Blocks.DRAGON_WALL_HEAD, Blocks.DRAGON_HEAD, Blocks.PLAYER_HEAD, Blocks.PLAYER_WALL_HEAD, Blocks.ZOMBIE_HEAD, Blocks.ZOMBIE_WALL_HEAD, Blocks.SKELETON_WALL_SKULL, Blocks.WITHER_SKELETON_SKULL, Blocks.WITHER_SKELETON_WALL_SKULL,
-                    Blocks.HONEY_BLOCK, Blocks.HONEYCOMB_BLOCK, Blocks.HOPPER, Blocks.JUKEBOX, Blocks.LIGHTNING_ROD, Blocks.LODESTONE, Blocks.OBSERVER, Blocks.POWERED_RAIL, Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE, Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE, Blocks.BIRCH_PRESSURE_PLATE, Blocks.JUNGLE_PRESSURE_PLATE, Blocks.DARK_OAK_PRESSURE_PLATE, Blocks.MANGROVE_PRESSURE_PLATE, Blocks.CRIMSON_PRESSURE_PLATE, Blocks.WARPED_PRESSURE_PLATE, Blocks.RESPAWN_ANCHOR, Blocks.CALIBRATED_SCULK_SENSOR, Blocks.SNIFFER_EGG
+                    Blocks.HONEY_BLOCK, Blocks.HONEYCOMB_BLOCK, Blocks.JUKEBOX, Blocks.LIGHTNING_ROD, Blocks.LODESTONE, Blocks.OBSERVER, Blocks.POWERED_RAIL, Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE, Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE, Blocks.BIRCH_PRESSURE_PLATE, Blocks.JUNGLE_PRESSURE_PLATE, Blocks.DARK_OAK_PRESSURE_PLATE, Blocks.MANGROVE_PRESSURE_PLATE, Blocks.CRIMSON_PRESSURE_PLATE, Blocks.WARPED_PRESSURE_PLATE, Blocks.RESPAWN_ANCHOR, Blocks.CALIBRATED_SCULK_SENSOR, Blocks.SNIFFER_EGG
             )
             .visible(list1Activar::get)
             .filter(this::filterBlocks)
@@ -279,7 +281,7 @@ public class BaseFinder extends Module {
     private final Setting<List<Block>> Blawcks2 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #2 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
-            .defaultValue(Blocks.SPRUCE_WALL_SIGN, Blocks.POLISHED_DIORITE, Blocks.NOTE_BLOCK)
+            .defaultValue(Blocks.SPRUCE_WALL_SIGN, Blocks.POLISHED_DIORITE, Blocks.NOTE_BLOCK, Blocks.MANGROVE_WOOD, Blocks.WEATHERED_COPPER)
             .visible(list2Activar::get)
             .filter(this::filterBlocks)
             .build()
@@ -318,7 +320,7 @@ public class BaseFinder extends Module {
     private final Setting<List<Block>> Blawcks5 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #5 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
-            .defaultValue(Blocks.QUARTZ_BLOCK, Blocks.RED_BED, Blocks.WHITE_BED, Blocks.YELLOW_BED, Blocks.ORANGE_BED, Blocks.BLUE_BED, Blocks.CYAN_BED, Blocks.GREEN_BED, Blocks.LIME_BED, Blocks.PURPLE_BED)
+            .defaultValue(Blocks.QUARTZ_BLOCK, Blocks.FURNACE, Blocks.BLACK_BED, Blocks.GRAY_BED, Blocks.LIGHT_BLUE_BED, Blocks.LIGHT_GRAY_BED, Blocks.PINK_BED, Blocks.RED_BED, Blocks.WHITE_BED, Blocks.YELLOW_BED, Blocks.ORANGE_BED, Blocks.BLUE_BED, Blocks.CYAN_BED, Blocks.GREEN_BED, Blocks.LIME_BED, Blocks.PURPLE_BED, Blocks.MAGENTA_BED, Blocks.BROWN_BED, Blocks.WHITE_CONCRETE)
             .visible(list5Activar::get)
             .filter(this::filterBlocks)
             .build()
@@ -331,7 +333,7 @@ public class BaseFinder extends Module {
     private final Setting<List<Block>> Blawcks6 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #6 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
-            .defaultValue(Blocks.REDSTONE_TORCH, Blocks.REDSTONE_WALL_TORCH, Blocks.FURNACE)
+            .defaultValue(Blocks.REDSTONE_TORCH, Blocks.HOPPER)
             .visible(list6Activar::get)
             .filter(this::filterBlocks)
             .build()
@@ -362,7 +364,7 @@ public class BaseFinder extends Module {
             .description("How many blocks it takes, from of any of the listed blocks to throw a base location.")
             .min(1)
             .sliderRange(1,100)
-            .defaultValue(5)
+            .defaultValue(6)
             .visible(list2Activar::get)
             .build());
     private final Setting<Integer> blowkfind3 = sglists.add(new IntSetting.Builder()
@@ -471,18 +473,16 @@ public class BaseFinder extends Module {
                 if (!baseChunks.contains(new ChunkPos(mc.player.getChunkPos().x, mc.player.getChunkPos().z))){
                     baseChunks.add(new ChunkPos(mc.player.getChunkPos().x, mc.player.getChunkPos().z));
                     try {
-                        Path dirPath = Paths.get("TrouserStreak", "BaseChunks", serverip, world);
-                        Files.createDirectories(dirPath);
-
-                        Path filePath = dirPath.resolve("BaseChunkData.txt");
+                        Path baseDir = FabricLoader.getInstance().getGameDir()
+                                .resolve("TrouserStreak").resolve("BaseChunks").resolve(serverip).resolve(world);
+                        Files.createDirectories(baseDir);
+                        Path filePath = baseDir.resolve("BaseChunkData.txt");
                         ChunkPos chunkPos = new ChunkPos(mc.player.getChunkPos().x, mc.player.getChunkPos().z);
                         String data = chunkPos + System.lineSeparator();
-
                         Files.write(filePath, data.getBytes(StandardCharsets.UTF_8),
-                                StandardOpenOption.CREATE,
-                                StandardOpenOption.APPEND);
+                                StandardOpenOption.CREATE, StandardOpenOption.APPEND);
                     } catch (IOException e) {
-                        //e.printStackTrace();
+                        e.printStackTrace();
                     }
                 }
                 ChatUtils.sendMsg(Text.of("Base near X"+mc.player.getChunkPos().getCenterX()+", Z"+mc.player.getChunkPos().getCenterZ()+" added to the BaseFinder."));
@@ -497,9 +497,10 @@ public class BaseFinder extends Module {
                 if (baseChunks.contains(new ChunkPos(mc.player.getChunkPos().x, mc.player.getChunkPos().z))){
                     baseChunks.remove(new ChunkPos(mc.player.getChunkPos().x, mc.player.getChunkPos().z));
                     try {
-                        Path dirPath = Paths.get("TrouserStreak", "BaseChunks", serverip, world);
-                        Files.createDirectories(dirPath);
-                        Path filePath = dirPath.resolve("BaseChunkData.txt");
+                        Path baseDir = FabricLoader.getInstance().getGameDir()
+                                .resolve("TrouserStreak").resolve("BaseChunks").resolve(serverip).resolve(world);
+                        Files.createDirectories(baseDir);
+                        Path filePath = baseDir.resolve("BaseChunkData.txt");
                         Files.deleteIfExists(filePath);
                         List<String> chunkDataLines = baseChunks.stream()
                                 .map(Object::toString)
@@ -507,9 +508,8 @@ public class BaseFinder extends Module {
                         Files.write(filePath, chunkDataLines, StandardCharsets.UTF_8,
                                 StandardOpenOption.CREATE, StandardOpenOption.WRITE);
                     } catch (IOException e) {
-                        //e.printStackTrace();
+                        e.printStackTrace();
                     }
-
                 }
                 ChatUtils.sendMsg(Text.of("Base near X"+mc.player.getChunkPos().getCenterX()+", Z"+mc.player.getChunkPos().getCenterZ()+" removed from the BaseFinder."));
             }
@@ -525,18 +525,18 @@ public class BaseFinder extends Module {
                 if (baseChunks.contains(new ChunkPos(LastBaseFound.x, LastBaseFound.z))){
                     baseChunks.remove(new ChunkPos(LastBaseFound.x, LastBaseFound.z));
                     try {
-                        Path dirPath = Paths.get("TrouserStreak", "BaseChunks", serverip, world);
-                        Files.createDirectories(dirPath);
-                        Path filePath = dirPath.resolve("BaseChunkData.txt");
+                        Path baseDir = FabricLoader.getInstance().getGameDir()
+                                .resolve("TrouserStreak").resolve("BaseChunks").resolve(serverip).resolve(world);
+                        Files.createDirectories(baseDir);
+                        Path filePath = baseDir.resolve("BaseChunkData.txt");
                         Files.deleteIfExists(filePath);
                         List<String> chunkDataLines = baseChunks.stream()
                                 .map(Object::toString)
                                 .collect(Collectors.toList());
                         Files.write(filePath, chunkDataLines, StandardCharsets.UTF_8,
-                                StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-
+                                StandardOpenOption.CREATE, StandardOpenOption.WRITE);
                     } catch (IOException e) {
-                        //e.printStackTrace();
+                        e.printStackTrace();
                     }
                 }
                 ChatUtils.sendMsg(Text.of("Base near X"+LastBaseFound.getCenterX()+", Z"+LastBaseFound.getCenterZ()+" removed from the BaseFinder."));
@@ -553,7 +553,7 @@ public class BaseFinder extends Module {
             }
         };
         table1.row();
-        java.util.List<LoggedBase> sortedBases = new java.util.ArrayList<>(loggedBases);
+        List<LoggedBase> sortedBases = new ArrayList<>(loggedBases);
         sortedBases.sort(Comparator.comparingInt(a -> a.y));
         var list = theme.verticalList();
         list.add(table1);
@@ -614,7 +614,7 @@ public class BaseFinder extends Module {
             .description("How many chunks from the character to render the detected chunks with bases.")
             .defaultValue(128)
             .min(6)
-            .sliderRange(6,1024)
+            .sliderRange(6,128)
             .build()
     );
     public final Setting<Integer> renderHeightY = sgRender.add(new IntSetting.Builder()
@@ -666,11 +666,17 @@ public class BaseFinder extends Module {
     );
     private final Setting<Boolean> locLogging = locationLogs.add(new BoolSetting.Builder()
             .name("Enable Location Logging")
-            .description("Logs the locations of detected spawners to a csv file as well as a table in this options menu.")
+            .description("Logs the locations of detected spawners to a table in this options menu.")
             .defaultValue(false)
             .build()
     );
-    private static final ExecutorService taskExecutor = Executors.newCachedThreadPool();
+    private final Setting<Boolean> locLoggingCSV = locationLogs.add(new BoolSetting.Builder()
+            .name("Log to CSV file")
+            .description("Logs the locations of detected spawners to a csv file.")
+            .defaultValue(false)
+            .build()
+    );
+    private ExecutorService taskExecutor;
     private int basefoundspamTicks=0;
     private boolean basefound=false;
     private int deletewarningTicks=666;
@@ -727,6 +733,7 @@ public class BaseFinder extends Module {
     }
     @Override
     public void onActivate() {
+        taskExecutor = Executors.newCachedThreadPool();
         isBaseFinderModuleOn=1;
         if (save.get())saveDataWasOn = true;
         else if (!save.get())saveDataWasOn = false;
@@ -735,17 +742,26 @@ public class BaseFinder extends Module {
         }
         if (save.get() || load.get()) {
             if (mc.isInSingleplayer()){
-                String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("/|\\\\");
-                serverip=array[array.length-2];
-                world= mc.world.getRegistryKey().getValue().toString().replace(':', '_');
+                Path worldPath = mc.getServer().getSavePath(WorldSavePath.ROOT);
+                Path savesDir = worldPath.getParent();
+                if (savesDir != null) {
+                    Path worldDir = savesDir.getFileName();
+                    serverip = (worldDir != null ? worldDir.toString() : "singleplayer")
+                            .replaceAll("[^a-zA-Z0-9._-]", "_");
+                } else {
+                    serverip = "singleplayer";
+                }
             } else {
-                serverip = mc.getCurrentServerEntry().address.replace(':', '_');}
-            world= mc.world.getRegistryKey().getValue().toString().replace(':', '_');
-            if (save.get()){
+                serverip = mc.getCurrentServerEntry().address.replaceAll("[^a-zA-Z0-9._\\-]", "_");
+            }
+            world= mc.world.getRegistryKey().getValue().toString().replaceAll("[^a-zA-Z0-9._\\-]", "_");
+            if (save.get()) {
                 try {
-                    Files.createDirectories(Paths.get("TrouserStreak", "BaseChunks", serverip, world));
+                    Path baseDir = FabricLoader.getInstance().getGameDir()
+                            .resolve("TrouserStreak").resolve("BaseChunks").resolve(serverip).resolve(world);
+                    Files.createDirectories(baseDir);
                 } catch (IOException e) {
-                    //e.printStackTrace();
+                    e.printStackTrace();
                 }
             }
             if (load.get()){
@@ -760,12 +776,13 @@ public class BaseFinder extends Module {
 
     @Override
     public void onDeactivate() {
+        taskExecutor.shutdownNow();
         isBaseFinderModuleOn=0;
         autoreloadticks=0;
         loadingticks=0;
         worldchange=false;
         justenabledsavedata = 0;
-        if (remove.get()|autoreload.get()) {
+        if (remove.get() || autoreload.get()) {
             clearChunkData();
         }
         super.onDeactivate();
@@ -777,7 +794,7 @@ public class BaseFinder extends Module {
                 clearChunkData();
             }
         }
-        if (event.screen instanceof DownloadingTerrainScreen) {
+        if (event.screen instanceof LevelLoadingScreen) {
             worldchange=true;
         }
     }
@@ -789,7 +806,7 @@ public class BaseFinder extends Module {
     }
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        world = mc.world.getRegistryKey().getValue().toString().replace(':', '_');
+        world = mc.world.getRegistryKey().getValue().toString().replaceAll("[^a-zA-Z0-9._\\-]", "_");
 
         if (basefound && basefoundspamTicks < bsefndtickdelay.get()) basefoundspamTicks++;
         else if (basefoundspamTicks >= bsefndtickdelay.get()) {
@@ -799,16 +816,26 @@ public class BaseFinder extends Module {
         if (deletewarningTicks <= 100) deletewarningTicks++;
         if (deletewarning>=2){
             if (mc.isInSingleplayer()){
-                String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("/|\\\\");
-                serverip=array[array.length-2];
+                Path worldPath = mc.getServer().getSavePath(WorldSavePath.ROOT);
+                Path savesDir = worldPath.getParent();
+                if (savesDir != null) {
+                    Path worldDir = savesDir.getFileName();
+                    serverip = (worldDir != null ? worldDir.toString() : "singleplayer")
+                            .replaceAll("[^a-zA-Z0-9._-]", "_");
+                } else {
+                    serverip = "singleplayer";
+                }
             } else {
-                serverip = mc.getCurrentServerEntry().address.replace(':', '_');
+                serverip = mc.getCurrentServerEntry().address.replaceAll("[^a-zA-Z0-9._\\-]", "_");
             }
             clearChunkData();
             try {
-                Files.deleteIfExists(Paths.get("TrouserStreak", "BaseChunks", serverip, world, "BaseChunkData.txt"));
+                Path baseDir = FabricLoader.getInstance().getGameDir()
+                        .resolve("TrouserStreak").resolve("BaseChunks").resolve(serverip).resolve(world);
+                Path filePath = baseDir.resolve("BaseChunkData.txt");
+                Files.deleteIfExists(filePath);
             } catch (IOException e) {
-                //e.printStackTrace();
+                e.printStackTrace();
             }
             error("Chunk Data deleted for this Dimension.");
             deletewarning=0;
@@ -833,7 +860,7 @@ public class BaseFinder extends Module {
                 basedistance = 2000000000;
             }
         } catch (Exception e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         }
 
         if (findnearestbaseticks == 1) {
@@ -846,13 +873,19 @@ public class BaseFinder extends Module {
 
         if (save.get() || load.get()) {
             if (mc.isInSingleplayer()) {
-                String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("/|\\\\");
-                serverip = array[array.length - 2];
-                world = mc.world.getRegistryKey().getValue().toString().replace(':', '_');
+                Path worldPath = mc.getServer().getSavePath(WorldSavePath.ROOT);
+                Path savesDir = worldPath.getParent();
+                if (savesDir != null) {
+                    Path worldDir = savesDir.getFileName();
+                    serverip = (worldDir != null ? worldDir.toString() : "singleplayer")
+                            .replaceAll("[^a-zA-Z0-9._-]", "_");
+                } else {
+                    serverip = "singleplayer";
+                }
             } else {
-                serverip = mc.getCurrentServerEntry().address.replace(':', '_');
+                serverip = mc.getCurrentServerEntry().address.replaceAll("[^a-zA-Z0-9._\\-]", "_");
             }
-            world = mc.world.getRegistryKey().getValue().toString().replace(':', '_');
+            world = mc.world.getRegistryKey().getValue().toString().replaceAll("[^a-zA-Z0-9._\\-]", "_");
         }
 
         if (autoreload.get()) {
@@ -1050,12 +1083,20 @@ public class BaseFinder extends Module {
             if (mc.world.getChunkManager().getChunk(packet.getChunkX(), packet.getChunkZ()) == null) {
                 WorldChunk chunk = new WorldChunk(mc.world, basepos);
                 try {
-                    CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-                        chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), new NbtCompound(),
-                                packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ()));
-                    }, taskExecutor);
-                    future.join();
-                } catch (CompletionException e) {}
+                    NbtCompound heightmapsNbt = new NbtCompound();
+                    NbtCompound motionBlocking = new NbtCompound();
+                    Heightmap.Type type = Heightmap.Type.MOTION_BLOCKING;
+
+                    long[] emptyHeightmapData = new long[37];
+                    motionBlocking.putLongArray("data", emptyHeightmapData);
+                    heightmapsNbt.put(type.getName(), motionBlocking);
+
+                    chunk.loadFromPacket(
+                            packet.getChunkData().getSectionsDataBuf(),
+                            heightmapsNbt,
+                            packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ())
+                    );
+                } catch (CompletionException e) {e.printStackTrace();}
 
                 if (bubblesFinder.get() || spawner.get() || signFinder.get() || portalFinder.get() || roofDetector.get() || bedrockfind.get() || skybuildfind.get() || !Blawcks1.get().isEmpty() || !Blawcks2.get().isEmpty() || !Blawcks3.get().isEmpty() || !Blawcks4.get().isEmpty() || !Blawcks5.get().isEmpty() || !Blawcks6.get().isEmpty() || !Blawcks7.get().isEmpty()){
                     int Ymin = mc.world.getBottomY()+minY.get();
@@ -1484,7 +1525,7 @@ public class BaseFinder extends Module {
                         }
                     }
                     catch (Exception e){
-                        //e.printStackTrace();
+                        e.printStackTrace();
                     }
                 }
                 if (spawnerfound && !spawnernaturalblocks){
@@ -1512,33 +1553,41 @@ public class BaseFinder extends Module {
         }
     }
     private void loadData() {
+        Path baseDir = FabricLoader.getInstance().getGameDir()
+                .resolve("TrouserStreak").resolve("BaseChunks").resolve(serverip).resolve(world);
+        Path filePath = baseDir.resolve("BaseChunkData.txt");
+
         try {
-            List<String> allLines = Files.readAllLines(Paths.get("TrouserStreak/BaseChunks/"+serverip+"/"+world+"/BaseChunkData.txt"));
+            if (!Files.exists(filePath)) return;
+            List<String> allLines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
 
             for (String line : allLines) {
                 String s = line;
-                String[] array = s.split(", ");
-                int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]",""));
-                int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]",""));
-                basepos = new ChunkPos(X,Z);
+                String[] array = s.split(",");
+                int X = Integer.parseInt(array[0].trim());
+                int Z = Integer.parseInt(array[1].trim());
+                basepos = new ChunkPos(X, Z);
                 baseChunks.add(basepos);
             }
-        } catch (IOException e) {
-            //e.printStackTrace();
+        } catch (IOException | NumberFormatException e) {
+            e.printStackTrace();
         }
     }
+
     private void saveBaseChunkData(ChunkPos basepos) {
-        Path dirPath = Paths.get("TrouserStreak", "BaseChunks", serverip, world);
-        Path filePath = dirPath.resolve("BaseChunkData.txt");
-        try {
-            Files.createDirectories(dirPath);
-            String data = basepos.toString() + System.lineSeparator();
-            Files.write(filePath, data.getBytes(StandardCharsets.UTF_8),
-                    StandardOpenOption.CREATE,
-                    StandardOpenOption.APPEND);
-        } catch (IOException e) {
-            //e.printStackTrace();
-        }
+        taskExecutor.submit(() -> {
+            try {
+                Path baseDir = FabricLoader.getInstance().getGameDir()
+                        .resolve("TrouserStreak").resolve("BaseChunks").resolve(serverip).resolve(world);
+                Files.createDirectories(baseDir);
+                Path filePath = baseDir.resolve("BaseChunkData.txt");
+                String data = basepos.x + "," + basepos.z + System.lineSeparator();
+                Files.write(filePath, data.getBytes(StandardCharsets.UTF_8),
+                        StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private boolean filterBlocks(Block block) {
@@ -1578,21 +1627,21 @@ public class BaseFinder extends Module {
         chunkSet.removeAll(chunksToRemove);
     }
 
-    private final java.util.List<LoggedBase> loggedBases = new java.util.ArrayList<>();
-    private final java.util.Set<ChunkPos> loggedBasePositions = new java.util.HashSet<>();
+    private final List<LoggedBase> loggedBases = new ArrayList<>();
+    private final Set<ChunkPos> loggedBasePositions = new HashSet<>();
     private static final com.google.gson.Gson gson = new com.google.gson.GsonBuilder().setPrettyPrinting().create();
 
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
-        for(ChunkPos pos : baseChunks) {
-            if(!loggedBasePositions.contains(pos) && locLogging.get()) {
+        for (ChunkPos pos : new ArrayList<>(baseChunks)) {
+            if (!loggedBasePositions.contains(pos) && (locLogging.get() || locLoggingCSV.get())) {
                 loggedBasePositions.add(pos);
                 int x = pos.getCenterX();
                 int z = pos.getCenterZ();
                 int y = (renderHeightY.get() + renderHeightYbottom.get()) / 2;
                 loggedBases.add(new LoggedBase(x, y, z));
-                saveJsonLog();
-                saveCsvLog();
+                if (locLogging.get()) saveJsonLog();
+                if (locLoggingCSV.get()) saveCsvLog();
             }
         }
     }
@@ -1607,7 +1656,7 @@ public class BaseFinder extends Module {
                 lb.write(writer);
             }
             writer.close();
-        } catch (IOException ignored) {}
+        } catch (IOException e) {e.printStackTrace();}
     }
 
     private void saveJsonLog() {
@@ -1617,14 +1666,18 @@ public class BaseFinder extends Module {
             Writer writer = new FileWriter(file);
             gson.toJson(loggedBases, writer);
             writer.close();
-        } catch (IOException ignored) {}
+        } catch (IOException e) {e.printStackTrace();}
     }
     private File getJsonFile() {
-        return new File(new File(new File("TrouserStreak", "BaseChunks"), Utils.getFileWorldName()), "bases.json");
+        Path baseDir = FabricLoader.getInstance().getGameDir()
+                .resolve("TrouserStreak").resolve("BaseChunks").resolve(serverip).resolve(world);
+        return baseDir.resolve("bases.json").toFile();
     }
 
     private File getCsvFile() {
-        return new File(new File(new File("TrouserStreak", "BaseChunks"), Utils.getFileWorldName()), "bases.csv");
+        Path baseDir = FabricLoader.getInstance().getGameDir()
+                .resolve("TrouserStreak").resolve("BaseChunks").resolve(serverip).resolve(world);
+        return baseDir.resolve("bases.csv").toFile();
     }
 
     private static class LoggedBase {
@@ -1648,7 +1701,7 @@ public class BaseFinder extends Module {
         }
         @Override
         public int hashCode() {
-            return java.util.Objects.hash(x, y, z);
+            return Objects.hash(x, y, z);
         }
     }
 }

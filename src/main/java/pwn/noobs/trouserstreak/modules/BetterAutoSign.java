@@ -8,12 +8,14 @@
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
+import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.AbstractSignEditScreenAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
+import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
@@ -43,7 +45,29 @@ public class BetterAutoSign extends Module {
     final SettingGroup sgHang = settings.createGroup("Hanging Sign Text");
     final SettingGroup sgSignAura = settings.createGroup("Sign Aura");
     final SettingGroup sgExtra = settings.createGroup("Visible");
-
+    private final SettingGroup sgPlace = settings.createGroup("Auto Place");
+    private final Setting<Boolean> autoPlace = sgPlace.add(new BoolSetting.Builder()
+            .name("auto-place")
+            .description("Places a sign on the last block you placed or interacted with.")
+            .defaultValue(false)
+            .build()
+    );
+    private final Setting<Integer> placeDelay = sgPlace.add(new IntSetting.Builder()
+            .name("place-delay")
+            .description("Delay between sign placements in ticks.")
+            .defaultValue(0)
+            .min(0)
+            .sliderMax(10)
+            .visible(autoPlace::get)
+            .build()
+    );
+    private final Setting<List<Item>> signTypes = sgPlace.add(new ItemListSetting.Builder()
+            .name("do-not-place-these-signs")
+            .description("Which signs to NOT use when auto-placing.")
+            .filter(item -> item instanceof SignItem)
+            .visible(autoPlace::get)
+            .build()
+    );
     private final Setting<Boolean> bothside = sgExtra.add(new BoolSetting.Builder()
             .name("both-sides")
             .description("Write on the rear of the signs as well.")
@@ -218,17 +242,72 @@ public class BetterAutoSign extends Module {
     private final ArrayList<BlockPos> openedSigns = new ArrayList<>();
     private int timer = 0;
     private int warningticks = 0;
-
+    private BlockPos lastPlacedBlock = null;
+    private int placeTimer = 0;
+    private boolean interactingsign = false;
     public BetterAutoSign() {
         super(Trouser.Main, "Better-auto-sign", "Automatically writes signs and can dye them as well. Credits to MeteorTweaks.");
     }
 
     @Override
     public void onActivate() {
+        lastPlacedBlock = null;
+        interactingsign = false;
+        placeTimer = 0;
         warningticks = 0;
         timer = 0;
         openedSigns.clear();
         editrear=false;
+    }
+    @Override
+    public void onDeactivate() {
+        lastPlacedBlock = null;
+        interactingsign = false;
+        placeTimer = 0;
+        warningticks = 0;
+        timer = 0;
+        openedSigns.clear();
+        editrear=false;
+    }
+    private void placeSign(BlockPos targetPos) {
+        if (mc.player == null || mc.interactionManager == null) return;
+
+        FindItemResult signSlot = InvUtils.findInHotbar(itemStack ->
+                itemStack.getItem() instanceof SignItem && !signTypes.get().contains(itemStack.getItem()));
+        if (signSlot.slot() == -1 || signSlot.slot() == 40) signSlot = InvUtils.findInHotbar(itemStack ->
+                itemStack.getItem() instanceof HangingSignItem && !signTypes.get().contains(itemStack.getItem()));
+        if (signSlot.slot() == -1 || signSlot.slot() == 40) {
+            info("No sign in hotbar!");
+            return;
+        }
+
+        int oldSlot = mc.player.getInventory().selectedSlot;
+
+        InvUtils.swap(signSlot.slot(), true);
+
+        Vec3d hitVec = Vec3d.ofCenter(targetPos).add(0, 1, 0);
+        BlockHitResult hitResult = new BlockHitResult(hitVec, Direction.UP, targetPos, false);
+
+        interactingsign = true;
+        mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(
+                Hand.MAIN_HAND, hitResult, 0));
+        interactingsign = false;
+
+        InvUtils.swap(oldSlot, true);
+    }
+
+    @EventHandler
+    private void onBlockPlace(PacketEvent.Send event) {
+        if (mc.world == null || !autoPlace.get() || interactingsign) return;
+
+        if (event.packet instanceof PlayerInteractBlockC2SPacket packet) {
+            BlockHitResult hit = packet.getBlockHitResult();
+
+            if (hit.getType() == BlockHitResult.Type.BLOCK) {
+                lastPlacedBlock = hit.getBlockPos().up();
+                placeTimer = placeDelay.get();
+            }
+        }
     }
 
     @EventHandler
@@ -238,6 +317,16 @@ public class BetterAutoSign extends Module {
             warningticks++;
             if (warningticks==2)error("Sign Aura does not work properly with hanging signs when holding a hanging sign.");
         }
+
+        if (autoPlace.get()) {
+            placeTimer--;
+            if (placeTimer <= 0 && lastPlacedBlock != null) {
+                placeSign(lastPlacedBlock);
+                lastPlacedBlock = null;
+                placeTimer = placeDelay.get();
+            }
+        }
+
         timer--;
         if(!signAura.get() || timer > 0) return;
 
@@ -247,9 +336,11 @@ public class BetterAutoSign extends Module {
             BlockPos pos = block.getPos();
             if(openedSigns.contains(pos)) continue;
 
+            interactingsign = true;
             Runnable click = () -> mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(pos.getX(), pos.getY(), pos.getZ()), Direction.UP, pos, false));
             if(signAuraRotate.get()) Rotations.rotate(Rotations.getYaw(pos), Rotations.getPitch(pos), click);
             else click.run();
+            interactingsign = false;
 
             openedSigns.add(pos);
             timer = signAuraDelay.get();
@@ -307,14 +398,14 @@ public class BetterAutoSign extends Module {
             if (slot != -1) {
                 InvUtils.move().from(slot).to(mc.player.getInventory().selectedSlot);
 
+                interactingsign = true;
                 mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, thesign, 1));
+                interactingsign = false;
 
                 InvUtils.move().from(mc.player.getInventory().selectedSlot).toHotbar(slot);
-
             }
         }
         if(autoGlow.get()) {
-
             int slot = -1;
             for (int i = 0; i < 36; i++) {
                 if (mc.player.getInventory().getStack(i).getItem() == Items.GLOW_INK_SAC) {
@@ -327,10 +418,11 @@ public class BetterAutoSign extends Module {
             if (slot != -1) {
                 InvUtils.move().from(slot).to(mc.player.getInventory().selectedSlot);
 
+                interactingsign = true;
                 mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, thesign, 2));
+                interactingsign = false;
 
                 InvUtils.move().from(mc.player.getInventory().selectedSlot).toHotbar(slot);
-
             }
         }
     }
@@ -338,7 +430,9 @@ public class BetterAutoSign extends Module {
     private void onPostTick(TickEvent.Post event) {
         if (!editrear || !bothside.get() || prevsignPos == signPos) return;
         if (!(mc.world.getBlockState(signPos).getBlock().asItem() instanceof HangingSignItem) && mc.world.getBlockState(signPos).getBlock().asItem() instanceof SignItem){
+            interactingsign = true;
             mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(signPos.getX(), signPos.getY(), signPos.getZ()), Direction.DOWN, signPos, false));
+            interactingsign = false;
             if (differentText.get())
                 mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
                         MeteorStarscript.run(MeteorStarscript.compile(lineOnedif.get())),
@@ -360,11 +454,15 @@ public class BetterAutoSign extends Module {
             BlockState blockState = mc.world.getBlockState(signPos);
             if (blockState.getBlock() instanceof WallHangingSignBlock) {
                 Direction facing = blockState.get(WallHangingSignBlock.FACING);
+                interactingsign = true;
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(signPos.getX(), signPos.getY(), signPos.getZ()), facing, signPos, false));
+                interactingsign = false;
             } else if (blockState.getBlock() instanceof HangingSignBlock) {
                 int rotation = blockState.get(HangingSignBlock.ROTATION);
                 Direction direction = Direction.fromHorizontal(rotation);
+                interactingsign = true;
                 mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(signPos.getX(), signPos.getY(), signPos.getZ()), direction, signPos, false));
+                interactingsign = false;
             }
             if (differentText.get())
                 mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
