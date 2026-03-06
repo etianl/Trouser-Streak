@@ -265,8 +265,8 @@ public class AutoMountain extends Module {
         WTable table = theme.table();
         WButton rstlowblock = table.add(theme.button("Reset Lowest/Highest Block")).expandX().minWidth(100).widget();
         rstlowblock.action = () -> {
-            lowestblock= new BlockPos(666,666,666);
-            highestblock= new BlockPos(666,666,666);
+            lowestblock= new BlockPos(666,-666,666);
+            highestblock= new BlockPos(666,-666,666);
             isthisfirstblock = true;
         };
         table.row();
@@ -290,8 +290,8 @@ public class AutoMountain extends Module {
     private float cookieyaw;
     private boolean search=true;
     private boolean search2=true;
-    public static BlockPos lowestblock= new BlockPos(666,666,666);
-    public static BlockPos highestblock= new BlockPos(666,666,666);
+    public static BlockPos lowestblock= new BlockPos(666,-666,666);
+    public static BlockPos highestblock= new BlockPos(666,-666,666);
     public static int groundY;
     public static int groundY2;
     private int lowblockY=-1;
@@ -383,7 +383,8 @@ public class AutoMountain extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (render.get() && mc.player != null) {
+        if (mc.player == null || mc.world == null) return;
+        if (render.get()) {
             if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
                 if ((mouseT.get() && mc.player.getPitch() <= 40) || (!mouseT.get() && prevPitch <= 40)){            //UP
                     if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {
@@ -504,10 +505,10 @@ public class AutoMountain extends Module {
                 }
             }
             if (rendertopbottomblock.get()){
-                if (highestblock != new BlockPos(666,666,666)){
+                if (!isthisfirstblock) {
                     event.renderer.box(highestblock, topbottomsideColor.get(), topbottomlineColor.get(), shapeMode.get(), 0);
                 }
-                if (lowestblock != new BlockPos(666,666,666)){
+                if (!isthisfirstblock) {
                     event.renderer.box(lowestblock, topbottomsideColor.get(), topbottomlineColor.get(), shapeMode.get(), 0);
                 }
             }
@@ -785,6 +786,7 @@ public class AutoMountain extends Module {
 
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
+        if (mc.player == null || mc.world == null) return;
         if (pause && autolavamountain.get()) {
             if (wasfacingBOT==Direction.NORTH) mc.player.setYaw(180);
             if (wasfacingBOT==Direction.SOUTH) mc.player.setYaw(0);
@@ -810,7 +812,6 @@ public class AutoMountain extends Module {
             if (delayLeft > 0) delayLeft--;
             else if ((!lagpause.get() || timeSinceLastTick < lag.get()) && delayLeft <= 0 && offLeft > 0 && (mc.player.getY() <= limit.get() &&  mc.player.getY() >= downlimit.get() && !autolavamountain.get() || mc.player.getY() <= limit.get()-4 && mc.player.getY() <= lowestblock.getY()+botlimit.get()+1 && autolavamountain.get())) {
                 offLeft--;
-                if (mc.player == null || mc.world == null) {toggle(); return;}
                 if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack()) || !pause || !go) return;
                 if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {            //UP
                     if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
@@ -1177,54 +1178,55 @@ public class AutoMountain extends Module {
     }
 
     private boolean isInvalidBlock(ItemStack stack) {
-        return !(stack.getItem() instanceof BlockItem)
-                || stack.getItem() instanceof BedItem
-                || stack.getItem() instanceof PowderSnowBucketItem
-                || stack.getItem() instanceof ScaffoldingItem
-                || stack.getItem() instanceof TallBlockItem
-                || stack.getItem() instanceof VerticallyAttachableBlockItem
-                || stack.getItem() instanceof PlaceableOnWaterItem
-                || ((BlockItem) stack.getItem()).getBlock() instanceof PlantBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof TorchBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof AbstractRedstoneGateBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof RedstoneWireBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof FenceBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof WallBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof FenceGateBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof FallingBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof AbstractRailBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof AbstractSignBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof BellBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof CarpetBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof ConduitBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof CoralFanBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof CoralWallFanBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof DeadCoralFanBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof DeadCoralWallFanBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof TripwireHookBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof PointedDripstoneBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof TripwireBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof SnowBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof PressurePlateBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof WallMountedBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof ShulkerBoxBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof AmethystClusterBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof BuddingAmethystBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof ChorusFlowerBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof ChorusPlantBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof LanternBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof CandleBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof TntBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof CakeBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof CobwebBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof SugarCaneBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof SporeBlossomBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof KelpBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof GlowLichenBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof CactusBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof BambooBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof FlowerPotBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof LadderBlock
-                || skippableBlox.get().contains(((BlockItem) stack.getItem()).getBlock());
+        if (!(stack.getItem() instanceof BlockItem blockItem)) return true;
+        if (stack.getItem() instanceof BedItem) return true;
+        if (stack.getItem() instanceof PowderSnowBucketItem) return true;
+        if (stack.getItem() instanceof ScaffoldingItem) return true;
+        if (stack.getItem() instanceof TallBlockItem) return true;
+        if (stack.getItem() instanceof VerticallyAttachableBlockItem) return true;
+        if (stack.getItem() instanceof PlaceableOnWaterItem) return true;
+        Block block = blockItem.getBlock();
+        return block instanceof PlantBlock
+                || block instanceof TorchBlock
+                || block instanceof AbstractRedstoneGateBlock
+                || block instanceof RedstoneWireBlock
+                || block instanceof FenceBlock
+                || block instanceof WallBlock
+                || block instanceof FenceGateBlock
+                || block instanceof FallingBlock
+                || block instanceof AbstractRailBlock
+                || block instanceof AbstractSignBlock
+                || block instanceof BellBlock
+                || block instanceof CarpetBlock
+                || block instanceof ConduitBlock
+                || block instanceof CoralFanBlock
+                || block instanceof CoralWallFanBlock
+                || block instanceof DeadCoralFanBlock
+                || block instanceof DeadCoralWallFanBlock
+                || block instanceof TripwireHookBlock
+                || block instanceof PointedDripstoneBlock
+                || block instanceof TripwireBlock
+                || block instanceof SnowBlock
+                || block instanceof PressurePlateBlock
+                || block instanceof WallMountedBlock
+                || block instanceof ShulkerBoxBlock
+                || block instanceof AmethystClusterBlock
+                || block instanceof BuddingAmethystBlock
+                || block instanceof ChorusFlowerBlock
+                || block instanceof ChorusPlantBlock
+                || block instanceof LanternBlock
+                || block instanceof CandleBlock
+                || block instanceof TntBlock
+                || block instanceof CakeBlock
+                || block instanceof CobwebBlock
+                || block instanceof SugarCaneBlock
+                || block instanceof SporeBlossomBlock
+                || block instanceof KelpBlock
+                || block instanceof GlowLichenBlock
+                || block instanceof CactusBlock
+                || block instanceof BambooBlock
+                || block instanceof FlowerPotBlock
+                || block instanceof LadderBlock
+                || skippableBlox.get().contains(block);
     }
 }

@@ -87,7 +87,15 @@ public class AutoScoreboard extends Module {
     }
 
     @Override
+    public void onDeactivate() {
+        commandQueue.clear();
+        tickCounter = 0;
+    }
+
+    @Override
     public void onActivate() {
+        commandQueue.clear();
+        tickCounter = 0;
         String scoreboardName = RandomStringUtils.randomAlphabetic(10).toLowerCase();
         String thecommand = "/scoreboard objectives add " + scoreboardName + " dummy {\"text\":\"" + MeteorStarscript.run(MeteorStarscript.compile(title.get())) + "\",\"color\":\"" + titleColor.get() + "\"}";
 
@@ -125,7 +133,9 @@ public class AutoScoreboard extends Module {
     @EventHandler
     public void onTick(TickEvent.Post event) {
         if (mc.player == null || mc.world == null) return;
-        if (notOP.get() && !(mc.player.hasPermissionLevel(2)) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+        if (notOP.get() && mc.player.getPermissionLevel() < 2 && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+            commandQueue.clear();
+            tickCounter = 0;
             return;
         }
         int delay = commandDelay.get();

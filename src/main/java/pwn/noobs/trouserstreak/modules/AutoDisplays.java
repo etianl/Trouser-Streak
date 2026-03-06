@@ -184,7 +184,7 @@ public class AutoDisplays extends Module {
         if (mc.player == null) return;
         tickTimer = 0;
         killTimer = 0;
-        if (notOP.get() && !mc.player.hasPermissionLevel(2) && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+        if (notOP.get() && mc.player.getPermissionLevel() < 2 && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
             toggle();
             error("Must have permission level 2 or higher");
         }
@@ -201,7 +201,7 @@ public class AutoDisplays extends Module {
     }
     @Override
     public void onDeactivate() {
-        if (mc.player.hasPermissionLevel(2) && !compatMode.get()) {
+        if (mc.player.getPermissionLevel() >= 2 && !compatMode.get()) {
             switch (displayMode.get()) {
                 case BLOCK -> {
                     if (killEntities.get()) {
@@ -332,10 +332,10 @@ public class AutoDisplays extends Module {
                 friendNames.add("name=!" + player.getProfile().name());
         }
         String friendsString = String.join(",", friendNames);
-        String thecommand1 = "/execute at @a[" + friendsString + "] run summon text_display ~ ~1 ~-"+distance.get()+" {brightness:{sky:"+textbrightness.get()+",block:"+textbrightness.get()+"},background:" + color + ",text:'\"" + text.get() + "\"',Tags:[\"MOL\"],Rotation:[0f, 0f]}";
-        String thecommand2 = "/execute at @a[" + friendsString + "] run summon text_display ~ ~1 ~"+distance.get()+" {brightness:{sky:"+textbrightness.get()+",block:"+textbrightness.get()+"},background:" + color + ",text:'\"" + text.get() + "\"',Tags:[\"MOL\"],Rotation:[180f, 0f]}";
-        String thecommand3 = "/execute at @a[" + friendsString + "] run summon text_display ~"+distance.get()+" ~1 ~ {brightness:{sky:"+textbrightness.get()+",block:"+textbrightness.get()+"},background:" + color + ",text:'\"" + text.get() + "\"',Tags:[\"MOL\"],Rotation:[90f, 0f]}";
-        String thecommand4 = "/execute at @a[" + friendsString + "] run summon text_display ~-"+distance.get()+" ~1 ~ {brightness:{sky:"+textbrightness.get()+",block:"+textbrightness.get()+"},background:" + color + ",text:'\"" + text.get() + "\"',Tags:[\"MOL\"],Rotation:[-90f, 0f]}";
+        String thecommand1 = "/execute at @a[" + friendsString + "] run summon text_display ~ ~1 ~-"+distance.get()+" {brightness:{sky:"+textbrightness.get()+",block:"+textbrightness.get()+"},background:" + color + ",text:'" + text.get() + "',Tags:[\"MOL\"],Rotation:[0f, 0f]}";
+        String thecommand2 = "/execute at @a[" + friendsString + "] run summon text_display ~ ~1 ~"+distance.get()+" {brightness:{sky:"+textbrightness.get()+",block:"+textbrightness.get()+"},background:" + color + ",text:'" + text.get() + "',Tags:[\"MOL\"],Rotation:[180f, 0f]}";
+        String thecommand3 = "/execute at @a[" + friendsString + "] run summon text_display ~"+distance.get()+" ~1 ~ {brightness:{sky:"+textbrightness.get()+",block:"+textbrightness.get()+"},background:" + color + ",text:'" + text.get() + "',Tags:[\"MOL\"],Rotation:[90f, 0f]}";
+        String thecommand4 = "/execute at @a[" + friendsString + "] run summon text_display ~-"+distance.get()+" ~1 ~ {brightness:{sky:"+textbrightness.get()+",block:"+textbrightness.get()+"},background:" + color + ",text:'" + text.get() + "',Tags:[\"MOL\"],Rotation:[-90f, 0f]}";
         if (thecommand1.length()<=257 && thecommand2.length()<=257 && thecommand3.length()<=257 && thecommand4.length()<=257){
             if (useDelay.get()) {
                 commandQueue.add(thecommand1);

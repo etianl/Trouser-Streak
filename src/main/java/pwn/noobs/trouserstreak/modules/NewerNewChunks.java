@@ -15,6 +15,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -61,7 +62,7 @@ public class NewerNewChunks extends Module {
 	private final SettingGroup sgCdata = settings.createGroup("Saved Chunk Data");
 	private final SettingGroup sgcacheCdata = settings.createGroup("Cached Chunk Data");
 	private final SettingGroup sgRender = settings.createGroup("Render");
-	private final SettingGroup sgAlarm = settings.createGroup("NewChunk Alarm");
+	private final SettingGroup sgAlarm = settings.createGroup("Chunk Alarms");
 
 	private final Setting<Boolean> PaletteExploit = specialGroup.add(new BoolSetting.Builder()
 			.name("PaletteExploit")
@@ -202,9 +203,209 @@ public class NewerNewChunks extends Module {
 
 	public final Setting<List<SoundEvent>> soundtouse = sgAlarm.add(new SoundEventListSetting.Builder()
 			.name("Sound to play (pick one)")
-			.description("The sound to play when a player joins. Just pick one.")
+			.description("The sound to play. Just pick one.")
 			.defaultValue(SoundEvents.BLOCK_BELL_USE)
 			.visible(() -> alarms.get())
+			.build()
+	);
+	private final Setting<Boolean> oldalarms = sgAlarm.add(new BoolSetting.Builder()
+			.name("Enable Alarms for OldChunks")
+			.description("rings alarms when oldchunks detected")
+			.defaultValue(false)
+			.build()
+	);
+	public final Setting<Integer> oldamountofrings = sgAlarm.add(new IntSetting.Builder()
+			.name("Amount Of Rings")
+			.description("How many times the alarm will ring when oldchunk detected.")
+			.defaultValue(1)
+			.sliderRange(1, 10)
+			.min(1)
+			.visible(() -> oldalarms.get())
+			.build()
+	);
+
+	public final Setting<Integer> oldringdelay = sgAlarm.add(new IntSetting.Builder()
+			.name("Delay Between Rings (ticks)")
+			.description("The delay between rings (in ticks).")
+			.defaultValue(20)
+			.sliderRange(1, 100)
+			.min(1)
+			.visible(() -> oldalarms.get())
+			.build()
+	);
+	public final Setting<Double> oldvolume = sgAlarm.add(new DoubleSetting.Builder()
+			.name("Volume")
+			.description("The volume of the sound.")
+			.defaultValue(1.0)
+			.sliderRange(0.0, 1.0)
+			.visible(() -> oldalarms.get())
+			.build()
+	);
+
+	public final Setting<Double> oldpitch = sgAlarm.add(new DoubleSetting.Builder()
+			.name("Pitch")
+			.description("The pitch of the sound.")
+			.defaultValue(1.0)
+			.sliderRange(0.5, 2.0)
+			.visible(() -> oldalarms.get())
+			.build()
+	);
+
+	public final Setting<List<SoundEvent>> oldsoundtouse = sgAlarm.add(new SoundEventListSetting.Builder()
+			.name("Sound to play (pick one)")
+			.description("The sound to play. Just pick one.")
+			.defaultValue(SoundEvents.BLOCK_BELL_USE)
+			.visible(() -> oldalarms.get())
+			.build()
+	);
+	private final Setting<Boolean> beingupdatedchunksalarms = sgAlarm.add(new BoolSetting.Builder()
+			.name("Enable Alarms for BeingUpdatedChunks")
+			.description("rings alarms when BeingUpdatedChunks detected")
+			.defaultValue(false)
+			.build()
+	);
+	public final Setting<Integer> beingupdatedchunksamountofrings = sgAlarm.add(new IntSetting.Builder()
+			.name("Amount Of Rings")
+			.description("How many times the alarm will ring when BeingUpdatedChunks detected.")
+			.defaultValue(1)
+			.sliderRange(1, 10)
+			.min(1)
+			.visible(() -> beingupdatedchunksalarms.get())
+			.build()
+	);
+
+	public final Setting<Integer> beingupdatedchunksringdelay = sgAlarm.add(new IntSetting.Builder()
+			.name("Delay Between Rings (ticks)")
+			.description("The delay between rings (in ticks).")
+			.defaultValue(20)
+			.sliderRange(1, 100)
+			.min(1)
+			.visible(() -> beingupdatedchunksalarms.get())
+			.build()
+	);
+	public final Setting<Double> beingupdatedchunksvolume = sgAlarm.add(new DoubleSetting.Builder()
+			.name("Volume")
+			.description("The volume of the sound.")
+			.defaultValue(1.0)
+			.sliderRange(0.0, 1.0)
+			.visible(() -> beingupdatedchunksalarms.get())
+			.build()
+	);
+
+	public final Setting<Double> beingupdatedchunkspitch = sgAlarm.add(new DoubleSetting.Builder()
+			.name("Pitch")
+			.description("The pitch of the sound.")
+			.defaultValue(1.0)
+			.sliderRange(0.5, 2.0)
+			.visible(() -> beingupdatedchunksalarms.get())
+			.build()
+	);
+
+	public final Setting<List<SoundEvent>> beingupdatedchunkssoundtouse = sgAlarm.add(new SoundEventListSetting.Builder()
+			.name("Sound to play (pick one)")
+			.description("The sound to play. Just pick one.")
+			.defaultValue(SoundEvents.BLOCK_BELL_USE)
+			.visible(() -> beingupdatedchunksalarms.get())
+			.build()
+	);
+	private final Setting<Boolean> oldversionchunksalarms = sgAlarm.add(new BoolSetting.Builder()
+			.name("Enable Alarms for OldVersionChunks")
+			.description("rings alarms when OldVersionChunks detected")
+			.defaultValue(false)
+			.build()
+	);
+	public final Setting<Integer> oldversionchunksamountofrings = sgAlarm.add(new IntSetting.Builder()
+			.name("Amount Of Rings")
+			.description("How many times the alarm will ring when OldVersionChunks detected.")
+			.defaultValue(1)
+			.sliderRange(1, 10)
+			.min(1)
+			.visible(() -> oldversionchunksalarms.get())
+			.build()
+	);
+
+	public final Setting<Integer> oldversionchunksringdelay = sgAlarm.add(new IntSetting.Builder()
+			.name("Delay Between Rings (ticks)")
+			.description("The delay between rings (in ticks).")
+			.defaultValue(20)
+			.sliderRange(1, 100)
+			.min(1)
+			.visible(() -> oldversionchunksalarms.get())
+			.build()
+	);
+	public final Setting<Double> oldversionchunksvolume = sgAlarm.add(new DoubleSetting.Builder()
+			.name("Volume")
+			.description("The volume of the sound.")
+			.defaultValue(1.0)
+			.sliderRange(0.0, 1.0)
+			.visible(() -> oldversionchunksalarms.get())
+			.build()
+	);
+
+	public final Setting<Double> oldversionchunkspitch = sgAlarm.add(new DoubleSetting.Builder()
+			.name("Pitch")
+			.description("The pitch of the sound.")
+			.defaultValue(1.0)
+			.sliderRange(0.5, 2.0)
+			.visible(() -> oldversionchunksalarms.get())
+			.build()
+	);
+
+	public final Setting<List<SoundEvent>> oldversionchunkssoundtouse = sgAlarm.add(new SoundEventListSetting.Builder()
+			.name("Sound to play (pick one)")
+			.description("The sound to play. Just pick one.")
+			.defaultValue(SoundEvents.BLOCK_BELL_USE)
+			.visible(() -> oldversionchunksalarms.get())
+			.build()
+	);
+	private final Setting<Boolean> blockexploitchunksalarms = sgAlarm.add(new BoolSetting.Builder()
+			.name("Enable Alarms for BlockExploitChunks")
+			.description("rings alarms when BlockExploitChunks detected")
+			.defaultValue(false)
+			.build()
+	);
+	public final Setting<Integer> blockexploitchunksamountofrings = sgAlarm.add(new IntSetting.Builder()
+			.name("Amount Of Rings")
+			.description("How many times the alarm will ring when BlockExploitChunks detected.")
+			.defaultValue(1)
+			.sliderRange(1, 10)
+			.min(1)
+			.visible(() -> blockexploitchunksalarms.get())
+			.build()
+	);
+
+	public final Setting<Integer> blockexploitchunksringdelay = sgAlarm.add(new IntSetting.Builder()
+			.name("Delay Between Rings (ticks)")
+			.description("The delay between rings (in ticks).")
+			.defaultValue(20)
+			.sliderRange(1, 100)
+			.min(1)
+			.visible(() -> blockexploitchunksalarms.get())
+			.build()
+	);
+	public final Setting<Double> blockexploitchunksvolume = sgAlarm.add(new DoubleSetting.Builder()
+			.name("Volume")
+			.description("The volume of the sound.")
+			.defaultValue(1.0)
+			.sliderRange(0.0, 1.0)
+			.visible(() -> blockexploitchunksalarms.get())
+			.build()
+	);
+
+	public final Setting<Double> blockexploitchunkspitch = sgAlarm.add(new DoubleSetting.Builder()
+			.name("Pitch")
+			.description("The pitch of the sound.")
+			.defaultValue(1.0)
+			.sliderRange(0.5, 2.0)
+			.visible(() -> blockexploitchunksalarms.get())
+			.build()
+	);
+
+	public final Setting<List<SoundEvent>> blockexploitchunkssoundtouse = sgAlarm.add(new SoundEventListSetting.Builder()
+			.name("Sound to play (pick one)")
+			.description("The sound to play. Just pick one.")
+			.defaultValue(SoundEvents.BLOCK_BELL_USE)
+			.visible(() -> blockexploitchunksalarms.get())
 			.build()
 	);
 
@@ -223,9 +424,9 @@ public class NewerNewChunks extends Module {
 	public final Setting<Integer> renderDistance = sgRender.add(new IntSetting.Builder()
 			.name("Render-Distance(Chunks)")
 			.description("How many chunks from the character to render the detected chunks.")
-			.defaultValue(64)
+			.defaultValue(128)
 			.min(6)
-			.sliderRange(6,1024)
+			.sliderRange(6,128)
 			.build()
 	);
 	public final Setting<Integer> renderHeight = sgRender.add(new IntSetting.Builder()
@@ -316,12 +517,23 @@ public class NewerNewChunks extends Module {
 			.visible(() -> shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both)
 			.build()
 	);
-	private static final ExecutorService taskExecutor = Executors.newCachedThreadPool();
+	private ExecutorService taskExecutor;
 	private int deletewarningTicks=666;
 	private int ticks = 0;
 	private int ringsLeft = 0;
-	private int cooldownticks=0;
 	private boolean ringring = false;
+	private int oldticks = 0;
+	private int oldringsLeft = 0;
+	private boolean oldringring = false;
+	private int beingupdatedticks = 0;
+	private int beingupdatedringsLeft = 0;
+	private boolean beingupdatedringring = false;
+	private int oldversionticks = 0;
+	private int oldversionringsLeft = 0;
+	private boolean oldversionringring = false;
+	private int blockexploitticks = 0;
+	private int blockexploitringsLeft = 0;
+	private boolean blockexploitringring = false;
 	private int deletewarning=0;
 	private String serverip;
 	private String world;
@@ -446,29 +658,41 @@ public class NewerNewChunks extends Module {
 	}
 	@Override
 	public void onActivate() {
+		taskExecutor = Executors.newCachedThreadPool();
 		if (save.get())saveDataWasOn = true;
 		else if (!save.get())saveDataWasOn = false;
 		if (autoreload.get()) {
 			clearChunkData();
 		}
-		if (save.get() || load.get() && mc.world != null) {
-			world= mc.world.getRegistryKey().getValue().toString().replace(':', '_');
+		if ((save.get() || load.get()) && mc.world != null) {
+			world= mc.world.getRegistryKey().getValue().toString().replaceAll("[^a-zA-Z0-9._\\-]", "_");
 			if (mc.isInSingleplayer()){
-				String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("/|\\\\");
-				serverip=array[array.length-2];
+				Path worldPath = mc.getServer().getSavePath(WorldSavePath.ROOT);
+				Path savesDir = worldPath.getParent();
+				if (savesDir != null) {
+					Path worldDir = savesDir.getFileName();
+					serverip = (worldDir != null ? worldDir.toString() : "singleplayer")
+							.replaceAll("[^a-zA-Z0-9._-]", "_");
+				} else {
+					serverip = "singleplayer";
+				}
 			} else {
-				serverip = mc.getCurrentServerEntry().address.replace(':', '_');
+				serverip = mc.getCurrentServerEntry().address.replaceAll("[^a-zA-Z0-9._\\-]", "_");
 			}
 		}
 		if (save.get()){
 			try {
-				Files.createDirectories(Paths.get("TrouserStreak", "NewChunks", serverip, world));
+				Files.createDirectories(FabricLoader.getInstance().getGameDir().resolve("TrouserStreak").resolve("NewChunks").resolve(serverip).resolve(world));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 		if (save.get() || load.get()) {
-			Path baseDir = Paths.get("TrouserStreak", "NewChunks", serverip, world);
+			Path baseDir = FabricLoader.getInstance().getGameDir()
+					.resolve("TrouserStreak")
+					.resolve("NewChunks")
+					.resolve(serverip)
+					.resolve(world);
 
 			for (Path fileName : FILE_PATHS) {
 				Path fullPath = baseDir.resolve(fileName);
@@ -486,9 +710,20 @@ public class NewerNewChunks extends Module {
 			loadData();
 		}
 		ringring = false;
-		cooldownticks = 0;
 		ticks = 0;
 		ringsLeft = 0;
+		oldringring = false;
+		oldticks = 0;
+		oldringsLeft = 0;
+		beingupdatedringring = false;
+		beingupdatedticks = 0;
+		beingupdatedringsLeft = 0;
+		oldversionringring = false;
+		oldversionticks = 0;
+		oldversionringsLeft = 0;
+		blockexploitringring = false;
+		blockexploitticks = 0;
+		blockexploitringsLeft = 0;
 		autoreloadticks=0;
 		loadingticks=0;
 		worldchange=false;
@@ -496,15 +731,27 @@ public class NewerNewChunks extends Module {
 	}
 	@Override
 	public void onDeactivate() {
+		taskExecutor.shutdownNow();
 		ringring = false;
-		cooldownticks = 0;
 		ticks = 0;
 		ringsLeft = 0;
+		oldringring = false;
+		oldticks = 0;
+		oldringsLeft = 0;
+		beingupdatedringring = false;
+		beingupdatedticks = 0;
+		beingupdatedringsLeft = 0;
+		oldversionringring = false;
+		oldversionticks = 0;
+		oldversionringsLeft = 0;
+		blockexploitringring = false;
+		blockexploitticks = 0;
+		blockexploitringsLeft = 0;
 		autoreloadticks=0;
 		loadingticks=0;
 		worldchange=false;
 		justenabledsavedata=0;
-		if (remove.get()|autoreload.get()) {
+		if (remove.get() || autoreload.get()) {
 			clearChunkData();
 		}
 		super.onDeactivate();
@@ -528,24 +775,32 @@ public class NewerNewChunks extends Module {
 	}
 	@EventHandler
 	private void onPreTick(TickEvent.Pre event) {
-		world= mc.world.getRegistryKey().getValue().toString().replace(':', '_');
+		world= mc.world.getRegistryKey().getValue().toString().replaceAll("[^a-zA-Z0-9._\\-]", "_");
 
 		if (deletewarningTicks<=100) deletewarningTicks++;
 		else deletewarning=0;
 		if (deletewarning>=2){
 			if (mc.isInSingleplayer()){
-				String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("/|\\\\");
-				serverip=array[array.length-2];
+				Path worldPath = mc.getServer().getSavePath(WorldSavePath.ROOT);
+				Path savesDir = worldPath.getParent();
+				if (savesDir != null) {
+					Path worldDir = savesDir.getFileName();
+					serverip = (worldDir != null ? worldDir.toString() : "singleplayer")
+							.replaceAll("[^a-zA-Z0-9._-]", "_");
+				} else {
+					serverip = "singleplayer";
+				}
 			} else {
-				serverip = mc.getCurrentServerEntry().address.replace(':', '_');
+				serverip = mc.getCurrentServerEntry().address.replaceAll("[^a-zA-Z0-9._\\-]", "_");
 			}
 			clearChunkData();
 			try {
-				Files.deleteIfExists(Paths.get("TrouserStreak", "NewChunks", serverip, world, "NewChunkData.txt"));
-				Files.deleteIfExists(Paths.get("TrouserStreak", "NewChunks", serverip, world, "OldChunkData.txt"));
-				Files.deleteIfExists(Paths.get("TrouserStreak", "NewChunks", serverip, world, "BeingUpdatedChunkData.txt"));
-				Files.deleteIfExists(Paths.get("TrouserStreak", "NewChunks", serverip, world, "OldGenerationChunkData.txt"));
-				Files.deleteIfExists(Paths.get("TrouserStreak", "NewChunks", serverip, world, "BlockExploitChunkData.txt"));
+				Path baseDir = FabricLoader.getInstance().getGameDir().resolve("TrouserStreak").resolve("NewChunks").resolve(serverip).resolve(world);
+				Files.deleteIfExists(baseDir.resolve("NewChunkData.txt"));
+				Files.deleteIfExists(baseDir.resolve("OldChunkData.txt"));
+				Files.deleteIfExists(baseDir.resolve("BeingUpdatedChunkData.txt"));
+				Files.deleteIfExists(baseDir.resolve("OldGenerationChunkData.txt"));
+				Files.deleteIfExists(baseDir.resolve("BlockExploitChunkData.txt"));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -563,7 +818,7 @@ public class NewerNewChunks extends Module {
 		if (alarms.get()){
 			if (ringring && ringsLeft > 0) {
 				if (ticks <= 0) {
-					playSound();
+					playSound(1);
 					ticks = ringdelay.get();
 					ringsLeft--;
 					if (ringsLeft <= 0) {
@@ -571,6 +826,62 @@ public class NewerNewChunks extends Module {
 					}
 				} else {
 					ticks--;
+				}
+			}
+		}
+		if (oldalarms.get()){
+			if (oldringring && oldringsLeft > 0) {
+				if (oldticks <= 0) {
+					playSound(2);
+					oldticks = oldringdelay.get();
+					oldringsLeft--;
+					if (oldringsLeft <= 0) {
+						oldringring = false;
+					}
+				} else {
+					oldticks--;
+				}
+			}
+		}
+		if (beingupdatedchunksalarms.get()){
+			if (beingupdatedringring && beingupdatedringsLeft > 0) {
+				if (beingupdatedticks <= 0) {
+					playSound(3);
+					beingupdatedticks = beingupdatedchunksringdelay.get();
+					beingupdatedringsLeft--;
+					if (beingupdatedringsLeft <= 0) {
+						beingupdatedringring = false;
+					}
+				} else {
+					beingupdatedticks--;
+				}
+			}
+		}
+		if (oldversionchunksalarms.get()){
+			if (oldversionringring && oldversionringsLeft > 0) {
+				if (oldversionticks <= 0) {
+					playSound(4);
+					oldversionticks = oldversionchunksringdelay.get();
+					oldversionringsLeft--;
+					if (oldversionringsLeft <= 0) {
+						oldversionringring = false;
+					}
+				} else {
+					oldversionticks--;
+				}
+			}
+		}
+		if (blockexploitchunksalarms.get()){
+			if (blockexploitringring && blockexploitringsLeft > 0) {
+				if (blockexploitticks <= 0) {
+					playSound(5);
+					blockexploitticks = blockexploitchunksringdelay.get();
+					blockexploitringsLeft--;
+					if (blockexploitringsLeft <= 0) {
+						blockexploitringring = false;
+					}
+				} else {
+					blockexploitticks--;
 				}
 			}
 		}
@@ -661,7 +972,7 @@ public class NewerNewChunks extends Module {
 							render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), newChunksSideColor.get(), newChunksLineColor.get(), shapeMode.get(), event);
 						} else if ((detectmode.get()== DetectMode.IgnoreBlockExploit) && blockupdateexploit.get()) {
 							render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
-						} else if ((detectmode.get()== DetectMode.BlockExploitMode | detectmode.get()== DetectMode.Normal | detectmode.get()== DetectMode.IgnoreBlockExploit) && !blockupdateexploit.get()) {
+						} else if ((detectmode.get()== DetectMode.BlockExploitMode || detectmode.get()== DetectMode.Normal || detectmode.get()== DetectMode.IgnoreBlockExploit) && !blockupdateexploit.get()) {
 							render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
 						}
 					}
@@ -700,13 +1011,13 @@ public class NewerNewChunks extends Module {
 	private void render(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
 		try {
 			event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, lines, shapeMode, 0);
-		} catch (Exception e) {}
+		} catch (Exception e) {e.printStackTrace();}
 	}
 
 	@EventHandler
 	private void onReadPacket(PacketEvent.Receive event) {
-		if (event.packet instanceof AcknowledgeChunksC2SPacket )return; //for some reason this packet keeps getting cast to other packets
-		if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && event.packet instanceof ChunkDeltaUpdateS2CPacket packet && liquidexploit.get()) {
+		if (event.packet instanceof AcknowledgeChunksC2SPacket) return; //for some reason this packet keeps getting cast to other packets
+		if (event.packet instanceof ChunkDeltaUpdateS2CPacket packet && liquidexploit.get()) {
 
 			packet.visitUpdates((pos, state) -> {
 				ChunkPos chunkPos = new ChunkPos(pos);
@@ -725,23 +1036,27 @@ public class NewerNewChunks extends Module {
 								}
 								return;
 							}
-						} catch (Exception e) {}
+						} catch (Exception e) {e.printStackTrace();}
 					}
 				}
 			});
 		}
-		else if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && event.packet instanceof BlockUpdateS2CPacket packet) {
+		else if (event.packet instanceof BlockUpdateS2CPacket packet) {
 			ChunkPos chunkPos = new ChunkPos(packet.getPos());
 			if (blockupdateexploit.get()){
 				try {
 					if (!OldGenerationOldChunks.contains(chunkPos) && !beingUpdatedOldChunks.contains(chunkPos) && !tickexploitChunks.contains(chunkPos) && !oldChunks.contains(chunkPos) && !newChunks.contains(chunkPos)){
 						tickexploitChunks.add(chunkPos);
+						if (blockexploitchunksalarms.get()) {
+							blockexploitringring = true;
+							blockexploitringsLeft = blockexploitchunksamountofrings.get();
+						}
 						if (save.get()){
 							saveData(Paths.get("BlockExploitChunkData.txt"), chunkPos);
 						}
 					}
 				}
-				catch (Exception e){}
+				catch (Exception e){e.printStackTrace();}
 			}
 			if (!packet.getState().getFluidState().isEmpty() && !packet.getState().getFluidState().isStill() && liquidexploit.get()) {
 				for (Direction dir: searchDirs) {
@@ -758,11 +1073,11 @@ public class NewerNewChunks extends Module {
 							}
 							return;
 						}
-					} catch (Exception e) {}
+					} catch (Exception e) {e.printStackTrace();}
 				}
 			}
 		}
-		else if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && !(event.packet instanceof PlayerMoveC2SPacket) && event.packet instanceof ChunkDataS2CPacket packet && mc.world != null) {
+		else if (!(event.packet instanceof PlayerMoveC2SPacket) && event.packet instanceof ChunkDataS2CPacket packet && mc.world != null) {
 			ChunkPos oldpos = new ChunkPos(packet.getChunkX(), packet.getChunkZ());
 
 			if (mc.world.getChunkManager().getChunk(packet.getChunkX(), packet.getChunkZ()) == null) {
@@ -774,12 +1089,9 @@ public class NewerNewChunks extends Module {
 					long[] emptyHeightmapData = new long[37];
 					heightmaps.put(type, emptyHeightmapData);
 
-					CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-						chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), heightmaps,
-								packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ()));
-					}, taskExecutor);
-					future.join();
-				} catch (CompletionException e) {}
+					chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), heightmaps,
+							packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ()));
+				} catch (CompletionException e) {e.printStackTrace();}
 
 				boolean isNewChunk = false;
 				boolean isOldGeneration = false;
@@ -788,9 +1100,10 @@ public class NewerNewChunks extends Module {
 				boolean isNewOverworldGeneration = false;
 				boolean isNewNetherGeneration = false;
 				ChunkSection[] sections = chunk.getSectionArray();
-
+				int safeamountofsectionstoscan = 17;
+				if (sections.length < 17) safeamountofsectionstoscan = sections.length;
 				if (overworldOldChunksDetector.get() && mc.world.getRegistryKey() == World.OVERWORLD && chunk.getStatus().isAtLeast(ChunkStatus.FULL) && !chunk.isEmpty()) {
-					for (int i = 0; i < 17; i++) {
+					for (int i = 0; i < safeamountofsectionstoscan; i++) {
 						ChunkSection section = sections[i];
 						if (section != null && !section.isEmpty()) {
 							for (int x = 0; x < 16; x++) {
@@ -900,7 +1213,6 @@ public class NewerNewChunks extends Module {
 										Palette<RegistryEntry<Biome>> biomePalette = biomesPaletteContainer.data.palette();
 										for (int i3 = 0; i3 < biomePalette.getSize(); i3++) {
 											if (i3 == 0 && biomePalette.get(i3).getKey().get() == BiomeKeys.PLAINS) isNewChunk = true;
-											if (!isNewChunk && i3 == 0 && biomePalette.get(i3).getKey().get() != BiomeKeys.THE_END) isNewChunk = false;
 										}
 									}
 								}
@@ -945,42 +1257,58 @@ public class NewerNewChunks extends Module {
 								return;
 							}
 						} catch (Exception e) {
+							e.printStackTrace();
 						}
 					}
 					else if (!isNewChunk && !chunkIsBeingUpdated && isOldGeneration) {
 						try {
 							if (!OldGenerationOldChunks.contains(oldpos) && !beingUpdatedOldChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
 								OldGenerationOldChunks.add(oldpos);
+								if (oldversionchunksalarms.get()) {
+									oldversionringring = true;
+									oldversionringsLeft = oldversionchunksamountofrings.get();
+								}
 								if (save.get()){
 									saveData(Paths.get("OldGenerationChunkData.txt"), oldpos);
 								}
 								return;
 							}
 						} catch (Exception e) {
+							e.printStackTrace();
 						}
 					}
 					else if (chunkIsBeingUpdated) {
 						try {
 							if (!OldGenerationOldChunks.contains(oldpos) && !beingUpdatedOldChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
 								beingUpdatedOldChunks.add(oldpos);
+								if (beingupdatedchunksalarms.get()) {
+									beingupdatedringring = true;
+									beingupdatedringsLeft = beingupdatedchunksamountofrings.get();
+								}
 								if (save.get()){
 									saveData(Paths.get("BeingUpdatedChunkData.txt"), oldpos);
 								}
 								return;
 							}
 						} catch (Exception e) {
+							e.printStackTrace();
 						}
 					}
 					else if (!isNewChunk) {
 						try {
 							if (!OldGenerationOldChunks.contains(oldpos) && !beingUpdatedOldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
 								oldChunks.add(oldpos);
+								if (oldalarms.get()) {
+									oldringring = true;
+									oldringsLeft = oldamountofrings.get();
+								}
 								if (save.get()) {
 									saveData(Paths.get("OldChunkData.txt"), oldpos);
 								}
 								return;
 							}
 						} catch (Exception e) {
+							e.printStackTrace();
 						}
 					}
 				}
@@ -992,12 +1320,17 @@ public class NewerNewChunks extends Module {
 								try {
 									if (!OldGenerationOldChunks.contains(oldpos) && !beingUpdatedOldChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos) && !fluid.isEmpty() && !fluid.isStill()) {
 										oldChunks.add(oldpos);
+										if (oldalarms.get()) {
+											oldringring = true;
+											oldringsLeft = oldamountofrings.get();
+										}
 										if (save.get()){
 											saveData(Paths.get("OldChunkData.txt"), oldpos);
 										}
 										return;
 									}
 								} catch (Exception e) {
+									e.printStackTrace();
 								}
 							}
 						}
@@ -1007,23 +1340,28 @@ public class NewerNewChunks extends Module {
 		}
 	}
 	private void loadData() {
-		loadChunkData(Paths.get("BlockExploitChunkData.txt"), tickexploitChunks);
-		loadChunkData(Paths.get("OldChunkData.txt"), oldChunks);
-		loadChunkData(Paths.get("NewChunkData.txt"), newChunks);
-		loadChunkData(Paths.get("BeingUpdatedChunkData.txt"), beingUpdatedOldChunks);
-		loadChunkData(Paths.get("OldGenerationChunkData.txt"), OldGenerationOldChunks);
+		Path baseDir = FabricLoader.getInstance().getGameDir()
+				.resolve("TrouserStreak").resolve("NewChunks").resolve(serverip).resolve(world);
+
+		loadChunkData(baseDir.resolve("BlockExploitChunkData.txt"), tickexploitChunks);
+		loadChunkData(baseDir.resolve("OldChunkData.txt"), oldChunks);
+		loadChunkData(baseDir.resolve("NewChunkData.txt"), newChunks);
+		loadChunkData(baseDir.resolve("BeingUpdatedChunkData.txt"), beingUpdatedOldChunks);
+		loadChunkData(baseDir.resolve("OldGenerationChunkData.txt"), OldGenerationOldChunks);
 	}
+
 	private void loadChunkData(Path savedDataLocation, Set<ChunkPos> chunkSet) {
 		try {
-			Path filePath = Paths.get("TrouserStreak/NewChunks", serverip, world).resolve(savedDataLocation);
-			List<String> allLines = Files.readAllLines(filePath);
+			if (!Files.exists(savedDataLocation)) return;
+
+			List<String> allLines = Files.readAllLines(savedDataLocation);
 
 			for (String line : allLines) {
 				if (line != null && !line.isEmpty()) {
-					String[] array = line.split(", ");
+					String[] array = line.split(",");
 					if (array.length == 2) {
-						int X = Integer.parseInt(array[0].replaceAll("\\[", "").replaceAll("\\]", ""));
-						int Z = Integer.parseInt(array[1].replaceAll("\\[", "").replaceAll("\\]", ""));
+						int X = Integer.parseInt(array[0].trim());
+						int Z = Integer.parseInt(array[1].trim());
 						ChunkPos chunkPos = new ChunkPos(X, Z);
 						if (!OldGenerationOldChunks.contains(chunkPos) && !beingUpdatedOldChunks.contains(chunkPos) && !tickexploitChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)) {
 							chunkSet.add(chunkPos);
@@ -1031,25 +1369,28 @@ public class NewerNewChunks extends Module {
 					}
 				}
 			}
-		} catch (IOException e) {
+		} catch (IOException | NumberFormatException e) {
 			e.printStackTrace();
 		}
 	}
+
 	private void saveData(Path savedDataLocation, ChunkPos chunkpos) {
-		try {
-			Path dirPath = Paths.get("TrouserStreak", "NewChunks", serverip, world);
-			Files.createDirectories(dirPath);
-
-			Path filePath = dirPath.resolve(savedDataLocation);
-			String data = chunkpos.toString() + System.lineSeparator();
-
-			Files.write(filePath, data.getBytes(StandardCharsets.UTF_8),
-					StandardOpenOption.CREATE,
-					StandardOpenOption.APPEND);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		taskExecutor.submit(() -> {
+			try {
+				Path baseDir = FabricLoader.getInstance().getGameDir()
+						.resolve("TrouserStreak").resolve("NewChunks").resolve(serverip).resolve(world);
+				Files.createDirectories(baseDir);
+				Path filePath = baseDir.resolve(savedDataLocation);
+				String data = chunkpos.x + "," + chunkpos.z + System.lineSeparator();
+				Files.write(filePath, data.getBytes(StandardCharsets.UTF_8),
+						StandardOpenOption.CREATE,
+						StandardOpenOption.APPEND);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		});
 	}
+
 	private void removeChunksOutsideRenderDistance() {
 		if (mc.player == null) return;
 		BlockPos playerPos = new BlockPos(mc.player.getBlockX(), renderHeight.get(), mc.player.getBlockZ());
@@ -1064,10 +1405,14 @@ public class NewerNewChunks extends Module {
 	private void removeChunksOutsideRenderDistance(Set<ChunkPos> chunkSet, BlockPos playerPos, double renderDistanceBlocks) {
 		chunkSet.removeIf(c -> !playerPos.isWithinDistance(new BlockPos(c.getCenterX(), renderHeight.get(), c.getCenterZ()), renderDistanceBlocks));
 	}
-	private void playSound() {
+	private void playSound(int soundtype) {
 		if (mc.player != null) {
 			Vec3d pos = mc.player.getEntityPos();
 			SoundEvent sound = soundtouse.get().get(0);
+			if (soundtype == 2) sound = oldsoundtouse.get().get(0);
+			else if (soundtype == 3) sound = beingupdatedchunkssoundtouse.get().get(0);
+			else if (soundtype == 4) sound = oldversionchunkssoundtouse.get().get(0);
+			else if (soundtype == 5) sound = blockexploitchunkssoundtouse.get().get(0);
 			float volumeSetting = volume.get().floatValue();
 			float pitchSetting = pitch.get().floatValue();
 

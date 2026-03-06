@@ -110,6 +110,7 @@ public class AnHero extends Module {
             }
             Modules.get().get(Timer.class).setOverride(Timer.OFF);
             toggle();
+            return;
         }
         ticks++;
         Modules.get().get(Timer.class).setOverride(toasterbath.get());
