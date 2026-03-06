@@ -12,23 +12,17 @@ import net.minecraft.text.Text;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.GlobalPos;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.WorldChunk;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class WorldInfoCommand extends Command {
     public WorldInfoCommand() {
@@ -86,15 +80,20 @@ public class WorldInfoCommand extends Command {
 
             boolean foundAnyOre = false;
             boolean isNewGeneration = false;
+            BlockPos.Mutable mutablePos = new BlockPos.Mutable();
+            outer:
             for (int x = 0; x < 16; x++) {
                 for (int y = mc.world.getBottomY(); y < mc.world.getTopYInclusive(); y++) {
                     for (int z = 0; z < 16; z++) {
-                        if (!foundAnyOre && isOreBlock(chunk.getBlockState(new BlockPos(x, y, z)).getBlock()) && mc.world.getRegistryKey() == World.OVERWORLD) {
+                        mutablePos.set(x, y, z);
+                        Block block = chunk.getBlockState(mutablePos).getBlock();
+                        if (!foundAnyOre && isOreBlock(block) && mc.world.getRegistryKey() == World.OVERWORLD) {
                             foundAnyOre = true;
                         }
-                        if (!isNewGeneration && y < 260 && y > 5 && NEW_OVERWORLD_BLOCKS.contains(chunk.getBlockState(new BlockPos(x, y, z)).getBlock()) && mc.world.getRegistryKey() == World.OVERWORLD) {
+                        if (!isNewGeneration && y < 260 && y > 5 && NEW_OVERWORLD_BLOCKS.contains(block) && mc.world.getRegistryKey() == World.OVERWORLD) {
                             isNewGeneration = true;
                         }
+                        if (foundAnyOre && isNewGeneration) break outer;
                     }
                 }
             }
@@ -169,43 +168,44 @@ public class WorldInfoCommand extends Command {
 
                 String serverip;
                 if (mc.isInSingleplayer()==true){
-                    String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("/|\\\\");
-                    serverip=array[array.length-2];
+                    Path worldPath = mc.getServer().getSavePath(WorldSavePath.ROOT);
+                    Path savesDir = worldPath.getParent();
+                    if (savesDir != null) {
+                        Path worldDir = savesDir.getFileName();
+                        serverip = (worldDir != null ? worldDir.toString() : "singleplayer")
+                                .replaceAll("[^a-zA-Z0-9._-]", "_");
+                    } else {
+                        serverip = "singleplayer";
+                    }
                 } else {
-                    serverip = mc.getCurrentServerEntry().address.replace(':', '_');
+                    serverip = mc.getCurrentServerEntry().address.replaceAll("[^a-zA-Z0-9._\\-]", "_");
                 }
 
-                if (!Files.exists(Paths.get("TrouserStreak/SavedWorldInfo/"+serverip+"/WorldInfoData.txt"))){
-                    File file = new File("TrouserStreak/SavedWorldInfo/"+serverip+"/WorldInfoData.txt");
-                    try {
-                        file.createNewFile();
-                    } catch (IOException e) {}
-                }
                 try {
                     new File("TrouserStreak/SavedWorldInfo/"+serverip+"/").mkdirs();
-                    FileWriter writer = new FileWriter("TrouserStreak/SavedWorldInfo/"+serverip+"/WorldInfoData.txt", true);
-                    if (!isNewGeneration) {
-                        writer.write("This chunk is pre 1.17 generation!");
-                        writer.write("\r\n");   // write new line
-                    } else {
-                        writer.write("This chunk is new generation! (post-1.17)");
-                        writer.write("\r\n");   // write new line
+                    try (FileWriter writer = new FileWriter("TrouserStreak/SavedWorldInfo/"+serverip+"/WorldInfoData.txt", true)) {
+                        if (!isNewGeneration) {
+                            writer.write("This chunk is pre 1.17 generation!");
+                            writer.write("\r\n");
+                        } else {
+                            writer.write("This chunk is new generation! (post-1.17)");
+                            writer.write("\r\n");
+                        }
+                        writer.write("East World Border X: "+(int) mc.world.getWorldBorder().getBoundEast()+", West World Border X: "+(int) mc.world.getWorldBorder().getBoundWest()+", South World Border Z: "+(int) mc.world.getWorldBorder().getBoundSouth()+", North World Border Z: "+(int) mc.world.getWorldBorder().getBoundNorth());
+                        writer.write("\r\n");
+                        writer.write("WorldSpawn Location: x"+mc.world.getLevelProperties().getSpawnPos().getX()+" y"+mc.world.getLevelProperties().getSpawnPos().getY()+" z"+mc.world.getLevelProperties().getSpawnPos().getZ());
+                        writer.write("\r\n");
+                        writer.write("Difficulty: "+mc.world.getDifficulty().toString());
+                        writer.write("\r\n");
+                        writer.write("Permission Level: "+mc.player.getPermissionLevel());
+                        writer.write("\r\n");
+                        writer.write("Simulation Distance (chunks): "+mc.world.getSimulationDistance());
+                        writer.write("\r\n");
+                        writer.write("Day Count: "+Math.floor(mc.world.getTime()/24000));
+                        writer.write("\r\n");
+                        writer.write("KnownPlayers (Names with a period are bedrock players): "+getKnownPlayers);
+                        writer.write("\r\n");
                     }
-                    writer.write("East World Border X: "+(int) mc.world.getWorldBorder().getBoundEast()+", West World Border X: "+(int) mc.world.getWorldBorder().getBoundWest()+", South World Border Z: "+(int) mc.world.getWorldBorder().getBoundSouth()+", North World Border Z: "+(int) mc.world.getWorldBorder().getBoundNorth());
-                    writer.write("\r\n");   // write new line
-                    writer.write("WorldSpawn Location: x"+mc.world.getLevelProperties().getSpawnPos().getX()+" y"+mc.world.getLevelProperties().getSpawnPos().getY()+" z"+mc.world.getLevelProperties().getSpawnPos().getZ());
-                    writer.write("\r\n");   // write new line
-                    writer.write("Difficulty: "+mc.world.getDifficulty().toString());
-                    writer.write("\r\n");   // write new line
-                    writer.write("Permission Level: "+mc.player.getPermissionLevel());
-                    writer.write("\r\n");   // write new line
-                    writer.write("Simulation Distance (chunks): "+mc.world.getSimulationDistance());
-                    writer.write("\r\n");   // write new line
-                    writer.write("Day Count: "+Math.floor(mc.world.getTime()/24000));
-                    writer.write("\r\n");   // write new line
-                    writer.write("KnownPlayers (Names with a period are bedrock players): "+getKnownPlayers);
-                    writer.write("\r\n");   // write new line
-                    writer.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
