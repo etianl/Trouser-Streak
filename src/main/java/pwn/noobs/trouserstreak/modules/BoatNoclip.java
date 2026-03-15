@@ -14,7 +14,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.vehicle.BoatEntity;
+import net.minecraft.entity.vehicle.AbstractBoatEntity;
 import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -98,10 +98,18 @@ public class BoatNoclip extends Module {
         lastPacketY = Double.MAX_VALUE;
     }
 
+    @Override
+    public void onDeactivate() {
+        if (mc.player != null && mc.player.getVehicle() instanceof AbstractBoatEntity boat) {
+            boat.noClip = false;
+        }
+    }
+
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (mc.player != null && mc.player.getVehicle() instanceof BoatEntity boat) {
+        if (mc.player != null && mc.player.getVehicle() instanceof AbstractBoatEntity boat) {
             insideBlock = isInsideBlock(boat);
+            boat.noClip = true;
             if (sentPacket) {
                 VehicleMoveC2SPacket packet = VehicleMoveC2SPacket.fromVehicle(boat);
                 ((IVec3d) packet.position()).meteor$setY(lastPacketY);
@@ -115,10 +123,10 @@ public class BoatNoclip extends Module {
 
     @EventHandler
     private void onEntityMove(EntityMoveEvent event) {
-        Entity entity = event.entity;
-        if (!(entity instanceof BoatEntity)) return;
+        if (!(event.entity instanceof AbstractBoatEntity entity)) return;
         if (entity.getControllingPassenger() != mc.player) return;
-
+        entity.noClip = true;
+        
         double velX = entity.getVelocity().x;
         double velY = 0;
         double velZ = entity.getVelocity().z;
@@ -147,7 +155,7 @@ public class BoatNoclip extends Module {
     private void onSendPacket(PacketEvent.Send event) {
         if (!(event.packet instanceof VehicleMoveC2SPacket packet)) return;
         if (!antiKick.get()) return;
-        if (!(mc.player.getVehicle() instanceof BoatEntity)) return;
+        if (!(mc.player.getVehicle() instanceof AbstractBoatEntity)) return;
 
         double currentY = packet.position().y;
 
@@ -211,4 +219,5 @@ public class BoatNoclip extends Module {
 
         return false;
     }
+
 }
