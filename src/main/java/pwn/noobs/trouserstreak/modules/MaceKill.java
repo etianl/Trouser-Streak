@@ -23,7 +23,7 @@ import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class MaceKill extends Module {
@@ -40,6 +40,12 @@ public class MaceKill extends Module {
             .description("Does not send movement packets if the attack was blocked. (prevents death)")
             .defaultValue(true)
             .build());
+    private final Setting<Boolean> requireCooldown = specialGroup.add(new BoolSetting.Builder()
+            .name("Require Full Cooldown")
+            .description("Only fire when attack cooldown is 100%. Useful for max base damage, but breaks totem bypass.")
+            .defaultValue(false)
+            .build()
+    );
     private final Setting<Integer> fallHeight = specialGroup.add(new IntSetting.Builder()
             .name("Fall height")
             .description("Simulates a fall from this distance")
@@ -58,7 +64,7 @@ public class MaceKill extends Module {
     );
     private final Setting<Boolean> attackSpam = totem.add(new BoolSetting.Builder()
             .name("Bypass totems")
-            .description("Max ~9 spam packets for this to work. Settings example: 49 fall height, 8 spam packet, 3 attack, 20 height increase.")
+            .description("Max ~9 spam packets for this to work. Settings example: 49 fall height, 8 spam packets, 3 attacks, 3 follow-up height.")
             .defaultValue(false)
             .build());
     private final Setting<Integer> attacks = totem.add(new IntSetting.Builder()
@@ -69,13 +75,13 @@ public class MaceKill extends Module {
             .min(0)
             .build()
     );
-    private final Setting<Integer> increase = totem.add(new IntSetting.Builder()
-            .name("Height Increase")
-            .description("Blocks distance to increase from the last attack")
-            .defaultValue(9)
-            .sliderRange(1, 100)
-            .min(1)
-            .max(100)
+    private final Setting<Integer> followupHeight = totem.add(new IntSetting.Builder()
+            .name("Follow-up Height")
+            .description("Fall height for attacks 2 and 3. 2 blocks is the minimum to kill through Absorption IV after a totem pops.")
+            .defaultValue(3)
+            .sliderRange(2, 15)
+            .min(2)
+            .max(15)
             .build()
     );
     private final Setting<Boolean> useOffset = specialGroup.add(new BoolSetting.Builder()
@@ -112,7 +118,9 @@ public class MaceKill extends Module {
     private void onSendPacket(PacketEvent.Send event) {
         if (sendingAttacks) return;
         if (mc.player == null) return;
-        if (mc.player.hasVehicle() || mc.player.getMainHandStack().getItem() != Items.MACE) return;
+        boolean holdingMace = mc.player.getMainHandStack().getItem() == Items.MACE
+                || mc.player.getOffHandStack().getItem() == Items.MACE;
+        if (mc.player.hasVehicle() || !holdingMace) return;
         if (!(event.packet instanceof IPlayerInteractEntityC2SPacket packet)) return;
         if (packet.meteor$getType() != PlayerInteractEntityC2SPacket.InteractType.ATTACK) return;
 
@@ -120,7 +128,14 @@ public class MaceKill extends Module {
         LivingEntity targetEntity = (LivingEntity) packet.meteor$getEntity();
         if (packetDisable.get() && (targetEntity.isBlocking() || targetEntity.isInvulnerable() || targetEntity.isInCreativeMode())) return;
         if (!targetEntity.isAlive()) return;
+
+        if (requireCooldown.get() && mc.player.getAttackCooldownProgress(1f) < 1.0f) return;
+
         int baseBlocks = getMaxHeightAbovePlayer();
+        if (baseBlocks == 0) {
+            error("No space above you to simulate a fall from.");
+            return;
+        }
         Vec3d firstTargetPos = new Vec3d(mc.player.getX(), mc.player.getY() + baseBlocks, mc.player.getZ());
         if (invalid(firstTargetPos)){
             error("No valid space above you to attack from.");
@@ -130,51 +145,64 @@ public class MaceKill extends Module {
         event.cancel();
 
         previouspos = mc.player.getEntityPos();
-        int currentHeight = baseBlocks;
         int attackCount = attacks.get();
         if (!attackSpam.get()) attackCount = 1;
         for (int i2 = 0; i2 < paperpackets.get(); i2++) {
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false, mc.player.horizontalCollision));
         }
-        boolean targetposvalid = true;
-        for (int i = 0; i < attackCount; i++) {
-            int blocks = (i == 0) ? baseBlocks : currentHeight;
-            Vec3d targetPos = new Vec3d(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ());
-            if (invalid(targetPos)) {
-                targetposvalid = false;
-                continue;
+
+        // try/finally so the flag always clears — if something throws mid-sequence without
+        // this it stays true permanently and the module silently stops working until relog
+        try {
+            boolean targetposvalid = true;
+            Hand maceHand = mc.player.getMainHandStack().getItem() == Items.MACE ? Hand.MAIN_HAND : Hand.OFF_HAND;
+            for (int i = 0; i < attackCount; i++) {
+                // re-prime the server's movement budget before each follow-up.
+                // after processing the home packet from hit 1, Paper resets movement tolerance
+                // to baseline — the next UP packet gets rejected without this. one OnGroundOnly
+                // is all it takes for a 3-block jump, we don't need the full spam again.
+                if (i > 0 && attackSpam.get()) {
+                    mc.player.networkHandler.sendPacket(
+                            new PlayerMoveC2SPacket.OnGroundOnly(false, mc.player.horizontalCollision));
+                }
+
+                int blocks = (i == 0) ? baseBlocks : followupHeight.get();
+                Vec3d targetPos = new Vec3d(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ());
+                if (invalid(targetPos)) {
+                    targetposvalid = false;
+                    continue;
+                }
+
+                PlayerMoveC2SPacket movepacket = new PlayerMoveC2SPacket.PositionAndOnGround(targetPos.getX(), targetPos.getY(), targetPos.getZ(), false, mc.player.horizontalCollision);
+                PlayerMoveC2SPacket homepacket = new PlayerMoveC2SPacket.PositionAndOnGround(previouspos.getX(), previouspos.getY(), previouspos.getZ(), false, mc.player.horizontalCollision);
+                ((IPlayerMoveC2SPacket) homepacket).meteor$setTag(1337);
+                ((IPlayerMoveC2SPacket) movepacket).meteor$setTag(1337);
+                mc.player.networkHandler.sendPacket(movepacket);
+                mc.player.networkHandler.sendPacket(homepacket);
+                mc.player.setPosition(previouspos);
+
+                sendingAttacks = true;
+                if (swing.get()) {
+                    mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(maceHand));
+                    mc.player.swingHand(maceHand);
+                }
+                mc.player.networkHandler.sendPacket(
+                        PlayerInteractEntityC2SPacket.attack(targetEntity, mc.player.isSneaking())
+                );
             }
 
-            PlayerMoveC2SPacket movepacket = new PlayerMoveC2SPacket.PositionAndOnGround(targetPos.getX(), targetPos.getY(), targetPos.getZ(), false, mc.player.horizontalCollision);
-            PlayerMoveC2SPacket homepacket = new PlayerMoveC2SPacket.PositionAndOnGround(previouspos.getX(), previouspos.getY(), previouspos.getZ(), false, mc.player.horizontalCollision);
-            ((IPlayerMoveC2SPacket) homepacket).meteor$setTag(1337);
-            ((IPlayerMoveC2SPacket) movepacket).meteor$setTag(1337);
-            mc.player.networkHandler.sendPacket(movepacket);
-            mc.player.networkHandler.sendPacket(homepacket);
-            mc.player.setPosition(previouspos);
+            positionCache.clear();
 
-            sendingAttacks = true;
-            if (swing.get()) {
-                mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
-                mc.player.swingHand(Hand.MAIN_HAND);
+            if (targetposvalid && useOffset.get()){
+                Vec3d offsetHome = getOffset(previouspos);
+                PlayerMoveC2SPacket offsethomepacket = new PlayerMoveC2SPacket.PositionAndOnGround(offsetHome.getX(), offsetHome.getY(), offsetHome.getZ(), false, mc.player.horizontalCollision);
+                ((IPlayerMoveC2SPacket) offsethomepacket).meteor$setTag(1337);
+                mc.player.networkHandler.sendPacket(offsethomepacket);
+                mc.player.setPosition(offsetHome);
             }
-            mc.player.networkHandler.sendPacket(
-                    PlayerInteractEntityC2SPacket.attack(targetEntity, mc.player.isSneaking())
-            );
-
-            currentHeight += increase.get();
+        } finally {
+            sendingAttacks = false;
         }
-
-        positionCache.clear();
-
-        if (targetposvalid && useOffset.get()){
-            Vec3d offsetHome = getOffset(previouspos);
-            PlayerMoveC2SPacket offsethomepacket = new PlayerMoveC2SPacket.PositionAndOnGround(offsetHome.getX(), offsetHome.getY(), offsetHome.getZ(), false, mc.player.horizontalCollision);
-            ((IPlayerMoveC2SPacket) offsethomepacket).meteor$setTag(1337);
-            mc.player.networkHandler.sendPacket(offsethomepacket);
-            mc.player.setPosition(offsetHome);
-        }
-        sendingAttacks = false;
     }
 
     private Vec3d getOffset(Vec3d base) {
@@ -204,7 +232,15 @@ public class MaceKill extends Module {
         return base;
     }
     private final BlockPos.Mutable mutablePos = new BlockPos.Mutable();
-    private final Map<Vec3d, Boolean> positionCache = new HashMap<>();
+
+    // bounded at 256 entries with LRU eviction — at high fall heights this grows pretty large
+    // without a cap since getMaxHeightAbovePlayer scans up to 169 positions per call
+    private final Map<Vec3d, Boolean> positionCache = new LinkedHashMap<>(256, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<Vec3d, Boolean> eldest) {
+            return size() > 256;
+        }
+    };
 
     private boolean invalid(Vec3d pos) {
         if (mc.world == null) return true;
