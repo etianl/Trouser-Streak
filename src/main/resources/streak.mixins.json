@@ -17,8 +17,6 @@
     "TrouserHandshakeC2SMixin",
     "PacketCodecsMixin",
     "StringEncodingMixin",
-    "ScreenMixin",
-    "HandledScreenMixin",
     "AbstractBlockMixin",
     "AbstractBoatEntityMixin"
   ]
