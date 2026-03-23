@@ -11,6 +11,8 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
 import pwn.noobs.trouserstreak.utils.PermissionUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class CrashCommand extends Command {
@@ -24,7 +26,7 @@ public class CrashCommand extends Command {
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(ctx -> {
             players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
-            if (players.size() <= 1) { // Check if there is only one player (you) on the server
+            if (players.size() <= 1) {
                 error("No other players found on the server");
                 return SINGLE_SUCCESS;
             }
@@ -64,29 +66,37 @@ public class CrashCommand extends Command {
             }
             return SINGLE_SUCCESS;
         }));
-        builder.then(literal("@").executes(ctx -> {
-            if (PermissionUtils.getPermissionLevel(mc.player) >= 2) {
-                players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
-                StringBuilder playerNames = new StringBuilder("Crashing all players (excluding friends): ");
-                boolean found = false;
-                for (PlayerListEntry player : players) {
-                    if (!player.getProfile().id().equals(mc.player.getGameProfile().id())
-                            && !Friends.get().isFriend(player)) {
-                        ChatUtils.sendPlayerMsg("/execute at " + player.getProfile().name()
-                                + " run particle ash ~ ~ ~ 1 1 1 1 2147483647 force " + player.getProfile().name());
-                        playerNames.append(player.getProfile().name()).append(", ");
-                        found = true;
-                    }
-                }
-                if (found) {
-                    playerNames.setLength(playerNames.length() - 2);
-                    ChatUtils.sendMsg(Text.of(playerNames.toString()));
-                } else {
-                    error("No other players (non-friends) found on the server");
-                }
-            } else {
-                error("Must have permission level 2 or higher");
+        builder.then(literal("@allNonFriends").executes(ctx -> {
+            players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
+            if (players.size() <= 1) {
+                error("No other players found on the server");
+                return SINGLE_SUCCESS;
             }
+            if (PermissionUtils.getPermissionLevel(mc.player) >= 2) {
+                List<String> friendNames = new ArrayList<>();
+                friendNames.add("name=!" + mc.player.getName().getLiteralString());
+                for(PlayerListEntry player : players) {
+                    if(Friends.get().isFriend(player)) friendNames.add("name=!" + player.getProfile().name());
+                }
+                String friendsString = String.join(",", friendNames);
+                String thecommand = "/execute at @a[" + friendsString + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[" + friendsString + "]";
+                if (thecommand.length()<=256){
+                    ChatUtils.sendPlayerMsg(thecommand);
+                    StringBuilder playerNames = new StringBuilder("Crashing players (non-friends): ");
+                    for (PlayerListEntry player : players) {
+                        if (!player.getProfile().id().equals(mc.player.getGameProfile().id()) && !Friends.get().isFriend(player)) {
+                            playerNames.append(player.getProfile().name()).append(", ");
+                        }
+                    }
+                    playerNames.setLength(playerNames.length() - 2); // Remove the extra comma and space at the end
+                    ChatUtils.sendMsg(Text.of(playerNames.toString()));
+                }
+                else {
+                    error("Crash all players command is too long, you have too many friends online.");
+                }
+                return SINGLE_SUCCESS;
+            } else if (PermissionUtils.getPermissionLevel(mc.player) < 2)
+                error("Must have permission level 2 or higher");
             return SINGLE_SUCCESS;
         }));
     }

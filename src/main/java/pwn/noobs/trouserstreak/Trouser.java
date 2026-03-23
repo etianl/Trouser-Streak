@@ -99,6 +99,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new TPFly());
                 Modules.get().add(new TrailMaker());
                 Modules.get().add(new TrouserBuild());
+                Modules.get().add(new UUIDBan());
                 Modules.get().add(new VoiderPlus());
                 Modules.get().add(new WaypointCoordExploit());
                 Commands.add(new AutoVaultClipCommand());

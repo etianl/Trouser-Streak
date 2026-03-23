@@ -37,7 +37,7 @@ Locks your view onto the LivingEntity that you were aiming at when the module is
 ### **AnHero:**
 Become An Hero! (Credits to etianl :D)
 ### **Attribute Swap:** 
-Swaps the current main hand item with another item on the hotbar for a single tick when you attack an entity. The attributes from the target item you are swapping to will be applied to the item you are swapping from. (Credits to [DonKisser](https://github.com/DonKisser) for this module! Their inspiration was this video: https://www.youtube.com/watch?v=q99eqD_fBqo)
+Swaps the current main hand item with another item on the hotbar for a single tick when you attack. The attributes from the target item you are swapping to will be applied to the item you are swapping from. (Credits to [DonKisser](https://github.com/DonKisser) for this module! Their inspiration was this video: https://www.youtube.com/watch?v=q99eqD_fBqo)
 ### **AutoDrop:** 
 Drops the stack in your selected slot, or choose a slot to dump. (Credits to etianl :D)
 ### **AutoLavaCaster:**
@@ -162,36 +162,17 @@ Thank you to [agreed](https://github.com/aisiaiiad) for making this! I only adde
 ### **RedstoneNuker:** 
 It's just the regular Nuker module from Meteor client, customized to only break things that generate redstone signals. Also with included AutoTool. Keeps you safer when placing lots of TNT. (Credits to Meteor Client for the borrowed code.)
 ### **RemoteEnderChest:** 
-This module allows you to store an ender chest GUI far away from the original chest, allowing you to store or take things out wherever. (Thank you to Mr. Skills93 for the idea. Credits to etianl for the module. :D)
+This module allows you to store an ender chest GUI far away from the original chest, allowing you to store or take things out wherever.
 
 You can even destroy the ender chest and still retain it's menu!
 
-**Opening your inventory, pressing the Escape key, or transitioning through portals will close the GUI and break your link with the Ender Chest!!!**
+**Opening your inventory, exiting the Ender Chest GUI by not pressing the hotkey, or transitioning between worlds will close the GUI and break your link with the Ender Chest!!!**
 
-To allow normal player movement many controls had to be routed around this GUI.
-*This can make for some wacky behaviour sometimes*
+**Interacting with certain things like Crafting Tables, Anvils, Furnaces, Storage Blocks, and many other blocks will also break the link with the error: "Ender chest handler invalid".**
 
-**Video demonstration: https://www.youtube.com/watch?v=Bv48zq_w58Y**
+**Video demonstration (Kinda outdated): https://www.youtube.com/watch?v=Bv48zq_w58Y**
 
-**Keys that have been routed past the GUI currently:**
-- Meteor Module hotkeys
-- Attack/Mining
-- Use (kinda janky because we had to implement interactItem/Block/Entity)
-- Forward
-- Back
-- Left
-- Right
-- Jump
-- Sneak
-- Sprint
-- 1-9 keys for hotbar
-- Scroll Wheel up/down hotbar cycling
-  
-**Keys I would like to implement but HAVE NOT:**
-- SwapHand (default F)
-- DropItem (default Q)
-- Chat (default T)
-- Some of the F keys, I noticed F5 doesn't work.
+Thank you to Mr. Skills93 for the idea. Credits to etianl for the module. Also thank you to [JirkaMaster](https://github.com/JirkaMaster9) for vastly improving it!
 ### **ShulkerDupe:** 
 Duplicate the contents of a shulker when pressing "Dupe" in the shulker menu. Only works on Vanilla, Forge, and Fabric servers 1.19 and below. (Credits to Allah-Hack, I just made the buttons, and make it dupe slot1 as well.)
 ### **SpearKill:** 
@@ -325,6 +306,16 @@ Generates items with modified NBT data.  (Credits to etianl :D) **CREATIVEMODE**
 Uses operator commands to teleport you to each player online one by one at the push of a button, or those players to you one by one. (Thank you to [ogmur](https://www.youtube.com/@Ogmur) for the idea.) **OPERATOR**
 ### **OPServerKillModule:** 
 Runs a set of operator commands to disable a server and cover up the tracks of the kill command. (Credits to etianl :D) **OPERATOR**
+### **UUIDBan:**
+Uses funny Operator level commands to ban a player.
+
+- First, the target player gets kicked.
+- Then after a delay an entity is created using /summon with their UUID. **This prevents the targeted player from joining back until that entity is killed by /kill.**
+
+You can choose a target player by either right clicking on them, or by typing in their name. There is also an option to execute commands for all players simultaneously.
+Commands are executed by either pressing the attackKey, or on a tick delay if that is disabled.
+
+Originally created by KI10, modified heavily by etianl. Thank you to KI10 for the new ban method! **OPERATOR**
 ### **Voider+:** 
 Runs /fill commands from the top down. (Credits to Allah-Hack for the original, modified by etianl) **OPERATOR**
 
