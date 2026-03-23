@@ -8,6 +8,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
@@ -39,6 +40,18 @@ public class AimBot extends Module {
             .sliderRange(0,512)
             .build()
     );
+    private final Setting<Boolean> onlyItem = sgGeneral.add(new BoolSetting.Builder()
+            .name("Only if holding Item/s.")
+            .description("Only aimbot if one of the selected items is in your Main Hand.")
+            .defaultValue(false)
+            .build()
+    );
+    private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
+            .name("items")
+            .description("Only aimbot if one of the selected items is in your Main Hand.")
+            .visible(onlyItem::get)
+            .build()
+    );
     public AimBot() {
         super(Trouser.Main, "Aim Bot", "Locks onto the targeted entity while the module is on.");
     }
@@ -54,6 +67,8 @@ public class AimBot extends Module {
     }
     @EventHandler
     private void onRender(Render3DEvent event) {
+        if (mc.player == null || mc.world == null) return;
+        if (onlyItem.get() && !items.get().contains(mc.player.getMainHandStack().getItem())) return;
         if (seek.get() && crosshairTarget == null) crosshairTarget = target();
         if (crosshairTarget != null && !crosshairTarget.isAlive()) crosshairTarget = null;
         if (crosshairTarget == null || !(crosshairTarget instanceof LivingEntity)) return;

@@ -21,10 +21,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import pwn.noobs.trouserstreak.Trouser;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class MaceKill extends Module {
     private final SettingGroup specialGroup2 = settings.createGroup("Disable \"Smash Attack\" in Criticals to make this module work.");
@@ -58,7 +55,7 @@ public class MaceKill extends Module {
     );
     private final Setting<Boolean> attackSpam = totem.add(new BoolSetting.Builder()
             .name("Bypass totems")
-            .description("Max ~9 spam packets for this to work. Settings example: 49 fall height, 8 spam packet, 3 attack, 20 height increase.")
+            .description("Settings example: 49 fall height, 8 spam packet, 3 attack, 9 height increase.")
             .defaultValue(false)
             .build());
     private final Setting<Integer> attacks = totem.add(new IntSetting.Builder()
@@ -71,7 +68,7 @@ public class MaceKill extends Module {
     );
     private final Setting<Integer> increase = totem.add(new IntSetting.Builder()
             .name("Height Increase")
-            .description("Blocks distance to increase from the last attack")
+            .description("Blocks to add to fall height for each follow-up attack. Each hit must deal more damage than the last to beat invulnerability frames.")
             .defaultValue(9)
             .sliderRange(1, 100)
             .min(1)
@@ -120,9 +117,9 @@ public class MaceKill extends Module {
         LivingEntity targetEntity = (LivingEntity) packet.meteor$getEntity();
         if (packetDisable.get() && (targetEntity.isBlocking() || targetEntity.isInvulnerable() || targetEntity.isInCreativeMode())) return;
         if (!targetEntity.isAlive()) return;
+
         int baseBlocks = getMaxHeightAbovePlayer();
-        Vec3d firstTargetPos = new Vec3d(mc.player.getX(), mc.player.getY() + baseBlocks, mc.player.getZ());
-        if (invalid(firstTargetPos)){
+        if (baseBlocks == 0) {
             error("No valid space above you to attack from.");
             return;
         }
@@ -134,49 +131,54 @@ public class MaceKill extends Module {
         int attackCount = attacks.get();
         if (!attackSpam.get()) attackCount = 1;
         for (int i2 = 0; i2 < paperpackets.get(); i2++) {
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false, mc.player.horizontalCollision));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(mc.player.getYaw(), mc.player.getPitch(), false, mc.player.horizontalCollision));
         }
-        boolean targetposvalid = true;
-        for (int i = 0; i < attackCount; i++) {
-            int blocks = (i == 0) ? baseBlocks : currentHeight;
-            Vec3d targetPos = new Vec3d(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ());
-            if (invalid(targetPos)) {
-                targetposvalid = false;
-                continue;
+
+        try {
+            boolean targetposvalid = true;
+            for (int i = 0; i < attackCount; i++) {
+                int blocks = (i == 0) ? baseBlocks : currentHeight;
+
+                if (mc.world == null || mc.player.getY() + blocks > mc.world.getTopYInclusive() - 1) {
+                    targetposvalid = false;
+                    continue;
+                }
+
+                Vec3d targetPos = new Vec3d(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ());
+
+                sendMove(targetPos);
+                sendMove(previouspos);
+                mc.player.setPosition(previouspos);
+
+                sendingAttacks = true;
+                if (swing.get()) {
+                    mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+                    mc.player.swingHand(Hand.MAIN_HAND);
+                }
+                mc.player.networkHandler.sendPacket(
+                        PlayerInteractEntityC2SPacket.attack(targetEntity, mc.player.isSneaking())
+                );
+
+                currentHeight += increase.get();
             }
 
-            PlayerMoveC2SPacket movepacket = new PlayerMoveC2SPacket.PositionAndOnGround(targetPos.getX(), targetPos.getY(), targetPos.getZ(), false, mc.player.horizontalCollision);
-            PlayerMoveC2SPacket homepacket = new PlayerMoveC2SPacket.PositionAndOnGround(previouspos.getX(), previouspos.getY(), previouspos.getZ(), false, mc.player.horizontalCollision);
-            ((IPlayerMoveC2SPacket) homepacket).meteor$setTag(1337);
-            ((IPlayerMoveC2SPacket) movepacket).meteor$setTag(1337);
-            mc.player.networkHandler.sendPacket(movepacket);
-            mc.player.networkHandler.sendPacket(homepacket);
-            mc.player.setPosition(previouspos);
+            positionCache.clear();
 
-            sendingAttacks = true;
-            if (swing.get()) {
-                mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
-                mc.player.swingHand(Hand.MAIN_HAND);
+            if (targetposvalid && useOffset.get()){
+                Vec3d offsetHome = getOffset(previouspos);
+                sendMove(offsetHome);
+                mc.player.setPosition(offsetHome);
             }
-            mc.player.networkHandler.sendPacket(
-                    PlayerInteractEntityC2SPacket.attack(targetEntity, mc.player.isSneaking())
-            );
-
-            currentHeight += increase.get();
+        } finally {
+            sendingAttacks = false;
         }
-
-        positionCache.clear();
-
-        if (targetposvalid && useOffset.get()){
-            Vec3d offsetHome = getOffset(previouspos);
-            PlayerMoveC2SPacket offsethomepacket = new PlayerMoveC2SPacket.PositionAndOnGround(offsetHome.getX(), offsetHome.getY(), offsetHome.getZ(), false, mc.player.horizontalCollision);
-            ((IPlayerMoveC2SPacket) offsethomepacket).meteor$setTag(1337);
-            mc.player.networkHandler.sendPacket(offsethomepacket);
-            mc.player.setPosition(offsetHome);
-        }
-        sendingAttacks = false;
     }
-
+    private void sendMove(Vec3d pos) {
+        if (mc.getNetworkHandler() == null) return;
+        PlayerMoveC2SPacket movepacket = new PlayerMoveC2SPacket.Full(pos.x,pos.y,pos.z,mc.player.getYaw(),mc.player.getPitch(), false, mc.player.horizontalCollision);
+        ((IPlayerMoveC2SPacket) movepacket).meteor$setTag(1337);
+        mc.player.networkHandler.sendPacket(movepacket);
+    }
     private Vec3d getOffset(Vec3d base) {
         double dx = offsethorizontal.get();
         double dy = offsetY.get();
@@ -204,8 +206,12 @@ public class MaceKill extends Module {
         return base;
     }
     private final BlockPos.Mutable mutablePos = new BlockPos.Mutable();
-    private final Map<Vec3d, Boolean> positionCache = new HashMap<>();
-
+    private final Map<Vec3d, Boolean> positionCache = new LinkedHashMap<>(256, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<Vec3d, Boolean> eldest) {
+            return size() > 256;
+        }
+    };
     private boolean invalid(Vec3d pos) {
         if (mc.world == null) return true;
 
@@ -252,17 +258,10 @@ public class MaceKill extends Module {
         positionCache.put(pos, collides);
         return collides;
     }
-
     private int getMaxHeightAbovePlayer() {
-        BlockPos playerPos = mc.player.getBlockPos();
-        int scanStart = (int) MathHelper.clamp(playerPos.getY() + fallHeight.get(),
-                playerPos.getY() + 1, mc.world.getTopYInclusive() - 1);
-
-        positionCache.clear();
-        for (int i = scanStart; i > playerPos.getY(); i--) {
-            Vec3d testPos = new Vec3d(playerPos.getX(), i, playerPos.getZ());
-            if (!invalid(testPos)) return i - playerPos.getY();
-        }
-        return 0;
+        if (mc.world == null) return 0;
+        int worldTop = mc.world.getTopYInclusive() - 1;
+        int maxBlocks = (int)(worldTop - mc.player.getY());
+        return Math.min(fallHeight.get(), maxBlocks);
     }
 }
