@@ -4,7 +4,9 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.PlayerListEntry;
@@ -37,32 +39,43 @@ import java.util.UUID;
 
 public class ForceTP extends Module {
     private final SettingGroup uuidOptions = settings.createGroup("UUID Options. Right Click entity to get UUID, or choose playername.");
-    private final SettingGroup pearlOptions = settings.createGroup("Pearl Options. Left Click to summon a pearl at the location.");
-    private final Setting<Boolean> allPlayers = uuidOptions.add(new BoolSetting.Builder()
-            .name("All Players")
-            .description("Spawn pearls for all players in tab list instead of single target.")
-            .defaultValue(false)
-            .build()
-    );
+    private final SettingGroup pearlOptions = settings.createGroup("Pearl Options.");
+
+    private enum uuidCollectionModes {
+        RightClick,
+        AllPlayers,
+        CustomUUID
+    }
+    private final Setting<uuidCollectionModes> uuidCollectionMode = uuidOptions.add(new EnumSetting.Builder<uuidCollectionModes>()
+            .name("uuid-collection-mode")
+            .description("How to get the uuid. RightClick = grab uuid of aimed at entity, AllPlayers = All players online, CustomUUID = Pick a UUID or name.")
+            .defaultValue(uuidCollectionModes.RightClick)
+            .build());
     private final Setting<Boolean> allPlayersAndSelf = uuidOptions.add(new BoolSetting.Builder()
             .name("All Players Include Self")
             .description("Spawn pearls for all players in tab list and yourself as well.")
             .defaultValue(false)
-            .visible(() -> allPlayers.get())
+            .visible(() -> uuidCollectionMode.get() == uuidCollectionModes.AllPlayers)
+            .build()
+    );
+    private final Setting<Boolean> ignorefrend = uuidOptions.add(new BoolSetting.Builder()
+            .name("All Players Ignore Friends")
+            .description("Spawn pearls for all players in tab list excluding friends.")
+            .defaultValue(false)
+            .visible(() -> uuidCollectionMode.get() == uuidCollectionModes.AllPlayers)
             .build()
     );
     private final Setting<Boolean> onlyliving = uuidOptions.add(new BoolSetting.Builder()
             .name("Only Living Entities")
             .description("Only grab uuid of living entity when right clicking.")
             .defaultValue(true)
-            .visible(() -> !allPlayers.get())
+            .visible(() -> uuidCollectionMode.get() == uuidCollectionModes.RightClick)
             .build()
     );
-    private final Setting<Boolean> customUUID = uuidOptions.add(new BoolSetting.Builder()
-            .name("Custom UUID")
-            .description("Use custom player UUID instead of targeted entity")
-            .defaultValue(false)
-            .visible(() -> !allPlayers.get())
+    private final Setting<Keybind> resetUUID = uuidOptions.add(new KeybindSetting.Builder()
+            .name("reset-uuid-keybind")
+            .description("Keybind used to reset the uuid to null.")
+            .visible(() -> uuidCollectionMode.get() == uuidCollectionModes.RightClick)
             .build()
     );
     private enum uuidModes {
@@ -73,19 +86,19 @@ public class ForceTP extends Module {
             .name("uuid-mode")
             .description("UUID or PlayerName.")
             .defaultValue(uuidModes.PlayerName)
-            .visible(() -> customUUID.get() && !allPlayers.get())
+            .visible(() -> uuidCollectionMode.get() == uuidCollectionModes.CustomUUID)
             .build());
     private final Setting<String> customPlayerName = uuidOptions.add(new StringSetting.Builder()
             .name("Player Name")
             .description("Player name to get UUID from")
             .defaultValue("")
-            .visible(() -> uuidMode.get() == uuidModes.PlayerName && customUUID.get() && !allPlayers.get())
+            .visible(() -> uuidMode.get() == uuidModes.PlayerName && uuidCollectionMode.get() == uuidCollectionModes.CustomUUID)
             .build()
     );
     private final Setting<String> customuuid = uuidOptions.add(new StringSetting.Builder()
             .name("Custom UUID")
             .defaultValue("")
-            .visible(() -> uuidMode.get() == uuidModes.UUID && customUUID.get() && !allPlayers.get())
+            .visible(() -> uuidMode.get() == uuidModes.UUID && uuidCollectionMode.get() == uuidCollectionModes.CustomUUID)
             .build()
     );
     private enum tModes {
@@ -160,13 +173,38 @@ public class ForceTP extends Module {
             .visible(auto::get)
             .build()
     );
-
+    private final Setting<Boolean> clicksummon = pearlOptions.add(new BoolSetting.Builder()
+            .name("Left Click Summon")
+            .description("Summon pearls when you click. Other wise use a tick delay")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Integer> tickdelay = pearlOptions.add(new IntSetting.Builder()
+            .name("TickDelay")
+            .description("How many ticks between summoning pearls.")
+            .defaultValue(2)
+            .min(0)
+            .sliderMax(20)
+            .visible(() -> !clicksummon.get())
+            .build()
+    );
     public ForceTP() {
-        super(Trouser.operator, "ForceTP", "Spawns ender pearls to teleport your target wherever you click. Requires Creative mode.");
+        super(Trouser.operator, "ForceTP", "Spawns ender pearls to teleport your target. Requires Creative mode.");
     }
 
     private int aticks = 0;
+    private int ticks = 0;
     private UUID entityUUID = null;
+
+    @Override
+    public void onActivate() {
+        entityUUID = null;
+        aticks = 0;
+        ticks = 0;
+        if (!clicksummon.get() && mc.currentScreen == null) {
+            spawnPearlAtTarget();
+        }
+    }
 
     @EventHandler
     public void onTick(TickEvent.Post event) {
@@ -178,12 +216,20 @@ public class ForceTP extends Module {
             return;
         }
 
-        if (auto.get() && mc.options.attackKey.isPressed() && mc.currentScreen == null) {
+        if (clicksummon.get() && auto.get() && mc.options.attackKey.isPressed() && mc.currentScreen == null) {
             if (aticks <= atickdelay.get()) {
                 aticks++;
             } else {
                 spawnPearlAtTarget();
                 aticks = 0;
+            }
+        }
+        if (!clicksummon.get() && mc.currentScreen == null) {
+            if (ticks <= tickdelay.get()) {
+                ticks++;
+            } else {
+                spawnPearlAtTarget();
+                ticks = 0;
             }
         }
     }
@@ -192,27 +238,22 @@ public class ForceTP extends Module {
     private void onMouseButton(MouseClickEvent event) {
         if (mc.player == null || mc.world == null) return;
 
-        if (mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player.getAbilities().creativeMode) {
+        if (clicksummon.get() && mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player.getAbilities().creativeMode) {
             spawnPearlAtTarget();
         }
-        if (customUUID.get() && mc.options.useKey.isPressed()) warning("Disable Custom UUID setting to use target's UUID");
-        if (!customUUID.get() && mc.options.useKey.isPressed() && mc.currentScreen == null) {
-            getEntityUUID();
+        if (uuidCollectionMode.get() == uuidCollectionModes.RightClick && mc.options.useKey.isPressed() && mc.currentScreen == null) {
+            Entity targetEntity = target();
+            if (targetEntity != null && targetEntity.isAlive() && targetEntity != mc.player) {
+                entityUUID = targetEntity.getUuid();
+                if (chatFeedback)info("Target entity UUID saved: " + targetEntity.getName().getString() + ". UUID: " + targetEntity.getUuid());
+            }
+        }
+        if (uuidCollectionMode.get() == uuidCollectionModes.RightClick && resetUUID.get().isPressed() && mc.currentScreen == null){
+            if (chatFeedback)info("Resetting saved entity.");
+            entityUUID = null;
         }
     }
 
-    private UUID getEntityUUID() {
-        Entity targetEntity = target();
-        if (targetEntity != null && targetEntity.isAlive() && targetEntity != mc.player) {
-            entityUUID = targetEntity.getUuid();
-            info("Target entity UUID saved: " + targetEntity.getName().getString() + ". UUID: " + targetEntity.getUuid());
-            return entityUUID;
-        }
-
-        info("No entity targeted. Resetting saved entity.");
-        entityUUID = null;
-        return null;
-    }
     private Entity target() {
         if (mc.player == null || mc.world == null) return null;
         if (mc.crosshairTarget instanceof EntityHitResult hit) return hit.getEntity();
@@ -256,10 +297,11 @@ public class ForceTP extends Module {
                 false
         );
 
-        if (allPlayers.get()) {
+        if (uuidCollectionMode.get() == uuidCollectionModes.AllPlayers) {
             if (mc.getNetworkHandler() != null) {
                 for (PlayerListEntry entry : mc.getNetworkHandler().getPlayerList()) {
                     if (!allPlayersAndSelf.get() && entry.getProfile().id().equals(mc.player.getUuid())) continue;
+                    if (ignorefrend.get() && Friends.get().isFriend(entry)) continue;
 
                     switch (targetplayeruuidMode.get()){
                         case PlayerName -> {
@@ -279,9 +321,44 @@ public class ForceTP extends Module {
         }
     }
     private void spawnSinglePearl(ItemStack rst, BlockHitResult bhr) {
+        UUID entityuuid = null;
+        if (uuidCollectionMode.get() == uuidCollectionModes.CustomUUID) {
+            switch (uuidMode.get()){
+                case PlayerName -> {
+                    if (!customPlayerName.get().isEmpty()) {
+                        entityuuid = getPlayerUUIDFromName(customPlayerName.get());
+                    } else {
+                        if (chatFeedback)warning("No valid UUID");
+                        return;
+                    }
+                }
+                case UUID -> {
+                    if (!customuuid.get().isEmpty()) {
+                        try {
+                            entityuuid = UUID.fromString(customuuid.get());
+                        } catch (IllegalArgumentException e) {
+                            if (chatFeedback)warning("No valid UUID");
+                            return;
+                        }
+                    } else {
+                        if (chatFeedback)warning("No valid UUID");
+                        return;
+                    }
+                }
+            }
+            if (entityuuid == null){
+                if (chatFeedback)warning("No valid UUID");
+                return;
+            }
+        } else if (entityUUID != null) {
+            entityuuid = entityUUID;
+        } else {
+            if (chatFeedback)warning("No target UUID");
+            return;
+        }
         ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
         var changes = ComponentChanges.builder()
-                .add(DataComponentTypes.ENTITY_DATA, createEnderPearlData())
+                .add(DataComponentTypes.ENTITY_DATA, createEnderPearlData(entityuuid))
                 .build();
         item.applyChanges(changes);
 
@@ -289,7 +366,7 @@ public class ForceTP extends Module {
         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
         mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
     }
-    private TypedEntityData<EntityType<?>> createEnderPearlData() {
+    private TypedEntityData<EntityType<?>> createEnderPearlData(UUID entityuuid) {
         NbtCompound entityTag = new NbtCompound();
 
         HitResult hr = mc.getCameraEntity().raycast(range.get(), 0, fluid.get());
@@ -354,47 +431,19 @@ public class ForceTP extends Module {
         }
         entityTag.put("Motion", motionList);
 
-        UUID entityuuid = null;
-        if (customUUID.get()) {
-            switch (uuidMode.get()){
-                case PlayerName -> {
-                    if (!customPlayerName.get().isEmpty()) {
-                        entityuuid = getPlayerUUIDFromName(customPlayerName.get());
-                    } else {
-                        warning("No valid UUID - using self");
-                        entityuuid = mc.player.getUuid();
-                    }
-                }
-                case UUID -> {
-                    if (!customuuid.get().isEmpty()) {
-                        try {
-                            entityuuid = UUID.fromString(customuuid.get());
-                        } catch (IllegalArgumentException e) {
-                            warning("Invalid custom UUID format: " + customuuid.get());
-                            warning("No valid UUID - using self");
-                            entityuuid = mc.player.getUuid();
-                        }
-                    } else {
-                        warning("No valid UUID - using self");
-                        entityuuid = mc.player.getUuid();
-                    }
-                }
-            }
-        } else if (entityUUID != null) {
-            entityuuid = entityUUID;
-        } else {
-            entityuuid = mc.player.getUuid();
-            warning("No target UUID - using self");
-        }
-        long most = entityuuid.getMostSignificantBits();
-        long least = entityuuid.getLeastSignificantBits();
+        if (entityuuid != null) {
+            long most = entityuuid.getMostSignificantBits();
+            long least = entityuuid.getLeastSignificantBits();
 
-        NbtList ownerUuid = new NbtList();
-        ownerUuid.add(NbtDouble.of((int) (most >> 32)));
-        ownerUuid.add(NbtDouble.of((int) most));
-        ownerUuid.add(NbtDouble.of((int) (least >> 32)));
-        ownerUuid.add(NbtDouble.of((int) least));
-        entityTag.put("Owner", ownerUuid);
+            int[] ownerInts = {
+                    (int) (most >> 32),
+                    (int) most,
+                    (int) (least >> 32),
+                    (int) least
+            };
+
+            entityTag.putIntArray("Owner", ownerInts);
+        }
 
         entityTag.putString("id", "minecraft:ender_pearl");
 
@@ -409,7 +458,6 @@ public class ForceTP extends Module {
             for (PlayerListEntry entry : mc.getNetworkHandler().getPlayerList()) {
                 if (entry.getProfile().name().equalsIgnoreCase(playerName)) {
                     UUID uuid = entry.getProfile().id();
-                    info("Found '" + playerName + "' in tab list: " + uuid);
                     return uuid;
                 }
             }
@@ -417,7 +465,6 @@ public class ForceTP extends Module {
 
         for (AbstractClientPlayerEntity player : mc.world.getPlayers()) {
             if (player.getGameProfile().name().equalsIgnoreCase(playerName)) {
-                info("Found '" + playerName + "' in world: " + player.getUuid());
                 return player.getUuid();
             }
         }
@@ -426,7 +473,7 @@ public class ForceTP extends Module {
             return mc.player.getUuid();
         }
 
-        warning("Player '" + playerName + "' not found anywhere - using self UUID");
-        return mc.player != null ? mc.player.getUuid() : UUID.randomUUID();
+        if (chatFeedback)warning("Player '" + playerName + "' not found anywhere.");
+        return null;
     }
 }

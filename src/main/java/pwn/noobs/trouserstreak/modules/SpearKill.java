@@ -7,29 +7,32 @@ import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.NoFall;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import pwn.noobs.trouserstreak.Trouser;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class SpearKill extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -43,19 +46,16 @@ public class SpearKill extends Module {
             .defaultValue(true)
             .build()
     );
-
     public enum Mode {
         Lunge,
         Blink
     }
-
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("Mode")
             .description("Lunge=velocity boost, Blink=packet delay.")
             .defaultValue(Mode.Lunge)
             .build()
     );
-
     public final Setting<Double> maxrange = sgGeneral.add(new DoubleSetting.Builder()
             .name("Max Targeting Range")
             .description("How far in blocks that entities can still be targeted.")
@@ -64,23 +64,29 @@ public class SpearKill extends Module {
             .sliderRange(0, 512)
             .build()
     );
-
     public enum TargetListMode {
         Whitelist,
         Blacklist
     }
-
     private final Setting<TargetListMode> targetListMode = sgGeneral.add(new EnumSetting.Builder<TargetListMode>()
             .name("Target List Mode")
             .description("Whitelist = only target these entities, Blacklist = don't target these entities")
             .defaultValue(TargetListMode.Blacklist)
-            .build());
-
+            .build()
+    );
     private final Setting<Set<EntityType<?>>> targetEntities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("Target Entities")
             .description("Entities to whitelist/blacklist")
             .onlyAttackable()
-            .build());
+            .build()
+    );
+    private final Setting<Boolean> ignorefriends = sgGeneral.add(new BoolSetting.Builder()
+            .name("Ignore Friends")
+            .description("Do not Spear Kill friends.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> blinkLunge = sgBlinkLunge.add(new BoolSetting.Builder()
             .name("Blink+Lunge")
             .description("Combine Blink mode with velocity based lunging.")
@@ -88,7 +94,6 @@ public class SpearKill extends Module {
             .visible(() -> mode.get() == Mode.Blink)
             .build()
     );
-
     private final Setting<Double> blinkLungeStrength = sgBlinkLunge.add(new DoubleSetting.Builder()
             .name("Lunge Strength")
             .description("Velocity applied towards target")
@@ -98,7 +103,6 @@ public class SpearKill extends Module {
             .visible(() -> mode.get() == Mode.Blink && blinkLunge.get())
             .build()
     );
-
     private final Setting<Integer> blinkLungeTicks = sgBlinkLunge.add(new IntSetting.Builder()
             .name("Lunge Delay")
             .description("Ticks to charge before lunging")
@@ -108,6 +112,7 @@ public class SpearKill extends Module {
             .visible(() -> mode.get() == Mode.Blink && blinkLunge.get())
             .build()
     );
+
     private final Setting<Double> flushRange = sgBlink.add(new DoubleSetting.Builder()
             .name("Flush Range")
             .description("Distance to target when flush occurs (blocks)")
@@ -116,7 +121,6 @@ public class SpearKill extends Module {
             .sliderRange(1.0, 10.0)
             .visible(() -> mode.get() == Mode.Blink)
             .build());
-
     private final Setting<Double> maxflushRange = sgBlink.add(new DoubleSetting.Builder()
             .name("Force Flush Distance")
             .description("Distance to force a flush")
@@ -125,7 +129,6 @@ public class SpearKill extends Module {
             .sliderRange(1.0, 20.0)
             .visible(() -> mode.get() == Mode.Blink && !blinkLunge.get())
             .build());
-
     private final Setting<Boolean> blinkAimbot = sgBlink.add(new BoolSetting.Builder()
             .name("Aimbot")
             .description("Lock on to target")
@@ -142,11 +145,16 @@ public class SpearKill extends Module {
             .visible(() -> mode.get() == Mode.Blink)
             .build()
     );
-    private final Setting<Boolean> lungeFromAbove = sgLunge.add(new BoolSetting.Builder()
-            .name("Lunge From Above")
-            .description("Lunge to a point above target first, then to target.")
-            .defaultValue(false)
-            .visible(() -> mode.get() == Mode.Lunge)
+
+    public enum lungeMode {
+        DirectionBased,
+        FromAbove,
+        Auto_FromAboveFirst
+    }
+    private final Setting<lungeMode> LungeDirectionMode = sgLunge.add(new EnumSetting.Builder<lungeMode>()
+            .name("Lunge Direction")
+            .description("DirectionBased = toward look direction, FromAbove = Stab from above, Auto_FromAboveFirst = Stab from above, unless the above position or path to target from above position is invalid.")
+            .defaultValue(lungeMode.DirectionBased)
             .build()
     );
     private final Setting<Double> aboveHeight = sgLunge.add(new DoubleSetting.Builder()
@@ -155,7 +163,7 @@ public class SpearKill extends Module {
             .defaultValue(10.0)
             .min(5)
             .sliderRange(5, 50)
-            .visible(() -> mode.get() == Mode.Lunge && lungeFromAbove.get())
+            .visible(() -> mode.get() == Mode.Lunge && (LungeDirectionMode.get() == lungeMode.FromAbove || LungeDirectionMode.get() == lungeMode.Auto_FromAboveFirst))
             .build()
     );
     private final Setting<Double> aboveHeightdistance = sgLunge.add(new DoubleSetting.Builder()
@@ -164,7 +172,14 @@ public class SpearKill extends Module {
             .defaultValue(3.0)
             .min(1)
             .sliderRange(1, 10)
-            .visible(() -> mode.get() == Mode.Lunge && lungeFromAbove.get())
+            .visible(() -> mode.get() == Mode.Lunge && (LungeDirectionMode.get() == lungeMode.FromAbove || LungeDirectionMode.get() == lungeMode.Auto_FromAboveFirst))
+            .build()
+    );
+    private final Setting<Boolean> checkdistanceinvalid = sgLunge.add(new BoolSetting.Builder()
+            .name("Trigger Distance Validition")
+            .description("Checks if the area around the above position is valid with using a radius of Above Height Trigger Distance.")
+            .defaultValue(true)
+            .visible(() -> mode.get() == Mode.Lunge && LungeDirectionMode.get() == lungeMode.Auto_FromAboveFirst)
             .build()
     );
     public final Setting<Double> getLungeStrength = sgLunge.add(new DoubleSetting.Builder()
@@ -176,7 +191,6 @@ public class SpearKill extends Module {
             .visible(() -> mode.get() == Mode.Lunge)
             .build()
     );
-
     private final Setting<Boolean> stop = sgLunge.add(new BoolSetting.Builder()
             .name("Stop on target")
             .description("Stops the lunge when you reach the target.")
@@ -184,7 +198,6 @@ public class SpearKill extends Module {
             .visible(() -> mode.get() == Mode.Lunge)
             .build()
     );
-
     public final Setting<Double> stopDistance = sgLunge.add(new DoubleSetting.Builder()
             .name("Stop Distance")
             .description("Distance between your hitbox and the entities hitbox to attempt to stop at.")
@@ -194,7 +207,6 @@ public class SpearKill extends Module {
             .visible(() -> stop.get() && mode.get() == Mode.Lunge)
             .build()
     );
-
     private final Setting<Integer> getreadyticksModifier = sgLunge.add(new IntSetting.Builder()
             .name("Lunge Delay Modifier")
             .description("Wait % amount of time until spear is ready before lunge.")
@@ -428,34 +440,152 @@ public class SpearKill extends Module {
             double lungeSpeed = getLungeStrength.get();
             Vec3d viewDir;
 
-            if (lungeFromAbove.get() && killtarget != null) {
-                if (!firstPhase || aboveTargetPos == null) {
-                    Vec3d targetCenter = killtarget.getBoundingBox().getCenter();
-                    aboveTargetPos = new Vec3d(targetCenter.x, targetCenter.y + aboveHeight.get(), targetCenter.z);
-                    firstPhase = true;
-                }
-
-                Vec3d playerPos = mc.player.getEntityPos();
-                double distToAbove = playerPos.distanceTo(aboveTargetPos);
-
-                if (distToAbove < aboveHeightdistance.get()) {
-                    Vec3d targetDir = killtarget.getBoundingBox().getCenter().subtract(playerPos).normalize();
+            if (killtarget == null) return;
+            switch (LungeDirectionMode.get()) {
+                case DirectionBased -> {
+                    Vec3d targetDir = killtarget.getBoundingBox().getCenter().subtract(mc.player.getEntityPos()).normalize();
                     viewDir = targetDir;
-                    firstPhase = false;
-                } else {
-                    Vec3d aboveDir = aboveTargetPos.subtract(playerPos).normalize();
-                    viewDir = aboveDir;
-                }
-            } else {
-                Vec3d targetDir = killtarget.getBoundingBox().getCenter().subtract(mc.player.getEntityPos()).normalize();
-                viewDir = targetDir;
-            }
 
-            mc.player.setSprinting(true);
-            mc.player.setVelocity(viewDir.multiply(lungeSpeed));
+                    mc.player.setSprinting(true);
+                    mc.player.setVelocity(viewDir.multiply(lungeSpeed));
+                }
+                case FromAbove -> {
+                    if (!firstPhase || aboveTargetPos == null) {
+                        Vec3d targetCenter = killtarget.getBoundingBox().getCenter();
+                        aboveTargetPos = new Vec3d(targetCenter.x, targetCenter.y + aboveHeight.get(), targetCenter.z);
+                        firstPhase = true;
+                    }
+
+                    Vec3d playerPos = mc.player.getEntityPos();
+                    double distToAbove = playerPos.distanceTo(aboveTargetPos);
+
+                    if (distToAbove < aboveHeightdistance.get()) {
+                        Vec3d targetDir = killtarget.getBoundingBox().getCenter().subtract(playerPos).normalize();
+                        viewDir = targetDir;
+                        firstPhase = false;
+                    } else {
+                        Vec3d aboveDir = aboveTargetPos.subtract(playerPos).normalize();
+                        viewDir = aboveDir;
+                    }
+
+                    mc.player.setSprinting(true);
+                    mc.player.setVelocity(viewDir.multiply(lungeSpeed));
+                }
+                case Auto_FromAboveFirst -> {
+                    if (!firstPhase || aboveTargetPos == null) {
+                        Vec3d targetCenter = killtarget.getBoundingBox().getCenter();
+                        aboveTargetPos = new Vec3d(targetCenter.x, targetCenter.y + aboveHeight.get(), targetCenter.z);
+                        firstPhase = true;
+                    }
+
+                    Vec3d playerPos = mc.player.getEntityPos();
+                    double distToAbove = playerPos.distanceTo(aboveTargetPos);
+
+                    boolean FromAbovePathValid = isFromAbovePathValid(aboveTargetPos, killtarget);
+
+                    if (!FromAbovePathValid) {
+                        Vec3d targetDir = killtarget.getBoundingBox().getCenter().subtract(playerPos).normalize();
+                        viewDir = targetDir;
+                        firstPhase = false;
+                    } else if (distToAbove < aboveHeightdistance.get()) {
+                        Vec3d targetDir = killtarget.getBoundingBox().getCenter().subtract(playerPos).normalize();
+                        viewDir = targetDir;
+                        firstPhase = false;
+                    } else {
+                        Vec3d aboveDir = aboveTargetPos.subtract(playerPos).normalize();
+                        viewDir = aboveDir;
+                    }
+
+                    mc.player.setSprinting(true);
+                    mc.player.setVelocity(viewDir.multiply(lungeSpeed));
+                }
+            }
         }
     }
+    private boolean isFromAbovePathValid(Vec3d abovePos, Entity target) {
+        if (mc.world == null || abovePos == null) return false;
 
+        Vec3d targetCenter = target.getBoundingBox().getCenter();
+
+        if (invalid(abovePos)) {
+            return false;
+        }
+
+        if (checkdistanceinvalid.get()) {
+            double checkDistance = aboveHeightdistance.get();
+            int radius = (int)checkDistance;
+            for (int x = -radius; x <= radius; x++) {
+                for (int y = -radius; y <= radius; y++) {
+                    for (int z = -radius; z <= radius; z++) {
+                        Vec3d testPos = abovePos.add(x, y, z);
+                        if (testPos.distanceTo(abovePos) <= checkDistance && invalid(testPos)) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+
+        int pathSteps = Math.max(10, (int)(abovePos.distanceTo(targetCenter) * 2.5));
+        for (int i = 1; i < pathSteps; i++) {
+            double t = i / (double)pathSteps;
+            Vec3d sample = abovePos.lerp(targetCenter, t);
+            if (invalid(sample)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private final BlockPos.Mutable mutablePos = new BlockPos.Mutable();
+    private final Map<Vec3d, Boolean> positionCache = new HashMap<>();
+    private boolean invalid(Vec3d pos) {
+        if (mc.world == null) return true;
+
+        double clampedY = MathHelper.clamp(pos.y, mc.world.getBottomY(), mc.world.getTopYInclusive() - 1);
+        if (clampedY != pos.y) return true;
+
+        BlockPos floored = BlockPos.ofFloored(pos);
+        int chunkX = floored.getX() >> 4;
+        int chunkZ = floored.getZ() >> 4;
+        if (mc.world.getChunkManager().getWorldChunk(chunkX, chunkZ) == null) return true;
+
+        if (positionCache.containsKey(pos)) return positionCache.get(pos);
+
+        Entity entity = mc.player;
+        Vec3d delta = pos.subtract(entity.getEntityPos());
+        Box box = entity.getBoundingBox().offset(delta);
+
+        mutablePos.set(floored);
+        for (int x = -1; x <= 1; x++) {
+            mutablePos.setX(floored.getX() + x);
+            for (int y = -1; y <= 1; y++) {
+                mutablePos.setY(floored.getY() + y);
+                for (int z = -1; z <= 1; z++) {
+                    mutablePos.setZ(floored.getZ() + z);
+                    BlockState state = mc.world.getBlockState(mutablePos);
+                    if (state.isOf(Blocks.LAVA) || state.isOf(Blocks.FIRE) || state.isOf(Blocks.SOUL_FIRE)
+                            || state.isOf(Blocks.MAGMA_BLOCK) || state.isOf(Blocks.CAMPFIRE)
+                            || state.isOf(Blocks.SWEET_BERRY_BUSH) || state.isOf(Blocks.POWDER_SNOW)) {
+                        positionCache.put(pos, true);
+                        return true;
+                    }
+                }
+            }
+        }
+
+        for (Entity e : mc.world.getOtherEntities(entity, box)) {
+            if (e.isCollidable(entity)) {
+                positionCache.put(pos, true);
+                return true;
+            }
+        }
+
+        boolean collides = mc.world.getBlockCollisions(entity, box).iterator().hasNext();
+        positionCache.put(pos, collides);
+        return collides;
+    }
     private void rotateToTarget(Entity target) {
         if (mc.player == null || target == null) return;
         Vec3d playerPos = mc.player.getEyePos();
@@ -667,6 +797,11 @@ public class SpearKill extends Module {
 
     private boolean isValidTarget(Entity entity) {
         if (entity == null) return false;
+
+        if (entity instanceof PlayerEntity player && ignorefriends.get() && Friends.get().isFriend(player)) {
+            return false;
+        }
+
         EntityType<?> type = entity.getType();
         boolean inList = targetEntities.get().contains(type);
         if (targetListMode.get() == TargetListMode.Whitelist) {

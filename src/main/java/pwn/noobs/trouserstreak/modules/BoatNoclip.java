@@ -25,15 +25,13 @@ import net.minecraft.util.shape.VoxelShape;
 public class BoatNoclip extends Module {
     private final SettingGroup sgSpeed = settings.createGroup("Speed");
     private final SettingGroup sgFlight = settings.createGroup("Flight");
+    private final SettingGroup warning = settings.createGroup("Horizontal speeds over 5-6 will rubberband inside blocks.");
 
     private final Setting<Boolean> speed = sgSpeed.add(new BoolSetting.Builder()
             .name("speed")
             .defaultValue(true)
             .build()
     );
-
-    private final SettingGroup warning = settings.createGroup("Horizontal speeds over 5-6 will rubberband inside blocks.");
-
     private final Setting<Double> horizontalSpeed = sgSpeed.add(new DoubleSetting.Builder()
             .name("horizontal-speed")
             .defaultValue(10)
@@ -42,7 +40,6 @@ public class BoatNoclip extends Module {
             .visible(speed::get)
             .build()
     );
-
     private final Setting<Double> horizontalSpeedInsideBlocks = sgSpeed.add(new DoubleSetting.Builder()
             .name("horizontal-speed-inside-blocks")
             .defaultValue(5)
@@ -51,7 +48,6 @@ public class BoatNoclip extends Module {
             .visible(speed::get)
             .build()
     );
-
     private final Setting<Double> verticalSpeed = sgSpeed.add(new DoubleSetting.Builder()
             .name("vertical-speed")
             .defaultValue(6)
@@ -66,13 +62,11 @@ public class BoatNoclip extends Module {
             .min(0)
             .build()
     );
-
     private final Setting<Boolean> antiKick = sgFlight.add(new BoolSetting.Builder()
             .name("anti-fly-kick")
             .defaultValue(true)
             .build()
     );
-
     private final Setting<Integer> delay = sgFlight.add(new IntSetting.Builder()
             .name("delay")
             .defaultValue(40)
@@ -117,7 +111,6 @@ public class BoatNoclip extends Module {
                 sentPacket = false;
             }
         }
-
         delayLeft--;
     }
 
@@ -126,7 +119,7 @@ public class BoatNoclip extends Module {
         if (!(event.entity instanceof AbstractBoatEntity entity)) return;
         if (entity.getControllingPassenger() != mc.player) return;
         entity.noClip = true;
-        
+
         double velX = entity.getVelocity().x;
         double velY = 0;
         double velZ = entity.getVelocity().z;
@@ -164,7 +157,6 @@ public class BoatNoclip extends Module {
             sentPacket = true;
             delayLeft = delay.get();
         }
-
         lastPacketY = currentY;
     }
 
@@ -216,8 +208,6 @@ public class BoatNoclip extends Module {
                 return true;
             }
         }
-
         return false;
     }
-
 }

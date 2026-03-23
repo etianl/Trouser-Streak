@@ -21,10 +21,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import pwn.noobs.trouserstreak.Trouser;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public class MaceKill extends Module {
     private final SettingGroup specialGroup2 = settings.createGroup("Disable \"Smash Attack\" in Criticals to make this module work.");
@@ -40,12 +37,6 @@ public class MaceKill extends Module {
             .description("Does not send movement packets if the attack was blocked. (prevents death)")
             .defaultValue(true)
             .build());
-    private final Setting<Boolean> requireCooldown = specialGroup.add(new BoolSetting.Builder()
-            .name("Require Full Cooldown")
-            .description("Only fire when attack cooldown is 100%. Useful for max base damage, but breaks totem bypass.")
-            .defaultValue(false)
-            .build()
-    );
     private final Setting<Integer> fallHeight = specialGroup.add(new IntSetting.Builder()
             .name("Fall height")
             .description("Simulates a fall from this distance")
@@ -64,7 +55,7 @@ public class MaceKill extends Module {
     );
     private final Setting<Boolean> attackSpam = totem.add(new BoolSetting.Builder()
             .name("Bypass totems")
-            .description("Max ~9 spam packets for this to work. Settings example: 49 fall height, 8 spam packets, 3 attacks, 9 height increase.")
+            .description("Settings example: 49 fall height, 8 spam packet, 3 attack, 9 height increase.")
             .defaultValue(false)
             .build());
     private final Setting<Integer> attacks = totem.add(new IntSetting.Builder()
@@ -118,9 +109,7 @@ public class MaceKill extends Module {
     private void onSendPacket(PacketEvent.Send event) {
         if (sendingAttacks) return;
         if (mc.player == null) return;
-        boolean holdingMace = mc.player.getMainHandStack().getItem() == Items.MACE
-                || mc.player.getOffHandStack().getItem() == Items.MACE;
-        if (mc.player.hasVehicle() || !holdingMace) return;
+        if (mc.player.hasVehicle() || mc.player.getMainHandStack().getItem() != Items.MACE) return;
         if (!(event.packet instanceof IPlayerInteractEntityC2SPacket packet)) return;
         if (packet.meteor$getType() != PlayerInteractEntityC2SPacket.InteractType.ATTACK) return;
 
@@ -129,11 +118,9 @@ public class MaceKill extends Module {
         if (packetDisable.get() && (targetEntity.isBlocking() || targetEntity.isInvulnerable() || targetEntity.isInCreativeMode())) return;
         if (!targetEntity.isAlive()) return;
 
-        if (requireCooldown.get() && mc.player.getAttackCooldownProgress(1f) < 1.0f) return;
-
         int baseBlocks = getMaxHeightAbovePlayer();
         if (baseBlocks == 0) {
-            error("No space above you to simulate a fall from.");
+            error("No valid space above you to attack from.");
             return;
         }
 
@@ -144,46 +131,29 @@ public class MaceKill extends Module {
         int attackCount = attacks.get();
         if (!attackSpam.get()) attackCount = 1;
         for (int i2 = 0; i2 < paperpackets.get(); i2++) {
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false, mc.player.horizontalCollision));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(mc.player.getYaw(), mc.player.getPitch(), false, mc.player.horizontalCollision));
         }
 
-        // try/finally so the flag always clears — if something throws mid-sequence without
-        // this it stays true permanently and the module silently stops working until relog
         try {
             boolean targetposvalid = true;
-            Hand maceHand = mc.player.getMainHandStack().getItem() == Items.MACE ? Hand.MAIN_HAND : Hand.OFF_HAND;
             for (int i = 0; i < attackCount; i++) {
-                // re-prime the server's movement budget before each follow-up.
-                // after processing the home packet from hit 1, Paper resets movement tolerance
-                // to baseline — the next UP packet gets rejected without this.
-                if (i > 0 && attackSpam.get()) {
-                    mc.player.networkHandler.sendPacket(
-                            new PlayerMoveC2SPacket.OnGroundOnly(false, mc.player.horizontalCollision));
-                }
-
                 int blocks = (i == 0) ? baseBlocks : currentHeight;
 
-                // the UP position is a spoofed packet — the server reads Y to compute fall damage
-                // but never validates block collisions at that coordinate for damage purposes.
-                // only world bounds matter here; block collision checks caused false failures.
                 if (mc.world == null || mc.player.getY() + blocks > mc.world.getTopYInclusive() - 1) {
                     targetposvalid = false;
                     continue;
                 }
 
                 Vec3d targetPos = new Vec3d(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ());
-                PlayerMoveC2SPacket movepacket = new PlayerMoveC2SPacket.PositionAndOnGround(targetPos.getX(), targetPos.getY(), targetPos.getZ(), false, mc.player.horizontalCollision);
-                PlayerMoveC2SPacket homepacket = new PlayerMoveC2SPacket.PositionAndOnGround(previouspos.getX(), previouspos.getY(), previouspos.getZ(), false, mc.player.horizontalCollision);
-                ((IPlayerMoveC2SPacket) homepacket).meteor$setTag(1337);
-                ((IPlayerMoveC2SPacket) movepacket).meteor$setTag(1337);
-                mc.player.networkHandler.sendPacket(movepacket);
-                mc.player.networkHandler.sendPacket(homepacket);
+
+                sendMove(targetPos);
+                sendMove(previouspos);
                 mc.player.setPosition(previouspos);
 
                 sendingAttacks = true;
                 if (swing.get()) {
-                    mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(maceHand));
-                    mc.player.swingHand(maceHand);
+                    mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+                    mc.player.swingHand(Hand.MAIN_HAND);
                 }
                 mc.player.networkHandler.sendPacket(
                         PlayerInteractEntityC2SPacket.attack(targetEntity, mc.player.isSneaking())
@@ -196,16 +166,19 @@ public class MaceKill extends Module {
 
             if (targetposvalid && useOffset.get()){
                 Vec3d offsetHome = getOffset(previouspos);
-                PlayerMoveC2SPacket offsethomepacket = new PlayerMoveC2SPacket.PositionAndOnGround(offsetHome.getX(), offsetHome.getY(), offsetHome.getZ(), false, mc.player.horizontalCollision);
-                ((IPlayerMoveC2SPacket) offsethomepacket).meteor$setTag(1337);
-                mc.player.networkHandler.sendPacket(offsethomepacket);
+                sendMove(offsetHome);
                 mc.player.setPosition(offsetHome);
             }
         } finally {
             sendingAttacks = false;
         }
     }
-
+    private void sendMove(Vec3d pos) {
+        if (mc.getNetworkHandler() == null) return;
+        PlayerMoveC2SPacket movepacket = new PlayerMoveC2SPacket.Full(pos,mc.player.getYaw(),mc.player.getPitch(), false, mc.player.horizontalCollision);
+        ((IPlayerMoveC2SPacket) movepacket).meteor$setTag(1337);
+        mc.player.networkHandler.sendPacket(movepacket);
+    }
     private Vec3d getOffset(Vec3d base) {
         double dx = offsethorizontal.get();
         double dy = offsetY.get();
@@ -233,16 +206,12 @@ public class MaceKill extends Module {
         return base;
     }
     private final BlockPos.Mutable mutablePos = new BlockPos.Mutable();
-
-    // bounded at 256 entries with LRU eviction — used by getOffset() which calls invalid()
-    // on multiple candidate positions each attack
     private final Map<Vec3d, Boolean> positionCache = new LinkedHashMap<>(256, 0.75f, true) {
         @Override
         protected boolean removeEldestEntry(Map.Entry<Vec3d, Boolean> eldest) {
             return size() > 256;
         }
     };
-
     private boolean invalid(Vec3d pos) {
         if (mc.world == null) return true;
 
@@ -289,10 +258,6 @@ public class MaceKill extends Module {
         positionCache.put(pos, collides);
         return collides;
     }
-
-    // the UP packet is spoofed so we only need the height to fit within world bounds.
-    // the old version scanned upward checking block collisions which was wrong — the server
-    // never validates block collisions at the spoofed Y for damage purposes.
     private int getMaxHeightAbovePlayer() {
         if (mc.world == null) return 0;
         int worldTop = mc.world.getTopYInclusive() - 1;
