@@ -3,6 +3,7 @@ package pwn.noobs.trouserstreak.modules;
 import io.netty.buffer.Unpooled;
 import meteordevelopment.meteorclient.events.entity.BoatMoveEvent;
 import net.minecraft.block.AbstractBlock;
+import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.network.PacketByteBuf;
 import pwn.noobs.trouserstreak.Trouser;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
@@ -16,7 +17,6 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -27,15 +27,13 @@ import net.minecraft.util.shape.VoxelShape;
 public class BoatNoclip extends Module {
     private final SettingGroup sgSpeed = settings.createGroup("Speed");
     private final SettingGroup sgFlight = settings.createGroup("Flight");
+    private final SettingGroup warning = settings.createGroup("Horizontal speeds over 5-6 will rubberband inside blocks.");
 
     private final Setting<Boolean> speed = sgSpeed.add(new BoolSetting.Builder()
             .name("speed")
             .defaultValue(true)
             .build()
     );
-
-    private final SettingGroup warning = settings.createGroup("Horizontal speeds over 5-6 will rubberband inside blocks.");
-
     private final Setting<Double> horizontalSpeed = sgSpeed.add(new DoubleSetting.Builder()
             .name("horizontal-speed")
             .defaultValue(10)
@@ -44,7 +42,6 @@ public class BoatNoclip extends Module {
             .visible(speed::get)
             .build()
     );
-
     private final Setting<Double> horizontalSpeedInsideBlocks = sgSpeed.add(new DoubleSetting.Builder()
             .name("horizontal-speed-inside-blocks")
             .defaultValue(5)
@@ -53,7 +50,6 @@ public class BoatNoclip extends Module {
             .visible(speed::get)
             .build()
     );
-
     private final Setting<Double> verticalSpeed = sgSpeed.add(new DoubleSetting.Builder()
             .name("vertical-speed")
             .defaultValue(6)
@@ -68,13 +64,11 @@ public class BoatNoclip extends Module {
             .min(0)
             .build()
     );
-
     private final Setting<Boolean> antiKick = sgFlight.add(new BoolSetting.Builder()
             .name("anti-fly-kick")
             .defaultValue(true)
             .build()
     );
-
     private final Setting<Integer> delay = sgFlight.add(new IntSetting.Builder()
             .name("delay")
             .defaultValue(40)
@@ -100,10 +94,18 @@ public class BoatNoclip extends Module {
         lastPacketY = Double.MAX_VALUE;
     }
 
+    @Override
+    public void onDeactivate() {
+        if (mc.player != null && mc.player.getVehicle() instanceof BoatEntity boat) {
+            boat.noClip = false;
+        }
+    }
+
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         if (mc.player != null && mc.player.getVehicle() instanceof BoatEntity boat) {
             insideBlock = isInsideBlock(boat);
+            boat.noClip = true;
             if (sentPacket) {
                 PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
                 buf.writeDouble(boat.getX());
@@ -124,6 +126,7 @@ public class BoatNoclip extends Module {
     private void onEntityMove(BoatMoveEvent event) {
         Entity entity = event.boat;
         if (entity.getControllingPassenger() != mc.player) return;
+        entity.noClip = true;
 
         double velX = entity.getVelocity().x;
         double velY = 0;
@@ -225,7 +228,6 @@ public class BoatNoclip extends Module {
                 return true;
             }
         }
-
         return false;
     }
 }

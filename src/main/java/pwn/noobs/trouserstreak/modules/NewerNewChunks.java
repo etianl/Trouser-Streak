@@ -1084,19 +1084,11 @@ public class NewerNewChunks extends Module {
 			if (mc.world.getChunkManager().getChunk(packet.getChunkX(), packet.getChunkZ()) == null) {
 				WorldChunk chunk = new WorldChunk(mc.world, oldpos);
 				try {
-					NbtCompound heightmapsNbt = new NbtCompound();
-					NbtCompound motionBlocking = new NbtCompound();
-					Heightmap.Type type = Heightmap.Type.MOTION_BLOCKING;
-
-					long[] emptyHeightmapData = new long[37];
-					motionBlocking.putLongArray("data", emptyHeightmapData);
-					heightmapsNbt.put(type.getName(), motionBlocking);
-
-					chunk.loadFromPacket(
-							packet.getChunkData().getSectionsDataBuf(),
-							heightmapsNbt,
-							packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ())
-					);
+					CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+						chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), new NbtCompound(),
+								packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ()));
+					}, taskExecutor);
+					future.join();
 				} catch (CompletionException e) {e.printStackTrace();}
 
 				boolean isNewChunk = false;

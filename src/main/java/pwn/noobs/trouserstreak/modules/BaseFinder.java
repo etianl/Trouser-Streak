@@ -1083,19 +1083,11 @@ public class BaseFinder extends Module {
             if (mc.world.getChunkManager().getChunk(packet.getChunkX(), packet.getChunkZ()) == null) {
                 WorldChunk chunk = new WorldChunk(mc.world, basepos);
                 try {
-                    NbtCompound heightmapsNbt = new NbtCompound();
-                    NbtCompound motionBlocking = new NbtCompound();
-                    Heightmap.Type type = Heightmap.Type.MOTION_BLOCKING;
-
-                    long[] emptyHeightmapData = new long[37];
-                    motionBlocking.putLongArray("data", emptyHeightmapData);
-                    heightmapsNbt.put(type.getName(), motionBlocking);
-
-                    chunk.loadFromPacket(
-                            packet.getChunkData().getSectionsDataBuf(),
-                            heightmapsNbt,
-                            packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ())
-                    );
+                    CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                        chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), new NbtCompound(),
+                                packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ()));
+                    }, taskExecutor);
+                    future.join();
                 } catch (CompletionException e) {e.printStackTrace();}
 
                 if (bubblesFinder.get() || spawner.get() || signFinder.get() || portalFinder.get() || roofDetector.get() || bedrockfind.get() || skybuildfind.get() || !Blawcks1.get().isEmpty() || !Blawcks2.get().isEmpty() || !Blawcks3.get().isEmpty() || !Blawcks4.get().isEmpty() || !Blawcks5.get().isEmpty() || !Blawcks6.get().isEmpty() || !Blawcks7.get().isEmpty()){
