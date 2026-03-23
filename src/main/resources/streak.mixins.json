@@ -15,8 +15,6 @@
     "PlayerEntityMixin",
     "TrouserSplashTextMixin",
     "TrouserHandshakeC2SMixin",
-    "ScreenMixin",
-    "HandledScreenMixin",
     "AbstractBlockMixin",
     "BoatEntityMixin"
   ]
