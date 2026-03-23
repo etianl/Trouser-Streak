@@ -5,9 +5,7 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixininterface.IPlayerInteractEntityC2SPacket;
-import meteordevelopment.meteorclient.settings.EnumSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.enchantment.Enchantment;
@@ -21,13 +19,24 @@ import pwn.noobs.trouserstreak.Trouser;
 public class KnockBackModifier extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     public enum directionMode {
+        Degrees,
         TowardSelf,
         Left, Right
     }
     private final Setting<directionMode> mode = sgGeneral.add(new EnumSetting.Builder<directionMode>()
             .name("Direction")
             .description("Direction of the Knockback that is inflicted")
-            .defaultValue(directionMode.TowardSelf)
+            .defaultValue(directionMode.Degrees)
+            .build()
+    );
+    private final Setting<Integer> degrees = sgGeneral.add(new IntSetting.Builder()
+            .name("Knockback Direction (degrees)")
+            .description("Relative to your Yaw. 90 = Right, 270 = Left, 180 = TowardSelf, 0 = Regular Knockback.")
+            .defaultValue(180)
+            .min(0)
+            .max(360)
+            .sliderRange(0, 360)
+            .visible(() -> mode.get() == directionMode.Degrees)
             .build()
     );
     public KnockBackModifier() {
@@ -60,6 +69,7 @@ public class KnockBackModifier extends Module {
             case TowardSelf -> modifiedYaw = originalYaw + 180f;
             case Left -> modifiedYaw = originalYaw - 90f;
             case Right -> modifiedYaw = originalYaw + 90f;
+            case Degrees -> modifiedYaw = (originalYaw + degrees.get()) % 360f;
         }
 
         mc.getNetworkHandler().sendPacket(

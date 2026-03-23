@@ -12,6 +12,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Hand;
@@ -27,20 +28,24 @@ public class TPAura extends Module {
     private final SettingGroup sgTP = settings.createGroup("Teleport Options");
     private final SettingGroup totem = settings.createGroup("Totem Bypass (PAPER ONLY)");
 
-    private final Setting<Boolean> swing = sgGeneral.add(
-            new BoolSetting.Builder()
-                    .name("swing arm")
-                    .defaultValue(true)
-                    .build()
+    private final Setting<Boolean> swing = sgGeneral.add(new BoolSetting.Builder()
+            .name("swing arm")
+            .defaultValue(true)
+            .build()
     );
-    private final Setting<Integer> entityAttackDelay = sgGeneral.add(
-            new IntSetting.Builder()
-                    .name("attack-delay")
-                    .description("Ticks between entity attacks.")
-                    .defaultValue(0)
-                    .min(0)
-                    .sliderMax(20)
-                    .build()
+    private final Setting<Boolean> rotateToTarget = sgGeneral.add(new BoolSetting.Builder()
+            .name("Rotate to Target")
+            .description("Sends a look packet aimed at the target before attacking. Helps hit registration on servers that check facing direction.")
+            .defaultValue(false)
+            .build()
+    );
+    private final Setting<Integer> entityAttackDelay = sgGeneral.add(new IntSetting.Builder()
+            .name("attack-delay")
+            .description("Ticks between entity attacks.")
+            .defaultValue(5)
+            .min(0)
+            .sliderMax(20)
+            .build()
     );
     private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
@@ -49,8 +54,18 @@ public class TPAura extends Module {
             .build()
     );
     public final Setting<Boolean> friends = sgGeneral.add(new BoolSetting.Builder()
-            .name("Attack Friends")
+            .name("Ignore Friends")
             .defaultValue(false)
+            .build()
+    );
+    public enum TargetPriority {
+        Closest,
+        LowestHealth
+    }
+    private final Setting<TargetPriority> targetPriority = sgGeneral.add(new EnumSetting.Builder<TargetPriority>()
+            .name("Target Priority")
+            .description("Closest = nearest entity. Lowest Health = entity with least HP remaining.")
+            .defaultValue(TargetPriority.Closest)
             .build()
     );
     public enum Mode {
@@ -69,77 +84,73 @@ public class TPAura extends Module {
             .defaultValue(true)
             .build()
     );
-    private final Setting<Boolean> goUp = sgTP.add(
-            new BoolSetting.Builder()
-                    .name("Clip up")
-                    .description("Clips upward to do a Mace Smash and get around obstacles. There isn't enough packets for this in vanilla mode.")
-                    .defaultValue(true)
-                    .visible(() -> mode.get() == Mode.Paper)
-                    .build()
+    private final Setting<Boolean> goUp = sgTP.add(new BoolSetting.Builder()
+            .name("Clip up")
+            .description("Clips upward to do a Mace Smash and get around obstacles. There isn't enough packets for this in vanilla mode.")
+            .defaultValue(true)
+            .visible(() -> mode.get() == Mode.Paper)
+            .build()
     );
-    private final Setting<Integer> packets = sgTP.add(
-            new IntSetting.Builder()
-                    .name("# spam packets to send (VANILLA)")
-                    .description("How many packets to send before actual movements.")
-                    .defaultValue(4)
-                    .min(1)
-                    .sliderRange(1,5)
-                    .visible(() -> mode.get() == Mode.Vanilla)
-                    .build()
+    private final Setting<Integer> packets = sgTP.add(new IntSetting.Builder()
+            .name("# spam packets to send (VANILLA)")
+            .description("How many packets to send before actual movements.")
+            .defaultValue(4)
+            .min(1)
+            .sliderRange(1,5)
+            .visible(() -> mode.get() == Mode.Vanilla)
+            .build()
     );
-    private final Setting<Double> Distance = sgTP.add(
-            new DoubleSetting.Builder()
-                    .name("Max Distance (VANILLA)")
-                    .description("Maximum range.")
-                    .defaultValue(22.0)
-                    .min(1.0)
-                    .sliderRange(1.0,22.0)
-                    .visible(() -> mode.get() == Mode.Vanilla)
-                    .build()
+    private final Setting<Double> Distance = sgTP.add(new DoubleSetting.Builder()
+            .name("Max Distance (VANILLA)")
+            .description("Maximum range.")
+            .defaultValue(22.0)
+            .min(1.0)
+            .sliderRange(1.0,22.0)
+            .visible(() -> mode.get() == Mode.Vanilla)
+            .onChanged(v -> { if (mode.get() == Mode.Vanilla) maxDistance = v; })
+            .build()
     );
-    private final Setting<Integer> paperpackets = sgTP.add(
-            new IntSetting.Builder()
-                    .name("# spam packets to send (PAPER)")
-                    .description("How many packets to send before actual movements.")
-                    .defaultValue(8)
-                    .min(1)
-                    .sliderRange(1,20)
-                    .visible(() -> mode.get() == Mode.Paper)
-                    .build()
+    private final Setting<Integer> paperpackets = sgTP.add(new IntSetting.Builder()
+            .name("# spam packets to send (PAPER)")
+            .description("How many packets to send before actual movements.")
+            .defaultValue(6)
+            .min(1)
+            .sliderRange(1,20)
+            .visible(() -> mode.get() == Mode.Paper)
+            .onChanged(v -> { if (mode.get() == Mode.Paper) maxDistance = v; })
+            .build()
     );
-    private final Setting<Double> paperDistance = sgTP.add(
-            new DoubleSetting.Builder()
-                    .name("Max Distance (PAPER)")
-                    .description("Maximum range.")
-                    .defaultValue(49.0)
-                    .min(1.0)
-                    .sliderRange(1.0,99.0)
-                    .visible(() -> mode.get() == Mode.Paper)
-                    .build()
+    private final Setting<Double> paperDistance = sgTP.add(new DoubleSetting.Builder()
+            .name("Max Distance (PAPER)")
+            .description("Maximum range.")
+            .defaultValue(49.0)
+            .min(1.0)
+            .sliderRange(1.0,99.0)
+            .visible(() -> mode.get() == Mode.Paper)
+            .build()
     );
-    private final Setting<Double> offsethorizontal = sgTP.add(
-            new DoubleSetting.Builder()
-                    .name("Horizontal Offset")
-                    .description("How much to offset the player after teleports.")
-                    .defaultValue(0.05)
-                    .min(0.001)
-                    .sliderMax(0.99)
-                    .build()
+    private final Setting<Double> offsethorizontal = sgTP.add(new DoubleSetting.Builder()
+            .name("Horizontal Offset")
+            .description("How much to offset the player after teleports.")
+            .defaultValue(0.05)
+            .min(0.001)
+            .sliderMax(0.99)
+            .build()
     );
-    private final Setting<Double> offsetY = sgTP.add(
-            new DoubleSetting.Builder()
-                    .name("Y Offset")
-                    .description("How much to offset the player after teleports.")
-                    .defaultValue(0.01)
-                    .min(0.001)
-                    .sliderMax(0.99)
-                    .build()
+    private final Setting<Double> offsetY = sgTP.add(new DoubleSetting.Builder()
+            .name("Y Offset")
+            .description("How much to offset the player after teleports.")
+            .defaultValue(0.01)
+            .min(0.001)
+            .sliderMax(0.99)
+            .build()
     );
     private final Setting<Boolean> attackSpam = totem.add(new BoolSetting.Builder()
             .name("Bypass totems (Mace)")
-            .description("Teleport pathway is simplified for this to work. Settings example: 49 distance, 8 spam packet, 2 attack, 20 height increase.")
+            .description("Teleport pathway is simplified for this to work. Settings example: 49 distance, 6 spam packet, 2 attack, 9 height increase.")
             .defaultValue(false)
-            .build());
+            .build()
+    );
     private final Setting<Integer> attacks = totem.add(new IntSetting.Builder()
             .name("# of Attacks")
             .description("This many attacks. 3 attacks may not work due to packet limits")
@@ -150,7 +161,7 @@ public class TPAura extends Module {
     );
     private final Setting<Integer> increase = totem.add(new IntSetting.Builder()
             .name("Height Increase")
-            .description("Blocks distance to increase from the last attack")
+            .description("Blocks to add to fall height for each follow-up attack. Each hit must deal more damage than the last to beat invulnerability frames.")
             .defaultValue(9)
             .sliderRange(1, 100)
             .min(1)
@@ -166,37 +177,44 @@ public class TPAura extends Module {
     }
     @Override
     public void onActivate() {
-        if (mode.get() == Mode.Vanilla) maxDistance = Distance.get();
-        else maxDistance = paperDistance.get();
+        maxDistance = mode.get() == Mode.Vanilla ? Distance.get() : paperDistance.get();
     }
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (mc.player == null || mc.world == null || mc.getNetworkHandler() == null) return;
 
-        if (mode.get() == Mode.Vanilla) maxDistance = Distance.get();
-        else maxDistance = paperDistance.get();
+        maxDistance = mode.get() == Mode.Vanilla ? Distance.get() : paperDistance.get();
         entityAttackTicks++;
-        if (entityAttackTicks>entityAttackDelay.get()){
+        if (entityAttackTicks > entityAttackDelay.get()){
             hitEntity();
             entityAttackTicks = 0;
         }
     }
 
     private Entity findClosestTarget() {
-        Entity closest = null;
-        double closestDist = Double.MAX_VALUE;
+        Entity best = null;
+        double bestValue = Double.MAX_VALUE;
+        double maxDistSq = maxDistance * maxDistance;
 
         for (Entity entity : mc.world.getEntities()) {
+            if (entity.squaredDistanceTo(mc.player) > maxDistSq) continue;
             if (!isValidListTarget(entity)) continue;
             if (friends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) continue;
-            double dist = entity.squaredDistanceTo(mc.player);
-            if (dist < closestDist) {
-                closestDist = dist;
-                closest = entity;
+
+            double value;
+            if (targetPriority.get() == TargetPriority.LowestHealth && entity instanceof LivingEntity living) {
+                value = living.getHealth();
+            } else {
+                value = entity.squaredDistanceTo(mc.player);
+            }
+
+            if (value < bestValue) {
+                bestValue = value;
+                best = entity;
             }
         }
 
-        return closest;
+        return best;
     }
     private boolean isValidListTarget(Entity entity) {
         return entities.get().contains(entity.getType())
@@ -224,12 +242,14 @@ public class TPAura extends Module {
         Vec3d startPos = entity.getEntityPos();
         Vec3d targetPos = target.getEntityPos();
 
+        double actualDist = startPos.distanceTo(targetPos);
+        if (actualDist > maxDistance - 0.5) return;
+
         double yOffset = mc.player.getVehicle() != null
                 ? target.getBoundingBox().maxY + 0.3
-                : targetPos.y;
+                : target.getBoundingBox().getCenter().y;
 
         Vec3d insideTarget = new Vec3d(targetPos.x, yOffset, targetPos.z);
-        double actualDist = startPos.distanceTo(targetPos);
 
         Vec3d finalPos = !invalid(insideTarget)
                 ? insideTarget
@@ -238,11 +258,14 @@ public class TPAura extends Module {
 
         Vec3d highPos = startPos.add(0, maxDistance, 0);
         Vec3d abovetarget = finalPos.add(0, maxDistance, 0);
+        boolean doGoUp = mode.get() == Mode.Paper && goUp.get();
 
-        if (invalid(finalPos) || invalid(highPos) || invalid(abovetarget) ||
-                (mode.get() == Mode.Paper && goUp.get() && !hasClearPath(highPos, abovetarget))) {
+        boolean aboveTargetInvalid = doGoUp && (attackSpam.get()
+                ? (mc.world == null || abovetarget.y > mc.world.getTopYInclusive() - 1)
+                : (invalid(highPos) || invalid(abovetarget) || !hasClearPath(highPos, abovetarget)));
+        if (invalid(finalPos) || aboveTargetInvalid) {
             if (chatFeedback) {
-                if (!attackSpam.get() && !hasClearPath(highPos, abovetarget)) {
+                if (doGoUp && !attackSpam.get() && !hasClearPath(highPos, abovetarget)) {
                     error("Path blocked between clip positions.");
                 } else {
                     error("At least one of the teleports are invalid.");
@@ -251,12 +274,10 @@ public class TPAura extends Module {
             return;
         }
 
-        if (actualDist > maxDistance - 0.5) return;
-
         int amountOfPackets = mode.get() == Mode.Vanilla ? packets.get() : paperpackets.get();
         for (int i2 = 0; i2 < amountOfPackets; i2++) {
             if (mc.player.hasVehicle()) mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
-            else mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false, mc.player.horizontalCollision));
+            else mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(mc.player.getYaw(), mc.player.getPitch(), false, mc.player.horizontalCollision));
         }
 
         int attackCount = attacks.get();
@@ -266,41 +287,66 @@ public class TPAura extends Module {
         for (int i = 0; i < attackCount; i++) {
             int blocks = (i == 0) ? (int)maxDistance : currentHeight;
 
+            if (attackSpam.get() && mc.world != null) {
+                int worldTop = mc.world.getTopYInclusive() - 1;
+                if (finalPos.y + blocks > worldTop) {
+                    blocks = (int)(worldTop - finalPos.y);
+                    if (blocks < 1) break;
+                }
+            }
+
             Vec3d progressiveAboveTarget = finalPos.add(0, blocks, 0);
 
-            if (mode.get() == Mode.Paper && goUp.get() && invalid(progressiveAboveTarget)) {
+            if (doGoUp && invalid(progressiveAboveTarget)) {
                 if (chatFeedback) error("Invalid progressive height positions at " + blocks + " blocks.");
                 break;
             }
 
-            if (attackCount > 1 && chatFeedback && ((mode.get() == Mode.Paper && goUp.get() && !hasClearPath(progressiveAboveTarget, finalPos)) || !hasClearPath(startPos, finalPos))) {
+            if (attackCount > 1 && chatFeedback && ((doGoUp && !hasClearPath(progressiveAboveTarget, finalPos)) || !hasClearPath(startPos, finalPos))) {
                 error("Path blocked between clip positions.");
                 break;
             }
 
-            if (attackCount == 1 && mode.get() == Mode.Paper && goUp.get()) {
+            if (attackCount == 1 && doGoUp) {
                 sendMove(entity, highPos);
             }
 
-            if (mode.get() == Mode.Paper && goUp.get()) {
+            if (doGoUp) {
                 sendMove(entity, progressiveAboveTarget);
             }
 
             sendMove(entity, finalPos);
 
+            if (rotateToTarget.get()) {
+                Vec3d toTarget = target.getBoundingBox().getCenter().subtract(mc.player.getEyePos()).normalize();
+                float yaw = (float)(Math.toDegrees(Math.atan2(toTarget.z, toTarget.x)) - 90.0);
+                float pitch = (float)-Math.toDegrees(Math.asin(MathHelper.clamp(toTarget.y, -1.0, 1.0)));
+                PlayerMoveC2SPacket rotPacket = new PlayerMoveC2SPacket.LookAndOnGround(yaw, pitch, false, mc.player.horizontalCollision);
+                ((IPlayerMoveC2SPacket) rotPacket).meteor$setTag(1337);
+                mc.player.networkHandler.sendPacket(rotPacket);
+            }
+
             if (swing.get()) {
                 mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
                 mc.player.swingHand(Hand.MAIN_HAND);
             }
+
             mc.getNetworkHandler().sendPacket(PlayerInteractEntityC2SPacket.attack(target, mc.player.isSneaking()));
-            if (attackCount == 1 && mode.get() == Mode.Paper && goUp.get()) {
+
+            if (attackCount == 1 && doGoUp) {
                 sendMove(entity, progressiveAboveTarget);
                 sendMove(entity, highPos);
             }
 
-            sendMove(entity, startPos);
+            if (attackCount == 1) {
+                sendMove(entity, startPos);
+            }
 
             currentHeight += increase.get();
+        }
+
+        if (attackCount > 1) {
+            sendMove(entity, startPos);
         }
 
         Vec3d offset = getOffset(startPos);
@@ -332,7 +378,7 @@ public class TPAura extends Module {
     private void sendMove(Entity entity, Vec3d pos) {
         if (mc.getNetworkHandler() == null) return;
         if (entity == mc.player) {
-            PlayerMoveC2SPacket movepacket = new PlayerMoveC2SPacket.PositionAndOnGround(pos.x, pos.y, pos.z, false, false);
+            PlayerMoveC2SPacket movepacket = new PlayerMoveC2SPacket.Full(pos,mc.player.getYaw(),mc.player.getPitch(), false, mc.player.horizontalCollision);
             ((IPlayerMoveC2SPacket) movepacket).meteor$setTag(1337);
             mc.player.networkHandler.sendPacket(movepacket);
         } else {

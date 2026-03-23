@@ -1092,8 +1092,11 @@ public class BaseFinder extends Module {
                     long[] emptyHeightmapData = new long[37];
                     heightmaps.put(type, emptyHeightmapData);
 
-                    chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), heightmaps,
-                            packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ()));
+                    CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                        chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), heightmaps,
+                                packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ()));
+                    }, taskExecutor);
+                    future.join();
                 } catch (CompletionException e) {e.printStackTrace();}
 
                 if (bubblesFinder.get() || spawner.get() || signFinder.get() || portalFinder.get() || roofDetector.get() || bedrockfind.get() || skybuildfind.get() || !Blawcks1.get().isEmpty() || !Blawcks2.get().isEmpty() || !Blawcks3.get().isEmpty() || !Blawcks4.get().isEmpty() || !Blawcks5.get().isEmpty() || !Blawcks6.get().isEmpty() || !Blawcks7.get().isEmpty()){

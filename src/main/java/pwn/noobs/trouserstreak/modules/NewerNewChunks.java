@@ -1089,8 +1089,11 @@ public class NewerNewChunks extends Module {
 					long[] emptyHeightmapData = new long[37];
 					heightmaps.put(type, emptyHeightmapData);
 
-					chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), heightmaps,
-							packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ()));
+					CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+						chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), heightmaps,
+								packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ()));
+					}, taskExecutor);
+					future.join();
 				} catch (CompletionException e) {e.printStackTrace();}
 
 				boolean isNewChunk = false;

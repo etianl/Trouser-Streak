@@ -7,9 +7,24 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.meteorclient.settings.KeybindSetting;
+import meteordevelopment.meteorclient.utils.misc.Keybind;
+import net.minecraft.component.ComponentChanges;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.TypedEntityData;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtDouble;
+import net.minecraft.nbt.NbtFloat;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import pwn.noobs.trouserstreak.Trouser;
 
@@ -27,7 +42,16 @@ public class ArmorStandImages extends Module {
     private final SettingGroup sgPosition = settings.createGroup("Position Settings");
     private final SettingGroup sgTiming = settings.createGroup("Timing Settings");
     private final SettingGroup sgRender = settings.createGroup("Render Settings");
-
+    public enum PlaceMode {
+        Spawn_Egg,
+        Command
+    }
+    private final Setting<PlaceMode> placeMode = sgGeneral.add(new EnumSetting.Builder<PlaceMode>()
+            .name("place-mode")
+            .description("The method of summoning armor stands.")
+            .defaultValue(PlaceMode.Spawn_Egg)
+            .build()
+    );
     private final Setting<String> imagePath = sgGeneral.add(new StringSetting.Builder()
             .name("image-path")
             .description("Full path to the PNG image file.")
@@ -248,11 +272,6 @@ public class ArmorStandImages extends Module {
     @Override
     public void onActivate() {
         if (mc.player == null || mc.world == null) return;
-        if (mc.player.getPermissionLevel() < 2 && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
-            error("Requires Operator permissions!");
-            toggle();
-            return;
-        }
         scaledImage = null;
         pixelPositions.clear();
         isPlacing = false;
@@ -277,6 +296,13 @@ public class ArmorStandImages extends Module {
         boolean currentKeyPressed = isPlaceKeyPressed();
 
         if (currentKeyPressed && !wasKeyPressed) {
+            if (placeMode.get() == PlaceMode.Command && mc.player.getPermissionLevel() < 2) {
+                error("Requires Operator permissions!");
+                return;
+            } else if (placeMode.get() == PlaceMode.Spawn_Egg && !mc.player.getAbilities().creativeMode) {
+                error("Requires Creative Mode!");
+                return;
+            }
             if (isPlacing) {
                 stopPlacing();
             } else if (!pixelPositions.isEmpty()) {
@@ -509,15 +535,58 @@ public class ArmorStandImages extends Module {
         if (concreteId == null) {
             concreteId = "minecraft:white_concrete";
         }
+        switch (placeMode.get()){
+            case Command -> {
+                String command = String.format(
+                        "summon armor_stand %.2f %.2f %.2f {Invisible:1b,NoGravity:1b,equipment:{head:{id:\"%s\"}}}",
+                        pixel.x, pixel.y, pixel.z, concreteId
+                );
 
-        String command = String.format(
-                "summon armor_stand %.2f %.2f %.2f {Invisible:1b,NoGravity:1b,equipment:{head:{id:\"%s\"}}}",
-                pixel.x, pixel.y, pixel.z, concreteId
-        );
-
-        if (mc.player != null) {
-            mc.player.networkHandler.sendChatCommand(command);
+                if (mc.player != null) {
+                    mc.player.networkHandler.sendChatCommand(command);
+                }
+            }
+            case Spawn_Egg -> {
+                ItemStack rst = mc.player.getMainHandStack();
+                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
+                ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
+                var changes = ComponentChanges.builder()
+                        .add(DataComponentTypes.ENTITY_DATA, createEntityData(pixel, concreteId))
+                        .build();
+                item.applyChanges(changes);
+                mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
+                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
+                mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
+            }
         }
+    }
+    private TypedEntityData<EntityType<?>> createEntityData(PixelPosition pixel, String blockId) {
+        NbtCompound entityTag = new NbtCompound();
+
+        entityTag.putString("id", "minecraft:armor_stand");
+
+        NbtList pos = new NbtList();
+        pos.add(NbtDouble.of(pixel.x));
+        pos.add(NbtDouble.of(pixel.y));
+        pos.add(NbtDouble.of(pixel.z));
+        entityTag.put("Pos", pos);
+
+        NbtList rotation = new NbtList();
+        rotation.add(NbtFloat.of(180.0f));
+        rotation.add(NbtFloat.of(0.0f));
+        entityTag.put("Rotation", rotation);
+
+        entityTag.putBoolean("Invisible", true);
+        entityTag.putBoolean("NoGravity", true);
+
+        NbtCompound head = new NbtCompound();
+        head.putString("id", blockId);
+
+        NbtCompound equipment = new NbtCompound();
+        equipment.put("head", head);
+        entityTag.put("equipment", equipment);
+
+        return TypedEntityData.create(EntityType.ARMOR_STAND, entityTag);
     }
     private String findClosestConcreteColor(int color) {
         int targetRed = (color >> 16) & 0xFF;

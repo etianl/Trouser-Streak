@@ -8,6 +8,7 @@ import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.movement.NoFall;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
@@ -28,11 +29,15 @@ import java.util.Arrays;
 import java.util.Collections;
 
 public class InfiniteReach extends Module {
-    public static InfiniteReach INSTANCE;
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
-
+    private final SettingGroup sgPacket = settings.createGroup("Packet Settings.");
+    private final Setting<Boolean> nonofall = sgGeneral.add(new BoolSetting.Builder()
+            .name("Disable NoFall While Teleporting")
+            .description("Prevents fall damage when teleporting.")
+            .defaultValue(true)
+            .build()
+    );
     private final Setting<Boolean> swing = sgGeneral.add(new BoolSetting.Builder()
             .name("swing arm")
             .defaultValue(true)
@@ -166,37 +171,52 @@ public class InfiniteReach extends Module {
             .visible(() -> renderblock.get())
             .build()
     );
-    private final SettingGroup sgDelay = settings.createGroup("Delay");
-
-    private final Setting<Integer> blockAttackDelay = sgDelay.add(new IntSetting.Builder()
+    private final Setting<Boolean> miningPacket = sgPacket.add(new BoolSetting.Builder()
+            .name("Send Mining packet.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Integer> blockAttackDelay = sgPacket.add(new IntSetting.Builder()
             .name("mining-packet-delay")
             .description("Ticks between mining packets.")
             .defaultValue(5)
             .min(1)
             .sliderMax(20)
+            .visible(miningPacket::get)
             .build()
     );
-
-    private final Setting<Integer> itemUseDelay = sgDelay.add(new IntSetting.Builder()
-            .name("item-use-delay")
+    private final Setting<Boolean> itemUsePacket = sgPacket.add(new BoolSetting.Builder()
+            .name("Send Item Use packet.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Integer> itemUseDelay = sgPacket.add(new IntSetting.Builder()
+            .name("item-use-packet-delay")
             .description("Ticks between item uses on blocks.")
             .defaultValue(5)
             .min(1)
             .sliderMax(20)
+            .visible(itemUsePacket::get)
             .build()
     );
-
-    private final Setting<Integer> entityAttackDelay = sgDelay.add(new IntSetting.Builder()
-            .name("attack-delay")
+    private final Setting<Boolean> attackPacket = sgPacket.add(new BoolSetting.Builder()
+            .name("Send Attack packet.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Integer> entityAttackDelay = sgPacket.add(new IntSetting.Builder()
+            .name("attack-packet-delay")
             .description("Ticks between entity attacks.")
             .defaultValue(5)
             .min(1)
             .sliderMax(20)
+            .visible(attackPacket::get)
             .build()
     );
-
-    public Entity hoveredTarget;
     private double maxDistance;
+    private boolean wasNoFallEnabled = false;
+    private boolean noFallToggled = false;
+    public Entity hoveredTarget = null;
     private int blockAttackTicks = 0;
     private boolean canBlockAttack = true;
     private int itemUseTicks = 0;
@@ -212,12 +232,33 @@ public class InfiniteReach extends Module {
     private volatile Vec3d blockabovetarget = Vec3d.ZERO;
     public InfiniteReach() {
         super(Trouser.Main, "infinite-reach", "Gives you super long arms. Lets you Mace Smash at long range in Paper servers.");
-        INSTANCE = this;
     }
     @Override
     public void onActivate() {
         if (mode.get() == Mode.Vanilla) maxDistance = Distance.get();
         else maxDistance = paperDistance.get();
+        wasNoFallEnabled = false;
+        noFallToggled = false;
+        hoveredTarget = null;
+        blockAttackTicks = 0;
+        canBlockAttack = true;
+        itemUseTicks = 0;
+        canItemUse = true;
+        entityAttackTicks = 0;
+        canEntityAttack = true;
+        startPos = Vec3d.ZERO;
+        finalPos = Vec3d.ZERO;
+        aboveself = Vec3d.ZERO;
+        abovetarget = Vec3d.ZERO;
+        blockfinalPos = Vec3d.ZERO;
+        blockaboveself = Vec3d.ZERO;
+        blockabovetarget = Vec3d.ZERO;
+    }
+    @Override
+    public void onDeactivate() {
+        if (noFallToggled && wasNoFallEnabled) {
+            Modules.get().get(NoFall.class).toggle();
+        }
     }
     @EventHandler
     private void onTick(TickEvent.Post event) {
@@ -353,24 +394,48 @@ public class InfiniteReach extends Module {
         boolean usePressed = mc.options.useKey.isPressed();
         boolean usingItem = mc.player.isUsingItem();
 
-        if (!attackPressed && !usePressed) return;
+        if (!attackPressed && !usePressed) {
+            if (nonofall.get()){
+                if (noFallToggled) {
+                    if (wasNoFallEnabled) {
+                        Modules.get().get(NoFall.class).toggle();
+                    }
+                    noFallToggled = false;
+                }
+            }
+            return;
+        }
         BlockHitResult bhr = null;
         if (mc.crosshairTarget instanceof BlockHitResult target) bhr = target;
-        if (entityHit != null && attackPressed && canEntityAttack) {
+        if (entityHit != null && attackPressed && canEntityAttack && attackPacket.get()) {
             canEntityAttack = false; entityAttackTicks = 0;
+            if (nonofall.get()) donofallstuff();
             hitEntity(hoveredTarget, true);
-        } else if (entityHit != null && usePressed && canItemUse) {
+        } else if (entityHit != null && usePressed && canItemUse && itemUsePacket.get()) {
             canItemUse = false; itemUseTicks = 0;
+            if (nonofall.get()) donofallstuff();
             hitEntity(hoveredTarget, false);
-        } else if (entityHit == null && attackPressed && canBlockAttack) {
+        } else if (entityHit == null && attackPressed && canBlockAttack && miningPacket.get()) {
             canBlockAttack = false; blockAttackTicks = 0;
+            if (nonofall.get()) donofallstuff();
             hitBlock(blockHit, true);
-        } else if (entityHit == null && usePressed && canItemUse && !usingItem) {
+        } else if (entityHit == null && usePressed && canItemUse && !usingItem && itemUsePacket.get()) {
             canItemUse = false; itemUseTicks = 0;
-            if (bhr != null && mc.world.getBlockState(bhr.getBlockPos()).isAir())hitBlock(blockHit, false);
+            if (bhr != null && mc.world.getBlockState(bhr.getBlockPos()).isAir()){
+                if (nonofall.get()) donofallstuff();
+                hitBlock(blockHit, false);
+            }
         }
     }
-
+    private void donofallstuff(){
+        if (!noFallToggled) {
+            wasNoFallEnabled = Modules.get().get(NoFall.class).isActive();
+            if (wasNoFallEnabled) {
+                Modules.get().get(NoFall.class).toggle();
+                noFallToggled = true;
+            }
+        }
+    }
     private void hitBlock(BlockHitResult bhr, Boolean attackpressed) {
         if (mc.player == null || mc.getNetworkHandler() == null || mc.world == null) return;
         if (mc.world.getChunk(bhr.getBlockPos()) == null) return;
