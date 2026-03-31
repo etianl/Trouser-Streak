@@ -47,7 +47,7 @@ public class MaceKill extends Module {
             .build());
     private final Setting<Integer> paperpackets = specialGroup.add(new IntSetting.Builder()
             .name("# spam packets")
-            .description("Paper allows ~10 blocks of movement per spam packet. 4 = 22 blocks, 39+ = 384 blocks. Safe to go high since MaceKill only fires on manual swing, not auto.")
+            .description("Paper allows ~10 blocks of movement per spam packet, 4 packets gets you 22 blocks, 39+ gets you 384. Safe to crank up since MaceKill fires once per manual swing, not continuously, unless you're pairing it with KillAura, in which case, good luck.")
             .defaultValue(4)
             .min(1)
             .sliderRange(1,40)
