@@ -115,7 +115,7 @@ public class TPAura extends Module {
             .description("How many packets to send before actual movements.")
             .defaultValue(6)
             .min(1)
-            .sliderRange(1,20)
+            .sliderRange(1,40)
             .visible(() -> mode.get() == Mode.Paper)
             .onChanged(v -> { if (mode.get() == Mode.Paper) maxDistance = v; })
             .build()
@@ -125,7 +125,14 @@ public class TPAura extends Module {
             .description("Maximum range.")
             .defaultValue(49.0)
             .min(1.0)
-            .sliderRange(1.0,99.0)
+            .sliderRange(1.0,512.0)
+            .visible(() -> mode.get() == Mode.Paper && !adaptiveDistance.get())
+            .build()
+    );
+    private final Setting<Boolean> adaptiveDistance = sgTP.add(new BoolSetting.Builder()
+            .name("Adaptive Distance (PAPER)")
+            .description("Automatically sets Max Distance to your current render distance (chunks × 16 blocks). Overrides the manual distance slider.")
+            .defaultValue(false)
             .visible(() -> mode.get() == Mode.Paper)
             .build()
     );
@@ -177,13 +184,13 @@ public class TPAura extends Module {
     }
     @Override
     public void onActivate() {
-        maxDistance = mode.get() == Mode.Vanilla ? Distance.get() : paperDistance.get();
+        maxDistance = mode.get() == Mode.Vanilla ? Distance.get() : (adaptiveDistance.get() ? (mc.options.getViewDistance().getValue() + 0.5) * 16.0 : paperDistance.get());
     }
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (mc.player == null || mc.world == null || mc.getNetworkHandler() == null) return;
 
-        maxDistance = mode.get() == Mode.Vanilla ? Distance.get() : paperDistance.get();
+        maxDistance = mode.get() == Mode.Vanilla ? Distance.get() : (adaptiveDistance.get() ? (mc.options.getViewDistance().getValue() + 0.5) * 16.0 : paperDistance.get());
         entityAttackTicks++;
         if (entityAttackTicks > entityAttackDelay.get()){
             hitEntity();
