@@ -87,10 +87,10 @@ public class InfiniteReach extends Module {
     );
     private final Setting<Integer> paperpackets = sgGeneral.add(new IntSetting.Builder()
             .name("# spam packets to send (PAPER)")
-            .description("How many packets to send before actual movements.")
+            .description("How many packets to send before actual movements. Paper allows ~10 blocks of movement per packet. WARNING: High values + low attack delay = packet rate kick. Safe max is ~8 at default 5-tick delay.")
             .defaultValue(7)
             .min(1)
-            .sliderRange(1,40)
+            .sliderRange(1,10)
             .visible(() -> mode.get() == Mode.Paper)
             .build()
     );
