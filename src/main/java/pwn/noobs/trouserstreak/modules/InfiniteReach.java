@@ -90,7 +90,7 @@ public class InfiniteReach extends Module {
             .description("How many packets to send before actual movements.")
             .defaultValue(7)
             .min(1)
-            .sliderRange(1,10)
+            .sliderRange(1,40)
             .visible(() -> mode.get() == Mode.Paper)
             .build()
     );
@@ -99,7 +99,14 @@ public class InfiniteReach extends Module {
             .description("Maximum range.")
             .defaultValue(59.0)
             .min(1.0)
-            .sliderRange(1.0,99.0)
+            .sliderRange(1.0,512.0)
+            .visible(() -> mode.get() == Mode.Paper && !adaptiveDistance.get())
+            .build()
+    );
+    private final Setting<Boolean> adaptiveDistance = sgGeneral.add(new BoolSetting.Builder()
+            .name("Adaptive Distance (PAPER)")
+            .description("Automatically sets Max Distance to your current render distance (chunks × 16 blocks). Overrides the manual distance slider.")
+            .defaultValue(false)
             .visible(() -> mode.get() == Mode.Paper)
             .build()
     );
@@ -236,7 +243,7 @@ public class InfiniteReach extends Module {
     @Override
     public void onActivate() {
         if (mode.get() == Mode.Vanilla) maxDistance = Distance.get();
-        else maxDistance = paperDistance.get();
+        else maxDistance = adaptiveDistance.get() ? (mc.options.getViewDistance().getValue() + 0.5) * 16.0 : paperDistance.get();
         wasNoFallEnabled = false;
         noFallToggled = false;
         hoveredTarget = null;
@@ -289,7 +296,7 @@ public class InfiniteReach extends Module {
         if (mc.player == null || mc.world == null || mc.getNetworkHandler() == null) return;
 
         if (mode.get() == Mode.Vanilla) maxDistance = Distance.get();
-        else maxDistance = paperDistance.get();
+        else maxDistance = adaptiveDistance.get() ? (mc.options.getViewDistance().getValue() + 0.5) * 16.0 : paperDistance.get();
 
         Vec3d cameraPos = mc.player.getCameraPosVec(1.0f);
         Vec3d rotation = mc.player.getRotationVec(1.0f);
