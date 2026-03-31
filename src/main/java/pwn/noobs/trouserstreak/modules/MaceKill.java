@@ -47,10 +47,10 @@ public class MaceKill extends Module {
             .build());
     private final Setting<Integer> paperpackets = specialGroup.add(new IntSetting.Builder()
             .name("# spam packets")
-            .description("4 required for max vanilla teleport of 22 blocks. 10 blocks distance per packet allowed in Paper.")
+            .description("Paper allows ~10 blocks of movement per spam packet. 4 = 22 blocks, 39+ = 384 blocks. Safe to go high since MaceKill only fires on manual swing, not auto.")
             .defaultValue(4)
             .min(1)
-            .sliderRange(1,17)
+            .sliderRange(1,40)
             .build()
     );
     private final Setting<Boolean> attackSpam = totem.add(new BoolSetting.Builder()
