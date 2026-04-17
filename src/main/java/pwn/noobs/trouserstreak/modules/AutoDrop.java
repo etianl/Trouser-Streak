@@ -14,6 +14,22 @@ import java.util.List;
 public class AutoDrop extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
+    private final Setting<DropMode> dropMode = sgGeneral.add(new EnumSetting.Builder<DropMode>()
+            .name("mode")
+            .description("How hotbar slots are dropped each tick.")
+            .defaultValue(DropMode.SEQUENTIAL)
+            .build()
+    );
+
+    private final Setting<Integer> dropsPerTick = sgGeneral.add(new IntSetting.Builder()
+            .name("drops-per-tick")
+            .description("Maximum number of hotbar slots to drop per tick (1-9).")
+            .defaultValue(1)
+            .min(1)
+            .sliderMax(9)
+            .build()
+    );
+
     private final Setting<Boolean> tool = sgGeneral.add(new BoolSetting.Builder()
             .name("No Throw Tools")
             .description("No Throw tools")
@@ -45,9 +61,7 @@ public class AutoDrop extends Module {
         }
     }
 
-    private int previousslot = 0;
     private int nextSlot = 0;
-    private boolean getprevslot = false;
 
     public static boolean isTool(ItemStack itemStack) {
         return itemStack.isIn(ItemTags.AXES) ||
@@ -63,6 +77,11 @@ public class AutoDrop extends Module {
         return slot >= 0 && slot < 9 && slots.get(slot).get();
     }
 
+    @Override
+    public void onActivate() {
+        nextSlot = 0;
+    }
+
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         if (mc.player == null) return;
@@ -73,32 +92,40 @@ public class AutoDrop extends Module {
             return;
         }
 
-        if (getprevslot) return;
+        int savedSlot = mc.player.getInventory().selectedSlot;
+        int dropped = 0;
+        int limit = Math.min(dropsPerTick.get(), 9);
 
-        for (int i = 0; i < 9; i++) {
-            int slot = (nextSlot + i) % 9;
-            if (!isSlotEnabled(slot)) continue;
-
-            ItemStack stack = mc.player.getInventory().getStack(slot);
-            if (stack.isEmpty()) continue;
-            if (tool.get() && isTool(stack)) continue;
-
-            previousslot = mc.player.getInventory().selectedSlot;
-            mc.player.getInventory().selectedSlot = slot;
-            nextSlot = (slot + 1) % 9;
-            getprevslot = true;
-            return;
+        if (dropMode.get() == DropMode.BURST) {
+            for (int i = 0; i < 9 && dropped < limit; i++) {
+                if (!isSlotEnabled(i)) continue;
+                ItemStack stack = mc.player.getInventory().getStack(i);
+                if (stack.isEmpty()) continue;
+                if (tool.get() && isTool(stack)) continue;
+                mc.player.getInventory().selectedSlot = i;
+                mc.player.dropSelectedItem(true);
+                dropped++;
+            }
+        } else {
+            int startSlot = nextSlot;
+            for (int i = 0; i < 9 && dropped < limit; i++) {
+                int slot = (startSlot + i) % 9;
+                if (!isSlotEnabled(slot)) continue;
+                ItemStack stack = mc.player.getInventory().getStack(slot);
+                if (stack.isEmpty()) continue;
+                if (tool.get() && isTool(stack)) continue;
+                mc.player.getInventory().selectedSlot = slot;
+                mc.player.dropSelectedItem(true);
+                nextSlot = (slot + 1) % 9;
+                dropped++;
+            }
         }
+
+        mc.player.getInventory().selectedSlot = savedSlot;
     }
 
-    @EventHandler
-    private void onPostTick(TickEvent.Post event) {
-        if (mc.player == null) return;
-
-        if (getprevslot) {
-            mc.player.dropSelectedItem(true);
-            mc.player.getInventory().selectedSlot = previousslot;
-            getprevslot = false;
-        }
+    public enum DropMode {
+        SEQUENTIAL,
+        BURST
     }
 }
