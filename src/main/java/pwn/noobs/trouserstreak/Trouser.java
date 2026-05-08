@@ -115,6 +115,7 @@ public class Trouser extends MeteorAddon {
                 Commands.add(new WorldInfoCommand());
                 Hud.get().register(ElytraCount.INFO);
                 Hud.get().register(WaypointTriangulationHud.INFO);
+                Hud.get().register(HorseInfo.INFO);
         }
 
         @Override
