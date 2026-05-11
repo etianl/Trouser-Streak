@@ -1,25 +1,17 @@
-accessWidener v2 named
+accessWidener v2 official
 
-accessible class net/minecraft/world/chunk/PalettedContainer$Data
-accessible field net/minecraft/world/chunk/PalettedContainer data Lnet/minecraft/world/chunk/PalettedContainer$Data;
-accessible method net/minecraft/world/chunk/PalettedContainer$Data palette ()Lnet/minecraft/world/chunk/Palette;
-accessible class net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractType
-accessible class net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractAtHandler
-accessible class net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractTypeHandler
-accessible field net/minecraft/block/spawner/MobSpawnerLogic spawnDelay I
-accessible field net/minecraft/block/spawner/MobSpawnerLogic spawnEntry Lnet/minecraft/block/spawner/MobSpawnerEntry;
-accessible field net/minecraft/block/entity/DecoratedPotBlockEntity stack Lnet/minecraft/item/ItemStack;
-accessible method net/minecraft/client/MinecraftClient doItemUse ()V
-accessible field net/minecraft/client/world/ClientChunkManager chunks Lnet/minecraft/client/world/ClientChunkManager$ClientChunkMap;
-accessible field net/minecraft/client/world/ClientChunkManager$ClientChunkMap chunks Ljava/util/concurrent/atomic/AtomicReferenceArray;
-accessible field net/minecraft/entity/player/PlayerInventory selectedSlot I
-accessible class net/minecraft/world/waypoint/TrackedWaypoint$Azimuth
-accessible field net/minecraft/world/waypoint/TrackedWaypoint$Azimuth azimuth F
-accessible class net/minecraft/world/waypoint/TrackedWaypoint$Positional
-accessible field net/minecraft/world/waypoint/TrackedWaypoint$Positional pos Lnet/minecraft/util/math/Vec3i;
-accessible field net/minecraft/client/gui/screen/ingame/HandledScreen x I
-accessible field net/minecraft/client/gui/screen/ingame/HandledScreen y I
-accessible field net/minecraft/client/option/KeyBinding boundKey Lnet/minecraft/client/util/InputUtil$Key;
-accessible field net/minecraft/client/Mouse cursorLocked Z
-accessible method net/minecraft/network/ClientConnection handlePacket (Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;)V
-accessible field net/minecraft/client/world/ClientWorld pendingUpdateManager Lnet/minecraft/client/network/PendingUpdateManager;
+accessible class net/minecraft/world/level/chunk/PalettedContainer$Data
+accessible field net/minecraft/world/level/chunk/PalettedContainer data Lnet/minecraft/world/level/chunk/PalettedContainer$Data;
+accessible method net/minecraft/world/level/chunk/PalettedContainer$Data palette ()Lnet/minecraft/world/level/chunk/Palette;
+accessible field net/minecraft/world/level/BaseSpawner spawnDelay I
+accessible field net/minecraft/world/level/BaseSpawner nextSpawnData Lnet/minecraft/world/level/SpawnData;
+accessible field net/minecraft/world/level/block/entity/DecoratedPotBlockEntity item Lnet/minecraft/world/item/ItemStack;
+accessible method net/minecraft/client/Minecraft startUseItem ()V
+accessible field net/minecraft/client/multiplayer/ClientChunkCache storage Lnet/minecraft/client/multiplayer/ClientChunkCache$Storage;
+accessible field net/minecraft/client/multiplayer/ClientChunkCache$Storage chunks Ljava/util/concurrent/atomic/AtomicReferenceArray;
+accessible class net/minecraft/world/waypoints/TrackedWaypoint$AzimuthWaypoint
+accessible field net/minecraft/world/waypoints/TrackedWaypoint$AzimuthWaypoint angle F
+accessible class net/minecraft/world/waypoints/TrackedWaypoint$Vec3iWaypoint
+accessible field net/minecraft/world/waypoints/TrackedWaypoint$Vec3iWaypoint vector Lnet/minecraft/core/Vec3i;
+accessible method net/minecraft/network/Connection genericsFtw (Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;)V
+accessible field net/minecraft/client/multiplayer/ClientLevel blockStatePredictionHandler Lnet/minecraft/client/multiplayer/prediction/BlockStatePredictionHandler;

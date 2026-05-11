@@ -2,14 +2,15 @@ package pwn.noobs.trouserstreak.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.command.CommandSource;
-import net.minecraft.entity.Entity;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.Vec3;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -19,31 +20,31 @@ public class AutoVclipCommand extends Command {
         super("autovclip", "Lets you clip through blocks vertically automatically.");
     }
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         builder.executes(ctx -> {
             error("Choose Up, Down or Highest");
             return SINGLE_SUCCESS;
         });
         builder.then(literal("up").executes(ctx -> {
-            ClientPlayerEntity player = mc.player;
+            LocalPlayer player = mc.player;
             assert player != null;
             for (int i = 0; i < 21; i++) {
-                BlockPos isopenair1 = (player.getBlockPos().add(0,i+2,0));
-                BlockPos isopenair2 = (player.getBlockPos().add(0,i+3,0));
-                if (mc.world.getBlockState(isopenair1).isReplaceable() && mc.world.getFluidState(isopenair1).isEmpty() && !mc.world.getBlockState(isopenair1).isOf(Blocks.POWDER_SNOW) && mc.world.getBlockState(isopenair2).isReplaceable() && mc.world.getFluidState(isopenair2).isEmpty() && !mc.world.getBlockState(isopenair2).isOf(Blocks.POWDER_SNOW)){
-                    if (player.hasVehicle()) {
+                BlockPos isopenair1 = (player.blockPosition().offset(0,i+2,0));
+                BlockPos isopenair2 = (player.blockPosition().offset(0,i+3,0));
+                if (mc.level.getBlockState(isopenair1).canBeReplaced() && mc.level.getFluidState(isopenair1).isEmpty() && !mc.level.getBlockState(isopenair1).is(Blocks.POWDER_SNOW) && mc.level.getBlockState(isopenair2).canBeReplaced() && mc.level.getFluidState(isopenair2).isEmpty() && !mc.level.getBlockState(isopenair2).is(Blocks.POWDER_SNOW)){
+                    if (player.isPassenger()) {
                         Entity vehicle = player.getVehicle();
                         for (int packetNumber = 0; packetNumber < 4; packetNumber++) {
-                            player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(player.getVehicle()));
+                            player.connection.send(ServerboundMoveVehiclePacket.fromEntity(player.getVehicle()));
                         }
-                        mc.getNetworkHandler().sendPacket(new VehicleMoveC2SPacket(new Vec3d(vehicle.getX(), isopenair1.getY(), vehicle.getZ()), vehicle.getYaw(), vehicle.getPitch(), false));
-                        vehicle.setPosition(vehicle.getX(), isopenair1.getY(), vehicle.getZ());
+                        mc.getConnection().send(new ServerboundMoveVehiclePacket(new Vec3(vehicle.getX(), isopenair1.getY(), vehicle.getZ()), vehicle.getYRot(), vehicle.getXRot(), false));
+                        vehicle.setPos(vehicle.getX(), isopenair1.getY(), vehicle.getZ());
                     } else {
                         for (int packetNumber = 0; packetNumber < 4; packetNumber++) {
-                            player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true, player.horizontalCollision));
+                            player.connection.send(new ServerboundMovePlayerPacket.StatusOnly(true, player.horizontalCollision));
                         }
-                        player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(player.getX(), isopenair1.getY(), player.getZ(), false, player.horizontalCollision));
-                        player.setPosition(player.getX(), isopenair1.getY(), player.getZ());
+                        player.connection.send(new ServerboundMovePlayerPacket.Pos(player.getX(), isopenair1.getY(), player.getZ(), false, player.horizontalCollision));
+                        player.setPos(player.getX(), isopenair1.getY(), player.getZ());
                     }
                     return SINGLE_SUCCESS;
                 }
@@ -52,28 +53,28 @@ public class AutoVclipCommand extends Command {
             return SINGLE_SUCCESS;
         }));
         builder.then(literal("down").executes(ctx -> {
-            ClientPlayerEntity player = mc.player;
+            LocalPlayer player = mc.player;
             assert player != null;
             for (int i = 0; i > -22; i--) {
-                BlockPos isopenair1 = (player.getBlockPos().add(0,i,0));
-                BlockPos isopenair2 = (player.getBlockPos().add(0,i-1,0));
-                if (mc.world.getBlockState(isopenair1).isReplaceable() && mc.world.getFluidState(isopenair1).isEmpty() && !mc.world.getBlockState(isopenair1).isOf(Blocks.POWDER_SNOW) && mc.world.getBlockState(isopenair2).isReplaceable() && mc.world.getFluidState(isopenair2).isEmpty() && !mc.world.getBlockState(isopenair2).isOf(Blocks.POWDER_SNOW)){
-                    if (player.hasVehicle()) {
+                BlockPos isopenair1 = (player.blockPosition().offset(0,i,0));
+                BlockPos isopenair2 = (player.blockPosition().offset(0,i-1,0));
+                if (mc.level.getBlockState(isopenair1).canBeReplaced() && mc.level.getFluidState(isopenair1).isEmpty() && !mc.level.getBlockState(isopenair1).is(Blocks.POWDER_SNOW) && mc.level.getBlockState(isopenair2).canBeReplaced() && mc.level.getFluidState(isopenair2).isEmpty() && !mc.level.getBlockState(isopenair2).is(Blocks.POWDER_SNOW)){
+                    if (player.isPassenger()) {
                         Entity vehicle = player.getVehicle();
                         for (int packetNumber = 0; packetNumber < 4; packetNumber++) {
-                            player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(player.getVehicle()));
+                            player.connection.send(ServerboundMoveVehiclePacket.fromEntity(player.getVehicle()));
                         }
-                        mc.getNetworkHandler().sendPacket(new VehicleMoveC2SPacket(new Vec3d(vehicle.getX(), isopenair2.getY(), vehicle.getZ()), vehicle.getYaw(), vehicle.getPitch(), false));
-                        vehicle.setPosition(vehicle.getX(), isopenair2.getY(), vehicle.getZ());
+                        mc.getConnection().send(new ServerboundMoveVehiclePacket(new Vec3(vehicle.getX(), isopenair2.getY(), vehicle.getZ()), vehicle.getYRot(), vehicle.getXRot(), false));
+                        vehicle.setPos(vehicle.getX(), isopenair2.getY(), vehicle.getZ());
                     } else {
                         for (int packetNumber = 0; packetNumber < 4; packetNumber++) {
-                            player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true, player.horizontalCollision));
+                            player.connection.send(new ServerboundMovePlayerPacket.StatusOnly(true, player.horizontalCollision));
                         }
-                        player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(player.getX(), isopenair2.getY(), player.getZ(), false, player.horizontalCollision));
-                        player.setPosition(player.getX(), isopenair2.getY(), player.getZ());
+                        player.connection.send(new ServerboundMovePlayerPacket.Pos(player.getX(), isopenair2.getY(), player.getZ(), false, player.horizontalCollision));
+                        player.setPos(player.getX(), isopenair2.getY(), player.getZ());
                         double y = isopenair2.getY() + 0.0000000001;
-                        player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(player.getX(), y, player.getZ(), false, player.horizontalCollision));
-                        player.setPosition(player.getX(), y, player.getZ());
+                        player.connection.send(new ServerboundMovePlayerPacket.Pos(player.getX(), y, player.getZ(), false, player.horizontalCollision));
+                        player.setPos(player.getX(), y, player.getZ());
                     }
                     return SINGLE_SUCCESS;
                 }
@@ -82,25 +83,25 @@ public class AutoVclipCommand extends Command {
             return SINGLE_SUCCESS;
         }));
         builder.then(literal("highest").executes(ctx -> {
-            ClientPlayerEntity player = mc.player;
+            LocalPlayer player = mc.player;
             assert player != null;
             for (int i = 21; i > 0; i--) {
-                BlockPos isopenair1 = (player.getBlockPos().add(0,i,0));
-                BlockPos newopenair2 = isopenair1.up(1);
-                if (!mc.world.getBlockState(isopenair1).isReplaceable() || mc.world.getBlockState(isopenair1).isOf(Blocks.POWDER_SNOW) || !mc.world.getFluidState(isopenair1).isEmpty()) {
-                    if (player.hasVehicle()) {
+                BlockPos isopenair1 = (player.blockPosition().offset(0,i,0));
+                BlockPos newopenair2 = isopenair1.above(1);
+                if (!mc.level.getBlockState(isopenair1).canBeReplaced() || mc.level.getBlockState(isopenair1).is(Blocks.POWDER_SNOW) || !mc.level.getFluidState(isopenair1).isEmpty()) {
+                    if (player.isPassenger()) {
                         Entity vehicle = player.getVehicle();
                         for (int packetNumber = 0; packetNumber < 4; packetNumber++) {
-                            player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(player.getVehicle()));
+                            player.connection.send(ServerboundMoveVehiclePacket.fromEntity(player.getVehicle()));
                         }
-                        mc.getNetworkHandler().sendPacket(new VehicleMoveC2SPacket(new Vec3d(vehicle.getX(), newopenair2.getY(), vehicle.getZ()), vehicle.getYaw(), vehicle.getPitch(), false));
-                        vehicle.setPosition(vehicle.getX(), newopenair2.getY(), vehicle.getZ());
+                        mc.getConnection().send(new ServerboundMoveVehiclePacket(new Vec3(vehicle.getX(), newopenair2.getY(), vehicle.getZ()), vehicle.getYRot(), vehicle.getXRot(), false));
+                        vehicle.setPos(vehicle.getX(), newopenair2.getY(), vehicle.getZ());
                     } else {
                         for (int packetNumber = 0; packetNumber < 4; packetNumber++) {
-                            player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true, player.horizontalCollision));
+                            player.connection.send(new ServerboundMovePlayerPacket.StatusOnly(true, player.horizontalCollision));
                         }
-                        player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(player.getX(), newopenair2.getY(), player.getZ(), false, player.horizontalCollision));
-                        player.setPosition(player.getX(), newopenair2.getY(), player.getZ());
+                        player.connection.send(new ServerboundMovePlayerPacket.Pos(player.getX(), newopenair2.getY(), player.getZ(), false, player.horizontalCollision));
+                        player.setPos(player.getX(), newopenair2.getY(), player.getZ());
                     }
                     return SINGLE_SUCCESS;
                 }

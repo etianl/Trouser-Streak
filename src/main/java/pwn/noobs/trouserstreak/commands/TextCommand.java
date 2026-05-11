@@ -6,24 +6,22 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import meteordevelopment.meteorclient.commands.Command;
-import net.minecraft.command.CommandSource;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.TypedEntityData;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtDouble;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.TypedEntityData;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -47,7 +45,7 @@ public class TextCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         builder
                 .then(argument("message", StringArgumentType.greedyString())
                         .executes(context -> {
@@ -112,14 +110,14 @@ public class TextCommand extends Command {
         String[] lines = text.split("\\|");
         for (int i = lines.length - 1; i >= 0; i--) {
             String line = lines[i].trim();
-            NbtList nbt = formatTextWithColors(line);
+            ListTag nbt = formatTextWithColors(line);
             double heightOffset = ((lines.length - 1 - i) * LINE_SPACING) + INITIAL_HEIGHT_OFFSET;
             spawnText(nbt, heightOffset);
         }
     }
 
-    private NbtList formatTextWithColors(String line) {
-        NbtList nbt = new NbtList();
+    private ListTag formatTextWithColors(String line) {
+        ListTag nbt = new ListTag();
         String currentColor = "white";
         boolean wasObfuscated = false;
 
@@ -154,8 +152,8 @@ public class TextCommand extends Command {
         return nbt;
     }
 
-    private NbtCompound makePart(String text, String color, boolean obfuscated, boolean wasObfuscated) {
-        NbtCompound part = new NbtCompound();
+    private CompoundTag makePart(String text, String color, boolean obfuscated, boolean wasObfuscated) {
+        CompoundTag part = new CompoundTag();
         part.putString("text", text);
         part.putString("color", color);
         if (obfuscated && !wasObfuscated) part.putBoolean("obfuscated", true);
@@ -257,36 +255,36 @@ public class TextCommand extends Command {
         }
     }
 
-    private void spawnText(NbtList nbt, double yOffset) {
-        if (!mc.player.getAbilities().creativeMode) {
+    private void spawnText(ListTag nbt, double yOffset) {
+        if (!mc.player.getAbilities().instabuild) {
             error("Creative mode required!");
             return;
         }
 
         ItemStack armorStand = new ItemStack(Items.ARMOR_STAND);
-        ItemStack current = mc.player.getMainHandStack();
-        Vec3d pos = mc.player.getEntityPos().add(mc.player.getRotationVector().multiply(2)).add(0, yOffset, 0);
+        ItemStack current = mc.player.getMainHandItem();
+        Vec3 pos = mc.player.position().add(mc.player.getLookAngle().scale(2)).add(0, yOffset, 0);
 
-        var changes = ComponentChanges.builder()
-                .add(DataComponentTypes.ENTITY_DATA, createEntityData(yOffset, nbt))
+        var changes = DataComponentPatch.builder()
+                .set(DataComponents.ENTITY_DATA, createEntityData(yOffset, nbt))
                 .build();
 
-        armorStand.applyChanges(changes);
+        armorStand.applyComponentsAndValidate(changes);
 
-        BlockHitResult bhr = new BlockHitResult(pos, Direction.UP, BlockPos.ofFloored(pos), false);
-        mc.interactionManager.clickCreativeStack(armorStand, 36 + mc.player.getInventory().selectedSlot);
-        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-        mc.interactionManager.clickCreativeStack(current, 36 + mc.player.getInventory().selectedSlot);
+        BlockHitResult bhr = new BlockHitResult(pos, Direction.UP, BlockPos.containing(pos), false);
+        mc.gameMode.handleCreativeModeItemAdd(armorStand, 36 + mc.player.getInventory().getSelectedSlot());
+        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, bhr);
+        mc.gameMode.handleCreativeModeItemAdd(current, 36 + mc.player.getInventory().getSelectedSlot());
     }
 
-    private TypedEntityData<EntityType<?>> createEntityData(double yOffset, NbtList nbt) {
-        Vec3d pos = mc.player.getEntityPos().add(mc.player.getRotationVector().multiply(2)).add(0, yOffset, 0);
-        NbtCompound entityTag = new NbtCompound();
+    private TypedEntityData<EntityType<?>> createEntityData(double yOffset, ListTag nbt) {
+        Vec3 pos = mc.player.position().add(mc.player.getLookAngle().scale(2)).add(0, yOffset, 0);
+        CompoundTag entityTag = new CompoundTag();
 
-        NbtList position = new NbtList();
-        position.add(NbtDouble.of(pos.x));
-        position.add(NbtDouble.of(pos.y));
-        position.add(NbtDouble.of(pos.z));
+        ListTag position = new ListTag();
+        position.add(DoubleTag.valueOf(pos.x));
+        position.add(DoubleTag.valueOf(pos.y));
+        position.add(DoubleTag.valueOf(pos.z));
 
         entityTag.putString("id", "minecraft:armor_stand");
         entityTag.put("Pos", position);
@@ -296,6 +294,6 @@ public class TextCommand extends Command {
         entityTag.putBoolean("CustomNameVisible", true);
         entityTag.put("CustomName", nbt);
 
-        return TypedEntityData.create(EntityType.ARMOR_STAND, entityTag);
+        return TypedEntityData.of(EntityType.ARMOR_STAND, entityTag);
     }
 }

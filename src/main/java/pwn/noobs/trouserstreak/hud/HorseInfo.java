@@ -1,15 +1,17 @@
 package pwn.noobs.trouserstreak.hud;
 
-
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.ColorSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.passive.AbstractHorseEntity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 
 public class HorseInfo extends HudElement {
     public static final HudElementInfo<HorseInfo> INFO = new HudElementInfo<>(
@@ -67,9 +69,9 @@ public class HorseInfo extends HudElement {
     @Override
     public void render(HudRenderer renderer) {
 
-        MinecraftClient mc = MinecraftClient.getInstance();
+        Minecraft mc = Minecraft.getInstance();
 
-        if (mc.player == null || !(mc.player.getVehicle() instanceof AbstractHorseEntity horse)) {
+        if (mc.player == null || !(mc.player.getVehicle() instanceof AbstractHorse horse)) {
             if (showPlaceholder.get()) {
                 renderer.text("Not on a horse", x, y, placeholderColor.get(), true);
                 setSize(renderer.textWidth("Not on a horse", true), renderer.textHeight(true));
@@ -77,11 +79,11 @@ public class HorseInfo extends HudElement {
             return;
         }
 
-        double speed = horse.getAttributeValue(EntityAttributes.MOVEMENT_SPEED) * 43.17;
-        double jump = horse.getAttributeValue(EntityAttributes.JUMP_STRENGTH);
+        double speed = horse.getAttributeValue(Attributes.MOVEMENT_SPEED) * 43.17;
+        double jump = horse.getAttributeValue(Attributes.JUMP_STRENGTH);
         double jumpBlocks = -0.1817584952 * Math.pow(jump, 3) + 3.689713992 * Math.pow(jump, 2) + 2.128599134 * jump - 0.343930367;
         double health = horse.getHealth();
-        double maxHealth = horse.getAttributeValue(EntityAttributes.MAX_HEALTH);
+        double maxHealth = horse.getAttributeValue(Attributes.MAX_HEALTH);
 
         java.util.List<String> lines = new java.util.ArrayList<>();
         if (showHealth.get()) lines.add(String.format("Health: %.1f / %.1f", health, maxHealth));
@@ -100,4 +102,3 @@ public class HorseInfo extends HudElement {
         }
     }
 }
-

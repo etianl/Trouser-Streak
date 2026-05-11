@@ -18,9 +18,9 @@ import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class ElytraCount extends HudElement {
     public static final HudElementInfo<ElytraCount> INFO = new HudElementInfo<>(Hud.GROUP, "elytra-count", "Displays a count of elytra's in inventory with configurable minimum durability.", ElytraCount::new);
@@ -34,8 +34,8 @@ public class ElytraCount extends HudElement {
             .name("min-durability")
             .description("Durability threshold to count elytras.")
             .defaultValue(300)
-            .range(1, Items.ELYTRA.getComponents().get(DataComponentTypes.MAX_DAMAGE) - 1)
-            .sliderRange(1, Items.ELYTRA.getComponents().get(DataComponentTypes.MAX_DAMAGE) - 1)
+            .range(1, Items.ELYTRA.components().get(DataComponents.MAX_DAMAGE) - 1)
+            .sliderRange(1, Items.ELYTRA.components().get(DataComponents.MAX_DAMAGE) - 1)
             .build()
     );
 
@@ -101,7 +101,7 @@ public class ElytraCount extends HudElement {
 
         ItemStack itemStack = new ItemStack(Items.ELYTRA, InvUtils.find(stack ->
                 stack.getItem() == Items.ELYTRA &&
-                        (stack.getMaxDamage() - stack.getDamage()) > minDurability.get()
+                        (stack.getMaxDamage() - stack.getDamageValue()) > minDurability.get()
         ).count());
 
         if (mode.get() == Mode.HideItem && itemStack.isEmpty()) {

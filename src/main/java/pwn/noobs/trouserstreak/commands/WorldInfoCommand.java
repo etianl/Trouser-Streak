@@ -3,17 +3,17 @@ package pwn.noobs.trouserstreak.commands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.command.CommandSource;
-import net.minecraft.scoreboard.ScoreHolder;
-import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.text.Text;
-import net.minecraft.util.WorldSavePath;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.GlobalPos;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.scores.ScoreHolder;
+import net.minecraft.world.scores.Scoreboard;
 import pwn.noobs.trouserstreak.utils.PermissionUtils;
 
 import java.io.File;
@@ -66,32 +66,32 @@ public class WorldInfoCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         builder.executes(context -> {
-            Scoreboard scoreboard = mc.world.getScoreboard();
-            Collection<ScoreHolder> scoreHolders = scoreboard.getKnownScoreHolders();
+            Scoreboard scoreboard = mc.level.getScoreboard();
+            Collection<ScoreHolder> scoreHolders = scoreboard.getTrackedPlayers();
             StringBuilder namesBuilder = new StringBuilder();
             for (ScoreHolder holder : scoreHolders) {
-                namesBuilder.append(holder.getNameForScoreboard()).append(", ");
+                namesBuilder.append(holder.getScoreboardName()).append(", ");
             }
             String getKnownPlayers = namesBuilder.toString();
             int chunkX = (int) mc.player.getX() >> 4;
             int chunkZ = (int) mc.player.getZ() >> 4;
-            WorldChunk chunk = mc.world.getChunk(chunkX, chunkZ);
+            LevelChunk chunk = mc.level.getChunk(chunkX, chunkZ);
 
             boolean foundAnyOre = false;
             boolean isNewGeneration = false;
-            BlockPos.Mutable mutablePos = new BlockPos.Mutable();
+            BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
             outer:
             for (int x = 0; x < 16; x++) {
-                for (int y = mc.world.getBottomY(); y < mc.world.getTopYInclusive(); y++) {
+                for (int y = mc.level.getMinY(); y < mc.level.getMaxY(); y++) {
                     for (int z = 0; z < 16; z++) {
                         mutablePos.set(x, y, z);
                         Block block = chunk.getBlockState(mutablePos).getBlock();
-                        if (!foundAnyOre && isOreBlock(block) && mc.world.getRegistryKey() == World.OVERWORLD) {
+                        if (!foundAnyOre && isOreBlock(block) && mc.level.dimension() == Level.OVERWORLD) {
                             foundAnyOre = true;
                         }
-                        if (!isNewGeneration && y < 260 && y > 5 && NEW_OVERWORLD_BLOCKS.contains(block) && mc.world.getRegistryKey() == World.OVERWORLD) {
+                        if (!isNewGeneration && y < 260 && y > 5 && NEW_OVERWORLD_BLOCKS.contains(block) && mc.level.dimension() == Level.OVERWORLD) {
                             isNewGeneration = true;
                         }
                         if (foundAnyOre && isNewGeneration) break outer;
@@ -100,54 +100,54 @@ public class WorldInfoCommand extends Command {
             }
 
             if (!isNewGeneration) {
-                ChatUtils.sendMsg(Text.of("This chunk is pre 1.17 generation!"));
+                ChatUtils.sendMsg(Component.nullToEmpty("This chunk is pre 1.17 generation!"));
             } else {
-                ChatUtils.sendMsg(Text.of("This chunk is new generation! (post-1.17)"));
+                ChatUtils.sendMsg(Component.nullToEmpty("This chunk is new generation! (post-1.17)"));
             }
-            ChatUtils.sendMsg(Text.of("East World Border X: "+(int) mc.world.getWorldBorder().getBoundEast()+", West World Border X: "+(int) mc.world.getWorldBorder().getBoundWest()+", South World Border Z: "+(int) mc.world.getWorldBorder().getBoundSouth()+", North World Border Z: "+(int) mc.world.getWorldBorder().getBoundNorth()));
-            ChatUtils.sendMsg(Text.of("WorldSpawn Location: x"+mc.world.getLevelProperties().getSpawnPoint().getPos().getX()+" y"+mc.world.getLevelProperties().getSpawnPoint().getPos().getY()+" z"+mc.world.getLevelProperties().getSpawnPoint().getPos().getZ()));
-            Optional<GlobalPos> deathPos = mc.player.getLastDeathPos();
+            ChatUtils.sendMsg(Component.nullToEmpty("East World Border X: "+(int) mc.level.getWorldBorder().getMaxX()+", West World Border X: "+(int) mc.level.getWorldBorder().getMinX()+", South World Border Z: "+(int) mc.level.getWorldBorder().getMaxZ()+", North World Border Z: "+(int) mc.level.getWorldBorder().getMinZ()));
+            ChatUtils.sendMsg(Component.nullToEmpty("WorldSpawn Location: x"+mc.level.getLevelData().getRespawnData().pos().getX()+" y"+mc.level.getLevelData().getRespawnData().pos().getY()+" z"+mc.level.getLevelData().getRespawnData().pos().getZ()));
+            Optional<GlobalPos> deathPos = mc.player.getLastDeathLocation();
             if (deathPos.isPresent()) {
                 GlobalPos pos = deathPos.get();
-                ChatUtils.sendMsg(Text.of(
+                ChatUtils.sendMsg(Component.nullToEmpty(
                         "Last Death Location: x" + pos.pos().getX() +
                                 " y" + pos.pos().getY() +
                                 " z" + pos.pos().getZ() +
-                                " | Dimension: " + pos.dimension().getValue()
+                                " | Dimension: " + pos.dimension().identifier()
                 ));
             } else {
-                ChatUtils.sendMsg(Text.of("No recorded death location"));
+                ChatUtils.sendMsg(Component.nullToEmpty("No recorded death location"));
             }
-            ChatUtils.sendMsg(Text.of("Difficulty: "+mc.world.getDifficulty().toString()));
-            ChatUtils.sendMsg(Text.of("Permission Level: "+PermissionUtils.getPermissionLevel(mc.player)));
-            ChatUtils.sendMsg(Text.of("Simulation Distance (chunks): "+mc.world.getSimulationDistance()));
-            ChatUtils.sendMsg(Text.of("Day Count: "+Math.floor(mc.world.getTime()/24000)));
-            ChatUtils.sendMsg(Text.of("KnownPlayers (Names with a period are bedrock players): "+getKnownPlayers));
+            ChatUtils.sendMsg(Component.nullToEmpty("Difficulty: "+mc.level.getDifficulty().toString()));
+            ChatUtils.sendMsg(Component.nullToEmpty("Permission Level: "+PermissionUtils.getPermissionLevel(mc.player)));
+            ChatUtils.sendMsg(Component.nullToEmpty("Simulation Distance (chunks): "+mc.level.getServerSimulationDistance()));
+            ChatUtils.sendMsg(Component.nullToEmpty("Day Count: "+Math.floor(mc.level.getGameTime()/24000)));
+            ChatUtils.sendMsg(Component.nullToEmpty("KnownPlayers (Names with a period are bedrock players): "+getKnownPlayers));
             return SINGLE_SUCCESS;
         });
         builder.then(literal("save").executes(ctx -> {
-            if (!mc.player.getMainHandStack().isEmpty()){
-                Scoreboard scoreboard = mc.world.getScoreboard();
-                Collection<ScoreHolder> scoreHolders = scoreboard.getKnownScoreHolders();
+            if (!mc.player.getMainHandItem().isEmpty()){
+                Scoreboard scoreboard = mc.level.getScoreboard();
+                Collection<ScoreHolder> scoreHolders = scoreboard.getTrackedPlayers();
                 StringBuilder namesBuilder = new StringBuilder();
                 for (ScoreHolder holder : scoreHolders) {
-                    namesBuilder.append(holder.getNameForScoreboard()).append(", ");
+                    namesBuilder.append(holder.getScoreboardName()).append(", ");
                 }
 
                 String getKnownPlayers = namesBuilder.toString();
                 int chunkX = (int) mc.player.getX() >> 4;
                 int chunkZ = (int) mc.player.getZ() >> 4;
-                WorldChunk chunk = mc.world.getChunk(chunkX, chunkZ);
+                LevelChunk chunk = mc.level.getChunk(chunkX, chunkZ);
 
                 boolean foundAnyOre = false;
                 boolean isNewGeneration = false;
                 for (int x = 0; x < 16; x++) {
-                    for (int y = mc.world.getBottomY(); y < mc.world.getTopYInclusive(); y++) {
+                    for (int y = mc.level.getMinY(); y < mc.level.getMaxY(); y++) {
                         for (int z = 0; z < 16; z++) {
-                            if (!foundAnyOre && isOreBlock(chunk.getBlockState(new BlockPos(x, y, z)).getBlock()) && mc.world.getRegistryKey().getValue().toString().toLowerCase().contains("overworld")) {
+                            if (!foundAnyOre && isOreBlock(chunk.getBlockState(new BlockPos(x, y, z)).getBlock()) && mc.level.dimension().identifier().toString().toLowerCase().contains("overworld")) {
                                 foundAnyOre = true;
                             }
-                            if (!isNewGeneration && y < 256 && y >= 0 && (chunk.getBlockState(new BlockPos(x, y, z)).getBlock() == Blocks.COPPER_ORE || chunk.getBlockState(new BlockPos(x, y, z)).getBlock() == Blocks.DEEPSLATE_COPPER_ORE) && mc.world.getRegistryKey().getValue().toString().toLowerCase().contains("overworld")) {
+                            if (!isNewGeneration && y < 256 && y >= 0 && (chunk.getBlockState(new BlockPos(x, y, z)).getBlock() == Blocks.COPPER_ORE || chunk.getBlockState(new BlockPos(x, y, z)).getBlock() == Blocks.DEEPSLATE_COPPER_ORE) && mc.level.dimension().identifier().toString().toLowerCase().contains("overworld")) {
                                 isNewGeneration = true;
                             }
                         }
@@ -155,21 +155,21 @@ public class WorldInfoCommand extends Command {
                 }
 
                 if (!isNewGeneration) {
-                    ChatUtils.sendMsg(Text.of("This chunk is pre 1.17 generation!"));
+                    ChatUtils.sendMsg(Component.nullToEmpty("This chunk is pre 1.17 generation!"));
                 } else {
-                    ChatUtils.sendMsg(Text.of("This chunk is new generation! (post-1.17)"));
+                    ChatUtils.sendMsg(Component.nullToEmpty("This chunk is new generation! (post-1.17)"));
                 }
-                ChatUtils.sendMsg(Text.of("East World Border X: "+(int) mc.world.getWorldBorder().getBoundEast()+", West World Border X: "+(int) mc.world.getWorldBorder().getBoundWest()+", South World Border Z: "+(int) mc.world.getWorldBorder().getBoundSouth()+", North World Border Z: "+(int) mc.world.getWorldBorder().getBoundNorth()));
-                ChatUtils.sendMsg(Text.of("WorldSpawn Location: x"+mc.world.getLevelProperties().getSpawnPoint().getPos().getX()+" y"+mc.world.getLevelProperties().getSpawnPoint().getPos().getY()+" z"+mc.world.getLevelProperties().getSpawnPoint().getPos().getZ()));
-                ChatUtils.sendMsg(Text.of("Difficulty: "+mc.world.getDifficulty().toString()));
-                ChatUtils.sendMsg(Text.of("Permission Level: "+PermissionUtils.getPermissionLevel(mc.player)));
-                ChatUtils.sendMsg(Text.of("Simulation Distance (chunks): "+mc.world.getSimulationDistance()));
-                ChatUtils.sendMsg(Text.of("Day Count: "+Math.floor(mc.world.getTime()/24000)));
-                ChatUtils.sendMsg(Text.of("KnownPlayers (Names with a period are bedrock players): "+getKnownPlayers));
+                ChatUtils.sendMsg(Component.nullToEmpty("East World Border X: "+(int) mc.level.getWorldBorder().getMaxX()+", West World Border X: "+(int) mc.level.getWorldBorder().getMinX()+", South World Border Z: "+(int) mc.level.getWorldBorder().getMaxZ()+", North World Border Z: "+(int) mc.level.getWorldBorder().getMinZ()));
+                ChatUtils.sendMsg(Component.nullToEmpty("WorldSpawn Location: x"+mc.level.getLevelData().getRespawnData().pos().getX()+" y"+mc.level.getLevelData().getRespawnData().pos().getY()+" z"+mc.level.getLevelData().getRespawnData().pos().getZ()));
+                ChatUtils.sendMsg(Component.nullToEmpty("Difficulty: "+mc.level.getDifficulty().toString()));
+                ChatUtils.sendMsg(Component.nullToEmpty("Permission Level: "+PermissionUtils.getPermissionLevel(mc.player)));
+                ChatUtils.sendMsg(Component.nullToEmpty("Simulation Distance (chunks): "+mc.level.getServerSimulationDistance()));
+                ChatUtils.sendMsg(Component.nullToEmpty("Day Count: "+Math.floor(mc.level.getGameTime()/24000)));
+                ChatUtils.sendMsg(Component.nullToEmpty("KnownPlayers (Names with a period are bedrock players): "+getKnownPlayers));
 
                 String serverip;
-                if (mc.isInSingleplayer()==true){
-                    Path worldPath = mc.getServer().getSavePath(WorldSavePath.ROOT);
+                if (mc.isLocalServer()==true){
+                    Path worldPath = mc.getSingleplayerServer().getWorldPath(LevelResource.ROOT);
                     Path savesDir = worldPath.getParent();
                     if (savesDir != null) {
                         Path worldDir = savesDir.getFileName();
@@ -179,7 +179,7 @@ public class WorldInfoCommand extends Command {
                         serverip = "singleplayer";
                     }
                 } else {
-                    serverip = mc.getCurrentServerEntry().address.replaceAll("[^a-zA-Z0-9._\\-]", "_");
+                    serverip = mc.getCurrentServer().ip.replaceAll("[^a-zA-Z0-9._\\-]", "_");
                 }
 
                 try {
@@ -192,17 +192,17 @@ public class WorldInfoCommand extends Command {
                             writer.write("This chunk is new generation! (post-1.17)");
                             writer.write("\r\n");
                         }
-                        writer.write("East World Border X: "+(int) mc.world.getWorldBorder().getBoundEast()+", West World Border X: "+(int) mc.world.getWorldBorder().getBoundWest()+", South World Border Z: "+(int) mc.world.getWorldBorder().getBoundSouth()+", North World Border Z: "+(int) mc.world.getWorldBorder().getBoundNorth());
+                        writer.write("East World Border X: "+(int) mc.level.getWorldBorder().getMaxX()+", West World Border X: "+(int) mc.level.getWorldBorder().getMinX()+", South World Border Z: "+(int) mc.level.getWorldBorder().getMaxZ()+", North World Border Z: "+(int) mc.level.getWorldBorder().getMinZ());
                         writer.write("\r\n");
-                        writer.write("WorldSpawn Location: x"+mc.world.getLevelProperties().getSpawnPoint().getPos().getX()+" y"+mc.world.getLevelProperties().getSpawnPoint().getPos().getY()+" z"+mc.world.getLevelProperties().getSpawnPoint().getPos().getZ());
+                        writer.write("WorldSpawn Location: x"+mc.level.getLevelData().getRespawnData().pos().getX()+" y"+mc.level.getLevelData().getRespawnData().pos().getY()+" z"+mc.level.getLevelData().getRespawnData().pos().getZ());
                         writer.write("\r\n");
-                        writer.write("Difficulty: "+mc.world.getDifficulty().toString());
+                        writer.write("Difficulty: "+mc.level.getDifficulty().toString());
                         writer.write("\r\n");
                         writer.write("Permission Level: "+PermissionUtils.getPermissionLevel(mc.player));
                         writer.write("\r\n");
-                        writer.write("Simulation Distance (chunks): "+mc.world.getSimulationDistance());
+                        writer.write("Simulation Distance (chunks): "+mc.level.getServerSimulationDistance());
                         writer.write("\r\n");
-                        writer.write("Day Count: "+Math.floor(mc.world.getTime()/24000));
+                        writer.write("Day Count: "+Math.floor(mc.level.getGameTime()/24000));
                         writer.write("\r\n");
                         writer.write("KnownPlayers (Names with a period are bedrock players): "+getKnownPlayers);
                         writer.write("\r\n");

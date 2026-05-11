@@ -5,7 +5,7 @@ import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import net.minecraft.item.Items;
+import net.minecraft.world.item.Items;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pwn.noobs.trouserstreak.commands.*;
@@ -14,9 +14,9 @@ import pwn.noobs.trouserstreak.modules.*;
 
 public class Trouser extends MeteorAddon {
         public static final Logger LOG = LoggerFactory.getLogger(Trouser.class);
-        public static final Category Main = new Category("TrouserStreak", Items.LEATHER_LEGGINGS.getDefaultStack());
-        public static final Category baseHunting = new Category("TrouserHunting", Items.SPYGLASS.getDefaultStack());
-        public static final Category operator = new Category("TrouserOP/Creative", Items.NETHER_STAR.getDefaultStack());
+        public static final Category Main = new Category("TrouserStreak", Items.LEATHER_LEGGINGS::getDefaultInstance);
+        public static final Category baseHunting = new Category("TrouserHunting", Items.SPYGLASS::getDefaultInstance);
+        public static final Category operator = new Category("TrouserOP/Creative", Items.NETHER_STAR::getDefaultInstance);
 
         @Override
         public void onInitialize() {
@@ -69,6 +69,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new KnockBackModifier());
                 Modules.get().add(new LavaAura());
                 Modules.get().add(new LecternCrash());
+                Modules.get().add(new LoadingTerrainDisconnect());
                 Modules.get().add(new TPAura());
                 Modules.get().add(new MaceKill());
                 Modules.get().add(new MobGearESP());
@@ -113,8 +114,8 @@ public class Trouser extends MeteorAddon {
                 Commands.add(new AutoVaultHclipCommand());
                 Commands.add(new ViewNbtCommand());
                 Commands.add(new WorldInfoCommand());
-                Hud.get().register(ElytraCount.INFO);
                 Hud.get().register(WaypointTriangulationHud.INFO);
+                Hud.get().register(ElytraCount.INFO);
                 Hud.get().register(HorseInfo.INFO);
         }
 

@@ -1,25 +1,25 @@
 package pwn.noobs.trouserstreak.utils;
 
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.command.permission.Permission;
-import net.minecraft.command.permission.PermissionLevel;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionLevel;
 
 public class PermissionUtils {
 
-    public static int getPermissionLevel(ClientPlayerEntity player) {
-        if (player.getPermissions().hasPermission(new Permission.Level(PermissionLevel.OWNERS))) {
+    public static int getPermissionLevel(LocalPlayer player) {
+        if (player.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.OWNERS))) {
             return 4;
         }
-        if (player.getPermissions().hasPermission(new Permission.Level(PermissionLevel.ADMINS))) {
+        if (player.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.ADMINS))) {
             return 3;
         }
-        if (player.getPermissions().hasPermission(new Permission.Level(PermissionLevel.GAMEMASTERS))) {
+        if (player.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.GAMEMASTERS))) {
             return 2;
         }
-        if (player.getPermissions().hasPermission(new Permission.Level(PermissionLevel.MODERATORS))) {
+        if (player.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.MODERATORS))) {
             return 1;
         }
-        if (player.getPermissions().hasPermission(new Permission.Level(PermissionLevel.ALL))) {
+        if (player.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.ALL))) {
             return 0;
         }
         return -1;

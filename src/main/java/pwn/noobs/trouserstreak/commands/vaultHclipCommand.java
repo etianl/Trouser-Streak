@@ -4,12 +4,13 @@ package pwn.noobs.trouserstreak.commands;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
-import net.minecraft.command.CommandSource;
-import net.minecraft.entity.Entity;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 public class vaultHclipCommand extends Command {
     public vaultHclipCommand() {
@@ -17,16 +18,16 @@ public class vaultHclipCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> builder) {
         builder.then(argument("blocks", DoubleArgumentType.doubleArg()).executes(ctx -> {
             double blocks = ctx.getArgument("blocks", Double.class);
             assert mc.player != null;
-            assert mc.world != null;
+            assert mc.level != null;
             if (blocks > 69) {
                 error("Distances greater than 69 do not work.");
                 return SINGLE_SUCCESS;
             }
-            Entity entity = mc.player.hasVehicle()
+            Entity entity = mc.player.isPassenger()
                     ? mc.player.getVehicle()
                     : mc.player;
 
@@ -34,13 +35,13 @@ public class vaultHclipCommand extends Command {
                 return SINGLE_SUCCESS;
             }
 
-            Vec3d start = entity.getEntityPos();
-            Vec3d forward = Vec3d.fromPolar(0, mc.player.getYaw()).normalize();
+            Vec3 start = entity.position();
+            Vec3 forward = Vec3.directionFromRotation(0, mc.player.getYRot()).normalize();
 
-            Vec3d upPos = start.add(0, 129.0, 0);
-            Vec3d aboveTarget = upPos.add(forward.x * blocks, 0, forward.z * blocks);
-            Vec3d downPos = new Vec3d(aboveTarget.x, start.y, aboveTarget.z);
-            Vec3d downUp = downPos.add(0, 0.01, 0);
+            Vec3 upPos = start.add(0, 129.0, 0);
+            Vec3 aboveTarget = upPos.add(forward.x * blocks, 0, forward.z * blocks);
+            Vec3 downPos = new Vec3(aboveTarget.x, start.y, aboveTarget.z);
+            Vec3 downUp = downPos.add(0, 0.01, 0);
 
             if (invalid(entity, upPos)
                     || invalid(entity, aboveTarget)
@@ -51,40 +52,40 @@ public class vaultHclipCommand extends Command {
             }
 
             for (int i = 0; i < 13; i++) {
-                if (mc.player.hasVehicle()) mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
-                else mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false, mc.player.horizontalCollision));
+                if (mc.player.isPassenger()) mc.player.connection.send(ServerboundMoveVehiclePacket.fromEntity(mc.player.getVehicle()));
+                else mc.player.connection.send(new ServerboundMovePlayerPacket.StatusOnly(false, mc.player.horizontalCollision));
             }
 
             sendMove(entity, upPos);
             sendMove(entity, aboveTarget);
             sendMove(entity, downPos);
             sendMove(entity, downUp);
-            entity.setPosition(downUp);
+            entity.setPos(downUp);
 
             return SINGLE_SUCCESS;
         }));
     }
 
-    private void sendMove(Entity entity, Vec3d pos) {
-        if (mc.getNetworkHandler() == null) return;
+    private void sendMove(Entity entity, Vec3 pos) {
+        if (mc.getConnection() == null) return;
 
         if (entity == mc.player) {
-            mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(pos.x, pos.y, pos.z, false, false));
+            mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(pos.x, pos.y, pos.z, false, false));
         } else {
-            mc.getNetworkHandler().sendPacket(new VehicleMoveC2SPacket(pos, mc.player.getVehicle().getYaw(), mc.player.getVehicle().getPitch(), false));
+            mc.getConnection().send(new ServerboundMoveVehiclePacket(pos, mc.player.getVehicle().getYRot(), mc.player.getVehicle().getXRot(), false));
         }
     }
 
-    private boolean invalid(Entity entity, Vec3d pos) {
-        Box box = entity.getBoundingBox().offset(
+    private boolean invalid(Entity entity, Vec3 pos) {
+        AABB box = entity.getBoundingBox().move(
                 pos.x - entity.getX(),
                 pos.y - entity.getY(),
                 pos.z - entity.getZ()
         );
-        for (Entity e : mc.world.getOtherEntities(mc.player, box)) {
-            if (e.isCollidable(entity)) return true;
+        for (Entity e : mc.level.getEntities(mc.player, box)) {
+            if (e.canBeCollidedWith(entity)) return true;
         }
-        Vec3d delta = pos.subtract(entity.getEntityPos());
-        return mc.world.getBlockCollisions(entity, entity.getBoundingBox().offset(delta)).iterator().hasNext();
+        Vec3 delta = pos.subtract(entity.position());
+        return mc.level.getBlockCollisions(entity, entity.getBoundingBox().move(delta)).iterator().hasNext();
     }
 }
