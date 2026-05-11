@@ -18,6 +18,7 @@
     "PacketCodecsMixin",
     "StringEncodingMixin",
     "AbstractBlockMixin",
-    "AbstractBoatEntityMixin"
+    "AbstractBoatEntityMixin",
+    "LoadingTerrainScreenMixin"
   ]
 }
