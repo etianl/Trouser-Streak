@@ -30,6 +30,12 @@ public class SuperInstaMine extends Module {
     public enum listModes {
         whitelist, blacklist
     }
+    private final Setting<Boolean> toolChecker = sgGeneral.add(new BoolSetting.Builder()
+            .name("Tool Checker")
+            .description("Only send packets to break blocks when holding the appropriate tool. This excludes the central targeted block")
+            .defaultValue(true)
+            .build()
+    );
     private final Setting<listModes> listmode = sgGeneral.add(new EnumSetting.Builder<listModes>()
             .name("List Mode")
             .description("Whether to break or not break the block list.")
@@ -296,10 +302,10 @@ public class SuperInstaMine extends Module {
         }
 
         boolean toolCheck;
-        if (mc.player.getAbilities().creativeMode || !isTool(mc.player.getMainHandStack())) {
-            toolCheck = BlockUtils.canBreak(pos);
-        } else {
+        if (pos != bPos[0] && toolChecker.get() && !mc.player.getAbilities().creativeMode && isTool(mc.player.getMainHandStack())) {
             toolCheck = mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(pos));
+        } else {
+            toolCheck = BlockUtils.canBreak(pos);
         }
 
         return listCheck && toolCheck;

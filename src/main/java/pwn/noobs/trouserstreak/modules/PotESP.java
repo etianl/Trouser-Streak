@@ -16,7 +16,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.DecoratedPotBlockEntity;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
+import net.minecraft.client.gui.screen.world.LevelLoadingScreen;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
@@ -128,7 +128,7 @@ public class PotESP extends Module {
     }
     @EventHandler
     private void onScreenOpen(OpenScreenEvent event) {
-        if (event.screen instanceof DisconnectedScreen || event.screen instanceof DownloadingTerrainScreen) clearChunkData();
+        if (event.screen instanceof DisconnectedScreen || event.screen instanceof LevelLoadingScreen) clearChunkData();
     }
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
@@ -161,8 +161,8 @@ public class PotESP extends Module {
                         if (!potLocations.contains(potLocation) && !naturalPot.contains(potItem) && !junkItemList.get().contains(potItem)) {
                             if (potMessage.get()) {
                                 if (displaycoords.get())
-                                    ChatUtils.sendMsg(Text.of("Found a dank pot! It contains: " + potItem + " Location: " + potLocation));
-                                else ChatUtils.sendMsg(Text.of("Found a dank pot! It contains: " + potItem));
+                                    ChatUtils.sendMsg(Text.of("Found a dank pot! It contains: §e" + potItem.getName().getString() + "§r Location: " + potLocation));
+                                else ChatUtils.sendMsg(Text.of("Found a dank pot! It contains: §e" + potItem.getName().getString()+"§r"));
                             }
                             potLocations.add(potLocation);
                         }
@@ -195,7 +195,7 @@ public class PotESP extends Module {
             synchronized (potLocations) {
                 if (!nearesttrcr.get()) {
                     for (BlockPos pos : potLocations) {
-                    BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
+                        BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
                         if (pos != null && playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
                             int startX = pos.getX();
                             int startY = pos.getY();

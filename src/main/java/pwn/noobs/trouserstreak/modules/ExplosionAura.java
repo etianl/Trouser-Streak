@@ -159,7 +159,7 @@ public class ExplosionAura extends Module {
         NbtCompound entityTag = new NbtCompound();
         entityTag.putString("id", "minecraft:creeper");
         if (click) {
-            HitResult hr = mc.cameraEntity.raycast(600, 0, true);
+            HitResult hr = mc.getCameraEntity().raycast(600, 0, true);
             Vec3d owo = hr.getPos();
             BlockPos pos = BlockPos.ofFloored(owo);
             NbtList Pos = new NbtList();
@@ -172,7 +172,7 @@ public class ExplosionAura extends Module {
         entityTag.putBoolean("Invulnerable", true);
         entityTag.putInt("Fuse", 0);
         entityTag.putBoolean("NoGravity", true);
-        entityTag.putInt("ExplosionRadius", cpower.get());
+        entityTag.putInt("ExplosionRadius", click ? cpower.get() : power.get());
         return NbtComponent.of(entityTag);
     }
 }

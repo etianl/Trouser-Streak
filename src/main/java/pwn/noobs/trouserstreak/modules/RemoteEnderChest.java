@@ -63,7 +63,7 @@ public class RemoteEnderChest extends Module {
             guiHidden = true;
             guiWasOpen = true;
             lastWorld = mc.world;
-            if (chatFeedback) info("EChest link created! Press " + toggleGui.get().toString() + " to toggle the Ender Chest GUI.");
+            if (chatFeedback) info("EChest link created! §ePress " + toggleGui.get().toString() + " to toggle the Ender Chest GUI.§r");
         }
 
         boolean keyDown = toggleGui.get().isPressed();
