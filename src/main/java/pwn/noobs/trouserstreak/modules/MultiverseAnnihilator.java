@@ -8,7 +8,7 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import pwn.noobs.trouserstreak.Trouser;
@@ -192,7 +192,7 @@ public class MultiverseAnnihilator extends Module {
 
     private void sendCommand(String command) {
         if (mc.player != null) {
-            mc.player.networkHandler.sendChatCommand(command);
+            mc.player.connection.sendCommand(command);
         }
     }
 

@@ -24,17 +24,21 @@ import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.client.gui.screen.world.LevelLoadingScreen;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.*;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.chunk.Palette;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
+import net.minecraft.client.gui.screens.LevelLoadingScreen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.Palette;
+import net.minecraft.world.level.chunk.PalettedContainer;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.io.*;
@@ -185,16 +189,16 @@ public class NoSpawnerDetector extends Module {
         closestStructureZ = 2000000000;
         StructureDistance = 2000000000;
     }
-    private boolean chunkContainsBlock(WorldChunk chunk, Block target, int sectionsToCheck) {
-        ChunkSection[] sections = chunk.getSectionArray();
+    private boolean chunkContainsBlock(LevelChunk chunk, Block target, int sectionsToCheck) {
+        LevelChunkSection[] sections = chunk.getSections();
         for (int i = 0; i < sectionsToCheck; i++) {
-            ChunkSection section = sections[i];
-            if (!section.isEmpty()) {
-                var blockStatesContainer = section.getBlockStateContainer();
+            LevelChunkSection section = sections[i];
+            if (!section.hasOnlyAir()) {
+                var blockStatesContainer = section.getStates();
                 Palette<BlockState> blockStatePalette = blockStatesContainer.data.palette();
                 int blockPaletteLength = blockStatePalette.getSize();
                 for (int i2 = 0; i2 < blockPaletteLength; i2++) {
-                    BlockState blockPaletteEntry = blockStatePalette.get(i2);
+                    BlockState blockPaletteEntry = blockStatePalette.valueFor(i2);
                     if (blockPaletteEntry.getBlock() == target) return true;
                 }
             }
@@ -203,29 +207,29 @@ public class NoSpawnerDetector extends Module {
     }
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (mc.world == null || mc.player == null) return;
-        AtomicReferenceArray<WorldChunk> chunks = mc.world.getChunkManager().chunks.chunks;
-        Set<WorldChunk> chunkSet = new HashSet<>();
+        if (mc.level == null || mc.player == null) return;
+        AtomicReferenceArray<LevelChunk> chunks = mc.level.getChunkSource().storage.chunks;
+        Set<LevelChunk> chunkSet = new HashSet<>();
 
         for (int i = 0; i < chunks.length(); i++) {
-            WorldChunk chunk = chunks.get(i);
+            LevelChunk chunk = chunks.get(i);
             if (chunk != null) {
                 chunkSet.add(chunk);
             }
         }
         chunkSet.forEach(chunk -> {
             if (!chunk.isEmpty() && !scannedChunks.contains(chunk.getPos())){
-                if ((enableDungeon.get() && mc.world.getRegistryKey() == World.OVERWORLD && chunkContainsBlock(chunk, Blocks.MOSSY_COBBLESTONE, Math.min(chunk.getSectionArray().length, 20))) || (enableMineshaft.get() && mc.world.getRegistryKey() == World.OVERWORLD && chunkContainsBlock(chunk, Blocks.COBWEB, Math.min(chunk.getSectionArray().length, 20)))) {
+                if ((enableDungeon.get() && mc.level.dimension() == Level.OVERWORLD && chunkContainsBlock(chunk, Blocks.MOSSY_COBBLESTONE, Math.min(chunk.getSections().length, 20))) || (enableMineshaft.get() && mc.level.dimension() == Level.OVERWORLD && chunkContainsBlock(chunk, Blocks.COBWEB, Math.min(chunk.getSections().length, 20)))) {
                     for (int x = 0; x < 16; x++) {
-                        for (int y = mc.world.getBottomY(); y < mc.world.getTopYInclusive(); y++) {
+                        for (int y = mc.level.getMinY(); y < mc.level.getMaxY(); y++) {
                             for (int z = 0; z < 16; z++) {
-                                BlockPos blockPos = new BlockPos(x + chunk.getPos().x * 16, y, z + chunk.getPos().z * 16);
-                                if (enableDungeon.get() && mc.world.getBlockState(blockPos).getBlock() == Blocks.MOSSY_COBBLESTONE) {
+                                BlockPos blockPos = new BlockPos(x + chunk.getPos().x() * 16, y, z + chunk.getPos().z() * 16);
+                                if (enableDungeon.get() && mc.level.getBlockState(blockPos).getBlock() == Blocks.MOSSY_COBBLESTONE) {
                                     if (!scannedBlocks.contains(blockPos) && !checkedBlocks.contains(blockPos))
                                         scanForDungeonFloor(blockPos);
                                     checkedBlocks.add(blockPos);
                                 }
-                                if (enableMineshaft.get() && mc.world.getBlockState(blockPos).getBlock() == Blocks.COBWEB) {
+                                if (enableMineshaft.get() && mc.level.getBlockState(blockPos).getBlock() == Blocks.COBWEB) {
                                     if (!scannedBlocks.contains(blockPos) && !checkedBlocks.contains(blockPos))
                                         scanForMineshaftSpawner(blockPos);
                                     checkedBlocks.add(blockPos);
@@ -276,12 +280,12 @@ public class NoSpawnerDetector extends Module {
         for (int x = minX; x <= maxX; x++) {
             for (int z = minZ; z <= maxZ; z++) {
                 BlockPos scanPos = new BlockPos(x, y, z);
-                if (mc.world.getBlockState(scanPos).getBlock() == Blocks.MOSSY_COBBLESTONE) mossyCobbleCount++;
-                else if (mc.world.getBlockState(scanPos).getBlock() == Blocks.COBBLESTONE) cobbleCount++;
+                if (mc.level.getBlockState(scanPos).getBlock() == Blocks.MOSSY_COBBLESTONE) mossyCobbleCount++;
+                else if (mc.level.getBlockState(scanPos).getBlock() == Blocks.COBBLESTONE) cobbleCount++;
                 BlockPos extraScanPos = new BlockPos(x, y+1, z);
-                if (!foundCaveAir) if (mc.world.getBlockState(extraScanPos).getBlock() == Blocks.CAVE_AIR)foundCaveAir=true;
-                if (chestDetect.get() && !foundChests) if (mc.world.getBlockState(extraScanPos).getBlock() == Blocks.CHEST)foundChests=true;
-                if (spawnerDetect.get() && !foundSpawner) if (mc.world.getBlockState(extraScanPos).getBlock() == Blocks.SPAWNER)foundSpawner=true;
+                if (!foundCaveAir) if (mc.level.getBlockState(extraScanPos).getBlock() == Blocks.CAVE_AIR)foundCaveAir=true;
+                if (chestDetect.get() && !foundChests) if (mc.level.getBlockState(extraScanPos).getBlock() == Blocks.CHEST)foundChests=true;
+                if (spawnerDetect.get() && !foundSpawner) if (mc.level.getBlockState(extraScanPos).getBlock() == Blocks.SPAWNER)foundSpawner=true;
                 potentialBlocks.add(scanPos);
             }
         }
@@ -320,13 +324,13 @@ public class NoSpawnerDetector extends Module {
             for (int z = minZ; z <= maxZ; z++) {
                 for (int y = minY; y <= maxY; y++) {
                     BlockPos scanPos = new BlockPos(x, y, z);
-                    if (mc.world.getBlockState(scanPos).getBlock() == Blocks.COBWEB) cobwebCount++;
+                    if (mc.level.getBlockState(scanPos).getBlock() == Blocks.COBWEB) cobwebCount++;
                     if (!foundCaveAir)
-                        if (mc.world.getBlockState(scanPos).getBlock() == Blocks.CAVE_AIR) foundCaveAir = true;
+                        if (mc.level.getBlockState(scanPos).getBlock() == Blocks.CAVE_AIR) foundCaveAir = true;
                     if (!foundAir)
-                        if (mc.world.getBlockState(scanPos).getBlock() == Blocks.AIR) foundAir = true;
+                        if (mc.level.getBlockState(scanPos).getBlock() == Blocks.AIR) foundAir = true;
                     if (!foundSpawner)
-                        if (mc.world.getBlockState(scanPos).getBlock() == Blocks.SPAWNER) foundSpawner = true;
+                        if (mc.level.getBlockState(scanPos).getBlock() == Blocks.SPAWNER) foundSpawner = true;
                     potentialBlocks.add(scanPos);
                 }
             }
@@ -343,8 +347,8 @@ public class NoSpawnerDetector extends Module {
             for (int x = minX2; x <= maxX2; x++) {
                 for (int z = minZ2; z <= maxZ2; z++) {
                     BlockPos scanPos = new BlockPos(x, y, z);
-                    if (!doublechecknospawner) if (mc.world.getBlockState(scanPos).getBlock() == Blocks.SPAWNER)doublechecknospawner=true;
-                    if (!doublechecknospawner) if (mc.world.getBlockState(scanPos).getBlock() == Blocks.VOID_AIR)doublechecknospawner=true;
+                    if (!doublechecknospawner) if (mc.level.getBlockState(scanPos).getBlock() == Blocks.SPAWNER)doublechecknospawner=true;
+                    if (!doublechecknospawner) if (mc.level.getBlockState(scanPos).getBlock() == Blocks.VOID_AIR)doublechecknospawner=true;
                 }
             }
         }
@@ -363,7 +367,7 @@ public class NoSpawnerDetector extends Module {
             synchronized (StructurePositions) {
                 for (BlockPos pos : StructurePositions) {
                     BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
-                    if (pos != null && playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
+                    if (pos != null && playerPos.closerThan(pos, renderDistance.get() * 16)) {
                         int startX = pos.getX();
                         int startY = pos.getY();
                         int startZ = pos.getZ();
@@ -371,10 +375,10 @@ public class NoSpawnerDetector extends Module {
                         int endY = pos.getY();
                         int endZ = pos.getZ();
                         if (!nearesttrcr.get()) {
-                            render(new Box(new Vec3d(startX+1, startY+1, startZ+1), new Vec3d(endX, endY, endZ)), spawnerSideColor.get(), spawnerLineColor.get(), shapeMode.get(), event);
+                            render(new AABB(new Vec3(startX+1, startY+1, startZ+1), new Vec3(endX, endY, endZ)), spawnerSideColor.get(), spawnerLineColor.get(), shapeMode.get(), event);
                         } else if (nearesttrcr.get()) {
-                            render(new Box(new Vec3d(startX+1, startY+1, startZ+1), new Vec3d(endX, endY, endZ)), spawnerSideColor.get(), spawnerLineColor.get(), shapeMode.get(), event);
-                            render2(new Box(new Vec3d(closestStructureX, closestStructureY, closestStructureZ), new Vec3d (closestStructureX, closestStructureY, closestStructureZ)), spawnerSideColor.get(), spawnerLineColor.get(),ShapeMode.Sides, event);
+                            render(new AABB(new Vec3(startX+1, startY+1, startZ+1), new Vec3(endX, endY, endZ)), spawnerSideColor.get(), spawnerLineColor.get(), shapeMode.get(), event);
+                            render2(new AABB(new Vec3(closestStructureX, closestStructureY, closestStructureZ), new Vec3 (closestStructureX, closestStructureY, closestStructureZ)), spawnerSideColor.get(), spawnerLineColor.get(),ShapeMode.Sides, event);
                         }
                     }
                 }
@@ -384,45 +388,45 @@ public class NoSpawnerDetector extends Module {
     private void displayMessage(String key, BlockPos pos) {
         if (chatFeedback.get()) {
             if (key=="dungeon") {
-                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§9NSD§r | Detected §9DUNGEON§r! Block Position: " + pos));
-                else ChatUtils.sendMsg(Text.of("§9NSD§r | Detected §9DUNGEON§r!"));
+                if (displaycoords.get()) ChatUtils.sendMsg(Component.nullToEmpty("§9NSD§r | Detected §9DUNGEON§r! Block Position: " + pos));
+                else ChatUtils.sendMsg(Component.nullToEmpty("§9NSD§r | Detected §9DUNGEON§r!"));
                 logStructure(pos);
             }
             if (key=="mineshaft") {
-                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§9NSD§r | Detected §9MINESHAFT§r! Block Position: " + pos));
-                else ChatUtils.sendMsg(Text.of("§9NSD§r | Detected §9MINESHAFT§r!"));
+                if (displaycoords.get()) ChatUtils.sendMsg(Component.nullToEmpty("§9NSD§r | Detected §9MINESHAFT§r! Block Position: " + pos));
+                else ChatUtils.sendMsg(Component.nullToEmpty("§9NSD§r | Detected §9MINESHAFT§r!"));
                 logStructure(pos);
             }
         }
     }
-    private void render(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
+    private void render(AABB box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
         if (trcr.get() && Math.abs(box.minX- RenderUtils.center.x)<=renderDistance.get()*16 && Math.abs(box.minZ-RenderUtils.center.z)<=renderDistance.get()*16)
             if (!nearesttrcr.get())
                 event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
         event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
     }
-    private void render2(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
+    private void render2(AABB box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
         if (trcr.get() && Math.abs(box.minX-RenderUtils.center.x)<=renderDistance.get()*16 && Math.abs(box.minZ-RenderUtils.center.z)<=renderDistance.get()*16)
             event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
         event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
     }
-    private void removeChunksOutsideRenderDistance(Set<WorldChunk> chunks) {
+    private void removeChunksOutsideRenderDistance(Set<LevelChunk> chunks) {
         removechunksOutsideRenderDistance(scannedChunks, chunks);
         removeBlockPosOutsideRenderDistance(StructurePositions, chunks);
         removeBlockPosOutsideRenderDistance(scannedBlocks, chunks);
         removeBlockPosOutsideRenderDistance(checkedBlocks, chunks);
     }
-    private void removeBlockPosOutsideRenderDistance(Set<BlockPos> blockSet, Set<WorldChunk> worldChunks) {
+    private void removeBlockPosOutsideRenderDistance(Set<BlockPos> blockSet, Set<LevelChunk> worldChunks) {
         blockSet.removeIf(blockpos -> {
             BlockPos boxPos = new BlockPos((int)Math.floor(blockpos.getX()), (int)Math.floor(blockpos.getY()), (int)Math.floor(blockpos.getZ()));
-            assert mc.world != null;
-            return !worldChunks.contains(mc.world.getChunk(boxPos));
+            assert mc.level != null;
+            return !worldChunks.contains(mc.level.getChunk(boxPos));
         });
     }
-    private void removechunksOutsideRenderDistance(Set<ChunkPos> chunkSet, Set<WorldChunk> worldChunks) {
+    private void removechunksOutsideRenderDistance(Set<ChunkPos> chunkSet, Set<LevelChunk> worldChunks) {
         chunkSet.removeIf(c -> {
-            assert mc.world != null;
-            return !worldChunks.contains(mc.world.getChunk(c.x, c.z));
+            assert mc.level != null;
+            return !worldChunks.contains(mc.level.getChunk(c.x(), c.z()));
         });
     }
     private void logStructure(BlockPos pos) {

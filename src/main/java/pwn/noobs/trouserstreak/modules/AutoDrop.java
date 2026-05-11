@@ -1,10 +1,20 @@
 package pwn.noobs.trouserstreak.modules;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import net.minecraft.item.*;
-import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.network.HashedPatchMap;
+import net.minecraft.network.HashedStack;
+import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.FlintAndSteelItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ShearsItem;
 import pwn.noobs.trouserstreak.Trouser;
 
 import meteordevelopment.orbit.EventHandler;
@@ -13,33 +23,43 @@ import java.util.List;
 
 public class AutoDrop extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
     private final Setting<DropMode> dropMode = sgGeneral.add(new EnumSetting.Builder<DropMode>()
-            .name("mode")
-            .description("How hotbar slots are dropped each tick.")
-            .defaultValue(DropMode.SEQUENTIAL)
+            .name("drop-mode")
+            .description("How many hotbar slots are dropped.")
+            .defaultValue(DropMode.HeldItem)
             .build()
     );
-
+    private final Setting<Boolean> throwmainhand = sgGeneral.add(new BoolSetting.Builder()
+            .name("throw-mainhand")
+            .defaultValue(true)
+            .visible(() -> dropMode.get() == DropMode.HeldItem)
+            .build()
+    );
+    private final Setting<Boolean> throwoffhand = sgGeneral.add(new BoolSetting.Builder()
+            .name("throw-offhand")
+            .defaultValue(false)
+            .visible(() -> dropMode.get() == DropMode.HeldItem)
+            .build()
+    );
+    private final Setting<DropMethod> dropMethod = sgGeneral.add(new EnumSetting.Builder<DropMethod>()
+            .name("drop-method")
+            .description("How hotbar slots are dropped each tick.")
+            .defaultValue(DropMethod.BURST)
+            .visible(() -> dropMode.get() == DropMode.SpecifySlots)
+            .build()
+    );
     private final Setting<Integer> dropsPerTick = sgGeneral.add(new IntSetting.Builder()
             .name("drops-per-tick")
             .description("Maximum number of hotbar slots to drop per tick (1-9).")
-            .defaultValue(1)
+            .defaultValue(9)
             .min(1)
             .sliderMax(9)
+            .visible(() -> dropMode.get() == DropMode.SpecifySlots)
             .build()
     );
-
     private final Setting<Boolean> tool = sgGeneral.add(new BoolSetting.Builder()
             .name("No Throw Tools")
             .description("No Throw tools")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> dropthisslot = sgGeneral.add(new BoolSetting.Builder()
-            .name("SpecifySlotToDrop")
-            .description("Specifies the slot to drop.")
             .defaultValue(false)
             .build()
     );
@@ -55,7 +75,7 @@ public class AutoDrop extends Module {
                     .name("slot " + slot)
                     .description("Drop items from hotbar slot " + slot + ".")
                     .defaultValue(false)
-                    .visible(dropthisslot::get)
+                    .visible(() -> dropMode.get() == DropMode.SpecifySlots)
                     .build()
             ));
         }
@@ -64,10 +84,10 @@ public class AutoDrop extends Module {
     private int nextSlot = 0;
 
     public static boolean isTool(ItemStack itemStack) {
-        return itemStack.isIn(ItemTags.AXES) ||
-                itemStack.isIn(ItemTags.HOES) ||
-                itemStack.isIn(ItemTags.PICKAXES) ||
-                itemStack.isIn(ItemTags.SHOVELS) ||
+        return itemStack.is(ItemTags.AXES) ||
+                itemStack.is(ItemTags.HOES) ||
+                itemStack.is(ItemTags.PICKAXES) ||
+                itemStack.is(ItemTags.SHOVELS) ||
                 itemStack.getItem() instanceof ShearsItem ||
                 itemStack.getItem() instanceof FlintAndSteelItem ||
                 itemStack.getItem() instanceof BucketItem;
@@ -86,46 +106,108 @@ public class AutoDrop extends Module {
     private void onPreTick(TickEvent.Pre event) {
         if (mc.player == null) return;
 
-        if (!dropthisslot.get()) {
-            if (tool.get() && isTool(mc.player.getMainHandStack())) return;
-            mc.player.dropSelectedItem(true);
-            return;
-        }
+        switch (dropMode.get()){
+            case HeldItem -> {
+                if (mc.player == null) return;
+                Inventory inv = mc.player.getInventory();
+                ItemStack offhandStack = inv.getItem(Inventory.SLOT_OFFHAND);
 
-        int savedSlot = mc.player.getInventory().selectedSlot;
-        int dropped = 0;
-        int limit = Math.min(dropsPerTick.get(), 9);
+                if (throwmainhand.get() && (!tool.get() || !isTool(inv.getSelectedItem()))) {
+                    mc.player.drop(true);
+                }
 
-        if (dropMode.get() == DropMode.BURST) {
-            for (int i = 0; i < 9 && dropped < limit; i++) {
-                if (!isSlotEnabled(i)) continue;
-                ItemStack stack = mc.player.getInventory().getStack(i);
-                if (stack.isEmpty()) continue;
-                if (tool.get() && isTool(stack)) continue;
-                mc.player.getInventory().selectedSlot = i;
-                mc.player.dropSelectedItem(true);
-                dropped++;
+                if (throwoffhand.get() && !offhandStack.isEmpty() && (!tool.get() || !isTool(offhandStack))) {
+                    short offhandSlotId = (short) 45;
+                    byte dropButton = (byte) 1;
+
+                    Int2ObjectMap<HashedStack> modifiedStacks = new Int2ObjectOpenHashMap<>();
+
+                    HashedPatchMap.HashGenerator hasher = mc.getConnection().decoratedHashOpsGenenerator();
+
+                    HashedStack offhandHash = HashedStack.create(offhandStack, hasher);
+                    modifiedStacks.put(offhandSlotId, offhandHash);
+
+                    mc.getConnection().send(new ServerboundContainerClickPacket(
+                            mc.player.containerMenu.containerId,
+                            mc.player.containerMenu.getStateId(),
+                            offhandSlotId,
+                            dropButton,
+                            ContainerInput.THROW,
+                            modifiedStacks,
+                            HashedStack.EMPTY
+                    ));
+                }
             }
-        } else {
-            int startSlot = nextSlot;
-            for (int i = 0; i < 9 && dropped < limit; i++) {
-                int slot = (startSlot + i) % 9;
-                if (!isSlotEnabled(slot)) continue;
-                ItemStack stack = mc.player.getInventory().getStack(slot);
-                if (stack.isEmpty()) continue;
-                if (tool.get() && isTool(stack)) continue;
-                mc.player.getInventory().selectedSlot = slot;
-                mc.player.dropSelectedItem(true);
-                nextSlot = (slot + 1) % 9;
-                dropped++;
+            case SpecifySlots -> {
+                int dropped = 0;
+                int limit = Math.min(dropsPerTick.get(), 9);
+                byte dropButton = (byte) 1;
+
+                if (dropMethod.get() == DropMethod.BURST) {
+                    for (int i = 0; i < 9 && dropped < limit; i++) {
+                        if (!isSlotEnabled(i)) continue;
+                        ItemStack stack = mc.player.getInventory().getItem(i);
+                        if (stack.isEmpty()) continue;
+                        if (tool.get() && isTool(stack)) continue;
+                        short hotbarSlotId = (short) (36 + i);
+
+                        Int2ObjectMap<HashedStack> modifiedStacks = new Int2ObjectOpenHashMap<>();
+
+                        HashedPatchMap.HashGenerator hasher = mc.getConnection().decoratedHashOpsGenenerator();
+
+                        HashedStack hotbarHash = HashedStack.create(stack, hasher);
+                        modifiedStacks.put(hotbarSlotId, hotbarHash);
+
+                        mc.getConnection().send(new ServerboundContainerClickPacket(
+                                mc.player.containerMenu.containerId,
+                                mc.player.containerMenu.getStateId(),
+                                hotbarSlotId,
+                                dropButton,
+                                ContainerInput.THROW,
+                                modifiedStacks,
+                                HashedStack.EMPTY
+                        ));
+                        dropped++;
+                    }
+                } else {
+                    int startSlot = nextSlot;
+                    for (int i = 0; i < 9 && dropped < limit; i++) {
+                        int slot = (startSlot + i) % 9;
+                        if (!isSlotEnabled(slot)) continue;
+                        ItemStack stack = mc.player.getInventory().getItem(slot);
+                        if (stack.isEmpty()) continue;
+                        if (tool.get() && isTool(stack)) continue;
+                        short hotbarSlotId = (short) (36 + slot);
+
+                        Int2ObjectMap<HashedStack> modifiedStacks = new Int2ObjectOpenHashMap<>();
+
+                        HashedPatchMap.HashGenerator hasher = mc.getConnection().decoratedHashOpsGenenerator();
+
+                        HashedStack hotbarHash = HashedStack.create(stack, hasher);
+                        modifiedStacks.put(hotbarSlotId, hotbarHash);
+
+                        mc.getConnection().send(new ServerboundContainerClickPacket(
+                                mc.player.containerMenu.containerId,
+                                mc.player.containerMenu.getStateId(),
+                                hotbarSlotId,
+                                dropButton,
+                                ContainerInput.THROW,
+                                modifiedStacks,
+                                HashedStack.EMPTY
+                        ));
+                        nextSlot = (slot + 1) % 9;
+                        dropped++;
+                    }
+                }
             }
         }
-
-        mc.player.getInventory().selectedSlot = savedSlot;
     }
-
     public enum DropMode {
-        SEQUENTIAL,
-        BURST
+        HeldItem,
+        SpecifySlots
+    }
+    public enum DropMethod {
+        BURST,
+        SEQUENTIAL
     }
 }

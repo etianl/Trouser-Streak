@@ -11,17 +11,23 @@ import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.network.packet.c2s.play.AcknowledgeChunksC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.s2c.play.*;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.*;
-import net.minecraft.world.Heightmap;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
+import net.minecraft.network.protocol.game.ServerboundChunkBatchReceivedPacket;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.LinearPalette;
+import net.minecraft.world.level.chunk.Palette;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.*;
@@ -182,7 +188,7 @@ public class OnlinePlayerActivityDetector extends Module {
             synchronized (playerActivityPositions) {
                 for (BlockPos pos : playerActivityPositions) {
                     BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
-                    if (pos != null && playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
+                    if (pos != null && playerPos.closerThan(pos, renderDistance.get() * 16)) {
                         int startX = pos.getX() - 8;
                         int startY = pos.getY() - 8;
                         int startZ = pos.getZ() - 8;
@@ -190,55 +196,55 @@ public class OnlinePlayerActivityDetector extends Module {
                         int endY = pos.getY() + 8;
                         int endZ = pos.getZ() + 8;
 
-                        render(new Box(new Vec3d(startX, startY, startZ), new Vec3d(endX, endY, endZ)), playerChunksSideColor.get(), playerChunksLineColor.get(), shapeMode.get(), event);
+                        render(new AABB(new Vec3(startX, startY, startZ), new Vec3(endX, endY, endZ)), playerChunksSideColor.get(), playerChunksLineColor.get(), shapeMode.get(), event);
                     }
                 }
             }
         }
     }
 
-    private void render(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
+    private void render(AABB box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
         event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, lines, shapeMode, 0);
     }
 
     @EventHandler
     private void onReadPacket(PacketEvent.Receive event) {
-        if (event.packet instanceof AcknowledgeChunksC2SPacket)return; //for some reason this packet keeps getting cast to other packets
-        if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && !(event.packet instanceof PlayerMoveC2SPacket) && event.packet instanceof ChunkDataS2CPacket packet && mc.world != null) {
-            ChunkPos playerActivityPos = new ChunkPos(packet.getChunkX(), packet.getChunkZ());
+        if (event.packet instanceof ServerboundChunkBatchReceivedPacket)return; //for some reason this packet keeps getting cast to other packets
+        if (!(event.packet instanceof ServerboundChunkBatchReceivedPacket) && !(event.packet instanceof ServerboundMovePlayerPacket) && event.packet instanceof ClientboundLevelChunkWithLightPacket packet && mc.level != null) {
+            ChunkPos playerActivityPos = new ChunkPos(packet.getX(), packet.getZ());
 
-            if (mc.world.getChunkManager().getChunk(packet.getChunkX(), packet.getChunkZ()) == null) {
-                WorldChunk chunk = new WorldChunk(mc.world, playerActivityPos);
+            if (mc.level.getChunkSource().getChunkForLighting(packet.getX(), packet.getZ()) == null) {
+                LevelChunk chunk = new LevelChunk(mc.level, playerActivityPos);
                 try {
-                    Map<Heightmap.Type, long[]> heightmaps = new EnumMap<>(Heightmap.Type.class);
+                    Map<Heightmap.Types, long[]> heightmaps = new EnumMap<>(Heightmap.Types.class);
 
-                    Heightmap.Type type = Heightmap.Type.MOTION_BLOCKING;
+                    Heightmap.Types type = Heightmap.Types.MOTION_BLOCKING;
                     long[] emptyHeightmapData = new long[37];
                     heightmaps.put(type, emptyHeightmapData);
 
                     CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-                        chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), heightmaps,
-                                packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ()));
+                        chunk.replaceWithPacketData(packet.getChunkData().getReadBuffer(), heightmaps,
+                                packet.getChunkData().getBlockEntitiesTagsConsumer(packet.getX(), packet.getZ()));
                     }, taskExecutor);
                     future.join();
                 } catch (CompletionException e) {}
 
-                ChunkSection[] sections = chunk.getSectionArray();
+                LevelChunkSection[] sections = chunk.getSections();
 
                 try {
-                    int Y=mc.world.getBottomY();
+                    int Y=mc.level.getMinY();
                     int i=0;
                     boolean firstsectionappearsnew = false;
-                    for (ChunkSection section : sections) {
-                        var blockStatesContainer = section.getBlockStateContainer();
+                    for (LevelChunkSection section : sections) {
+                        var blockStatesContainer = section.getStates();
 
                         Palette<BlockState> blockStatePalette = blockStatesContainer.data.palette();
-                        if (!(blockStatePalette instanceof ArrayPalette<BlockState>))return;
+                        if (!(blockStatePalette instanceof LinearPalette<BlockState>))return;
 
                         int blockPaletteLength = blockStatePalette.getSize();
                         for (int i2 = 0; i2 < blockPaletteLength; i2++) {
-                            BlockState blockPaletteEntry = blockStatePalette.get(i2);
-                            if (i2 == 0 && i == 0 && blockPaletteEntry.getBlock() == Blocks.AIR && mc.world.getRegistryKey() != World.END){
+                            BlockState blockPaletteEntry = blockStatePalette.valueFor(i2);
+                            if (i2 == 0 && i == 0 && blockPaletteEntry.getBlock() == Blocks.AIR && mc.level.dimension() != Level.END){
                                 firstsectionappearsnew = true;
                                 break;
                             }
@@ -258,7 +264,7 @@ public class OnlinePlayerActivityDetector extends Module {
                         if (bstatesSize < blockPaletteLength && !firstsectionappearsnew) {
                             Set<BlockState> missingBlocks = new HashSet<>();
                             for (int i2 = 0; i2 < blockPaletteLength; i2++) {
-                                BlockState blockPaletteEntry = blockStatePalette.get(i2);
+                                BlockState blockPaletteEntry = blockStatePalette.valueFor(i2);
                                 if (!bstates.contains(blockPaletteEntry)) {
                                     missingBlocks.add(blockPaletteEntry);
                                 }
@@ -269,7 +275,7 @@ public class OnlinePlayerActivityDetector extends Module {
 
                             if (!missingBlocks.isEmpty()) {
                                 for (BlockState missingBlock : missingBlocks) {
-                                    if (mc.world.getRegistryKey() == World.OVERWORLD) {
+                                    if (mc.level.dimension() == Level.OVERWORLD) {
                                         if (FalsePositivesOVERWORLD.contains(missingBlock.getBlock())) falsepositive = true;
                                         if (!detectOres.get() && ORE_BLOCKS.contains(missingBlock.getBlock())) falsepositive = true;
                                         if (!falsepositive && !detectOres.get() && !FalsePositivesOVERWORLD.contains(missingBlock.getBlock())) {
@@ -280,7 +286,7 @@ public class OnlinePlayerActivityDetector extends Module {
                                             detectedBlocks.add(missingBlock);
                                             missingAblock = true;
                                         }
-                                    } else if (mc.world.getRegistryKey() == World.NETHER) {
+                                    } else if (mc.level.dimension() == Level.NETHER) {
                                         if (FalsePositivesNETHER.contains(missingBlock.getBlock())) falsepositive = true;
                                         if (!detectOres.get() && NETHER_ORE_BLOCKS.contains(missingBlock.getBlock())) falsepositive = true;
                                         if (!falsepositive && !detectOres.get() && !FalsePositivesNETHER.contains(missingBlock.getBlock())) {
@@ -291,7 +297,7 @@ public class OnlinePlayerActivityDetector extends Module {
                                             detectedBlocks.add(missingBlock);
                                             missingAblock = true;
                                         }
-                                    } else if (mc.world.getRegistryKey() == World.END) {
+                                    } else if (mc.level.dimension() == Level.END) {
                                         if (FalsePositivesEND.contains(missingBlock.getBlock())) falsepositive = true;
                                         if (!falsepositive && !FalsePositivesEND.contains(missingBlock.getBlock())) {
                                             detectedBlocks.add(missingBlock);
@@ -303,10 +309,10 @@ public class OnlinePlayerActivityDetector extends Module {
 
                             if (!playerActivityPositions.contains(playerActivityPos) && !falsepositive && missingAblock) {
                                 for (BlockState state : detectedBlocks) {
-                                    ChatUtils.sendMsg(Text.of("Missing block in Section " + i + ": " + state.getBlock()));
+                                    ChatUtils.sendMsg(Component.nullToEmpty("Missing block in Section " + i + ": " + state.getBlock()));
                                 }
-                                ChatUtils.sendMsg(Text.of("Detected Player Activity. X: " + playerActivityPos.getCenterX() + " Y: " + (Y+8) + " Z: " + playerActivityPos.getCenterZ()));
-                                playerActivityPositions.add(new BlockPos(playerActivityPos.getCenterX(), Y+8, playerActivityPos.getCenterZ()));
+                                ChatUtils.sendMsg(Component.nullToEmpty("Detected Player Activity. X: " + playerActivityPos.getMiddleBlockX() + " Y: " + (Y+8) + " Z: " + playerActivityPos.getMiddleBlockZ()));
+                                playerActivityPositions.add(new BlockPos(playerActivityPos.getMiddleBlockX(), Y+8, playerActivityPos.getMiddleBlockZ()));
                             }
                         }
                         i++;
@@ -324,7 +330,7 @@ public class OnlinePlayerActivityDetector extends Module {
     private void removeChunksOutsideRenderDistance(Set<BlockPos> chunkSet, double renderDistanceBlocks) {
         chunkSet.removeIf(blockPos -> {
             BlockPos playerPos = new BlockPos(mc.player.getBlockX(), blockPos.getY(), mc.player.getBlockZ());
-            return !playerPos.isWithinDistance(blockPos, renderDistanceBlocks);
+            return !playerPos.closerThan(blockPos, renderDistanceBlocks);
         });
     }
 }

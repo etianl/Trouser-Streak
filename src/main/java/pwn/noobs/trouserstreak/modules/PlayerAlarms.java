@@ -9,12 +9,12 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.HashSet;
@@ -111,7 +111,7 @@ public class PlayerAlarms extends Module {
     public final Setting<List<SoundEvent>> soundtouse = sgJ.add(new SoundEventListSetting.Builder()
             .name("Sound to play (pick one)")
             .description("The sound to play when a player joins. Just pick one.")
-            .defaultValue(SoundEvents.BLOCK_BELL_USE)
+            .defaultValue(SoundEvents.BELL_BLOCK)
             .visible(() -> joined.get())
             .build()
     );
@@ -156,7 +156,7 @@ public class PlayerAlarms extends Module {
     public final Setting<List<SoundEvent>> soundtouseRD = sgRD.add(new SoundEventListSetting.Builder()
             .name("Sound to play (pick one)")
             .description("The sound to play when a player joins. Just pick one.")
-            .defaultValue(SoundEvents.BLOCK_ANVIL_DESTROY)
+            .defaultValue(SoundEvents.ANVIL_DESTROY)
             .visible(() -> renderdistance.get())
             .build()
     );
@@ -194,7 +194,7 @@ public class PlayerAlarms extends Module {
 
     @EventHandler
     public void onPreTick(TickEvent.Pre event) {
-        if (mc.world == null || mc.player == null) return;
+        if (mc.level == null || mc.player == null) return;
         if (ringring && ringsLeft > 0) {
             if (ticks <= 0) {
                 playSound();
@@ -220,9 +220,9 @@ public class PlayerAlarms extends Module {
             }
         }
         if (renderdistance.get()){
-            for (Entity entity : mc.world.getEntities()){
-                if (entity instanceof PlayerEntity && entity != mc.player){
-                    PlayerEntity player = (PlayerEntity) entity;
+            for (Entity entity : mc.level.entitiesForRendering()){
+                if (entity instanceof Player && entity != mc.player){
+                    Player player = (Player) entity;
                     if (!playersSpottedRD.contains(player.getDisplayName().getString())){
                         if (useListRD.get()){
                             if (namesRD.get().contains(player.getDisplayName().getString())) {
@@ -253,34 +253,34 @@ public class PlayerAlarms extends Module {
 
     private void playSound() {
         if (mc.player != null) {
-            Vec3d pos = mc.player.getEntityPos();
-            SoundEvent sound = SoundEvents.BLOCK_BELL_USE;
+            Vec3 pos = mc.player.position();
+            SoundEvent sound = SoundEvents.BELL_BLOCK;
             if (!soundtouse.get().isEmpty()) sound = soundtouse.get().get(0);
             float volumeSetting = volume.get().floatValue();
             float pitchSetting = pitch.get().floatValue();
 
-            mc.world.playSoundClient(pos.x, pos.y, pos.z, sound, mc.player.getSoundCategory(), volumeSetting, pitchSetting, false);
+            mc.level.playLocalSound(pos.x, pos.y, pos.z, sound, mc.player.getSoundSource(), volumeSetting, pitchSetting, false);
         }
     }
     private void playSoundRD() {
         if (mc.player != null) {
-            Vec3d pos = mc.player.getEntityPos();
-            SoundEvent sound = SoundEvents.BLOCK_ANVIL_DESTROY;
+            Vec3 pos = mc.player.position();
+            SoundEvent sound = SoundEvents.ANVIL_DESTROY;
             if (!soundtouseRD.get().isEmpty()) sound = soundtouseRD.get().get(0);
             float volumeSetting = volumeRD.get().floatValue();
             float pitchSetting = pitchRD.get().floatValue();
 
-            mc.world.playSoundClient(pos.x, pos.y, pos.z, sound, mc.player.getSoundCategory(), volumeSetting, pitchSetting, false);
+            mc.level.playLocalSound(pos.x, pos.y, pos.z, sound, mc.player.getSoundSource(), volumeSetting, pitchSetting, false);
         }
     }
     @EventHandler
     private void onReceivePacket(PacketEvent.Receive event) {
-        if (event.packet instanceof PlayerListS2CPacket && joined.get()) {
-            PlayerListS2CPacket packet = (PlayerListS2CPacket) event.packet;
+        if (event.packet instanceof ClientboundPlayerInfoUpdatePacket && joined.get()) {
+            ClientboundPlayerInfoUpdatePacket packet = (ClientboundPlayerInfoUpdatePacket) event.packet;
 
-            if (packet.getActions().contains(PlayerListS2CPacket.Action.ADD_PLAYER)) {
+            if (packet.actions().contains(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER)) {
                 if (useListJ.get()) {
-                    for (PlayerListS2CPacket.Entry entry : packet.getPlayerAdditionEntries()) {
+                    for (ClientboundPlayerInfoUpdatePacket.Entry entry : packet.newEntries()) {
                         String playerName = entry.profile().name();
                         if (namesJ.get().contains(playerName)){
                             ringring = true;

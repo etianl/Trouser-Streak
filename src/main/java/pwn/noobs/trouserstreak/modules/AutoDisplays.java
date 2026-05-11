@@ -11,28 +11,28 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.TypedEntityData;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtDouble;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.TypedEntityData;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.BlockHitResult;
 import pwn.noobs.trouserstreak.Trouser;
 import pwn.noobs.trouserstreak.utils.PermissionUtils;
 
@@ -166,7 +166,7 @@ public class AutoDisplays extends Module {
     public AutoDisplays() {
         super(Trouser.operator, "auto-displays", "Automatically spam block or text displays around players. Requires operator access.");
     }
-    private CopyOnWriteArrayList<PlayerListEntry> players;
+    private CopyOnWriteArrayList<PlayerInfo> players;
     private int tickTimer = 0;
     private int killTimer = 0;
     private Queue<String> commandQueue = new LinkedList<>();
@@ -185,7 +185,7 @@ public class AutoDisplays extends Module {
         if (mc.player == null) return;
         tickTimer = 0;
         killTimer = 0;
-        if (notOP.get() && PermissionUtils.getPermissionLevel(mc.player) < 2 && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+        if (notOP.get() && PermissionUtils.getPermissionLevel(mc.player) < 2 && mc.level.hasChunk(mc.player.chunkPosition().x(), mc.player.chunkPosition().z())) {
             toggle();
             error("Must have permission level 2 or higher");
         }
@@ -228,7 +228,7 @@ public class AutoDisplays extends Module {
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         if (compatMode.get() && displayMode.get() == Modes.TEXT) return;
-        if (mc.getNetworkHandler().getPlayerList().toArray().length == 1 && allAloneToggle.get()) {
+        if (mc.getConnection().getOnlinePlayers().toArray().length == 1 && allAloneToggle.get()) {
             toggle();
             error("No other players online.");
         }
@@ -302,10 +302,10 @@ public class AutoDisplays extends Module {
                     String[] parts = fullString.split(":");
                     String block = parts[1];
                     String blockName = block.replace("}", "");
-                    players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
+                    players = new CopyOnWriteArrayList<>(mc.getConnection().getOnlinePlayers());
                     List<String> friendNames = new ArrayList<>();
-                    if (!trollyourself.get())friendNames.add("name=!" + mc.player.getName().getLiteralString());
-                    for (PlayerListEntry player : players) {
+                    if (!trollyourself.get())friendNames.add("name=!" + mc.player.getName().tryCollapseToString());
+                    for (PlayerInfo player : players) {
                         if (Friends.get().isFriend(player) && !trollfriends.get())
                             friendNames.add("name=!" + player.getProfile().name());
                     }
@@ -325,10 +325,10 @@ public class AutoDisplays extends Module {
     }
     private void createTextDisplays() {
         int color = (backgroundColor.get().a << 24) | (backgroundColor.get().r << 16) | (backgroundColor.get().g << 8) | backgroundColor.get().b;
-        players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
+        players = new CopyOnWriteArrayList<>(mc.getConnection().getOnlinePlayers());
         List<String> friendNames = new ArrayList<>();
-        if (!trollyourself.get())friendNames.add("name=!" + mc.player.getName().getLiteralString());
-        for (PlayerListEntry player : players) {
+        if (!trollyourself.get())friendNames.add("name=!" + mc.player.getName().tryCollapseToString());
+        for (PlayerInfo player : players) {
             if (Friends.get().isFriend(player) && !trollfriends.get())
                 friendNames.add("name=!" + player.getProfile().name());
         }
@@ -357,7 +357,7 @@ public class AutoDisplays extends Module {
         }
     }
     private void createTextDisplaysCompat() {
-        if (!mc.player.getAbilities().creativeMode) {
+        if (!mc.player.getAbilities().instabuild) {
             error("You need to be in creative mode for compatibility mode.");
             toggle();
             return;
@@ -366,11 +366,11 @@ public class AutoDisplays extends Module {
         int color = (backgroundColor.get().a << 24) | (backgroundColor.get().r << 16)
                 | (backgroundColor.get().g << 8) | backgroundColor.get().b;
 
-        ItemStack previous = mc.player.getMainHandStack().copy();
+        ItemStack previous = mc.player.getMainHandItem().copy();
 
-        List<PlayerEntity> nearbyPlayers = new ArrayList<>();
-        for (Entity entity : mc.world.getEntities()) {
-            if (entity instanceof PlayerEntity player) {
+        List<Player> nearbyPlayers = new ArrayList<>();
+        for (Entity entity : mc.level.entitiesForRendering()) {
+            if (entity instanceof Player player) {
 
                 if (Friends.get().isFriend(player) && !trollfriends.get()) continue;
                 if (mc.player == player && !trollyourself.get()) continue;
@@ -379,55 +379,55 @@ public class AutoDisplays extends Module {
             }
         }
 
-        for (PlayerEntity target : nearbyPlayers) {
-            ItemStack egg = createTextDisplayEgg(text.get(), textbrightness.get(), color, target.getBlockPos().up());
+        for (Player target : nearbyPlayers) {
+            ItemStack egg = createTextDisplayEgg(text.get(), textbrightness.get(), color, target.blockPosition().above());
 
-            mc.interactionManager.clickCreativeStack(egg, 36 + mc.player.getInventory().selectedSlot);
+            mc.gameMode.handleCreativeModeItemAdd(egg, 36 + mc.player.getInventory().getSelectedSlot());
 
-            BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
+            BlockHitResult bhr = new BlockHitResult(mc.player.getEyePosition(), Direction.DOWN, BlockPos.containing(mc.player.getEyePosition()), false);
 
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
+            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, bhr);
 
-            mc.interactionManager.clickCreativeStack(previous, 36 + mc.player.getInventory().selectedSlot);
+            mc.gameMode.handleCreativeModeItemAdd(previous, 36 + mc.player.getInventory().getSelectedSlot());
         }
     }
 
     private ItemStack createTextDisplayEgg(String text, int brightness, int argbColor, BlockPos pos) {
         ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
 
-        NbtList Pos = new NbtList();
-        Pos.add(NbtDouble.of(pos.getX()));
-        Pos.add(NbtDouble.of(pos.getY()));
-        Pos.add(NbtDouble.of(pos.getZ()));
+        ListTag Pos = new ListTag();
+        Pos.add(DoubleTag.valueOf(pos.getX()));
+        Pos.add(DoubleTag.valueOf(pos.getY()));
+        Pos.add(DoubleTag.valueOf(pos.getZ()));
 
-        NbtCompound entityTag = new NbtCompound();
+        CompoundTag entityTag = new CompoundTag();
         entityTag.putString("id", "minecraft:text_display");
 
         entityTag.put("Pos", Pos);
 
         entityTag.putInt("background", argbColor);
-        NbtCompound brightnessTag = new NbtCompound();
+        CompoundTag brightnessTag = new CompoundTag();
         brightnessTag.putInt("sky", brightness);
         brightnessTag.putInt("block", brightness);
         entityTag.put("brightness", brightnessTag);
 
         entityTag.putString("text", text);
 
-        NbtList tags = new NbtList();
-        tags.add(NbtString.of("MOL"));
+        ListTag tags = new ListTag();
+        tags.add(StringTag.valueOf("MOL"));
         entityTag.put("Tags", tags);
 
         Identifier entityId = Identifier.tryParse("minecraft:text_display");
-        EntityType<?> entityType = Registries.ENTITY_TYPE.get(entityId);
+        EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.getValue(entityId);
         if (entityType == null) entityType = EntityType.TEXT_DISPLAY;
 
-        TypedEntityData<EntityType<?>> data = TypedEntityData.create(entityType, entityTag);
+        TypedEntityData<EntityType<?>> data = TypedEntityData.of(entityType, entityTag);
 
-        var changes = ComponentChanges.builder()
-                .add(DataComponentTypes.ENTITY_DATA, data)
+        var changes = DataComponentPatch.builder()
+                .set(DataComponents.ENTITY_DATA, data)
                 .build();
 
-        item.applyChanges(changes);
+        item.applyComponentsAndValidate(changes);
         return item;
     }
 

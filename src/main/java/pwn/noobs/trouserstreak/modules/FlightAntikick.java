@@ -7,10 +7,10 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.MovementType;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 public class FlightAntikick extends Module {
@@ -42,10 +42,10 @@ public class FlightAntikick extends Module {
         if (delayLeft > 0) delayLeft--;
         else if (delayLeft <= 0 && offLeft > 0) {
             offLeft--;
-            BlockPos playerPos = mc.player.getBlockPos();
-            BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
-            if (mc.world.getBlockState(pos).isAir() || (!mc.world.getBlockState(pos).isAir() && mc.player.getY()>=pos.getY()+1.11)){
-                mc.player.move(MovementType.SELF, new Vec3d(0,-0.1,0));
+            BlockPos playerPos = mc.player.blockPosition();
+            BlockPos pos = playerPos.offset(new Vec3i(0,-1,0));
+            if (mc.level.getBlockState(pos).isAir() || (!mc.level.getBlockState(pos).isAir() && mc.player.getY()>=pos.getY()+1.11)){
+                mc.player.move(MoverType.SELF, new Vec3(0,-0.1,0));
             }
         } else if (delayLeft <= 0 && offLeft <= 0) {
             delayLeft = delay.get();

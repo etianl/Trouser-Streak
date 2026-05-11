@@ -8,12 +8,12 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.util.Hand;
 import pwn.noobs.trouserstreak.Trouser;
 
 public class InfiniteElytra extends Module {
@@ -62,9 +62,9 @@ public class InfiniteElytra extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (mc.player == null || mc.world == null) return;
+        if (mc.player == null || mc.level == null) return;
 
-        if (!playerWasFlying) playerWasFlying = mc.player.isGliding();
+        if (!playerWasFlying) playerWasFlying = mc.player.isFallFlying();
         if (!playerWasFlying) return;
 
         tickCounter++;
@@ -81,13 +81,13 @@ public class InfiniteElytra extends Module {
             tickCounter = 0;
         }
 
-        ItemStack chestStack = mc.player.getEquippedStack(EquipmentSlot.CHEST);
+        ItemStack chestStack = mc.player.getItemBySlot(EquipmentSlot.CHEST);
 
         if (currentPhaseTick < elytraOnTicks.get()) {
             glidingTime = true;
             if (chestStack.getItem() != Items.ELYTRA) {
-                for (int i = 0; i < mc.player.getInventory().getMainStacks().size(); i++) {
-                    ItemStack stack = mc.player.getInventory().getMainStacks().get(i);
+                for (int i = 0; i < mc.player.getInventory().getNonEquipmentItems().size(); i++) {
+                    ItemStack stack = mc.player.getInventory().getNonEquipmentItems().get(i);
                     if (stack.getItem() == Items.ELYTRA) {
                         InvUtils.move().from(i).toArmor(2);
                         break;
@@ -95,15 +95,15 @@ public class InfiniteElytra extends Module {
                 }
             }
 
-            if (chestStack.getItem() == Items.ELYTRA && !mc.player.isOnGround() && !mc.player.isGliding()) {
-                mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
+            if (chestStack.getItem() == Items.ELYTRA && !mc.player.onGround() && !mc.player.isFallFlying()) {
+                mc.player.connection.send(new ServerboundPlayerCommandPacket(mc.player, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
             }
         } else {
             glidingTime = false;
             if (chestStack.getItem() == Items.ELYTRA) {
                 int emptySlot = -1;
                 for (int i = 0; i < 36; i++) {
-                    if (mc.player.getInventory().getStack(i).isEmpty()) {
+                    if (mc.player.getInventory().getItem(i).isEmpty()) {
                         emptySlot = i;
                         break;
                     }
@@ -119,7 +119,7 @@ public class InfiniteElytra extends Module {
                 int rocketSlot = -1;
 
                 for (int i = 0; i < 9; i++) {
-                    ItemStack stack = mc.player.getInventory().getStack(i);
+                    ItemStack stack = mc.player.getInventory().getItem(i);
                     if (stack.getItem() == Items.FIREWORK_ROCKET) {
                         rocketSlot = i;
                         break;
@@ -127,14 +127,14 @@ public class InfiniteElytra extends Module {
                 }
 
                 if (rocketSlot != -1) {
-                    int currentSlot = mc.player.getInventory().selectedSlot;
+                    int currentSlot = mc.player.getInventory().getSelectedSlot();
 
                     if (rocketSlot != currentSlot) {
-                        mc.player.getInventory().selectedSlot = rocketSlot;
-                        mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
-                        mc.player.getInventory().selectedSlot = currentSlot;
+                        mc.player.getInventory().setSelectedSlot(rocketSlot);
+                        mc.gameMode.useItem(mc.player, InteractionHand.MAIN_HAND);
+                        mc.player.getInventory().setSelectedSlot(currentSlot);
                     } else {
-                        mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
+                        mc.gameMode.useItem(mc.player, InteractionHand.MAIN_HAND);
                     }
                 }
             }
@@ -144,7 +144,7 @@ public class InfiniteElytra extends Module {
     private void onInteractItem(InteractItemEvent event) {
         if (mc.player == null) return;
 
-        ItemStack stack = mc.player.getStackInHand(event.hand);
+        ItemStack stack = mc.player.getItemInHand(event.hand);
 
         if (stack != null && stack.getItem() == Items.FIREWORK_ROCKET) {
             ticksSinceLastRocket = 0;

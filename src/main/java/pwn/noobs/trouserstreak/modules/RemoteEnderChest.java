@@ -5,13 +5,13 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.gui.screen.ingame.*;
-import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.BlockHitResult;
 import pwn.noobs.trouserstreak.Trouser;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_ALT;
@@ -35,9 +35,9 @@ public class RemoteEnderChest extends Module {
     private boolean guiHidden = false;
     private boolean guiWasOpen = false;
     private boolean lastKeyState = false;
-    private GenericContainerScreen savedScreen = null;
+    private ContainerScreen savedScreen = null;
     private int savedSyncId = -1;
-    private World lastWorld = null;
+    private Level lastWorld = null;
     private BlockPos potentialEChestPos = null;
 
     @Override
@@ -47,23 +47,23 @@ public class RemoteEnderChest extends Module {
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (mc.crosshairTarget instanceof BlockHitResult bhr) {
+        if (mc.hitResult instanceof BlockHitResult bhr) {
             potentialEChestPos = bhr.getBlockPos();
-            if (mc.world.getBlockState(bhr.getBlockPos()).getBlock() == Blocks.ENDER_CHEST
-                    && mc.options.useKey.isPressed() && !isEnderChestScreen(potentialEChestPos) && !guiHidden) {
-                mc.doItemUse();
-                mc.doItemUse();
+            if (mc.level.getBlockState(bhr.getBlockPos()).getBlock() == Blocks.ENDER_CHEST
+                    && mc.options.keyUse.isDown() && !isEnderChestScreen(potentialEChestPos) && !guiHidden) {
+                mc.startUseItem();
+                mc.startUseItem();
             }
         }
 
         if (isEnderChestScreen(potentialEChestPos) && savedScreen == null && !guiWasOpen && !guiHidden) {
-            savedScreen = (GenericContainerScreen) mc.currentScreen;
-            savedSyncId = mc.player.currentScreenHandler.syncId;
+            savedScreen = (ContainerScreen) mc.screen;
+            savedSyncId = mc.player.containerMenu.containerId;
             mc.setScreen(null);
             guiHidden = true;
             guiWasOpen = true;
-            lastWorld = mc.world;
-            if (chatFeedback) info("EChest link created! Press " + toggleGui.get().toString() + " to toggle the Ender Chest GUI.");
+            lastWorld = mc.level;
+            if (chatFeedback) info("EChest link created! §ePress " + toggleGui.get().toString() + " to toggle the Ender Chest GUI.§r");
         }
 
         boolean keyDown = toggleGui.get().isPressed();
@@ -80,15 +80,15 @@ public class RemoteEnderChest extends Module {
             }
         }
 
-        if (savedScreen != null && mc.currentScreen == null && !guiHidden && guiWasOpen) {
+        if (savedScreen != null && mc.screen == null && !guiHidden && guiWasOpen) {
             resetStuff();
             if (chatFeedback) error("Ender Chest GUI closed. EChest link broken.");
             return;
         }
 
         if (savedScreen != null && savedSyncId != -1) {
-            boolean handlerValid = mc.player.currentScreenHandler != null &&
-                    mc.player.currentScreenHandler.syncId == savedSyncId;
+            boolean handlerValid = mc.player.containerMenu != null &&
+                    mc.player.containerMenu.containerId == savedSyncId;
             if (!handlerValid) {
                 resetStuff();
                 if (chatFeedback) error("Ender chest handler invalid. EChest link broken.");
@@ -96,20 +96,20 @@ public class RemoteEnderChest extends Module {
             }
         }
 
-        if (savedScreen != null && mc.world != lastWorld) {
+        if (savedScreen != null && mc.level != lastWorld) {
             resetStuff();
-            lastWorld = mc.world;
+            lastWorld = mc.level;
             if (chatFeedback) error("World changed. EChest link broken.");
             return;
         }
 
-        lastWorld = mc.world;
+        lastWorld = mc.level;
     }
 
     private boolean isEnderChestScreen(BlockPos echest) {
-        return mc.currentScreen instanceof GenericContainerScreen screen &&
-                screen.getScreenHandler().getType() == ScreenHandlerType.GENERIC_9X3 &&
-                mc.world.getBlockState(echest).getBlock() == Blocks.ENDER_CHEST;
+        return mc.screen instanceof ContainerScreen screen &&
+                screen.getMenu().getType() == MenuType.GENERIC_9x3 &&
+                mc.level.getBlockState(echest).getBlock() == Blocks.ENDER_CHEST;
     }
 
     private void resetStuff() {
@@ -118,7 +118,7 @@ public class RemoteEnderChest extends Module {
         lastKeyState = false;
         potentialEChestPos = null;
         if (savedSyncId != -1) {
-            mc.getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(savedSyncId));
+            mc.getConnection().send(new ServerboundContainerClosePacket(savedSyncId));
             savedSyncId = -1;
         }
         savedScreen = null;

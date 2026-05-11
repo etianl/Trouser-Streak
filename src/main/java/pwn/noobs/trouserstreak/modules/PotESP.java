@@ -13,18 +13,18 @@ import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.DecoratedPotBlockEntity;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.client.gui.screen.world.LevelLoadingScreen;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
+import net.minecraft.client.gui.screens.LevelLoadingScreen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.DecoratedPotBlockEntity;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.*;
@@ -143,26 +143,26 @@ public class PotESP extends Module {
     }
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (mc.world == null) return;
+        if (mc.level == null) return;
 
-        int renderDistance = mc.options.getViewDistance().getValue();
-        ChunkPos playerChunkPos = new ChunkPos(mc.player.getBlockPos());
-        for (int chunkX = playerChunkPos.x - renderDistance; chunkX <= playerChunkPos.x + renderDistance; chunkX++) {
-            for (int chunkZ = playerChunkPos.z - renderDistance; chunkZ <= playerChunkPos.z + renderDistance; chunkZ++) {
-                WorldChunk chunk = mc.world.getChunk(chunkX, chunkZ);
+        int renderDistance = mc.options.renderDistance().get();
+        ChunkPos playerChunkPos = mc.player.chunkPosition();
+        for (int chunkX = playerChunkPos.x() - renderDistance; chunkX <= playerChunkPos.x() + renderDistance; chunkX++) {
+            for (int chunkZ = playerChunkPos.z() - renderDistance; chunkZ <= playerChunkPos.z() + renderDistance; chunkZ++) {
+                LevelChunk chunk = mc.level.getChunk(chunkX, chunkZ);
                 List<BlockEntity> blockEntities = new ArrayList<>(chunk.getBlockEntities().values());
 
                 for (BlockEntity blockEntity : blockEntities) {
                     if (blockEntity instanceof DecoratedPotBlockEntity){
                         DecoratedPotBlockEntity pot = (DecoratedPotBlockEntity) blockEntity;
-                        Item potItem = pot.stack.getItem();
+                        Item potItem = pot.item.getItem();
 
-                        BlockPos potLocation = pot.getPos();
+                        BlockPos potLocation = pot.getBlockPos();
                         if (!potLocations.contains(potLocation) && !naturalPot.contains(potItem) && !junkItemList.get().contains(potItem)) {
                             if (potMessage.get()) {
                                 if (displaycoords.get())
-                                    ChatUtils.sendMsg(Text.of("Found a dank pot! It contains: " + potItem + " Location: " + potLocation));
-                                else ChatUtils.sendMsg(Text.of("Found a dank pot! It contains: " + potItem));
+                                    ChatUtils.sendMsg(Component.nullToEmpty("Found a dank pot! It contains: §e" + potItem.getName(potItem.getDefaultInstance()).getString() + "§r Location: " + potLocation));
+                                else ChatUtils.sendMsg(Component.nullToEmpty("Found a dank pot! It contains: §e" + potItem.getName(potItem.getDefaultInstance()).getString()+"§r"));
                             }
                             potLocations.add(potLocation);
                         }
@@ -195,43 +195,43 @@ public class PotESP extends Module {
             synchronized (potLocations) {
                 if (!nearesttrcr.get()) {
                     for (BlockPos pos : potLocations) {
-                    BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
-                        if (pos != null && playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
+                        BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
+                        if (pos != null && playerPos.closerThan(pos, renderDistance.get() * 16)) {
                             int startX = pos.getX();
                             int startY = pos.getY();
                             int startZ = pos.getZ();
                             int endX = pos.getX();
                             int endY = pos.getY();
                             int endZ = pos.getZ();
-                            render(new Box(new Vec3d(startX+1, startY+1, startZ+1), new Vec3d(endX, endY, endZ)), potSideColor.get(), potLineColor.get(), shapeMode.get(), event);
+                            render(new AABB(new Vec3(startX+1, startY+1, startZ+1), new Vec3(endX, endY, endZ)), potSideColor.get(), potLineColor.get(), shapeMode.get(), event);
                         }
                     }
                 } else if (nearesttrcr.get()){
                     for (BlockPos pos : potLocations) {
                         BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
-                        if (pos != null && playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
+                        if (pos != null && playerPos.closerThan(pos, renderDistance.get() * 16)) {
                             int startX = pos.getX();
                             int startY = pos.getY();
                             int startZ = pos.getZ();
                             int endX = pos.getX();
                             int endY = pos.getY();
                             int endZ = pos.getZ();
-                            render(new Box(new Vec3d(startX+1, startY+1, startZ+1), new Vec3d(endX, endY, endZ)), potSideColor.get(), potLineColor.get(), shapeMode.get(), event);
+                            render(new AABB(new Vec3(startX+1, startY+1, startZ+1), new Vec3(endX, endY, endZ)), potSideColor.get(), potLineColor.get(), shapeMode.get(), event);
                         }
                     }
-                    render2(new Box(new Vec3d(closestPotX+1, closestPotY+1, closestPotZ+1), new Vec3d (closestPotX, closestPotY, closestPotZ)), potSideColor.get(), potLineColor.get(),ShapeMode.Sides, event);
+                    render2(new AABB(new Vec3(closestPotX+1, closestPotY+1, closestPotZ+1), new Vec3 (closestPotX, closestPotY, closestPotZ)), potSideColor.get(), potLineColor.get(),ShapeMode.Sides, event);
                 }
             }
         }
     }
 
-    private void render(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
+    private void render(AABB box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
         if (trcr.get() && Math.abs(box.minX- RenderUtils.center.x)<=renderDistance.get()*16 && Math.abs(box.minZ-RenderUtils.center.z)<=renderDistance.get()*16)
             if (!nearesttrcr.get())
                 event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
         event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
     }
-    private void render2(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
+    private void render2(AABB box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
         if (trcr.get() && Math.abs(box.minX-RenderUtils.center.x)<=renderDistance.get()*16 && Math.abs(box.minZ-RenderUtils.center.z)<=renderDistance.get()*16)
             event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
         event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
@@ -244,7 +244,7 @@ public class PotESP extends Module {
     private void removeChunksOutsideRenderDistance(Set<BlockPos> chunkSet, double renderDistanceBlocks) {
         chunkSet.removeIf(blockPos -> {
             BlockPos playerPos = new BlockPos(mc.player.getBlockX(), blockPos.getY(), mc.player.getBlockZ());
-            return !playerPos.isWithinDistance(blockPos, renderDistanceBlocks);
+            return !playerPos.closerThan(blockPos, renderDistanceBlocks);
         });
     }
 }

@@ -9,10 +9,10 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
-import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
+import net.minecraft.network.protocol.game.ServerboundEditBookPacket;
+import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.item.Items;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.ArrayList;
@@ -50,7 +50,7 @@ public class BookAndQuillDupe extends Module {
     }
     @Override
     public void onActivate() {
-        if (mc.player.getMainHandStack().getItem() != Items.WRITABLE_BOOK) {
+        if (mc.player.getMainHandItem().getItem() != Items.WRITABLE_BOOK) {
             error("You must be holding a writable book to use this.");
             toggle();
             return;
@@ -59,14 +59,14 @@ public class BookAndQuillDupe extends Module {
         pages.add("popbob");
         if (!donottoss.get()){
             for (int i = 9; i <= 44; i++) {
-                if (mc.player.getInventory().selectedSlot == i-36) continue;
-                mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, i, 10, SlotActionType.THROW, mc.player);
+                if (mc.player.getInventory().getSelectedSlot() == i-36) continue;
+                mc.gameMode.handleContainerInput(mc.player.containerMenu.containerId, i, 10, ContainerInput.THROW, mc.player);
             }
-            mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getInventory().selectedSlot, pages, Optional.of("popbobfunnysexdupe2024hahafunnyrealrealreal")));
-            if (chunkBan.get())mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 36, 10, SlotActionType.THROW, mc.player);
+            mc.player.connection.send(new ServerboundEditBookPacket(mc.player.getInventory().getSelectedSlot(), pages, Optional.of("popbobfunnysexdupe2024hahafunnyrealrealreal")));
+            if (chunkBan.get())mc.gameMode.handleContainerInput(mc.player.containerMenu.containerId, 36, 10, ContainerInput.THROW, mc.player);
         } else {
-            mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getInventory().selectedSlot, pages, Optional.of("popbobfunnysexdupe2024hahafunnyrealrealreal")));
-            if (chunkBan.get())mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 36, 10, SlotActionType.THROW, mc.player);
+            mc.player.connection.send(new ServerboundEditBookPacket(mc.player.getInventory().getSelectedSlot(), pages, Optional.of("popbobfunnysexdupe2024hahafunnyrealrealreal")));
+            if (chunkBan.get())mc.gameMode.handleContainerInput(mc.player.containerMenu.containerId, 36, 10, ContainerInput.THROW, mc.player);
         }
         toggle();
     }

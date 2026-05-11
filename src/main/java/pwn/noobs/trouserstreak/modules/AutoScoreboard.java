@@ -133,8 +133,8 @@ public class AutoScoreboard extends Module {
 
     @EventHandler
     public void onTick(TickEvent.Post event) {
-        if (mc.player == null || mc.world == null) return;
-        if (notOP.get() && PermissionUtils.getPermissionLevel(mc.player) < 2 && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+        if (mc.player == null || mc.level == null) return;
+        if (notOP.get() && PermissionUtils.getPermissionLevel(mc.player) < 2 && mc.level.hasChunk(mc.player.chunkPosition().x(), mc.player.chunkPosition().z())) {
             commandQueue.clear();
             tickCounter = 0;
             return;

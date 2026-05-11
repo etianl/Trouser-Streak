@@ -3,25 +3,30 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.minecraft.component.*;
-import net.minecraft.component.type.*;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.TypedEntityData;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.*;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.text.Text;
-import net.minecraft.util.*;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.component.TypedEntityData;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.*;
@@ -192,10 +197,10 @@ public class NbtEditor extends Module {
             .defaultValue(pModes.Splash)
             .visible(() -> mode.get() == Modes.Potion)
             .build());
-    private final Setting<List<StatusEffect>> effects = sgOptions.add(new StatusEffectListSetting.Builder()
+    private final Setting<List<MobEffect>> effects = sgOptions.add(new StatusEffectListSetting.Builder()
             .name("Effects")
             .description("List of potion effects.")
-            .defaultValue(StatusEffects.INSTANT_HEALTH.value())
+            .defaultValue(MobEffects.INSTANT_HEALTH.value())
             .visible(() -> mode.get() == Modes.Potion)
             .build()
     );
@@ -243,7 +248,7 @@ public class NbtEditor extends Module {
             .sliderRange(0, 255)
             .visible(() -> mode.get() == Modes.Potion)
             .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> enchants = sgOptions.add(new EnchantmentListSetting.Builder()
+    private final Setting<Set<ResourceKey<Enchantment>>> enchants = sgOptions.add(new EnchantmentListSetting.Builder()
             .name("Enchants")
             .description("List of enchantments.")
             .defaultValue(Enchantments.KNOCKBACK)
@@ -264,92 +269,92 @@ public class NbtEditor extends Module {
     }
     @Override
     public void onActivate() {
-        if (mc.player != null  && mc.interactionManager != null && mc.world != null && mc.player.getAbilities().creativeMode) {
+        if (mc.player != null  && mc.gameMode != null && mc.level != null && mc.player.getAbilities().instabuild) {
             switch (mode.get()) {
                 case Entity -> {
                     ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
-                    var changes = ComponentChanges.builder()
-                            .add(DataComponentTypes.CUSTOM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())))
-                            .add(DataComponentTypes.ITEM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())))
-                            .add(DataComponentTypes.ENTITY_DATA, createEntityData())
+                    var changes = DataComponentPatch.builder()
+                            .set(DataComponents.CUSTOM_NAME, Component.literal(nom.get()).withStyle(ChatFormatting.valueOf(nomcolor.get().toString().toUpperCase())))
+                            .set(DataComponents.ITEM_NAME, Component.literal(nom.get()).withStyle(ChatFormatting.valueOf(nomcolor.get().toString().toUpperCase())))
+                            .set(DataComponents.ENTITY_DATA, createEntityData())
                             .build();
-                    item.applyChanges(changes);
+                    item.applyComponentsAndValidate(changes);
                     createItem(item);
                 }
                 case Item -> {
                     ItemStack item;
 
-                    if (!mc.player.getMainHandStack().isEmpty()) {
-                        item = mc.player.getMainHandStack().copy();
+                    if (!mc.player.getMainHandItem().isEmpty()) {
+                        item = mc.player.getMainHandItem().copy();
                     } else {
                         item = new ItemStack(itemlist.get());
                     }
 
-                    Registry<Enchantment> enchantmentRegistry = mc.world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
+                    Registry<Enchantment> enchantmentRegistry = mc.level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
 
-                    for (RegistryKey<Enchantment> enchantKey : enchants.get()) {
-                        RegistryEntry<Enchantment> enchantEntry = enchantmentRegistry.getOrThrow(enchantKey);
-                        item.addEnchantment(enchantEntry, level.get());
+                    for (ResourceKey<Enchantment> enchantKey : enchants.get()) {
+                        Holder<Enchantment> enchantEntry = enchantmentRegistry.getOrThrow(enchantKey);
+                        item.enchant(enchantEntry, level.get());
                     }
 
-                    item.set(DataComponentTypes.CUSTOM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())));
+                    item.set(DataComponents.CUSTOM_NAME, Component.literal(nom.get()).withStyle(ChatFormatting.valueOf(nomcolor.get().toString().toUpperCase())));
                     createItem(item);
                 }
                 case Potion -> {
                     ItemStack item;
 
-                    if (!mc.player.getMainHandStack().isEmpty()) {
-                        if (mc.player.getMainHandStack().getItem() != Items.SPLASH_POTION && potionmode.get() == pModes.Splash) item =  new ItemStack(Items.SPLASH_POTION);
-                        else if (mc.player.getMainHandStack().getItem() != Items.LINGERING_POTION && potionmode.get() == pModes.Lingering) item =  new ItemStack(Items.LINGERING_POTION);
-                        else if (mc.player.getMainHandStack().getItem() != Items.POTION && potionmode.get() == pModes.Normal) item =  new ItemStack(Items.POTION);
-                        else item = mc.player.getMainHandStack().copy();
-                        var changes = ComponentChanges.builder()
-                                .add(DataComponentTypes.CUSTOM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())))
-                                .add(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.empty(), pileOfStatusEffects(), Optional.ofNullable(nom.get())))
+                    if (!mc.player.getMainHandItem().isEmpty()) {
+                        if (mc.player.getMainHandItem().getItem() != Items.SPLASH_POTION && potionmode.get() == pModes.Splash) item =  new ItemStack(Items.SPLASH_POTION);
+                        else if (mc.player.getMainHandItem().getItem() != Items.LINGERING_POTION && potionmode.get() == pModes.Lingering) item =  new ItemStack(Items.LINGERING_POTION);
+                        else if (mc.player.getMainHandItem().getItem() != Items.POTION && potionmode.get() == pModes.Normal) item =  new ItemStack(Items.POTION);
+                        else item = mc.player.getMainHandItem().copy();
+                        var changes = DataComponentPatch.builder()
+                                .set(DataComponents.CUSTOM_NAME, Component.literal(nom.get()).withStyle(ChatFormatting.valueOf(nomcolor.get().toString().toUpperCase())))
+                                .set(DataComponents.POTION_CONTENTS, new PotionContents(Optional.empty(), Optional.empty(), pileOfStatusEffects(), Optional.ofNullable(nom.get())))
                                 .build();
-                        item.applyChanges(changes);
+                        item.applyComponentsAndValidate(changes);
                         createItem(item);
                     }
                     else switch (potionmode.get()) {
                         case Normal -> {
                             item =  new ItemStack(Items.POTION);
-                            var changes = ComponentChanges.builder()
-                                    .add(DataComponentTypes.CUSTOM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())))
-                                    .add(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.empty(), pileOfStatusEffects(), Optional.ofNullable(nom.get())))
+                            var changes = DataComponentPatch.builder()
+                                    .set(DataComponents.CUSTOM_NAME, Component.literal(nom.get()).withStyle(ChatFormatting.valueOf(nomcolor.get().toString().toUpperCase())))
+                                    .set(DataComponents.POTION_CONTENTS, new PotionContents(Optional.empty(), Optional.empty(), pileOfStatusEffects(), Optional.ofNullable(nom.get())))
                                     .build();
-                            item.applyChanges(changes);
+                            item.applyComponentsAndValidate(changes);
                             createItem(item);
                         }
                         case Splash -> {
                             item =  new ItemStack(Items.SPLASH_POTION);
-                            var changes = ComponentChanges.builder()
-                                    .add(DataComponentTypes.CUSTOM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())))
-                                    .add(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.empty(), pileOfStatusEffects(), Optional.ofNullable(nom.get())))
+                            var changes = DataComponentPatch.builder()
+                                    .set(DataComponents.CUSTOM_NAME, Component.literal(nom.get()).withStyle(ChatFormatting.valueOf(nomcolor.get().toString().toUpperCase())))
+                                    .set(DataComponents.POTION_CONTENTS, new PotionContents(Optional.empty(), Optional.empty(), pileOfStatusEffects(), Optional.ofNullable(nom.get())))
                                     .build();
-                            item.applyChanges(changes);
+                            item.applyComponentsAndValidate(changes);
                             createItem(item);
                         }
                         case Lingering -> {
                             item =  new ItemStack(Items.LINGERING_POTION);
-                            var changes = ComponentChanges.builder()
-                                    .add(DataComponentTypes.CUSTOM_NAME, Text.literal(nom.get()).formatted(Formatting.valueOf(nomcolor.get().toString().toUpperCase())))
-                                    .add(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Optional.empty(), Optional.empty(), pileOfStatusEffects(), Optional.ofNullable(nom.get())))
+                            var changes = DataComponentPatch.builder()
+                                    .set(DataComponents.CUSTOM_NAME, Component.literal(nom.get()).withStyle(ChatFormatting.valueOf(nomcolor.get().toString().toUpperCase())))
+                                    .set(DataComponents.POTION_CONTENTS, new PotionContents(Optional.empty(), Optional.empty(), pileOfStatusEffects(), Optional.ofNullable(nom.get())))
                                     .build();
-                            item.applyChanges(changes);
+                            item.applyComponentsAndValidate(changes);
                             createItem(item);
                         }
                     }
                 }
                 case Copy -> {
-                    ItemStack mainHandStack = mc.player.getMainHandStack();
+                    ItemStack mainHandStack = mc.player.getMainHandItem();
 
                     if (mainHandStack.isEmpty()) {
                         error("Put an item in your main hand.");
                         return;
                     }
 
-                    ComponentMap mainHandComponents = mainHandStack.getComponents();
-                    ItemStack offHandStack = mc.player.getOffHandStack();
+                    DataComponentMap mainHandComponents = mainHandStack.getComponents();
+                    ItemStack offHandStack = mc.player.getOffhandItem();
 
                     if (copyStack.get()){
                         offHandStack = mainHandStack;
@@ -359,14 +364,14 @@ public class NbtEditor extends Module {
                             offHandStack = new ItemStack(Items.CARROT_ON_A_STICK);
                         }
                     }
-                    offHandStack.applyComponentsFrom(mainHandComponents);
-                    mc.interactionManager.clickCreativeStack(offHandStack, 45); // 45 is the offhand slot
+                    offHandStack.applyComponents(mainHandComponents);
+                    mc.gameMode.handleCreativeModeItemAdd(offHandStack, 45); // 45 is the offhand slot
                     //clickSlot twice to make the item actually appear clientside
-                    mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 45, 0, SlotActionType.PICKUP, mc.player);
-                    mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 45, 0, SlotActionType.PICKUP, mc.player);
+                    mc.gameMode.handleContainerInput(mc.player.containerMenu.containerId, 45, 0, ContainerInput.PICKUP, mc.player);
+                    mc.gameMode.handleContainerInput(mc.player.containerMenu.containerId, 45, 0, ContainerInput.PICKUP, mc.player);
                 }
             }
-            ChatUtils.sendMsg(Text.of("Modified item created."));
+            ChatUtils.sendMsg(Component.nullToEmpty("Modified item created."));
             toggle();
         } else {
             error("You need to be in creative mode.");
@@ -374,17 +379,17 @@ public class NbtEditor extends Module {
         }
     }
     private void createItem(ItemStack item){
-        mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
+        mc.gameMode.handleCreativeModeItemAdd(item, 36 + mc.player.getInventory().getSelectedSlot());
         //clickSlot twice to make the item actually appear clientside
-        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 36 + mc.player.getInventory().selectedSlot, 0, SlotActionType.PICKUP, mc.player);
-        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 36 + mc.player.getInventory().selectedSlot, 0, SlotActionType.PICKUP, mc.player);
+        mc.gameMode.handleContainerInput(mc.player.containerMenu.containerId, 36 + mc.player.getInventory().getSelectedSlot(), 0, ContainerInput.PICKUP, mc.player);
+        mc.gameMode.handleContainerInput(mc.player.containerMenu.containerId, 36 + mc.player.getInventory().getSelectedSlot(), 0, ContainerInput.PICKUP, mc.player);
     }
-    private List<StatusEffectInstance> pileOfStatusEffects() {
-        List<StatusEffectInstance> effectInstances = new ArrayList<>();
+    private List<MobEffectInstance> pileOfStatusEffects() {
+        List<MobEffectInstance> effectInstances = new ArrayList<>();
 
-        for (StatusEffect effect : effects.get()) {
-            RegistryEntry<StatusEffect> registryEntry = Registries.STATUS_EFFECT.getEntry(effect);
-            effectInstances.add(new StatusEffectInstance(registryEntry, duration.get(), amplifier.get()));
+        for (MobEffect effect : effects.get()) {
+            Holder<MobEffect> registryEntry = BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect);
+            effectInstances.add(new MobEffectInstance(registryEntry, duration.get(), amplifier.get()));
         }
 
         return effectInstances;
@@ -393,7 +398,7 @@ public class NbtEditor extends Module {
     private TypedEntityData<EntityType<?>> createEntityData() {
         String entityName = entity.get().trim().replace(" ", "_");
 
-        NbtCompound entityTag = new NbtCompound();
+        CompoundTag entityTag = new CompoundTag();
         entityTag.putString("id", "minecraft:" + entityName);
         entityTag.putInt("Health", health.get());
         entityTag.putInt("AbsorptionAmount", absorption.get());
@@ -412,14 +417,14 @@ public class NbtEditor extends Module {
         entityTag.putInt("Fuse", fuse.get());
         entityTag.putInt("Size", size.get());
         if(customname.get())entityTag.putBoolean("CustomNameVisible", customname.get());
-        NbtCompound customName = new NbtCompound();
+        CompoundTag customName = new CompoundTag();
         customName.putString("text", nom.get());
         customName.putString("color", nomcolor.get().name());
         String serverVersion;
-        if (mc.isIntegratedServerRunning()) {
-            serverVersion = mc.getServer().getVersion();
+        if (mc.hasSingleplayerServer()) {
+            serverVersion = mc.getSingleplayerServer().getServerVersion();
         } else {
-            serverVersion = mc.getCurrentServerEntry().version.getLiteralString();
+            serverVersion = mc.getCurrentServer().version.tryCollapseToString();
         }
         if (serverVersion == null) {
             entityTag.put("CustomName", customName);
@@ -435,12 +440,12 @@ public class NbtEditor extends Module {
         entityTag.putString("Particle", particle.get());
         entityTag.putString("Potion", ceffect.get());
         Identifier entityId = Identifier.tryParse("minecraft:" + entityName);
-        EntityType<?> entityType = Registries.ENTITY_TYPE.get(entityId);
+        EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.getValue(entityId);
         if (entityType == null) {
             entityType = EntityType.PIG;
         }
 
-        return TypedEntityData.create(entityType, entityTag);
+        return TypedEntityData.of(entityType, entityTag);
     }
     private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
         if (serverVersion == null) return false;

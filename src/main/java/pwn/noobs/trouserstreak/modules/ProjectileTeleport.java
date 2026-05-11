@@ -3,25 +3,39 @@ package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
+import meteordevelopment.meteorclient.mixininterface.IServerboundMovePlayerPacket;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
-import net.minecraft.network.packet.c2s.play.*;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Box;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.EggItem;
+import net.minecraft.world.item.EnderpearlItem;
+import net.minecraft.world.item.ExperienceBottleItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.LingeringPotionItem;
+import net.minecraft.world.item.SnowballItem;
+import net.minecraft.world.item.SplashPotionItem;
+import net.minecraft.world.item.TridentItem;
+import net.minecraft.world.item.WindChargeItem;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.Arrays;
@@ -168,10 +182,10 @@ public class ProjectileTeleport extends Module {
         Entity closest = null;
         double closestDist = Double.MAX_VALUE;
 
-        for (Entity entity : mc.world.getEntities()) {
+        for (Entity entity : mc.level.entitiesForRendering()) {
             if (!isValidListTarget(entity)) continue;
-            if (friends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) continue;
-            double dist = entity.squaredDistanceTo(mc.player);
+            if (friends.get() && entity instanceof Player && Friends.get().isFriend((Player) entity)) continue;
+            double dist = entity.distanceToSqr(mc.player);
             if (dist < closestDist) {
                 closestDist = dist;
                 closest = entity;
@@ -191,10 +205,10 @@ public class ProjectileTeleport extends Module {
     private void onTick(TickEvent.Post event) {
         target = findClosestTarget();
 
-        if (!arrowFire.get() || mc.player == null || mc.interactionManager == null) return;
+        if (!arrowFire.get() || mc.player == null || mc.gameMode == null) return;
 
-        boolean holdingBow = mc.player.getMainHandStack().getItem() instanceof BowItem
-                || mc.player.getOffHandStack().getItem() instanceof BowItem;
+        boolean holdingBow = mc.player.getMainHandItem().getItem() instanceof BowItem
+                || mc.player.getOffhandItem().getItem() instanceof BowItem;
 
         if (holdingBow && !wasHoldingBow) {
             bowChargeTimer = 0;
@@ -213,20 +227,20 @@ public class ProjectileTeleport extends Module {
         wasHoldingBow = holdingBow;
     }
     private void fireArrowTick() {
-        mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(
-                PlayerActionC2SPacket.Action.RELEASE_USE_ITEM,
-                BlockPos.ORIGIN,
-                Direction.DOWN, mc.player.getInventory().selectedSlot
+        mc.getConnection().send(new ServerboundPlayerActionPacket(
+                ServerboundPlayerActionPacket.Action.RELEASE_USE_ITEM,
+                BlockPos.ZERO,
+                Direction.DOWN, mc.player.getInventory().getSelectedSlot()
         ));
     }
     private boolean executingInteract = false;
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onPacketSend(PacketEvent.Send event) {
-        if (mc.player == null || mc.world == null || mc.getNetworkHandler() == null) return;
-        if (event.packet instanceof PlayerInteractItemC2SPacket packet) {
-            ItemStack stack = packet.getHand() == Hand.MAIN_HAND
-                    ? mc.player.getMainHandStack()
-                    : mc.player.getOffHandStack();
+        if (mc.player == null || mc.level == null || mc.getConnection() == null) return;
+        if (event.packet instanceof ServerboundUseItemPacket packet) {
+            ItemStack stack = packet.getHand() == InteractionHand.MAIN_HAND
+                    ? mc.player.getMainHandItem()
+                    : mc.player.getOffhandItem();
 
             Item item = stack.getItem();
 
@@ -244,11 +258,11 @@ public class ProjectileTeleport extends Module {
             }
         }
 
-        if (event.packet instanceof PlayerActionC2SPacket packet && !paction) {
-            if (packet.getAction() != PlayerActionC2SPacket.Action.RELEASE_USE_ITEM) return;
+        if (event.packet instanceof ServerboundPlayerActionPacket packet && !paction) {
+            if (packet.getAction() != ServerboundPlayerActionPacket.Action.RELEASE_USE_ITEM) return;
 
-            Item item = mc.player.getMainHandStack().getItem();
-            Item item2 = mc.player.getOffHandStack().getItem();
+            Item item = mc.player.getMainHandItem().getItem();
+            Item item2 = mc.player.getOffhandItem().getItem();
             if (!isAction(item) && !isAction(item2)) return;
 
             isChargingBow = false;
@@ -258,7 +272,7 @@ public class ProjectileTeleport extends Module {
     }
 
     private boolean isValidProjectile(Item item) {
-        return (item instanceof EnderPearlItem && projectileItems.get().contains(Items.ENDER_PEARL)) ||
+        return (item instanceof EnderpearlItem && projectileItems.get().contains(Items.ENDER_PEARL)) ||
                 (item instanceof SplashPotionItem && projectileItems.get().contains(Items.SPLASH_POTION)) ||
                 (item instanceof LingeringPotionItem && projectileItems.get().contains(Items.LINGERING_POTION)) ||
                 (item instanceof ExperienceBottleItem && projectileItems.get().contains(Items.EXPERIENCE_BOTTLE)) ||
@@ -271,28 +285,28 @@ public class ProjectileTeleport extends Module {
         return (item instanceof BowItem && projectileItems.get().contains(Items.BOW)) || (item instanceof TridentItem && projectileItems.get().contains(Items.TRIDENT));
     }
     private boolean isValidTarget(Entity entity) {
-        Entity playerentity = mc.player.hasVehicle() ? mc.player.getVehicle() : mc.player;
+        Entity playerentity = mc.player.isPassenger() ? mc.player.getVehicle() : mc.player;
         return entity.isAlive()
                 && playerentity.distanceTo(entity) <= maxDistance.get();
     }
-    public void interact(Hand hand) {
+    public void interact(InteractionHand hand) {
         if (target == null || !isValidTarget(target)) return;
-        Entity entity = mc.player.hasVehicle() ? mc.player.getVehicle() : mc.player;
-        Vec3d home = entity.getEntityPos();
+        Entity entity = mc.player.isPassenger() ? mc.player.getVehicle() : mc.player;
+        Vec3 home = entity.position();
 
-        if (mc.player.squaredDistanceTo(target) > maxDistance.get() * maxDistance.get()) return;
+        if (mc.player.distanceToSqr(target) > maxDistance.get() * maxDistance.get()) return;
 
-        Box box = target.getBoundingBox();
+        AABB box = target.getBoundingBox();
 
         double x = box.getCenter().x;
         double y = box.maxY;
         double z = box.getCenter().z;
 
-        Vec3d topPos = new Vec3d(x, y, z);
-        Vec3d aboveHome = home.add(0, teleportHeight.get(), 0);
-        Vec3d aboveTarget = topPos.add(0, teleportHeight.get(), 0);
-        Vec3d shotPos = topPos.add(0, targetoffset.get(), 0);
-        Vec3d homeOffset = getOffset(home);
+        Vec3 topPos = new Vec3(x, y, z);
+        Vec3 aboveHome = home.add(0, teleportHeight.get(), 0);
+        Vec3 aboveTarget = topPos.add(0, teleportHeight.get(), 0);
+        Vec3 shotPos = topPos.add(0, targetoffset.get(), 0);
+        Vec3 homeOffset = getOffset(home);
 
         if (!validatePath(aboveHome, aboveTarget, shotPos, aboveTarget, aboveHome, homeOffset)) {
             if (chatFeedback)error("One of the teleports are blocked.");
@@ -303,9 +317,9 @@ public class ProjectileTeleport extends Module {
         }
         for (int i = 0; i < prePackets.get(); i++) {
             if (entity == mc.player) {
-                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true,mc.player.horizontalCollision));
+                mc.player.connection.send(new ServerboundMovePlayerPacket.StatusOnly(true,mc.player.horizontalCollision));
             } else {
-                mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(entity));
+                mc.player.connection.send(ServerboundMoveVehiclePacket.fromEntity(entity));
             }
         }
 
@@ -313,10 +327,10 @@ public class ProjectileTeleport extends Module {
         moveTo(entity, aboveTarget);
         moveTo(entity, shotPos);
 
-        float yaw = mc.player.getYaw();
+        float yaw = mc.player.getYRot();
 
         for (int i = 0; i < interactAmount.get(); i++) {
-            mc.player.networkHandler.sendPacket(new PlayerInteractItemC2SPacket(hand, 0, yaw, 90.0f));
+            mc.player.connection.send(new ServerboundUseItemPacket(hand, 0, yaw, 90.0f));
         }
 
         moveTo(entity, aboveTarget);
@@ -324,27 +338,27 @@ public class ProjectileTeleport extends Module {
         moveTo(entity, home);
         moveTo(entity, homeOffset);
 
-        entity.setPosition(homeOffset);
+        entity.setPos(homeOffset);
     }
 
-    public void action(PlayerActionC2SPacket.Action action) {
+    public void action(ServerboundPlayerActionPacket.Action action) {
         if (target == null || !isValidTarget(target)) return;
-        Entity entity = mc.player.hasVehicle() ? mc.player.getVehicle() : mc.player;
-        Vec3d home = entity.getEntityPos();
+        Entity entity = mc.player.isPassenger() ? mc.player.getVehicle() : mc.player;
+        Vec3 home = entity.position();
 
-        if (mc.player.squaredDistanceTo(target) > maxDistance.get() * maxDistance.get()) return;
+        if (mc.player.distanceToSqr(target) > maxDistance.get() * maxDistance.get()) return;
 
-        Box box = target.getBoundingBox();
+        AABB box = target.getBoundingBox();
 
         double x = box.getCenter().x;
         double y = box.maxY;
         double z = box.getCenter().z;
 
-        Vec3d topPos = new Vec3d(x, y, z);
-        Vec3d aboveHome = home.add(0, teleportHeight.get(), 0);
-        Vec3d aboveTarget = topPos.add(0, teleportHeight.get(), 0);
-        Vec3d shotPos = topPos.add(0, targetoffset.get(), 0);
-        Vec3d homeOffset = getOffset(home);
+        Vec3 topPos = new Vec3(x, y, z);
+        Vec3 aboveHome = home.add(0, teleportHeight.get(), 0);
+        Vec3 aboveTarget = topPos.add(0, teleportHeight.get(), 0);
+        Vec3 shotPos = topPos.add(0, targetoffset.get(), 0);
+        Vec3 homeOffset = getOffset(home);
 
         if (!validatePath(aboveHome, aboveTarget, shotPos, aboveTarget, aboveHome, homeOffset)) {
             if (chatFeedback)error("One of the teleports are blocked.");
@@ -353,9 +367,9 @@ public class ProjectileTeleport extends Module {
 
         for (int i = 0; i < prePackets.get(); i++) {
             if (entity == mc.player) {
-                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true,mc.player.horizontalCollision));
+                mc.player.connection.send(new ServerboundMovePlayerPacket.StatusOnly(true,mc.player.horizontalCollision));
             } else {
-                mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(entity));
+                mc.player.connection.send(ServerboundMoveVehiclePacket.fromEntity(entity));
             }
         }
 
@@ -364,7 +378,7 @@ public class ProjectileTeleport extends Module {
         moveTo(entity, shotPos);
 
         paction = true;
-        mc.player.networkHandler.sendPacket(new PlayerActionC2SPacket(action, BlockPos.ORIGIN, Direction.DOWN, 0));
+        mc.player.connection.send(new ServerboundPlayerActionPacket(action, BlockPos.ZERO, Direction.DOWN, 0));
         paction = false;
 
         moveTo(entity, aboveTarget);
@@ -373,84 +387,84 @@ public class ProjectileTeleport extends Module {
         moveTo(entity, homeOffset);
     }
 
-    private void moveTo(Entity entity, Vec3d pos) {
+    private void moveTo(Entity entity, Vec3 pos) {
         if (entity == mc.player) {
-            PlayerMoveC2SPacket packet = new PlayerMoveC2SPacket.PositionAndOnGround(pos.x, pos.y, pos.z, false, false);
-            ((IPlayerMoveC2SPacket) packet).meteor$setTag(1337);
-            mc.player.networkHandler.sendPacket(packet);
+            ServerboundMovePlayerPacket packet = new ServerboundMovePlayerPacket.Pos(pos.x, pos.y, pos.z, false, false);
+            ((IServerboundMovePlayerPacket) packet).meteor$setTag(1337);
+            mc.player.connection.send(packet);
         } else {
-            mc.player.networkHandler.sendPacket(new VehicleMoveC2SPacket(pos, entity.getYaw(), entity.getPitch(), false));
+            mc.player.connection.send(new ServerboundMoveVehiclePacket(pos, entity.getYRot(), entity.getXRot(), false));
         }
-        entity.setPosition(pos);
+        entity.setPos(pos);
     }
 
-    private boolean invalid(Vec3d pos) {
-        if (mc.world == null) return true;
-        if (mc.world.getChunk(BlockPos.ofFloored(pos)) == null) return true;
+    private boolean invalid(Vec3 pos) {
+        if (mc.level == null) return true;
+        if (mc.level.getChunk(BlockPos.containing(pos)) == null) return true;
 
-        Entity entity = mc.player.hasVehicle() ? mc.player.getVehicle() : mc.player;
+        Entity entity = mc.player.isPassenger() ? mc.player.getVehicle() : mc.player;
 
-        Box targetBox = entity.getBoundingBox().offset(
+        AABB targetBox = entity.getBoundingBox().move(
                 pos.x - entity.getX(),
                 pos.y - entity.getY(),
                 pos.z - entity.getZ()
         );
         Module boatNoclip = Modules.get().get(BoatNoclip.class);
         if (skipCollisionCheck.get() && entity != mc.player && boatNoclip != null && boatNoclip.isActive()) {
-            for (BlockPos bp : BlockPos.iterate(
-                    BlockPos.ofFloored(targetBox.minX, targetBox.minY, targetBox.minZ),
-                    BlockPos.ofFloored(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
+            for (BlockPos bp : BlockPos.betweenClosed(
+                    BlockPos.containing(targetBox.minX, targetBox.minY, targetBox.minZ),
+                    BlockPos.containing(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
             )) {
-                BlockState state = mc.world.getBlockState(bp);
-                if (state.isOf(Blocks.LAVA)) {
+                BlockState state = mc.level.getBlockState(bp);
+                if (state.is(Blocks.LAVA)) {
                     return true;
                 }
             }
         } else {
-            for (BlockPos bp : BlockPos.iterate(
-                    BlockPos.ofFloored(targetBox.minX, targetBox.minY, targetBox.minZ),
-                    BlockPos.ofFloored(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
+            for (BlockPos bp : BlockPos.betweenClosed(
+                    BlockPos.containing(targetBox.minX, targetBox.minY, targetBox.minZ),
+                    BlockPos.containing(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
             )) {
-                BlockState state = mc.world.getBlockState(bp);
-                if (state.isOf(Blocks.LAVA) || !state.getCollisionShape(mc.world, bp).isEmpty()) {
+                BlockState state = mc.level.getBlockState(bp);
+                if (state.is(Blocks.LAVA) || !state.getCollisionShape(mc.level, bp).isEmpty()) {
                     return true;
                 }
             }
         }
 
-        for (Entity e : mc.world.getOtherEntities(entity, targetBox)) {
-            if (e.isCollidable(entity)) return true;
+        for (Entity e : mc.level.getEntities(entity, targetBox)) {
+            if (e.canBeCollidedWith(entity)) return true;
         }
 
         return false;
     }
 
-    private boolean validatePath(Vec3d... positions) {
-        for (Vec3d pos : positions) {
+    private boolean validatePath(Vec3... positions) {
+        for (Vec3 pos : positions) {
             if (invalid(pos)) {
                 return false;
             }
         }
         return true;
     }
-    private boolean hasClearPath(Vec3d start, Vec3d end) {
+    private boolean hasClearPath(Vec3 start, Vec3 end) {
         if (invalid(start) || invalid(end)) return false;
 
         int steps = Math.max(10, (int)(start.distanceTo(end) * 2.5));
 
         for (int i = 1; i < steps; i++) {
             double t = i / (double)steps;
-            Vec3d sample = start.lerp(end, t);
+            Vec3 sample = start.lerp(end, t);
 
             if (invalid(sample)) return false;
         }
         return true;
     }
-    private Vec3d getOffset(Vec3d base) {
+    private Vec3 getOffset(Vec3 base) {
         double dx = offsethorizontal.get();
         double dy = offsetY.get();
 
-        Vec3d[] shuffledOffsets = new Vec3d[] {
+        Vec3[] shuffledOffsets = new Vec3[] {
                 base.add( dx, dy,  0),
                 base.add(-dx, dy,  0),
                 base.add( 0, dy,  dx),
@@ -463,11 +477,11 @@ public class ProjectileTeleport extends Module {
 
         Collections.shuffle(Arrays.asList(shuffledOffsets));
 
-        for (Vec3d pos : shuffledOffsets) {
+        for (Vec3 pos : shuffledOffsets) {
             if (!invalid(pos)) return pos;
         }
 
-        Vec3d noHorizontal = base.add(0, dy, 0);
+        Vec3 noHorizontal = base.add(0, dy, 0);
         if (!invalid(noHorizontal)) return noHorizontal;
 
         return base;

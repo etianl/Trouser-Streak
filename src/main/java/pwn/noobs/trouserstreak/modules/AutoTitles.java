@@ -12,7 +12,7 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import pwn.noobs.trouserstreak.Trouser;
 import pwn.noobs.trouserstreak.utils.PermissionUtils;
 
@@ -233,7 +233,7 @@ public class AutoTitles extends Module {
         super(Trouser.operator, "AutoTitles", "Creates text across the screens for online players. Requires OP.");
     }
 
-    private CopyOnWriteArrayList<PlayerListEntry> players;
+    private CopyOnWriteArrayList<PlayerInfo> players;
     private String fadein;
     private String duration;
     private String fadeout;
@@ -243,7 +243,7 @@ public class AutoTitles extends Module {
 
     @Override
     public void onActivate() {
-        if (notOP.get() && PermissionUtils.getPermissionLevel(mc.player) < 2 && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+        if (notOP.get() && PermissionUtils.getPermissionLevel(mc.player) < 2 && mc.level.hasChunk(mc.player.chunkPosition().x(), mc.player.chunkPosition().z())) {
             toggle();
             error("Must have permission level 2 or higher");
         }
@@ -262,12 +262,12 @@ public class AutoTitles extends Module {
 
         if (!notitlefrend.get()) {
             if (notitleself.get()){
-                if (messageLengthExceedsLimit("/title @a[name=!" + mc.player.getName().getLiteralString() + "] title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}", "Title")) {
+                if (messageLengthExceedsLimit("/title @a[name=!" + mc.player.getName().tryCollapseToString() + "] title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}", "Title")) {
                     toggle();
                     return;
                 }
-                String command1 = "/title @a[name=!" + mc.player.getName().getLiteralString() + "] times " + fadein + " " + duration + " " + fadeout;
-                String command2 = "/title @a[name=!" + mc.player.getName().getLiteralString() + "] title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}";
+                String command1 = "/title @a[name=!" + mc.player.getName().tryCollapseToString() + "] times " + fadein + " " + duration + " " + fadeout;
+                String command2 = "/title @a[name=!" + mc.player.getName().tryCollapseToString() + "] title {\"text\":\"" + title.get() + "\", \"bold\":" + titlebold.get() + ", \"italic\":" + titleitalic.get() + ", \"color\":\"" + titlecolour.get() + "\"}";
 
                 if (useDelay.get()) {
                     commandQueue.add(command1);
@@ -277,14 +277,14 @@ public class AutoTitles extends Module {
                     ChatUtils.sendPlayerMsg(command2);
                 }
 
-                if (makesubtitle.get() && !messageLengthExceedsLimit("/title @a[name=!" + mc.player.getName().getLiteralString() + "] subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}", "Subtitle")) {
-                    String command3 = "/title @a[name=!" + mc.player.getName().getLiteralString() + "] subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}";
+                if (makesubtitle.get() && !messageLengthExceedsLimit("/title @a[name=!" + mc.player.getName().tryCollapseToString() + "] subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}", "Subtitle")) {
+                    String command3 = "/title @a[name=!" + mc.player.getName().tryCollapseToString() + "] subtitle {\"text\":\"" + subtitle.get() + "\", \"bold\":" + subtitlebold.get() + ", \"italic\":" + subtitleitalic.get() + ", \"color\":\"" + subtitlecolour.get() + "\"}";
                     if (useDelay.get()) commandQueue.add(command3);
                     else ChatUtils.sendPlayerMsg(command3);
                 }
 
-                if (makeactionbar.get() && !messageLengthExceedsLimit("/title @a[name=!" + mc.player.getName().getLiteralString() + "] actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}", "Actionbar")) {
-                    String command4 = "/title @a[name=!" + mc.player.getName().getLiteralString() + "] actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}";
+                if (makeactionbar.get() && !messageLengthExceedsLimit("/title @a[name=!" + mc.player.getName().tryCollapseToString() + "] actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}", "Actionbar")) {
+                    String command4 = "/title @a[name=!" + mc.player.getName().tryCollapseToString() + "] actionbar {\"text\":\"" + actionbar.get() + "\", \"bold\":" + actionbarbold.get() + ", \"italic\":" + actionbaritalic.get() + ", \"color\":\"" + actionbarcolour.get() + "\"}";
                     if (useDelay.get()) commandQueue.add(command4);
                     else ChatUtils.sendPlayerMsg(command4);
                 }
@@ -317,10 +317,10 @@ public class AutoTitles extends Module {
                 }
             }
         } else if (notitlefrend.get()) {
-            players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
+            players = new CopyOnWriteArrayList<>(mc.getConnection().getOnlinePlayers());
             List<String> friendNames = new ArrayList<>();
-            if (notitleself.get())friendNames.add("name=!" + mc.player.getName().getLiteralString());
-            for(PlayerListEntry player : players) {
+            if (notitleself.get())friendNames.add("name=!" + mc.player.getName().tryCollapseToString());
+            for(PlayerInfo player : players) {
                 if(Friends.get().isFriend(player) && notitlefrend.get()) friendNames.add("name=!" + player.getProfile().name());
             }
             String friendsString = String.join(",", friendNames);

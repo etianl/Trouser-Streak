@@ -13,17 +13,17 @@ import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.client.gui.screen.world.LevelLoadingScreen;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
+import net.minecraft.client.gui.screens.LevelLoadingScreen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.*;
@@ -115,17 +115,17 @@ public class CaveDisturbanceDetector extends Module {
 		clearChunkData();
 	}
 	private void scanTheAir() {
-		if (mc.world == null) return;
+		if (mc.level == null) return;
 		List<ChunkPos> chunksToProcess = new ArrayList<>();
-		AtomicReferenceArray<WorldChunk> chunks = mc.world.getChunkManager().chunks.chunks;
+		AtomicReferenceArray<LevelChunk> chunks = mc.level.getChunkSource().storage.chunks;
 		for (int i = 0; i < chunks.length(); i++) {
-			WorldChunk chunk = chunks.get(i);
+			LevelChunk chunk = chunks.get(i);
 			if (chunk != null && !chunk.isEmpty()) {
 				chunksToProcess.add(chunk.getPos());
 			}
 		}
 		chunksToProcess.parallelStream().forEach(chunkPos -> {
-			WorldChunk chunk = mc.world.getChunk(chunkPos.x, chunkPos.z);
+			LevelChunk chunk = mc.level.getChunk(chunkPos.x(), chunkPos.z());
 			if (chunk != null && !chunk.isEmpty() && !scannedChunks.contains(chunk.getPos())) {
 				processChunk(chunk);
 				scannedChunks.add(chunk.getPos());
@@ -176,15 +176,15 @@ public class CaveDisturbanceDetector extends Module {
 		if (removerenderdist.get())removeChunksOutsideRenderDistance();
 	}
 
-	private void processChunk(WorldChunk chunk) {
-		int minY = mc.world.getBottomY();
+	private void processChunk(LevelChunk chunk) {
+		int minY = mc.level.getMinY();
 		int maxY = 180;
-		if (mc.world.getRegistryKey() == World.NETHER) maxY = 126;
+		if (mc.level.dimension() == Level.NETHER) maxY = 126;
 
 		for (int x = 0; x < 16; x++) {
 			for (int z = 0; z < 16; z++) {
 				for (int y = minY; y <= maxY; y++) {
-					BlockPos blockPos = new BlockPos(chunk.getPos().getStartX() + x, y, chunk.getPos().getStartZ() + z);
+					BlockPos blockPos = new BlockPos(chunk.getPos().getMinBlockX() + x, y, chunk.getPos().getMinBlockZ() + z);
 					BlockState blockState = chunk.getBlockState(blockPos);
 
 					if (blockState.getBlock() == Blocks.CAVE_AIR) {
@@ -202,12 +202,12 @@ public class CaveDisturbanceDetector extends Module {
 				case 1 -> {
 					BlockPos Air = bPos.north();
 					if (!scannedAir.contains(Air)) {
-						BlockPos BlockPastTheAir = Air.add(0,0,-1);
-						if (mc.world.getBlockState(Air).getBlock() == Blocks.AIR && mc.world.getBlockState(BlockPastTheAir).getBlock() != Blocks.AIR) {
-							if (mc.world.getBlockState(Air.add(1,0,0)).getBlock() != Blocks.AIR &&
-									mc.world.getBlockState(Air.add(-1,0,0)).getBlock() != Blocks.AIR &&
-									mc.world.getBlockState(Air.add(0,1,0)).getBlock() != Blocks.AIR &&
-									mc.world.getBlockState(Air.add(0,-1,0)).getBlock() != Blocks.AIR)
+						BlockPos BlockPastTheAir = Air.offset(0,0,-1);
+						if (mc.level.getBlockState(Air).getBlock() == Blocks.AIR && mc.level.getBlockState(BlockPastTheAir).getBlock() != Blocks.AIR) {
+							if (mc.level.getBlockState(Air.offset(1,0,0)).getBlock() != Blocks.AIR &&
+									mc.level.getBlockState(Air.offset(-1,0,0)).getBlock() != Blocks.AIR &&
+									mc.level.getBlockState(Air.offset(0,1,0)).getBlock() != Blocks.AIR &&
+									mc.level.getBlockState(Air.offset(0,-1,0)).getBlock() != Blocks.AIR)
 							{
 								if (!FPcheck(Air))disturbanceFound(Air);
 							}
@@ -218,12 +218,12 @@ public class CaveDisturbanceDetector extends Module {
 				case 2 -> {
 					BlockPos Air = bPos.south();
 					if (!scannedAir.contains(Air)) {
-						BlockPos BlockPastTheAir = Air.add(0,0,1);
-						if (mc.world.getBlockState(Air).getBlock() == Blocks.AIR && mc.world.getBlockState(BlockPastTheAir).getBlock() != Blocks.AIR) {
-							if (mc.world.getBlockState(Air.add(1,0,0)).getBlock() != Blocks.AIR &&
-									mc.world.getBlockState(Air.add(-1,0,0)).getBlock() != Blocks.AIR &&
-									mc.world.getBlockState(Air.add(0,1,0)).getBlock() != Blocks.AIR &&
-									mc.world.getBlockState(Air.add(0,-1,0)).getBlock() != Blocks.AIR)
+						BlockPos BlockPastTheAir = Air.offset(0,0,1);
+						if (mc.level.getBlockState(Air).getBlock() == Blocks.AIR && mc.level.getBlockState(BlockPastTheAir).getBlock() != Blocks.AIR) {
+							if (mc.level.getBlockState(Air.offset(1,0,0)).getBlock() != Blocks.AIR &&
+									mc.level.getBlockState(Air.offset(-1,0,0)).getBlock() != Blocks.AIR &&
+									mc.level.getBlockState(Air.offset(0,1,0)).getBlock() != Blocks.AIR &&
+									mc.level.getBlockState(Air.offset(0,-1,0)).getBlock() != Blocks.AIR)
 							{
 								if (!FPcheck(Air))disturbanceFound(Air);
 							}
@@ -234,12 +234,12 @@ public class CaveDisturbanceDetector extends Module {
 				case 3 -> {
 					BlockPos Air = bPos.west();
 					if (!scannedAir.contains(Air)) {
-						BlockPos BlockPastTheAir = Air.add(-1,0,0);
-						if (mc.world.getBlockState(Air).getBlock() == Blocks.AIR && mc.world.getBlockState(BlockPastTheAir).getBlock() != Blocks.AIR) {
-							if (mc.world.getBlockState(Air.add(0,1,0)).getBlock() != Blocks.AIR &&
-									mc.world.getBlockState(Air.add(0,-1,0)).getBlock() != Blocks.AIR &&
-									mc.world.getBlockState(Air.add(0,0,1)).getBlock() != Blocks.AIR &&
-									mc.world.getBlockState(Air.add(0,0,-1)).getBlock() != Blocks.AIR)
+						BlockPos BlockPastTheAir = Air.offset(-1,0,0);
+						if (mc.level.getBlockState(Air).getBlock() == Blocks.AIR && mc.level.getBlockState(BlockPastTheAir).getBlock() != Blocks.AIR) {
+							if (mc.level.getBlockState(Air.offset(0,1,0)).getBlock() != Blocks.AIR &&
+									mc.level.getBlockState(Air.offset(0,-1,0)).getBlock() != Blocks.AIR &&
+									mc.level.getBlockState(Air.offset(0,0,1)).getBlock() != Blocks.AIR &&
+									mc.level.getBlockState(Air.offset(0,0,-1)).getBlock() != Blocks.AIR)
 							{
 								if (!FPcheck(Air))disturbanceFound(Air);
 							}
@@ -250,12 +250,12 @@ public class CaveDisturbanceDetector extends Module {
 				case 4 -> {
 					BlockPos Air = bPos.east();
 					if (!scannedAir.contains(Air)) {
-						BlockPos BlockPastTheAir = Air.add(1,0,0);
-						if (mc.world.getBlockState(Air).getBlock() == Blocks.AIR && mc.world.getBlockState(BlockPastTheAir).getBlock() != Blocks.AIR) {
-							if (mc.world.getBlockState(Air.add(0,1,0)).getBlock() != Blocks.AIR &&
-									mc.world.getBlockState(Air.add(0,-1,0)).getBlock() != Blocks.AIR &&
-									mc.world.getBlockState(Air.add(0,0,1)).getBlock() != Blocks.AIR &&
-									mc.world.getBlockState(Air.add(0,0,-1)).getBlock() != Blocks.AIR)
+						BlockPos BlockPastTheAir = Air.offset(1,0,0);
+						if (mc.level.getBlockState(Air).getBlock() == Blocks.AIR && mc.level.getBlockState(BlockPastTheAir).getBlock() != Blocks.AIR) {
+							if (mc.level.getBlockState(Air.offset(0,1,0)).getBlock() != Blocks.AIR &&
+									mc.level.getBlockState(Air.offset(0,-1,0)).getBlock() != Blocks.AIR &&
+									mc.level.getBlockState(Air.offset(0,0,1)).getBlock() != Blocks.AIR &&
+									mc.level.getBlockState(Air.offset(0,0,-1)).getBlock() != Blocks.AIR)
 							{
 								if (!FPcheck(Air))disturbanceFound(Air);
 							}
@@ -264,14 +264,14 @@ public class CaveDisturbanceDetector extends Module {
 					scannedAir.add(Air);
 				}
 				case 5 -> {
-					BlockPos Air = bPos.up();
+					BlockPos Air = bPos.above();
 					if (!scannedAir.contains(Air)) {
-						BlockPos BlockPastTheAir = Air.add(0,1,0);
-						if (mc.world.getBlockState(Air).getBlock() == Blocks.AIR && mc.world.getBlockState(BlockPastTheAir).getBlock() != Blocks.AIR) {
-							if (mc.world.getBlockState(Air.add(1,0,0)).getBlock() != Blocks.AIR &&
-									mc.world.getBlockState(Air.add(-1,0,0)).getBlock() != Blocks.AIR &&
-									mc.world.getBlockState(Air.add(0,0,1)).getBlock() != Blocks.AIR &&
-									mc.world.getBlockState(Air.add(0,0,-1)).getBlock() != Blocks.AIR)
+						BlockPos BlockPastTheAir = Air.offset(0,1,0);
+						if (mc.level.getBlockState(Air).getBlock() == Blocks.AIR && mc.level.getBlockState(BlockPastTheAir).getBlock() != Blocks.AIR) {
+							if (mc.level.getBlockState(Air.offset(1,0,0)).getBlock() != Blocks.AIR &&
+									mc.level.getBlockState(Air.offset(-1,0,0)).getBlock() != Blocks.AIR &&
+									mc.level.getBlockState(Air.offset(0,0,1)).getBlock() != Blocks.AIR &&
+									mc.level.getBlockState(Air.offset(0,0,-1)).getBlock() != Blocks.AIR)
 							{
 								if (!FPcheck(Air))disturbanceFound(Air);
 							}
@@ -280,14 +280,14 @@ public class CaveDisturbanceDetector extends Module {
 					scannedAir.add(Air);
 				}
 				case 6 -> {
-					BlockPos Air = bPos.down();
+					BlockPos Air = bPos.below();
 					if (!scannedAir.contains(Air)) {
-						BlockPos BlockPastTheAir = Air.add(0,-1,0);
-						if (mc.world.getBlockState(Air).getBlock() == Blocks.AIR && mc.world.getBlockState(BlockPastTheAir).getBlock() != Blocks.AIR) {
-							if (mc.world.getBlockState(Air.add(1,0,0)).getBlock() != Blocks.AIR &&
-									mc.world.getBlockState(Air.add(-1,0,0)).getBlock() != Blocks.AIR &&
-									mc.world.getBlockState(Air.add(0,0,1)).getBlock() != Blocks.AIR &&
-									mc.world.getBlockState(Air.add(0,0,-1)).getBlock() != Blocks.AIR)
+						BlockPos BlockPastTheAir = Air.offset(0,-1,0);
+						if (mc.level.getBlockState(Air).getBlock() == Blocks.AIR && mc.level.getBlockState(BlockPastTheAir).getBlock() != Blocks.AIR) {
+							if (mc.level.getBlockState(Air.offset(1,0,0)).getBlock() != Blocks.AIR &&
+									mc.level.getBlockState(Air.offset(-1,0,0)).getBlock() != Blocks.AIR &&
+									mc.level.getBlockState(Air.offset(0,0,1)).getBlock() != Blocks.AIR &&
+									mc.level.getBlockState(Air.offset(0,0,-1)).getBlock() != Blocks.AIR)
 							{
 								if (!FPcheck(Air))disturbanceFound(Air);
 							}
@@ -303,9 +303,9 @@ public class CaveDisturbanceDetector extends Module {
 		for (int x = -FPdistance.get(); x < FPdistance.get()+1; x++) {
 			for (int y = -FPdistance.get(); y < FPdistance.get()+1; y++) {
 				for (int z = -FPdistance.get(); z < FPdistance.get()+1; z++) {
-					BlockPos bpos = new BlockPos(disturbance.add(x,y,z));
+					BlockPos bpos = new BlockPos(disturbance.offset(x,y,z));
 					if (bpos.equals(disturbance))continue;
-					if (mc.world.getBlockState(bpos).getBlock() == Blocks.AIR){
+					if (mc.level.getBlockState(bpos).getBlock() == Blocks.AIR){
 						extraAirFound = true;
 						break;
 					}
@@ -319,8 +319,8 @@ public class CaveDisturbanceDetector extends Module {
 			disturbanceLocations.add(disturbance);
 			if (chatFeedback.get()){
 				if (displaycoords.get())
-					ChatUtils.sendMsg(Text.of("Disturbance in the Cave Air found: " + disturbance));
-				else if (!displaycoords.get()) ChatUtils.sendMsg(Text.of("Disturbance in the Cave Air found!"));
+					ChatUtils.sendMsg(Component.nullToEmpty("Disturbance in the Cave Air found: " + disturbance));
+				else if (!displaycoords.get()) ChatUtils.sendMsg(Component.nullToEmpty("Disturbance in the Cave Air found!"));
 			}
 		}
 	}
@@ -332,51 +332,51 @@ public class CaveDisturbanceDetector extends Module {
 				if (!nearesttrcr.get()) {
 					for (BlockPos pos : disturbanceLocations) {
 						BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
-						if (pos != null && playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
+						if (pos != null && playerPos.closerThan(pos, renderDistance.get() * 16)) {
 							int startX = pos.getX();
 							int startY = pos.getY();
 							int startZ = pos.getZ();
 							int endX = pos.getX();
 							int endY = pos.getY();
 							int endZ = pos.getZ();
-							render(new Box(new Vec3d(startX+1, startY+1, startZ+1), new Vec3d(endX, endY, endZ)), sideColor.get(), lineColor.get(), shapeMode.get(), event);
+							render(new AABB(new Vec3(startX+1, startY+1, startZ+1), new Vec3(endX, endY, endZ)), sideColor.get(), lineColor.get(), shapeMode.get(), event);
 						}
 					}
 				} else if (nearesttrcr.get()){
 					for (BlockPos pos : disturbanceLocations) {
 						BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
-						if (pos != null && playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
+						if (pos != null && playerPos.closerThan(pos, renderDistance.get() * 16)) {
 							int startX = pos.getX();
 							int startY = pos.getY();
 							int startZ = pos.getZ();
 							int endX = pos.getX();
 							int endY = pos.getY();
 							int endZ = pos.getZ();
-							render(new Box(new Vec3d(startX+1, startY+1, startZ+1), new Vec3d(endX, endY, endZ)), sideColor.get(), lineColor.get(), shapeMode.get(), event);
+							render(new AABB(new Vec3(startX+1, startY+1, startZ+1), new Vec3(endX, endY, endZ)), sideColor.get(), lineColor.get(), shapeMode.get(), event);
 						}
 					}
-					render2(new Box(new Vec3d(closestX+1, closestY+1, closestZ+1), new Vec3d (closestX, closestY, closestZ)), sideColor.get(), lineColor.get(),ShapeMode.Sides, event);
+					render2(new AABB(new Vec3(closestX+1, closestY+1, closestZ+1), new Vec3 (closestX, closestY, closestZ)), sideColor.get(), lineColor.get(),ShapeMode.Sides, event);
 				}
 			}
 		}
 	}
-	private void render(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
+	private void render(AABB box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
 		if (trcr.get() && Math.abs(box.minX- RenderUtils.center.x)<=renderDistance.get()*16 && Math.abs(box.minZ-RenderUtils.center.z)<=renderDistance.get()*16)
 			if (!nearesttrcr.get())
 				event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
 		event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
 	}
-	private void render2(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
+	private void render2(AABB box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
 		if (trcr.get() && Math.abs(box.minX-RenderUtils.center.x)<=renderDistance.get()*16 && Math.abs(box.minZ-RenderUtils.center.z)<=renderDistance.get()*16)
 			event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
 		event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
 	}
 	private void removeChunksOutsideRenderDistance() {
-		AtomicReferenceArray<WorldChunk> chunks = mc.world.getChunkManager().chunks.chunks;
-		Set<WorldChunk> chunkSet = new HashSet<>();
+		AtomicReferenceArray<LevelChunk> chunks = mc.level.getChunkSource().storage.chunks;
+		Set<LevelChunk> chunkSet = new HashSet<>();
 
 		for (int i = 0; i < chunks.length(); i++) {
-			WorldChunk chunk = chunks.get(i);
+			LevelChunk chunk = chunks.get(i);
 			if (chunk != null) {
 				chunkSet.add(chunk);
 			}
@@ -384,16 +384,16 @@ public class CaveDisturbanceDetector extends Module {
 		removechunksOutsideRenderDistance(scannedChunks, chunkSet);
 		removeChunksOutsideRenderDistance(disturbanceLocations, chunkSet);
 	}
-	private void removeChunksOutsideRenderDistance(Set<BlockPos> boxSet, Set<WorldChunk> worldChunks) {
+	private void removeChunksOutsideRenderDistance(Set<BlockPos> boxSet, Set<LevelChunk> worldChunks) {
 		boxSet.removeIf(box -> {
-			assert mc.world != null;
-			return !worldChunks.contains(mc.world.getChunk(box));
+			assert mc.level != null;
+			return !worldChunks.contains(mc.level.getChunk(box));
 		});
 	}
-	private void removechunksOutsideRenderDistance(Set<ChunkPos> chunkSet, Set<WorldChunk> worldChunks) {
+	private void removechunksOutsideRenderDistance(Set<ChunkPos> chunkSet, Set<LevelChunk> worldChunks) {
 		chunkSet.removeIf(c -> {
-			assert mc.world != null;
-			return !worldChunks.contains(mc.world.getChunk(c.x, c.z));
+			assert mc.level != null;
+			return !worldChunks.contains(mc.level.getChunk(c.x(), c.z()));
 		});
 	}
 }

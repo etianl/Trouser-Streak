@@ -6,8 +6,8 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import meteordevelopment.meteorclient.systems.friends.Friends;
-import net.minecraft.client.network.PlayerListEntry;
 import pwn.noobs.trouserstreak.Trouser;
 import pwn.noobs.trouserstreak.utils.PermissionUtils;
 
@@ -100,7 +100,7 @@ public class AutoNames extends Module {
             .build()
     );
 
-    private CopyOnWriteArrayList<PlayerListEntry> players;
+    private CopyOnWriteArrayList<PlayerInfo> players;
     private int tickCounter;
     private int currentColorIndex;
     private String teamName;
@@ -167,7 +167,7 @@ public class AutoNames extends Module {
     }
 
     private void applyToPlayers() {
-        players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
+        players = new CopyOnWriteArrayList<>(mc.getConnection().getOnlinePlayers());
         List<String> excludedPlayers = getExcludedPlayers();
         String playerSelector = excludedPlayers.isEmpty() ? "@a" : "@a[" + String.join(",", excludedPlayers) + "]";
         ChatUtils.sendPlayerMsg("/team join " + teamName + " " + playerSelector);
@@ -176,7 +176,7 @@ public class AutoNames extends Module {
     private List<String> getExcludedPlayers() {
         List<String> excluded = new ArrayList<>();
         if (!targetSelf.get()) {
-            excluded.add("name=!" + mc.player.getName().getLiteralString());
+            excluded.add("name=!" + mc.player.getName().tryCollapseToString());
         }
         if (!trollfriends.get()) {
             players.stream()

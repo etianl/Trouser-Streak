@@ -5,14 +5,14 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.Comparator;
@@ -67,80 +67,80 @@ public class AimBot extends Module {
     }
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (mc.player == null || mc.world == null) return;
-        if (onlyItem.get() && !items.get().contains(mc.player.getMainHandStack().getItem())) return;
+        if (mc.player == null || mc.level == null) return;
+        if (onlyItem.get() && !items.get().contains(mc.player.getMainHandItem().getItem())) return;
         if (seek.get() && crosshairTarget == null) crosshairTarget = target();
         if (crosshairTarget != null && !crosshairTarget.isAlive()) crosshairTarget = null;
         if (crosshairTarget == null || !(crosshairTarget instanceof LivingEntity)) return;
-        if (targetPlayers.get() && !(crosshairTarget instanceof PlayerEntity)) return;
+        if (targetPlayers.get() && !(crosshairTarget instanceof Player)) return;
 
-        Vec3d playerPos = mc.player.getEyePos();
-        Vec3d targetPos = crosshairTarget.getBoundingBox().getCenter();
-        Vec3d toTarget = targetPos.subtract(playerPos).normalize();
+        Vec3 playerPos = mc.player.getEyePosition();
+        Vec3 targetPos = crosshairTarget.getBoundingBox().getCenter();
+        Vec3 toTarget = targetPos.subtract(playerPos).normalize();
 
         float yaw = (float) (Math.toDegrees(Math.atan2(toTarget.z, toTarget.x)) - 90.0);
         float pitch = (float) -Math.toDegrees(Math.asin(toTarget.y));
 
-        mc.player.setYaw(yaw);
-        mc.player.setHeadYaw(yaw);
-        mc.player.setPitch(pitch);
+        mc.player.setYRot(yaw);
+        mc.player.setYHeadRot(yaw);
+        mc.player.setXRot(pitch);
     }
 
     private Entity target() {
-        if (mc.player == null || mc.world == null) return null;
-        if (mc.crosshairTarget instanceof EntityHitResult hit) {
-            if (!targetPlayers.get() || hit.getEntity() instanceof PlayerEntity) return hit.getEntity();
+        if (mc.player == null || mc.level == null) return null;
+        if (mc.hitResult instanceof EntityHitResult hit) {
+            if (!targetPlayers.get() || hit.getEntity() instanceof Player) return hit.getEntity();
         }
 
         double maxRange = maxrange.get();
-        Vec3d eyePos = mc.player.getEyePos();
-        Vec3d lookVec = mc.player.getRotationVec(1.0f);
+        Vec3 eyePos = mc.player.getEyePosition();
+        Vec3 lookVec = mc.player.getViewVector(1.0f);
 
-        HitResult blockHit = mc.world.raycast(new RaycastContext(eyePos,
-                eyePos.add(lookVec.multiply(maxRange)), RaycastContext.ShapeType.COLLIDER,
-                RaycastContext.FluidHandling.NONE, mc.player));
+        HitResult blockHit = mc.level.clip(new ClipContext(eyePos,
+                eyePos.add(lookVec.scale(maxRange)), ClipContext.Block.COLLIDER,
+                ClipContext.Fluid.NONE, mc.player));
         double rayLength = blockHit.getType() == HitResult.Type.MISS ? maxRange :
-                eyePos.distanceTo(blockHit.getPos());
+                eyePos.distanceTo(blockHit.getLocation());
 
-        List<Entity> candidates = mc.world.getOtherEntities(mc.player,
-                mc.player.getBoundingBox().stretch(lookVec.multiply(rayLength)),
+        List<Entity> candidates = mc.level.getEntities(mc.player,
+                mc.player.getBoundingBox().expandTowards(lookVec.scale(rayLength)),
                 e -> e instanceof LivingEntity && e.isAlive() && e != mc.player);
 
         candidates.sort(Comparator.comparingDouble(e ->
-                eyePos.squaredDistanceTo(e.getBoundingBox().getCenter())));
+                eyePos.distanceToSqr(e.getBoundingBox().getCenter())));
 
         double coneAngle = 0.999;
         for (Entity e : candidates) {
             double dist = eyePos.distanceTo(e.getBoundingBox().getCenter());
             if (dist > maxRange) break;
 
-            if (targetPlayers.get() && !(e instanceof PlayerEntity)) continue;
+            if (targetPlayers.get() && !(e instanceof Player)) continue;
 
             if (!canSeeTarget(e)) continue;
 
-            Vec3d toEntity = e.getBoundingBox().getCenter().subtract(eyePos).normalize();
+            Vec3 toEntity = e.getBoundingBox().getCenter().subtract(eyePos).normalize();
 
-            if (lookVec.dotProduct(toEntity) > coneAngle) {
+            if (lookVec.dot(toEntity) > coneAngle) {
                 return e;
             }
         }
         return null;
     }
     private boolean canSeeTarget(Entity target) {
-        if (mc.player == null || mc.world == null) return false;
+        if (mc.player == null || mc.level == null) return false;
 
-        Vec3d eyePos = mc.player.getEyePos();
-        Vec3d targetCenter = target.getBoundingBox().getCenter();
+        Vec3 eyePos = mc.player.getEyePosition();
+        Vec3 targetCenter = target.getBoundingBox().getCenter();
 
-        HitResult result = mc.world.raycast(new RaycastContext(
+        HitResult result = mc.level.clip(new ClipContext(
                 eyePos,
                 targetCenter,
-                RaycastContext.ShapeType.COLLIDER,
-                RaycastContext.FluidHandling.NONE,
+                ClipContext.Block.COLLIDER,
+                ClipContext.Fluid.NONE,
                 mc.player
         ));
 
         if (result.getType() == HitResult.Type.MISS) return true;
-        return eyePos.distanceTo(result.getPos()) >= eyePos.distanceTo(targetCenter) - 0.5;
+        return eyePos.distanceTo(result.getLocation()) >= eyePos.distanceTo(targetCenter) - 0.5;
     }
 }

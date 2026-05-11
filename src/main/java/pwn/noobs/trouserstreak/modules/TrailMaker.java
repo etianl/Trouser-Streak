@@ -6,15 +6,15 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.List;
@@ -75,13 +75,13 @@ public class TrailMaker extends Module {
 
     @Override
     public void onActivate() {
-        rememberedblock=mc.player.getBlockPos();
+        rememberedblock=mc.player.blockPosition();
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (mc.player == null || mc.world == null || mc.interactionManager == null) return;
-        currentblock=mc.player.getBlockPos();
+        if (mc.player == null || mc.level == null || mc.gameMode == null) return;
+        currentblock=mc.player.blockPosition();
 
         if (currentblock.getX()> rememberedblock.getX()+1 || currentblock.getX()<rememberedblock.getX()-1 ||currentblock.getY()> rememberedblock.getY()+1 || currentblock.getY()<rememberedblock.getY()-1 || currentblock.getZ()> rememberedblock.getZ()+1 || currentblock.getZ()<rememberedblock.getZ()-1){
             placeticks++;
@@ -89,75 +89,75 @@ public class TrailMaker extends Module {
                     FindItemResult item = InvUtils.findInHotbar(itemStack -> validItem(itemStack));
                     if (!item.found()) return;
                     else {
-                        mc.player.getInventory().selectedSlot= item.slot();
+                        mc.player.getInventory().setSelectedSlot(item.slot());
                     }
                     if (placeticks<=attemptplaceticks.get()){
                     for (int ph = 0; ph < placeheight.get(); ph++) {
                     if (placewidth.get()==1) {
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ())).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ())).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()), false));
                     }
                     else if (placewidth.get()==2) {
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ())).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ())).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ())).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+1)).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+1), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+1), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-1)).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-1), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-1), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ())).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ())).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ())).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+1)).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+1), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+1), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-1)).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-1), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-1), false));
                     }
                     else if (placewidth.get()==3) {
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ())).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ())).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ())).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+1)).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+1), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+1), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-1)).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-1), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-1), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()+1)).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()+1), Direction.DOWN, new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()+1), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()-1)).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()-1), Direction.DOWN, new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()-1), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()+1)).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()+1), Direction.DOWN, new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()+1), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()-1)).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()-1), Direction.DOWN, new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()-1), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ())).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ())).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ())).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+1)).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+1), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+1), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-1)).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-1), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-1), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()+1)).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()+1), Direction.DOWN, new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()+1), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()-1)).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()-1), Direction.DOWN, new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()-1), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()+1)).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()+1), Direction.DOWN, new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()+1), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()-1)).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()-1), Direction.DOWN, new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()-1), false));
                     }
                     else if (placewidth.get()==4) {
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ())).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ())).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ())).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+1)).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+1), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+1), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-1)).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-1), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-1), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()+1)).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()+1), Direction.DOWN, new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()+1), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()-1)).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()-1), Direction.DOWN, new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()-1), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()+1)).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()+1), Direction.DOWN, new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()+1), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()-1)).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()-1), Direction.DOWN, new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()-1), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX()+2, rememberedblock.getY() + ph, rememberedblock.getZ())).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX()+2, rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX()+2, rememberedblock.getY() + ph, rememberedblock.getZ()), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX()-2, rememberedblock.getY() + ph, rememberedblock.getZ())).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX()-2, rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX()-2, rememberedblock.getY() + ph, rememberedblock.getZ()), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+2)).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+2), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+2), false));
-                        if (mc.world.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-2)).isReplaceable())
-                            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-2), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-2), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ())).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ())).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ())).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+1)).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+1), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+1), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-1)).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-1), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-1), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()+1)).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()+1), Direction.DOWN, new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()+1), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()-1)).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()-1), Direction.DOWN, new BlockPos(rememberedblock.getX()+1, rememberedblock.getY() + ph, rememberedblock.getZ()-1), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()+1)).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()+1), Direction.DOWN, new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()+1), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()-1)).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()-1), Direction.DOWN, new BlockPos(rememberedblock.getX()-1, rememberedblock.getY() + ph, rememberedblock.getZ()-1), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX()+2, rememberedblock.getY() + ph, rememberedblock.getZ())).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX()+2, rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX()+2, rememberedblock.getY() + ph, rememberedblock.getZ()), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX()-2, rememberedblock.getY() + ph, rememberedblock.getZ())).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX()-2, rememberedblock.getY() + ph, rememberedblock.getZ()), Direction.DOWN, new BlockPos(rememberedblock.getX()-2, rememberedblock.getY() + ph, rememberedblock.getZ()), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+2)).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+2), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()+2), false));
+                        if (mc.level.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-2)).canBeReplaced())
+                            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-2), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-2), false));
                     }
-                    mc.player.swingHand(Hand.MAIN_HAND);
+                    mc.player.swing(InteractionHand.MAIN_HAND);
                 }
                     }
             if (placeticks>=Math.round(placetickdelay.get()*20)){

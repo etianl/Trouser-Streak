@@ -24,14 +24,17 @@ import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.client.gui.screen.world.LevelLoadingScreen;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.*;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.*;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
+import net.minecraft.client.gui.screens.LevelLoadingScreen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.io.BufferedReader;
@@ -151,7 +154,7 @@ public class PortalPatternFinder extends Module {
 			.build()
 	);
 	private final Set<ChunkPos> scannedChunks = new CopyOnWriteArraySet<>();
-	private final Set<Box> possiblePortalLocations = new CopyOnWriteArraySet<>();
+	private final Set<AABB> possiblePortalLocations = new CopyOnWriteArraySet<>();
 	private final Set<BlockPos> loggedPortalPositions = new CopyOnWriteArraySet<>();
 	private int closestPortalX=2000000000;
 	private int closestPortalY=2000000000;
@@ -170,16 +173,16 @@ public class PortalPatternFinder extends Module {
 		clearChunkData();
 		loadPortalPatterns();
 	}
-	private void scanTheAir(AtomicReferenceArray<WorldChunk> chunks) {
+	private void scanTheAir(AtomicReferenceArray<LevelChunk> chunks) {
 		List<ChunkPos> chunksToProcess = new ArrayList<>();
 		for (int i = 0; i < chunks.length(); i++) {
-			WorldChunk chunk = chunks.get(i);
+			LevelChunk chunk = chunks.get(i);
 			if (chunk != null && !chunk.isEmpty()) {
 				chunksToProcess.add(chunk.getPos());
 			}
 		}
 		chunksToProcess.stream().forEach(chunkPos -> {
-			WorldChunk chunk = mc.world.getChunk(chunkPos.x, chunkPos.z);
+			LevelChunk chunk = mc.level.getChunk(chunkPos.x(), chunkPos.z());
 			if (chunk != null && !chunk.isEmpty() && !scannedChunks.contains(chunk.getPos())) {
 				processChunk(chunk);
 				scannedChunks.add(chunk.getPos());
@@ -210,12 +213,12 @@ public class PortalPatternFinder extends Module {
 	}
 	@EventHandler
 	private void onPreTick(TickEvent.Pre event) {
-		if (mc.world == null) return;
-		AtomicReferenceArray<WorldChunk> chunks = mc.world.getChunkManager().chunks.chunks;
-		Set<WorldChunk> chunkSet = new HashSet<>();
+		if (mc.level == null) return;
+		AtomicReferenceArray<LevelChunk> chunks = mc.level.getChunkSource().storage.chunks;
+		Set<LevelChunk> chunkSet = new HashSet<>();
 
 		for (int i = 0; i < chunks.length(); i++) {
-			WorldChunk chunk = chunks.get(i);
+			LevelChunk chunk = chunks.get(i);
 			if (chunk != null) {
 				chunkSet.add(chunk);
 			}
@@ -241,15 +244,15 @@ public class PortalPatternFinder extends Module {
 		if (removerenderdist.get())removeChunksOutsideRenderDistance(chunkSet);
 	}
 
-	private void processChunk(WorldChunk chunk) {
-		int minY = mc.world.getBottomY();
+	private void processChunk(LevelChunk chunk) {
+		int minY = mc.level.getMinY();
 		int maxY = 180;
-		if (mc.world.getRegistryKey() == World.NETHER) maxY = 126;
+		if (mc.level.dimension() == Level.NETHER) maxY = 126;
 
 		for (int x = 0; x < 16; x++) {
 			for (int z = 0; z < 16; z++) {
 				for (int y = minY; y <= maxY; y++) {
-					BlockPos blockPos = new BlockPos(chunk.getPos().getStartX() + x, y, chunk.getPos().getStartZ() + z);
+					BlockPos blockPos = new BlockPos(chunk.getPos().getMinBlockX() + x, y, chunk.getPos().getMinBlockZ() + z);
 					BlockState blockState = chunk.getBlockState(blockPos);
 
 					if (blockState.getBlock() == Blocks.CAVE_AIR) {
@@ -262,27 +265,27 @@ public class PortalPatternFinder extends Module {
 
 	private void isSurroundingBlockRegAir(BlockPos bPos) {
 		BlockPos airPos=bPos.north();
-		BlockPos blockPastTheAir=bPos.north().add(0, 0, -1);
+		BlockPos blockPastTheAir=bPos.north().offset(0, 0, -1);
 		for (int dir = 1; dir <= 4; dir++) {
 			switch (dir) {
 				case 1 -> {
 					airPos = bPos.north();
-					blockPastTheAir = bPos.north().add(0, 0, -1);
+					blockPastTheAir = bPos.north().offset(0, 0, -1);
 				}
 				case 2 -> {
 					airPos = bPos.south();
-					blockPastTheAir = bPos.south().add(0, 0, 1);
+					blockPastTheAir = bPos.south().offset(0, 0, 1);
 				}
 				case 3 -> {
 					airPos = bPos.west();
-					blockPastTheAir = bPos.west().add(-1, 0, 0);
+					blockPastTheAir = bPos.west().offset(-1, 0, 0);
 				}
 				case 4 -> {
 					airPos = bPos.east();
-					blockPastTheAir = bPos.east().add(1, 0, 0);
+					blockPastTheAir = bPos.east().offset(1, 0, 0);
 				}
 			}
-			if (mc.world.getBlockState(airPos).getBlock() == Blocks.AIR && mc.world.getBlockState(blockPastTheAir).getBlock() != Blocks.AIR) findAirShape(airPos);
+			if (mc.level.getBlockState(airPos).getBlock() == Blocks.AIR && mc.level.getBlockState(blockPastTheAir).getBlock() != Blocks.AIR) findAirShape(airPos);
 		}
 	}
 
@@ -302,14 +305,14 @@ public class PortalPatternFinder extends Module {
 		for (int x = -areaWidth; x <= areaWidth; x++) {
 			for (int y = -areaHeight; y <= areaHeight; y++) {
 				BlockPos bPos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ());
-				if (mc.world.getBlockState(bPos).getBlock() == Blocks.AIR) {
+				if (mc.level.getBlockState(bPos).getBlock() == Blocks.AIR) {
 					int nonairblockonsides = 0;
 					BlockPos[] surroundingPositions = new BlockPos[] {
 							bPos.north(),
 							bPos.south()
 					};
 					for (BlockPos posi : surroundingPositions) {
-						if (mc.world.getBlockState(posi).getBlock() != Blocks.AIR) {
+						if (mc.level.getBlockState(posi).getBlock() != Blocks.AIR) {
 							nonairblockonsides++;
 						}
 					}
@@ -318,7 +321,7 @@ public class PortalPatternFinder extends Module {
 						AirBlockPatternWEastREJECT++;
 						AirBlockPatternWEast.add(bPos);
 					}
-				} else if (mc.world.getBlockState(bPos).getBlock() != Blocks.AIR && mc.world.getBlockState(bPos).getBlock() != Blocks.CAVE_AIR) {
+				} else if (mc.level.getBlockState(bPos).getBlock() != Blocks.AIR && mc.level.getBlockState(bPos).getBlock() != Blocks.CAVE_AIR) {
 					AirBlockPatternWEastREJECT2++;
 					AirBlockPatternWEast.add(bPos);
 				}
@@ -327,14 +330,14 @@ public class PortalPatternFinder extends Module {
 		for (int z = -areaWidth; z <= areaWidth; z++) {
 			for (int y = -areaHeight; y <= areaHeight; y++) {
 				BlockPos bPos = new BlockPos(pos.getX(), pos.getY() + y, pos.getZ() + z);
-				if (mc.world.getBlockState(bPos).getBlock() == Blocks.AIR) {
+				if (mc.level.getBlockState(bPos).getBlock() == Blocks.AIR) {
 					int nonairblockonsides = 0;
 					BlockPos[] surroundingPositions = new BlockPos[] {
 							bPos.west(),
 							bPos.east()
 					};
 					for (BlockPos posi : surroundingPositions) {
-						if (mc.world.getBlockState(posi).getBlock() != Blocks.AIR) {
+						if (mc.level.getBlockState(posi).getBlock() != Blocks.AIR) {
 							nonairblockonsides++;
 						}
 					}
@@ -343,7 +346,7 @@ public class PortalPatternFinder extends Module {
 						AirBlockPatternNouthREJECT++;
 						AirBlockPatternNouth.add(bPos);
 					}
-				} else if (mc.world.getBlockState(bPos).getBlock() != Blocks.AIR && mc.world.getBlockState(bPos).getBlock() != Blocks.CAVE_AIR) {
+				} else if (mc.level.getBlockState(bPos).getBlock() != Blocks.AIR && mc.level.getBlockState(bPos).getBlock() != Blocks.CAVE_AIR) {
 					AirBlockPatternNouthREJECT2++;
 					AirBlockPatternNouth.add(bPos);
 				}
@@ -361,23 +364,23 @@ public class PortalPatternFinder extends Module {
 
 							if (falsepositives1.get()) {
 								for (int x = 0; x < currentWidth; x++) {
-									BlockPos blockPos = boxStart.add(x, -1, 0);
-									if (mc.world.getBlockState(blockPos).getBlock() == Blocks.AIR) airfoundaboveorbelow = true;
+									BlockPos blockPos = boxStart.offset(x, -1, 0);
+									if (mc.level.getBlockState(blockPos).getBlock() == Blocks.AIR) airfoundaboveorbelow = true;
 								}
 								for (int x = 0; x < currentWidth; x++) {
-									BlockPos blockPos = boxStart.add(x, currentHeight + 1, 0);
-									if (mc.world.getBlockState(blockPos).getBlock() == Blocks.AIR) airfoundaboveorbelow = true;
+									BlockPos blockPos = boxStart.offset(x, currentHeight + 1, 0);
+									if (mc.level.getBlockState(blockPos).getBlock() == Blocks.AIR) airfoundaboveorbelow = true;
 								}
 								if (airfoundaboveorbelow) continue;
 							}
 
-							Box portalBox = new Box(
-									new Vec3d(boxStart.getX(), boxStart.getY(), boxStart.getZ()),
-									new Vec3d(boxEnd.getX() + 1, boxEnd.getY() + 1, boxEnd.getZ() + 1)
+							AABB portalBox = new AABB(
+									new Vec3(boxStart.getX(), boxStart.getY(), boxStart.getZ()),
+									new Vec3(boxEnd.getX() + 1, boxEnd.getY() + 1, boxEnd.getZ() + 1)
 							);
 
 							boolean intersects = false;
-							for (Box existingBox : possiblePortalLocations) {
+							for (AABB existingBox : possiblePortalLocations) {
 								if (portalBox.intersects(existingBox)) {
 									intersects = true;
 									break;
@@ -405,25 +408,25 @@ public class PortalPatternFinder extends Module {
 
 							if (falsepositives1.get()) {
 								for (int z = 0; z < currentWidth; z++) {
-									BlockPos blockPos = boxStart.add(0, -1, z);
-									if (mc.world.getBlockState(blockPos).getBlock() == Blocks.AIR)
+									BlockPos blockPos = boxStart.offset(0, -1, z);
+									if (mc.level.getBlockState(blockPos).getBlock() == Blocks.AIR)
 										airfoundaboveorbelow = true;
 								}
 								for (int z = 0; z < currentWidth; z++) {
-									BlockPos blockPos = boxStart.add(0, currentHeight + 1, z);
-									if (mc.world.getBlockState(blockPos).getBlock() == Blocks.AIR)
+									BlockPos blockPos = boxStart.offset(0, currentHeight + 1, z);
+									if (mc.level.getBlockState(blockPos).getBlock() == Blocks.AIR)
 										airfoundaboveorbelow = true;
 								}
 								if (airfoundaboveorbelow) continue;
 							}
 
-							Box portalBox = new Box(
-									new Vec3d(boxStart.getX(), boxStart.getY(), boxStart.getZ()),
-									new Vec3d(boxEnd.getX() + 1, boxEnd.getY() + 1, boxEnd.getZ() + 1)
+							AABB portalBox = new AABB(
+									new Vec3(boxStart.getX(), boxStart.getY(), boxStart.getZ()),
+									new Vec3(boxEnd.getX() + 1, boxEnd.getY() + 1, boxEnd.getZ() + 1)
 							);
 
 							boolean intersects = false;
-							for (Box existingBox : possiblePortalLocations) {
+							for (AABB existingBox : possiblePortalLocations) {
 								if (portalBox.intersects(existingBox)) {
 									intersects = true;
 									break;
@@ -437,13 +440,13 @@ public class PortalPatternFinder extends Module {
 			}
 		}
 	}
-	private void portalFound(Box portalBox){
+	private void portalFound(AABB portalBox){
 		if (!possiblePortalLocations.contains(portalBox)){
 			possiblePortalLocations.add(portalBox);
 			mc.execute(() -> {
 				if (displaycoords.get())
-					ChatUtils.sendMsg(Text.of("Possible portal found: " + portalBox.getCenter()));
-				else if (!displaycoords.get()) ChatUtils.sendMsg(Text.of("Possible portal found!"));
+					ChatUtils.sendMsg(Component.nullToEmpty("Possible portal found: " + portalBox.getCenter()));
+				else if (!displaycoords.get()) ChatUtils.sendMsg(Component.nullToEmpty("Possible portal found!"));
 			});
 			BlockPos cp = new BlockPos(Math.round((float)portalBox.getCenter().x),Math.round((float)portalBox.getCenter().y),Math.round((float)portalBox.getCenter().z));
 			if(!loggedPortalPositions.contains(cp) && locLogging.get()){
@@ -462,7 +465,7 @@ public class PortalPatternFinder extends Module {
 
 				for (int dx = 0; dx < currentWidth; dx++) {
 					for (int dy = 0; dy < currentHeight; dy++) {
-						BlockPos checkPos = startBlock.add(dx, dy, 0);
+						BlockPos checkPos = startBlock.offset(dx, dy, 0);
 
 						if (ignorecorners.get() && ((dx == 0 && dy == 0) || (dx == currentWidth - 1 && dy == 0) ||
 								(dx == 0 && dy == currentHeight - 1) || (dx == currentWidth - 1 && dy == currentHeight - 1))) {
@@ -490,7 +493,7 @@ public class PortalPatternFinder extends Module {
 
 				for (int dz = 0; dz < currentWidth; dz++) {
 					for (int dy = 0; dy < currentHeight; dy++) {
-						BlockPos checkPos = startBlock.add(0, dy, dz);
+						BlockPos checkPos = startBlock.offset(0, dy, dz);
 
 						if (ignorecorners.get() && ((dz == 0 && dy == 0) || (dz == currentWidth - 1 && dy == 0) ||
 								(dz == 0 && dy == currentHeight - 1) || (dz == currentWidth - 1 && dy == currentHeight - 1))) {
@@ -516,50 +519,50 @@ public class PortalPatternFinder extends Module {
 		if (portalSideColor.get().a > 5 || portalLineColor.get().a > 5) {
 			synchronized (possiblePortalLocations) {
 				if (!nearesttrcr.get()) {
-					for (Box box : possiblePortalLocations) {
-						BlockPos playerPos = new BlockPos(mc.player.getBlockX(), Math.round((float)box.getCenter().getY()), mc.player.getBlockZ());
-						if (box != null && playerPos.isWithinDistance(box.getCenter(), renderDistance.get() * 16)) {
+					for (AABB box : possiblePortalLocations) {
+						BlockPos playerPos = new BlockPos(mc.player.getBlockX(), Math.round((float)box.getCenter().y()), mc.player.getBlockZ());
+						if (box != null && playerPos.closerToCenterThan(box.getCenter(), renderDistance.get() * 16)) {
 							render(box, portalSideColor.get(), portalLineColor.get(), shapeMode.get(), event);
 						}
 					}
 				} else if (nearesttrcr.get()) {
-					for (Box box : possiblePortalLocations) {
-						BlockPos playerPos = new BlockPos(mc.player.getBlockX(), Math.round((float)box.getCenter().getY()), mc.player.getBlockZ());
-						if (box != null && playerPos.isWithinDistance(box.getCenter(), renderDistance.get() * 16)) {
+					for (AABB box : possiblePortalLocations) {
+						BlockPos playerPos = new BlockPos(mc.player.getBlockX(), Math.round((float)box.getCenter().y()), mc.player.getBlockZ());
+						if (box != null && playerPos.closerToCenterThan(box.getCenter(), renderDistance.get() * 16)) {
 							render(box, portalSideColor.get(), portalLineColor.get(), shapeMode.get(), event);
 						}
 					}
-					render2(new Box(new Vec3d(closestPortalX, closestPortalY, closestPortalZ), new Vec3d (closestPortalX, closestPortalY, closestPortalZ)), portalSideColor.get(), portalLineColor.get(),ShapeMode.Sides, event);
+					render2(new AABB(new Vec3(closestPortalX, closestPortalY, closestPortalZ), new Vec3 (closestPortalX, closestPortalY, closestPortalZ)), portalSideColor.get(), portalLineColor.get(),ShapeMode.Sides, event);
 				}
 			}
 		}
 	}
-	private void render(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
+	private void render(AABB box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
 		if (trcr.get() && Math.abs(box.minX- RenderUtils.center.x)<=renderDistance.get()*16 && Math.abs(box.minZ-RenderUtils.center.z)<=renderDistance.get()*16)
 			if (!nearesttrcr.get())
 				event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
 		event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
 	}
-	private void render2(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
+	private void render2(AABB box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
 		if (trcr.get() && Math.abs(box.minX-RenderUtils.center.x)<=renderDistance.get()*16 && Math.abs(box.minZ-RenderUtils.center.z)<=renderDistance.get()*16)
 			event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
 		event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
 	}
-	private void removeChunksOutsideRenderDistance(Set<WorldChunk> worldChunks) {
+	private void removeChunksOutsideRenderDistance(Set<LevelChunk> worldChunks) {
 		removechunksOutsideRenderDistance(scannedChunks, worldChunks);
 		removeChunksOutsideRenderDistance(possiblePortalLocations, worldChunks);
 	}
-	private void removeChunksOutsideRenderDistance(Set<Box> boxSet, Set<WorldChunk> worldChunks) {
+	private void removeChunksOutsideRenderDistance(Set<AABB> boxSet, Set<LevelChunk> worldChunks) {
 		boxSet.removeIf(box -> {
-			BlockPos boxPos = new BlockPos((int)Math.floor(box.getCenter().getX()), (int)Math.floor(box.getCenter().getY()), (int)Math.floor(box.getCenter().getZ()));
-			assert mc.world != null;
-			return !worldChunks.contains(mc.world.getChunk(boxPos));
+			BlockPos boxPos = new BlockPos((int)Math.floor(box.getCenter().x()), (int)Math.floor(box.getCenter().y()), (int)Math.floor(box.getCenter().z()));
+			assert mc.level != null;
+			return !worldChunks.contains(mc.level.getChunk(boxPos));
 		});
 	}
-	private void removechunksOutsideRenderDistance(Set<ChunkPos> chunkSet, Set<WorldChunk> worldChunks) {
+	private void removechunksOutsideRenderDistance(Set<ChunkPos> chunkSet, Set<LevelChunk> worldChunks) {
 		chunkSet.removeIf(c -> {
-			assert mc.world != null;
-			return !worldChunks.contains(mc.world.getChunk(c.x, c.z));
+			assert mc.level != null;
+			return !worldChunks.contains(mc.level.getChunk(c.x(), c.z()));
 		});
 	}
 

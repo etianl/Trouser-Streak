@@ -25,17 +25,17 @@ public class MultiUse extends Module {
     }
     @EventHandler
     private void onMouseButton(MouseClickEvent event) {
-        if (mc.options.useKey.isPressed()) {
+        if (mc.options.keyUse.isDown()) {
             for (int i = 0; i < uses.get(); i++) {
-                mc.doItemUse();
+                mc.startUseItem();
             }
         }
     }
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (mc.options.useKey.isPressed()) {
+        if (mc.options.keyUse.isDown()) {
             for (int i = 0; i < uses.get(); i++) {
-                mc.doItemUse();
+                mc.startUseItem();
             }
         }
     }

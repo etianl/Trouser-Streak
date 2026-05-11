@@ -4,8 +4,8 @@ import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.screen.world.LevelLoadingScreen;
-import net.minecraft.network.packet.c2s.play.TeleportConfirmC2SPacket;
+import net.minecraft.client.gui.screens.LevelLoadingScreen;
+import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
 import pwn.noobs.trouserstreak.Trouser;
 
 public class PortalGodMode extends Module {
@@ -27,6 +27,6 @@ public class PortalGodMode extends Module {
     }
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (godMode && event.packet instanceof TeleportConfirmC2SPacket) event.cancel();
+        if (godMode && event.packet instanceof ServerboundAcceptTeleportationPacket) event.cancel();
     }
 }

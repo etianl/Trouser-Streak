@@ -5,15 +5,6 @@
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.AxeItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
 import pwn.noobs.trouserstreak.Trouser;
 import meteordevelopment.meteorclient.events.entity.player.AttackEntityEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -24,6 +15,15 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 
 public class AttributeSwap extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -77,22 +77,22 @@ public class AttributeSwap extends Module {
 
     @EventHandler
     private void onMouseButton(MouseClickEvent event) {
-        if (mc.player == null || mc.world == null || !autoLunge.get()) return;
-        if (!mc.options.attackKey.isPressed()) return;
+        if (mc.player == null || mc.level == null || !autoLunge.get()) return;
+        if (!mc.options.keyAttack.isDown()) return;
         if (swapBack.get()) {
-            prevSlot = mc.player.getInventory().selectedSlot;
+            prevSlot = mc.player.getInventory().getSelectedSlot();
         }
         didSwap = false;
 
-        if (enchantmentRegistry == null) enchantmentRegistry = mc.world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
+        if (enchantmentRegistry == null) enchantmentRegistry = mc.level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
 
         int bestSlot = -1;
         int bestLevel = 0;
 
         for (int i = 0; i < 9; i++) {
-            ItemStack stack = mc.player.getInventory().getMainStacks().get(i);
+            ItemStack stack = mc.player.getInventory().getNonEquipmentItems().get(i);
 
-            int level = EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.LUNGE), stack);
+            int level = EnchantmentHelper.getItemEnchantmentLevel(enchantmentRegistry.getOrThrow(Enchantments.LUNGE), stack);
             if (level > 0 && level >= bestLevel) {
                 bestSlot = i;
                 bestLevel = level;
@@ -102,10 +102,10 @@ public class AttributeSwap extends Module {
         if (bestSlot != -1) {
             InvUtils.swap(bestSlot, false);
             didSwap = true;
-            mc.player.networkHandler.sendPacket(new PlayerActionC2SPacket(
-                    PlayerActionC2SPacket.Action.STAB,
-                    mc.player.getBlockPos(),
-                    mc.player.getFacing()
+            mc.player.connection.send(new ServerboundPlayerActionPacket(
+                    ServerboundPlayerActionPacket.Action.STAB,
+                    mc.player.blockPosition(),
+                    mc.player.getNearestViewDirection()
             ));
         }
 
@@ -116,16 +116,16 @@ public class AttributeSwap extends Module {
 
     @EventHandler
     private void onAttack(AttackEntityEvent event) {
-        if (mc.player == null || mc.world == null) return;
+        if (mc.player == null || mc.level == null) return;
         if (swapBack.get()) {
-            prevSlot = mc.player.getInventory().selectedSlot;
+            prevSlot = mc.player.getInventory().getSelectedSlot();
         }
         didSwap = false;
         if (shieldBreaker.get()) {
-            if (event.entity != null && event.entity instanceof PlayerEntity player){
+            if (event.entity != null && event.entity instanceof Player player){
                 if (player.isBlocking()){
                     for (int i = 0; i < 9; i++) {
-                        ItemStack stack = mc.player.getInventory().getMainStacks().get(i);
+                        ItemStack stack = mc.player.getInventory().getNonEquipmentItems().get(i);
                         if (stack.getItem() instanceof AxeItem) {
                             InvUtils.swap(i, false);
                             didSwap = true;

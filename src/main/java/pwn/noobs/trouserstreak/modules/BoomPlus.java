@@ -5,25 +5,25 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.TypedEntityData;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.*;
-import net.minecraft.registry.Registries;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.TypedEntityData;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 public class BoomPlus extends Module {
@@ -177,29 +177,29 @@ public class BoomPlus extends Module {
 
     @EventHandler
     public void onTick(TickEvent.Post event) {
-        if (!mc.player.getAbilities().creativeMode) {
+        if (!mc.player.getAbilities().instabuild) {
             error("You need to be in creative mode.");
             toggle();
         }
 
-        if (auto.get() && mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player.getAbilities().creativeMode) {
+        if (auto.get() && mc.options.keyAttack.isDown() && mc.screen == null && mc.player.getAbilities().instabuild) {
             if (aticks<=atickdelay.get()){
                 aticks++;
             } else if (aticks>atickdelay.get()) {
                 customName = nom.get();
                 namecolour = nomcolor.get().toString();
-                ItemStack rst = mc.player.getMainHandStack();
-                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
+                ItemStack rst = mc.player.getMainHandItem();
+                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePosition(), Direction.DOWN, BlockPos.containing(mc.player.getEyePosition()), false);
                 ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
-                var changes = ComponentChanges.builder()
-                        .add(DataComponentTypes.CUSTOM_NAME, Text.literal(customName).formatted(Formatting.valueOf(namecolour.toUpperCase())))
-                        .add(DataComponentTypes.ITEM_NAME, Text.literal(customName).formatted(Formatting.valueOf(namecolour.toUpperCase())))
-                        .add(DataComponentTypes.ENTITY_DATA, createEntityData())
+                var changes = DataComponentPatch.builder()
+                        .set(DataComponents.CUSTOM_NAME, Component.literal(customName).withStyle(ChatFormatting.valueOf(namecolour.toUpperCase())))
+                        .set(DataComponents.ITEM_NAME, Component.literal(customName).withStyle(ChatFormatting.valueOf(namecolour.toUpperCase())))
+                        .set(DataComponents.ENTITY_DATA, createEntityData())
                         .build();
-                item.applyChanges(changes);
-                mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
-                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
+                item.applyComponentsAndValidate(changes);
+                mc.gameMode.handleCreativeModeItemAdd(item, 36 + mc.player.getInventory().getSelectedSlot());
+                mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, bhr);
+                mc.gameMode.handleCreativeModeItemAdd(rst, 36 + mc.player.getInventory().getSelectedSlot());
                 aticks=0;
             }
         }
@@ -207,21 +207,21 @@ public class BoomPlus extends Module {
 
     @EventHandler
     private void onMouseButton(MouseClickEvent event) {
-        if (mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player.getAbilities().creativeMode) {
+        if (mc.options.keyAttack.isDown() && mc.screen == null && mc.player.getAbilities().instabuild) {
             customName = nom.get();
             namecolour = nomcolor.get().toString();
-            ItemStack rst = mc.player.getMainHandStack();
-            BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
+            ItemStack rst = mc.player.getMainHandItem();
+            BlockHitResult bhr = new BlockHitResult(mc.player.getEyePosition(), Direction.DOWN, BlockPos.containing(mc.player.getEyePosition()), false);
             ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
-            var changes = ComponentChanges.builder()
-                    .add(DataComponentTypes.CUSTOM_NAME, Text.literal(customName).formatted(Formatting.valueOf(namecolour.toUpperCase())))
-                    .add(DataComponentTypes.ITEM_NAME, Text.literal(customName).formatted(Formatting.valueOf(namecolour.toUpperCase())))
-                    .add(DataComponentTypes.ENTITY_DATA, createEntityData())
+            var changes = DataComponentPatch.builder()
+                    .set(DataComponents.CUSTOM_NAME, Component.literal(customName).withStyle(ChatFormatting.valueOf(namecolour.toUpperCase())))
+                    .set(DataComponents.ITEM_NAME, Component.literal(customName).withStyle(ChatFormatting.valueOf(namecolour.toUpperCase())))
+                    .set(DataComponents.ENTITY_DATA, createEntityData())
                     .build();
-            item.applyChanges(changes);
-            mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-            mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
+            item.applyComponentsAndValidate(changes);
+            mc.gameMode.handleCreativeModeItemAdd(item, 36 + mc.player.getInventory().getSelectedSlot());
+            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, bhr);
+            mc.gameMode.handleCreativeModeItemAdd(rst, 36 + mc.player.getInventory().getSelectedSlot());
         }
     }
     private TypedEntityData<EntityType<?>> createEntityData() {
@@ -229,28 +229,28 @@ public class BoomPlus extends Module {
         String[] parts = fullString.split(":");
         String block = parts[1];
         String blockName = block.replace("}", "");
-        NbtList motion = new NbtList();
-        NbtList Pos = new NbtList();
-        HitResult hr = mc.getCameraEntity().raycast(900, 0, true);
-        Vec3d owo = hr.getPos();
-        BlockPos pos = BlockPos.ofFloored(owo);
-        Vec3d sex = mc.player.getRotationVector().multiply(speed.get());
+        ListTag motion = new ListTag();
+        ListTag Pos = new ListTag();
+        HitResult hr = mc.getCameraEntity().pick(900, 0, true);
+        Vec3 owo = hr.getLocation();
+        BlockPos pos = BlockPos.containing(owo);
+        Vec3 sex = mc.player.getLookAngle().scale(speed.get());
         String entityName = entity.get().trim().replace(" ", "_");
 
-        NbtCompound entityTag = new NbtCompound();
+        CompoundTag entityTag = new CompoundTag();
         if (target.get()) {
-            Pos.add(NbtDouble.of(pos.getX()));
-            Pos.add(NbtDouble.of(pos.getY()));
-            Pos.add(NbtDouble.of(pos.getZ()));
+            Pos.add(DoubleTag.valueOf(pos.getX()));
+            Pos.add(DoubleTag.valueOf(pos.getY()));
+            Pos.add(DoubleTag.valueOf(pos.getZ()));
             entityTag.put("Pos", Pos);
         } else {
-            Pos.add(NbtDouble.of(mc.player.getX()));
-            Pos.add(NbtDouble.of(mc.player.getY()+1));
-            Pos.add(NbtDouble.of(mc.player.getZ()));
+            Pos.add(DoubleTag.valueOf(mc.player.getX()));
+            Pos.add(DoubleTag.valueOf(mc.player.getY()+1));
+            Pos.add(DoubleTag.valueOf(mc.player.getZ()));
             entityTag.put("Pos", Pos);
-            motion.add(NbtDouble.of(sex.x));
-            motion.add(NbtDouble.of(sex.y));
-            motion.add(NbtDouble.of(sex.z));
+            motion.add(DoubleTag.valueOf(sex.x));
+            motion.add(DoubleTag.valueOf(sex.y));
+            motion.add(DoubleTag.valueOf(sex.z));
             entityTag.put("Motion", motion);
         }
 
@@ -260,10 +260,10 @@ public class BoomPlus extends Module {
         entityTag.putInt("Age", age.get());
         entityTag.putInt("ExplosionPower", exppower.get());
         entityTag.putInt("ExplosionRadius", exppower.get());
-        NbtCompound blockState = new NbtCompound();
+        CompoundTag blockState = new CompoundTag();
         blockState.putString("Name", "minecraft:" + blockName);
         entityTag.put("BlockState", blockState);
-        NbtCompound CustomNameNBT = new NbtCompound();
+        CompoundTag CustomNameNBT = new CompoundTag();
         CustomNameNBT.putString("text", customName);
         CustomNameNBT.putString("color", namecolour);
 
@@ -280,10 +280,10 @@ public class BoomPlus extends Module {
         entityTag.putInt("Size", size.get());
         if (customname.get()) entityTag.putBoolean("CustomNameVisible", customname.get());
         String serverVersion;
-        if (mc.isIntegratedServerRunning()) {
-            serverVersion = mc.getServer().getVersion();
+        if (mc.hasSingleplayerServer()) {
+            serverVersion = mc.getSingleplayerServer().getServerVersion();
         } else {
-            serverVersion = mc.getCurrentServerEntry().version.getLiteralString();
+            serverVersion = mc.getCurrentServer().version.tryCollapseToString();
         }
         if (serverVersion == null) {
             entityTag.put("CustomName", CustomNameNBT);
@@ -296,12 +296,12 @@ public class BoomPlus extends Module {
         }
 
         Identifier entityId = Identifier.tryParse("minecraft:" + entityName);
-        EntityType<?> entityType = Registries.ENTITY_TYPE.get(entityId);
+        EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.getValue(entityId);
         if (entityType == null) {
             entityType = EntityType.PIG;
         }
 
-        return TypedEntityData.create(entityType, entityTag);
+        return TypedEntityData.of(entityType, entityTag);
     }
     private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
         if (serverVersion == null) return false;

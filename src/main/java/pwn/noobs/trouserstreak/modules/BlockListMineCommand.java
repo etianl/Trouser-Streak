@@ -5,12 +5,12 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.Arrays;
@@ -49,7 +49,7 @@ public class BlockListMineCommand extends Module {
                     Blocks.PURPLE_TERRACOTTA, Blocks.MAGENTA_TERRACOTTA, Blocks.PINK_TERRACOTTA, Blocks.MAGENTA_GLAZED_TERRACOTTA, Blocks.PINK_GLAZED_TERRACOTTA, Blocks.GRAY_GLAZED_TERRACOTTA, Blocks.BLUE_GLAZED_TERRACOTTA, Blocks.BROWN_GLAZED_TERRACOTTA, Blocks.GREEN_GLAZED_TERRACOTTA,
                     Blocks.OXIDIZED_COPPER, Blocks.CUT_COPPER, Blocks.EXPOSED_CUT_COPPER, Blocks.WEATHERED_CUT_COPPER, Blocks.CUT_COPPER_SLAB, Blocks.CUT_COPPER_STAIRS, Blocks.EXPOSED_CUT_COPPER_SLAB, Blocks.EXPOSED_CUT_COPPER_STAIRS, Blocks.WEATHERED_CUT_COPPER_SLAB, Blocks.WEATHERED_CUT_COPPER_STAIRS, Blocks.OXIDIZED_CUT_COPPER_SLAB, Blocks.OXIDIZED_CUT_COPPER_STAIRS, Blocks.COPPER_BULB, Blocks.EXPOSED_COPPER_BULB, Blocks.WEATHERED_COPPER_BULB, Blocks.OXIDIZED_COPPER_BULB, Blocks.CHISELED_COPPER, Blocks.EXPOSED_CHISELED_COPPER, Blocks.WEATHERED_CHISELED_COPPER, Blocks.OXIDIZED_CHISELED_COPPER, Blocks.COPPER_DOOR, Blocks.EXPOSED_COPPER_DOOR, Blocks.WEATHERED_COPPER_DOOR, Blocks.OXIDIZED_COPPER_DOOR, Blocks.COPPER_GRATE, Blocks.EXPOSED_COPPER_GRATE, Blocks.WEATHERED_COPPER_GRATE, Blocks.OXIDIZED_COPPER_GRATE, Blocks.COPPER_TRAPDOOR, Blocks.EXPOSED_COPPER_TRAPDOOR, Blocks.WEATHERED_COPPER_TRAPDOOR,
                     Blocks.WAXED_EXPOSED_COPPER, Blocks.WAXED_WEATHERED_COPPER, Blocks.WAXED_EXPOSED_CUT_COPPER, Blocks.WAXED_WEATHERED_CUT_COPPER, Blocks.WAXED_EXPOSED_CUT_COPPER_SLAB, Blocks.WAXED_EXPOSED_CUT_COPPER_STAIRS, Blocks.WAXED_WEATHERED_CUT_COPPER_SLAB, Blocks.WAXED_WEATHERED_CUT_COPPER_STAIRS, Blocks.WAXED_EXPOSED_CHISELED_COPPER, Blocks.WAXED_WEATHERED_CHISELED_COPPER, Blocks.WAXED_EXPOSED_COPPER_DOOR, Blocks.WAXED_WEATHERED_COPPER_DOOR, Blocks.WAXED_EXPOSED_COPPER_GRATE, Blocks.WAXED_WEATHERED_COPPER_GRATE, Blocks.WAXED_COPPER_TRAPDOOR, Blocks.WAXED_EXPOSED_COPPER_TRAPDOOR, Blocks.WAXED_WEATHERED_COPPER_TRAPDOOR,
-                    Blocks.SOUL_TORCH, Blocks.SOUL_WALL_TORCH, Blocks.POTTED_MANGROVE_PROPAGULE, Blocks.POTTED_AZALEA_BUSH, Blocks.POTTED_CHERRY_SAPLING, Blocks.POTTED_FERN, Blocks.POTTED_ACACIA_SAPLING, Blocks.POTTED_WARPED_FUNGUS, Blocks.POTTED_WARPED_ROOTS, Blocks.POTTED_CRIMSON_FUNGUS, Blocks.POTTED_CRIMSON_ROOTS, Blocks.POTTED_OAK_SAPLING, Blocks.POTTED_WITHER_ROSE, Blocks.WITHER_ROSE,
+                    Blocks.SOUL_TORCH, Blocks.SOUL_WALL_TORCH, Blocks.POTTED_MANGROVE_PROPAGULE, Blocks.POTTED_AZALEA, Blocks.POTTED_CHERRY_SAPLING, Blocks.POTTED_FERN, Blocks.POTTED_ACACIA_SAPLING, Blocks.POTTED_WARPED_FUNGUS, Blocks.POTTED_WARPED_ROOTS, Blocks.POTTED_CRIMSON_FUNGUS, Blocks.POTTED_CRIMSON_ROOTS, Blocks.POTTED_OAK_SAPLING, Blocks.POTTED_WITHER_ROSE, Blocks.WITHER_ROSE,
                     Blocks.CAKE, Blocks.CANDLE_CAKE, Blocks.BLUE_CANDLE_CAKE, Blocks.BLACK_CANDLE_CAKE, Blocks.BROWN_CANDLE_CAKE, Blocks.CYAN_CANDLE_CAKE, Blocks.GRAY_CANDLE_CAKE, Blocks.GREEN_CANDLE_CAKE, Blocks.LIGHT_BLUE_CANDLE_CAKE, Blocks.LIGHT_GRAY_CANDLE_CAKE, Blocks.LIME_CANDLE_CAKE, Blocks.MAGENTA_CANDLE_CAKE, Blocks.ORANGE_CANDLE_CAKE, Blocks.PINK_CANDLE_CAKE, Blocks.PURPLE_CANDLE_CAKE, Blocks.RED_CANDLE_CAKE, Blocks.WHITE_CANDLE_CAKE, Blocks.YELLOW_CANDLE_CAKE,
                     Blocks.BLUE_CANDLE, Blocks.BLACK_CANDLE, Blocks.BROWN_CANDLE, Blocks.CYAN_CANDLE, Blocks.GRAY_CANDLE, Blocks.GREEN_CANDLE, Blocks.LIGHT_BLUE_CANDLE, Blocks.LIGHT_GRAY_CANDLE, Blocks.LIME_CANDLE, Blocks.MAGENTA_CANDLE, Blocks.ORANGE_CANDLE, Blocks.PINK_CANDLE, Blocks.PURPLE_CANDLE, Blocks.YELLOW_CANDLE,
                     Blocks.SMOOTH_RED_SANDSTONE, Blocks.CHISELED_RED_SANDSTONE, Blocks.CUT_RED_SANDSTONE, Blocks.SMOOTH_RED_SANDSTONE_SLAB, Blocks.SMOOTH_RED_SANDSTONE_STAIRS, Blocks.CUT_RED_SANDSTONE_SLAB, Blocks.RED_SANDSTONE_SLAB, Blocks.RED_SANDSTONE_STAIRS, Blocks.RED_SANDSTONE_WALL,
@@ -68,7 +68,7 @@ public class BlockListMineCommand extends Module {
                     Blocks.PIGLIN_HEAD, Blocks.PIGLIN_WALL_HEAD, Blocks.CREEPER_HEAD, Blocks.CREEPER_WALL_HEAD, Blocks.DRAGON_WALL_HEAD, Blocks.DRAGON_HEAD, Blocks.PLAYER_HEAD, Blocks.PLAYER_WALL_HEAD, Blocks.ZOMBIE_HEAD, Blocks.ZOMBIE_WALL_HEAD, Blocks.SKELETON_WALL_SKULL, Blocks.WITHER_SKELETON_SKULL, Blocks.WITHER_SKELETON_WALL_SKULL, Blocks.HEAVY_CORE,
                     Blocks.HONEY_BLOCK, Blocks.HONEYCOMB_BLOCK, Blocks.JUKEBOX, Blocks.LIGHTNING_ROD, Blocks.LODESTONE, Blocks.OBSERVER, Blocks.POWERED_RAIL, Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE, Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE, Blocks.BIRCH_PRESSURE_PLATE, Blocks.JUNGLE_PRESSURE_PLATE, Blocks.DARK_OAK_PRESSURE_PLATE, Blocks.MANGROVE_PRESSURE_PLATE, Blocks.CRIMSON_PRESSURE_PLATE, Blocks.WARPED_PRESSURE_PLATE, Blocks.RESPAWN_ANCHOR, Blocks.CALIBRATED_SCULK_SENSOR, Blocks.SNIFFER_EGG,
                     Blocks.RESIN_BLOCK, Blocks.RESIN_BRICKS, Blocks.RESIN_BRICK_SLAB, Blocks.RESIN_BRICK_WALL, Blocks.RESIN_BRICK_STAIRS, Blocks.CHISELED_RESIN_BRICKS, Blocks.POTTED_CLOSED_EYEBLOSSOM, Blocks.POTTED_OPEN_EYEBLOSSOM, Blocks.POTTED_PALE_OAK_SAPLING, Blocks.PALE_OAK_SAPLING, Blocks.PALE_OAK_BUTTON, Blocks.PALE_OAK_DOOR, Blocks.PALE_OAK_FENCE, Blocks.PALE_OAK_FENCE_GATE, Blocks.PALE_OAK_PLANKS, Blocks.PALE_OAK_PRESSURE_PLATE, Blocks.PALE_OAK_HANGING_SIGN, Blocks.PALE_OAK_SIGN, Blocks.PALE_OAK_WALL_SIGN, Blocks.PALE_OAK_WALL_HANGING_SIGN, Blocks.PALE_OAK_SLAB, Blocks.PALE_OAK_STAIRS, Blocks.PALE_OAK_TRAPDOOR, Blocks.PALE_OAK_WOOD, Blocks.STRIPPED_PALE_OAK_WOOD,
-                    Blocks.COPPER_BARS.unaffected(),Blocks.COPPER_BARS.waxed(),Blocks.COPPER_BARS.exposed(),Blocks.COPPER_BARS.waxedExposed(),Blocks.COPPER_BARS.weathered(),Blocks.COPPER_BARS.waxedWeathered(),Blocks.COPPER_BARS.oxidized(),Blocks.COPPER_BARS.waxedOxidized(), Blocks.COPPER_CHAINS.unaffected(),Blocks.COPPER_CHAINS.waxed(),Blocks.COPPER_CHAINS.exposed(),Blocks.COPPER_CHAINS.waxedExposed(),Blocks.COPPER_CHAINS.weathered(),Blocks.COPPER_CHAINS.waxedWeathered(),Blocks.COPPER_CHAINS.oxidized(),Blocks.COPPER_CHAINS.waxedOxidized(), Blocks.COPPER_LANTERNS.unaffected(), Blocks.COPPER_LANTERNS.waxed(), Blocks.COPPER_LANTERNS.exposed(), Blocks.COPPER_LANTERNS.waxedExposed(), Blocks.COPPER_LANTERNS.weathered(), Blocks.COPPER_LANTERNS.waxedWeathered(), Blocks.COPPER_LANTERNS.oxidized(), Blocks.COPPER_LANTERNS.waxedOxidized(),
+                    Blocks.COPPER_BARS.unaffected(),Blocks.COPPER_BARS.waxed(),Blocks.COPPER_BARS.exposed(),Blocks.COPPER_BARS.waxedExposed(),Blocks.COPPER_BARS.weathered(),Blocks.COPPER_BARS.waxedWeathered(),Blocks.COPPER_BARS.oxidized(),Blocks.COPPER_BARS.waxedOxidized(), Blocks.COPPER_CHAIN.unaffected(),Blocks.COPPER_CHAIN.waxed(),Blocks.COPPER_CHAIN.exposed(),Blocks.COPPER_CHAIN.waxedExposed(),Blocks.COPPER_CHAIN.weathered(),Blocks.COPPER_CHAIN.waxedWeathered(),Blocks.COPPER_CHAIN.oxidized(),Blocks.COPPER_CHAIN.waxedOxidized(), Blocks.COPPER_LANTERN.unaffected(), Blocks.COPPER_LANTERN.waxed(), Blocks.COPPER_LANTERN.exposed(), Blocks.COPPER_LANTERN.waxedExposed(), Blocks.COPPER_LANTERN.weathered(), Blocks.COPPER_LANTERN.waxedWeathered(), Blocks.COPPER_LANTERN.oxidized(), Blocks.COPPER_LANTERN.waxedOxidized(),
                     Blocks.COPPER_CHEST,Blocks.EXPOSED_COPPER_CHEST,Blocks.OXIDIZED_COPPER_CHEST,Blocks.WEATHERED_COPPER_CHEST, Blocks.WAXED_COPPER_CHEST,Blocks.WAXED_EXPOSED_COPPER_CHEST,Blocks.WAXED_OXIDIZED_COPPER_CHEST,Blocks.WAXED_WEATHERED_COPPER_CHEST, Blocks.COPPER_GOLEM_STATUE, Blocks.EXPOSED_COPPER_GOLEM_STATUE, Blocks.WEATHERED_COPPER_GOLEM_STATUE, Blocks.OXIDIZED_COPPER_GOLEM_STATUE, Blocks.WAXED_COPPER_GOLEM_STATUE, Blocks.WAXED_EXPOSED_COPPER_GOLEM_STATUE, Blocks.WAXED_WEATHERED_COPPER_GOLEM_STATUE, Blocks.WAXED_OXIDIZED_COPPER_GOLEM_STATUE, Blocks.COPPER_TORCH, Blocks.COPPER_WALL_TORCH,
                     Blocks.OAK_SHELF, Blocks.DARK_OAK_SHELF, Blocks.PALE_OAK_SHELF, Blocks.ACACIA_SHELF, Blocks.BAMBOO_SHELF, Blocks.BIRCH_SHELF, Blocks.CHERRY_SHELF, Blocks.CRIMSON_SHELF, Blocks.JUNGLE_SHELF, Blocks.MANGROVE_SHELF, Blocks.SPRUCE_SHELF, Blocks.WARPED_SHELF
             )
@@ -92,11 +92,11 @@ public class BlockListMineCommand extends Module {
         String blockListString = "";
         Set<BlockState> addedBlocks = new HashSet<>();
 
-        Chunk playerchunk = mc.world.getChunk(mc.player.getBlockPos());
+        ChunkAccess playerchunk = mc.level.getChunk(mc.player.blockPosition());
         for (int x = 0; x < 16; x++) {
             for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
                 for (int z = 0; z < 16; z++) {
-                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopYInclusive()) {
+                    if (y >= mc.level.getMinY() && y <= mc.level.getMaxY()) {
                         BlockState blockState = playerchunk.getBlockState(new BlockPos(x, y, z));
                         if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
                             if (!addedBlocks.contains(blockState)){
@@ -109,11 +109,11 @@ public class BlockListMineCommand extends Module {
             }
         }
 
-        Chunk playerchunk2 = mc.world.getChunk(new BlockPos(mc.player.getBlockX()+16, mc.player.getBlockY(), mc.player.getBlockZ()));
+        ChunkAccess playerchunk2 = mc.level.getChunk(new BlockPos(mc.player.getBlockX()+16, mc.player.getBlockY(), mc.player.getBlockZ()));
         for (int x = 0; x < 16; x++) {
             for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
                 for (int z = 0; z < 16; z++) {
-                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopYInclusive()) {
+                    if (y >= mc.level.getMinY() && y <= mc.level.getMaxY()) {
                         BlockState blockState = playerchunk2.getBlockState(new BlockPos(x, y, z));
                         if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
                             if (!addedBlocks.contains(blockState)){
@@ -126,11 +126,11 @@ public class BlockListMineCommand extends Module {
             }
         }
 
-        Chunk playerchunk3 = mc.world.getChunk(new BlockPos(mc.player.getBlockX()-16, mc.player.getBlockY(), mc.player.getBlockZ()));
+        ChunkAccess playerchunk3 = mc.level.getChunk(new BlockPos(mc.player.getBlockX()-16, mc.player.getBlockY(), mc.player.getBlockZ()));
         for (int x = 0; x < 16; x++) {
             for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
                 for (int z = 0; z < 16; z++) {
-                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopYInclusive()) {
+                    if (y >= mc.level.getMinY() && y <= mc.level.getMaxY()) {
                         BlockState blockState = playerchunk3.getBlockState(new BlockPos(x, y, z));
                         if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
                             if (!addedBlocks.contains(blockState)){
@@ -143,11 +143,11 @@ public class BlockListMineCommand extends Module {
             }
         }
 
-        Chunk playerchunk4 = mc.world.getChunk(new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ()+16));
+        ChunkAccess playerchunk4 = mc.level.getChunk(new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ()+16));
         for (int x = 0; x < 16; x++) {
             for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
                 for (int z = 0; z < 16; z++) {
-                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopYInclusive()) {
+                    if (y >= mc.level.getMinY() && y <= mc.level.getMaxY()) {
                         BlockState blockState = playerchunk4.getBlockState(new BlockPos(x, y, z));
                         if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
                             if (!addedBlocks.contains(blockState)){
@@ -160,11 +160,11 @@ public class BlockListMineCommand extends Module {
             }
         }
 
-        Chunk playerchunk5 = mc.world.getChunk(new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ()-16));
+        ChunkAccess playerchunk5 = mc.level.getChunk(new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ()-16));
         for (int x = 0; x < 16; x++) {
             for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
                 for (int z = 0; z < 16; z++) {
-                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopYInclusive()) {
+                    if (y >= mc.level.getMinY() && y <= mc.level.getMaxY()) {
                         BlockState blockState = playerchunk5.getBlockState(new BlockPos(x, y, z));
                         if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
                             if (!addedBlocks.contains(blockState)){
@@ -177,11 +177,11 @@ public class BlockListMineCommand extends Module {
             }
         }
 
-        Chunk playerchunk6 = mc.world.getChunk(new BlockPos(mc.player.getBlockX()-16, mc.player.getBlockY(), mc.player.getBlockZ()-16));
+        ChunkAccess playerchunk6 = mc.level.getChunk(new BlockPos(mc.player.getBlockX()-16, mc.player.getBlockY(), mc.player.getBlockZ()-16));
         for (int x = 0; x < 16; x++) {
             for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
                 for (int z = 0; z < 16; z++) {
-                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopYInclusive()) {
+                    if (y >= mc.level.getMinY() && y <= mc.level.getMaxY()) {
                         BlockState blockState = playerchunk6.getBlockState(new BlockPos(x, y, z));
                         if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
                             if (!addedBlocks.contains(blockState)){
@@ -194,11 +194,11 @@ public class BlockListMineCommand extends Module {
             }
         }
 
-        Chunk playerchunk7 = mc.world.getChunk(new BlockPos(mc.player.getBlockX()+16, mc.player.getBlockY(), mc.player.getBlockZ()+16));
+        ChunkAccess playerchunk7 = mc.level.getChunk(new BlockPos(mc.player.getBlockX()+16, mc.player.getBlockY(), mc.player.getBlockZ()+16));
         for (int x = 0; x < 16; x++) {
             for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
                 for (int z = 0; z < 16; z++) {
-                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopYInclusive()) {
+                    if (y >= mc.level.getMinY() && y <= mc.level.getMaxY()) {
                         BlockState blockState = playerchunk7.getBlockState(new BlockPos(x, y, z));
                         if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
                             if (!addedBlocks.contains(blockState)){
@@ -211,11 +211,11 @@ public class BlockListMineCommand extends Module {
             }
         }
 
-        Chunk playerchunk8 = mc.world.getChunk(new BlockPos(mc.player.getBlockX()-16, mc.player.getBlockY(), mc.player.getBlockZ()+16));
+        ChunkAccess playerchunk8 = mc.level.getChunk(new BlockPos(mc.player.getBlockX()-16, mc.player.getBlockY(), mc.player.getBlockZ()+16));
         for (int x = 0; x < 16; x++) {
             for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
                 for (int z = 0; z < 16; z++) {
-                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopYInclusive()) {
+                    if (y >= mc.level.getMinY() && y <= mc.level.getMaxY()) {
                         BlockState blockState = playerchunk8.getBlockState(new BlockPos(x, y, z));
                         if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
                             if (!addedBlocks.contains(blockState)){
@@ -228,11 +228,11 @@ public class BlockListMineCommand extends Module {
             }
         }
 
-        Chunk playerchunk9 = mc.world.getChunk(new BlockPos(mc.player.getBlockX()+16, mc.player.getBlockY(), mc.player.getBlockZ()-16));
+        ChunkAccess playerchunk9 = mc.level.getChunk(new BlockPos(mc.player.getBlockX()+16, mc.player.getBlockY(), mc.player.getBlockZ()-16));
         for (int x = 0; x < 16; x++) {
             for (int y = mc.player.getBlockY()-range.get(); y < mc.player.getBlockY()+range.get(); y++) {
                 for (int z = 0; z < 16; z++) {
-                    if (y >= mc.world.getBottomY() && y <= mc.world.getTopYInclusive()) {
+                    if (y >= mc.level.getMinY() && y <= mc.level.getMaxY()) {
                         BlockState blockState = playerchunk9.getBlockState(new BlockPos(x, y, z));
                         if (blockState.getBlock() != Blocks.AIR && ((Blawcks1.get().contains(blockState.getBlock()) && mode.get() == Modes.UnnaturalBlocks) || (mode.get() == Modes.Custom && Blawcks2.get().contains(blockState.getBlock())))) {
                             if (!addedBlocks.contains(blockState)){
@@ -249,8 +249,8 @@ public class BlockListMineCommand extends Module {
             String[] blockNames = blockListString.split(" ");
             Set<String> uniqueBlockNames = new HashSet<>(Arrays.asList(blockNames));
             blockListString = String.join(" ", uniqueBlockNames);
-            mc.inGameHud.getChatHud().addToMessageHistory("#mine " + blockListString);
-            ChatUtils.sendMsg(Text.of("Press T, then the up key, then ENTER to execute the #mine command. **REQUIRES BARITONE**"));
+            mc.gui.getChat().addRecentChat("#mine " + blockListString);
+            ChatUtils.sendMsg(Component.nullToEmpty("Press T, then the up key, then ENTER to execute the #mine command. **REQUIRES BARITONE**"));
         } else if (blockListString.isEmpty()) error("No blocks in the list within range.");
         toggle();
     }

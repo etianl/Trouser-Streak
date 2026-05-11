@@ -22,25 +22,44 @@ import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.block.*;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ShearsItem;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ShearsItem;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.block.BambooSaplingBlock;
+import net.minecraft.world.level.block.BambooStalkBlock;
+import net.minecraft.world.level.block.BasePressurePlateBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ButtonBlock;
+import net.minecraft.world.level.block.ComparatorBlock;
+import net.minecraft.world.level.block.DaylightDetectorBlock;
+import net.minecraft.world.level.block.DetectorRailBlock;
+import net.minecraft.world.level.block.FireBlock;
+import net.minecraft.world.level.block.LecternBlock;
+import net.minecraft.world.level.block.LeverBlock;
+import net.minecraft.world.level.block.LightningRodBlock;
+import net.minecraft.world.level.block.ObserverBlock;
+import net.minecraft.world.level.block.PoweredBlock;
+import net.minecraft.world.level.block.RedStoneWireBlock;
+import net.minecraft.world.level.block.RedstoneTorchBlock;
+import net.minecraft.world.level.block.RepeaterBlock;
+import net.minecraft.world.level.block.SculkSensorBlock;
+import net.minecraft.world.level.block.TargetBlock;
+import net.minecraft.world.level.block.TrappedChestBlock;
+import net.minecraft.world.level.block.TripWireBlock;
+import net.minecraft.world.level.block.TripWireHookBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
-import net.minecraft.block.BambooBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -277,21 +296,21 @@ public class RedstoneNuker extends Module {
     private boolean shouldSwitch;
     private int ticks;
     private int bestSlot;
-    private final Pool<BlockPos.Mutable> blockPosPool = new Pool<>(BlockPos.Mutable::new);
-    private final List<BlockPos.Mutable> blocks = new ArrayList<>();
+    private final Pool<BlockPos.MutableBlockPos> blockPosPool = new Pool<>(BlockPos.MutableBlockPos::new);
+    private final List<BlockPos.MutableBlockPos> blocks = new ArrayList<>();
 
     private final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
     private final List<RenderBlock> renderBlocks = new ArrayList<>();
 
     private boolean firstBlock;
-    private final BlockPos.Mutable lastBlockPos = new BlockPos.Mutable();
+    private final BlockPos.MutableBlockPos lastBlockPos = new BlockPos.MutableBlockPos();
 
     private int timer;
     private int noBlockTimer;
 
-    private BlockPos.Mutable pos1 = new BlockPos.Mutable(); // Rendering for cubes
-    private BlockPos.Mutable pos2 = new BlockPos.Mutable();
-    private Box box;
+    private BlockPos.MutableBlockPos pos1 = new BlockPos.MutableBlockPos(); // Rendering for cubes
+    private BlockPos.MutableBlockPos pos2 = new BlockPos.MutableBlockPos();
+    private AABB box;
     int maxh = 0;
     int maxv = 0;
 
@@ -327,7 +346,7 @@ public class RedstoneNuker extends Module {
         if (enableRenderBounding.get()){
             // Render bounding box if cube and should break stuff
             if (shape.get() != Shape.Sphere && mode.get() != Mode.Smash) {
-                box = new Box(new Vec3d(pos1.getX(), pos1.getY() , pos1.getZ()), new Vec3d(pos2.getX(), pos2.getY(), pos2.getZ()));
+                box = new AABB(new Vec3(pos1.getX(), pos1.getY() , pos1.getZ()), new Vec3(pos2.getX(), pos2.getY(), pos2.getZ()));
                 event.renderer.box(box, sideColorBox.get(), lineColorBox.get(), shapeModeBox.get(), 0);
             }
         }
@@ -365,7 +384,7 @@ public class RedstoneNuker extends Module {
             pos1.set(pX_ - r, pY - r + 1, pZ - r+1); // down
             pos2.set(pX_ + r-1, pY + r, pZ + r); // up
         } else {
-            int direction = Math.round((mc.player.getRotationClient().y % 360) / 90);
+            int direction = Math.round((mc.player.getRotationVector().y % 360) / 90);
             direction = Math.floorMod(direction, 4);
 
             // direction == 1
@@ -397,7 +416,7 @@ public class RedstoneNuker extends Module {
         if (mode.get() == Mode.Flatten){
             pos1.setY((int) Math.floor(pY));
         }
-        box = new Box(pos1.toCenterPos(), pos2.toCenterPos());
+        box = new AABB(pos1.getCenter(), pos2.getCenter());
 
 
         // Find blocks to break
@@ -405,7 +424,7 @@ public class RedstoneNuker extends Module {
             // Check for air, unbreakable blocks and distance
             boolean toofarSphere = Utils.squaredDistance(pX, pY, pZ, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5) > rangeSq;
             boolean toofarUniformCube = maxDist(Math.floor(pX), Math.floor(pY), Math.floor(pZ), blockPos.getX(), blockPos.getY(), blockPos.getZ()) >= range.get();
-            boolean toofarCube = !box.contains(Vec3d.ofCenter(blockPos));
+            boolean toofarCube = !box.contains(Vec3.atCenterOf(blockPos));
 
             if (!BlockUtils.canBreak(blockPos, blockState)
                     || (toofarSphere && shape.get() == Shape.Sphere)
@@ -417,7 +436,7 @@ public class RedstoneNuker extends Module {
             if (mode.get() == Mode.Flatten && blockPos.getY() < Math.floor(mc.player.getY())) return;
 
             // Smash
-            if (mode.get() == Mode.Smash && blockState.getHardness(mc.world, blockPos) != 0) return;
+            if (mode.get() == Mode.Smash && blockState.getDestroySpeed(mc.level, blockPos) != 0) return;
 
             // Check for selected
             if (!whitelist.get().contains(blockState.getBlock())) return;
@@ -475,16 +494,16 @@ public class RedstoneNuker extends Module {
             firstBlock = false;
 
             // Clear current block positions
-            for (BlockPos.Mutable blockPos : blocks) blockPosPool.free(blockPos);
+            for (BlockPos.MutableBlockPos blockPos : blocks) blockPosPool.free(blockPos);
             blocks.clear();
         });
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (Modules.get().isActive(InfinityMiner.class) || mc.world == null || mc.player == null) return;
+        if (Modules.get().isActive(InfinityMiner.class) || mc.level == null || mc.player == null) return;
 
-        if (switchBack.get() && !mc.options.attackKey.isPressed() && wasPressed && InvUtils.previousSlot != -1) {
+        if (switchBack.get() && !mc.options.keyAttack.isDown() && wasPressed && InvUtils.previousSlot != -1) {
             InvUtils.swapBack();
             wasPressed = false;
             return;
@@ -497,7 +516,7 @@ public class RedstoneNuker extends Module {
             ticks--;
         }
 
-        wasPressed = mc.options.attackKey.isPressed();
+        wasPressed = mc.options.keyAttack.isDown();
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -505,17 +524,17 @@ public class RedstoneNuker extends Module {
         if (Modules.get().isActive(InfinityMiner.class)) return;
 
         // Get blockState
-        BlockState blockState = mc.world.getBlockState(event.blockPos);
+        BlockState blockState = mc.level.getBlockState(event.blockPos);
         if (!BlockUtils.canBreak(event.blockPos, blockState)) return;
 
         // Check if we should switch to a better tool
-        ItemStack currentStack = mc.player.getMainHandStack();
+        ItemStack currentStack = mc.player.getMainHandItem();
 
         double bestScore = -1;
         bestSlot = -1;
 
         for (int i = 0; i < 9; i++) {
-            double score = getScore(mc.player.getInventory().getStack(i), blockState, silkTouchForEnderChest, prefer.get(), itemStack -> !shouldStopUsing(itemStack));
+            double score = getScore(mc.player.getInventory().getItem(i), blockState, silkTouchForEnderChest, prefer.get(), itemStack -> !shouldStopUsing(itemStack));
             if (score < 0) continue;
 
             if (score > bestScore) {
@@ -523,7 +542,7 @@ public class RedstoneNuker extends Module {
                 bestSlot = i;
             }
         }
-        enchantmentRegistry = mc.world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
+        enchantmentRegistry = mc.level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
 
         if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest, prefer.get(), itemStack -> !shouldStopUsing(itemStack))) || shouldStopUsing(currentStack) || !isTool(currentStack))) {
             ticks = switchDelay.get();
@@ -533,16 +552,16 @@ public class RedstoneNuker extends Module {
         }
 
         // Anti break
-        currentStack = mc.player.getMainHandStack();
+        currentStack = mc.player.getMainHandItem();
 
         if (shouldStopUsing(currentStack) && isTool(currentStack)) {
-            mc.options.attackKey.setPressed(false);
+            mc.options.keyAttack.setDown(false);
             event.setCancelled(true);
         }
     }
 
     private boolean shouldStopUsing(ItemStack itemStack) {
-        return antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamage()) < (itemStack.getMaxDamage() * breakDurability.get() / 100);
+        return antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamageValue()) < (itemStack.getMaxDamage() * breakDurability.get() / 100);
     }
 
     public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, RedstoneNuker.EnchantPreference enchantPreference, Predicate<ItemStack> good) {
@@ -551,44 +570,44 @@ public class RedstoneNuker extends Module {
         if (enchantmentRegistry != null) {
             if (silkTouchEnderChest
                     && state.getBlock() == Blocks.ENDER_CHEST
-                    && EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.SILK_TOUCH), itemStack) == 0) {
+                    && EnchantmentHelper.getItemEnchantmentLevel(enchantmentRegistry.getOrThrow(Enchantments.SILK_TOUCH), itemStack) == 0) {
                 return -1;
             }
         }
 
         double score = 0;
 
-        score += itemStack.getMiningSpeedMultiplier(state) * 1000;
+        score += itemStack.getDestroySpeed(state) * 1000;
         if (enchantmentRegistry != null) {
-            score += EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.UNBREAKING), itemStack);
-            score += EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.EFFICIENCY), itemStack);
-            score += EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.MENDING), itemStack);
+            score += EnchantmentHelper.getItemEnchantmentLevel(enchantmentRegistry.getOrThrow(Enchantments.UNBREAKING), itemStack);
+            score += EnchantmentHelper.getItemEnchantmentLevel(enchantmentRegistry.getOrThrow(Enchantments.EFFICIENCY), itemStack);
+            score += EnchantmentHelper.getItemEnchantmentLevel(enchantmentRegistry.getOrThrow(Enchantments.MENDING), itemStack);
 
             if (enchantPreference == EnchantPreference.Fortune)
-                score += EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.FORTUNE), itemStack);
+                score += EnchantmentHelper.getItemEnchantmentLevel(enchantmentRegistry.getOrThrow(Enchantments.FORTUNE), itemStack);
             if (enchantPreference == EnchantPreference.SilkTouch)
-                score += EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.SILK_TOUCH), itemStack);
+                score += EnchantmentHelper.getItemEnchantmentLevel(enchantmentRegistry.getOrThrow(Enchantments.SILK_TOUCH), itemStack);
         }
         Item item = itemStack.getItem();
-        if (itemStack.isIn(ItemTags.SWORDS) && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooShootBlock))
-        score += 9000 + (item.getComponents().get(DataComponentTypes.TOOL).getSpeed(state) * 1000);
+        if (itemStack.is(ItemTags.SWORDS) && (state.getBlock() instanceof BambooStalkBlock || state.getBlock() instanceof BambooSaplingBlock))
+        score += 9000 + (item.components().get(DataComponents.TOOL).getMiningSpeed(state) * 1000);
 
         return score;
     }
 
     public static boolean isTool(ItemStack itemStack) {
-        return itemStack.isIn(ItemTags.AXES) || itemStack.isIn(ItemTags.HOES) || itemStack.isIn(ItemTags.PICKAXES) || itemStack.isIn(ItemTags.SHOVELS) || itemStack.getItem() instanceof ShearsItem;
+        return itemStack.is(ItemTags.AXES) || itemStack.is(ItemTags.HOES) || itemStack.is(ItemTags.PICKAXES) || itemStack.is(ItemTags.SHOVELS) || itemStack.getItem() instanceof ShearsItem;
     }
     private boolean filterBlocks(Block block) {
         return isRedstoneBlock(block);
     }
 
     private boolean isRedstoneBlock(Block block) {
-        return block instanceof RedstoneBlock ||
+        return block instanceof PoweredBlock ||
                 block instanceof RedstoneTorchBlock ||
-                block instanceof AbstractPressurePlateBlock ||
+                block instanceof BasePressurePlateBlock ||
                 block instanceof DaylightDetectorBlock ||
-                block instanceof RedstoneWireBlock ||
+                block instanceof RedStoneWireBlock ||
                 block instanceof ComparatorBlock ||
                 block instanceof RepeaterBlock ||
                 block instanceof ButtonBlock ||
@@ -600,8 +619,8 @@ public class RedstoneNuker extends Module {
                 block instanceof FireBlock ||
                 block instanceof LightningRodBlock ||
                 block instanceof LecternBlock ||
-                block instanceof TripwireHookBlock ||
-                block instanceof TripwireBlock ||
+                block instanceof TripWireHookBlock ||
+                block instanceof TripWireBlock ||
                 block instanceof ObserverBlock;
     }
     public enum Mode {
@@ -638,7 +657,7 @@ public class RedstoneNuker extends Module {
     }
 
     public static class RenderBlock {
-        public BlockPos.Mutable pos = new BlockPos.Mutable();
+        public BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         public int ticks;
 
         public RenderBlock set(BlockPos blockPos) {

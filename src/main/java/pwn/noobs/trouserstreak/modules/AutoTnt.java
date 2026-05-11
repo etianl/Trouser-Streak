@@ -6,14 +6,14 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.*;
@@ -72,15 +72,15 @@ public class AutoTnt extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (mc.player == null || mc.world == null || igniting) return;
+        if (mc.player == null || mc.level == null || igniting) return;
 
-        if (event.packet instanceof PlayerInteractBlockC2SPacket packet) {
-            BlockHitResult hit = packet.getBlockHitResult();
+        if (event.packet instanceof ServerboundUseItemOnPacket packet) {
+            BlockHitResult hit = packet.getHitResult();
             BlockPos clicked = hit.getBlockPos();
-            BlockPos offset  = clicked.offset(hit.getSide());
+            BlockPos offset  = clicked.relative(hit.getDirection());
 
-            boolean clickedIsTnt = mc.world.getBlockState(clicked).isOf(Blocks.TNT);
-            boolean offsetIsTnt  = mc.world.getBlockState(offset).isOf(Blocks.TNT);
+            boolean clickedIsTnt = mc.level.getBlockState(clicked).is(Blocks.TNT);
+            boolean offsetIsTnt  = mc.level.getBlockState(offset).is(Blocks.TNT);
 
             if (clickedIsTnt) candidatePositions.add(clicked);
             if (offsetIsTnt)  candidatePositions.add(offset);
@@ -90,7 +90,7 @@ public class AutoTnt extends Module {
             Iterator<BlockPos> it = candidatePositions.iterator();
             while (it.hasNext()) {
                 BlockPos pos = it.next();
-                if (mc.world.getBlockState(pos).getBlock() == Blocks.TNT) {
+                if (mc.level.getBlockState(pos).getBlock() == Blocks.TNT) {
                     if (ignitionQueue.stream().anyMatch(task -> task.pos().equals(pos))) {
                         it.remove();
                         continue;
@@ -114,7 +114,7 @@ public class AutoTnt extends Module {
 
         if (ignitePos != null && !igniting && flintSlot == -1) {
             if (originalSlot == -1) {
-                originalSlot = mc.player.getInventory().selectedSlot;
+                originalSlot = mc.player.getInventory().getSelectedSlot();
             }
 
             flintSlot = InvUtils.findInHotbar(Items.FLINT_AND_STEEL).slot();
@@ -126,18 +126,18 @@ public class AutoTnt extends Module {
                 return;
             }
 
-            mc.player.getInventory().selectedSlot = flintSlot;
+            mc.player.getInventory().setSelectedSlot(flintSlot);
             return;
         }
 
-        if (ignitePos != null && !igniting && mc.player.getInventory().selectedSlot == flintSlot) {
+        if (ignitePos != null && !igniting && mc.player.getInventory().getSelectedSlot() == flintSlot) {
             igniting = true;
-            Vec3d hitVec = Vec3d.ofCenter(ignitePos);
+            Vec3 hitVec = Vec3.atCenterOf(ignitePos);
             BlockHitResult hit = new BlockHitResult(hitVec, Direction.UP, ignitePos, false);
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, hit);
-            mc.player.swingHand(Hand.MAIN_HAND);
+            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, hit);
+            mc.player.swing(InteractionHand.MAIN_HAND);
 
-            mc.player.getInventory().selectedSlot = originalSlot;
+            mc.player.getInventory().setSelectedSlot(originalSlot);
             ignitePos = null;
             flintSlot = -1;
             originalSlot = -1;
@@ -146,7 +146,7 @@ public class AutoTnt extends Module {
     }
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (mc.player == null || mc.world == null) return;
+        if (mc.player == null || mc.level == null) return;
         if (!useTickDelay.get()) return;
         if (igniting) return;
 
@@ -178,17 +178,17 @@ public class AutoTnt extends Module {
     }
 
     private void igniteNow(BlockPos pos, int flint) {
-        if (mc.player.getEntityPos().distanceTo(Vec3d.ofCenter(pos)) > reach.get()) return;
+        if (mc.player.position().distanceTo(Vec3.atCenterOf(pos)) > reach.get()) return;
         igniting = true;
-        int prevSlot = mc.player.getInventory().selectedSlot;
-        mc.player.getInventory().selectedSlot = flint;
+        int prevSlot = mc.player.getInventory().getSelectedSlot();
+        mc.player.getInventory().setSelectedSlot(flint);
 
-        Vec3d hitVec = Vec3d.ofCenter(pos);
+        Vec3 hitVec = Vec3.atCenterOf(pos);
         BlockHitResult hit = new BlockHitResult(hitVec, Direction.UP, pos, false);
-        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, hit);
-        mc.player.swingHand(Hand.MAIN_HAND);
+        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, hit);
+        mc.player.swing(InteractionHand.MAIN_HAND);
 
-        mc.player.getInventory().selectedSlot = prevSlot;
+        mc.player.getInventory().setSelectedSlot(prevSlot);
         igniting = false;
     }
 }

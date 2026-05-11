@@ -1,8 +1,6 @@
 //Made by etianl
 package pwn.noobs.trouserstreak.modules;
 
-import net.minecraft.command.argument.EntityAnchorArgumentType;
-import net.minecraft.component.type.FoodComponents;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
@@ -10,30 +8,51 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.*;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.vehicle.ChestMinecartEntity;
-import net.minecraft.item.*;
-import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.screen.*;
-import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.vehicle.minecart.MinecartChest;
+import net.minecraft.world.food.Foods;
+import net.minecraft.world.inventory.*;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.FlintAndSteelItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ShearsItem;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.world.level.block.BarrelBlock;
+import net.minecraft.world.level.block.BlastFurnaceBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BrewingStandBlock;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.CrafterBlock;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.level.block.DoubleBlockCombiner;
+import net.minecraft.world.level.block.DropperBlock;
+import net.minecraft.world.level.block.FurnaceBlock;
+import net.minecraft.world.level.block.HopperBlock;
+import net.minecraft.world.level.block.ShulkerBoxBlock;
+import net.minecraft.world.level.block.SmokerBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.lang.reflect.Field;
@@ -367,19 +386,19 @@ public class StorageLooter extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (event.packet instanceof PlayerInteractBlockC2SPacket) {
-            lastInteractedBlockPos = ((PlayerInteractBlockC2SPacket) event.packet).getBlockHitResult().getBlockPos();
+        if (event.packet instanceof ServerboundUseItemOnPacket) {
+            lastInteractedBlockPos = ((ServerboundUseItemOnPacket) event.packet).getHitResult().getBlockPos();
         }
-        else if (event.packet instanceof PlayerInteractEntityC2SPacket packet) {
-            Entity entity = mc.world.getEntityById(getEntityId(packet));
+        else if (event.packet instanceof ServerboundInteractPacket packet) {
+            Entity entity = mc.level.getEntity(getEntityId(packet));
             if (entity != null) {
-                lastInteractedBlockPos = entity.getBlockPos();
+                lastInteractedBlockPos = entity.blockPosition();
             }
         }
     }
-    private int getEntityId(PlayerInteractEntityC2SPacket packet) {
+    private int getEntityId(ServerboundInteractPacket packet) {
         try {
-            Field entityIdField = PlayerInteractEntityC2SPacket.class.getDeclaredField("entityId");
+            Field entityIdField = ServerboundInteractPacket.class.getDeclaredField("entityId");
             entityIdField.setAccessible(true);
             return entityIdField.getInt(packet);
         } catch (NoSuchFieldException | IllegalAccessException e) {
@@ -389,16 +408,16 @@ public class StorageLooter extends Module {
     }
     @EventHandler
     private void onTickPre(TickEvent.Pre event) {
-        if ((!hasEnoughFreeSlots() && stopLoot.get()) || mc.player == null || mc.world == null) return;
+        if ((!hasEnoughFreeSlots() && stopLoot.get()) || mc.player == null || mc.level == null) return;
         updateReach();
         int bottomlimit = (int) (mc.player.getBlockY() - Math.round(Math.ceil(reach)));
-        if (!isContainerScreen(mc.player.currentScreenHandler)) autoStealTicks = 0;
+        if (!isContainerScreen(mc.player.containerMenu)) autoStealTicks = 0;
         if (autosteal.get() && lastInteractedBlockPos != null) {
-            BlockState blockState = mc.world.getBlockState(lastInteractedBlockPos);
+            BlockState blockState = mc.level.getBlockState(lastInteractedBlockPos);
             Block block = blockState.getBlock();
 
             if (isValidContainerBlock(block) && containerList.get().contains(block.asItem())) {
-                if (mc.player.currentScreenHandler != null && isContainerScreen(mc.player.currentScreenHandler)) {
+                if (mc.player.containerMenu != null && isContainerScreen(mc.player.containerMenu)) {
                     if (autoStealTicks == 0) {
                         processContainerItems();
                     }
@@ -411,9 +430,9 @@ public class StorageLooter extends Module {
                     }
                 }
             }
-            for (Entity entity : mc.world.getEntities()) {
-                if (entity.getBlockPos().equals(lastInteractedBlockPos) && entity instanceof ChestMinecartEntity && containerList.get().contains(Items.CHEST_MINECART)) {
-                    if (mc.player.currentScreenHandler != null && isContainerScreen(mc.player.currentScreenHandler)) {
+            for (Entity entity : mc.level.entitiesForRendering()) {
+                if (entity.blockPosition().equals(lastInteractedBlockPos) && entity instanceof MinecartChest && containerList.get().contains(Items.CHEST_MINECART)) {
+                    if (mc.player.containerMenu != null && isContainerScreen(mc.player.containerMenu)) {
                         if (autoStealTicks == 0) {
                         processContainerItems();
                         }
@@ -430,43 +449,44 @@ public class StorageLooter extends Module {
             }
         }
         if (ticks < delay.get())ticks++;
-        if (mc.interactionManager == null) return;
+        if (mc.gameMode == null) return;
         if (ticks >= delay.get() && autoloot.get()) {
             List<BlockPos> blocks = getBlocksInRange(bottomlimit);
-            blocks.sort(Comparator.comparingDouble(pos -> pos.getSquaredDistance(mc.player.getEntityPos())));
+            blocks.sort(Comparator.comparingDouble(pos -> pos.distToCenterSqr(mc.player.position())));
 
             for (BlockPos blockPos : blocks) {
-                BlockState blockState = mc.world.getBlockState(blockPos);
+                BlockState blockState = mc.level.getBlockState(blockPos);
                 Block block = blockState.getBlock();
 
                 if (isValidContainerBlock(block) && !processedChests.contains(blockPos) && !isChestOpen) {
                     if (containerList.get().contains(block.asItem())) {
                         if (block instanceof ChestBlock) {
-                            DoubleBlockProperties.Type chestType = ChestBlock.getDoubleBlockType(blockState);
-                            if (chestType == DoubleBlockProperties.Type.SINGLE || chestType == DoubleBlockProperties.Type.FIRST) {
+                            DoubleBlockCombiner.BlockType chestType = ChestBlock.getBlockType(blockState);
+                            if (chestType == DoubleBlockCombiner.BlockType.SINGLE || chestType == DoubleBlockCombiner.BlockType.FIRST) {
                                 openContainer(blockPos, block);
-                            } else if (chestType == DoubleBlockProperties.Type.SECOND) processedChests.add(blockPos);
+                            } else if (chestType == DoubleBlockCombiner.BlockType.SECOND) processedChests.add(blockPos);
                         } else {
                             openContainer(blockPos, block);
                         }
                     }
                 }
 
-                for (Entity entity : mc.world.getEntities()) {
-                    if (entity instanceof ChestMinecartEntity && containerList.get().contains(Items.CHEST_MINECART) && blocks.contains(entity.getBlockPos())) {
-                        if (!openedEntities.contains(entity.getId()) && !processedChests.contains(entity.getBlockPos()) && !isChestOpen) {
+                for (Entity entity : mc.level.entitiesForRendering()) {
+                    if (entity instanceof MinecartChest && containerList.get().contains(Items.CHEST_MINECART) && blocks.contains(entity.blockPosition())) {
+                        if (!openedEntities.contains(entity.getId()) && !processedChests.contains(entity.blockPosition()) && !isChestOpen) {
                             if (rotate.get()){
-                                originalYaw = mc.player.getYaw();
-                                originalPitch = mc.player.getPitch();
-                                mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(entity.getX(), entity.getY(), entity.getZ()));
+                                originalYaw = mc.player.getYRot();
+                                originalPitch = mc.player.getXRot();
+                                mc.player.lookAt(EntityAnchorArgument.Anchor.EYES, new Vec3(entity.getX(), entity.getY(), entity.getZ()));
                             }
                             if (swing.get()){
-                                mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
-                                mc.player.swingHand(Hand.MAIN_HAND);
+                                mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
+                                mc.player.swing(InteractionHand.MAIN_HAND);
                             }
-                            mc.interactionManager.interactEntity(mc.player, entity, Hand.MAIN_HAND);
-                            chestsToProcess.put(entity.getBlockPos(), opendelay.get());
-                            processedChests.add(entity.getBlockPos());
+                            EntityHitResult hitResult = new EntityHitResult(entity, Vec3.atCenterOf(entity.blockPosition()));
+                            mc.gameMode.interact(mc.player, entity, hitResult, InteractionHand.MAIN_HAND);
+                            chestsToProcess.put(entity.blockPosition(), opendelay.get());
+                            processedChests.add(entity.blockPosition());
                             openedEntities.add(entity.getId()); // Add the entity ID to the set
                             isChestOpen = true;
                         }
@@ -503,22 +523,22 @@ public class StorageLooter extends Module {
         reach = mode.get() == Modes.Sphere ? spherereach.get() : boxreach.get();
     }
 
-    private boolean isContainerScreen(ScreenHandler screenHandler) {
-        return screenHandler instanceof GenericContainerScreenHandler
-                || screenHandler instanceof ShulkerBoxScreenHandler
-                || screenHandler instanceof HopperScreenHandler
-                || screenHandler instanceof Generic3x3ContainerScreenHandler
-                || screenHandler instanceof FurnaceScreenHandler
-                || screenHandler instanceof AbstractFurnaceScreenHandler
-                || screenHandler instanceof BlastFurnaceScreenHandler
-                || screenHandler instanceof SmokerScreenHandler
-                || screenHandler instanceof BrewingStandScreenHandler
-                || screenHandler instanceof CrafterScreenHandler;
+    private boolean isContainerScreen(AbstractContainerMenu screenHandler) {
+        return screenHandler instanceof ChestMenu
+                || screenHandler instanceof ShulkerBoxMenu
+                || screenHandler instanceof HopperMenu
+                || screenHandler instanceof DispenserMenu
+                || screenHandler instanceof FurnaceMenu
+                || screenHandler instanceof AbstractFurnaceMenu
+                || screenHandler instanceof BlastFurnaceMenu
+                || screenHandler instanceof SmokerMenu
+                || screenHandler instanceof BrewingStandMenu
+                || screenHandler instanceof CrafterMenu;
     }
 
     private void processContainerItems() {
         if (mc.player == null) return;
-        int playerInvStart = mc.player.currentScreenHandler.slots.size() - 36;
+        int playerInvStart = mc.player.containerMenu.slots.size() - 36;
         maxClicks = maxClicksPerTick.get();
 
         if (!itemList.get().isEmpty()) {
@@ -536,25 +556,25 @@ public class StorageLooter extends Module {
         if (!foodItemList.get().isEmpty()) {
             processItemList(foodItemList.get(), playerInvStart);
         }
-        if (swapStacks.get() && (mc.player.currentScreenHandler instanceof GenericContainerScreenHandler
-                || mc.player.currentScreenHandler instanceof ShulkerBoxScreenHandler
-                || mc.player.currentScreenHandler instanceof HopperScreenHandler
-                || mc.player.currentScreenHandler instanceof Generic3x3ContainerScreenHandler)) {
+        if (swapStacks.get() && (mc.player.containerMenu instanceof ChestMenu
+                || mc.player.containerMenu instanceof ShulkerBoxMenu
+                || mc.player.containerMenu instanceof HopperMenu
+                || mc.player.containerMenu instanceof DispenserMenu)) {
             swapSmallerStacksForBigger(playerInvStart);
         }
-        if ((moveJunkToContainer.get() || moveOverlimitToContainer.get()) && (mc.player.currentScreenHandler instanceof GenericContainerScreenHandler
-                || mc.player.currentScreenHandler instanceof ShulkerBoxScreenHandler
-                || mc.player.currentScreenHandler instanceof HopperScreenHandler
-                || mc.player.currentScreenHandler instanceof Generic3x3ContainerScreenHandler)) {
+        if ((moveJunkToContainer.get() || moveOverlimitToContainer.get()) && (mc.player.containerMenu instanceof ChestMenu
+                || mc.player.containerMenu instanceof ShulkerBoxMenu
+                || mc.player.containerMenu instanceof HopperMenu
+                || mc.player.containerMenu instanceof DispenserMenu)) {
             moveExcessItemsToContainer(playerInvStart);
         }
 
         totalClicksThisTick = 0; // Reset the total clicks for the next tick
     }
     private void moveExcessItemsToContainer(int playerInvStart) {
-        if (mc.player == null || mc.interactionManager == null) return;
-        for (int i = playerInvStart; i < mc.player.currentScreenHandler.slots.size(); i++) {
-            ItemStack playerStack = mc.player.currentScreenHandler.getSlot(i).getStack();
+        if (mc.player == null || mc.gameMode == null) return;
+        for (int i = playerInvStart; i < mc.player.containerMenu.slots.size(); i++) {
+            ItemStack playerStack = mc.player.containerMenu.getSlot(i).getItem();
             if (!playerStack.isEmpty()) {
                 Item playerItem = playerStack.getItem();
 
@@ -562,19 +582,19 @@ public class StorageLooter extends Module {
                 if (moveJunkToContainer.get() && (junkItemList.get().contains(playerItem) || (nonitemlistjunk.get() && (!itemList.get().contains(playerItem) && !blockItemList.get().contains(playerItem)  && !woodItemList.get().contains(playerItem) && !foodItemList.get().contains(playerItem) && !miscItemList.get().contains(playerItem) && !isNonJunkVariant(playerStack, itemList.get()))))) {
                     // Move the entire stack to the container
                     for (int j = 0; j < playerInvStart; j++) {
-                        ItemStack containerStack = mc.player.currentScreenHandler.getSlot(j).getStack();
+                        ItemStack containerStack = mc.player.containerMenu.getSlot(j).getItem();
                         if (containerStack.isEmpty()) {
                             if (totalClicksThisTick >= maxClicks) {
                                 return; // Stop moving items if the maximum clicks per tick is reached
                             }
-                            mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, i, 0, SlotActionType.QUICK_MOVE, mc.player);
+                            mc.gameMode.handleContainerInput(mc.player.containerMenu.containerId, i, 0, ContainerInput.QUICK_MOVE, mc.player);
                             totalClicksThisTick++;
                             break; // Exit the inner loop since the stack has been moved
                         }
                     }
                 }
                 if (moveOverlimitToContainer.get()) {
-                    int maxStackSize = playerItem.getMaxCount();
+                    int maxStackSize = playerItem.getDefaultMaxStackSize();
                     int maxCount = getMaxCount(playerItem);
                     List<Item> itemList = getItemList(playerItem);
 
@@ -591,7 +611,7 @@ public class StorageLooter extends Module {
                     if (currentCount > maxCount) {
                         int excessAmount = currentCount - maxCount;
                         for (int j = 0; j < playerInvStart; j++) {
-                            ItemStack containerStack = mc.player.currentScreenHandler.getSlot(j).getStack();
+                            ItemStack containerStack = mc.player.containerMenu.getSlot(j).getItem();
                             if (containerStack.isEmpty()) {
                                 continue; // Skip empty container slots
                             }
@@ -601,7 +621,7 @@ public class StorageLooter extends Module {
                                 if (totalClicksThisTick >= maxClicks) {
                                     return; // Stop moving items if the maximum clicks per tick is reached
                                 }
-                                mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, i, 0, SlotActionType.QUICK_MOVE, mc.player);
+                                mc.gameMode.handleContainerInput(mc.player.containerMenu.containerId, i, 0, ContainerInput.QUICK_MOVE, mc.player);
                                 totalClicksThisTick++;
                                 excessAmount -= playerStack.getCount();
                                 if (excessAmount <= 0) {
@@ -615,10 +635,10 @@ public class StorageLooter extends Module {
         }
     }
     private boolean isNonJunkVariant(ItemStack playerItem, List<Item> itemList) {
-        String itemName = playerItem.getItem().getTranslationKey().toLowerCase();
+        String itemName = playerItem.getItem().getDescriptionId().toLowerCase();
 
         if (itemName.contains("shulker_box")) {
-            return itemList.stream().anyMatch(item -> item.getTranslationKey().contains("shulker_box"));
+            return itemList.stream().anyMatch(item -> item.getDescriptionId().contains("shulker_box"));
         } else if (itemName.contains("_pickaxe")) {
             return itemList.stream().anyMatch(item -> item == Items.DIAMOND_PICKAXE);
         } else if (itemName.contains("_sword")) {
@@ -659,8 +679,8 @@ public class StorageLooter extends Module {
     private void processItemList(List<Item> itemList, int playerInvStart) {
         if (mc.player == null) return;
         List<Integer> slotIndices = new ArrayList<>();
-        for (int i = 0; i < mc.player.currentScreenHandler.slots.size(); i++) {
-            Item item = mc.player.currentScreenHandler.getSlot(i).getStack().getItem();
+        for (int i = 0; i < mc.player.containerMenu.slots.size(); i++) {
+            Item item = mc.player.containerMenu.getSlot(i).getItem().getItem();
             String itemName = item.toString().toLowerCase();
             if (((itemName.contains("shulker_box") && itemList.contains(Items.SHULKER_BOX)) ||
                     (itemName.contains("_pickaxe") && itemList.contains(Items.DIAMOND_PICKAXE)) ||
@@ -678,13 +698,13 @@ public class StorageLooter extends Module {
         }
 
         slotIndices.sort((a, b) -> {
-            ItemStack stackA = mc.player.currentScreenHandler.getSlot(a).getStack();
-            ItemStack stackB = mc.player.currentScreenHandler.getSlot(b).getStack();
+            ItemStack stackA = mc.player.containerMenu.getSlot(a).getItem();
+            ItemStack stackB = mc.player.containerMenu.getSlot(b).getItem();
             return compareItems(stackA, stackB);
         });
 
         for (int slotIndex : slotIndices) {
-            Item item = mc.player.currentScreenHandler.getSlot(slotIndex).getStack().getItem();
+            Item item = mc.player.containerMenu.getSlot(slotIndex).getItem().getItem();
             moveItemsWithLimit(slotIndex, item, getMaxCount(item), itemList);
         }
     }
@@ -705,10 +725,10 @@ public class StorageLooter extends Module {
             for (int y = bottomlimit; y <= (mc.player.getBlockY() + 1) + Math.round(Math.ceil(reach)); y++) {
                 for (int z = (int) (mc.player.getBlockZ() - Math.round(Math.ceil(reach))); z <= mc.player.getBlockZ() + Math.round(Math.ceil(reach)); z++) {
                     BlockPos blockPos = new BlockPos(x, y, z);
-                    Vec3d playerPos1 = new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ()).toCenterPos();
-                    Vec3d playerPos2 = new BlockPos(mc.player.getBlockX(), mc.player.getBlockY() + 1, mc.player.getBlockZ()).toCenterPos();
-                    double distance1 = playerPos1.distanceTo(blockPos.toCenterPos());
-                    double distance2 = playerPos2.distanceTo(blockPos.toCenterPos());
+                    Vec3 playerPos1 = new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ()).getCenter();
+                    Vec3 playerPos2 = new BlockPos(mc.player.getBlockX(), mc.player.getBlockY() + 1, mc.player.getBlockZ()).getCenter();
+                    double distance1 = playerPos1.distanceTo(blockPos.getCenter());
+                    double distance2 = playerPos2.distanceTo(blockPos.getCenter());
                     if (mode.get() == Modes.Sphere && (distance1 <= reach || distance2 <= reach)) {
                         blocks.add(blockPos);
                     } else if (mode.get() == Modes.Box) {
@@ -727,15 +747,15 @@ public class StorageLooter extends Module {
     private void openContainer(BlockPos blockPos, Block block) {
         if (mc.player == null) return;
         if (rotate.get()){
-            originalYaw = mc.player.getYaw();
-            originalPitch = mc.player.getPitch();
-            mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
+            originalYaw = mc.player.getYRot();
+            originalPitch = mc.player.getXRot();
+            mc.player.lookAt(EntityAnchorArgument.Anchor.EYES, new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
         }
         if (swing.get()){
-            mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
-            mc.player.swingHand(Hand.MAIN_HAND);
+            mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
+            mc.player.swing(InteractionHand.MAIN_HAND);
         }
-        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(blockPos.toCenterPos(), Direction.UP, blockPos, true));
+        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(blockPos.getCenter(), Direction.UP, blockPos, true));
         chestsToProcess.put(blockPos, opendelay.get());
         processedChests.add(blockPos);
         isChestOpen = true;
@@ -746,12 +766,12 @@ public class StorageLooter extends Module {
         chestsToProcess.entrySet().removeIf(entry -> {
             int delay = entry.getValue();
             if (delay <= 0) {
-                if (mc.player.currentScreenHandler != null && isContainerScreen(mc.player.currentScreenHandler)) {
+                if (mc.player.containerMenu != null && isContainerScreen(mc.player.containerMenu)) {
                     processContainerItems();
-                    mc.player.closeHandledScreen();
+                    mc.player.closeContainer();
                     if (rotate.get()){
-                        mc.player.setYaw(originalYaw);
-                        mc.player.setPitch(originalPitch);
+                        mc.player.setYRot(originalYaw);
+                        mc.player.setXRot(originalPitch);
                     }
                     isChestOpen = false;
                 }
@@ -767,31 +787,31 @@ public class StorageLooter extends Module {
         if (mc.player == null) return;
         List<Integer> containerSlotIndices = new ArrayList<>();
         for (int i = 0; i < playerInvStart; i++) {
-            ItemStack containerStack = mc.player.currentScreenHandler.getSlot(i).getStack();
+            ItemStack containerStack = mc.player.containerMenu.getSlot(i).getItem();
             if (!containerStack.isEmpty()) {
                 containerSlotIndices.add(i);
             }
         }
 
         containerSlotIndices.sort((a, b) -> {
-            ItemStack stackA = mc.player.currentScreenHandler.getSlot(a).getStack();
-            ItemStack stackB = mc.player.currentScreenHandler.getSlot(b).getStack();
+            ItemStack stackA = mc.player.containerMenu.getSlot(a).getItem();
+            ItemStack stackB = mc.player.containerMenu.getSlot(b).getItem();
             return compareItems(stackA, stackB);
         });
 
-        for (int i = playerInvStart; i < mc.player.currentScreenHandler.slots.size(); i++) {
-            ItemStack playerStack = mc.player.currentScreenHandler.getSlot(i).getStack();
+        for (int i = playerInvStart; i < mc.player.containerMenu.slots.size(); i++) {
+            ItemStack playerStack = mc.player.containerMenu.getSlot(i).getItem();
             if (!playerStack.isEmpty()) {
                 Item playerItem = playerStack.getItem();
                 int playerStackSize = playerStack.getCount();
 
                 for (int containerSlotIndex : containerSlotIndices) {
-                    ItemStack containerStack = mc.player.currentScreenHandler.getSlot(containerSlotIndex).getStack();
+                    ItemStack containerStack = mc.player.containerMenu.getSlot(containerSlotIndex).getItem();
                     Item containerItem = containerStack.getItem();
                     int containerStackSize = containerStack.getCount();
 
                     if (isSameItemList(playerItem, containerItem)) {
-                        if (containerStackSize > playerStackSize && Math.round(((double) containerStackSize / containerStack.getItem().getMaxCount()) * 100) >= minLootableStackSize.get()) {
+                        if (containerStackSize > playerStackSize && Math.round(((double) containerStackSize / containerStack.getItem().getDefaultMaxStackSize()) * 100) >= minLootableStackSize.get()) {
                             swapItems(i, containerSlotIndex, playerInvStart);
                             break; // Exit the inner loop since the swap has been performed
                         } else if (compareItems(playerStack, containerStack) > 0) {
@@ -812,35 +832,35 @@ public class StorageLooter extends Module {
     }
     public static ArrayList<ItemStack> getArmorItems(LivingEntity livingEntity) {
         ArrayList<ItemStack> armorItems = new ArrayList<>();
-        armorItems.add(livingEntity.getEquippedStack(EquipmentSlot.HEAD));
-        armorItems.add(livingEntity.getEquippedStack(EquipmentSlot.CHEST));
-        armorItems.add(livingEntity.getEquippedStack(EquipmentSlot.LEGS));
-        armorItems.add(livingEntity.getEquippedStack(EquipmentSlot.FEET));
+        armorItems.add(livingEntity.getItemBySlot(EquipmentSlot.HEAD));
+        armorItems.add(livingEntity.getItemBySlot(EquipmentSlot.CHEST));
+        armorItems.add(livingEntity.getItemBySlot(EquipmentSlot.LEGS));
+        armorItems.add(livingEntity.getItemBySlot(EquipmentSlot.FEET));
         return armorItems;
     }
     public static ArrayList<ItemStack> getHandItems(LivingEntity livingEntity) {
         ArrayList<ItemStack> handItems = new ArrayList<>();
-        handItems.add(livingEntity.getEquippedStack(EquipmentSlot.MAINHAND));
-        handItems.add(livingEntity.getEquippedStack(EquipmentSlot.OFFHAND));
+        handItems.add(livingEntity.getItemBySlot(EquipmentSlot.MAINHAND));
+        handItems.add(livingEntity.getItemBySlot(EquipmentSlot.OFFHAND));
         return handItems;
     }
     public static boolean isArmor(ItemStack itemStack) {
-        return itemStack.isIn(ItemTags.HEAD_ARMOR) ||
-                itemStack.isIn(ItemTags.CHEST_ARMOR) ||
-                itemStack.isIn(ItemTags.LEG_ARMOR) ||
-                itemStack.isIn(ItemTags.FOOT_ARMOR);
+        return itemStack.is(ItemTags.HEAD_ARMOR) ||
+                itemStack.is(ItemTags.CHEST_ARMOR) ||
+                itemStack.is(ItemTags.LEG_ARMOR) ||
+                itemStack.is(ItemTags.FOOT_ARMOR);
     }
     public static boolean isTool(ItemStack itemStack) {
-        return itemStack.isIn(ItemTags.AXES) ||
-                itemStack.isIn(ItemTags.HOES) ||
-                itemStack.isIn(ItemTags.PICKAXES) ||
-                itemStack.isIn(ItemTags.SHOVELS) ||
+        return itemStack.is(ItemTags.AXES) ||
+                itemStack.is(ItemTags.HOES) ||
+                itemStack.is(ItemTags.PICKAXES) ||
+                itemStack.is(ItemTags.SHOVELS) ||
                 itemStack.getItem() instanceof ShearsItem ||
                 itemStack.getItem() instanceof FlintAndSteelItem;
     }
     private int getItemScore(ItemStack stack) {
         assert mc.player != null;
-        String itemName = stack.getItem().getTranslationKey().toLowerCase();
+        String itemName = stack.getItem().getDescriptionId().toLowerCase();
         int score = 0;
 
         if (itemName.contains("wooden") || itemName.contains("golden")) {
@@ -858,14 +878,14 @@ public class StorageLooter extends Module {
         //durability score
         int durabilityscore = 0;
         int maxDurability = stack.getMaxDamage();
-        int currentDurability = maxDurability - stack.getDamage();
+        int currentDurability = maxDurability - stack.getDamageValue();
         durabilityscore = (int) ((double) currentDurability / maxDurability * 100);
         score += durabilityscore;
 
         //enchantments score
-        ItemEnchantmentsComponent enchantments = stack.getEnchantments();
+        ItemEnchantments enchantments = stack.getEnchantments();
         int enchantmentscore = 0;
-        Registry<Enchantment> enchantmentRegistry = mc.world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
+        Registry<Enchantment> enchantmentRegistry = mc.level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
         if (isArmor(stack)) {
             enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.PROTECTION)) * 10;
             enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.BLAST_PROTECTION)) * 10;
@@ -874,7 +894,7 @@ public class StorageLooter extends Module {
             enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.UNBREAKING)) * 9;
             enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.MENDING)) * 8;
             enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.THORNS)) * 5;
-        } else if (stack.isIn(ItemTags.SWORDS)) {
+        } else if (stack.is(ItemTags.SWORDS)) {
             enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.SMITE)) * 10;
             enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.SHARPNESS)) * 10;
             enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.getOrThrow(Enchantments.BANE_OF_ARTHROPODS)) * 9;
@@ -894,7 +914,7 @@ public class StorageLooter extends Module {
         return score;
     }
 
-    private int getEnchantmentLevel(ItemEnchantmentsComponent enchantments, RegistryEntry<Enchantment> enchantment) {
+    private int getEnchantmentLevel(ItemEnchantments enchantments, Holder<Enchantment> enchantment) {
         return enchantments.getLevel(enchantment);
     }
 
@@ -914,20 +934,20 @@ public class StorageLooter extends Module {
     }
 
     private void swapItems(int playerSlotIndex, int containerSlotIndex, int playerInvStart) {
-        if (mc.player != null && mc.interactionManager != null && isContainerScreen(mc.player.currentScreenHandler)) {
+        if (mc.player != null && mc.gameMode != null && isContainerScreen(mc.player.containerMenu)) {
             // Perform the swap if we have enough clicks left
             if (totalClicksThisTick + 3 <= maxClicks) {
                 // Move the entire stack to the container
                 for (int j = 0; j < playerInvStart; j++) {
-                    ItemStack containerStack = mc.player.currentScreenHandler.getSlot(j).getStack();
+                    ItemStack containerStack = mc.player.containerMenu.getSlot(j).getItem();
                     if (containerStack.isEmpty()) {
-                        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, playerSlotIndex, 0, SlotActionType.QUICK_MOVE, mc.player);
+                        mc.gameMode.handleContainerInput(mc.player.containerMenu.containerId, playerSlotIndex, 0, ContainerInput.QUICK_MOVE, mc.player);
                         totalClicksThisTick++;
 
-                        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, containerSlotIndex, 0, SlotActionType.PICKUP, mc.player);
+                        mc.gameMode.handleContainerInput(mc.player.containerMenu.containerId, containerSlotIndex, 0, ContainerInput.PICKUP, mc.player);
                         totalClicksThisTick++;
 
-                        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, playerSlotIndex, 0, SlotActionType.PICKUP, mc.player);
+                        mc.gameMode.handleContainerInput(mc.player.containerMenu.containerId, playerSlotIndex, 0, ContainerInput.PICKUP, mc.player);
                         totalClicksThisTick++;
                         break; // Exit the inner loop since the stack has been moved
                     }
@@ -937,18 +957,18 @@ public class StorageLooter extends Module {
     }
 
     private void moveItems(int slotIndex, int amountToMove) {
-        if (mc.player != null && mc.interactionManager != null && isContainerScreen(mc.player.currentScreenHandler) && slotIndex >= 0 && slotIndex < mc.player.currentScreenHandler.slots.size()) {
-            ItemStack sourceStack = mc.player.currentScreenHandler.getSlot(slotIndex).getStack();
-            if (!sourceStack.isEmpty() && Math.round(((double)sourceStack.getCount() / sourceStack.getItem().getMaxCount()) * 100) >= minLootableStackSize.get()) {
+        if (mc.player != null && mc.gameMode != null && isContainerScreen(mc.player.containerMenu) && slotIndex >= 0 && slotIndex < mc.player.containerMenu.slots.size()) {
+            ItemStack sourceStack = mc.player.containerMenu.getSlot(slotIndex).getItem();
+            if (!sourceStack.isEmpty() && Math.round(((double)sourceStack.getCount() / sourceStack.getItem().getDefaultMaxStackSize()) * 100) >= minLootableStackSize.get()) {
                 amountToMove = Math.min(amountToMove, sourceStack.getCount());
 
-                int clicksNeeded = (int) Math.ceil((double) amountToMove / sourceStack.getMaxCount());
+                int clicksNeeded = (int) Math.ceil((double) amountToMove / sourceStack.getMaxStackSize());
 
                 for (int i = 0; i < clicksNeeded; i++) {
                     if (totalClicksThisTick >= maxClicks) {
                         return; // Stop moving items if the maximum clicks per tick is reached
                     }
-                    mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, slotIndex, 0, SlotActionType.QUICK_MOVE, mc.player);
+                    mc.gameMode.handleContainerInput(mc.player.containerMenu.containerId, slotIndex, 0, ContainerInput.QUICK_MOVE, mc.player);
                     totalClicksThisTick++;
                 }
             }
@@ -963,8 +983,8 @@ public class StorageLooter extends Module {
                 count += stack.getCount();
             }
         }
-        if (isSameItem(mc.player.getOffHandStack().getItem(), item, itemName)) {
-            count += mc.player.getOffHandStack().getCount();
+        if (isSameItem(mc.player.getOffhandItem().getItem(), item, itemName)) {
+            count += mc.player.getOffhandItem().getCount();
         }
         for (ItemStack armorStack : getArmorItems(mc.player)) {
             if (isSameItem(armorStack.getItem(), item, itemName)) {
@@ -1082,7 +1102,7 @@ public class StorageLooter extends Module {
             }
         }
 
-        ItemStack offhandStack = mc.player.getOffHandStack();
+        ItemStack offhandStack = mc.player.getOffhandItem();
         Item offhandItem = offhandStack.getItem();
         if (isSameItem(offhandItem, item, itemName)) {
             if (offhandStack.isStackable()) {
@@ -1138,7 +1158,7 @@ public class StorageLooter extends Module {
 
     static {
         try {
-            Field[] fields = FoodComponents.class.getFields();
+            Field[] fields = Foods.class.getFields();
             for (Field field : fields) {
                 FOOD_ITEMS.add(field.getName().toLowerCase());
             }
@@ -1179,7 +1199,7 @@ public class StorageLooter extends Module {
                 Items.DIAMOND_BOOTS
         );
 
-        if (isTool(item.getDefaultStack()) || isArmor(item.getDefaultStack())) {
+        if (isTool(item.getDefaultInstance()) || isArmor(item.getDefaultInstance())) {
             return diamondItems.contains(item);
         }
 

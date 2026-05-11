@@ -8,26 +8,23 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.TypedEntityData;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtDouble;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.registry.Registries;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.TypedEntityData;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.List;
@@ -115,7 +112,7 @@ public class AutoTexts extends Module {
 
     private final Random random = new Random();
     private int ticks;
-    private Vec3d origin;
+    private Vec3 origin;
     private String namecolour;
 
     public AutoTexts() {
@@ -125,7 +122,7 @@ public class AutoTexts extends Module {
     @Override
     public void onActivate() {
         if (mc.player == null) return;
-        if (!mc.player.getAbilities().creativeMode) {
+        if (!mc.player.getAbilities().instabuild) {
             error("Creative mode required!");
             toggle();
             return;
@@ -147,14 +144,14 @@ public class AutoTexts extends Module {
 
     @EventHandler
     private void onPlaySound(PlaySoundEvent event) {
-        if (muteSounds.get() && event.sound.getId().getPath().contains("entity.armor_stand.place")) {
+        if (muteSounds.get() && event.sound.getIdentifier().getPath().contains("entity.armor_stand.place")) {
             event.cancel();
         }
     }
 
     @EventHandler
     public void onTick(TickEvent.Pre event) {
-        origin = mc.player.getEntityPos();
+        origin = mc.player.position();
     }
 
     @EventHandler
@@ -178,40 +175,40 @@ public class AutoTexts extends Module {
         }
     }
 
-    private Vec3d pickRandomPos() {
+    private Vec3 pickRandomPos() {
         double x = random.nextDouble(radius.get() * 2) - radius.get() + origin.x;
         double y = mc.player.getY() + height.get() + (heightVariation.get() ? random.nextDouble(8) - 4 : 0);
         double z = random.nextDouble(radius.get() * 2) - radius.get() + origin.z;
-        return new Vec3d(x, y, z);
+        return new Vec3(x, y, z);
     }
 
     private void spawnArmorStand() {
         ItemStack armorStand = new ItemStack(Items.ARMOR_STAND);
-        ItemStack current = mc.player.getMainHandStack();
-        Vec3d pos = pickRandomPos();
+        ItemStack current = mc.player.getMainHandItem();
+        Vec3 pos = pickRandomPos();
         String selectedText = texts.get().get(random.nextInt(texts.get().size()));
 
-        var changes = ComponentChanges.builder()
-                .add(DataComponentTypes.CUSTOM_NAME, Text.literal(selectedText).formatted(Formatting.valueOf(namecolour.toUpperCase())))
-                .add(DataComponentTypes.ENTITY_DATA, createEntityData(pos))
+        var changes = DataComponentPatch.builder()
+                .set(DataComponents.CUSTOM_NAME, Component.literal(selectedText).withStyle(ChatFormatting.valueOf(namecolour.toUpperCase())))
+                .set(DataComponents.ENTITY_DATA, createEntityData(pos))
                 .build();
 
-        armorStand.applyChanges(changes);
+        armorStand.applyComponentsAndValidate(changes);
 
-        BlockHitResult bhr = new BlockHitResult(pos, Direction.UP, BlockPos.ofFloored(pos), false);
-        mc.interactionManager.clickCreativeStack(armorStand, 36 + mc.player.getInventory().selectedSlot);
-        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-        mc.interactionManager.clickCreativeStack(current, 36 + mc.player.getInventory().selectedSlot);
+        BlockHitResult bhr = new BlockHitResult(pos, Direction.UP, BlockPos.containing(pos), false);
+        mc.gameMode.handleCreativeModeItemAdd(armorStand, 36 + mc.player.getInventory().getSelectedSlot());
+        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, bhr);
+        mc.gameMode.handleCreativeModeItemAdd(current, 36 + mc.player.getInventory().getSelectedSlot());
     }
 
-    private TypedEntityData<EntityType<?>> createEntityData(Vec3d pos) {
-        NbtCompound entityTag = new NbtCompound();
-        NbtList position = new NbtList();
+    private TypedEntityData<EntityType<?>> createEntityData(Vec3 pos) {
+        CompoundTag entityTag = new CompoundTag();
+        ListTag position = new ListTag();
         String selectedText = texts.get().get(random.nextInt(texts.get().size()));
 
-        position.add(NbtDouble.of(pos.x));
-        position.add(NbtDouble.of(pos.y));
-        position.add(NbtDouble.of(pos.z));
+        position.add(DoubleTag.valueOf(pos.x));
+        position.add(DoubleTag.valueOf(pos.y));
+        position.add(DoubleTag.valueOf(pos.z));
 
         entityTag.putString("id", "minecraft:armor_stand");
         entityTag.put("Pos", position);
@@ -219,14 +216,14 @@ public class AutoTexts extends Module {
         entityTag.putBoolean("Marker", true);
         entityTag.putBoolean("NoGravity", true);
         entityTag.putBoolean("CustomNameVisible", true);
-        NbtCompound CustomNameNBT = new NbtCompound();
+        CompoundTag CustomNameNBT = new CompoundTag();
         CustomNameNBT.putString("text", selectedText);
         CustomNameNBT.putString("color", namecolour);
         String serverVersion;
-        if (mc.isIntegratedServerRunning()) {
-            serverVersion = mc.getServer().getVersion();
+        if (mc.hasSingleplayerServer()) {
+            serverVersion = mc.getSingleplayerServer().getServerVersion();
         } else {
-            serverVersion = mc.getCurrentServerEntry().version.getLiteralString();
+            serverVersion = mc.getCurrentServer().version.tryCollapseToString();
         }
         if (serverVersion == null) {
             entityTag.put("CustomName", CustomNameNBT);
@@ -238,7 +235,7 @@ public class AutoTexts extends Module {
             }
         }
 
-        return TypedEntityData.create(EntityType.ARMOR_STAND, entityTag);
+        return TypedEntityData.of(EntityType.ARMOR_STAND, entityTag);
     }
     private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
         if (serverVersion == null) return false;

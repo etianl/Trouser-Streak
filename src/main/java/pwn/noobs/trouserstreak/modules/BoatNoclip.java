@@ -4,23 +4,23 @@ import pwn.noobs.trouserstreak.Trouser;
 import meteordevelopment.meteorclient.events.entity.EntityMoveEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixininterface.IVec3d;
+import meteordevelopment.meteorclient.mixininterface.IVec3;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.vehicle.AbstractBoatEntity;
-import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.vehicle.boat.AbstractBoat;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class BoatNoclip extends Module {
     private final SettingGroup sgSpeed = settings.createGroup("Speed");
@@ -94,20 +94,20 @@ public class BoatNoclip extends Module {
 
     @Override
     public void onDeactivate() {
-        if (mc.player != null && mc.player.getVehicle() instanceof AbstractBoatEntity boat) {
-            boat.noClip = false;
+        if (mc.player != null && mc.player.getVehicle() instanceof AbstractBoat boat) {
+            boat.noPhysics = false;
         }
     }
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (mc.player != null && mc.player.getVehicle() instanceof AbstractBoatEntity boat) {
+        if (mc.player != null && mc.player.getVehicle() instanceof AbstractBoat boat) {
             insideBlock = isInsideBlock(boat);
-            boat.noClip = true;
+            boat.noPhysics = true;
             if (sentPacket) {
-                VehicleMoveC2SPacket packet = VehicleMoveC2SPacket.fromVehicle(boat);
-                ((IVec3d) packet.position()).meteor$setY(lastPacketY);
-                mc.player.networkHandler.sendPacket(packet);
+                ServerboundMoveVehiclePacket packet = ServerboundMoveVehiclePacket.fromEntity(boat);
+                ((IVec3) packet.position()).meteor$setY(lastPacketY);
+                mc.player.connection.send(packet);
                 sentPacket = false;
             }
         }
@@ -116,13 +116,13 @@ public class BoatNoclip extends Module {
 
     @EventHandler
     private void onEntityMove(EntityMoveEvent event) {
-        if (!(event.entity instanceof AbstractBoatEntity entity)) return;
+        if (!(event.entity instanceof AbstractBoat entity)) return;
         if (entity.getControllingPassenger() != mc.player) return;
-        entity.noClip = true;
+        entity.noPhysics = true;
 
-        double velX = entity.getVelocity().x;
+        double velX = entity.getDeltaMovement().x;
         double velY = 0;
-        double velZ = entity.getVelocity().z;
+        double velZ = entity.getDeltaMovement().z;
 
         insideBlock = isInsideBlock(entity);
 
@@ -131,29 +131,29 @@ public class BoatNoclip extends Module {
                     ? horizontalSpeedInsideBlocks.get()
                     : horizontalSpeed.get();
 
-            Vec3d vel = PlayerUtils.getHorizontalVelocity(appliedSpeed);
+            Vec3 vel = PlayerUtils.getHorizontalVelocity(appliedSpeed);
             velX = vel.x;
             velZ = vel.z;
         }
 
-        if (mc.currentScreen == null && Input.isPressed(mc.options.jumpKey)) velY += verticalSpeed.get() / 20;
-        if (mc.currentScreen == null && Input.isPressed(mc.options.sprintKey)) velY -= verticalSpeed.get() / 20;
+        if (mc.screen == null && Input.isPressed(mc.options.keyJump)) velY += verticalSpeed.get() / 20;
+        if (mc.screen == null && Input.isPressed(mc.options.keySprint)) velY -= verticalSpeed.get() / 20;
         else velY -= fallSpeed.get() / 20;
 
-        entity.setYaw(mc.player.getYaw());
-        ((IVec3d) event.movement).meteor$set(velX, velY, velZ);
+        entity.setYRot(mc.player.getYRot());
+        ((IVec3) event.movement).meteor$set(velX, velY, velZ);
     }
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (!(event.packet instanceof VehicleMoveC2SPacket packet)) return;
+        if (!(event.packet instanceof ServerboundMoveVehiclePacket packet)) return;
         if (!antiKick.get()) return;
-        if (!(mc.player.getVehicle() instanceof AbstractBoatEntity)) return;
+        if (!(mc.player.getVehicle() instanceof AbstractBoat)) return;
 
         double currentY = packet.position().y;
 
         if (delayLeft <= 0 && !sentPacket && shouldFlyDown(currentY) && EntityUtils.isOnAir(mc.player.getVehicle())) {
-            ((IVec3d) packet.position()).meteor$setY(lastPacketY - 0.03130D);
+            ((IVec3) packet.position()).meteor$setY(lastPacketY - 0.03130D);
             sentPacket = true;
             delayLeft = delay.get();
         }
@@ -166,39 +166,39 @@ public class BoatNoclip extends Module {
     }
 
     private boolean isInsideBlock(Entity entity) {
-        if (entity == null || mc.world == null) return false;
+        if (entity == null || mc.level == null) return false;
 
-        Box box = entity.getBoundingBox()
-                .shrink(0.0, 0.05, 0.0)
-                .expand(0.5, 0.0, 0.5);
+        AABB box = entity.getBoundingBox()
+                .contract(0.0, 0.05, 0.0)
+                .inflate(0.5, 0.0, 0.5);
 
-        int minX = MathHelper.floor(box.minX);
-        int minY = MathHelper.floor(box.minY);
-        int minZ = MathHelper.floor(box.minZ);
-        int maxX = MathHelper.floor(box.maxX);
-        int maxY = MathHelper.floor(box.maxY);
-        int maxZ = MathHelper.floor(box.maxZ);
+        int minX = Mth.floor(box.minX);
+        int minY = Mth.floor(box.minY);
+        int minZ = Mth.floor(box.minZ);
+        int maxX = Mth.floor(box.maxX);
+        int maxY = Mth.floor(box.maxY);
+        int maxZ = Mth.floor(box.maxZ);
 
-        BlockPos.Mutable pos = new BlockPos.Mutable();
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
         for (int x = minX; x <= maxX; x++) {
             for (int y = minY; y <= maxY; y++) {
                 for (int z = minZ; z <= maxZ; z++) {
                     pos.set(x, y, z);
-                    BlockState state = mc.world.getBlockState(pos);
+                    BlockState state = mc.level.getBlockState(pos);
                     if (state.isAir()) continue;
 
-                    VoxelShape shape = state.getCollisionShape(mc.world, pos, ShapeContext.absent());
+                    VoxelShape shape = state.getCollisionShape(mc.level, pos, CollisionContext.empty());
                     if (shape.isEmpty()) continue;
 
-                    if (entity.getBoundingBox().intersects(shape.getBoundingBox().offset(pos))) {
+                    if (entity.getBoundingBox().intersects(shape.bounds().move(pos))) {
                         return true;
                     }
                 }
             }
         }
 
-        for (Entity other : mc.world.getOtherEntities(entity, box)) {
+        for (Entity other : mc.level.getEntities(entity, box)) {
             if (other == mc.player) continue;
             if (other == entity.getVehicle()) continue;
             if (other.hasPassenger(entity) || entity.hasPassenger(other)) continue;

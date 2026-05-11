@@ -7,22 +7,30 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.WallBannerBlock;
-import net.minecraft.block.BannerBlock;
-import net.minecraft.block.entity.BannerBlockEntity;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.decoration.ItemFrameEntity;
-import net.minecraft.item.*;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.item.FishingRodItem;
+import net.minecraft.world.item.FlintAndSteelItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.MaceItem;
+import net.minecraft.world.item.ShearsItem;
+import net.minecraft.world.item.ShieldItem;
+import net.minecraft.world.item.TridentItem;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.block.BannerBlock;
+import net.minecraft.world.level.block.WallBannerBlock;
+import net.minecraft.world.level.block.entity.BannerBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.AABB;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.ArrayList;
@@ -118,31 +126,31 @@ public class CollectibleESP extends Module {
             .visible(() -> enchants.get())
             .build()
     );
-    private final Setting<Set<RegistryKey<Enchantment>>> toolenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+    private final Setting<Set<ResourceKey<Enchantment>>> toolenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("Mining Tool Enchants")
             .description("List of enchantments required.")
             .visible(() -> enchants.get() && certainenchants.get())
             .defaultValue(Enchantments.EFFICIENCY, Enchantments.UNBREAKING, Enchantments.MENDING)
             .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> swordenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+    private final Setting<Set<ResourceKey<Enchantment>>> swordenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("Sword Enchants")
             .description("List of enchantments required.")
             .visible(() -> enchants.get() && certainenchants.get())
             .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
             .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> armorenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+    private final Setting<Set<ResourceKey<Enchantment>>> armorenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("Armor Enchants")
             .description("List of enchantments required.")
             .visible(() -> enchants.get() && certainenchants.get())
             .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
             .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> maceenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+    private final Setting<Set<ResourceKey<Enchantment>>> maceenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("Mace Enchants")
             .description("List of enchantments required.")
             .visible(() -> enchants.get() && certainenchants.get())
             .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
             .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> tridentenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+    private final Setting<Set<ResourceKey<Enchantment>>> tridentenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("Trident Enchants")
             .description("List of enchantments required.")
             .visible(() -> enchants.get() && certainenchants.get())
@@ -195,20 +203,20 @@ public class CollectibleESP extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (mc.world == null || mc.player == null) return;
+        if (mc.level == null || mc.player == null) return;
         if (highlightMaps.get() || highlightItems.get()) {
-            for (Entity frame : mc.world.getEntities()) {
-                if (!(frame instanceof ItemFrameEntity itemframe)) continue;
+            for (Entity frame : mc.level.entitiesForRendering()) {
+                if (!(frame instanceof ItemFrame itemframe)) continue;
                 boolean renderedFrame = false;
-                Box box;
-                if (highlightMaps.get() && itemframe.getHeldItemStack().getItem().getTranslationKey().equals("item.minecraft.filled_map")){
-                    float pitch = itemframe.getPitch();
+                AABB box;
+                if (highlightMaps.get() && itemframe.getItem().getItem().getDescriptionId().equals("item.minecraft.filled_map")){
+                    float pitch = itemframe.getXRot();
                     if (pitch == 90 || pitch == -90) {
-                        box = itemframe.getBoundingBox().expand(0.12, 0.01, 0.12);
+                        box = itemframe.getBoundingBox().inflate(0.12, 0.01, 0.12);
                     } else {
-                        if (itemframe.getHorizontalFacing() == Direction.EAST || itemframe.getHorizontalFacing() == Direction.WEST)
-                            box = itemframe.getBoundingBox().expand(0.01, 0.12, 0.12);
-                        else box = itemframe.getBoundingBox().expand(0.12, 0.12, 0.01);
+                        if (itemframe.getDirection() == Direction.EAST || itemframe.getDirection() == Direction.WEST)
+                            box = itemframe.getBoundingBox().inflate(0.01, 0.12, 0.12);
+                        else box = itemframe.getBoundingBox().inflate(0.12, 0.12, 0.01);
                     }
                     Color fill = new Color(mapColor.get());
                     Color outline = new Color(mapOutlineColor.get());
@@ -216,14 +224,14 @@ public class CollectibleESP extends Module {
                     renderedFrame = true;
                 }
                 if (!renderedFrame && highlightItems.get()) {
-                    if (shouldSkip(itemframe.getHeldItemStack())) continue;
-                    float pitch = itemframe.getPitch();
+                    if (shouldSkip(itemframe.getItem())) continue;
+                    float pitch = itemframe.getXRot();
                     if (pitch == 90 || pitch == -90) {
-                        box = itemframe.getBoundingBox().expand(0.12, 0.01, 0.12);
+                        box = itemframe.getBoundingBox().inflate(0.12, 0.01, 0.12);
                     } else {
-                        if (itemframe.getHorizontalFacing() == Direction.EAST || itemframe.getHorizontalFacing() == Direction.WEST)
-                            box = itemframe.getBoundingBox().expand(0.01, 0.12, 0.12);
-                        else box = itemframe.getBoundingBox().expand(0.12, 0.12, 0.01);
+                        if (itemframe.getDirection() == Direction.EAST || itemframe.getDirection() == Direction.WEST)
+                            box = itemframe.getBoundingBox().inflate(0.01, 0.12, 0.12);
+                        else box = itemframe.getBoundingBox().inflate(0.12, 0.12, 0.01);
                     }
                     Color fill = new Color(itemColor.get());
                     Color outline = new Color(itemOutlineColor.get());
@@ -232,23 +240,23 @@ public class CollectibleESP extends Module {
             }
         }
         if (highlightBanners.get()) {
-            AtomicReferenceArray<WorldChunk> chunks = mc.world.getChunkManager().chunks.chunks;
+            AtomicReferenceArray<LevelChunk> chunks = mc.level.getChunkSource().storage.chunks;
 
             for (int i = 0; i < chunks.length(); i++) {
-                WorldChunk chunk = chunks.get(i);
+                LevelChunk chunk = chunks.get(i);
                 if (chunk != null) {
                     for (BlockEntity be : chunk.getBlockEntities().values()) {
                         if (!(be instanceof BannerBlockEntity banner)) continue;
 
-                        BlockPos pos = banner.getPos();
-                        BlockState state = mc.world.getBlockState(pos);
-                        Box box;
+                        BlockPos pos = banner.getBlockPos();
+                        BlockState state = mc.level.getBlockState(pos);
+                        AABB box;
 
                         Color fill = new Color(bannerColor.get());
                         Color outline = new Color(bannerOutline.get());
 
-                        if (state.contains(WallBannerBlock.FACING)) {
-                            Direction facing = state.get(WallBannerBlock.FACING);
+                        if (state.hasProperty(WallBannerBlock.FACING)) {
+                            Direction facing = state.getValue(WallBannerBlock.FACING);
                             double centerX = pos.getX() + 0.5;
                             double centerZ = pos.getZ() + 0.5;
                             double offset = 0.1;
@@ -259,24 +267,24 @@ public class CollectibleESP extends Module {
 
                             switch (facing) {
                                 case NORTH:
-                                    box = new Box(centerX - width, y1, pos.getZ() + 1 - offset - depth, centerX + width, y2, pos.getZ() + 1 - offset);
+                                    box = new AABB(centerX - width, y1, pos.getZ() + 1 - offset - depth, centerX + width, y2, pos.getZ() + 1 - offset);
                                     break;
                                 case SOUTH:
-                                    box = new Box(centerX - width, y1, pos.getZ() + offset, centerX + width, y2, pos.getZ() + offset + depth);
+                                    box = new AABB(centerX - width, y1, pos.getZ() + offset, centerX + width, y2, pos.getZ() + offset + depth);
                                     break;
                                 case WEST:
-                                    box = new Box(pos.getX() + 1 - offset - depth, y1, centerZ - width, pos.getX() + 1 - offset, y2, centerZ + width);
+                                    box = new AABB(pos.getX() + 1 - offset - depth, y1, centerZ - width, pos.getX() + 1 - offset, y2, centerZ + width);
                                     break;
                                 case EAST:
-                                    box = new Box(pos.getX() + offset, y1, centerZ - width, pos.getX() + offset + depth, y2, centerZ + width);
+                                    box = new AABB(pos.getX() + offset, y1, centerZ - width, pos.getX() + offset + depth, y2, centerZ + width);
                                     break;
                                 default:
                                     continue;
                             }
 
                             event.renderer.box(box, fill, outline, ShapeMode.Both, 0);
-                        } else if (state.contains(BannerBlock.ROTATION)) {
-                            int rotation = state.get(BannerBlock.ROTATION);
+                        } else if (state.hasProperty(BannerBlock.ROTATION)) {
+                            int rotation = state.getValue(BannerBlock.ROTATION);
                             double centerX = pos.getX() + 0.5;
                             double centerZ = pos.getZ() + 0.5;
                             double y1 = pos.getY();
@@ -348,27 +356,27 @@ public class CollectibleESP extends Module {
         }
     }
     public static boolean isTool(ItemStack itemStack) {
-        return itemStack.isIn(ItemTags.AXES) ||
-                itemStack.isIn(ItemTags.HOES) ||
-                itemStack.isIn(ItemTags.PICKAXES) ||
-                itemStack.isIn(ItemTags.SHOVELS) ||
+        return itemStack.is(ItemTags.AXES) ||
+                itemStack.is(ItemTags.HOES) ||
+                itemStack.is(ItemTags.PICKAXES) ||
+                itemStack.is(ItemTags.SHOVELS) ||
                 itemStack.getItem() instanceof ShearsItem ||
                 itemStack.getItem() instanceof FlintAndSteelItem;
     }
     public static boolean isArmor(ItemStack itemStack) {
-        return itemStack.isIn(ItemTags.HEAD_ARMOR) ||
-                itemStack.isIn(ItemTags.CHEST_ARMOR) ||
-                itemStack.isIn(ItemTags.LEG_ARMOR) ||
-                itemStack.isIn(ItemTags.FOOT_ARMOR);
+        return itemStack.is(ItemTags.HEAD_ARMOR) ||
+                itemStack.is(ItemTags.CHEST_ARMOR) ||
+                itemStack.is(ItemTags.LEG_ARMOR) ||
+                itemStack.is(ItemTags.FOOT_ARMOR);
     }
     public boolean shouldSkip(ItemStack stack) {
         boolean skip = false;
         if (enchants.get()) {
-            if (!certainenchants.get() && (isTool(stack) || isArmor(stack) || stack.isIn(ItemTags.SWORDS) || stack.getItem() instanceof FishingRodItem || stack.getItem() instanceof FlintAndSteelItem || stack.getItem() instanceof MaceItem || stack.getItem() instanceof ShearsItem || stack.getItem() instanceof ShieldItem || stack.getItem() instanceof TridentItem) && stack.isEnchantable() && stack.getEnchantments().isEmpty()) skip = true;
+            if (!certainenchants.get() && (isTool(stack) || isArmor(stack) || stack.is(ItemTags.SWORDS) || stack.getItem() instanceof FishingRodItem || stack.getItem() instanceof FlintAndSteelItem || stack.getItem() instanceof MaceItem || stack.getItem() instanceof ShearsItem || stack.getItem() instanceof ShieldItem || stack.getItem() instanceof TridentItem) && stack.isEnchantable() && stack.getEnchantments().isEmpty()) skip = true;
             else if (certainenchants.get()){
                 if (isTool(stack)){
                     skip = compareEnchants(stack, toolenchants);
-                } else if (stack.isIn(ItemTags.SWORDS)){
+                } else if (stack.is(ItemTags.SWORDS)){
                     skip = compareEnchants(stack, swordenchants);
                 } else if (isArmor(stack)){
                     skip = compareEnchants(stack, armorenchants);
@@ -382,13 +390,13 @@ public class CollectibleESP extends Module {
         if (!items.get().contains(stack.getItem())) skip = true;
         return skip;
     }
-    private boolean compareEnchants(ItemStack stack, Setting<Set<RegistryKey<Enchantment>>> enchantsetting) {
+    private boolean compareEnchants(ItemStack stack, Setting<Set<ResourceKey<Enchantment>>> enchantsetting) {
         boolean skip = false;
-        Set<RegistryKey<Enchantment>> itemenchants = new HashSet<>();
-        stack.getEnchantments().getEnchantments().forEach(enchantment -> {
-            itemenchants.add(enchantment.getKey().get());
+        Set<ResourceKey<Enchantment>> itemenchants = new HashSet<>();
+        stack.getEnchantments().keySet().forEach(enchantment -> {
+            itemenchants.add(enchantment.unwrapKey().get());
         });
-        for (RegistryKey<Enchantment> enchantKey : enchantsetting.get()) {
+        for (ResourceKey<Enchantment> enchantKey : enchantsetting.get()) {
             if (!itemenchants.contains(enchantKey)) {
                 skip = true;
                 break;

@@ -9,14 +9,14 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 import pwn.noobs.trouserstreak.utils.PermissionUtils;
 
@@ -109,7 +109,7 @@ public class UUIDBan extends Module {
         super(Trouser.operator, "UUIDBan", "Kicks players and summons an entity with their UUID, preventing them joining back. Original module made by KI10");
     }
 
-    private Collection<PlayerListEntry> playerlistattimeofkick = null;
+    private Collection<PlayerInfo> playerlistattimeofkick = null;
     private String pendingCommand = null;
     private UUID entityUUID = null;
     private String entityName = null;
@@ -131,7 +131,7 @@ public class UUIDBan extends Module {
 
     @EventHandler
     public void onTick(TickEvent.Post event) {
-        if (mc.player == null || mc.world == null) return;
+        if (mc.player == null || mc.level == null) return;
 
         if (PermissionUtils.getPermissionLevel(mc.player) < requiredOpLevel.get()) {
             if (chatFeedback)error("You do not have the required OP rights (required: %d).", requiredOpLevel.get());
@@ -155,18 +155,18 @@ public class UUIDBan extends Module {
         }
 
         if (uuidCollectionMode.get() == uuidCollectionModes.AllPlayers) {
-            if (mc.getNetworkHandler() != null) {
-                for (PlayerListEntry entry : playerlistattimeofkick) {
-                    if (!allPlayersAndSelf.get() && entry.getProfile().id().equals(mc.player.getUuid())) continue;
+            if (mc.getConnection() != null) {
+                for (PlayerInfo entry : playerlistattimeofkick) {
+                    if (!allPlayersAndSelf.get() && entry.getProfile().id().equals(mc.player.getUUID())) continue;
                     if (ignorefrend.get() && Friends.get().isFriend(entry)) continue;
 
                     String summonCommand = String.format("summon villager ~ ~ ~ " + makeEntityNBT(entry.getProfile().id()));
-                    mc.player.networkHandler.sendChatCommand(summonCommand);
+                    mc.player.connection.sendCommand(summonCommand);
                 }
                 playerlistattimeofkick = null;
             }
         } else {
-            mc.player.networkHandler.sendChatCommand(pendingCommand);
+            mc.player.connection.sendCommand(pendingCommand);
         }
         pendingCommand = null;
         ticksLeft = 0;
@@ -174,17 +174,17 @@ public class UUIDBan extends Module {
 
     @EventHandler
     private void onMouseButton(MouseClickEvent event) {
-        if (mc.player == null || mc.world == null) return;
+        if (mc.player == null || mc.level == null) return;
 
-        if (clickBan.get() && mc.options.attackKey.isPressed() && PermissionUtils.getPermissionLevel(mc.player) >= requiredOpLevel.get()) {
+        if (clickBan.get() && mc.options.keyAttack.isDown() && PermissionUtils.getPermissionLevel(mc.player) >= requiredOpLevel.get()) {
             runBanCommands();
         }
-        if (uuidCollectionMode.get() == uuidCollectionModes.RightClick && mc.options.useKey.isPressed()) {
+        if (uuidCollectionMode.get() == uuidCollectionModes.RightClick && mc.options.keyUse.isDown()) {
             Entity targetEntity = target();
             if (targetEntity != null && targetEntity.isAlive() && targetEntity != mc.player) {
-                entityUUID = targetEntity.getUuid();
+                entityUUID = targetEntity.getUUID();
                 entityName = targetEntity.getName().getString();
-                if (chatFeedback)info("Target entity UUID saved: " + targetEntity.getName().getString() + ". UUID: " + targetEntity.getUuid());
+                if (chatFeedback)info("Target entity UUID saved: " + targetEntity.getName().getString() + ". UUID: " + targetEntity.getUUID());
             }
         }
         if (resetUUID.get().isPressed()){
@@ -194,34 +194,34 @@ public class UUIDBan extends Module {
     }
 
     private Entity target() {
-        if (mc.player == null || mc.world == null) return null;
-        if (mc.crosshairTarget instanceof EntityHitResult hit) return hit.getEntity();
+        if (mc.player == null || mc.level == null) return null;
+        if (mc.hitResult instanceof EntityHitResult hit) return hit.getEntity();
 
         double maxRange = 512;
-        Vec3d eyePos = mc.player.getEyePos();
-        Vec3d lookVec = mc.player.getRotationVec(1.0f);
+        Vec3 eyePos = mc.player.getEyePosition();
+        Vec3 lookVec = mc.player.getViewVector(1.0f);
 
-        HitResult blockHit = mc.world.raycast(new RaycastContext(eyePos,
-                eyePos.add(lookVec.multiply(maxRange)), RaycastContext.ShapeType.COLLIDER,
-                RaycastContext.FluidHandling.NONE, mc.player));
+        HitResult blockHit = mc.level.clip(new ClipContext(eyePos,
+                eyePos.add(lookVec.scale(maxRange)), ClipContext.Block.COLLIDER,
+                ClipContext.Fluid.NONE, mc.player));
         double rayLength = blockHit.getType() == HitResult.Type.MISS ? maxRange :
-                eyePos.distanceTo(blockHit.getPos());
+                eyePos.distanceTo(blockHit.getLocation());
 
-        List<Entity> candidates = mc.world.getOtherEntities(mc.player,
-                mc.player.getBoundingBox().stretch(lookVec.multiply(rayLength)),
-                e -> e instanceof PlayerEntity && e.isAlive() && e != mc.player);
+        List<Entity> candidates = mc.level.getEntities(mc.player,
+                mc.player.getBoundingBox().expandTowards(lookVec.scale(rayLength)),
+                e -> e instanceof Player && e.isAlive() && e != mc.player);
 
         candidates.sort(Comparator.comparingDouble(e ->
-                eyePos.squaredDistanceTo(e.getBoundingBox().getCenter())));
+                eyePos.distanceToSqr(e.getBoundingBox().getCenter())));
 
         double coneAngle = 0.999;
         for (Entity e : candidates) {
             double dist = eyePos.distanceTo(e.getBoundingBox().getCenter());
             if (dist > maxRange) break;
 
-            Vec3d toEntity = e.getBoundingBox().getCenter().subtract(eyePos).normalize();
+            Vec3 toEntity = e.getBoundingBox().getCenter().subtract(eyePos).normalize();
 
-            if (lookVec.dotProduct(toEntity) > coneAngle) {
+            if (lookVec.dot(toEntity) > coneAngle) {
                 return e;
             }
         }
@@ -229,10 +229,10 @@ public class UUIDBan extends Module {
     }
     private void runBanCommands(){
         if (uuidCollectionMode.get() == uuidCollectionModes.AllPlayers) {
-            if (mc.getNetworkHandler() != null) {
-                playerlistattimeofkick = List.copyOf(mc.getNetworkHandler().getPlayerList());
-                for (PlayerListEntry entry : playerlistattimeofkick) {
-                    if (!allPlayersAndSelf.get() && entry.getProfile().id().equals(mc.player.getUuid())) continue;
+            if (mc.getConnection() != null) {
+                playerlistattimeofkick = List.copyOf(mc.getConnection().getOnlinePlayers());
+                for (PlayerInfo entry : playerlistattimeofkick) {
+                    if (!allPlayersAndSelf.get() && entry.getProfile().id().equals(mc.player.getUUID())) continue;
                     if (ignorefrend.get() && Friends.get().isFriend(entry)) continue;
                     entityUUID = entry.getProfile().id();
                     entityName = entry.getProfile().name();
@@ -272,26 +272,26 @@ public class UUIDBan extends Module {
         String kickCommand = String.format("kick \"%s\"", playerName);
         String summonCommand = String.format("summon villager ~ ~ ~ " + makeEntityNBT(entityuuid));
 
-        mc.player.networkHandler.sendChatCommand(kickCommand);
+        mc.player.connection.sendCommand(kickCommand);
         pendingCommand = summonCommand;
     }
     private UUID getPlayerUUIDFromName(String playerName) {
-        if (mc.getNetworkHandler() != null) {
-            for (PlayerListEntry entry : mc.getNetworkHandler().getPlayerList()) {
+        if (mc.getConnection() != null) {
+            for (PlayerInfo entry : mc.getConnection().getOnlinePlayers()) {
                 if (entry.getProfile().name().equalsIgnoreCase(playerName)) {
                     return entry.getProfile().id();
                 }
             }
         }
 
-        for (AbstractClientPlayerEntity player : mc.world.getPlayers()) {
+        for (AbstractClientPlayer player : mc.level.players()) {
             if (player.getGameProfile().name().equalsIgnoreCase(playerName)) {
-                return player.getUuid();
+                return player.getUUID();
             }
         }
 
         if (mc.player != null && mc.player.getGameProfile().name().equalsIgnoreCase(playerName)) {
-            return mc.player.getUuid();
+            return mc.player.getUUID();
         }
 
         if (chatFeedback)warning("Player '" + playerName + "' not found anywhere.");

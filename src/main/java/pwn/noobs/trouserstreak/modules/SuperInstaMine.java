@@ -10,15 +10,15 @@ import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ShearsItem;
-import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ShearsItem;
+import net.minecraft.world.level.block.Block;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.List;
@@ -30,6 +30,12 @@ public class SuperInstaMine extends Module {
     public enum listModes {
         whitelist, blacklist
     }
+    private final Setting<Boolean> toolChecker = sgGeneral.add(new BoolSetting.Builder()
+            .name("Tool Checker")
+            .description("Only send packets to break blocks when holding the appropriate tool. This excludes the central targeted block")
+            .defaultValue(true)
+            .build()
+    );
     private final Setting<listModes> listmode = sgGeneral.add(new EnumSetting.Builder<listModes>()
             .name("List Mode")
             .description("Whether to break or not break the block list.")
@@ -118,7 +124,7 @@ public class SuperInstaMine extends Module {
     );
 
     private int ticks;
-    private final BlockPos.Mutable[] bPos = new BlockPos.Mutable[27];
+    private final BlockPos.MutableBlockPos[] bPos = new BlockPos.MutableBlockPos[27];
     private Direction direction;
     private Direction playerMoveDir;
     private int playerpitch;
@@ -133,19 +139,19 @@ public class SuperInstaMine extends Module {
         startBreak = false;
         ticks = 0;
         for (int i = 0; i < bPos.length; i++) {
-            bPos[i] = new BlockPos.Mutable(0, -128, 0);
+            bPos[i] = new BlockPos.MutableBlockPos(0, -128, 0);
         }
     }
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
         if (mc.player == null || startBreak) return;
-        if (event.packet instanceof PlayerActionC2SPacket){
-            PlayerActionC2SPacket actionPacket = (PlayerActionC2SPacket) event.packet;
-            if (actionPacket.getAction() == PlayerActionC2SPacket.Action.START_DESTROY_BLOCK){
+        if (event.packet instanceof ServerboundPlayerActionPacket){
+            ServerboundPlayerActionPacket actionPacket = (ServerboundPlayerActionPacket) event.packet;
+            if (actionPacket.getAction() == ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK){
                 direction = actionPacket.getDirection();
-                playerMoveDir = mc.player.getMovementDirection();
-                playerpitch= Math.round(mc.player.getPitch());
+                playerMoveDir = mc.player.getMotionDirection();
+                playerpitch= Math.round(mc.player.getXRot());
                 BlockPos center = actionPacket.getPos();
 
                 bPos[0].set(center);
@@ -183,7 +189,7 @@ public class SuperInstaMine extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (mc.player  == null || mc.world == null || bPos[0].getY() == -128) return;
+        if (mc.player  == null || mc.level == null || bPos[0].getY() == -128) return;
         if (ticks >= tickDelay.get()) {
             ticks = 0;
 
@@ -285,8 +291,8 @@ public class SuperInstaMine extends Module {
     }
 
     private boolean shouldBreak(BlockPos pos) {
-        if (mc.world == null || mc.player == null) return false;
-        Block block = mc.world.getBlockState(pos).getBlock();
+        if (mc.level == null || mc.player == null) return false;
+        Block block = mc.level.getBlockState(pos).getBlock();
 
         boolean listCheck;
         if (listmode.get() == listModes.whitelist) {
@@ -296,46 +302,46 @@ public class SuperInstaMine extends Module {
         }
 
         boolean toolCheck;
-        if (mc.player.getAbilities().creativeMode || !isTool(mc.player.getMainHandStack())) {
-            toolCheck = BlockUtils.canBreak(pos);
+        if (pos != bPos[0] && toolChecker.get() && !mc.player.getAbilities().instabuild && isTool(mc.player.getMainHandItem())) {
+            toolCheck = mc.player.getMainHandItem().isCorrectToolForDrops(mc.level.getBlockState(pos));
         } else {
-            toolCheck = mc.player.getMainHandStack().isSuitableFor(mc.world.getBlockState(pos));
+            toolCheck = BlockUtils.canBreak(pos);
         }
 
         return listCheck && toolCheck;
     }
     public static boolean isTool(ItemStack itemStack) {
-        return itemStack.isIn(ItemTags.AXES) || itemStack.isIn(ItemTags.HOES) || itemStack.isIn(ItemTags.PICKAXES) || itemStack.isIn(ItemTags.SHOVELS) || itemStack.getItem() instanceof ShearsItem;
+        return itemStack.is(ItemTags.AXES) || itemStack.is(ItemTags.HOES) || itemStack.is(ItemTags.PICKAXES) || itemStack.is(ItemTags.SHOVELS) || itemStack.getItem() instanceof ShearsItem;
     }
     private void doStartStopBreakPacket(BlockPos bp){
         if (!shouldBreak(bp)) return;
         startBreak=true;
-        mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, bp, direction));
+        mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, bp, direction));
         startBreak=false;
-        mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, bp, direction));
+        mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, bp, direction));
     }
     private void doRotatingBreakPacketWithSwing(){
         if (!shouldBreak(bPos[0])) return;
         if (swing.get()) {
-            mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
-            mc.player.swingHand(Hand.MAIN_HAND);
+            mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
+            mc.player.swing(InteractionHand.MAIN_HAND);
         }
-        if (rotate.get())Rotations.rotate(Rotations.getYaw(bPos[0]), Rotations.getPitch(bPos[0]), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, bPos[0], direction)));
-        else if (!rotate.get())mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, bPos[0], direction));
+        if (rotate.get())Rotations.rotate(Rotations.getYaw(bPos[0]), Rotations.getPitch(bPos[0]), () -> mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, bPos[0], direction)));
+        else if (!rotate.get())mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, bPos[0], direction));
         if (rotate.get())Rotations.rotate(Rotations.getYaw(bPos[0]), Rotations.getPitch(bPos[0]), () -> {
             startBreak=true;
-            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, bPos[0], direction));
+            mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, bPos[0], direction));
             startBreak=false;
         });
         else if (!rotate.get()){
             startBreak=true;
-            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, bPos[0], direction));
+            mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, bPos[0], direction));
             startBreak=false;
         }
     }
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (!render.get() || bPos[0].getY() == -128 || mc.world == null || mc.player == null) return;
+        if (!render.get() || bPos[0].getY() == -128 || mc.level == null || mc.player == null) return;
         if (shouldBreak(bPos[0]))event.renderer.box(bPos[0], sColor.get(), lColor.get(), shape.get(), 0);
         if (((range.get()==-1 && playerMoveDir==Direction.SOUTH) || (range.get()==1 && playerMoveDir==Direction.NORTH) || (range.get()==2 && (playerMoveDir==Direction.NORTH || playerMoveDir==Direction.SOUTH))) && shouldBreak(bPos[1])) event.renderer.box(bPos[1], sColor.get(), lColor.get(), shape.get(), 0);
         if (((range.get()==-1 && playerMoveDir==Direction.NORTH) || (range.get()==1 && playerMoveDir==Direction.SOUTH) || (range.get()==2 && (playerMoveDir==Direction.NORTH || playerMoveDir==Direction.SOUTH))) && shouldBreak(bPos[2])) event.renderer.box(bPos[2], sColor.get(), lColor.get(), shape.get(), 0);

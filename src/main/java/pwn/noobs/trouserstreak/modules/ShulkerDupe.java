@@ -10,13 +10,13 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.Direction;
+import net.minecraft.client.gui.screens.inventory.ShulkerBoxScreen;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import pwn.noobs.trouserstreak.Trouser;
 
 public class ShulkerDupe extends Module {
@@ -60,9 +60,9 @@ public class ShulkerDupe extends Module {
                 Modules.get().get(Timer.class).toggle();
             }
             for (int i = 0; i < 8; i++) {
-                if (autoT.get() && (mc.player.getInventory().getStack(0).isIn(ItemTags.PICKAXES) || mc.player.getInventory().getStack(1).isIn(ItemTags.PICKAXES) ||mc.player.getInventory().getStack(2).isIn(ItemTags.PICKAXES) ||mc.player.getInventory().getStack(3).isIn(ItemTags.PICKAXES) ||mc.player.getInventory().getStack(4).isIn(ItemTags.PICKAXES) ||mc.player.getInventory().getStack(5).isIn(ItemTags.PICKAXES) ||mc.player.getInventory().getStack(6).isIn(ItemTags.PICKAXES) ||mc.player.getInventory().getStack(7).isIn(ItemTags.PICKAXES) ||mc.player.getInventory().getStack(8).isIn(ItemTags.PICKAXES)) && !(mc.player.getMainHandStack().isIn(ItemTags.PICKAXES))){
-                    mc.player.getInventory().selectedSlot++;
-                    if (mc.player.getInventory().selectedSlot>8) mc.player.getInventory().selectedSlot=0;
+                if (autoT.get() && (mc.player.getInventory().getItem(0).is(ItemTags.PICKAXES) || mc.player.getInventory().getItem(1).is(ItemTags.PICKAXES) ||mc.player.getInventory().getItem(2).is(ItemTags.PICKAXES) ||mc.player.getInventory().getItem(3).is(ItemTags.PICKAXES) ||mc.player.getInventory().getItem(4).is(ItemTags.PICKAXES) ||mc.player.getInventory().getItem(5).is(ItemTags.PICKAXES) ||mc.player.getInventory().getItem(6).is(ItemTags.PICKAXES) ||mc.player.getInventory().getItem(7).is(ItemTags.PICKAXES) ||mc.player.getInventory().getItem(8).is(ItemTags.PICKAXES)) && !(mc.player.getMainHandItem().is(ItemTags.PICKAXES))){
+                    mc.player.getInventory().setSelectedSlot(mc.player.getInventory().getSelectedSlot() + 1);
+                    if (mc.player.getInventory().getSelectedSlot()>8) mc.player.getInventory().setSelectedSlot(0);
                 }
             }
         } else if (!shouldDupe| !shouldDupeAll){
@@ -75,28 +75,28 @@ public class ShulkerDupe extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (mc.currentScreen instanceof ShulkerBoxScreen && mc.player != null && mc.interactionManager != null) {
-            HitResult wow = mc.crosshairTarget;
+        if (mc.screen instanceof ShulkerBoxScreen && mc.player != null && mc.gameMode != null) {
+            HitResult wow = mc.hitResult;
             BlockHitResult a = (BlockHitResult) wow;
             if (shouldDupe| shouldDupeAll){
-                mc.interactionManager.updateBlockBreakingProgress(a.getBlockPos(), Direction.DOWN);
+                mc.gameMode.continueDestroyBlock(a.getBlockPos(), Direction.DOWN);
             }
         }
     }
 
     @EventHandler
     public void onSendPacket(PacketEvent.Sent event) {
-        if (event.packet instanceof PlayerActionC2SPacket && mc.interactionManager != null && mc.player != null) {
+        if (event.packet instanceof ServerboundPlayerActionPacket && mc.gameMode != null && mc.player != null) {
             if (shouldDupeAll){
-                if (((PlayerActionC2SPacket) event.packet).getAction() == PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK) {
+                if (((ServerboundPlayerActionPacket) event.packet).getAction() == ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK) {
                     for (int i = 0; i < 27; i++) {
-                        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, i, 0, SlotActionType.QUICK_MOVE, mc.player);
+                        mc.gameMode.handleContainerInput(mc.player.containerMenu.containerId, i, 0, ContainerInput.QUICK_MOVE, mc.player);
                     }
                     shouldDupeAll=false;
                 }
             } else if (shouldDupe){
-                if (((PlayerActionC2SPacket) event.packet).getAction() == PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK) {
-                    mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, 0, 0, SlotActionType.QUICK_MOVE, mc.player);
+                if (((ServerboundPlayerActionPacket) event.packet).getAction() == ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK) {
+                    mc.gameMode.handleContainerInput(mc.player.containerMenu.containerId, 0, 0, ContainerInput.QUICK_MOVE, mc.player);
                     shouldDupe=false;
                 }
             }

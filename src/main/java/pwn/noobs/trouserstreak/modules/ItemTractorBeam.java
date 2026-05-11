@@ -4,15 +4,15 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.AntiHunger;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import pwn.noobs.trouserstreak.Trouser;
 
 public class ItemTractorBeam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    public static final MinecraftClient mc = MinecraftClient.getInstance();
+    public static final Minecraft mc = Minecraft.getInstance();
     public final Setting<Integer> multiply = sgGeneral.add(new IntSetting.Builder()
             .name("Multiplier")
             .description("Higher values make success more likely at the cost of more hunger.")
@@ -33,16 +33,16 @@ public class ItemTractorBeam extends Module {
             Modules.get().get(AntiHunger.class).toggle();
             antihungerWasEnabled = true;
         }
-        mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_SPRINTING));
+        mc.player.connection.send(new ServerboundPlayerCommandPacket(mc.player, ServerboundPlayerCommandPacket.Action.START_SPRINTING));
         for (int i = 0; i < multiply.get(); i++) {
             sendmovementpackets();
         }
-        if (!mc.options.sprintKey.isPressed() || !mc.options.getSprintToggled().getValue()) mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.STOP_SPRINTING));
+        if (!mc.options.keySprint.isDown() || !mc.options.toggleSprint().get()) mc.player.connection.send(new ServerboundPlayerCommandPacket(mc.player, ServerboundPlayerCommandPacket.Action.STOP_SPRINTING));
         if (antihungerWasEnabled) Modules.get().get(AntiHunger.class).toggle();
         toggle();
     }
     private static void sendmovementpackets(){
-        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() - 0.00000000000001, mc.player.getZ(), true, mc.player.horizontalCollision));
-        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 0.00000000000001, mc.player.getZ(), false, mc.player.horizontalCollision));
+        mc.player.connection.send(new ServerboundMovePlayerPacket.Pos(mc.player.getX(), mc.player.getY() - 0.00000000000001, mc.player.getZ(), true, mc.player.horizontalCollision));
+        mc.player.connection.send(new ServerboundMovePlayerPacket.Pos(mc.player.getX(), mc.player.getY() + 0.00000000000001, mc.player.getZ(), false, mc.player.horizontalCollision));
     }
 }

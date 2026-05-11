@@ -11,28 +11,27 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.Flight;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.TypedEntityData;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtDouble;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.TypedEntityData;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 import pwn.noobs.trouserstreak.utils.PermissionUtils;
 
@@ -447,7 +446,7 @@ public class HandOfGod extends Module {
     public HandOfGod() {
         super(Trouser.operator, "HandOfGod", "Modify the world and troll players with automated /fill commands. (Must have OP status)");
     }
-    private CopyOnWriteArrayList<PlayerListEntry> players;
+    private CopyOnWriteArrayList<PlayerInfo> players;
     private int ticks=0;
     private int swpr=0;
     private boolean sweep=false;
@@ -466,8 +465,8 @@ public class HandOfGod extends Module {
     private int sZ;
     int i;
     public int adjustYValue(int yValue) {
-        int bottomY = mc.world.getBottomY();
-        int topY = mc.world.getTopYInclusive();
+        int bottomY = mc.level.getMinY();
+        int topY = mc.level.getMaxY();
 
         if (yValue < bottomY) {
             return bottomY;
@@ -495,31 +494,31 @@ public class HandOfGod extends Module {
         trollticks=0;
         terminateticks=0;
         if (voider.get()){
-            i=mc.player.getBlockPos().getY();
+            i=mc.player.blockPosition().getY();
         }
     }
 
     @EventHandler
     private void onMouseButton(MouseClickEvent event) {
-        if (mc.player == null || mc.world == null) return;
-        if (notOP.get() && PermissionUtils.getPermissionLevel(mc.player) < 2 && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+        if (mc.player == null || mc.level == null) return;
+        if (notOP.get() && PermissionUtils.getPermissionLevel(mc.player) < 2 && mc.level.hasChunk(mc.player.chunkPosition().x(), mc.player.chunkPosition().z())) {
             return;
         }
-        if (mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.interactionManager != null) {
-            HitResult hr = mc.getCameraEntity().raycast(900, 0, fluids.get());
-            Vec3d god = hr.getPos();
-            BlockPos pos = BlockPos.ofFloored(god);
+        if (mc.options.keyAttack.isDown() && mc.screen == null && mc.gameMode != null) {
+            HitResult hr = mc.getCameraEntity().pick(900, 0, fluids.get());
+            Vec3 god = hr.getLocation();
+            BlockPos pos = BlockPos.containing(god);
             if (lightning.get()) {
-                ItemStack rst = mc.player.getMainHandStack();
-                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
+                ItemStack rst = mc.player.getMainHandItem();
+                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePosition(), Direction.DOWN, BlockPos.containing(mc.player.getEyePosition()), false);
                 ItemStack Lightning = new ItemStack(Items.SALMON_SPAWN_EGG);
-                var changes = ComponentChanges.builder()
-                        .add(DataComponentTypes.ENTITY_DATA, createEntityData(pos))
+                var changes = DataComponentPatch.builder()
+                        .set(DataComponents.ENTITY_DATA, createEntityData(pos))
                         .build();
-                Lightning.applyChanges(changes);
-                mc.interactionManager.clickCreativeStack(Lightning, 36 + mc.player.getInventory().selectedSlot);
-                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
+                Lightning.applyComponentsAndValidate(changes);
+                mc.gameMode.handleCreativeModeItemAdd(Lightning, 36 + mc.player.getInventory().getSelectedSlot());
+                mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, bhr);
+                mc.gameMode.handleCreativeModeItemAdd(rst, 36 + mc.player.getInventory().getSelectedSlot());
             }
             String fullString = block.get().toString();
             String[] parts = fullString.split(":");
@@ -529,7 +528,7 @@ public class HandOfGod extends Module {
             String[] repparts = repfullString.split(":");
             String repblock = repparts[1];
             String repblockName = repblock.replace("}", "");
-            switch (mc.player.getHorizontalFacing()){
+            switch (mc.player.getDirection()){
                 case NORTH, SOUTH -> {
                     int x1 = pos.getX() + cwidth.get();
                     int y1 = pos.getY() + cheight.get();
@@ -556,43 +555,43 @@ public class HandOfGod extends Module {
 
     @EventHandler
     public void onTick(TickEvent.Pre event) {
-        if (mc.player == null || mc.world == null) return;
-        if (notOP.get() && PermissionUtils.getPermissionLevel(mc.player) < 2 && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+        if (mc.player == null || mc.level == null) return;
+        if (notOP.get() && PermissionUtils.getPermissionLevel(mc.player) < 2 && mc.level.hasChunk(mc.player.chunkPosition().x(), mc.player.chunkPosition().z())) {
             return;
         }
-        pX=mc.player.getBlockPos().getX();
-        pY=mc.player.getBlockPos().getY();
-        pZ=mc.player.getBlockPos().getZ();
+        pX=mc.player.blockPosition().getX();
+        pY=mc.player.blockPosition().getY();
+        pZ=mc.player.blockPosition().getZ();
         if (autosave.get()){
             asaveticks++;
             if (asaveticks>=autosavedelay.get()*20){
                 ChatUtils.sendPlayerMsg("/save-all");
                 asaveticks=0;
             }
-            if (mc.options.sneakKey.isPressed() && mc.options.backKey.isPressed()){
+            if (mc.options.keyShift.isDown() && mc.options.keyDown.isDown()){
                 ChatUtils.sendPlayerMsg("/save-all");
                 asaveticks=0;
             }
         }
-        if (auto.get() && mc.options.attackKey.isPressed() && mc.currentScreen == null) {
+        if (auto.get() && mc.options.keyAttack.isDown() && mc.screen == null) {
             if (aticks<=atickdelay.get()){
                 aticks++;
             } else if (aticks>atickdelay.get()){
-                HitResult hr = mc.getCameraEntity().raycast(900, 0, fluids.get());
-                Vec3d god = hr.getPos();
-                BlockPos pos = BlockPos.ofFloored(god);
+                HitResult hr = mc.getCameraEntity().pick(900, 0, fluids.get());
+                Vec3 god = hr.getLocation();
+                BlockPos pos = BlockPos.containing(god);
                 if (lightning.get()) {
-                    ItemStack rst = mc.player.getMainHandStack();
-                    BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
+                    ItemStack rst = mc.player.getMainHandItem();
+                    BlockHitResult bhr = new BlockHitResult(mc.player.getEyePosition(), Direction.DOWN, BlockPos.containing(mc.player.getEyePosition()), false);
                     ItemStack Lightning = new ItemStack(Items.SALMON_SPAWN_EGG);
-                    var changes = ComponentChanges.builder()
-                            .add(DataComponentTypes.ENTITY_DATA, createEntityData(pos))
+                    var changes = DataComponentPatch.builder()
+                            .set(DataComponents.ENTITY_DATA, createEntityData(pos))
                             .build();
-                    Lightning.applyChanges(changes);
+                    Lightning.applyComponentsAndValidate(changes);
 
-                    mc.interactionManager.clickCreativeStack(Lightning, 36 + mc.player.getInventory().selectedSlot);
-                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                    mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
+                    mc.gameMode.handleCreativeModeItemAdd(Lightning, 36 + mc.player.getInventory().getSelectedSlot());
+                    mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, bhr);
+                    mc.gameMode.handleCreativeModeItemAdd(rst, 36 + mc.player.getInventory().getSelectedSlot());
                 }
                 String fullString = block.get().toString();
                 String[] parts = fullString.split(":");
@@ -602,7 +601,7 @@ public class HandOfGod extends Module {
                 String[] repparts = repfullString.split(":");
                 String repblock = repparts[1];
                 String repblockName = repblock.replace("}", "");
-                switch (mc.player.getHorizontalFacing()){
+                switch (mc.player.getDirection()){
                     case NORTH, SOUTH -> {
                         int x1 = pos.getX() + cwidth.get();
                         int y1 = pos.getY() + cheight.get();
@@ -628,9 +627,9 @@ public class HandOfGod extends Module {
             }
         }
         if (SwpAway.get()){
-            if (mc.options.useKey.isPressed()){
+            if (mc.options.keyUse.isDown()){
                 sweep=true;
-            }else if (!mc.options.useKey.isPressed()) sweep=false;
+            }else if (!mc.options.keyUse.isDown()) sweep=false;
             if (!sweep){
                 sX=mc.player.getBlockX();
                 sY=mc.player.getBlockY();
@@ -645,7 +644,7 @@ public class HandOfGod extends Module {
                 String[] repparts = repfullString.split(":");
                 String repblock = repparts[1];
                 String repblockName = repblock.replace("}", "");
-                switch (mc.player.getHorizontalFacing()){
+                switch (mc.player.getDirection()){
                     case NORTH -> {
                         if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX - sweepradius.get()) + " " + adjustYValue((sY-sweepradius.get())) + " "+ (sZ - (sweepstart.get()+swpr)) +" "+ (sX + sweepradius.get()) + " " + adjustYValue((sY +sweepradius.get())) +" "+ (sZ - (sweepstart.get()+swpr)) + " " + sblockName);
                         else if (!replace.get())ChatUtils.sendPlayerMsg("/fill " + (sX - sweepradius.get()) + " " + adjustYValue((sY-sweepradius.get())) + " "+ (sZ - (sweepstart.get()+swpr)) +" "+ (sX + sweepradius.get()) + " " + adjustYValue((sY +sweepradius.get())) +" "+ (sZ - (sweepstart.get()+swpr)) + " " + sblockName + " replace " + repblockName);
@@ -678,7 +677,7 @@ public class HandOfGod extends Module {
                 String[] prepparts = prepfullString.split(":");
                 String prepblock = prepparts[1];
                 String pRepblockName = prepblock.replace("}", "");
-                switch (mc.player.getHorizontalFacing()){
+                switch (mc.player.getDirection()){
                     case NORTH, SOUTH -> {
                         if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill "+(pX+pwidth.get())+" "+adjustYValue((pY+pheight.get()))+" "+(pZ+pdepth.get())+" "+(pX-pwidth.get())+" "+adjustYValue((pY-pheight.get()))+" "+(pZ-pdepth.get())+" air");
                         else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill "+(pX+pwidth.get())+" "+adjustYValue((pY+pheight.get()))+" "+(pZ+pdepth.get())+" "+(pX-pwidth.get())+" "+adjustYValue((pY-pheight.get()))+" "+(pZ-pdepth.get())+" "+pBlockName+" replace "+pRepblockName);
@@ -700,11 +699,11 @@ public class HandOfGod extends Module {
             String[] prepparts = prepfullString.split(":");
             String prepblock = prepparts[1];
             String pRepblockName = prepblock.replace("}", "");
-            if (i>= mc.player.getBlockPos().getY()-vrange.get()){
+            if (i>= mc.player.blockPosition().getY()-vrange.get()){
                 if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + adjustYValue(i) +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + adjustYValue(i) +" "+ (pZ + radius.get()) +" air");
                 else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - radius.get()) + " " + adjustYValue(i) +" "+ (pZ - radius.get()) +" "+ (pX + radius.get()) + " " + adjustYValue(i) +" "+ (pZ + radius.get()) +" "+pBlockName+" replace "+pRepblockName);
                 i--;
-            }else if (i<= mc.player.getBlockPos().getY()-vrange.get()){
+            }else if (i<= mc.player.blockPosition().getY()-vrange.get()){
                 i=pY+vrange.get();
             }
 
@@ -726,16 +725,16 @@ public class HandOfGod extends Module {
             String[] prepparts = prepfullString.split(":");
             String prepblock = prepparts[1];
             String pRepblockName = prepblock.replace("}", "");
-            if (mc.options.jumpKey.isPressed()){
+            if (mc.options.keyJump.isDown()){
                 if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY+mgcdist.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcdist.get())) +" "+ (pZ + mgcradius.get()) +" air");
                 else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY+mgcdist.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcdist.get())) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
             }
-            if (mc.options.sneakKey.isPressed()){
+            if (mc.options.keyShift.isDown()){
                 if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcdist.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY-mgcdist.get())) +" "+ (pZ + mgcradius.get()) +" air");
                 else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcdist.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY-mgcdist.get())) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
             }
-            if (mc.options.forwardKey.isPressed()){
-                switch (mc.player.getHorizontalFacing()){
+            if (mc.options.keyUp.isDown()){
+                switch (mc.player.getDirection()){
                     case NORTH -> {
                         if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ - mgcdist.get()) +" air");
                         else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ - mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
@@ -754,8 +753,8 @@ public class HandOfGod extends Module {
                     }
                 }
             }
-            if (mc.options.backKey.isPressed()){
-                switch (mc.player.getHorizontalFacing()){
+            if (mc.options.keyDown.isDown()){
+                switch (mc.player.getDirection()){
                     case NORTH -> {
                         if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcdist.get()) +" air");
                         else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcradius.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ + mgcdist.get()) +" "+ (pX + mgcradius.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcdist.get()) +" "+pBlockName+" replace "+pRepblockName);
@@ -774,8 +773,8 @@ public class HandOfGod extends Module {
                     }
                 }
             }
-            if (mc.options.rightKey.isPressed()){
-                switch (mc.player.getHorizontalFacing()){
+            if (mc.options.keyRight.isDown()){
+                switch (mc.player.getDirection()){
                     case NORTH -> {
                         if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcradius.get()) +" air");
                         else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX + mgcdist.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX + mgcdist.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
@@ -794,8 +793,8 @@ public class HandOfGod extends Module {
                     }
                 }
             }
-            if (mc.options.leftKey.isPressed()){
-                switch (mc.player.getHorizontalFacing()){
+            if (mc.options.keyLeft.isDown()){
+                switch (mc.player.getDirection()){
                     case NORTH -> {
                         if (!pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcradius.get()) +" air");
                         else if (pReplace.get()) ChatUtils.sendPlayerMsg("/fill " + (pX - mgcdist.get()) + " " + adjustYValue((pY-mgcradius.get())) + " "+ (pZ - mgcradius.get()) +" "+ (pX - mgcdist.get()) + " " + adjustYValue((pY+mgcradius.get())) +" "+ (pZ + mgcradius.get()) +" "+pBlockName+" replace "+pRepblockName);
@@ -844,14 +843,14 @@ public class HandOfGod extends Module {
                     //every player in server, default
                     if (trollfriends.get()) {
                         if (!trollreplace.get())
-                            ChatUtils.sendPlayerMsg("/execute at @a[name=!" + mc.player.getName().getLiteralString() + "] run fill " + "~" + trollwidth.get() + " " + "~" + trollheight.get() + " " + "~" + trolldepth.get() + " " + "~-" + trollwidth.get() + " " + "~-" + trollheight.get() + " " + "~-" + trolldepth.get() + " " + tBlockName);
+                            ChatUtils.sendPlayerMsg("/execute at @a[name=!" + mc.player.getName().tryCollapseToString() + "] run fill " + "~" + trollwidth.get() + " " + "~" + trollheight.get() + " " + "~" + trolldepth.get() + " " + "~-" + trollwidth.get() + " " + "~-" + trollheight.get() + " " + "~-" + trolldepth.get() + " " + tBlockName);
                         else if (trollreplace.get())
-                            ChatUtils.sendPlayerMsg("/execute at @a[name=!" + mc.player.getName().getLiteralString() + "] run fill " + "~" + trollwidth.get() + " " + "~" + trollheight.get() + " " + "~" + trolldepth.get() + " " + "~-" + trollwidth.get() + " " + "~-" + trollheight.get() + " " + "~-" + trolldepth.get() + " " + tBlockName + " replace " + tRepblockName);
+                            ChatUtils.sendPlayerMsg("/execute at @a[name=!" + mc.player.getName().tryCollapseToString() + "] run fill " + "~" + trollwidth.get() + " " + "~" + trollheight.get() + " " + "~" + trolldepth.get() + " " + "~-" + trollwidth.get() + " " + "~-" + trollheight.get() + " " + "~-" + trolldepth.get() + " " + tBlockName + " replace " + tRepblockName);
                     } else if (!trollfriends.get()) {
-                        players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
+                        players = new CopyOnWriteArrayList<>(mc.getConnection().getOnlinePlayers());
                         List<String> friendNames = new ArrayList<>();
-                        friendNames.add("name=!" + mc.player.getName().getLiteralString());
-                        for (PlayerListEntry player : players) {
+                        friendNames.add("name=!" + mc.player.getName().tryCollapseToString());
+                        for (PlayerInfo player : players) {
                             if (Friends.get().isFriend(player) && !trollfriends.get())
                                 friendNames.add("name=!" + player.getProfile().name());
                         }
@@ -877,19 +876,19 @@ public class HandOfGod extends Module {
                     }
                 } else if (trollrenderdist.get()){
                     //every player in render distance
-                    for (Entity entity : mc.world.getEntities()) {
-                        if (entity instanceof PlayerEntity && entity != mc.player){
-                            if (!trollfriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) {
+                    for (Entity entity : mc.level.entitiesForRendering()) {
+                        if (entity instanceof Player && entity != mc.player){
+                            if (!trollfriends.get() && entity instanceof Player && Friends.get().isFriend((Player) entity)) {
                                 return;
                             }
-                            switch (entity.getHorizontalFacing()){
+                            switch (entity.getDirection()){
                                 case NORTH, SOUTH -> {
-                                    if (!trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trollwidth.get())+" "+adjustYValue((entity.getBlockPos().getY()+trollheight.get()))+" "+(entity.getBlockPos().getZ()+trolldepth.get())+" "+(entity.getBlockPos().getX()-trollwidth.get())+" "+adjustYValue((entity.getBlockPos().getY()-trollheight.get()))+" "+(entity.getBlockPos().getZ()-trolldepth.get())+" "+tBlockName);
-                                    else if (trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trollwidth.get())+" "+adjustYValue((entity.getBlockPos().getY()+trollheight.get()))+" "+(entity.getBlockPos().getZ()+trolldepth.get())+" "+(entity.getBlockPos().getX()-trollwidth.get())+" "+adjustYValue((entity.getBlockPos().getY()-trollheight.get()))+" "+(entity.getBlockPos().getZ()-trolldepth.get())+" "+tBlockName+" replace "+tRepblockName);
+                                    if (!trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.blockPosition().getX()+trollwidth.get())+" "+adjustYValue((entity.blockPosition().getY()+trollheight.get()))+" "+(entity.blockPosition().getZ()+trolldepth.get())+" "+(entity.blockPosition().getX()-trollwidth.get())+" "+adjustYValue((entity.blockPosition().getY()-trollheight.get()))+" "+(entity.blockPosition().getZ()-trolldepth.get())+" "+tBlockName);
+                                    else if (trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.blockPosition().getX()+trollwidth.get())+" "+adjustYValue((entity.blockPosition().getY()+trollheight.get()))+" "+(entity.blockPosition().getZ()+trolldepth.get())+" "+(entity.blockPosition().getX()-trollwidth.get())+" "+adjustYValue((entity.blockPosition().getY()-trollheight.get()))+" "+(entity.blockPosition().getZ()-trolldepth.get())+" "+tBlockName+" replace "+tRepblockName);
                                 }
                                 case EAST, WEST -> {
-                                    if (!trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trolldepth.get())+" "+adjustYValue((entity.getBlockPos().getY()+trollheight.get()))+" "+(entity.getBlockPos().getZ()+trollwidth.get())+" "+(entity.getBlockPos().getX()-trolldepth.get())+" "+adjustYValue((entity.getBlockPos().getY()-trollheight.get()))+" "+(entity.getBlockPos().getZ()-trollwidth.get())+" "+tBlockName);
-                                    else if (trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+trolldepth.get())+" "+adjustYValue((entity.getBlockPos().getY()+trollheight.get()))+" "+(entity.getBlockPos().getZ()+trollwidth.get())+" "+(entity.getBlockPos().getX()-trolldepth.get())+" "+adjustYValue((entity.getBlockPos().getY()-trollheight.get()))+" "+(entity.getBlockPos().getZ()-trollwidth.get())+" "+tBlockName+" replace "+tRepblockName);
+                                    if (!trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.blockPosition().getX()+trolldepth.get())+" "+adjustYValue((entity.blockPosition().getY()+trollheight.get()))+" "+(entity.blockPosition().getZ()+trollwidth.get())+" "+(entity.blockPosition().getX()-trolldepth.get())+" "+adjustYValue((entity.blockPosition().getY()-trollheight.get()))+" "+(entity.blockPosition().getZ()-trollwidth.get())+" "+tBlockName);
+                                    else if (trollreplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.blockPosition().getX()+trolldepth.get())+" "+adjustYValue((entity.blockPosition().getY()+trollheight.get()))+" "+(entity.blockPosition().getZ()+trollwidth.get())+" "+(entity.blockPosition().getX()-trolldepth.get())+" "+adjustYValue((entity.blockPosition().getY()-trollheight.get()))+" "+(entity.blockPosition().getZ()-trollwidth.get())+" "+tBlockName+" replace "+tRepblockName);
                                 }
                             }
                         }
@@ -918,16 +917,16 @@ public class HandOfGod extends Module {
                         ChatUtils.sendPlayerMsg("/execute at @e[type=!player] run fill " + "~" + terminatewidth.get() + " " + "~" + terminateheight.get() + " " + "~" + terminatedepth.get() + " " + "~-" + terminatewidth.get() + " " + "~-" + terminateheight.get() + " " + "~-" + terminatedepth.get() + " " + tBlockName + " replace " + tRepblockName);
                 } else if (terminaterenderdist.get()){
                     //every entity in just your render distance
-                    for (Entity entity : mc.world.getEntities()) {
-                        if (!(entity instanceof PlayerEntity)){
-                            switch (entity.getHorizontalFacing()){
+                    for (Entity entity : mc.level.entitiesForRendering()) {
+                        if (!(entity instanceof Player)){
+                            switch (entity.getDirection()){
                                 case NORTH, SOUTH -> {
-                                    if (!terminatereplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+terminatewidth.get())+" "+adjustYValue((entity.getBlockPos().getY()+terminateheight.get()))+" "+(entity.getBlockPos().getZ()+terminatedepth.get())+" "+(entity.getBlockPos().getX()-terminatewidth.get())+" "+adjustYValue((entity.getBlockPos().getY()-terminateheight.get()))+" "+(entity.getBlockPos().getZ()-terminatedepth.get())+" "+tBlockName);
-                                    else if (terminatereplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+terminatewidth.get())+" "+adjustYValue((entity.getBlockPos().getY()+terminateheight.get()))+" "+(entity.getBlockPos().getZ()+terminatedepth.get())+" "+(entity.getBlockPos().getX()-terminatewidth.get())+" "+adjustYValue((entity.getBlockPos().getY()-terminateheight.get()))+" "+(entity.getBlockPos().getZ()-terminatedepth.get())+" "+tBlockName+" replace "+tRepblockName);
+                                    if (!terminatereplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.blockPosition().getX()+terminatewidth.get())+" "+adjustYValue((entity.blockPosition().getY()+terminateheight.get()))+" "+(entity.blockPosition().getZ()+terminatedepth.get())+" "+(entity.blockPosition().getX()-terminatewidth.get())+" "+adjustYValue((entity.blockPosition().getY()-terminateheight.get()))+" "+(entity.blockPosition().getZ()-terminatedepth.get())+" "+tBlockName);
+                                    else if (terminatereplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.blockPosition().getX()+terminatewidth.get())+" "+adjustYValue((entity.blockPosition().getY()+terminateheight.get()))+" "+(entity.blockPosition().getZ()+terminatedepth.get())+" "+(entity.blockPosition().getX()-terminatewidth.get())+" "+adjustYValue((entity.blockPosition().getY()-terminateheight.get()))+" "+(entity.blockPosition().getZ()-terminatedepth.get())+" "+tBlockName+" replace "+tRepblockName);
                                 }
                                 case EAST, WEST -> {
-                                    if (!terminatereplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+terminatedepth.get())+" "+adjustYValue((entity.getBlockPos().getY()+terminateheight.get()))+" "+(entity.getBlockPos().getZ()+terminatewidth.get())+" "+(entity.getBlockPos().getX()-terminatedepth.get())+" "+adjustYValue((entity.getBlockPos().getY()-terminateheight.get()))+" "+(entity.getBlockPos().getZ()-terminatewidth.get())+" "+tBlockName);
-                                    else if (terminatereplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.getBlockPos().getX()+terminatedepth.get())+" "+adjustYValue((entity.getBlockPos().getY()+terminateheight.get()))+" "+(entity.getBlockPos().getZ()+terminatewidth.get())+" "+(entity.getBlockPos().getX()-terminatedepth.get())+" "+adjustYValue((entity.getBlockPos().getY()-terminateheight.get()))+" "+(entity.getBlockPos().getZ()-terminatewidth.get())+" "+tBlockName+" replace "+tRepblockName);
+                                    if (!terminatereplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.blockPosition().getX()+terminatedepth.get())+" "+adjustYValue((entity.blockPosition().getY()+terminateheight.get()))+" "+(entity.blockPosition().getZ()+terminatewidth.get())+" "+(entity.blockPosition().getX()-terminatedepth.get())+" "+adjustYValue((entity.blockPosition().getY()-terminateheight.get()))+" "+(entity.blockPosition().getZ()-terminatewidth.get())+" "+tBlockName);
+                                    else if (terminatereplace.get()) ChatUtils.sendPlayerMsg("/fill "+(entity.blockPosition().getX()+terminatedepth.get())+" "+adjustYValue((entity.blockPosition().getY()+terminateheight.get()))+" "+(entity.blockPosition().getZ()+terminatewidth.get())+" "+(entity.blockPosition().getX()-terminatedepth.get())+" "+adjustYValue((entity.blockPosition().getY()-terminateheight.get()))+" "+(entity.blockPosition().getZ()-terminatewidth.get())+" "+tBlockName+" replace "+tRepblockName);
                                 }
                             }
                         }
@@ -938,13 +937,13 @@ public class HandOfGod extends Module {
         }
     }
     private TypedEntityData<EntityType<?>> createEntityData(BlockPos pos) {
-        NbtCompound entityTag = new NbtCompound();
-        NbtList Pos = new NbtList();
-        Pos.add(NbtDouble.of(pos.getX()));
-        Pos.add(NbtDouble.of(pos.getY()));
-        Pos.add(NbtDouble.of(pos.getZ()));
+        CompoundTag entityTag = new CompoundTag();
+        ListTag Pos = new ListTag();
+        Pos.add(DoubleTag.valueOf(pos.getX()));
+        Pos.add(DoubleTag.valueOf(pos.getY()));
+        Pos.add(DoubleTag.valueOf(pos.getZ()));
         entityTag.put("Pos", Pos);
         entityTag.putString("id", "minecraft:lightning_bolt");
-        return TypedEntityData.create(EntityType.LIGHTNING_BOLT, entityTag);
+        return TypedEntityData.of(EntityType.LIGHTNING_BOLT, entityTag);
     }
 }

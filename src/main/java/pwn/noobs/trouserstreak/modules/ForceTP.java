@@ -8,29 +8,29 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.TypedEntityData;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtDouble;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.Identifier;
-import net.minecraft.registry.Registries;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.TypedEntityData;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.Comparator;
@@ -201,22 +201,22 @@ public class ForceTP extends Module {
         entityUUID = null;
         aticks = 0;
         ticks = 0;
-        if (!clicksummon.get() && mc.currentScreen == null) {
+        if (!clicksummon.get() && mc.screen == null) {
             spawnPearlAtTarget();
         }
     }
 
     @EventHandler
     public void onTick(TickEvent.Post event) {
-        if (mc.player == null || mc.world == null) return;
+        if (mc.player == null || mc.level == null) return;
 
-        if (!mc.player.getAbilities().creativeMode) {
+        if (!mc.player.getAbilities().instabuild) {
             error("You need to be in creative mode.");
             toggle();
             return;
         }
 
-        if (clicksummon.get() && auto.get() && mc.options.attackKey.isPressed() && mc.currentScreen == null) {
+        if (clicksummon.get() && auto.get() && mc.options.keyAttack.isDown() && mc.screen == null) {
             if (aticks <= atickdelay.get()) {
                 aticks++;
             } else {
@@ -224,7 +224,7 @@ public class ForceTP extends Module {
                 aticks = 0;
             }
         }
-        if (!clicksummon.get() && mc.currentScreen == null) {
+        if (!clicksummon.get() && mc.screen == null) {
             if (ticks <= tickdelay.get()) {
                 ticks++;
             } else {
@@ -236,71 +236,71 @@ public class ForceTP extends Module {
 
     @EventHandler
     private void onMouseButton(MouseClickEvent event) {
-        if (mc.player == null || mc.world == null) return;
+        if (mc.player == null || mc.level == null) return;
 
-        if (clicksummon.get() && mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player.getAbilities().creativeMode) {
+        if (clicksummon.get() && mc.options.keyAttack.isDown() && mc.screen == null && mc.player.getAbilities().instabuild) {
             spawnPearlAtTarget();
         }
-        if (uuidCollectionMode.get() == uuidCollectionModes.RightClick && mc.options.useKey.isPressed() && mc.currentScreen == null) {
+        if (uuidCollectionMode.get() == uuidCollectionModes.RightClick && mc.options.keyUse.isDown() && mc.screen == null) {
             Entity targetEntity = target();
             if (targetEntity != null && targetEntity.isAlive() && targetEntity != mc.player) {
-                entityUUID = targetEntity.getUuid();
-                if (chatFeedback)info("Target entity UUID saved: " + targetEntity.getName().getString() + ". UUID: " + targetEntity.getUuid());
+                entityUUID = targetEntity.getUUID();
+                if (chatFeedback)info("Target entity UUID saved: " + targetEntity.getName().getString() + ". UUID: " + targetEntity.getUUID());
             }
         }
-        if (uuidCollectionMode.get() == uuidCollectionModes.RightClick && resetUUID.get().isPressed() && mc.currentScreen == null){
+        if (uuidCollectionMode.get() == uuidCollectionModes.RightClick && resetUUID.get().isPressed() && mc.screen == null){
             if (chatFeedback)info("Resetting saved entity.");
             entityUUID = null;
         }
     }
 
     private Entity target() {
-        if (mc.player == null || mc.world == null) return null;
-        if (mc.crosshairTarget instanceof EntityHitResult hit) return hit.getEntity();
+        if (mc.player == null || mc.level == null) return null;
+        if (mc.hitResult instanceof EntityHitResult hit) return hit.getEntity();
 
         double maxRange = 512;
-        Vec3d eyePos = mc.player.getEyePos();
-        Vec3d lookVec = mc.player.getRotationVec(1.0f);
+        Vec3 eyePos = mc.player.getEyePosition();
+        Vec3 lookVec = mc.player.getViewVector(1.0f);
 
-        HitResult blockHit = mc.world.raycast(new RaycastContext(eyePos,
-                eyePos.add(lookVec.multiply(maxRange)), RaycastContext.ShapeType.COLLIDER,
-                RaycastContext.FluidHandling.NONE, mc.player));
+        HitResult blockHit = mc.level.clip(new ClipContext(eyePos,
+                eyePos.add(lookVec.scale(maxRange)), ClipContext.Block.COLLIDER,
+                ClipContext.Fluid.NONE, mc.player));
         double rayLength = blockHit.getType() == HitResult.Type.MISS ? maxRange :
-                eyePos.distanceTo(blockHit.getPos());
+                eyePos.distanceTo(blockHit.getLocation());
 
-        List<Entity> candidates = mc.world.getOtherEntities(mc.player,
-                mc.player.getBoundingBox().stretch(lookVec.multiply(rayLength)),
+        List<Entity> candidates = mc.level.getEntities(mc.player,
+                mc.player.getBoundingBox().expandTowards(lookVec.scale(rayLength)),
                 e -> (onlyliving.get() && e instanceof LivingEntity && e.isAlive()) || !onlyliving.get());
 
         candidates.sort(Comparator.comparingDouble(e ->
-                eyePos.squaredDistanceTo(e.getBoundingBox().getCenter())));
+                eyePos.distanceToSqr(e.getBoundingBox().getCenter())));
 
         double coneAngle = 0.999;
         for (Entity e : candidates) {
             double dist = eyePos.distanceTo(e.getBoundingBox().getCenter());
             if (dist > maxRange) break;
 
-            Vec3d toEntity = e.getBoundingBox().getCenter().subtract(eyePos).normalize();
+            Vec3 toEntity = e.getBoundingBox().getCenter().subtract(eyePos).normalize();
 
-            if (lookVec.dotProduct(toEntity) > coneAngle) {
+            if (lookVec.dot(toEntity) > coneAngle) {
                 return e;
             }
         }
         return null;
     }
     private void spawnPearlAtTarget() {
-        ItemStack rst = mc.player.getMainHandStack();
+        ItemStack rst = mc.player.getMainHandItem();
         BlockHitResult bhr = new BlockHitResult(
-                mc.player.getEyePos(),
+                mc.player.getEyePosition(),
                 Direction.DOWN,
-                BlockPos.ofFloored(mc.player.getEyePos()),
+                BlockPos.containing(mc.player.getEyePosition()),
                 false
         );
 
         if (uuidCollectionMode.get() == uuidCollectionModes.AllPlayers) {
-            if (mc.getNetworkHandler() != null) {
-                for (PlayerListEntry entry : mc.getNetworkHandler().getPlayerList()) {
-                    if (!allPlayersAndSelf.get() && entry.getProfile().id().equals(mc.player.getUuid())) continue;
+            if (mc.getConnection() != null) {
+                for (PlayerInfo entry : mc.getConnection().getOnlinePlayers()) {
+                    if (!allPlayersAndSelf.get() && entry.getProfile().id().equals(mc.player.getUUID())) continue;
                     if (ignorefrend.get() && Friends.get().isFriend(entry)) continue;
 
                     switch (targetplayeruuidMode.get()){
@@ -357,37 +357,37 @@ public class ForceTP extends Module {
             return;
         }
         ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
-        var changes = ComponentChanges.builder()
-                .add(DataComponentTypes.ENTITY_DATA, createEnderPearlData(entityuuid))
+        var changes = DataComponentPatch.builder()
+                .set(DataComponents.ENTITY_DATA, createEnderPearlData(entityuuid))
                 .build();
-        item.applyChanges(changes);
+        item.applyComponentsAndValidate(changes);
 
-        mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
-        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-        mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
+        mc.gameMode.handleCreativeModeItemAdd(item, 36 + mc.player.getInventory().getSelectedSlot());
+        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, bhr);
+        mc.gameMode.handleCreativeModeItemAdd(rst, 36 + mc.player.getInventory().getSelectedSlot());
     }
     private TypedEntityData<EntityType<?>> createEnderPearlData(UUID entityuuid) {
-        NbtCompound entityTag = new NbtCompound();
+        CompoundTag entityTag = new CompoundTag();
 
-        HitResult hr = mc.getCameraEntity().raycast(range.get(), 0, fluid.get());
-        Vec3d hitPos = hr.getPos();
+        HitResult hr = mc.getCameraEntity().pick(range.get(), 0, fluid.get());
+        Vec3 hitPos = hr.getLocation();
 
-        BlockPos bp = BlockPos.ofFloored(hitPos);
-        NbtList posList = new NbtList();
+        BlockPos bp = BlockPos.containing(hitPos);
+        ListTag posList = new ListTag();
         switch (teleportMode.get()){
             case OnTarget -> {
-                posList.add(NbtDouble.of(bp.getX() + 0.5));
-                posList.add(NbtDouble.of(bp.getY() + 0.5));
-                posList.add(NbtDouble.of(bp.getZ() + 0.5));
+                posList.add(DoubleTag.valueOf(bp.getX() + 0.5));
+                posList.add(DoubleTag.valueOf(bp.getY() + 0.5));
+                posList.add(DoubleTag.valueOf(bp.getZ() + 0.5));
             }
             case ToVoid -> {
-                posList.add(NbtDouble.of(mc.player.getX()));
-                posList.add(NbtDouble.of(mc.world.getBottomY()-1));
-                posList.add(NbtDouble.of(mc.player.getZ()));
+                posList.add(DoubleTag.valueOf(mc.player.getX()));
+                posList.add(DoubleTag.valueOf(mc.level.getMinY()-1));
+                posList.add(DoubleTag.valueOf(mc.player.getZ()));
             }
             case ToPlayer -> {
-                AbstractClientPlayerEntity targetPlayer = null;
-                for (AbstractClientPlayerEntity player : mc.world.getPlayers()) {
+                AbstractClientPlayer targetPlayer = null;
+                for (AbstractClientPlayer player : mc.level.players()) {
                     switch (targetplayeruuidMode.get()) {
                         case PlayerName -> {
                             if (player.getName().getString().equals(targetplayercustomPlayerName.get())) {
@@ -395,7 +395,7 @@ public class ForceTP extends Module {
                             }
                         }
                         case UUID -> {
-                            if (player.getUuid().toString().equals(targetplayercustomuuid.get())) {
+                            if (player.getUUID().toString().equals(targetplayercustomuuid.get())) {
                                 targetPlayer = player;
                             }
                         }
@@ -403,31 +403,31 @@ public class ForceTP extends Module {
                     if (targetPlayer != null) break;
                 }
                 if (targetPlayer != null) {
-                    posList.add(NbtDouble.of(targetPlayer.getX()));
-                    posList.add(NbtDouble.of(targetPlayer.getY()));
-                    posList.add(NbtDouble.of(targetPlayer.getZ()));
+                    posList.add(DoubleTag.valueOf(targetPlayer.getX()));
+                    posList.add(DoubleTag.valueOf(targetPlayer.getY()));
+                    posList.add(DoubleTag.valueOf(targetPlayer.getZ()));
                 }
             }
         }
         entityTag.put("Pos", posList);
 
-        Vec3d eyePos = mc.player.getEyePos();
-        Vec3d dir = null;
+        Vec3 eyePos = mc.player.getEyePosition();
+        Vec3 dir = null;
         switch (teleportMode.get()){
             case OnTarget -> {
                 dir = hitPos.subtract(eyePos);
-                if (dir.lengthSquared() > 0) {
-                    dir = dir.normalize().multiply(velocity.get());
+                if (dir.lengthSqr() > 0) {
+                    dir = dir.normalize().scale(velocity.get());
                 }
             }
-            case ToVoid -> dir = new Vec3d(0, velocity.get(), 0);
-            case ToPlayer -> dir = new Vec3d(0, -velocity.get(), 0);
+            case ToVoid -> dir = new Vec3(0, velocity.get(), 0);
+            case ToPlayer -> dir = new Vec3(0, -velocity.get(), 0);
         }
-        NbtList motionList = new NbtList();
+        ListTag motionList = new ListTag();
         if (dir != null){
-            motionList.add(NbtDouble.of(dir.x));
-            motionList.add(NbtDouble.of(dir.y));
-            motionList.add(NbtDouble.of(dir.z));  
+            motionList.add(DoubleTag.valueOf(dir.x));
+            motionList.add(DoubleTag.valueOf(dir.y));
+            motionList.add(DoubleTag.valueOf(dir.z));  
         }
         entityTag.put("Motion", motionList);
 
@@ -448,14 +448,14 @@ public class ForceTP extends Module {
         entityTag.putString("id", "minecraft:ender_pearl");
 
         Identifier entityId = Identifier.tryParse("minecraft:ender_pearl");
-        EntityType<?> entityType = Registries.ENTITY_TYPE.get(entityId);
+        EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.getValue(entityId);
         if (entityType == null) entityType = EntityType.ENDER_PEARL;
 
-        return TypedEntityData.create(entityType, entityTag);
+        return TypedEntityData.of(entityType, entityTag);
     }
     private UUID getPlayerUUIDFromName(String playerName) {
-        if (mc.getNetworkHandler() != null) {
-            for (PlayerListEntry entry : mc.getNetworkHandler().getPlayerList()) {
+        if (mc.getConnection() != null) {
+            for (PlayerInfo entry : mc.getConnection().getOnlinePlayers()) {
                 if (entry.getProfile().name().equalsIgnoreCase(playerName)) {
                     UUID uuid = entry.getProfile().id();
                     return uuid;
@@ -463,14 +463,14 @@ public class ForceTP extends Module {
             }
         }
 
-        for (AbstractClientPlayerEntity player : mc.world.getPlayers()) {
+        for (AbstractClientPlayer player : mc.level.players()) {
             if (player.getGameProfile().name().equalsIgnoreCase(playerName)) {
-                return player.getUuid();
+                return player.getUUID();
             }
         }
 
         if (mc.player != null && mc.player.getGameProfile().name().equalsIgnoreCase(playerName)) {
-            return mc.player.getUuid();
+            return mc.player.getUUID();
         }
 
         if (chatFeedback)warning("Player '" + playerName + "' not found anywhere.");

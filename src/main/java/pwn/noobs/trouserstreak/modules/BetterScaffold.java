@@ -19,14 +19,14 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.FallingBlock;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FallingBlock;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.ArrayList;
@@ -178,8 +178,8 @@ public class BetterScaffold extends Module {
     private final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
     private final List<RenderBlock> renderBlocks = new ArrayList<>();
 
-    private final BlockPos.Mutable bp = new BlockPos.Mutable();
-    private final BlockPos.Mutable prevBp = new BlockPos.Mutable();
+    private final BlockPos.MutableBlockPos bp = new BlockPos.MutableBlockPos();
+    private final BlockPos.MutableBlockPos prevBp = new BlockPos.MutableBlockPos();
     private int initialY;
 
     private boolean lastWasSneaking;
@@ -193,7 +193,7 @@ public class BetterScaffold extends Module {
     public void onActivate() {
         if (mc.player == null) return;
         initialY = mc.player.getBlockY()-1;
-        lastWasSneaking = mc.options.sneakKey.isPressed();
+        lastWasSneaking = mc.options.keyShift.isDown();
         if (lastWasSneaking) {
             assert mc.player != null;
             lastSneakingY = mc.player.getY();
@@ -217,28 +217,28 @@ public class BetterScaffold extends Module {
         renderBlocks.removeIf(renderBlock -> renderBlock.ticks <= 0);
         if (airPlace.get()) {
             assert mc.player != null;
-            Vec3d vec = mc.player.getEntityPos().add(mc.player.getVelocity()).add(0, -0.5f, 0);
-            bp.set(vec.getX(), vec.getY(), vec.getZ());
+            Vec3 vec = mc.player.position().add(mc.player.getDeltaMovement()).add(0, -0.5f, 0);
+            bp.set(vec.x(), vec.y(), vec.z());
 
         } else {
             assert mc.player != null;
-            if (BlockUtils.getPlaceSide(mc.player.getBlockPos().down()) != null) {
-                bp.set(mc.player.getBlockPos().down());
+            if (BlockUtils.getPlaceSide(mc.player.blockPosition().below()) != null) {
+                bp.set(mc.player.blockPosition().below());
 
             } else {
-                Vec3d pos = mc.player.getEntityPos();
+                Vec3 pos = mc.player.position();
                 pos = pos.add(0, -0.98f, 0);
-                pos.add(mc.player.getVelocity());
+                pos.add(mc.player.getDeltaMovement());
 
                 if (PlayerUtils.distanceTo(prevBp) > placeRange.get()) {
                     List<BlockPos> blockPosArray = new ArrayList<>();
 
                     for (int x = (int) (mc.player.getX() - placeRange.get()); x < mc.player.getX() + placeRange.get(); x++) {
                         for (int z = (int) (mc.player.getZ() - placeRange.get()); z < mc.player.getZ() + placeRange.get(); z++) {
-                            assert mc.world != null;
-                            for (int y = (int) Math.max(mc.world.getBottomY(), mc.player.getY() - placeRange.get()); y < Math.min(mc.world.getTopYInclusive(), mc.player.getY() + placeRange.get()); y++) {
+                            assert mc.level != null;
+                            for (int y = (int) Math.max(mc.level.getMinY(), mc.player.getY() - placeRange.get()); y < Math.min(mc.level.getMaxY(), mc.player.getY() + placeRange.get()); y++) {
                                 bp.set(x, y, z);
-                                if (!mc.world.getBlockState(bp).isAir()) blockPosArray.add(new BlockPos(bp));
+                                if (!mc.level.getBlockState(bp).isAir()) blockPosArray.add(new BlockPos(bp));
                             }
                         }
                     }
@@ -251,26 +251,26 @@ public class BetterScaffold extends Module {
                     prevBp.set(blockPosArray.get(0));
                 }
 
-                Vec3d vecPrevBP = new Vec3d((double) prevBp.getX() + 0.5f,
+                Vec3 vecPrevBP = new Vec3((double) prevBp.getX() + 0.5f,
                         (double) prevBp.getY() + 0.5f,
                         (double) prevBp.getZ() + 0.5f);
 
-                Vec3d sub = pos.subtract(vecPrevBP);
+                Vec3 sub = pos.subtract(vecPrevBP);
                 Direction facing;
-                if (sub.getY() < -0.5f) {
+                if (sub.y() < -0.5f) {
                     facing = Direction.DOWN;
-                } else if (sub.getY() > 0.5f) {
+                } else if (sub.y() > 0.5f) {
                     facing = Direction.UP;
-                } else facing = Direction.getFacing(sub.getX(), 0, sub.getZ());
+                } else facing = Direction.getApproximateNearest(sub.x(), 0, sub.z());
 
-                bp.set(prevBp.offset(facing));
+                bp.set(prevBp.relative(facing));
             }
         }
         // Check if keepY is enabled and adjust the block position
         if (keepY.get()) {
             bp.setY(initialY);
             // Skip placing blocks if the distance exceeds keepYreach
-            if (bp.getSquaredDistance(mc.player.getEntityPos()) > keepYreach.get()) {
+            if (bp.distToCenterSqr(mc.player.position()) > keepYreach.get()) {
                 return;
             }
         }
@@ -282,7 +282,7 @@ public class BetterScaffold extends Module {
         if (item.getHand() == null && !autoSwitch.get()) return;
 
         // Move down if shifting
-        if (mc.options.sneakKey.isPressed() && !mc.options.jumpKey.isPressed()) {
+        if (mc.options.keyShift.isDown() && !mc.options.keyJump.isDown()) {
             if (lastSneakingY - mc.player.getY() < 0.1) {
                 lastWasSneaking = false;
                 return;
@@ -292,8 +292,8 @@ public class BetterScaffold extends Module {
         }
         if (!lastWasSneaking) lastSneakingY = mc.player.getY();
 
-        if (mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() && fastTower.get()) {
-            mc.player.setVelocity(0, 0.42f, 0);
+        if (mc.options.keyJump.isDown() && !mc.options.keyShift.isDown() && fastTower.get()) {
+            mc.player.setDeltaMovement(0, 0.42f, 0);
         }
         int vOffset;
         if (placementMode.get() == PlaceMode.BelowFeet) {
@@ -304,28 +304,28 @@ public class BetterScaffold extends Module {
             return; // Skip the rest of the code if the placement mode is not valid
         }
 
-        if (BlockUtils.place(bp.add(0, vOffset, 0), item, rotate.get(), 50, renderSwing.get(), true)) {
+        if (BlockUtils.place(bp.offset(0, vOffset, 0), item, rotate.get(), 50, renderSwing.get(), true)) {
 
             if (horizontalRadius.get() > 1 || verticalRadius.get() > 1) {
                 horizontalAndVertical(bp, item);
             }
 
             // Render block if was placed
-            renderBlocks.add(renderBlockPool.get().set(bp.add(0, vOffset, 0)));
+            renderBlocks.add(renderBlockPool.get().set(bp.offset(0, vOffset, 0)));
 
             // Move player down so they are on top of the placed block ready to jump again
-            if (mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() && !mc.player.isOnGround()) {
-                assert mc.world != null;
-                if (!mc.world.getBlockState(bp).isAir() && fastTower.get()) {
-                    mc.player.setVelocity(0, -0.28f, 0);
+            if (mc.options.keyJump.isDown() && !mc.options.keyShift.isDown() && !mc.player.onGround()) {
+                assert mc.level != null;
+                if (!mc.level.getBlockState(bp).isAir() && fastTower.get()) {
+                    mc.player.setDeltaMovement(0, -0.28f, 0);
                 }
             }
         } else if(onSurface.get()){
-            horizontalAndVertical(new BlockPos.Mutable(mc.player.getX(), mc.player.getY() - 1, mc.player.getZ()), item);
+            horizontalAndVertical(new BlockPos.MutableBlockPos(mc.player.getX(), mc.player.getY() - 1, mc.player.getZ()), item);
         }
 
-        assert mc.world != null;
-        if (!mc.world.getBlockState(bp).isAir()) {
+        assert mc.level != null;
+        if (!mc.level.getBlockState(bp).isAir()) {
             prevBp.set(bp);
         }
     }
@@ -338,14 +338,14 @@ public class BetterScaffold extends Module {
         if (blocksFilter.get() == ListMode.Blacklist && blocks.get().contains(block)) return false;
         else if (blocksFilter.get() == ListMode.Whitelist && !blocks.get().contains(block)) return false;
 
-        if (!Block.isShapeFullCube(block.getDefaultState().getCollisionShape(mc.world, pos))) return false;
+        if (!Block.isShapeFullBlock(block.defaultBlockState().getCollisionShape(mc.level, pos))) return false;
         if (!(block instanceof FallingBlock)) return true;
-        assert mc.world != null;
-        return !FallingBlock.canFallThrough(mc.world.getBlockState(pos));
+        assert mc.level != null;
+        return !FallingBlock.isFree(mc.level.getBlockState(pos));
     }
 
     //Place horizontal and vertical blocks
-    private void horizontalAndVertical(BlockPos.Mutable bp, FindItemResult item) {
+    private void horizontalAndVertical(BlockPos.MutableBlockPos bp, FindItemResult item) {
         if (keepY.get()) {
             // Only place blocks at the initial Y level
             bp.setY(initialY);
@@ -361,8 +361,8 @@ public class BetterScaffold extends Module {
                     continue; // Skip the loop iteration if the placement mode is not valid
                 }
 
-                if (BlockUtils.place(bp.add(0, vOffset, 0), item, rotate.get(), 50, renderSwing.get(), true)) {
-                    renderBlocks.add(renderBlockPool.get().set(bp.add(0, vOffset, 0)));
+                if (BlockUtils.place(bp.offset(0, vOffset, 0), item, rotate.get(), 50, renderSwing.get(), true)) {
+                    renderBlocks.add(renderBlockPool.get().set(bp.offset(0, vOffset, 0)));
                 }
             }
         }
@@ -382,39 +382,39 @@ public class BetterScaffold extends Module {
                 for (int h = 1; h < horizontalRadius.get(); h++) {
                     for (int d = -h + 1; d <= h - 1; d++) {
                         //Front
-                        if (BlockUtils.place(bp.add(h, vOffset, d), item, rotate.get(), 50, renderSwing.get(), true)) {
-                            renderBlocks.add(renderBlockPool.get().set(bp.add(h, vOffset, d)));
+                        if (BlockUtils.place(bp.offset(h, vOffset, d), item, rotate.get(), 50, renderSwing.get(), true)) {
+                            renderBlocks.add(renderBlockPool.get().set(bp.offset(h, vOffset, d)));
                         }
                         //Back
-                        if (BlockUtils.place(bp.add(-h, vOffset, d), item, rotate.get(), 50, renderSwing.get(), true)) {
-                            renderBlocks.add(renderBlockPool.get().set(bp.add(-h, vOffset, d)));
+                        if (BlockUtils.place(bp.offset(-h, vOffset, d), item, rotate.get(), 50, renderSwing.get(), true)) {
+                            renderBlocks.add(renderBlockPool.get().set(bp.offset(-h, vOffset, d)));
                         }
 
                         //Left
-                        if (BlockUtils.place(bp.add(d, vOffset, h), item, rotate.get(), 50, renderSwing.get(), true)) {
-                            renderBlocks.add(renderBlockPool.get().set(bp.add(d, vOffset, h)));
+                        if (BlockUtils.place(bp.offset(d, vOffset, h), item, rotate.get(), 50, renderSwing.get(), true)) {
+                            renderBlocks.add(renderBlockPool.get().set(bp.offset(d, vOffset, h)));
                         }
 
                         //Right
-                        if (BlockUtils.place(bp.add(d, vOffset, -h), item, rotate.get(), 50, renderSwing.get(), true)) {
-                            renderBlocks.add(renderBlockPool.get().set(bp.add(d, vOffset, -h)));
+                        if (BlockUtils.place(bp.offset(d, vOffset, -h), item, rotate.get(), 50, renderSwing.get(), true)) {
+                            renderBlocks.add(renderBlockPool.get().set(bp.offset(d, vOffset, -h)));
                         }
                     }
                     //Diagonals
-                    if (BlockUtils.place(bp.add(h, vOffset, -h), item, rotate.get(), 50, renderSwing.get(), true)) {
-                        renderBlocks.add(renderBlockPool.get().set(bp.add(h, vOffset, -h)));
+                    if (BlockUtils.place(bp.offset(h, vOffset, -h), item, rotate.get(), 50, renderSwing.get(), true)) {
+                        renderBlocks.add(renderBlockPool.get().set(bp.offset(h, vOffset, -h)));
                     }
 
-                    if (BlockUtils.place(bp.add(-h, vOffset, h), item, rotate.get(), 50, renderSwing.get(), true)) {
-                        renderBlocks.add(renderBlockPool.get().set(bp.add(-h, vOffset, h)));
+                    if (BlockUtils.place(bp.offset(-h, vOffset, h), item, rotate.get(), 50, renderSwing.get(), true)) {
+                        renderBlocks.add(renderBlockPool.get().set(bp.offset(-h, vOffset, h)));
                     }
 
-                    if (BlockUtils.place(bp.add(h, vOffset, h), item, rotate.get(), 50, renderSwing.get(), true)) {
-                        renderBlocks.add(renderBlockPool.get().set(bp.add(h, vOffset, h)));
+                    if (BlockUtils.place(bp.offset(h, vOffset, h), item, rotate.get(), 50, renderSwing.get(), true)) {
+                        renderBlocks.add(renderBlockPool.get().set(bp.offset(h, vOffset, h)));
                     }
 
-                    if (BlockUtils.place(bp.add(-h, vOffset, -h), item, rotate.get(), 50, renderSwing.get(), true)) {
-                        renderBlocks.add(renderBlockPool.get().set(bp.add(-h, vOffset, -h)));
+                    if (BlockUtils.place(bp.offset(-h, vOffset, -h), item, rotate.get(), 50, renderSwing.get(), true)) {
+                        renderBlocks.add(renderBlockPool.get().set(bp.offset(-h, vOffset, -h)));
                     }
 
                 }
@@ -439,7 +439,7 @@ public class BetterScaffold extends Module {
         AboveHead
     }
     public static class RenderBlock {
-        public final BlockPos.Mutable pos = new BlockPos.Mutable();
+        public final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         public int ticks;
 
         public RenderBlock set(BlockPos blockPos) {

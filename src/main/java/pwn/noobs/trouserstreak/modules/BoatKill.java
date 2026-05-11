@@ -5,12 +5,12 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.minecraft.entity.vehicle.BoatEntity;
-import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
-import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
-import net.minecraft.text.Text;
-import net.minecraft.util.PlayerInput;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
+import net.minecraft.world.entity.player.Input;
+import net.minecraft.world.entity.vehicle.boat.Boat;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 public class BoatKill extends Module {
@@ -32,13 +32,13 @@ public class BoatKill extends Module {
 
     @Override
     public void onActivate() {
-        if (!(mc.player.getVehicle() instanceof BoatEntity boat)) {
-            ChatUtils.sendMsg(Text.of("you must be on the boat."));
+        if (!(mc.player.getVehicle() instanceof Boat boat)) {
+            ChatUtils.sendMsg(Component.nullToEmpty("you must be on the boat."));
             toggle();
             return;
         }
 
-        Vec3d oPos = boat.getEntityPos();
+        Vec3 oPos = boat.position();
 
         // cba calculating the actual packets for this. 15 should be more than enough
         for (int i = 0; i < 15; i++) {
@@ -50,12 +50,12 @@ public class BoatKill extends Module {
         // floating point is what makes the boat break.
         moveTo(oPos.add(0,0.0001,0));
 
-        mc.player.networkHandler.sendPacket(new PlayerInputC2SPacket(new PlayerInput(false, false, false, false, false,true,false)));
+        mc.player.connection.send(new ServerboundPlayerInputPacket(new Input(false, false, false, false, false,true,false)));
         toggle();
     }
 
-    public void moveTo(Vec3d pos){
-        mc.player.getVehicle().setPosition(pos);
-        mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
+    public void moveTo(Vec3 pos){
+        mc.player.getVehicle().setPos(pos);
+        mc.player.connection.send(ServerboundMoveVehiclePacket.fromEntity(mc.player.getVehicle()));
     }
 }

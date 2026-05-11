@@ -1,24 +1,24 @@
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
-import meteordevelopment.meteorclient.mixininterface.IPlayerInteractEntityC2SPacket;
-import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
+import meteordevelopment.meteorclient.mixininterface.IServerboundMovePlayerPacket;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ServerboundAttackPacket;
+import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.*;
@@ -103,19 +103,19 @@ public class MaceKill extends Module {
         super(Trouser.Main, "MaceKill", "Makes the Mace powerful when swung. Can also bypass totem usage.");
     }
 
-    private Vec3d previouspos;
+    private Vec3 previouspos;
     private boolean sendingAttacks = false;
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
         if (sendingAttacks) return;
         if (mc.player == null) return;
-        if (mc.player.hasVehicle() || mc.player.getMainHandStack().getItem() != Items.MACE) return;
-        if (!(event.packet instanceof IPlayerInteractEntityC2SPacket packet)) return;
-        if (packet.meteor$getType() != PlayerInteractEntityC2SPacket.InteractType.ATTACK) return;
+        if (mc.player.isPassenger() || mc.player.getMainHandItem().getItem() != Items.MACE) return;
+        if (!(event.packet instanceof ServerboundAttackPacket packet)) return;
 
-        if (!(packet.meteor$getEntity() instanceof LivingEntity)) return;
-        LivingEntity targetEntity = (LivingEntity) packet.meteor$getEntity();
-        if (packetDisable.get() && (targetEntity.isBlocking() || targetEntity.isInvulnerable() || targetEntity.isInCreativeMode())) return;
+        Entity targetentity = mc.level.getEntity(packet.entityId());
+        if (!(targetentity instanceof LivingEntity)) return;
+        LivingEntity targetEntity = (LivingEntity) targetentity;
+        if (packetDisable.get() && (targetEntity.isBlocking() || targetEntity.isInvulnerable() || targetEntity.hasInfiniteMaterials())) return;
         if (!targetEntity.isAlive()) return;
 
         int baseBlocks = getMaxHeightAbovePlayer();
@@ -126,12 +126,12 @@ public class MaceKill extends Module {
 
         event.cancel();
 
-        previouspos = mc.player.getEntityPos();
+        previouspos = mc.player.position();
         int currentHeight = baseBlocks;
         int attackCount = attacks.get();
         if (!attackSpam.get()) attackCount = 1;
         for (int i2 = 0; i2 < paperpackets.get(); i2++) {
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(mc.player.getYaw(), mc.player.getPitch(), false, mc.player.horizontalCollision));
+            mc.player.connection.send(new ServerboundMovePlayerPacket.Rot(mc.player.getYRot(), mc.player.getXRot(), false, mc.player.horizontalCollision));
         }
 
         try {
@@ -139,24 +139,24 @@ public class MaceKill extends Module {
             for (int i = 0; i < attackCount; i++) {
                 int blocks = (i == 0) ? baseBlocks : currentHeight;
 
-                if (mc.world == null || mc.player.getY() + blocks > mc.world.getTopYInclusive() - 1) {
+                if (mc.level == null || mc.player.getY() + blocks > mc.level.getMaxY() - 1) {
                     targetposvalid = false;
                     continue;
                 }
 
-                Vec3d targetPos = new Vec3d(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ());
+                Vec3 targetPos = new Vec3(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ());
 
                 sendMove(targetPos);
                 sendMove(previouspos);
-                mc.player.setPosition(previouspos);
+                mc.player.setPos(previouspos);
 
                 sendingAttacks = true;
                 if (swing.get()) {
-                    mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
-                    mc.player.swingHand(Hand.MAIN_HAND);
+                    mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
+                    mc.player.swing(InteractionHand.MAIN_HAND);
                 }
-                mc.player.networkHandler.sendPacket(
-                        PlayerInteractEntityC2SPacket.attack(targetEntity, mc.player.isSneaking())
+                mc.player.connection.send(
+                        new ServerboundAttackPacket(targetEntity.getId())
                 );
 
                 currentHeight += increase.get();
@@ -165,25 +165,25 @@ public class MaceKill extends Module {
             positionCache.clear();
 
             if (targetposvalid && useOffset.get()){
-                Vec3d offsetHome = getOffset(previouspos);
+                Vec3 offsetHome = getOffset(previouspos);
                 sendMove(offsetHome);
-                mc.player.setPosition(offsetHome);
+                mc.player.setPos(offsetHome);
             }
         } finally {
             sendingAttacks = false;
         }
     }
-    private void sendMove(Vec3d pos) {
-        if (mc.getNetworkHandler() == null) return;
-        PlayerMoveC2SPacket movepacket = new PlayerMoveC2SPacket.Full(pos,mc.player.getYaw(),mc.player.getPitch(), false, mc.player.horizontalCollision);
-        ((IPlayerMoveC2SPacket) movepacket).meteor$setTag(1337);
-        mc.player.networkHandler.sendPacket(movepacket);
+    private void sendMove(Vec3 pos) {
+        if (mc.getConnection() == null) return;
+        ServerboundMovePlayerPacket movepacket = new ServerboundMovePlayerPacket.PosRot(pos,mc.player.getYRot(),mc.player.getXRot(), false, mc.player.horizontalCollision);
+        ((IServerboundMovePlayerPacket) movepacket).meteor$setTag(1337);
+        mc.player.connection.send(movepacket);
     }
-    private Vec3d getOffset(Vec3d base) {
+    private Vec3 getOffset(Vec3 base) {
         double dx = offsethorizontal.get();
         double dy = offsetY.get();
 
-        Vec3d[] shuffledOffsets = new Vec3d[] {
+        Vec3[] shuffledOffsets = new Vec3[] {
                 base.add( dx, dy,  0),
                 base.add(-dx, dy,  0),
                 base.add( 0, dy,  dx),
@@ -196,38 +196,38 @@ public class MaceKill extends Module {
 
         Collections.shuffle(Arrays.asList(shuffledOffsets));
 
-        for (Vec3d pos : shuffledOffsets) {
+        for (Vec3 pos : shuffledOffsets) {
             if (!invalid(pos)) return pos;
         }
 
-        Vec3d noHorizontal = base.add(0, dy, 0);
+        Vec3 noHorizontal = base.add(0, dy, 0);
         if (!invalid(noHorizontal)) return noHorizontal;
 
         return base;
     }
-    private final BlockPos.Mutable mutablePos = new BlockPos.Mutable();
-    private final Map<Vec3d, Boolean> positionCache = new LinkedHashMap<>(256, 0.75f, true) {
+    private final BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+    private final Map<Vec3, Boolean> positionCache = new LinkedHashMap<>(256, 0.75f, true) {
         @Override
-        protected boolean removeEldestEntry(Map.Entry<Vec3d, Boolean> eldest) {
+        protected boolean removeEldestEntry(Map.Entry<Vec3, Boolean> eldest) {
             return size() > 256;
         }
     };
-    private boolean invalid(Vec3d pos) {
-        if (mc.world == null) return true;
+    private boolean invalid(Vec3 pos) {
+        if (mc.level == null) return true;
 
-        double clampedY = MathHelper.clamp(pos.y, mc.world.getBottomY(), mc.world.getTopYInclusive() - 1);
+        double clampedY = Mth.clamp(pos.y, mc.level.getMinY(), mc.level.getMaxY() - 1);
         if (clampedY != pos.y) return true;
 
-        BlockPos floored = BlockPos.ofFloored(pos);
+        BlockPos floored = BlockPos.containing(pos);
         int chunkX = floored.getX() >> 4;
         int chunkZ = floored.getZ() >> 4;
-        if (mc.world.getChunkManager().getWorldChunk(chunkX, chunkZ) == null) return true;
+        if (mc.level.getChunkSource().getChunkNow(chunkX, chunkZ) == null) return true;
 
         if (positionCache.containsKey(pos)) return positionCache.get(pos);
 
         Entity entity = mc.player;
-        Vec3d delta = pos.subtract(entity.getEntityPos());
-        Box box = entity.getBoundingBox().offset(delta);
+        Vec3 delta = pos.subtract(entity.position());
+        AABB box = entity.getBoundingBox().move(delta);
 
         mutablePos.set(floored);
         for (int x = -1; x <= 1; x++) {
@@ -236,10 +236,10 @@ public class MaceKill extends Module {
                 mutablePos.setY(floored.getY() + y);
                 for (int z = -1; z <= 1; z++) {
                     mutablePos.setZ(floored.getZ() + z);
-                    BlockState state = mc.world.getBlockState(mutablePos);
-                    if (state.isOf(Blocks.LAVA) || state.isOf(Blocks.FIRE) || state.isOf(Blocks.SOUL_FIRE)
-                            || state.isOf(Blocks.MAGMA_BLOCK) || state.isOf(Blocks.CAMPFIRE)
-                            || state.isOf(Blocks.SWEET_BERRY_BUSH) || state.isOf(Blocks.POWDER_SNOW)) {
+                    BlockState state = mc.level.getBlockState(mutablePos);
+                    if (state.is(Blocks.LAVA) || state.is(Blocks.FIRE) || state.is(Blocks.SOUL_FIRE)
+                            || state.is(Blocks.MAGMA_BLOCK) || state.is(Blocks.CAMPFIRE)
+                            || state.is(Blocks.SWEET_BERRY_BUSH) || state.is(Blocks.POWDER_SNOW)) {
                         positionCache.put(pos, true);
                         return true;
                     }
@@ -247,20 +247,20 @@ public class MaceKill extends Module {
             }
         }
 
-        for (Entity e : mc.world.getOtherEntities(entity, box)) {
-            if (e.isCollidable(entity)) {
+        for (Entity e : mc.level.getEntities(entity, box)) {
+            if (e.canBeCollidedWith(entity)) {
                 positionCache.put(pos, true);
                 return true;
             }
         }
 
-        boolean collides = mc.world.getBlockCollisions(entity, box).iterator().hasNext();
+        boolean collides = mc.level.getBlockCollisions(entity, box).iterator().hasNext();
         positionCache.put(pos, collides);
         return collides;
     }
     private int getMaxHeightAbovePlayer() {
-        if (mc.world == null) return 0;
-        int worldTop = mc.world.getTopYInclusive() - 1;
+        if (mc.level == null) return 0;
+        int worldTop = mc.level.getMaxY() - 1;
         int maxBlocks = (int)(worldTop - mc.player.getY());
         return Math.min(fallHeight.get(), maxBlocks);
     }

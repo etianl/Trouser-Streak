@@ -21,16 +21,61 @@ import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.*;
-import net.minecraft.client.gui.screen.DeathScreen;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.item.*;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.gui.screens.DeathScreen;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.BedItem;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.DoubleHighBlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.PlaceOnWaterBlockItem;
+import net.minecraft.world.item.ScaffoldingBlockItem;
+import net.minecraft.world.item.SolidBucketItem;
+import net.minecraft.world.item.StandingAndWallBlockItem;
+import net.minecraft.world.level.block.AmethystClusterBlock;
+import net.minecraft.world.level.block.BambooStalkBlock;
+import net.minecraft.world.level.block.BaseCoralFanBlock;
+import net.minecraft.world.level.block.BaseCoralWallFanBlock;
+import net.minecraft.world.level.block.BaseRailBlock;
+import net.minecraft.world.level.block.BellBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.BuddingAmethystBlock;
+import net.minecraft.world.level.block.CactusBlock;
+import net.minecraft.world.level.block.CakeBlock;
+import net.minecraft.world.level.block.CandleBlock;
+import net.minecraft.world.level.block.CarpetBlock;
+import net.minecraft.world.level.block.ChorusFlowerBlock;
+import net.minecraft.world.level.block.ChorusPlantBlock;
+import net.minecraft.world.level.block.ConduitBlock;
+import net.minecraft.world.level.block.CoralFanBlock;
+import net.minecraft.world.level.block.CoralWallFanBlock;
+import net.minecraft.world.level.block.DiodeBlock;
+import net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock;
+import net.minecraft.world.level.block.FallingBlock;
+import net.minecraft.world.level.block.FenceBlock;
+import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.FlowerPotBlock;
+import net.minecraft.world.level.block.GlowLichenBlock;
+import net.minecraft.world.level.block.KelpBlock;
+import net.minecraft.world.level.block.LadderBlock;
+import net.minecraft.world.level.block.LanternBlock;
+import net.minecraft.world.level.block.PointedDripstoneBlock;
+import net.minecraft.world.level.block.PressurePlateBlock;
+import net.minecraft.world.level.block.RedStoneWireBlock;
+import net.minecraft.world.level.block.ShulkerBoxBlock;
+import net.minecraft.world.level.block.SignBlock;
+import net.minecraft.world.level.block.SporeBlossomBlock;
+import net.minecraft.world.level.block.SugarCaneBlock;
+import net.minecraft.world.level.block.TorchBlock;
+import net.minecraft.world.level.block.TripWireBlock;
+import net.minecraft.world.level.block.TripWireHookBlock;
+import net.minecraft.world.level.block.VegetationBlock;
+import net.minecraft.world.level.block.WallBlock;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.io.IOException;
@@ -314,16 +359,16 @@ public class TrouserBuild extends Module {
     @EventHandler
     private void onMouseButton(MouseClickEvent event) {
         if (mc.player == null) return;
-        if (mc.options.useKey.isPressed()){
+        if (mc.options.keyUse.isDown()){
             lava = cast();
-            playerdir=mc.player.getHorizontalFacing();
-            playerpitch=mc.player.getPitch();
+            playerdir=mc.player.getDirection();
+            playerpitch=mc.player.getXRot();
             pause = !pause;
         }
     }
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (mc.player == null || mc.world == null || mc.interactionManager == null) return;
+        if (mc.player == null || mc.level == null || mc.gameMode == null) return;
         if (pause) {
             lava=cast();
             blockticks=0;
@@ -450,548 +495,548 @@ public class TrouserBuild extends Module {
             if (playerdir == Direction.NORTH){
                 //1st row
                 if (ett){
-                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Nettpos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nettpos), Direction.DOWN, Nettpos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks== tickdelay.get() && mc.level.getBlockState(Nettpos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nettpos), Direction.DOWN, Nettpos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva){
-                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Ntvapos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntvapos), Direction.DOWN, Ntvapos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks== tickdelay.get() && mc.level.getBlockState(Ntvapos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Ntvapos), Direction.DOWN, Ntvapos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree){
-                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Ntreepos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntreepos), Direction.DOWN, Ntreepos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks== tickdelay.get() && mc.level.getBlockState(Ntreepos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Ntreepos), Direction.DOWN, Ntreepos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra){
-                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Nfyrapos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfyrapos), Direction.DOWN, Nfyrapos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks== tickdelay.get() && mc.level.getBlockState(Nfyrapos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nfyrapos), Direction.DOWN, Nfyrapos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem){
-                    if (blockticks== tickdelay.get() && mc.world.getBlockState(Nfempos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfempos), Direction.DOWN, Nfempos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks== tickdelay.get() && mc.level.getBlockState(Nfempos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nfempos), Direction.DOWN, Nfempos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //2nd row
                 if (ett1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Nett1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nett1pos), Direction.DOWN, Nett1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Nett1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nett1pos), Direction.DOWN, Nett1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Ntva1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntva1pos), Direction.DOWN, Ntva1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Ntva1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Ntva1pos), Direction.DOWN, Ntva1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Ntree1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntree1pos), Direction.DOWN, Ntree1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Ntree1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Ntree1pos), Direction.DOWN, Ntree1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Nfyra1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfyra1pos), Direction.DOWN, Nfyra1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Nfyra1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nfyra1pos), Direction.DOWN, Nfyra1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Nfem1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfem1pos), Direction.DOWN, Nfem1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Nfem1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nfem1pos), Direction.DOWN, Nfem1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //3rd row
                 if (ett2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Nett2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nett2pos), Direction.DOWN, Nett2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Nett2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nett2pos), Direction.DOWN, Nett2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Ntva2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntva2pos), Direction.DOWN, Ntva2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Ntva2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Ntva2pos), Direction.DOWN, Ntva2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Ntree2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntree2pos), Direction.DOWN, Ntree2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Ntree2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Ntree2pos), Direction.DOWN, Ntree2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Nfyra2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfyra2pos), Direction.DOWN, Nfyra2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Nfyra2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nfyra2pos), Direction.DOWN, Nfyra2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Nfem2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfem2pos), Direction.DOWN, Nfem2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Nfem2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nfem2pos), Direction.DOWN, Nfem2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //4th row
                 if (ett3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Nett3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nett3pos), Direction.DOWN, Nett3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Nett3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nett3pos), Direction.DOWN, Nett3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Ntva3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntva3pos), Direction.DOWN, Ntva3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Ntva3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Ntva3pos), Direction.DOWN, Ntva3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Ntree3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntree3pos), Direction.DOWN, Ntree3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Ntree3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Ntree3pos), Direction.DOWN, Ntree3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Nfyra3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfyra3pos), Direction.DOWN, Nfyra3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Nfyra3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nfyra3pos), Direction.DOWN, Nfyra3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Nfem3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfem3pos), Direction.DOWN, Nfem3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Nfem3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nfem3pos), Direction.DOWN, Nfem3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //5th row
                 if (ett4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Nett4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nett4pos), Direction.DOWN, Nett4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Nett4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nett4pos), Direction.DOWN, Nett4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Ntva4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntva4pos), Direction.DOWN, Ntva4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Ntva4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Ntva4pos), Direction.DOWN, Ntva4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Ntree4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntree4pos), Direction.DOWN, Ntree4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Ntree4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Ntree4pos), Direction.DOWN, Ntree4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Nfyra4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfyra4pos), Direction.DOWN, Nfyra4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Nfyra4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nfyra4pos), Direction.DOWN, Nfyra4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Nfem4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfem4pos), Direction.DOWN, Nfem4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Nfem4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nfem4pos), Direction.DOWN, Nfem4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
             }
 
             if (playerdir == Direction.SOUTH){
                 //1st row
                 if (ett){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Settpos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Settpos), Direction.DOWN, Settpos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Settpos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Settpos), Direction.DOWN, Settpos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Stvapos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stvapos), Direction.DOWN, Stvapos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Stvapos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Stvapos), Direction.DOWN, Stvapos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Streepos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Streepos), Direction.DOWN, Streepos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Streepos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Streepos), Direction.DOWN, Streepos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Sfyrapos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfyrapos), Direction.DOWN, Sfyrapos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Sfyrapos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sfyrapos), Direction.DOWN, Sfyrapos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Sfempos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfempos), Direction.DOWN, Sfempos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Sfempos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sfempos), Direction.DOWN, Sfempos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //2nd row
                 if (ett1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Sett1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sett1pos), Direction.DOWN, Sett1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Sett1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sett1pos), Direction.DOWN, Sett1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Stva1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stva1pos), Direction.DOWN, Stva1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Stva1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Stva1pos), Direction.DOWN, Stva1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Stree1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stree1pos), Direction.DOWN, Stree1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Stree1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Stree1pos), Direction.DOWN, Stree1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Sfyra1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfyra1pos), Direction.DOWN, Sfyra1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Sfyra1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sfyra1pos), Direction.DOWN, Sfyra1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Sfem1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfem1pos), Direction.DOWN, Sfem1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Sfem1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sfem1pos), Direction.DOWN, Sfem1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //3rd row
                 if (ett2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Sett2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sett2pos), Direction.DOWN, Sett2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Sett2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sett2pos), Direction.DOWN, Sett2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Stva2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stva2pos), Direction.DOWN, Stva2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Stva2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Stva2pos), Direction.DOWN, Stva2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Stree2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stree2pos), Direction.DOWN, Stree2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Stree2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Stree2pos), Direction.DOWN, Stree2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Sfyra2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfyra2pos), Direction.DOWN, Sfyra2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Sfyra2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sfyra2pos), Direction.DOWN, Sfyra2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Sfem2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfem2pos), Direction.DOWN, Sfem2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Sfem2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sfem2pos), Direction.DOWN, Sfem2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //4th row
                 if (ett3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Sett3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sett3pos), Direction.DOWN, Sett3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Sett3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sett3pos), Direction.DOWN, Sett3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Stva3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stva3pos), Direction.DOWN, Stva3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Stva3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Stva3pos), Direction.DOWN, Stva3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Stree3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stree3pos), Direction.DOWN, Stree3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Stree3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Stree3pos), Direction.DOWN, Stree3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Sfyra3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfyra3pos), Direction.DOWN, Sfyra3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Sfyra3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sfyra3pos), Direction.DOWN, Sfyra3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Sfem3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfem3pos), Direction.DOWN, Sfem3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Sfem3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sfem3pos), Direction.DOWN, Sfem3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //5th row
                 if (ett4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Sett4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sett4pos), Direction.DOWN, Sett4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Sett4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sett4pos), Direction.DOWN, Sett4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Stva4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stva4pos), Direction.DOWN, Stva4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Stva4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Stva4pos), Direction.DOWN, Stva4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Stree4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stree4pos), Direction.DOWN, Stree4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Stree4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Stree4pos), Direction.DOWN, Stree4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Sfyra4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfyra4pos), Direction.DOWN, Sfyra4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Sfyra4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sfyra4pos), Direction.DOWN, Sfyra4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Sfem4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfem4pos), Direction.DOWN, Sfem4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Sfem4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sfem4pos), Direction.DOWN, Sfem4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
             }
 
             if (playerdir == Direction.EAST){
                 //1st row
                 if (ett){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Eettpos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Eettpos), Direction.DOWN, Eettpos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Eettpos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Eettpos), Direction.DOWN, Eettpos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Etvapos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etvapos), Direction.DOWN, Etvapos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Etvapos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Etvapos), Direction.DOWN, Etvapos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Etreepos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etreepos), Direction.DOWN, Etreepos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Etreepos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Etreepos), Direction.DOWN, Etreepos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Efyrapos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efyrapos), Direction.DOWN, Efyrapos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Efyrapos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Efyrapos), Direction.DOWN, Efyrapos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Efempos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efempos), Direction.DOWN, Efempos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Efempos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Efempos), Direction.DOWN, Efempos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //2nd row
                 if (ett1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Eett1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Eett1pos), Direction.DOWN, Eett1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Eett1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Eett1pos), Direction.DOWN, Eett1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Etva1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etva1pos), Direction.DOWN, Etva1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Etva1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Etva1pos), Direction.DOWN, Etva1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Etree1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etree1pos), Direction.DOWN, Etree1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Etree1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Etree1pos), Direction.DOWN, Etree1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Efyra1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efyra1pos), Direction.DOWN, Efyra1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Efyra1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Efyra1pos), Direction.DOWN, Efyra1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Efem1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efem1pos), Direction.DOWN, Efem1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Efem1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Efem1pos), Direction.DOWN, Efem1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //3rd row
                 if (ett2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Eett2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Eett2pos), Direction.DOWN, Eett2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Eett2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Eett2pos), Direction.DOWN, Eett2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Etva2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etva2pos), Direction.DOWN, Etva2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Etva2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Etva2pos), Direction.DOWN, Etva2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Etree2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etree2pos), Direction.DOWN, Etree2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Etree2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Etree2pos), Direction.DOWN, Etree2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Efyra2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efyra2pos), Direction.DOWN, Efyra2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Efyra2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Efyra2pos), Direction.DOWN, Efyra2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Efem2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efem2pos), Direction.DOWN, Efem2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Efem2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Efem2pos), Direction.DOWN, Efem2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //4th row
                 if (ett3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Eett3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Eett3pos), Direction.DOWN, Eett3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Eett3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Eett3pos), Direction.DOWN, Eett3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Etva3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etva3pos), Direction.DOWN, Etva3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Etva3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Etva3pos), Direction.DOWN, Etva3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Etree3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etree3pos), Direction.DOWN, Etree3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Etree3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Etree3pos), Direction.DOWN, Etree3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Efyra3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efyra3pos), Direction.DOWN, Efyra3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Efyra3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Efyra3pos), Direction.DOWN, Efyra3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Efem3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efem3pos), Direction.DOWN, Efem3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Efem3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Efem3pos), Direction.DOWN, Efem3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //5th row
                 if (ett4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Eett4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Eett4pos), Direction.DOWN, Eett4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Eett4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Eett4pos), Direction.DOWN, Eett4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Etva4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etva4pos), Direction.DOWN, Etva4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Etva4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Etva4pos), Direction.DOWN, Etva4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Etree4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etree4pos), Direction.DOWN, Etree4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Etree4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Etree4pos), Direction.DOWN, Etree4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Efyra4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efyra4pos), Direction.DOWN, Efyra4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Efyra4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Efyra4pos), Direction.DOWN, Efyra4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Efem4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efem4pos), Direction.DOWN, Efem4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Efem4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Efem4pos), Direction.DOWN, Efem4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
             }
 
             if (playerdir == Direction.WEST){
                 //1st row
                 if (ett){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Wettpos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wettpos), Direction.DOWN, Wettpos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Wettpos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wettpos), Direction.DOWN, Wettpos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Wtvapos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtvapos), Direction.DOWN, Wtvapos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Wtvapos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wtvapos), Direction.DOWN, Wtvapos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Wtreepos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtreepos), Direction.DOWN, Wtreepos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Wtreepos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wtreepos), Direction.DOWN, Wtreepos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Wfyrapos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfyrapos), Direction.DOWN, Wfyrapos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Wfyrapos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wfyrapos), Direction.DOWN, Wfyrapos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Wfempos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfempos), Direction.DOWN, Wfempos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Wfempos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wfempos), Direction.DOWN, Wfempos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //2nd row
                 if (ett1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wett1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wett1pos), Direction.DOWN, Wett1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Wett1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wett1pos), Direction.DOWN, Wett1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wtva1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtva1pos), Direction.DOWN, Wtva1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Wtva1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wtva1pos), Direction.DOWN, Wtva1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wtree1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtree1pos), Direction.DOWN, Wtree1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Wtree1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wtree1pos), Direction.DOWN, Wtree1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wfyra1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfyra1pos), Direction.DOWN, Wfyra1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Wfyra1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wfyra1pos), Direction.DOWN, Wfyra1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wfem1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfem1pos), Direction.DOWN, Wfem1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Wfem1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wfem1pos), Direction.DOWN, Wfem1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //3rd row
                 if (ett2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wett2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wett2pos), Direction.DOWN, Wett2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Wett2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wett2pos), Direction.DOWN, Wett2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wtva2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtva2pos), Direction.DOWN, Wtva2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Wtva2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wtva2pos), Direction.DOWN, Wtva2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wtree2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtree2pos), Direction.DOWN, Wtree2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Wtree2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wtree2pos), Direction.DOWN, Wtree2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wfyra2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfyra2pos), Direction.DOWN, Wfyra2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Wfyra2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wfyra2pos), Direction.DOWN, Wfyra2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wfem2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfem2pos), Direction.DOWN, Wfem2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Wfem2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wfem2pos), Direction.DOWN, Wfem2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //4th row
                 if (ett3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wett3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wett3pos), Direction.DOWN, Wett3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Wett3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wett3pos), Direction.DOWN, Wett3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wtva3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtva3pos), Direction.DOWN, Wtva3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Wtva3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wtva3pos), Direction.DOWN, Wtva3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wtree3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtree3pos), Direction.DOWN, Wtree3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Wtree3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wtree3pos), Direction.DOWN, Wtree3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wfyra3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfyra3pos), Direction.DOWN, Wfyra3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Wfyra3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wfyra3pos), Direction.DOWN, Wfyra3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wfem3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfem3pos), Direction.DOWN, Wfem3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Wfem3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wfem3pos), Direction.DOWN, Wfem3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //5th row
                 if (ett4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wett4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wett4pos), Direction.DOWN, Wett4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Wett4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wett4pos), Direction.DOWN, Wett4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wtva4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtva4pos), Direction.DOWN, Wtva4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Wtva4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wtva4pos), Direction.DOWN, Wtva4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wtree4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtree4pos), Direction.DOWN, Wtree4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Wtree4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wtree4pos), Direction.DOWN, Wtree4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wfyra4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfyra4pos), Direction.DOWN, Wfyra4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Wfyra4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wfyra4pos), Direction.DOWN, Wfyra4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wfem4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfem4pos), Direction.DOWN, Wfem4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Wfem4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wfem4pos), Direction.DOWN, Wfem4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
             }
         }
@@ -1105,548 +1150,548 @@ public class TrouserBuild extends Module {
             if (playerdir == Direction.NORTH){
                 //1st row
                 if (ett){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Nettpos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nettpos), Direction.DOWN, Nettpos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Nettpos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nettpos), Direction.DOWN, Nettpos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Ntvapos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntvapos), Direction.DOWN, Ntvapos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Ntvapos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Ntvapos), Direction.DOWN, Ntvapos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Ntreepos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntreepos), Direction.DOWN, Ntreepos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Ntreepos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Ntreepos), Direction.DOWN, Ntreepos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Nfyrapos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfyrapos), Direction.DOWN, Nfyrapos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Nfyrapos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nfyrapos), Direction.DOWN, Nfyrapos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Nfempos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfempos), Direction.DOWN, Nfempos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Nfempos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nfempos), Direction.DOWN, Nfempos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //2nd row
                 if (ett1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Nett1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nett1pos), Direction.DOWN, Nett1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Nett1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nett1pos), Direction.DOWN, Nett1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Ntva1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntva1pos), Direction.DOWN, Ntva1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Ntva1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Ntva1pos), Direction.DOWN, Ntva1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Ntree1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntree1pos), Direction.DOWN, Ntree1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Ntree1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Ntree1pos), Direction.DOWN, Ntree1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Nfyra1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfyra1pos), Direction.DOWN, Nfyra1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Nfyra1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nfyra1pos), Direction.DOWN, Nfyra1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Nfem1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfem1pos), Direction.DOWN, Nfem1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Nfem1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nfem1pos), Direction.DOWN, Nfem1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //3rd row
                 if (ett2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Nett2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nett2pos), Direction.DOWN, Nett2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Nett2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nett2pos), Direction.DOWN, Nett2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Ntva2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntva2pos), Direction.DOWN, Ntva2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Ntva2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Ntva2pos), Direction.DOWN, Ntva2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Ntree2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntree2pos), Direction.DOWN, Ntree2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Ntree2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Ntree2pos), Direction.DOWN, Ntree2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Nfyra2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfyra2pos), Direction.DOWN, Nfyra2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Nfyra2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nfyra2pos), Direction.DOWN, Nfyra2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Nfem2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfem2pos), Direction.DOWN, Nfem2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Nfem2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nfem2pos), Direction.DOWN, Nfem2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //4th row
                 if (ett3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Nett3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nett3pos), Direction.DOWN, Nett3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Nett3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nett3pos), Direction.DOWN, Nett3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Ntva3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntva3pos), Direction.DOWN, Ntva3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Ntva3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Ntva3pos), Direction.DOWN, Ntva3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Ntree3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntree3pos), Direction.DOWN, Ntree3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Ntree3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Ntree3pos), Direction.DOWN, Ntree3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Nfyra3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfyra3pos), Direction.DOWN, Nfyra3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Nfyra3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nfyra3pos), Direction.DOWN, Nfyra3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Nfem3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfem3pos), Direction.DOWN, Nfem3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Nfem3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nfem3pos), Direction.DOWN, Nfem3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //5th row
                 if (ett4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Nett4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nett4pos), Direction.DOWN, Nett4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Nett4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nett4pos), Direction.DOWN, Nett4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Ntva4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntva4pos), Direction.DOWN, Ntva4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Ntva4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Ntva4pos), Direction.DOWN, Ntva4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Ntree4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Ntree4pos), Direction.DOWN, Ntree4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Ntree4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Ntree4pos), Direction.DOWN, Ntree4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Nfyra4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfyra4pos), Direction.DOWN, Nfyra4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Nfyra4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nfyra4pos), Direction.DOWN, Nfyra4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Nfem4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Nfem4pos), Direction.DOWN, Nfem4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Nfem4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Nfem4pos), Direction.DOWN, Nfem4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
             }
 
             if (playerdir == Direction.SOUTH){
                 //1st row
                 if (ett){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Settpos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Settpos), Direction.DOWN, Settpos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Settpos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Settpos), Direction.DOWN, Settpos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Stvapos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stvapos), Direction.DOWN, Stvapos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Stvapos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Stvapos), Direction.DOWN, Stvapos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Streepos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Streepos), Direction.DOWN, Streepos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Streepos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Streepos), Direction.DOWN, Streepos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Sfyrapos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfyrapos), Direction.DOWN, Sfyrapos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Sfyrapos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sfyrapos), Direction.DOWN, Sfyrapos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Sfempos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfempos), Direction.DOWN, Sfempos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Sfempos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sfempos), Direction.DOWN, Sfempos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //2nd row
                 if (ett1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Sett1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sett1pos), Direction.DOWN, Sett1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Sett1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sett1pos), Direction.DOWN, Sett1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Stva1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stva1pos), Direction.DOWN, Stva1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Stva1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Stva1pos), Direction.DOWN, Stva1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Stree1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stree1pos), Direction.DOWN, Stree1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Stree1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Stree1pos), Direction.DOWN, Stree1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Sfyra1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfyra1pos), Direction.DOWN, Sfyra1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Sfyra1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sfyra1pos), Direction.DOWN, Sfyra1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Sfem1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfem1pos), Direction.DOWN, Sfem1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Sfem1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sfem1pos), Direction.DOWN, Sfem1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //3rd row
                 if (ett2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Sett2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sett2pos), Direction.DOWN, Sett2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Sett2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sett2pos), Direction.DOWN, Sett2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Stva2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stva2pos), Direction.DOWN, Stva2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Stva2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Stva2pos), Direction.DOWN, Stva2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Stree2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stree2pos), Direction.DOWN, Stree2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Stree2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Stree2pos), Direction.DOWN, Stree2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Sfyra2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfyra2pos), Direction.DOWN, Sfyra2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Sfyra2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sfyra2pos), Direction.DOWN, Sfyra2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Sfem2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfem2pos), Direction.DOWN, Sfem2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Sfem2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sfem2pos), Direction.DOWN, Sfem2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //4th row
                 if (ett3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Sett3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sett3pos), Direction.DOWN, Sett3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Sett3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sett3pos), Direction.DOWN, Sett3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Stva3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stva3pos), Direction.DOWN, Stva3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Stva3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Stva3pos), Direction.DOWN, Stva3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Stree3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stree3pos), Direction.DOWN, Stree3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Stree3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Stree3pos), Direction.DOWN, Stree3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Sfyra3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfyra3pos), Direction.DOWN, Sfyra3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Sfyra3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sfyra3pos), Direction.DOWN, Sfyra3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Sfem3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfem3pos), Direction.DOWN, Sfem3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Sfem3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sfem3pos), Direction.DOWN, Sfem3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //5th row
                 if (ett4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Sett4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sett4pos), Direction.DOWN, Sett4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Sett4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sett4pos), Direction.DOWN, Sett4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Stva4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stva4pos), Direction.DOWN, Stva4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Stva4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Stva4pos), Direction.DOWN, Stva4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Stree4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Stree4pos), Direction.DOWN, Stree4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Stree4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Stree4pos), Direction.DOWN, Stree4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Sfyra4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfyra4pos), Direction.DOWN, Sfyra4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Sfyra4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sfyra4pos), Direction.DOWN, Sfyra4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Sfem4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Sfem4pos), Direction.DOWN, Sfem4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Sfem4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Sfem4pos), Direction.DOWN, Sfem4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
             }
 
             if (playerdir == Direction.EAST){
                 //1st row
                 if (ett){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Eettpos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Eettpos), Direction.DOWN, Eettpos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Eettpos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Eettpos), Direction.DOWN, Eettpos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Etvapos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etvapos), Direction.DOWN, Etvapos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Etvapos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Etvapos), Direction.DOWN, Etvapos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Etreepos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etreepos), Direction.DOWN, Etreepos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Etreepos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Etreepos), Direction.DOWN, Etreepos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Efyrapos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efyrapos), Direction.DOWN, Efyrapos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Efyrapos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Efyrapos), Direction.DOWN, Efyrapos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Efempos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efempos), Direction.DOWN, Efempos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Efempos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Efempos), Direction.DOWN, Efempos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //2nd row
                 if (ett1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Eett1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Eett1pos), Direction.DOWN, Eett1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Eett1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Eett1pos), Direction.DOWN, Eett1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Etva1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etva1pos), Direction.DOWN, Etva1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Etva1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Etva1pos), Direction.DOWN, Etva1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Etree1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etree1pos), Direction.DOWN, Etree1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Etree1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Etree1pos), Direction.DOWN, Etree1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Efyra1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efyra1pos), Direction.DOWN, Efyra1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Efyra1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Efyra1pos), Direction.DOWN, Efyra1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Efem1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efem1pos), Direction.DOWN, Efem1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Efem1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Efem1pos), Direction.DOWN, Efem1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //3rd row
                 if (ett2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Eett2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Eett2pos), Direction.DOWN, Eett2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Eett2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Eett2pos), Direction.DOWN, Eett2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Etva2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etva2pos), Direction.DOWN, Etva2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Etva2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Etva2pos), Direction.DOWN, Etva2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Etree2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etree2pos), Direction.DOWN, Etree2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Etree2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Etree2pos), Direction.DOWN, Etree2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Efyra2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efyra2pos), Direction.DOWN, Efyra2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Efyra2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Efyra2pos), Direction.DOWN, Efyra2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Efem2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efem2pos), Direction.DOWN, Efem2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Efem2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Efem2pos), Direction.DOWN, Efem2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //4th row
                 if (ett3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Eett3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Eett3pos), Direction.DOWN, Eett3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Eett3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Eett3pos), Direction.DOWN, Eett3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Etva3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etva3pos), Direction.DOWN, Etva3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Etva3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Etva3pos), Direction.DOWN, Etva3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Etree3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etree3pos), Direction.DOWN, Etree3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Etree3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Etree3pos), Direction.DOWN, Etree3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Efyra3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efyra3pos), Direction.DOWN, Efyra3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Efyra3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Efyra3pos), Direction.DOWN, Efyra3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Efem3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efem3pos), Direction.DOWN, Efem3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Efem3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Efem3pos), Direction.DOWN, Efem3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //5th row
                 if (ett4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Eett4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Eett4pos), Direction.DOWN, Eett4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Eett4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Eett4pos), Direction.DOWN, Eett4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Etva4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etva4pos), Direction.DOWN, Etva4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Etva4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Etva4pos), Direction.DOWN, Etva4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Etree4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Etree4pos), Direction.DOWN, Etree4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Etree4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Etree4pos), Direction.DOWN, Etree4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Efyra4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efyra4pos), Direction.DOWN, Efyra4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Efyra4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Efyra4pos), Direction.DOWN, Efyra4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Efem4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Efem4pos), Direction.DOWN, Efem4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Efem4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Efem4pos), Direction.DOWN, Efem4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
             }
 
             if (playerdir == Direction.WEST){
                 //1st row
                 if (ett){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Wettpos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wettpos), Direction.DOWN, Wettpos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Wettpos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wettpos), Direction.DOWN, Wettpos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Wtvapos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtvapos), Direction.DOWN, Wtvapos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Wtvapos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wtvapos), Direction.DOWN, Wtvapos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Wtreepos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtreepos), Direction.DOWN, Wtreepos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Wtreepos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wtreepos), Direction.DOWN, Wtreepos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Wfyrapos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfyrapos), Direction.DOWN, Wfyrapos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Wfyrapos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wfyrapos), Direction.DOWN, Wfyrapos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem){
-                    if (blockticks==tickdelay.get() && mc.world.getBlockState(Wfempos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfempos), Direction.DOWN, Wfempos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get() && mc.level.getBlockState(Wfempos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wfempos), Direction.DOWN, Wfempos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //2nd row
                 if (ett1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wett1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wett1pos), Direction.DOWN, Wett1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Wett1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wett1pos), Direction.DOWN, Wett1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wtva1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtva1pos), Direction.DOWN, Wtva1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Wtva1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wtva1pos), Direction.DOWN, Wtva1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wtree1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtree1pos), Direction.DOWN, Wtree1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Wtree1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wtree1pos), Direction.DOWN, Wtree1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wfyra1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfyra1pos), Direction.DOWN, Wfyra1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Wfyra1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wfyra1pos), Direction.DOWN, Wfyra1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem1){
-                    if (blockticks==tickdelay.get()*2 && mc.world.getBlockState(Wfem1pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfem1pos), Direction.DOWN, Wfem1pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*2 && mc.level.getBlockState(Wfem1pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wfem1pos), Direction.DOWN, Wfem1pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //3rd row
                 if (ett2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wett2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wett2pos), Direction.DOWN, Wett2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Wett2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wett2pos), Direction.DOWN, Wett2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wtva2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtva2pos), Direction.DOWN, Wtva2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Wtva2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wtva2pos), Direction.DOWN, Wtva2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wtree2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtree2pos), Direction.DOWN, Wtree2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Wtree2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wtree2pos), Direction.DOWN, Wtree2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wfyra2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfyra2pos), Direction.DOWN, Wfyra2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Wfyra2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wfyra2pos), Direction.DOWN, Wfyra2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem2){
-                    if (blockticks==tickdelay.get()*3 && mc.world.getBlockState(Wfem2pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfem2pos), Direction.DOWN, Wfem2pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*3 && mc.level.getBlockState(Wfem2pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wfem2pos), Direction.DOWN, Wfem2pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //4th row
                 if (ett3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wett3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wett3pos), Direction.DOWN, Wett3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Wett3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wett3pos), Direction.DOWN, Wett3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wtva3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtva3pos), Direction.DOWN, Wtva3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Wtva3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wtva3pos), Direction.DOWN, Wtva3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wtree3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtree3pos), Direction.DOWN, Wtree3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Wtree3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wtree3pos), Direction.DOWN, Wtree3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wfyra3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfyra3pos), Direction.DOWN, Wfyra3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Wfyra3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wfyra3pos), Direction.DOWN, Wfyra3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem3){
-                    if (blockticks==tickdelay.get()*4 && mc.world.getBlockState(Wfem3pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfem3pos), Direction.DOWN, Wfem3pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*4 && mc.level.getBlockState(Wfem3pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wfem3pos), Direction.DOWN, Wfem3pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
 
                 //5th row
                 if (ett4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wett4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wett4pos), Direction.DOWN, Wett4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Wett4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wett4pos), Direction.DOWN, Wett4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tva4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wtva4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtva4pos), Direction.DOWN, Wtva4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Wtva4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wtva4pos), Direction.DOWN, Wtva4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (tree4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wtree4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wtree4pos), Direction.DOWN, Wtree4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Wtree4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wtree4pos), Direction.DOWN, Wtree4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fyra4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wfyra4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfyra4pos), Direction.DOWN, Wfyra4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Wfyra4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wfyra4pos), Direction.DOWN, Wfyra4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if (fem4){
-                    if (blockticks==tickdelay.get()*5 && mc.world.getBlockState(Wfem4pos).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(Wfem4pos), Direction.DOWN, Wfem4pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (blockticks==tickdelay.get()*5 && mc.level.getBlockState(Wfem4pos).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(Wfem4pos), Direction.DOWN, Wfem4pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
             }
         }
@@ -1666,7 +1711,7 @@ public class TrouserBuild extends Module {
     }
 
     private BlockPos cast() {
-        HitResult blockHit = mc.getCameraEntity().raycast(reach.get(), 0, false);
+        HitResult blockHit = mc.getCameraEntity().pick(reach.get(), 0, false);
         return ((BlockHitResult) blockHit).getBlockPos();
     }
     private void cascadingpileof() {
@@ -1675,38 +1720,38 @@ public class TrouserBuild extends Module {
         if (!findResult.found()) {
             return;
         }
-        mc.player.getInventory().selectedSlot = findResult.slot();
+        mc.player.getInventory().setSelectedSlot(findResult.slot());
     }
     private boolean isInvalidBlock(ItemStack stack) {
         return !(stack.getItem() instanceof BlockItem)
                 || stack.getItem() instanceof BedItem
-                || stack.getItem() instanceof PowderSnowBucketItem
-                || stack.getItem() instanceof ScaffoldingItem
-                || stack.getItem() instanceof TallBlockItem
-                || stack.getItem() instanceof VerticallyAttachableBlockItem
-                || stack.getItem() instanceof PlaceableOnWaterItem
-                || ((BlockItem) stack.getItem()).getBlock() instanceof PlantBlock
+                || stack.getItem() instanceof SolidBucketItem
+                || stack.getItem() instanceof ScaffoldingBlockItem
+                || stack.getItem() instanceof DoubleHighBlockItem
+                || stack.getItem() instanceof StandingAndWallBlockItem
+                || stack.getItem() instanceof PlaceOnWaterBlockItem
+                || ((BlockItem) stack.getItem()).getBlock() instanceof VegetationBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof TorchBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof AbstractRedstoneGateBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof RedstoneWireBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof DiodeBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof RedStoneWireBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof FenceBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof WallBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof FenceGateBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof FallingBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof AbstractRailBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof AbstractSignBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof BaseRailBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof SignBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof BellBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof CarpetBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof ConduitBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof CoralFanBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof CoralWallFanBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof DeadCoralFanBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof DeadCoralWallFanBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof TripwireHookBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof BaseCoralFanBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof BaseCoralWallFanBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof TripWireHookBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof PointedDripstoneBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof TripwireBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof TripWireBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof PressurePlateBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof WallMountedBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof FaceAttachedHorizontalDirectionalBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof ShulkerBoxBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof AmethystClusterBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof BuddingAmethystBlock
@@ -1720,7 +1765,7 @@ public class TrouserBuild extends Module {
                 || ((BlockItem) stack.getItem()).getBlock() instanceof KelpBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof GlowLichenBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof CactusBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof BambooBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof BambooStalkBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof FlowerPotBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof LadderBlock
                 || skippableBlox.get().contains(((BlockItem) stack.getItem()).getBlock());

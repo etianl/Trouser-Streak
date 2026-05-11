@@ -4,16 +4,15 @@ package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixininterface.IPlayerInteractEntityC2SPacket;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.protocol.game.ServerboundAttackPacket;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
 import pwn.noobs.trouserstreak.Trouser;
 
 public class KnockBackModifier extends Module {
@@ -53,17 +52,16 @@ public class KnockBackModifier extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (attacking || mc.player == null || mc.world == null) return;
-        if (!(event.packet instanceof IPlayerInteractEntityC2SPacket packet)) return;
-        if (packet.meteor$getType() != PlayerInteractEntityC2SPacket.InteractType.ATTACK) return;
-        Registry<Enchantment> enchantmentRegistry = mc.world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
-        if (!mc.player.isSprinting() && mc.player.getMainHandStack().getEnchantments().getLevel(enchantmentRegistry.getOrThrow(Enchantments.KNOCKBACK)) == 0) return;
+        if (attacking || mc.player == null || mc.level == null) return;
+        if (!(event.packet instanceof ServerboundAttackPacket)) return;
+        Registry<Enchantment> enchantmentRegistry = mc.level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        if (!mc.player.isSprinting() && mc.player.getMainHandItem().getEnchantments().getLevel(enchantmentRegistry.getOrThrow(Enchantments.KNOCKBACK)) == 0) return;
         attacking = true;
 
         event.cancel(); //cancel original attack
 
-        originalYaw = mc.player.getYaw();
-        float modifiedYaw = mc.player.getYaw();
+        originalYaw = mc.player.getYRot();
+        float modifiedYaw = mc.player.getYRot();
 
         switch (mode.get()) {
             case TowardSelf -> modifiedYaw = originalYaw + 180f;
@@ -72,11 +70,11 @@ public class KnockBackModifier extends Module {
             case Degrees -> modifiedYaw = (originalYaw + degrees.get()) % 360f;
         }
 
-        mc.getNetworkHandler().sendPacket(
-                new PlayerMoveC2SPacket.LookAndOnGround(modifiedYaw, mc.player.getPitch(), mc.player.isOnGround(), mc.player.horizontalCollision)
+        mc.getConnection().send(
+                new ServerboundMovePlayerPacket.Rot(modifiedYaw, mc.player.getXRot(), mc.player.onGround(), mc.player.horizontalCollision)
         );
 
-        mc.getNetworkHandler().sendPacket(event.packet); //send attack after we look for modified knockback
+        mc.getConnection().send(event.packet); //send attack after we look for modified knockback
     }
 
     @EventHandler
@@ -84,8 +82,8 @@ public class KnockBackModifier extends Module {
         if (mc.player == null) return;
 
         if (attacking) {
-            mc.player.setYaw(originalYaw); //incase sending the modified yaw packet affects you clientside
-            mc.player.headYaw = originalYaw;
+            mc.player.setYRot(originalYaw); //incase sending the modified yaw packet affects you clientside
+            mc.player.yHeadRot = originalYaw;
             attacking = false;
         }
     }

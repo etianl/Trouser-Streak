@@ -7,28 +7,27 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.TypedEntityData;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtDouble;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.registry.Registries;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.TypedEntityData;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.Random;
@@ -81,14 +80,22 @@ public class AirstrikePlus extends Module {
             .defaultValue(true)
             .build()
     );
-    private final Setting<Integer> radius = sgGeneral.add(new IntSetting.Builder()
-            .name("radius")
+    private final Setting<Integer> minrange = sgGeneral.add(new IntSetting.Builder()
+            .name("min-range")
+            .description("radius they spawn from the player")
+            .defaultValue(0)
+            .sliderRange(0, 100)
+            .min(0)
+            .build()
+    );
+    private final Setting<Integer> maxrange = sgGeneral.add(new IntSetting.Builder()
+            .name("max-range")
             .description("radius they spawn from the player")
             .defaultValue(30)
             .sliderRange(1, 100)
             .min(1)
-            .build());
-
+            .build()
+    );
     private final Setting<Integer> height = sgGeneral.add(new IntSetting.Builder()
             .name("HeightAboveHead")
             .description("How far from your Characters Y level to spawn at.")
@@ -266,7 +273,13 @@ public class AirstrikePlus extends Module {
             .name("CustomNameVisible")
             .description("CustomNameVisible or not.")
             .defaultValue(false)
-            .visible(() -> airstrikeEveryone.get())
+            .visible(airstrikeEveryone::get)
+            .build()
+    );
+    public final Setting<Boolean> EcustomHP = sgeveryone.add(new BoolSetting.Builder()
+            .name("Modify Health Points")
+            .defaultValue(false)
+            .visible(airstrikeEveryone::get)
             .build()
     );
     private final Setting<Integer> Ehealth = sgeveryone.add(new IntSetting.Builder()
@@ -275,7 +288,7 @@ public class AirstrikePlus extends Module {
             .defaultValue(100)
             .min(0)
             .sliderRange(0, 10000)
-            .visible(() -> airstrikeEveryone.get())
+            .visible(() -> airstrikeEveryone.get() && EcustomHP.get())
             .build());
     private final Setting<Integer> Eabsorption = sgeveryone.add(new IntSetting.Builder()
             .name("Absorption Points")
@@ -283,13 +296,13 @@ public class AirstrikePlus extends Module {
             .defaultValue(0)
             .min(0)
             .sliderRange(0, 10000)
-            .visible(() -> airstrikeEveryone.get())
+            .visible(airstrikeEveryone::get)
             .build());
     public final Setting<Boolean> EageSpecify = sgeveryone.add(new BoolSetting.Builder()
             .name("Specify Age")
             .description("Add an Age NBT tag.")
             .defaultValue(false)
-            .visible(() -> airstrikeEveryone.get())
+            .visible(airstrikeEveryone::get)
             .build()
     );
     private final Setting<Integer> Eage = sgeveryone.add(new IntSetting.Builder()
@@ -304,63 +317,63 @@ public class AirstrikePlus extends Module {
             .name("Invulnerable")
             .description("Invulnerable or not")
             .defaultValue(true)
-            .visible(() -> airstrikeEveryone.get())
+            .visible(airstrikeEveryone::get)
             .build()
     );
     public final Setting<Boolean> Epersist = sgeveryone.add(new BoolSetting.Builder()
             .name("Never Despawn")
             .description("adds PersistenceRequired tag.")
             .defaultValue(false)
-            .visible(() -> airstrikeEveryone.get())
+            .visible(airstrikeEveryone::get)
             .build()
     );
     public final Setting<Boolean> EnoAI = sgeveryone.add(new BoolSetting.Builder()
             .name("NoAI")
             .description("NoAI")
             .defaultValue(false)
-            .visible(() -> airstrikeEveryone.get())
+            .visible(airstrikeEveryone::get)
             .build()
     );
     public final Setting<Boolean> Efalsefire = sgeveryone.add(new BoolSetting.Builder()
             .name("HasVisualFire")
             .description("HasVisualFire or not")
             .defaultValue(false)
-            .visible(() -> airstrikeEveryone.get())
+            .visible(airstrikeEveryone::get)
             .build()
     );
     public final Setting<Boolean> Enograv = sgeveryone.add(new BoolSetting.Builder()
             .name("NoGravity")
             .description("NoGravity or not")
             .defaultValue(false)
-            .visible(() -> airstrikeEveryone.get())
+            .visible(airstrikeEveryone::get)
             .build()
     );
     public final Setting<Boolean> Esilence = sgeveryone.add(new BoolSetting.Builder()
             .name("Silent")
             .description("adds Silent tag.")
             .defaultValue(false)
-            .visible(() -> airstrikeEveryone.get())
+            .visible(airstrikeEveryone::get)
             .build()
     );
     public final Setting<Boolean> Eglow = sgeveryone.add(new BoolSetting.Builder()
             .name("Glowing")
             .description("Glowing or not")
             .defaultValue(false)
-            .visible(() -> airstrikeEveryone.get())
+            .visible(airstrikeEveryone::get)
             .build()
     );
     public final Setting<Boolean> Eignite = sgeveryone.add(new BoolSetting.Builder()
             .name("Ignited")
             .description("Pre-ignite creeper or not.")
             .defaultValue(true)
-            .visible(() -> airstrikeEveryone.get())
+            .visible(airstrikeEveryone::get)
             .build()
     );
     public final Setting<Boolean> Epowah = sgeveryone.add(new BoolSetting.Builder()
             .name("Charged Creeper")
             .description("powered creeper or not.")
             .defaultValue(false)
-            .visible(() -> airstrikeEveryone.get())
+            .visible(airstrikeEveryone::get)
             .build()
     );
     private final Setting<Integer> Efuse = sgeveryone.add(new IntSetting.Builder()
@@ -369,7 +382,7 @@ public class AirstrikePlus extends Module {
             .defaultValue(20)
             .min(0)
             .sliderRange(0, 120)
-            .visible(() -> airstrikeEveryone.get())
+            .visible(airstrikeEveryone::get)
             .build());
     private final Setting<Integer> Eexppower = sgeveryone.add(new IntSetting.Builder()
             .name("ExplosionPower/Radius")
@@ -377,7 +390,7 @@ public class AirstrikePlus extends Module {
             .defaultValue(10)
             .min(1)
             .sliderMax(127)
-            .visible(() -> airstrikeEveryone.get())
+            .visible(airstrikeEveryone::get)
             .build());
     private final Setting<Integer> Esize = sgeveryone.add(new IntSetting.Builder()
             .name("Slime/Magma Cube Size")
@@ -385,13 +398,13 @@ public class AirstrikePlus extends Module {
             .defaultValue(1)
             .min(0)
             .sliderRange(0, 100)
-            .visible(() -> airstrikeEveryone.get())
+            .visible(airstrikeEveryone::get)
             .build());
     public final Setting<Boolean> EblockstateSpecify = sgeveryone.add(new BoolSetting.Builder()
             .name("Specify falling_block")
             .description("Add an NBT tag defining what is the falling block.")
             .defaultValue(false)
-            .visible(() -> airstrikeEveryone.get())
+            .visible(airstrikeEveryone::get)
             .build()
     );
     private final Setting<Block> Eblockstate = sgeveryone.add(new BlockSetting.Builder()
@@ -406,15 +419,14 @@ public class AirstrikePlus extends Module {
     }
 
     final Random r = new Random();
-    Vec3d origin = null;
+    Vec3 origin = null;
     int i = 0;
     private int mix=0;
     private String namecolour = nomcolor.get().toString();
-    private NbtList speedlist = new NbtList();
     private String entityName = entity.get().trim().replace(" ", "_");
     private String customName = nom.get();
 
-    private String[] prefixes = {
+    private final String[] prefixes = {
             "§k111 §r| ",
             "§k222 §r| ",
             "§k333 §r| ",
@@ -425,11 +437,21 @@ public class AirstrikePlus extends Module {
             "§k888 §r| ",
             "§k999 §r| "
     };
-    private Vec3d pickRandomPos() {
-        double x = r.nextDouble(radius.get() * 2) - radius.get() + origin.x;
-        double y = mc.player.getY()+height.get();
-        double z = r.nextDouble(radius.get() * 2) - radius.get() + origin.z;
-        return new Vec3d(x, y, z);
+    private Vec3 pickRandomPos() {
+        double minR = minrange.get();
+        double maxR = maxrange.get();
+
+        double angle = r.nextDouble(Math.PI * 2);
+
+        double dist = (maxR > minR)
+                ? minR + r.nextDouble(maxR - minR)
+                : minR;
+
+        double x = origin.x + Math.cos(angle) * dist;
+        double z = origin.z + Math.sin(angle) * dist;
+        double y = mc.player.getY() + height.get();
+
+        return new Vec3(x, y, z);
     }
     @EventHandler
     private void onScreenOpen(OpenScreenEvent event) {
@@ -444,47 +466,44 @@ public class AirstrikePlus extends Module {
 
     @EventHandler
     public void onTick(TickEvent.Pre event) {
-        origin = mc.player.getEntityPos();
+        origin = mc.player.position();
     }
 
     @EventHandler
     public void onTick(TickEvent.Post event) {
         if (randomPrefix.get()) {
-            String randomPrefix = prefixes[new Random().nextInt(prefixes.length)];
+            String randomPrefix = prefixes[r.nextInt(prefixes.length)];
             customName = randomPrefix + nom.get();
         } else {
             customName = nom.get();
         }
         if (mixer.get()) {
-            mix++;
-            if (mix == 1)entityName = entity.get().trim().replace(" ", "_");
-            if (mix == 2) entityName = entity2.get().trim().replace(" ", "_");
-            if (mix > 2)mix = 0;
+            mix = (mix + 1) % 2;
+            entityName = (mix == 0 ? entity.get() : entity2.get()).trim().replace(" ", "_");
         } else entityName = entity.get().trim().replace(" ", "_");
         for (int griefs = 0; griefs < grief.get(); griefs++) {
             if (airstrikeEveryone.get()) executeCommandsToCreateEntities();
             else {
                 if (randomnomcolor.get()) {
                     String[] colorCodes = {"black", "dark_blue", "dark_green", "dark_aqua", "dark_red", "dark_purple", "gold", "gray", "dark_gray", "blue", "green", "aqua", "red", "light_purple", "yellow", "white"};
-                    Random random = new Random();
-                    int index = random.nextInt(colorCodes.length);
+                    int index = r.nextInt(colorCodes.length);
                     namecolour = colorCodes[index];
                 } else namecolour = nomcolor.get().toString();
                 ItemStack bomb = new ItemStack(Items.SALMON_SPAWN_EGG);
-                ItemStack bfr = mc.player.getMainHandStack();
-                BlockHitResult bhr = new BlockHitResult(mc.player.getEntityPos().add(0, 1, 0), Direction.UP, new BlockPos(mc.player.getBlockPos().add(0, 1, 0)), false);
+                ItemStack bfr = mc.player.getMainHandItem();
+                BlockHitResult bhr = new BlockHitResult(mc.player.position().add(0, 1, 0), Direction.UP, new BlockPos(mc.player.blockPosition().offset(0, 1, 0)), false);
                 i++;
-                if (mc.player.getAbilities().creativeMode) {
+                if (mc.player.getAbilities().instabuild) {
                     if (i >= delay.get()) {
-                        var changes = ComponentChanges.builder()
-                                .add(DataComponentTypes.CUSTOM_NAME, Text.literal(customName).formatted(Formatting.valueOf(namecolour.toUpperCase())))
-                                .add(DataComponentTypes.ITEM_NAME, Text.literal(customName).formatted(Formatting.valueOf(namecolour.toUpperCase())))
-                                .add(DataComponentTypes.ENTITY_DATA, createEntityData())
+                        var changes = DataComponentPatch.builder()
+                                .set(DataComponents.CUSTOM_NAME, Component.literal(customName).withStyle(ChatFormatting.valueOf(namecolour.toUpperCase())))
+                                .set(DataComponents.ITEM_NAME, Component.literal(customName).withStyle(ChatFormatting.valueOf(namecolour.toUpperCase())))
+                                .set(DataComponents.ENTITY_DATA, createEntityData())
                                 .build();
-                        bomb.applyChanges(changes);
-                        mc.interactionManager.clickCreativeStack(bomb, 36 + mc.player.getInventory().selectedSlot);
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                        mc.interactionManager.clickCreativeStack(bfr, 36 + mc.player.getInventory().selectedSlot);
+                        bomb.applyComponentsAndValidate(changes);
+                        mc.gameMode.handleCreativeModeItemAdd(bomb, 36 + mc.player.getInventory().getSelectedSlot());
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, bhr);
+                        mc.gameMode.handleCreativeModeItemAdd(bfr, 36 + mc.player.getInventory().getSelectedSlot());
                         i = 0;
                     }
                 } else {
@@ -499,20 +518,22 @@ public class AirstrikePlus extends Module {
         String[] parts = fullString.split(":");
         String block = parts[1];
         String blockName = block.replace("}", "");
-        NbtCompound entityTag = new NbtCompound();
-        NbtList pos = new NbtList();
-        NbtList speedlist = new NbtList();
-        Vec3d cpos = pickRandomPos();
+        CompoundTag entityTag = new CompoundTag();
+        ListTag pos = new ListTag();
+        ListTag speedlist = new ListTag();
+        Vec3 cpos = pickRandomPos();
 
-        speedlist.add(NbtDouble.of(0));
-        speedlist.add(NbtDouble.of(-speed.get()));
-        speedlist.add(NbtDouble.of(0));
-        pos.add(NbtDouble.of(cpos.x));
-        pos.add(NbtDouble.of(mc.player.getY() + height.get()));
-        pos.add(NbtDouble.of(cpos.z));
+        speedlist.add(DoubleTag.valueOf(0));
+        speedlist.add(DoubleTag.valueOf(-speed.get()));
+        speedlist.add(DoubleTag.valueOf(0));
+        pos.add(DoubleTag.valueOf(cpos.x));
+        pos.add(DoubleTag.valueOf(mc.player.getY() + height.get()));
+        pos.add(DoubleTag.valueOf(cpos.z));
 
         entityTag.putString("id", "minecraft:" + entityName);
-        entityTag.put("power", speedlist);
+        if (entity.get().equals("dragon_fireball") || entity2.get().equals("dragon_fireball") || entity.get().equals("fireball") || entity2.get().equals("fireball") || entity.get().equals("small_fireball") || entity2.get().equals("small_fireball") || entity.get().equals("wither_skull") || entity2.get().equals("wither_skull") || entity.get().equals("wind_projectile") || entity2.get().equals("wind_projectile")) {
+            entityTag.put("power", speedlist);
+        }
         entityTag.put("Motion", speedlist);
         entityTag.put("Pos", pos);
         entityTag.putInt("Health", health.get());
@@ -520,10 +541,10 @@ public class AirstrikePlus extends Module {
         if (ageSpecify.get()) entityTag.putInt("Age", age.get());
         entityTag.putInt("ExplosionPower", exppower.get());
         entityTag.putInt("ExplosionRadius", exppower.get());
-        NbtCompound blockState = new NbtCompound();
+        CompoundTag blockState = new CompoundTag();
         blockState.putString("Name", "minecraft:" + blockName);
         entityTag.put("BlockState", blockState);
-        NbtCompound CustomNameNBT = new NbtCompound();
+        CompoundTag CustomNameNBT = new CompoundTag();
         CustomNameNBT.putString("text", customName);
         CustomNameNBT.putString("color", namecolour);
 
@@ -540,10 +561,10 @@ public class AirstrikePlus extends Module {
         entityTag.putInt("Size", size.get());
         if (customname.get()) entityTag.putBoolean("CustomNameVisible", customname.get());
         String serverVersion;
-        if (mc.isIntegratedServerRunning()) {
-            serverVersion = mc.getServer().getVersion();
+        if (mc.hasSingleplayerServer()) {
+            serverVersion = mc.getSingleplayerServer().getServerVersion();
         } else {
-            serverVersion = mc.getCurrentServerEntry().version.getLiteralString();
+            serverVersion = mc.getCurrentServer().version.tryCollapseToString();
         }
         if (serverVersion == null) {
             entityTag.put("CustomName", CustomNameNBT);
@@ -556,12 +577,11 @@ public class AirstrikePlus extends Module {
         }
 
         Identifier entityId = Identifier.tryParse("minecraft:" + entityName);
-        EntityType<?> entityType = Registries.ENTITY_TYPE.get(entityId);
-        if (entityType == null) {
-            entityType = EntityType.PIG;
-        }
+        EntityType<?> entityType = (entityId != null)
+                ? BuiltInRegistries.ENTITY_TYPE.getValue(entityId)
+                : EntityType.FIREBALL;
 
-        return TypedEntityData.create(entityType, entityTag);
+        return TypedEntityData.of(entityType, entityTag);
     }
     private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
         if (serverVersion == null) return false;
@@ -590,16 +610,15 @@ public class AirstrikePlus extends Module {
         return false;
     }
     private void executeCommandsToCreateEntities() {
-        speedlist = new NbtList();
+        ListTag speedlist = new ListTag();
         if (randomnomcolor.get()){
             String[] colorCodes = {"black", "dark_blue", "dark_green", "dark_aqua", "dark_red", "dark_purple", "gold", "gray", "dark_gray", "blue", "green", "aqua", "red", "light_purple", "yellow", "white"};
-            Random random = new Random();
-            int index = random.nextInt(colorCodes.length);
+            int index = r.nextInt(colorCodes.length);
             namecolour = colorCodes[index];
         } else namecolour = nomcolor.get().toString();
-        speedlist.add(NbtDouble.of(0));
-        speedlist.add(NbtDouble.of(-speed.get()));
-        speedlist.add(NbtDouble.of(0));
+        speedlist.add(DoubleTag.valueOf(0));
+        speedlist.add(DoubleTag.valueOf(-speed.get()));
+        speedlist.add(DoubleTag.valueOf(0));
         String nameColor = namecolour;
         int healthPoints = Ehealth.get();
         int absorptionPoints = Eabsorption.get();
@@ -622,19 +641,39 @@ public class AirstrikePlus extends Module {
         String[] parts = fullString.split(":");
         String block = parts[1];
         String blockName = block.replace("}", "");
-        NbtCompound blockState = new NbtCompound();
+        CompoundTag blockState = new CompoundTag();
         blockState.putString("Name", "minecraft:" + blockName);
 
         String command = "/execute as @a at @s run summon " + entityName + " ";
-        command += String.format("~%d ~%d ~%d", r.nextInt(radius.get() * 2) - radius.get(), height.get(), r.nextInt(radius.get() * 2) - radius.get());
+        double angle = r.nextDouble(Math.PI * 2);
+        double dist = minrange.get() + r.nextDouble(maxrange.get() - minrange.get());
+        int xOffset = (int) (Math.cos(angle) * dist);
+        int zOffset = (int) (Math.sin(angle) * dist);
+        command += String.format("~%d ~%d ~%d", xOffset, height.get(), zOffset);
         command += " {";
-        command += "\"CustomName\":\"{\\\"text\\\":\\\"" + customName + "\\\",\\\"color\\\":\\\"" + nameColor + "\\\"}\",";
-        command += "\"Health\":" + healthPoints + ",";
+        if (Ecustomname.get()) {
+            String serverVersion;
+            if (mc.hasSingleplayerServer()) {
+                serverVersion = mc.getSingleplayerServer().getServerVersion();
+            } else {
+                serverVersion = mc.getCurrentServer().version.tryCollapseToString();
+            }
+            if (serverVersion == null) {
+                command += "\"CustomName\":[{\"text\":\"" + customName + "\",\"color\":\"" + nameColor + "\"}],";
+            } else {
+                if (isVersionLessThan(serverVersion, 1, 21, 5)) {
+                    command += "\"CustomName\":\"{\\\"text\\\":\\\"" + customName + "\\\",\\\"color\\\":\\\"" + nameColor + "\\\"}\",";
+                } else {
+                    command += "\"CustomName\":[{\"text\":\"" + customName + "\",\"color\":\"" + nameColor + "\"}],";
+                }
+            }
+        }
+        if (EcustomHP.get()) command += "\"Health\":" + healthPoints + ",";
         if (Eabsorption.get() > 0) command += "\"AbsorptionAmount\":" + absorptionPoints + ",";
         if (EageSpecify.get()) command += "\"Age\":" + ageValue + ",";
         if (EblockstateSpecify.get()) command += "\"BlockState\":" + blockState + ",";
-        if (entity.get() == "fireball" || entity2.get() == "fireball") command += "\"ExplosionPower\":" + explosionPower + ",";
-        if (entity.get() == "creeper" || entity2.get() == "creeper") command += "\"ExplosionRadius\":" + explosionRadius + ",";
+        if (entity.get().equals("fireball") || entity2.get().equals("fireball")) command += "\"ExplosionPower\":" + explosionPower + ",";
+        if (entity.get().equals("creeper") || entity2.get().equals("creeper")) command += "\"ExplosionRadius\":" + explosionRadius + ",";
         if (Einvincible.get()) command += "\"Invulnerable\":" + isInvulnerable + ",";
         if (Esilence.get()) command += "\"Silent\":" + isSilent + ",";
         if (Eglow.get()) command += "\"Glowing\":" + isGlowing + ",";
@@ -643,12 +682,12 @@ public class AirstrikePlus extends Module {
         if (EnoAI.get()) command += "\"NoAI\":" + hasNoAI + ",";
         if (Efalsefire.get()) command += "\"HasVisualFire\":" + hasVisualFire + ",";
         if (Epowah.get()) command += "\"powered\":" + isPowered + ",";
-        if (Eignite.get() && entity.get() == "creeper" || entity2.get() == "creeper") command += "\"ignited\":" + isIgnited + ",";
-        if (entity.get() == "tnt" || entity2.get() == "tnt" || entity.get() == "creeper" || entity.get() == "creeper")command += "\"Fuse\":" + fuseTicks + ",";
-        if (entity.get() == "slime" || entity2.get() == "slime" || entity.get() == "magma_cube" || entity.get() == "magma_cube")command += "\"Size\":" + sizeValue + ",";
+        if (Eignite.get() && (entity.get().equals("creeper") || entity2.get().equals("creeper"))) command += "\"ignited\":" + isIgnited + ",";
+        if (entity.get().equals("tnt") || entity2.get().equals("tnt") || entity.get().equals("creeper") || entity2.get().equals("creeper")) command += "\"Fuse\":" + fuseTicks + ",";
+        if (entity.get().equals("slime") || entity2.get().equals("slime") || entity.get().equals("magma_cube") || entity2.get().equals("magma_cube")) command += "\"Size\":" + sizeValue + ",";
         if (Ecustomname.get()) command += "\"CustomNameVisible\":" + isCustomNameVisible + ",";
-        if (entity.get() == "dragon_fireball" || entity2.get() == "dragon_fireball" || entity.get() == "fireball" || entity.get() == "fireball" || entity.get() == "small_fireball" || entity2.get() == "small_fireball" || entity.get() == "wither_skull" || entity.get() == "wither_skull" || entity.get() == "wind_projectile" || entity.get() == "wind_projectile")command += "\"power\":" + speedlist.toString() + ",";
-        else command += "\"Motion\":" + speedlist.toString() + "";
+        if (entity.get().equals("dragon_fireball") || entity2.get().equals("dragon_fireball") || entity.get().equals("fireball") || entity2.get().equals("fireball") || entity.get().equals("small_fireball") || entity2.get().equals("small_fireball") || entity.get().equals("wither_skull") || entity2.get().equals("wither_skull") || entity.get().equals("wind_projectile") || entity2.get().equals("wind_projectile")) command += "\"power\":" + speedlist + ",";
+        command += "\"Motion\":" + speedlist;
         command += "}";
         if (command.length()<=256)ChatUtils.sendPlayerMsg(command);
         else {

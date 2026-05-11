@@ -14,14 +14,14 @@ import meteordevelopment.meteorclient.systems.modules.movement.Flight;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.command.argument.EntityAnchorArgumentType;
-import net.minecraft.item.BlockItem;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 /**
@@ -65,14 +65,14 @@ public class AutoStaircase extends Module {
     @Override
     public void onActivate() {
         if (mc.player == null) return;
-        mc.player.setVelocity(0,0,0);
+        mc.player.setDeltaMovement(0,0,0);
         resetTimer = false;
         PlayerUtils.centerPlayer();
-        if (!(mc.player.getMainHandStack().getItem() instanceof BlockItem)) return;
-        BlockPos pos = mc.player.getBlockPos().add(0,-1,0);
-        if (mc.world.getBlockState(pos).isReplaceable()) {;
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-            mc.player.swingHand(Hand.MAIN_HAND);}
+        if (!(mc.player.getMainHandItem().getItem() instanceof BlockItem)) return;
+        BlockPos pos = mc.player.blockPosition().offset(0,-1,0);
+        if (mc.level.getBlockState(pos).canBeReplaced()) {;
+            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+            mc.player.swing(InteractionHand.MAIN_HAND);}
         if (Modules.get().get(Flight.class).isActive()) {
             Modules.get().get(Flight.class).toggle();
         }
@@ -86,83 +86,83 @@ public class AutoStaircase extends Module {
 
     @Override
     public void onDeactivate() {
-        mc.options.forwardKey.setPressed(false);
-        mc.options.jumpKey.setPressed(false);
+        mc.options.keyUp.setDown(false);
+        mc.options.keyJump.setDown(false);
         resetTimer = true;
         Modules.get().get(Timer.class).setOverride(Timer.OFF);
     }
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (mc.player == null || mc.world == null) {toggle(); return;}
-            if (mc.player.getMainHandStack().getItem() instanceof BlockItem) {
+        if (mc.player == null || mc.level == null) {toggle(); return;}
+            if (mc.player.getMainHandItem().getItem() instanceof BlockItem) {
                 resetTimer = false;
                 Modules.get().get(Timer.class).setOverride(StairTimer.get());
             } else if (!resetTimer) {
                 resetTimer = true;
                 Modules.get().get(Timer.class).setOverride(Timer.OFF);
         }
-        if (mc.player.getMainHandStack().isEmpty()) {
-            mc.options.forwardKey.setPressed(false);
-            mc.options.rightKey.setPressed(false);
-            mc.options.leftKey.setPressed(false);
-            mc.options.backKey.setPressed(false);
-            mc.options.jumpKey.setPressed(false);
+        if (mc.player.getMainHandItem().isEmpty()) {
+            mc.options.keyUp.setDown(false);
+            mc.options.keyRight.setDown(false);
+            mc.options.keyLeft.setDown(false);
+            mc.options.keyDown.setDown(false);
+            mc.options.keyJump.setDown(false);
             PlayerUtils.centerPlayer();
         }
-        if (mc.options.rightKey.isPressed())
-            mc.options.rightKey.setPressed(false);
-        if (mc.options.leftKey.isPressed())
-            mc.options.leftKey.setPressed(false);
-        if (!(mc.player.getMainHandStack().getItem() instanceof BlockItem)) return;
-        switch (mc.player.getMovementDirection()) {
+        if (mc.options.keyRight.isDown())
+            mc.options.keyRight.setDown(false);
+        if (mc.options.keyLeft.isDown())
+            mc.options.keyLeft.setDown(false);
+        if (!(mc.player.getMainHandItem().getItem() instanceof BlockItem)) return;
+        switch (mc.player.getMotionDirection()) {
             case NORTH ->
-                    mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(mc.player.getX(), mc.player.getY(), mc.player.getZ() - view.get()));
+                    mc.player.lookAt(EntityAnchorArgument.Anchor.EYES, new Vec3(mc.player.getX(), mc.player.getY(), mc.player.getZ() - view.get()));
             case EAST ->
-                    mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(mc.player.getX() + view.get(), mc.player.getY(), mc.player.getZ()));
+                    mc.player.lookAt(EntityAnchorArgument.Anchor.EYES, new Vec3(mc.player.getX() + view.get(), mc.player.getY(), mc.player.getZ()));
             case SOUTH ->
-                    mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(mc.player.getX(), mc.player.getY(), mc.player.getZ() + view.get()));
+                    mc.player.lookAt(EntityAnchorArgument.Anchor.EYES, new Vec3(mc.player.getX(), mc.player.getY(), mc.player.getZ() + view.get()));
             case WEST ->
-                    mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(mc.player.getX() - view.get(), mc.player.getY(), mc.player.getZ()));
+                    mc.player.lookAt(EntityAnchorArgument.Anchor.EYES, new Vec3(mc.player.getX() - view.get(), mc.player.getY(), mc.player.getZ()));
             default -> {
             }
         }
-        if (!mc.player.isOnGround())return;
-        if (mc.options.backKey.isPressed()){
-            mc.options.forwardKey.setPressed(false);
-            mc.options.jumpKey.setPressed(false);
-            mc.options.rightKey.setPressed(false);
-            mc.options.leftKey.setPressed(false);
-            mc.player.setVelocity(0,0,0);
+        if (!mc.player.onGround())return;
+        if (mc.options.keyDown.isDown()){
+            mc.options.keyUp.setDown(false);
+            mc.options.keyJump.setDown(false);
+            mc.options.keyRight.setDown(false);
+            mc.options.keyLeft.setDown(false);
+            mc.player.setDeltaMovement(0,0,0);
         }
         if(mc.player.getY() >= limit.get()){
-            mc.options.forwardKey.setPressed(false);
-            mc.options.rightKey.setPressed(false);
-            mc.options.leftKey.setPressed(false);
-            mc.options.backKey.setPressed(false);
-            mc.options.jumpKey.setPressed(false);
+            mc.options.keyUp.setDown(false);
+            mc.options.keyRight.setDown(false);
+            mc.options.keyLeft.setDown(false);
+            mc.options.keyDown.setDown(false);
+            mc.options.keyJump.setDown(false);
             PlayerUtils.centerPlayer();
         }
     }
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent playerMoveEvent) {
-        if (mc.player == null || mc.world == null) {toggle(); return;}
-        if (!mc.player.isOnGround() || !(mc.player.getMainHandStack().getItem() instanceof BlockItem)) return;
-        BlockPos pos = mc.player.getBlockPos().offset(mc.player.getMovementDirection());
-        if (mc.world.getBlockState(pos).isReplaceable()) {
-            mc.options.forwardKey.setPressed(false);
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-            mc.player.swingHand(Hand.MAIN_HAND);
+        if (mc.player == null || mc.level == null) {toggle(); return;}
+        if (!mc.player.onGround() || !(mc.player.getMainHandItem().getItem() instanceof BlockItem)) return;
+        BlockPos pos = mc.player.blockPosition().relative(mc.player.getMotionDirection());
+        if (mc.level.getBlockState(pos).canBeReplaced()) {
+            mc.options.keyUp.setDown(false);
+            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+            mc.player.swing(InteractionHand.MAIN_HAND);
         }
-        if (!mc.world.getBlockState(pos).isReplaceable()) {
-            mc.options.forwardKey.setPressed(true);
-            mc.options.jumpKey.setPressed(true);
+        if (!mc.level.getBlockState(pos).canBeReplaced()) {
+            mc.options.keyUp.setDown(true);
+            mc.options.keyJump.setDown(true);
             PlayerUtils.centerPlayer();
         }
-        if (mc.player.getMainHandStack().isEmpty()) {
-            mc.options.forwardKey.setPressed(false);
-            mc.options.jumpKey.setPressed(false);
+        if (mc.player.getMainHandItem().isEmpty()) {
+            mc.options.keyUp.setDown(false);
+            mc.options.keyJump.setDown(false);
         }
     }
     @EventHandler

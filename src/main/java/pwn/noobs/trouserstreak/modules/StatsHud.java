@@ -7,15 +7,15 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.item.Item;
-import net.minecraft.network.packet.c2s.play.ClientStatusC2SPacket;
-import net.minecraft.registry.Registries;
-import net.minecraft.stat.Stat;
-import net.minecraft.stat.StatHandler;
-import net.minecraft.stat.Stats;
-import net.minecraft.entity.EntityType;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
+import net.minecraft.stats.Stat;
+import net.minecraft.stats.Stats;
+import net.minecraft.stats.StatsCounter;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 import org.joml.Matrix3x2fStack;
 import pwn.noobs.trouserstreak.Trouser;
 
@@ -236,9 +236,9 @@ public class StatsHud extends Module {
 
     public StatsHud() {
         super(Trouser.Main, "StatsHud", "Displays player statistics on screen.");
-        allBlocks = Registries.BLOCK.stream().toList();
-        allItems = Registries.ITEM.stream().toList();
-        allEntities = Registries.ENTITY_TYPE.stream().toList();
+        allBlocks = BuiltInRegistries.BLOCK.stream().toList();
+        allItems = BuiltInRegistries.ITEM.stream().toList();
+        allEntities = BuiltInRegistries.ENTITY_TYPE.stream().toList();
     }
 
     private static final String KEY_PLAYTIME = "playtime";
@@ -259,8 +259,8 @@ public class StatsHud extends Module {
 
     @Override
     public void onActivate() {
-        ClientStatusC2SPacket getStats = new ClientStatusC2SPacket(ClientStatusC2SPacket.Mode.REQUEST_STATS);
-        mc.getNetworkHandler().sendPacket(getStats);
+        ServerboundClientCommandPacket getStats = new ServerboundClientCommandPacket(ServerboundClientCommandPacket.Action.REQUEST_STATS);
+        mc.getConnection().send(getStats);
         tickCounter = 0;
         updateTickCounter = 0;
         computeAllStats();
@@ -276,9 +276,9 @@ public class StatsHud extends Module {
         updateTickCounter++;
 
         tickCounter++;
-        if (autoSync.get() && mc.getNetworkHandler() != null && tickCounter >= syncDelay.get() * 20) {
-            ClientStatusC2SPacket getStats = new ClientStatusC2SPacket(ClientStatusC2SPacket.Mode.REQUEST_STATS);
-            mc.getNetworkHandler().sendPacket(getStats);
+        if (autoSync.get() && mc.getConnection() != null && tickCounter >= syncDelay.get() * 20) {
+            ServerboundClientCommandPacket getStats = new ServerboundClientCommandPacket(ServerboundClientCommandPacket.Action.REQUEST_STATS);
+            mc.getConnection().send(getStats);
             tickCounter = 0;
         }
 
@@ -288,14 +288,14 @@ public class StatsHud extends Module {
         }
     }
     private void computeAllStats() {
-        if (mc.player == null || mc.player.getStatHandler() == null) return;
+        if (mc.player == null || mc.player.getStats() == null) return;
 
-        StatHandler statHandler = mc.player.getStatHandler();
+        StatsCounter statHandler = mc.player.getStats();
         Map<String, String> newStats = new LinkedHashMap<>();
         double hours = getHoursPlayed(statHandler);
 
         if (showPlayTime.get()) {
-            long playTime = statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.PLAY_TIME));
+            long playTime = statHandler.getValue(Stats.CUSTOM.get(Stats.PLAY_TIME));
             long hrs = playTime / 72000L;
             long mins = (playTime % 72000) / 1200L;
             newStats.put(KEY_PLAYTIME, String.format("Play Time: %dh %dm", hrs, mins));
@@ -303,21 +303,21 @@ public class StatsHud extends Module {
 
         if (showDistance.get()) {
             int totalDistanceCm = 0;
-            totalDistanceCm += statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.WALK_ONE_CM));
-            totalDistanceCm += statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.SPRINT_ONE_CM));
-            totalDistanceCm += statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.CROUCH_ONE_CM));
-            totalDistanceCm += statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.FLY_ONE_CM));
-            totalDistanceCm += statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.SWIM_ONE_CM));
-            totalDistanceCm += statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.WALK_UNDER_WATER_ONE_CM));
-            totalDistanceCm += statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.WALK_ON_WATER_ONE_CM));
-            totalDistanceCm += statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.AVIATE_ONE_CM));
-            totalDistanceCm += statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.BOAT_ONE_CM));
-            totalDistanceCm += statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.MINECART_ONE_CM));
-            totalDistanceCm += statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.PIG_ONE_CM));
-            totalDistanceCm += statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.HORSE_ONE_CM));
-            totalDistanceCm += statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.NAUTILUS_ONE_CM));
-            totalDistanceCm += statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.STRIDER_ONE_CM));
-            totalDistanceCm += statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.HAPPY_GHAST_ONE_CM));
+            totalDistanceCm += statHandler.getValue(Stats.CUSTOM.get(Stats.WALK_ONE_CM));
+            totalDistanceCm += statHandler.getValue(Stats.CUSTOM.get(Stats.SPRINT_ONE_CM));
+            totalDistanceCm += statHandler.getValue(Stats.CUSTOM.get(Stats.CROUCH_ONE_CM));
+            totalDistanceCm += statHandler.getValue(Stats.CUSTOM.get(Stats.FLY_ONE_CM));
+            totalDistanceCm += statHandler.getValue(Stats.CUSTOM.get(Stats.SWIM_ONE_CM));
+            totalDistanceCm += statHandler.getValue(Stats.CUSTOM.get(Stats.WALK_UNDER_WATER_ONE_CM));
+            totalDistanceCm += statHandler.getValue(Stats.CUSTOM.get(Stats.WALK_ON_WATER_ONE_CM));
+            totalDistanceCm += statHandler.getValue(Stats.CUSTOM.get(Stats.AVIATE_ONE_CM));
+            totalDistanceCm += statHandler.getValue(Stats.CUSTOM.get(Stats.BOAT_ONE_CM));
+            totalDistanceCm += statHandler.getValue(Stats.CUSTOM.get(Stats.MINECART_ONE_CM));
+            totalDistanceCm += statHandler.getValue(Stats.CUSTOM.get(Stats.PIG_ONE_CM));
+            totalDistanceCm += statHandler.getValue(Stats.CUSTOM.get(Stats.HORSE_ONE_CM));
+            totalDistanceCm += statHandler.getValue(Stats.CUSTOM.get(Stats.NAUTILUS_ONE_CM));
+            totalDistanceCm += statHandler.getValue(Stats.CUSTOM.get(Stats.STRIDER_ONE_CM));
+            totalDistanceCm += statHandler.getValue(Stats.CUSTOM.get(Stats.HAPPY_GHAST_ONE_CM));
             double km = totalDistanceCm / 100000.0;
             newStats.put(KEY_DISTANCE, String.format("Distance travelled: %.1fkm", km));
         }
@@ -340,8 +340,8 @@ public class StatsHud extends Module {
                     shouldCount = !blockList.contains(block);
                 }
                 if (shouldCount) {
-                    Stat<Block> stat = Stats.MINED.getOrCreateStat(block);
-                    totalBlocksBroken += statHandler.getStat(stat);
+                    Stat<Block> stat = Stats.BLOCK_MINED.get(block);
+                    totalBlocksBroken += statHandler.getValue(stat);
                 }
             }
 
@@ -377,14 +377,14 @@ public class StatsHud extends Module {
                     shouldCount = !mobList.contains(entityType);
                 }
                 if (shouldCount) {
-                    Stat<EntityType<?>> stat = Stats.KILLED.getOrCreateStat(entityType);
-                    totalMobsKilled += statHandler.getStat(stat);
+                    Stat<EntityType<?>> stat = Stats.ENTITY_KILLED.get(entityType);
+                    totalMobsKilled += statHandler.getValue(stat);
                 }
             }
 
             String mobsText;
             if (singleMob != null) {
-                String mobName = singleMob.getName().getString();
+                String mobName = singleMob.getDescription().getString();
                 mobsText = String.format("%s killed: %d",
                         mobName != null ? mobName : "Unknown Mob", totalMobsKilled);
             } else {
@@ -397,7 +397,7 @@ public class StatsHud extends Module {
         }
 
         if (showPvpKills.get()) {
-            int pvpKills = statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.PLAYER_KILLS));
+            int pvpKills = statHandler.getValue(Stats.CUSTOM.get(Stats.PLAYER_KILLS));
             String text = String.format("Players killed: %d", pvpKills);
             if (showRates.get() && hours > 0) {
                 text += String.format(" (%.1f/h)", pvpKills / hours);
@@ -418,15 +418,15 @@ public class StatsHud extends Module {
                     shouldCount = !craftedItemList.contains(item);
                 }
                 if (shouldCount) {
-                    Stat<Item> stat = Stats.CRAFTED.getOrCreateStat(item);
-                    totalItemsCrafted += statHandler.getStat(stat);
+                    Stat<Item> stat = Stats.ITEM_CRAFTED.get(item);
+                    totalItemsCrafted += statHandler.getValue(stat);
                 }
             }
 
             String craftedText;
             if (craftedMode == cModes.Count && craftedItemList.size() == 1) {
                 Item singleItem = craftedItemList.get(0);
-                String itemName = singleItem.getName().getString();
+                String itemName = singleItem.getName(singleItem.getDefaultInstance()).getString();
                 craftedText = String.format("%s crafted: %d",
                         itemName != null ? itemName : "Unknown Item", totalItemsCrafted);
             } else {
@@ -451,15 +451,15 @@ public class StatsHud extends Module {
                     shouldCount = !usedItemList.contains(item);
                 }
                 if (shouldCount) {
-                    Stat<Item> stat = Stats.USED.getOrCreateStat(item);
-                    totalItemsUsed += statHandler.getStat(stat);
+                    Stat<Item> stat = Stats.ITEM_USED.get(item);
+                    totalItemsUsed += statHandler.getValue(stat);
                 }
             }
 
             String usedText;
             if (usedMode == uModes.Count && usedItemList.size() == 1) {
                 Item singleItem = usedItemList.get(0);
-                String itemName = singleItem.getName().getString();
+                String itemName = singleItem.getName(singleItem.getDefaultInstance()).getString();
                 usedText = String.format("%s used: %d",
                         itemName != null ? itemName : "Unknown Item", totalItemsUsed);
             } else {
@@ -484,15 +484,15 @@ public class StatsHud extends Module {
                     shouldCount = !itemList.contains(item);
                 }
                 if (shouldCount) {
-                    Stat<Item> stat = Stats.PICKED_UP.getOrCreateStat(item);
-                    totalItemsPicked += statHandler.getStat(stat);
+                    Stat<Item> stat = Stats.ITEM_PICKED_UP.get(item);
+                    totalItemsPicked += statHandler.getValue(stat);
                 }
             }
 
             String itemsText;
             if (itemMode == iModes.Count && itemList.size() == 1) {
                 Item singleItem = itemList.get(0);
-                String itemName = singleItem.getName().getString();
+                String itemName = singleItem.getName(singleItem.getDefaultInstance()).getString();
                 itemsText = String.format("%s picked up: %d",
                         itemName != null ? itemName : "Unknown Item", totalItemsPicked);
             } else {
@@ -504,7 +504,7 @@ public class StatsHud extends Module {
             newStats.put(KEY_ITEMSPICKED, itemsText);
         }
 
-        int deaths = statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.DEATHS));
+        int deaths = statHandler.getValue(Stats.CUSTOM.get(Stats.DEATHS));
         if (showDeaths.get()) {
             String text = String.format("Deaths: %d", deaths);
             if (showRates.get() && hours > 0) {
@@ -514,7 +514,7 @@ public class StatsHud extends Module {
         }
 
         if (showTimeSinceDeath.get() && deaths >= 1) {
-            int ticksSinceDeath = statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.TIME_SINCE_DEATH));
+            int ticksSinceDeath = statHandler.getValue(Stats.CUSTOM.get(Stats.TIME_SINCE_DEATH));
             long totalSeconds = ticksSinceDeath / 20;
             long hrs = totalSeconds / 3600;
             long mins = (totalSeconds % 3600) / 60;
@@ -526,7 +526,7 @@ public class StatsHud extends Module {
         }
 
         if (showTimeSinceSleep.get()) {
-            int ticksSinceSleep = statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.TIME_SINCE_REST));
+            int ticksSinceSleep = statHandler.getValue(Stats.CUSTOM.get(Stats.TIME_SINCE_REST));
             long totalSeconds = ticksSinceSleep / 20;
             long hrs = totalSeconds / 3600;
             long mins = (totalSeconds % 3600) / 60;
@@ -539,16 +539,16 @@ public class StatsHud extends Module {
         cachedStatLines.clear();
         cachedStatLines.putAll(newStats);
     }
-    private double getHoursPlayed(StatHandler statHandler) {
-        long playTime = statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.PLAY_TIME));
+    private double getHoursPlayed(StatsCounter statHandler) {
+        long playTime = statHandler.getValue(Stats.CUSTOM.get(Stats.PLAY_TIME));
         return playTime / 72000.0; // 72000 ticks = 1 hour
     }
     @EventHandler
     private void onRender2D(Render2DEvent event) {
         if (cachedStatLines.isEmpty()) return;
 
-        DrawContext context = event.drawContext;
-        double guiScale = mc.options.getGuiScale().getValue();
+        GuiGraphicsExtractor context = event.graphics;
+        double guiScale = mc.options.guiScale().get();
         double x = posX.get() / guiScale;
         double y = posY.get() / guiScale;
         double customScale = scale.get();
@@ -562,10 +562,10 @@ public class StatsHud extends Module {
 
         double unscaledMaxWidth = 0;
         for (String line : statLines) {
-            unscaledMaxWidth = Math.max(unscaledMaxWidth, mc.textRenderer.getWidth(line));
+            unscaledMaxWidth = Math.max(unscaledMaxWidth, mc.font.width(line));
         }
 
-        Matrix3x2fStack matrices = context.getMatrices();
+        Matrix3x2fStack matrices = context.pose();
         matrices.pushMatrix();
         matrices.scale((float) customScale, (float) customScale);
 
@@ -575,7 +575,7 @@ public class StatsHud extends Module {
                     (int)(x - padding.get()),
                     (int)(y - padding.get()),
                     (int)(x + (unscaledMaxWidth + 2 * padding.get())),
-                    (int)(y + (statLines.size() * mc.textRenderer.fontHeight + 2 * padding.get())),
+                    (int)(y + (statLines.size() * mc.font.lineHeight + 2 * padding.get())),
                     bgColor
             );
         }
@@ -583,15 +583,15 @@ public class StatsHud extends Module {
         double yOffset = 0;
         for (String line : statLines) {
             int tc = textColor.get().getPacked();
-            context.drawText(
-                    mc.textRenderer,
+            context.text(
+                    mc.font,
                     line,
                     (int)x,
                     (int)(y + yOffset),
                     tc,
                     textshadow.get()
             );
-            yOffset += mc.textRenderer.fontHeight;
+            yOffset += mc.font.lineHeight;
         }
 
         matrices.popMatrix();

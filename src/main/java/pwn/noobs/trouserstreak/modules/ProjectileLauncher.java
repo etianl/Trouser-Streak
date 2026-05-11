@@ -3,22 +3,39 @@ package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
+import meteordevelopment.meteorclient.mixininterface.IServerboundMovePlayerPacket;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.AntiHunger;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.*;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.c2s.play.*;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
+import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.EggItem;
+import net.minecraft.world.item.EnderpearlItem;
+import net.minecraft.world.item.ExperienceBottleItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.LingeringPotionItem;
+import net.minecraft.world.item.SnowballItem;
+import net.minecraft.world.item.SplashPotionItem;
+import net.minecraft.world.item.TridentItem;
+import net.minecraft.world.item.WindChargeItem;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
-import net.minecraft.entity.Entity;
-
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -191,8 +208,8 @@ public class ProjectileLauncher extends Module {
     );
 
     private double maxDistance;
-    private volatile Vec3d startPos = Vec3d.ZERO;
-    private volatile Vec3d teleportPos = Vec3d.ZERO;
+    private volatile Vec3 startPos = Vec3.ZERO;
+    private volatile Vec3 teleportPos = Vec3.ZERO;
 
     public ProjectileLauncher() {
         super(Trouser.Main, "ProjectileLauncher", "Teleports backward on item use (pearl/potion) to safe furthest position.");
@@ -205,10 +222,10 @@ public class ProjectileLauncher extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (!arrowFire.get() || mc.player == null || mc.interactionManager == null) return;
+        if (!arrowFire.get() || mc.player == null || mc.gameMode == null) return;
 
-        boolean holdingBow = mc.player.getMainHandStack().getItem() instanceof BowItem
-                || mc.player.getOffHandStack().getItem() instanceof BowItem;
+        boolean holdingBow = mc.player.getMainHandItem().getItem() instanceof BowItem
+                || mc.player.getOffhandItem().getItem() instanceof BowItem;
 
         if (!holdingBow) {
             isChargingBow = false;
@@ -234,10 +251,10 @@ public class ProjectileLauncher extends Module {
         wasHoldingBow = holdingBow;
     }
     private void fireArrowTick() {
-        mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(
-                PlayerActionC2SPacket.Action.RELEASE_USE_ITEM,
-                BlockPos.ORIGIN,
-                Direction.DOWN, mc.player.getInventory().selectedSlot
+        mc.getConnection().send(new ServerboundPlayerActionPacket(
+                ServerboundPlayerActionPacket.Action.RELEASE_USE_ITEM,
+                BlockPos.ZERO,
+                Direction.DOWN, mc.player.getInventory().getSelectedSlot()
         ));
     }
     private boolean sendingPacketToSend;
@@ -247,10 +264,10 @@ public class ProjectileLauncher extends Module {
         if (mc.player == null) return;
         Packet<?> packetToSend = event.packet;
 
-        if (event.packet instanceof PlayerInteractItemC2SPacket packet) {
-            ItemStack stack = packet.getHand() == Hand.MAIN_HAND
-                    ? mc.player.getMainHandStack()
-                    : mc.player.getOffHandStack();
+        if (event.packet instanceof ServerboundUseItemPacket packet) {
+            ItemStack stack = packet.getHand() == InteractionHand.MAIN_HAND
+                    ? mc.player.getMainHandItem()
+                    : mc.player.getOffhandItem();
 
             Item item = stack.getItem();
             if (isValidProjectile(item)) {
@@ -266,8 +283,8 @@ public class ProjectileLauncher extends Module {
             return;
         }
 
-        if (isChargingBow && event.packet instanceof PlayerActionC2SPacket packet &&
-                packet.getAction() == PlayerActionC2SPacket.Action.RELEASE_USE_ITEM) {
+        if (isChargingBow && event.packet instanceof ServerboundPlayerActionPacket packet &&
+                packet.getAction() == ServerboundPlayerActionPacket.Action.RELEASE_USE_ITEM) {
             if (!legacyMode.get()){
                 event.cancel();
                 executeTeleport(packetToSend);
@@ -283,16 +300,16 @@ public class ProjectileLauncher extends Module {
             Modules.get().get(AntiHunger.class).toggle();
             antihungerWasEnabled = true;
         }
-        mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_SPRINTING));
+        mc.player.connection.send(new ServerboundPlayerCommandPacket(mc.player, ServerboundPlayerCommandPacket.Action.START_SPRINTING));
         for (int i = 0; i < multiplier.get(); i++) {
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() - 0.000000001, mc.player.getZ(), true, mc.player.horizontalCollision));
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 0.000000001, mc.player.getZ(), false, mc.player.horizontalCollision));
+            mc.player.connection.send(new ServerboundMovePlayerPacket.Pos(mc.player.getX(), mc.player.getY() - 0.000000001, mc.player.getZ(), true, mc.player.horizontalCollision));
+            mc.player.connection.send(new ServerboundMovePlayerPacket.Pos(mc.player.getX(), mc.player.getY() + 0.000000001, mc.player.getZ(), false, mc.player.horizontalCollision));
         }
-        if (!mc.options.sprintKey.isPressed() || !mc.options.getSprintToggled().getValue()) mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.STOP_SPRINTING));
+        if (!mc.options.keySprint.isDown() || !mc.options.toggleSprint().get()) mc.player.connection.send(new ServerboundPlayerCommandPacket(mc.player, ServerboundPlayerCommandPacket.Action.STOP_SPRINTING));
         if (antihungerWasEnabled) Modules.get().get(AntiHunger.class).toggle();
     }
     private boolean isValidProjectile(Item item) {
-        return (item instanceof EnderPearlItem && projectileItems.get().contains(Items.ENDER_PEARL)) ||
+        return (item instanceof EnderpearlItem && projectileItems.get().contains(Items.ENDER_PEARL)) ||
                 (item instanceof SplashPotionItem && projectileItems.get().contains(Items.SPLASH_POTION)) ||
                 (item instanceof LingeringPotionItem && projectileItems.get().contains(Items.LINGERING_POTION)) ||
                 (item instanceof ExperienceBottleItem && projectileItems.get().contains(Items.EXPERIENCE_BOTTLE)) ||
@@ -301,15 +318,15 @@ public class ProjectileLauncher extends Module {
                 (item instanceof EggItem && projectileItems.get().contains(Items.EGG));
     }
     private void executeTeleport(Packet<?> packetToSend) {
-        if (mc.player == null || mc.world == null) return;
-        Entity entity = mc.player.hasVehicle() ? mc.player.getVehicle() : mc.player;
+        if (mc.player == null || mc.level == null) return;
+        Entity entity = mc.player.isPassenger() ? mc.player.getVehicle() : mc.player;
         maxDistance = mode.get() == Mode.Vanilla ? Distance.get() : paperDistance.get();
 
         boolean isReverseTeleport = tpmode.get() == tpMode.Reverse;
 
-        startPos = entity.getEntityPos();
-        Vec3d forwardDir = mc.player.getRotationVec(1.0f);
-        Vec3d reverseDir = new Vec3d(-forwardDir.x, -forwardDir.y, -forwardDir.z).normalize();
+        startPos = entity.position();
+        Vec3 forwardDir = mc.player.getViewVector(1.0f);
+        Vec3 reverseDir = new Vec3(-forwardDir.x, -forwardDir.y, -forwardDir.z).normalize();
 
         if (tpmode.get() == tpMode.Reverse) teleportPos = findFurthestSafePos(startPos, reverseDir, maxDistance, isReverseTeleport);
         else if (tpmode.get() == tpMode.Forward) teleportPos = findFurthestSafePos(startPos, forwardDir, maxDistance, isReverseTeleport);
@@ -324,22 +341,22 @@ public class ProjectileLauncher extends Module {
                 teleportPos = findFurthestSafePos(startPos, reverseDir, maxDistance, isReverseTeleport);
             }
             if (fallbackDirections.get() && teleportPos == null) {
-                Vec3d horizontalDir = null;
+                Vec3 horizontalDir = null;
                 if (tpmode.get() == tpMode.Reverse){
-                    horizontalDir = new Vec3d(reverseDir.x, 0, reverseDir.z).normalize();
+                    horizontalDir = new Vec3(reverseDir.x, 0, reverseDir.z).normalize();
                     isReverseTeleport = true;
                 } else if (tpmode.get() == tpMode.Forward) {
-                    horizontalDir = new Vec3d(forwardDir.x, 0, forwardDir.z).normalize();
+                    horizontalDir = new Vec3(forwardDir.x, 0, forwardDir.z).normalize();
                     isReverseTeleport = false;
                 }
                 if (horizontalDir != null) teleportPos = findFurthestSafePos(startPos, horizontalDir, maxDistance, isReverseTeleport);
                 if (oppositeFallbackDirections.get() && teleportPos == null) {
                     if (tpmode.get() == tpMode.Reverse){
                         isReverseTeleport = false;
-                        horizontalDir = new Vec3d(forwardDir.x, 0, forwardDir.z).normalize();
+                        horizontalDir = new Vec3(forwardDir.x, 0, forwardDir.z).normalize();
                     } else if (tpmode.get() == tpMode.Forward) {
                         isReverseTeleport = true;
-                        horizontalDir = new Vec3d(reverseDir.x, 0, reverseDir.z).normalize();
+                        horizontalDir = new Vec3(reverseDir.x, 0, reverseDir.z).normalize();
                     }
                     if (horizontalDir != null) teleportPos = findFurthestSafePos(startPos, horizontalDir, maxDistance, isReverseTeleport);
                 }
@@ -354,38 +371,38 @@ public class ProjectileLauncher extends Module {
 
         for (int i = 0; i < packetCount; i++) {
             if (entity == mc.player) {
-                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true,mc.player.horizontalCollision));
+                mc.player.connection.send(new ServerboundMovePlayerPacket.StatusOnly(true,mc.player.horizontalCollision));
             } else {
-                mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(entity));
+                mc.player.connection.send(ServerboundMoveVehiclePacket.fromEntity(entity));
             }
         }
 
         sendMove(entity, teleportPos);
-        entity.setPosition(teleportPos);
+        entity.setPos(teleportPos);
         if (!isReverseTeleport){
             sendingPacketToSend = true;
-            mc.player.networkHandler.sendPacket(packetToSend);
+            mc.player.connection.send(packetToSend);
             sendingPacketToSend = false;
         }
         sendMove(entity, startPos);
-        entity.setPosition(startPos);
+        entity.setPos(startPos);
         if (isReverseTeleport){
             sendingPacketToSend = true;
-            mc.player.networkHandler.sendPacket(packetToSend);
+            mc.player.connection.send(packetToSend);
             sendingPacketToSend = false;
         }
-        Vec3d offset = getOffset(startPos);
+        Vec3 offset = getOffset(startPos);
         sendMove(entity, offset);
-        entity.setPosition(offset);
+        entity.setPos(offset);
 
         if (chatFeedback)info("Teleported %s (%.1f blocks)", isReverseTeleport ? "REVERSE" : "FORWARD", startPos.distanceTo(teleportPos));
     }
 
-    private Vec3d findFurthestSafePos(Vec3d start, Vec3d direction, double maxDist, boolean isReverseTeleport) {
-        Vec3d bestPos = null;
+    private Vec3 findFurthestSafePos(Vec3 start, Vec3 direction, double maxDist, boolean isReverseTeleport) {
+        Vec3 bestPos = null;
 
         for (double dist = maxDist; dist >= minDistance.get(); dist -= 0.5) {
-            Vec3d testPos = start.add(direction.multiply(dist));
+            Vec3 testPos = start.add(direction.scale(dist));
 
             if (hasClearPath(start, testPos, isReverseTeleport)) {
                 bestPos = testPos;
@@ -395,22 +412,22 @@ public class ProjectileLauncher extends Module {
 
         return bestPos;
     }
-    private void sendMove(Entity entity, Vec3d pos) {
-        if (mc.getNetworkHandler() == null) return;
+    private void sendMove(Entity entity, Vec3 pos) {
+        if (mc.getConnection() == null) return;
         if (entity == mc.player) {
-            PlayerMoveC2SPacket movepacket = new PlayerMoveC2SPacket.PositionAndOnGround(pos.x, pos.y, pos.z, false, false);
-            ((IPlayerMoveC2SPacket) movepacket).meteor$setTag(1337);
-            mc.player.networkHandler.sendPacket(movepacket);
+            ServerboundMovePlayerPacket movepacket = new ServerboundMovePlayerPacket.Pos(pos.x, pos.y, pos.z, false, false);
+            ((IServerboundMovePlayerPacket) movepacket).meteor$setTag(1337);
+            mc.player.connection.send(movepacket);
         } else {
-            mc.getNetworkHandler().sendPacket(new VehicleMoveC2SPacket(pos, entity.getYaw(), entity.getPitch(), false));
+            mc.getConnection().send(new ServerboundMoveVehiclePacket(pos, entity.getYRot(), entity.getXRot(), false));
         }
     }
 
-    private Vec3d getOffset(Vec3d base) {
+    private Vec3 getOffset(Vec3 base) {
         double dx = offsethorizontal.get();
         double dy = offsetY.get();
 
-        Vec3d[] shuffledOffsets = new Vec3d[] {
+        Vec3[] shuffledOffsets = new Vec3[] {
                 base.add( dx, dy,  0),
                 base.add(-dx, dy,  0),
                 base.add( 0, dy,  dx),
@@ -423,58 +440,58 @@ public class ProjectileLauncher extends Module {
 
         Collections.shuffle(Arrays.asList(shuffledOffsets));
 
-        for (Vec3d pos : shuffledOffsets) {
+        for (Vec3 pos : shuffledOffsets) {
             if (!invalid(pos)) return pos;
         }
 
-        Vec3d noHorizontal = base.add(0, dy, 0);
+        Vec3 noHorizontal = base.add(0, dy, 0);
         if (!invalid(noHorizontal)) return noHorizontal;
 
         return base;
     }
 
-    private boolean invalid(Vec3d pos) {
-        if (mc.world == null) return true;
-        if (mc.world.getChunk(BlockPos.ofFloored(pos)) == null) return true;
+    private boolean invalid(Vec3 pos) {
+        if (mc.level == null) return true;
+        if (mc.level.getChunk(BlockPos.containing(pos)) == null) return true;
 
-        Entity entity = mc.player.hasVehicle() ? mc.player.getVehicle() : mc.player;
+        Entity entity = mc.player.isPassenger() ? mc.player.getVehicle() : mc.player;
 
-        Box targetBox = entity.getBoundingBox().offset(
+        AABB targetBox = entity.getBoundingBox().move(
                 pos.x - entity.getX(),
                 pos.y - entity.getY(),
                 pos.z - entity.getZ()
         );
         Module boatNoclip = Modules.get().get(BoatNoclip.class);
         if (skipCollisionCheck.get() && entity != mc.player && boatNoclip != null && boatNoclip.isActive()) {
-            for (BlockPos bp : BlockPos.iterate(
-                    BlockPos.ofFloored(targetBox.minX, targetBox.minY, targetBox.minZ),
-                    BlockPos.ofFloored(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
+            for (BlockPos bp : BlockPos.betweenClosed(
+                    BlockPos.containing(targetBox.minX, targetBox.minY, targetBox.minZ),
+                    BlockPos.containing(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
             )) {
-                BlockState state = mc.world.getBlockState(bp);
-                if (state.isOf(Blocks.LAVA)) {
+                BlockState state = mc.level.getBlockState(bp);
+                if (state.is(Blocks.LAVA)) {
                     return true;
                 }
             }
         } else {
-            for (BlockPos bp : BlockPos.iterate(
-                    BlockPos.ofFloored(targetBox.minX, targetBox.minY, targetBox.minZ),
-                    BlockPos.ofFloored(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
+            for (BlockPos bp : BlockPos.betweenClosed(
+                    BlockPos.containing(targetBox.minX, targetBox.minY, targetBox.minZ),
+                    BlockPos.containing(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
             )) {
-                BlockState state = mc.world.getBlockState(bp);
-                if (state.isOf(Blocks.LAVA) || !state.getCollisionShape(mc.world, bp).isEmpty()) {
+                BlockState state = mc.level.getBlockState(bp);
+                if (state.is(Blocks.LAVA) || !state.getCollisionShape(mc.level, bp).isEmpty()) {
                     return true;
                 }
             }
         }
 
-        for (Entity e : mc.world.getOtherEntities(entity, targetBox)) {
-            if (e.isCollidable(entity)) return true;
+        for (Entity e : mc.level.getEntities(entity, targetBox)) {
+            if (e.canBeCollidedWith(entity)) return true;
         }
 
         return false;
     }
 
-    private boolean hasClearPath(Vec3d start, Vec3d end, boolean isReverseTeleport) {
+    private boolean hasClearPath(Vec3 start, Vec3 end, boolean isReverseTeleport) {
         if (invalid(start) || invalid(end)) return false;
 
         int steps = Math.max(10, (int)(start.distanceTo(end) * 2.5));
@@ -483,20 +500,20 @@ public class ProjectileLauncher extends Module {
 
         for (int i = 1; i < steps; i++) {
             double t = i / (double)steps;
-            Vec3d sample = start.lerp(end, t);
+            Vec3 sample = start.lerp(end, t);
 
             if (invalid(sample)) return false;
 
             if (checkLivingEntities) {
-                Entity entity = mc.player.hasVehicle() ? mc.player.getVehicle() : mc.player;
-                Box sampleBox = entity.getBoundingBox().offset(
+                Entity entity = mc.player.isPassenger() ? mc.player.getVehicle() : mc.player;
+                AABB sampleBox = entity.getBoundingBox().move(
                         sample.x - entity.getX(),
                         sample.y - entity.getY(),
                         sample.z - entity.getZ()
                 );
 
-                for (Entity other : mc.world.getOtherEntities(entity, sampleBox, e ->
-                        e.isAlive() && e.isLiving()
+                for (Entity other : mc.level.getEntities(entity, sampleBox, e ->
+                        e.isAlive() && e.showVehicleHealth()
                 )) {
                     return false;
                 }

@@ -15,16 +15,24 @@ import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.*;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.FishingRodItem;
+import net.minecraft.world.item.FlintAndSteelItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.MaceItem;
+import net.minecraft.world.item.ShearsItem;
+import net.minecraft.world.item.ShieldItem;
+import net.minecraft.world.item.TridentItem;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.phys.AABB;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.*;
@@ -129,31 +137,31 @@ public class AdvancedItemESP extends Module {
             .visible(() -> enchants.get())
             .build()
     );
-    private final Setting<Set<RegistryKey<Enchantment>>> toolenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+    private final Setting<Set<ResourceKey<Enchantment>>> toolenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("Mining Tool Enchants")
             .description("List of enchantments required.")
             .visible(() -> enchants.get() && certainenchants.get())
             .defaultValue(Enchantments.EFFICIENCY, Enchantments.UNBREAKING, Enchantments.MENDING)
             .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> swordenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+    private final Setting<Set<ResourceKey<Enchantment>>> swordenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("Sword Enchants")
             .description("List of enchantments required.")
             .visible(() -> enchants.get() && certainenchants.get())
             .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
             .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> armorenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+    private final Setting<Set<ResourceKey<Enchantment>>> armorenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("Armor Enchants")
             .description("List of enchantments required.")
             .visible(() -> enchants.get() && certainenchants.get())
             .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
             .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> maceenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+    private final Setting<Set<ResourceKey<Enchantment>>> maceenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("Mace Enchants")
             .description("List of enchantments required.")
             .visible(() -> enchants.get() && certainenchants.get())
             .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
             .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> tridentenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+    private final Setting<Set<ResourceKey<Enchantment>>> tridentenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("Trident Enchants")
             .description("List of enchantments required.")
             .visible(() -> enchants.get() && certainenchants.get())
@@ -219,14 +227,14 @@ public class AdvancedItemESP extends Module {
     @EventHandler
     private void onRender3D(Render3DEvent event) {
         count = 0;
-        for (Entity entity : mc.world.getEntities()) {
+        for (Entity entity : mc.level.entitiesForRendering()) {
             if (!(entity instanceof ItemEntity itemEntity)) continue;
             if (shouldSkip(itemEntity)) continue;
             if (!scannedEntities.contains(entity)) {
-                StringBuilder message = new StringBuilder(itemEntity.getStack().getItem().getName().getString() + " found ");
+                StringBuilder message = new StringBuilder(itemEntity.getItem().getItemName().getString() + " found ");
                 if (chatFeedback.get()) {
                     if (coordsInChat.get()) message.append(" at ").append(entity.getBlockX()).append(", ").append(entity.getBlockY()).append(", ").append(entity.getBlockZ());
-                    ChatUtils.sendMsg(Text.of(message.toString()));
+                    ChatUtils.sendMsg(Component.nullToEmpty(message.toString()));
                 }
             }
             scannedEntities.add(entity);
@@ -252,24 +260,24 @@ public class AdvancedItemESP extends Module {
             sideColor.set(color).a((int) (sideColor.a * fillOpacity.get()));
         }
 
-        double x = MathHelper.lerp(event.tickDelta, entity.lastRenderX, entity.getX()) - entity.getX();
-        double y = MathHelper.lerp(event.tickDelta, entity.lastRenderY, entity.getY()) - entity.getY();
-        double z = MathHelper.lerp(event.tickDelta, entity.lastRenderZ, entity.getZ()) - entity.getZ();
-        Box box = entity.getBoundingBox();
+        double x = Mth.lerp(event.tickDelta, entity.xOld, entity.getX()) - entity.getX();
+        double y = Mth.lerp(event.tickDelta, entity.yOld, entity.getY()) - entity.getY();
+        double z = Mth.lerp(event.tickDelta, entity.zOld, entity.getZ()) - entity.getZ();
+        AABB box = entity.getBoundingBox();
         event.renderer.box(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor, lineColor, shapeMode.get(), 0);
     }
 
     private void drawTracer(Render3DEvent event, Entity entity) {
-        if (mc.options.hudHidden) return;
+        if (mc.options.hideGui) return;
 
         Color baseColor = monstersColor.get();
         if (distance.get()){
             baseColor = getOpposingColor(baseColor, entity);
         }
 
-        double x = entity.lastX + (entity.getX() - entity.lastX) * event.tickDelta;
-        double y = entity.lastY + (entity.getY() - entity.lastY) * event.tickDelta;
-        double z = entity.lastZ + (entity.getZ() - entity.lastZ) * event.tickDelta;
+        double x = entity.xo + (entity.getX() - entity.xo) * event.tickDelta;
+        double y = entity.yo + (entity.getY() - entity.yo) * event.tickDelta;
+        double z = entity.zo + (entity.getZ() - entity.zo) * event.tickDelta;
         double height = entity.getBoundingBox().maxY - entity.getBoundingBox().minY;
         y += height / 2;
 
@@ -279,10 +287,10 @@ public class AdvancedItemESP extends Module {
         Color interpolatedColor;
         Color oppositeColor = distantColor.get();
 
-        double distance = Math.sqrt(mc.player.squaredDistanceTo(e));
+        double distance = Math.sqrt(mc.player.distanceToSqr(e));
 
         double maxDistance = distanceInt.get();
-        double percent = MathHelper.clamp(distance / maxDistance, 0, 1);
+        double percent = Mth.clamp(distance / maxDistance, 0, 1);
 
         int r = (int) (c.r + (oppositeColor.r - c.r) * percent);
         int g = (int) (c.g + (oppositeColor.g - c.g) * percent);
@@ -293,47 +301,47 @@ public class AdvancedItemESP extends Module {
         return interpolatedColor;
     }
     public static boolean isTool(ItemStack itemStack) {
-        return itemStack.isIn(ItemTags.AXES) ||
-                itemStack.isIn(ItemTags.HOES) ||
-                itemStack.isIn(ItemTags.PICKAXES) ||
-                itemStack.isIn(ItemTags.SHOVELS) ||
+        return itemStack.is(ItemTags.AXES) ||
+                itemStack.is(ItemTags.HOES) ||
+                itemStack.is(ItemTags.PICKAXES) ||
+                itemStack.is(ItemTags.SHOVELS) ||
                 itemStack.getItem() instanceof ShearsItem ||
                 itemStack.getItem() instanceof FlintAndSteelItem;
     }
     public static boolean isArmor(ItemStack itemStack) {
-        return itemStack.isIn(ItemTags.HEAD_ARMOR) ||
-                itemStack.isIn(ItemTags.CHEST_ARMOR) ||
-                itemStack.isIn(ItemTags.LEG_ARMOR) ||
-                itemStack.isIn(ItemTags.FOOT_ARMOR);
+        return itemStack.is(ItemTags.HEAD_ARMOR) ||
+                itemStack.is(ItemTags.CHEST_ARMOR) ||
+                itemStack.is(ItemTags.LEG_ARMOR) ||
+                itemStack.is(ItemTags.FOOT_ARMOR);
     }
     public boolean shouldSkip(ItemEntity entity) {
         boolean skip = false;
         if (enchants.get()) {
-            if (!certainenchants.get() && (isTool(entity.getStack()) || isArmor(entity.getStack()) || entity.getStack().isIn(ItemTags.SWORDS) || entity.getStack().getItem() instanceof FishingRodItem || entity.getStack().getItem() instanceof FlintAndSteelItem || entity.getStack().getItem() instanceof MaceItem || entity.getStack().getItem() instanceof ShearsItem || entity.getStack().getItem() instanceof ShieldItem || entity.getStack().getItem() instanceof TridentItem) && entity.getStack().isEnchantable() && entity.getStack().getEnchantments().isEmpty()) skip = true;
+            if (!certainenchants.get() && (isTool(entity.getItem()) || isArmor(entity.getItem()) || entity.getItem().is(ItemTags.SWORDS) || entity.getItem().getItem() instanceof FishingRodItem || entity.getItem().getItem() instanceof FlintAndSteelItem || entity.getItem().getItem() instanceof MaceItem || entity.getItem().getItem() instanceof ShearsItem || entity.getItem().getItem() instanceof ShieldItem || entity.getItem().getItem() instanceof TridentItem) && entity.getItem().isEnchantable() && entity.getItem().getEnchantments().isEmpty()) skip = true;
             else if (certainenchants.get()){
-                if (isTool(entity.getStack())){
+                if (isTool(entity.getItem())){
                     skip = compareEnchants(entity, toolenchants);
-                } else if ( entity.getStack().isIn(ItemTags.SWORDS)){
+                } else if ( entity.getItem().is(ItemTags.SWORDS)){
                     skip = compareEnchants(entity, swordenchants);
-                } else if (isArmor(entity.getStack())){
+                } else if (isArmor(entity.getItem())){
                     skip = compareEnchants(entity, armorenchants);
-                } else if (entity.getStack().getItem() instanceof MaceItem){
+                } else if (entity.getItem().getItem() instanceof MaceItem){
                     skip = compareEnchants(entity, maceenchants);
-                } else if (entity.getStack().getItem() instanceof TridentItem){
+                } else if (entity.getItem().getItem() instanceof TridentItem){
                     skip = compareEnchants(entity, tridentenchants);
                 }
             }
         }
-        if (!items.get().contains(entity.getStack().getItem())) skip = true;
+        if (!items.get().contains(entity.getItem().getItem())) skip = true;
         return skip;
     }
-    private boolean compareEnchants(ItemEntity entity, Setting<Set<RegistryKey<Enchantment>>> enchantsetting) {
+    private boolean compareEnchants(ItemEntity entity, Setting<Set<ResourceKey<Enchantment>>> enchantsetting) {
         boolean skip = false;
-        Set<RegistryKey<Enchantment>> itemenchants = new HashSet<>();
-        entity.getStack().getEnchantments().getEnchantments().forEach(enchantment -> {
-            itemenchants.add(enchantment.getKey().get());
+        Set<ResourceKey<Enchantment>> itemenchants = new HashSet<>();
+        entity.getItem().getEnchantments().keySet().forEach(enchantment -> {
+            itemenchants.add(enchantment.unwrapKey().get());
         });
-        for (RegistryKey<Enchantment> enchantKey : enchantsetting.get()) {
+        for (ResourceKey<Enchantment> enchantKey : enchantsetting.get()) {
             if (!itemenchants.contains(enchantKey)) {
                 skip = true;
                 break;
@@ -352,7 +360,7 @@ public class AdvancedItemESP extends Module {
     }
 
     private double getFadeAlpha(Entity entity) {
-        double dist = PlayerUtils.squaredDistanceToCamera(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getEyeHeight(entity.getPose()), entity.getZ() + entity.getWidth() / 2);
+        double dist = PlayerUtils.squaredDistanceToCamera(entity.getX() + entity.getBbWidth() / 2, entity.getY() + entity.getEyeHeight(entity.getPose()), entity.getZ() + entity.getBbWidth() / 2);
         double fadeDist = Math.pow(fadeDistance.get(), 2);
         double alpha = 1;
         if (dist <= fadeDist * fadeDist) alpha = (float) (Math.sqrt(dist) / fadeDist);
@@ -366,8 +374,8 @@ public class AdvancedItemESP extends Module {
     }
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (mc.world != null){
-            Iterable<net.minecraft.entity.Entity> entities = mc.world.getEntities();
+        if (mc.level != null){
+            Iterable<net.minecraft.world.entity.Entity> entities = mc.level.entitiesForRendering();
             scannedEntities.removeIf(entity -> {
                 Set<Entity> entitySet = new HashSet<>();
                 entities.forEach(entity1 -> entitySet.add(entity1));

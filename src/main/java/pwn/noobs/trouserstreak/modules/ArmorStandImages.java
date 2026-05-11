@@ -9,23 +9,22 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import meteordevelopment.meteorclient.settings.KeybindSetting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.FloatTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.TypedEntityData;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.TypedEntityData;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtDouble;
-import net.minecraft.nbt.NbtFloat;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 import pwn.noobs.trouserstreak.Trouser;
 import pwn.noobs.trouserstreak.utils.PermissionUtils;
 
@@ -272,7 +271,7 @@ public class ArmorStandImages extends Module {
 
     @Override
     public void onActivate() {
-        if (mc.player == null || mc.world == null) return;
+        if (mc.player == null || mc.level == null) return;
         scaledImage = null;
         pixelPositions.clear();
         isPlacing = false;
@@ -300,7 +299,7 @@ public class ArmorStandImages extends Module {
             if (placeMode.get() == PlaceMode.Command && PermissionUtils.getPermissionLevel(mc.player) < 2) {
                 error("Requires Operator permissions!");
                 return;
-            } else if (placeMode.get() == PlaceMode.Spawn_Egg && !mc.player.getAbilities().creativeMode) {
+            } else if (placeMode.get() == PlaceMode.Spawn_Egg && !mc.player.getAbilities().instabuild) {
                 error("Requires Creative Mode!");
                 return;
             }
@@ -314,7 +313,7 @@ public class ArmorStandImages extends Module {
             wasKeyPressed = false;
         }
 
-        if (!isPlacing || mc.player == null || mc.world == null) return;
+        if (!isPlacing || mc.player == null || mc.level == null) return;
 
         if (tickCounter > 0) {
             tickCounter--;
@@ -415,7 +414,7 @@ public class ArmorStandImages extends Module {
 
             double rotationRad = 0;
             if (mc.player != null) {
-                float playerYaw = mc.player.getYaw();
+                float playerYaw = mc.player.getYRot();
                 playerYaw = Math.round(playerYaw / 90f) * 90f;
                 rotationRad = Math.toRadians(playerYaw + 180);
             }
@@ -456,7 +455,7 @@ public class ArmorStandImages extends Module {
         double rotationRad = Math.toRadians(rotation.get());
         double yOffsetValue = yOffset.get();
 
-        Vec3d playerPos = mc.player.getEntityPos();
+        Vec3 playerPos = mc.player.position();
 
         double offsetX = 0;
         double offsetZ = 0;
@@ -544,50 +543,50 @@ public class ArmorStandImages extends Module {
                 );
 
                 if (mc.player != null) {
-                    mc.player.networkHandler.sendChatCommand(command);
+                    mc.player.connection.sendCommand(command);
                 }
             }
             case Spawn_Egg -> {
-                ItemStack rst = mc.player.getMainHandStack();
-                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
+                ItemStack rst = mc.player.getMainHandItem();
+                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePosition(), Direction.DOWN, BlockPos.containing(mc.player.getEyePosition()), false);
                 ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
-                var changes = ComponentChanges.builder()
-                        .add(DataComponentTypes.ENTITY_DATA, createEntityData(pixel, concreteId))
+                var changes = DataComponentPatch.builder()
+                        .set(DataComponents.ENTITY_DATA, createEntityData(pixel, concreteId))
                         .build();
-                item.applyChanges(changes);
-                mc.interactionManager.clickCreativeStack(item, 36 + mc.player.getInventory().selectedSlot);
-                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
+                item.applyComponentsAndValidate(changes);
+                mc.gameMode.handleCreativeModeItemAdd(item, 36 + mc.player.getInventory().getSelectedSlot());
+                mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, bhr);
+                mc.gameMode.handleCreativeModeItemAdd(rst, 36 + mc.player.getInventory().getSelectedSlot());
             }
         }
     }
     private TypedEntityData<EntityType<?>> createEntityData(PixelPosition pixel, String blockId) {
-        NbtCompound entityTag = new NbtCompound();
+        CompoundTag entityTag = new CompoundTag();
 
         entityTag.putString("id", "minecraft:armor_stand");
 
-        NbtList pos = new NbtList();
-        pos.add(NbtDouble.of(pixel.x));
-        pos.add(NbtDouble.of(pixel.y));
-        pos.add(NbtDouble.of(pixel.z));
+        ListTag pos = new ListTag();
+        pos.add(DoubleTag.valueOf(pixel.x));
+        pos.add(DoubleTag.valueOf(pixel.y));
+        pos.add(DoubleTag.valueOf(pixel.z));
         entityTag.put("Pos", pos);
 
-        NbtList rotation = new NbtList();
-        rotation.add(NbtFloat.of(180.0f));
-        rotation.add(NbtFloat.of(0.0f));
+        ListTag rotation = new ListTag();
+        rotation.add(FloatTag.valueOf(180.0f));
+        rotation.add(FloatTag.valueOf(0.0f));
         entityTag.put("Rotation", rotation);
 
         entityTag.putBoolean("Invisible", true);
         entityTag.putBoolean("NoGravity", true);
 
-        NbtCompound head = new NbtCompound();
+        CompoundTag head = new CompoundTag();
         head.putString("id", blockId);
 
-        NbtCompound equipment = new NbtCompound();
+        CompoundTag equipment = new CompoundTag();
         equipment.put("head", head);
         entityTag.put("equipment", equipment);
 
-        return TypedEntityData.create(EntityType.ARMOR_STAND, entityTag);
+        return TypedEntityData.of(EntityType.ARMOR_STAND, entityTag);
     }
     private String findClosestConcreteColor(int color) {
         int targetRed = (color >> 16) & 0xFF;

@@ -12,13 +12,12 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.List;
@@ -41,10 +40,10 @@ public class InfiniteTools extends Module {
     }
     @EventHandler
     private void onBreakBlock(BreakBlockEvent event) {
-        if (mc.player == null || mc.world == null || blacklist.get().contains(mc.world.getBlockState(event.blockPos).getBlock())) return;
+        if (mc.player == null || mc.level == null || blacklist.get().contains(mc.level.getBlockState(event.blockPos).getBlock())) return;
 
-        if (swapBack.get()) prevSlot = mc.player.getInventory().selectedSlot;
-        if (autoSlot.get()) InvUtils.swap(findToolSlot(mc.player.getInventory().selectedSlot, mc.world.getBlockState(event.blockPos)), false);
+        if (swapBack.get()) prevSlot = mc.player.getInventory().getSelectedSlot();
+        if (autoSlot.get()) InvUtils.swap(findToolSlot(mc.player.getInventory().getSelectedSlot(), mc.level.getBlockState(event.blockPos)), false);
         else InvUtils.swap(targetSlot.get()-1, false);
         if (swapBack.get() && prevSlot != -1) {
             dDelay = delay.get();
@@ -62,8 +61,8 @@ public class InfiniteTools extends Module {
     }
     private int findToolSlot(int itemNumber, BlockState state) {
         int finalnumber = itemNumber;
-        ItemStack workingitem = mc.player.getInventory().getStack(itemNumber);
-        float lowestminingspeed = workingitem.getMiningSpeedMultiplier(state);
+        ItemStack workingitem = mc.player.getInventory().getItem(itemNumber);
+        float lowestminingspeed = workingitem.getDestroySpeed(state);
 
         TagKey<Item> pickaxeTag = ItemTags.PICKAXES;
         TagKey<Item> axeTag = ItemTags.AXES;
@@ -72,16 +71,16 @@ public class InfiniteTools extends Module {
         TagKey<Item> swordTag = ItemTags.SWORDS;
 
         TagKey<Item> toolTag = null;
-        if (workingitem.streamTags().toList().contains(pickaxeTag)) toolTag = pickaxeTag;
-        else if (workingitem.streamTags().toList().contains(axeTag)) toolTag = axeTag;
-        else if (workingitem.streamTags().toList().contains(shovelTag)) toolTag = shovelTag;
-        else if (workingitem.streamTags().toList().contains(hoeTag)) toolTag = hoeTag;
-        else if (workingitem.streamTags().toList().contains(swordTag)) toolTag = swordTag;
+        if (workingitem.tags().toList().contains(pickaxeTag)) toolTag = pickaxeTag;
+        else if (workingitem.tags().toList().contains(axeTag)) toolTag = axeTag;
+        else if (workingitem.tags().toList().contains(shovelTag)) toolTag = shovelTag;
+        else if (workingitem.tags().toList().contains(hoeTag)) toolTag = hoeTag;
+        else if (workingitem.tags().toList().contains(swordTag)) toolTag = swordTag;
 
         for (int i = 0; i < 9; i++) {
-            ItemStack item = mc.player.getInventory().getStack(i);
-            if (item.streamTags().toList().contains(toolTag)) {
-                float miningSpeed = item.getMiningSpeedMultiplier(state);
+            ItemStack item = mc.player.getInventory().getItem(i);
+            if (item.tags().toList().contains(toolTag)) {
+                float miningSpeed = item.getDestroySpeed(state);
                 if (miningSpeed < lowestminingspeed) {
                     lowestminingspeed = miningSpeed;
                     finalnumber = i;

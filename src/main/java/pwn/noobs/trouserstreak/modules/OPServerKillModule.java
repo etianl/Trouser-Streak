@@ -6,8 +6,8 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import pwn.noobs.trouserstreak.Trouser;
 import pwn.noobs.trouserstreak.utils.PermissionUtils;
 
@@ -80,24 +80,24 @@ public class OPServerKillModule extends Module {
     }
     String serverVersion;
     private int ticks=0;
-    private CopyOnWriteArrayList<PlayerListEntry> players;
+    private CopyOnWriteArrayList<PlayerInfo> players;
 
     @Override
     public void onActivate() {
-        if (mc.player == null || mc.world == null) return;
-        if (dontBeStupid.get() && MinecraftClient.getInstance().isInSingleplayer()) {
+        if (mc.player == null || mc.level == null) return;
+        if (dontBeStupid.get() && Minecraft.getInstance().isLocalServer()) {
             toggle();
             error("Don't break your single player world, it sucks.");
         }
-        if (notOP.get() && PermissionUtils.getPermissionLevel(mc.player) < 2 && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+        if (notOP.get() && PermissionUtils.getPermissionLevel(mc.player) < 2 && mc.level.hasChunk(mc.player.chunkPosition().x(), mc.player.chunkPosition().z())) {
             toggle();
             error("Must have permission level 2 or higher");
         }
         if (autoCompat.get()){
-            if (mc.isIntegratedServerRunning()) {
-                serverVersion = mc.getServer().getVersion();
+            if (mc.hasSingleplayerServer()) {
+                serverVersion = mc.getSingleplayerServer().getServerVersion();
             } else {
-                serverVersion = mc.getCurrentServerEntry().version.getLiteralString();
+                serverVersion = mc.getCurrentServer().version.tryCollapseToString();
             }
         }
         ticks=0;
@@ -156,12 +156,12 @@ public class OPServerKillModule extends Module {
             }
             if (ticks == 2*tickdelay.get()){ //crash players
                 if (mc.player == null) return;
-                if (!nocrashfrend.get())ChatUtils.sendPlayerMsg("/execute at @a[name=!"+mc.player.getName().getLiteralString()+"] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[name=!"+mc.player.getName().getLiteralString()+"]");
+                if (!nocrashfrend.get())ChatUtils.sendPlayerMsg("/execute at @a[name=!"+mc.player.getName().tryCollapseToString()+"] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[name=!"+mc.player.getName().tryCollapseToString()+"]");
                 else if (nocrashfrend.get()) {
-                    players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
+                    players = new CopyOnWriteArrayList<>(mc.getConnection().getOnlinePlayers());
                     List<String> friendNames = new ArrayList<>();
-                    friendNames.add("name=!" + mc.player.getName().getLiteralString());
-                    for(PlayerListEntry player : players) {
+                    friendNames.add("name=!" + mc.player.getName().tryCollapseToString());
+                    for(PlayerInfo player : players) {
                         if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().name());
                     }
                     String friendsString = String.join(",", friendNames);
@@ -187,12 +187,12 @@ public class OPServerKillModule extends Module {
             }
             if (ticks == 2*tickdelay.get()){ //crash players
                 if (mc.player == null) return;
-                if (!nocrashfrend.get())ChatUtils.sendPlayerMsg("/execute at @a[name=!"+mc.player.getName().getLiteralString()+"] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[name=!"+mc.player.getName().getLiteralString()+"]");
+                if (!nocrashfrend.get())ChatUtils.sendPlayerMsg("/execute at @a[name=!"+mc.player.getName().tryCollapseToString()+"] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[name=!"+mc.player.getName().tryCollapseToString()+"]");
                 else if (nocrashfrend.get()) {
-                    players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
+                    players = new CopyOnWriteArrayList<>(mc.getConnection().getOnlinePlayers());
                     List<String> friendNames = new ArrayList<>();
-                    friendNames.add("name=!" + mc.player.getName().getLiteralString());
-                    for(PlayerListEntry player : players) {
+                    friendNames.add("name=!" + mc.player.getName().tryCollapseToString());
+                    for(PlayerInfo player : players) {
                         if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().name());
                     }
                     String friendsString = String.join(",", friendNames);
@@ -221,12 +221,12 @@ public class OPServerKillModule extends Module {
             }
             if (ticks == 3*tickdelay.get()){ //crash players
                 if (mc.player == null) return;
-                if (!nocrashfrend.get())ChatUtils.sendPlayerMsg("/execute at @a[name=!"+mc.player.getName().getLiteralString()+"] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[name=!"+mc.player.getName().getLiteralString()+"]");
+                if (!nocrashfrend.get())ChatUtils.sendPlayerMsg("/execute at @a[name=!"+mc.player.getName().tryCollapseToString()+"] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @a[name=!"+mc.player.getName().tryCollapseToString()+"]");
                 else if (nocrashfrend.get()) {
-                    players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
+                    players = new CopyOnWriteArrayList<>(mc.getConnection().getOnlinePlayers());
                     List<String> friendNames = new ArrayList<>();
-                    friendNames.add("name=!" + mc.player.getName().getLiteralString());
-                    for(PlayerListEntry player : players) {
+                    friendNames.add("name=!" + mc.player.getName().tryCollapseToString());
+                    for(PlayerInfo player : players) {
                         if(Friends.get().isFriend(player) && nocrashfrend.get()) friendNames.add("name=!" + player.getProfile().name());
                     }
                     String friendsString = String.join(",", friendNames);

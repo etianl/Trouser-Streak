@@ -2,7 +2,7 @@ package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
-import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
-import meteordevelopment.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
+import meteordevelopment.meteorclient.mixin.ServerboundMovePlayerPacketAccessor;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -25,17 +25,67 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.*;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.item.*;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.text.Text;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.BedItem;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.DoubleHighBlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.PlaceOnWaterBlockItem;
+import net.minecraft.world.item.ScaffoldingBlockItem;
+import net.minecraft.world.item.SolidBucketItem;
+import net.minecraft.world.item.StandingAndWallBlockItem;
+import net.minecraft.world.level.block.AmethystClusterBlock;
+import net.minecraft.world.level.block.BambooStalkBlock;
+import net.minecraft.world.level.block.BaseCoralFanBlock;
+import net.minecraft.world.level.block.BaseCoralWallFanBlock;
+import net.minecraft.world.level.block.BaseRailBlock;
+import net.minecraft.world.level.block.BellBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BuddingAmethystBlock;
+import net.minecraft.world.level.block.CactusBlock;
+import net.minecraft.world.level.block.CakeBlock;
+import net.minecraft.world.level.block.CandleBlock;
+import net.minecraft.world.level.block.CarpetBlock;
+import net.minecraft.world.level.block.ChorusFlowerBlock;
+import net.minecraft.world.level.block.ChorusPlantBlock;
+import net.minecraft.world.level.block.ConduitBlock;
+import net.minecraft.world.level.block.CoralFanBlock;
+import net.minecraft.world.level.block.CoralWallFanBlock;
+import net.minecraft.world.level.block.DiodeBlock;
+import net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock;
+import net.minecraft.world.level.block.FallingBlock;
+import net.minecraft.world.level.block.FenceBlock;
+import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.FlowerPotBlock;
+import net.minecraft.world.level.block.GlowLichenBlock;
+import net.minecraft.world.level.block.KelpBlock;
+import net.minecraft.world.level.block.LadderBlock;
+import net.minecraft.world.level.block.LanternBlock;
+import net.minecraft.world.level.block.PointedDripstoneBlock;
+import net.minecraft.world.level.block.PressurePlateBlock;
+import net.minecraft.world.level.block.RedStoneWireBlock;
+import net.minecraft.world.level.block.ShulkerBoxBlock;
+import net.minecraft.world.level.block.SignBlock;
+import net.minecraft.world.level.block.SnowLayerBlock;
+import net.minecraft.world.level.block.SporeBlossomBlock;
+import net.minecraft.world.level.block.SugarCaneBlock;
+import net.minecraft.world.level.block.TntBlock;
+import net.minecraft.world.level.block.TorchBlock;
+import net.minecraft.world.level.block.TripWireBlock;
+import net.minecraft.world.level.block.TripWireHookBlock;
+import net.minecraft.world.level.block.VegetationBlock;
+import net.minecraft.world.level.block.WallBlock;
+import net.minecraft.world.level.block.WebBlock;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.List;
@@ -315,7 +365,7 @@ public class AutoMountain extends Module {
 
     @Override
     public void onActivate() {
-        lastHotbarSlot = mc.player.getInventory().selectedSlot;
+        lastHotbarSlot = mc.player.getInventory().getSelectedSlot();
         if (lowYrst.get() || autolavamountain.get())isthisfirstblock = true;
         groundY=0;
         groundY2=0;
@@ -323,32 +373,32 @@ public class AutoMountain extends Module {
         highblockY=-1;
         if (startPaused.get()){
             pause = false;
-            if (autolavamountain.get()) ChatUtils.sendMsg(Text.of("Press UseKey (RightClick) to Build a Mountain! Please wait while the bot works."));
-            else ChatUtils.sendMsg(Text.of("Press UseKey (RightClick) to Build Stairs!"));
+            if (autolavamountain.get()) ChatUtils.sendMsg(Component.nullToEmpty("Press UseKey (RightClick) to Build a Mountain! Please wait while the bot works."));
+            else ChatUtils.sendMsg(Component.nullToEmpty("Press UseKey (RightClick) to Build Stairs!"));
         } else if (!startPaused.get()){
-            mc.player.setPos(mc.player.getX(),Math.ceil(mc.player.getY()),mc.player.getZ());
-            wasfacing=mc.player.getHorizontalFacing();
-            prevPitch=Math.round(mc.player.getPitch());
+            mc.player.setPosRaw(mc.player.getX(),Math.ceil(mc.player.getY()),mc.player.getZ());
+            wasfacing=mc.player.getDirection();
+            prevPitch=Math.round(mc.player.getXRot());
             if (swap.get()){
                 cascadingpileof();
             }
             if (autolavamountain.get()){
-                wasfacingBOT=mc.player.getHorizontalFacing();
+                wasfacingBOT=mc.player.getDirection();
                 lavamountainingredients();
             }
-            mc.player.setVelocity(0,0,0);
+            mc.player.setDeltaMovement(0,0,0);
             PlayerUtils.centerPlayer();
             pause = true;
-            if (autolavamountain.get()) ChatUtils.sendMsg(Text.of("Building a Mountain! Please wait while the bot works."));
+            if (autolavamountain.get()) ChatUtils.sendMsg(Component.nullToEmpty("Building a Mountain! Please wait while the bot works."));
         }
         resetTimer = false;
-        playerPos = mc.player.getBlockPos();
-        renderplayerPos = mc.player.getBlockPos();
-        if (startPaused.get() || isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack())) return;
-        BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
-        if (mc.world.getBlockState(pos).isReplaceable()) {
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-            mc.player.swingHand(Hand.MAIN_HAND);
+        playerPos = mc.player.blockPosition();
+        renderplayerPos = mc.player.blockPosition();
+        if (startPaused.get() || isInvalidBlock(mc.player.getMainHandItem().getItem().getDefaultInstance())) return;
+        BlockPos pos = playerPos.offset(new Vec3i(0,-1,0));
+        if (mc.level.getBlockState(pos).canBeReplaced()) {
+            mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+            mc.player.swing(InteractionHand.MAIN_HAND);
         }
     }
 
@@ -357,13 +407,13 @@ public class AutoMountain extends Module {
         if (mc.player == null) return;
         mc.player.setNoGravity(false);
         if (isthisfirstblock){
-            highestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
-            lowestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
+            highestblock=mc.player.blockPosition().offset(new Vec3i(0,-1,0));
+            lowestblock=mc.player.blockPosition().offset(new Vec3i(0,-1,0));
             isthisfirstblock=false;
         }
         if (!startPaused.get() && pause==true){
-            if (!isthisfirstblock && mc.player.getY()<lowestblock.getY()) lowestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
-            if (!isthisfirstblock && mc.player.getY()>highestblock.getY()+1) highestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
+            if (!isthisfirstblock && mc.player.getY()<lowestblock.getY()) lowestblock=mc.player.blockPosition().offset(new Vec3i(0,-1,0));
+            if (!isthisfirstblock && mc.player.getY()>highestblock.getY()+1) highestblock=mc.player.blockPosition().offset(new Vec3i(0,-1,0));
         }
         search=true;
         seekground();
@@ -372,134 +422,134 @@ public class AutoMountain extends Module {
         speed=0;
         resetTimer = true;
         Modules.get().get(Timer.class).setOverride(Timer.OFF);
-        if (isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack())) return;
+        if (isInvalidBlock(mc.player.getMainHandItem().getItem().getDefaultInstance())) return;
         if (!startPaused.get() && !pause){
-            BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
-            if (mc.world.getBlockState(pos).isReplaceable()) {
-                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                mc.player.swingHand(Hand.MAIN_HAND);}
+            BlockPos pos = playerPos.offset(new Vec3i(0,-1,0));
+            if (mc.level.getBlockState(pos).canBeReplaced()) {
+                mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                mc.player.swing(InteractionHand.MAIN_HAND);}
         }
     }
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (mc.player == null || mc.world == null) return;
+        if (mc.player == null || mc.level == null) return;
         if (render.get()) {
-            if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
-                if ((mouseT.get() && mc.player.getPitch() <= 40) || (!mouseT.get() && prevPitch <= 40)){            //UP
-                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {
-                        BlockPos pos1 = renderplayerPos.add(new Vec3i(0, +spcoffset.get(), -1));
+            if (mc.options.keyJump.isDown() && !autolavamountain.get()){
+                if ((mouseT.get() && mc.player.getXRot() <= 40) || (!mouseT.get() && prevPitch <= 40)){            //UP
+                    if ((mouseT.get() && mc.player.getMotionDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {
+                        BlockPos pos1 = renderplayerPos.offset(new Vec3i(0, +spcoffset.get(), -1));
                         event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
-                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {
-                        BlockPos pos1 = renderplayerPos.add(new Vec3i(0, +spcoffset.get(), 1));
+                    if ((mouseT.get() && mc.player.getMotionDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {
+                        BlockPos pos1 = renderplayerPos.offset(new Vec3i(0, +spcoffset.get(), 1));
                         event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
-                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {
-                        BlockPos pos1 = renderplayerPos.add(new Vec3i(1, +spcoffset.get(), 0));
+                    if ((mouseT.get() && mc.player.getMotionDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {
+                        BlockPos pos1 = renderplayerPos.offset(new Vec3i(1, +spcoffset.get(), 0));
                         event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
-                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {
-                        BlockPos pos1 = renderplayerPos.add(new Vec3i(-1, +spcoffset.get(), 0));
+                    if ((mouseT.get() && mc.player.getMotionDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {
+                        BlockPos pos1 = renderplayerPos.offset(new Vec3i(-1, +spcoffset.get(), 0));
                         event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
                 }
-                else if ((mouseT.get() && mc.player.getPitch() > 40) || (!mouseT.get() && prevPitch > 40)){            //DOWN
-                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {
-                        BlockPos pos1 = renderplayerPos.add(new Vec3i(0, -spcoffset.get()-2, -1));
+                else if ((mouseT.get() && mc.player.getXRot() > 40) || (!mouseT.get() && prevPitch > 40)){            //DOWN
+                    if ((mouseT.get() && mc.player.getMotionDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {
+                        BlockPos pos1 = renderplayerPos.offset(new Vec3i(0, -spcoffset.get()-2, -1));
                         event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
-                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {
-                        BlockPos pos1 = renderplayerPos.add(new Vec3i(0, -spcoffset.get()-2, 1));
+                    if ((mouseT.get() && mc.player.getMotionDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {
+                        BlockPos pos1 = renderplayerPos.offset(new Vec3i(0, -spcoffset.get()-2, 1));
                         event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
-                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {
-                        BlockPos pos1 = renderplayerPos.add(new Vec3i(1, -spcoffset.get()-2, 0));
+                    if ((mouseT.get() && mc.player.getMotionDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {
+                        BlockPos pos1 = renderplayerPos.offset(new Vec3i(1, -spcoffset.get()-2, 0));
                         event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
-                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {
-                        BlockPos pos1 = renderplayerPos.add(new Vec3i(-1, -spcoffset.get()-2, 0));
+                    if ((mouseT.get() && mc.player.getMotionDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {
+                        BlockPos pos1 = renderplayerPos.offset(new Vec3i(-1, -spcoffset.get()-2, 0));
                         event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
                 }
             }
-            else if (!mc.options.jumpKey.isPressed() || autolavamountain.get()) {
-                if (((mouseT.get() && mc.player.getPitch() <= 40) || autolavamountain.get()) || (!mouseT.get() && prevPitch <= 40 && !autolavamountain.get())) {            //UP
-                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {
-                        BlockPos pos1 = renderplayerPos.add(new Vec3i(0, 0, -1));
+            else if (!mc.options.keyJump.isDown() || autolavamountain.get()) {
+                if (((mouseT.get() && mc.player.getXRot() <= 40) || autolavamountain.get()) || (!mouseT.get() && prevPitch <= 40 && !autolavamountain.get())) {            //UP
+                    if ((mouseT.get() && mc.player.getMotionDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {
+                        BlockPos pos1 = renderplayerPos.offset(new Vec3i(0, 0, -1));
                         event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                         if (autolavamountain.get() && !pause){
-                            BlockPos pos2 = renderplayerPos.add(new Vec3i(0, botlimit.get()-1, -botlimit.get()));
-                            BlockPos pos3 = renderplayerPos.add(new Vec3i(0, 1, -2));
+                            BlockPos pos2 = renderplayerPos.offset(new Vec3i(0, botlimit.get()-1, -botlimit.get()));
+                            BlockPos pos3 = renderplayerPos.offset(new Vec3i(0, 1, -2));
                             event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                             event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                         } else if (autolavamountain.get() && pause){
-                            BlockPos pos2 = lowestblock.add(new Vec3i(0, botlimit.get(), -botlimit.get()));
-                            BlockPos pos3 = renderplayerPos.add(new Vec3i(0, 1, -2));
+                            BlockPos pos2 = lowestblock.offset(new Vec3i(0, botlimit.get(), -botlimit.get()));
+                            BlockPos pos3 = renderplayerPos.offset(new Vec3i(0, 1, -2));
                             event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                             event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                         }
                     }
-                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {
-                        BlockPos pos1 = renderplayerPos.add(new Vec3i(0, 0, 1));
+                    if ((mouseT.get() && mc.player.getMotionDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {
+                        BlockPos pos1 = renderplayerPos.offset(new Vec3i(0, 0, 1));
                         event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                         if (autolavamountain.get() && !pause){
-                            BlockPos pos2 = renderplayerPos.add(new Vec3i(0, botlimit.get()-1, botlimit.get()));
-                            BlockPos pos3 = renderplayerPos.add(new Vec3i(0, 1, 2));
+                            BlockPos pos2 = renderplayerPos.offset(new Vec3i(0, botlimit.get()-1, botlimit.get()));
+                            BlockPos pos3 = renderplayerPos.offset(new Vec3i(0, 1, 2));
                             event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                             event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                         } else if (autolavamountain.get() && pause){
-                            BlockPos pos2 = lowestblock.add(new Vec3i(0, botlimit.get(), botlimit.get()));
-                            BlockPos pos3 = renderplayerPos.add(new Vec3i(0, 1, 2));
+                            BlockPos pos2 = lowestblock.offset(new Vec3i(0, botlimit.get(), botlimit.get()));
+                            BlockPos pos3 = renderplayerPos.offset(new Vec3i(0, 1, 2));
                             event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                             event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                         }
                     }
-                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {
-                        BlockPos pos1 = renderplayerPos.add(new Vec3i(1, 0, 0));
+                    if ((mouseT.get() && mc.player.getMotionDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {
+                        BlockPos pos1 = renderplayerPos.offset(new Vec3i(1, 0, 0));
                         event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                         if (autolavamountain.get() && !pause){
-                            BlockPos pos3 = renderplayerPos.add(new Vec3i(2, 1, 0));
-                            BlockPos pos2 = renderplayerPos.add(new Vec3i(botlimit.get(), botlimit.get()-1, 0));
+                            BlockPos pos3 = renderplayerPos.offset(new Vec3i(2, 1, 0));
+                            BlockPos pos2 = renderplayerPos.offset(new Vec3i(botlimit.get(), botlimit.get()-1, 0));
                             event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                             event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                         } else if (autolavamountain.get() && pause){
-                            BlockPos pos3 = renderplayerPos.add(new Vec3i(2, 1, 0));
-                            BlockPos pos2 = lowestblock.add(new Vec3i(botlimit.get(), botlimit.get(), 0));
+                            BlockPos pos3 = renderplayerPos.offset(new Vec3i(2, 1, 0));
+                            BlockPos pos2 = lowestblock.offset(new Vec3i(botlimit.get(), botlimit.get(), 0));
                             event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                             event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                         }
                     }
-                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {
-                        BlockPos pos1 = renderplayerPos.add(new Vec3i(-1, 0, -0));
+                    if ((mouseT.get() && mc.player.getMotionDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {
+                        BlockPos pos1 = renderplayerPos.offset(new Vec3i(-1, 0, -0));
                         event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                         if (autolavamountain.get() && !pause){
-                            BlockPos pos3 = renderplayerPos.add(new Vec3i(-2, 1, 0));
-                            BlockPos pos2 = renderplayerPos.add(new Vec3i(-botlimit.get(), botlimit.get()-1, 0));
+                            BlockPos pos3 = renderplayerPos.offset(new Vec3i(-2, 1, 0));
+                            BlockPos pos2 = renderplayerPos.offset(new Vec3i(-botlimit.get(), botlimit.get()-1, 0));
                             event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                             event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                         } else if (autolavamountain.get() && pause){
-                            BlockPos pos3 = renderplayerPos.add(new Vec3i(-2, 1, 0));
-                            BlockPos pos2 = lowestblock.add(new Vec3i(-botlimit.get(), botlimit.get(), 0));
+                            BlockPos pos3 = renderplayerPos.offset(new Vec3i(-2, 1, 0));
+                            BlockPos pos2 = lowestblock.offset(new Vec3i(-botlimit.get(), botlimit.get(), 0));
                             event.renderer.box(pos2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                             event.renderer.box(pos3, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                         }
                     }
-                } else if ((mouseT.get() && mc.player.getPitch() > 40) || (!mouseT.get() && prevPitch > 40)) {            //DOWN
-                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {
-                        BlockPos pos1 = renderplayerPos.add(new Vec3i(0, -2, -1));
+                } else if ((mouseT.get() && mc.player.getXRot() > 40) || (!mouseT.get() && prevPitch > 40)) {            //DOWN
+                    if ((mouseT.get() && mc.player.getMotionDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {
+                        BlockPos pos1 = renderplayerPos.offset(new Vec3i(0, -2, -1));
                         event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
-                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {
-                        BlockPos pos1 = renderplayerPos.add(new Vec3i(0, -2, 1));
+                    if ((mouseT.get() && mc.player.getMotionDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {
+                        BlockPos pos1 = renderplayerPos.offset(new Vec3i(0, -2, 1));
                         event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
-                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {
-                        BlockPos pos1 = renderplayerPos.add(new Vec3i(1, -2, 0));
+                    if ((mouseT.get() && mc.player.getMotionDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {
+                        BlockPos pos1 = renderplayerPos.offset(new Vec3i(1, -2, 0));
                         event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
-                    if ((mouseT.get() && mc.player.getMovementDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {
-                        BlockPos pos1 = renderplayerPos.add(new Vec3i(-1, -2, 0));
+                    if ((mouseT.get() && mc.player.getMotionDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {
+                        BlockPos pos1 = renderplayerPos.offset(new Vec3i(-1, -2, 0));
                         event.renderer.box(pos1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     }
                 }
@@ -517,51 +567,51 @@ public class AutoMountain extends Module {
 
     @EventHandler
     private void onMouseButton(MouseClickEvent event) {
-        if (mc.options.useKey.isPressed()){
+        if (mc.options.keyUse.isDown()){
             if (pause){
-                BlockPos pos = playerPos.add(new Vec3i(0,-1,0));
-                if (mc.world.getBlockState(pos).isReplaceable()) {
-                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                    mc.player.swingHand(Hand.MAIN_HAND);}
+                BlockPos pos = playerPos.offset(new Vec3i(0,-1,0));
+                if (mc.level.getBlockState(pos).canBeReplaced()) {
+                    mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                    mc.player.swing(InteractionHand.MAIN_HAND);}
             }
-            if (!pause)mc.player.setPos(mc.player.getX(),Math.ceil(mc.player.getY()),mc.player.getZ());
+            if (!pause)mc.player.setPosRaw(mc.player.getX(),Math.ceil(mc.player.getY()),mc.player.getZ());
             pause = !pause;
-            mc.player.setVelocity(0,0,0);
+            mc.player.setDeltaMovement(0,0,0);
             cookie=0;
             speed=0;
             resetTimer = true;
             Modules.get().get(Timer.class).setOverride(Timer.OFF);
-            if (isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack())) return;
+            if (isInvalidBlock(mc.player.getMainHandItem().getItem().getDefaultInstance())) return;
             if (isthisfirstblock){
-                highestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
-                lowestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
+                highestblock=mc.player.blockPosition().offset(new Vec3i(0,-1,0));
+                lowestblock=mc.player.blockPosition().offset(new Vec3i(0,-1,0));
                 isthisfirstblock=false;
             }
             if (!isthisfirstblock &&mc.player.getY()<lowestblock.getY()){
-                lowestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
+                lowestblock=mc.player.blockPosition().offset(new Vec3i(0,-1,0));
                 seekground();
             }
             if (!isthisfirstblock && mc.player.getY()>highestblock.getY()+1){
-                highestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
+                highestblock=mc.player.blockPosition().offset(new Vec3i(0,-1,0));
                 seekground2();
             }
         }
     }
     @EventHandler
-    private void onKeyEvent(KeyEvent event) {
+    private void onKeyEvent(KeyInputEvent event) {
         if (!pause)return;
         if (!autolavamountain.get()){
-            if (mc.options.forwardKey.isPressed()){
-                if (mouseT.get())mc.player.setPitch(35);
+            if (mc.options.keyUp.isDown()){
+                if (mouseT.get())mc.player.setXRot(35);
                 if (!mouseT.get())prevPitch=35;
             }
-            if (mc.options.backKey.isPressed()){
-                if (mouseT.get())mc.player.setPitch(75);
+            if (mc.options.keyDown.isDown()){
+                if (mouseT.get())mc.player.setXRot(75);
                 if (!mouseT.get())prevPitch=75;
             }
-            if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack()) || !pause) return;
-            if (mc.options.leftKey.isPressed() && !mc.options.sneakKey.isPressed()){
-                if (mouseT.get())mc.player.setYaw(mc.player.getYaw()-90);
+            if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getMainHandItem().getItem().getDefaultInstance()) || !pause) return;
+            if (mc.options.keyLeft.isDown() && !mc.options.keyShift.isDown()){
+                if (mouseT.get())mc.player.setYRot(mc.player.getYRot()-90);
                 if (!mouseT.get()){
                     if (wasfacing==Direction.NORTH){
                         wasfacing=Direction.WEST;
@@ -581,8 +631,8 @@ public class AutoMountain extends Module {
                     }
                 }
             }
-            if (mc.options.rightKey.isPressed() && !mc.options.sneakKey.isPressed()){
-                if (mouseT.get())mc.player.setYaw(mc.player.getYaw()+90);
+            if (mc.options.keyRight.isDown() && !mc.options.keyShift.isDown()){
+                if (mouseT.get())mc.player.setYRot(mc.player.getYRot()+90);
                 if (!mouseT.get()){
                     if (wasfacing==Direction.NORTH){
                         wasfacing=Direction.EAST;
@@ -605,22 +655,22 @@ public class AutoMountain extends Module {
     }
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (event.packet instanceof PlayerMoveC2SPacket)
-            ((PlayerMoveC2SPacketAccessor) event.packet).meteor$setOnGround(true);
+        if (event.packet instanceof ServerboundMovePlayerPacket)
+            ((ServerboundMovePlayerPacketAccessor) event.packet).meteor$setOnGround(true);
     }
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        playerPos = mc.player.getBlockPos();
+        playerPos = mc.player.blockPosition();
         if (mc.player.getY() % 1 != 0 && !pause){
             renderplayerPos = new BlockPos(mc.player.getBlockX(), mc.player.getBlockY()+1, mc.player.getBlockZ());
-        } else renderplayerPos = mc.player.getBlockPos();
+        } else renderplayerPos = mc.player.blockPosition();
         timeSinceLastTick = TickRate.INSTANCE.getTimeSinceLastTick();
 
         if (pause && swap.get()) {
-            int currentSlot = mc.player.getInventory().selectedSlot;
+            int currentSlot = mc.player.getInventory().getSelectedSlot();
             cascadingpileof();
 
-            int newSlot = mc.player.getInventory().selectedSlot;
+            int newSlot = mc.player.getInventory().getSelectedSlot();
             if (newSlot != lastHotbarSlot && newSlot != currentSlot) {
                 justSwapped = true;
                 graceTicks = swapPause.get();
@@ -640,9 +690,9 @@ public class AutoMountain extends Module {
             if (graceTicks > 0) {
                 go = false;
                 speed = 0;
-                mc.player.setVelocity(0,0,0);
+                mc.player.setDeltaMovement(0,0,0);
                 PlayerUtils.centerPlayer();
-                mc.player.setPos(mc.player.getX(), Math.round(mc.player.getY())+0.25, mc.player.getZ());
+                mc.player.setPosRaw(mc.player.getX(), Math.round(mc.player.getY())+0.25, mc.player.getZ());
                 return;
             } else {
                 justSwapped = false;
@@ -654,10 +704,10 @@ public class AutoMountain extends Module {
         }
 
         if (!pause){
-            wasfacing=mc.player.getHorizontalFacing();
-            prevPitch=Math.round(mc.player.getPitch());
+            wasfacing=mc.player.getDirection();
+            prevPitch=Math.round(mc.player.getXRot());
             if (autolavamountain.get()){
-                wasfacingBOT=mc.player.getHorizontalFacing();
+                wasfacingBOT=mc.player.getDirection();
                 isthisfirstblock=true;
                 lavamountainingredients();
             }
@@ -667,10 +717,10 @@ public class AutoMountain extends Module {
         }
         if (!pause) return;
         if (autolavamountain.get()){
-            if (wasfacingBOT==Direction.NORTH) mc.player.setYaw(180);
-            if (wasfacingBOT==Direction.SOUTH) mc.player.setYaw(0);
-            if (wasfacingBOT==Direction.WEST) mc.player.setYaw(90);
-            if (wasfacingBOT==Direction.EAST) mc.player.setYaw(-90);
+            if (wasfacingBOT==Direction.NORTH) mc.player.setYRot(180);
+            if (wasfacingBOT==Direction.SOUTH) mc.player.setYRot(0);
+            if (wasfacingBOT==Direction.WEST) mc.player.setYRot(90);
+            if (wasfacingBOT==Direction.EAST) mc.player.setYRot(-90);
         }
         if (!delayakick.get()){
             offLeft=666666666;
@@ -679,9 +729,9 @@ public class AutoMountain extends Module {
         else if (delayakick.get() && offLeft>offTime.get()){
             offLeft=offTime.get();
         }
-        mc.player.setVelocity(0,0,0);
+        mc.player.setDeltaMovement(0,0,0);
         PlayerUtils.centerPlayer();
-        mc.player.setPos(mc.player.getX(),Math.round(mc.player.getY())+0.25,mc.player.getZ());
+        mc.player.setPosRaw(mc.player.getX(),Math.round(mc.player.getY())+0.25,mc.player.getZ());
         if (Modules.get().get(Flight.class).isActive()) {
             Modules.get().get(Flight.class).toggle();
         }
@@ -691,19 +741,19 @@ public class AutoMountain extends Module {
         if (Modules.get().get(TPFly.class).isActive()) {
             Modules.get().get(TPFly.class).toggle();
         }
-        if (mc.world.getBlockState(mc.player.getBlockPos()).getBlock() == Blocks.AIR) {
+        if (mc.level.getBlockState(mc.player.blockPosition()).getBlock() == Blocks.AIR) {
             resetTimer = false;
             Modules.get().get(Timer.class).setOverride(StairTimer.get());
         } else if (!resetTimer) {
             resetTimer = true;
             Modules.get().get(Timer.class).setOverride(Timer.OFF);
         }
-        if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack()) || !pause || !go) return;
-        if (mc.options.sneakKey.isPressed() && mc.options.rightKey.isPressed() && delayLeft <= 0 && offLeft > 0 && !autolavamountain.get()){
+        if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getMainHandItem().getItem().getDefaultInstance()) || !pause || !go) return;
+        if (mc.options.keyShift.isDown() && mc.options.keyRight.isDown() && delayLeft <= 0 && offLeft > 0 && !autolavamountain.get()){
             cookie++;
             if (cookie==munscher.get()){
-                cookieyaw=mc.player.getYaw();
-                if (mouseT.get())mc.player.setYaw(mc.player.getYaw()+90);
+                cookieyaw=mc.player.getYRot();
+                if (mouseT.get())mc.player.setYRot(mc.player.getYRot()+90);
                 if (!mouseT.get()){
                     if (wasfacing==Direction.NORTH){
                         wasfacing=Direction.EAST;
@@ -716,7 +766,7 @@ public class AutoMountain extends Module {
                     }
                 }
             }else if (cookie>=munscher.get()+munscher.get()){
-                if (mouseT.get())mc.player.setYaw(mc.player.getYaw()-90);
+                if (mouseT.get())mc.player.setYRot(mc.player.getYRot()-90);
                 if (!mouseT.get()){
                     if (wasfacing==Direction.NORTH){
                         wasfacing=Direction.WEST;
@@ -731,11 +781,11 @@ public class AutoMountain extends Module {
                 cookie=0;
             }
         }
-        if (mc.options.sneakKey.isPressed() && mc.options.leftKey.isPressed() && delayLeft <= 0 && offLeft > 0 && !autolavamountain.get()){
+        if (mc.options.keyShift.isDown() && mc.options.keyLeft.isDown() && delayLeft <= 0 && offLeft > 0 && !autolavamountain.get()){
             cookie++;
             if (cookie==munscher.get()){
-                cookieyaw=mc.player.getYaw();
-                if (mouseT.get())mc.player.setYaw(mc.player.getYaw()-90);
+                cookieyaw=mc.player.getYRot();
+                if (mouseT.get())mc.player.setYRot(mc.player.getYRot()-90);
                 if (!mouseT.get()){
                     if (wasfacing==Direction.NORTH){
                         wasfacing=Direction.WEST;
@@ -748,7 +798,7 @@ public class AutoMountain extends Module {
                     }
                 }
             }else if (cookie>=munscher.get()+munscher.get()){
-                if (mouseT.get())mc.player.setYaw(mc.player.getYaw()+90);
+                if (mouseT.get())mc.player.setYRot(mc.player.getYRot()+90);
                 if (!mouseT.get()){
                     if (wasfacing==Direction.NORTH){
                         wasfacing=Direction.EAST;
@@ -763,35 +813,35 @@ public class AutoMountain extends Module {
                 cookie=0;
             }
         }
-        else if (!mc.options.leftKey.isPressed() && !mc.options.rightKey.isPressed() && cookie>=1){
-            mc.player.setYaw(cookieyaw);
-            cookieyaw=mc.player.getYaw();
+        else if (!mc.options.keyLeft.isDown() && !mc.options.keyRight.isDown() && cookie>=1){
+            mc.player.setYRot(cookieyaw);
+            cookieyaw=mc.player.getYRot();
             cookie=0;
         }
         if (pause){
             if (isthisfirstblock){
-                highestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
-                lowestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
+                highestblock=mc.player.blockPosition().offset(new Vec3i(0,-1,0));
+                lowestblock=mc.player.blockPosition().offset(new Vec3i(0,-1,0));
                 isthisfirstblock=false;
             }
             if (!isthisfirstblock &&mc.player.getY()<lowestblock.getY()){
-                lowestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
+                lowestblock=mc.player.blockPosition().offset(new Vec3i(0,-1,0));
                 seekground();
             }
             if (!isthisfirstblock && mc.player.getY()>highestblock.getY()+1){
-                highestblock=mc.player.getBlockPos().add(new Vec3i(0,-1,0));
+                highestblock=mc.player.blockPosition().offset(new Vec3i(0,-1,0));
                 seekground2();
             }}
     }
 
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
-        if (mc.player == null || mc.world == null) return;
+        if (mc.player == null || mc.level == null) return;
         if (pause && autolavamountain.get()) {
-            if (wasfacingBOT==Direction.NORTH) mc.player.setYaw(180);
-            if (wasfacingBOT==Direction.SOUTH) mc.player.setYaw(0);
-            if (wasfacingBOT==Direction.WEST) mc.player.setYaw(90);
-            if (wasfacingBOT==Direction.EAST) mc.player.setYaw(-90);
+            if (wasfacingBOT==Direction.NORTH) mc.player.setYRot(180);
+            if (wasfacingBOT==Direction.SOUTH) mc.player.setYRot(0);
+            if (wasfacingBOT==Direction.WEST) mc.player.setYRot(90);
+            if (wasfacingBOT==Direction.EAST) mc.player.setYRot(-90);
             mc.player.setNoGravity(true);
             if (mc.player.getY() >= limit.get()-4 | mc.player.getY() > lowestblock.getY()+botlimit.get()){
                 autocasttimenow=true;
@@ -799,335 +849,335 @@ public class AutoMountain extends Module {
                 seekground();
                 search2=true;
                 seekground2();
-                mc.player.setPos(mc.player.getX(), mc.player.getY()+1, mc.player.getZ());
-                mc.player.setPitch(80);
+                mc.player.setPosRaw(mc.player.getX(), mc.player.getY()+1, mc.player.getZ());
+                mc.player.setXRot(80);
                 if (!Modules.get().get(AutoLavaCaster.class).isActive()) Modules.get().get(AutoLavaCaster.class).toggle();
-                ChatUtils.sendMsg(Text.of("Activating AutoLavaCaster."));
+                ChatUtils.sendMsg(Component.nullToEmpty("Activating AutoLavaCaster."));
                 toggle();
             }
         }
         if (!pause) return;
 
-        if (((mouseT.get() && mc.player.getPitch() <= 40 || autolavamountain.get())) || (!mouseT.get() && prevPitch <= 40)){
+        if (((mouseT.get() && mc.player.getXRot() <= 40 || autolavamountain.get())) || (!mouseT.get() && prevPitch <= 40)){
             if (delayLeft > 0) delayLeft--;
             else if ((!lagpause.get() || timeSinceLastTick < lag.get()) && delayLeft <= 0 && offLeft > 0 && (mc.player.getY() <= limit.get() &&  mc.player.getY() >= downlimit.get() && !autolavamountain.get() || mc.player.getY() <= limit.get()-4 && mc.player.getY() <= lowestblock.getY()+botlimit.get()+1 && autolavamountain.get())) {
                 offLeft--;
-                if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack()) || !pause || !go) return;
-                if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {            //UP
-                    if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
-                        BlockPos un1 = playerPos.add(new Vec3i(0,spcoffset.get()+2,0));
-                        BlockPos un2 = playerPos.add(new Vec3i(0,spcoffset.get()+1,-1));
-                        BlockPos un3 = playerPos.add(new Vec3i(0,spcoffset.get()+2,-1));
-                        BlockPos un4 = playerPos.add(new Vec3i(0,spcoffset.get()+3,-1));
-                        BlockPos pos = playerPos.add(new Vec3i(0,spcoffset.get(),-1));
-                        if (mc.world.getBlockState(un1).isReplaceable() && mc.world.getBlockState(un2).isReplaceable() && mc.world.getBlockState(un3).isReplaceable() && mc.world.getBlockState(un4).isReplaceable() && mc.world.getFluidState(un1).isEmpty() && mc.world.getFluidState(un2).isEmpty() && mc.world.getFluidState(un3).isEmpty() && mc.world.getFluidState(un4).isEmpty() && !mc.world.getBlockState(un1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(un2)){
-                            if (mc.world.getBlockState(pos).isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
+                if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getMainHandItem().getItem().getDefaultInstance()) || !pause || !go) return;
+                if ((mouseT.get() && mc.player.getMotionDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {            //UP
+                    if (mc.options.keyJump.isDown() && !autolavamountain.get()){
+                        BlockPos un1 = playerPos.offset(new Vec3i(0,spcoffset.get()+2,0));
+                        BlockPos un2 = playerPos.offset(new Vec3i(0,spcoffset.get()+1,-1));
+                        BlockPos un3 = playerPos.offset(new Vec3i(0,spcoffset.get()+2,-1));
+                        BlockPos un4 = playerPos.offset(new Vec3i(0,spcoffset.get()+3,-1));
+                        BlockPos pos = playerPos.offset(new Vec3i(0,spcoffset.get(),-1));
+                        if (mc.level.getBlockState(un1).canBeReplaced() && mc.level.getBlockState(un2).canBeReplaced() && mc.level.getBlockState(un3).canBeReplaced() && mc.level.getBlockState(un4).canBeReplaced() && mc.level.getFluidState(un1).isEmpty() && mc.level.getFluidState(un2).isEmpty() && mc.level.getFluidState(un3).isEmpty() && mc.level.getFluidState(un4).isEmpty() && !mc.level.getBlockState(un1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(un2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(un3).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(un4).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(un2)){
+                            if (mc.level.getBlockState(pos).canBeReplaced()){
+                                mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                                mc.player.swing(InteractionHand.MAIN_HAND);
                             }
-                            mc.player.setPosition(mc.player.getX(),mc.player.getY()+1+spcoffset.get(),mc.player.getZ()-1);
+                            mc.player.setPos(mc.player.getX(),mc.player.getY()+1+spcoffset.get(),mc.player.getZ()-1);
                         } else {
                             if (InvertUpDir.get() && !autolavamountain.get()){
-                                if (mouseT.get())mc.player.setPitch(75);
+                                if (mouseT.get())mc.player.setXRot(75);
                                 if (!mouseT.get())prevPitch=75;
                             }
                         }
                     } else {
-                        BlockPos un1 = playerPos.add(new Vec3i(0,2,0));
-                        BlockPos un2 = playerPos.add(new Vec3i(0,1,-1));
-                        BlockPos un3 = playerPos.add(new Vec3i(0,2,-1));
-                        BlockPos un4 = playerPos.add(new Vec3i(0,3,-1));
-                        BlockPos pos = playerPos.add(new Vec3i(0,0,-1));
-                        if (mc.world.getBlockState(un1).isReplaceable() && mc.world.getBlockState(un2).isReplaceable() && mc.world.getBlockState(un3).isReplaceable() && mc.world.getBlockState(un4).isReplaceable() && mc.world.getFluidState(un1).isEmpty() && mc.world.getFluidState(un2).isEmpty() && mc.world.getFluidState(un3).isEmpty() && mc.world.getFluidState(un4).isEmpty() && !mc.world.getBlockState(un1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(un4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(un2)){
-                            if (mc.world.getBlockState(pos).isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
+                        BlockPos un1 = playerPos.offset(new Vec3i(0,2,0));
+                        BlockPos un2 = playerPos.offset(new Vec3i(0,1,-1));
+                        BlockPos un3 = playerPos.offset(new Vec3i(0,2,-1));
+                        BlockPos un4 = playerPos.offset(new Vec3i(0,3,-1));
+                        BlockPos pos = playerPos.offset(new Vec3i(0,0,-1));
+                        if (mc.level.getBlockState(un1).canBeReplaced() && mc.level.getBlockState(un2).canBeReplaced() && mc.level.getBlockState(un3).canBeReplaced() && mc.level.getBlockState(un4).canBeReplaced() && mc.level.getFluidState(un1).isEmpty() && mc.level.getFluidState(un2).isEmpty() && mc.level.getFluidState(un3).isEmpty() && mc.level.getFluidState(un4).isEmpty() && !mc.level.getBlockState(un1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(un2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(un3).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(un4).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(un2)){
+                            if (mc.level.getBlockState(pos).canBeReplaced()){
+                                mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                                mc.player.swing(InteractionHand.MAIN_HAND);
                             }
-                            mc.player.setPosition(mc.player.getX(),mc.player.getY()+1,mc.player.getZ()-1);
+                            mc.player.setPos(mc.player.getX(),mc.player.getY()+1,mc.player.getZ()-1);
                         } else {
                             if (InvertUpDir.get() && !autolavamountain.get()){
-                                if (mouseT.get())mc.player.setPitch(75);
+                                if (mouseT.get())mc.player.setXRot(75);
                                 if (!mouseT.get())prevPitch=75;
                             }
                         }
                     }
                 }
-                if ((mouseT.get() && mc.player.getMovementDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {            //UP
-                    if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
-                        BlockPos ue1 = playerPos.add(new Vec3i(0,spcoffset.get()+2,0));
-                        BlockPos ue2 = playerPos.add(new Vec3i(+1,spcoffset.get()+1,0));
-                        BlockPos ue3 = playerPos.add(new Vec3i(+1,spcoffset.get()+2,0));
-                        BlockPos ue4 = playerPos.add(new Vec3i(+1,spcoffset.get()+3,0));
-                        BlockPos pos = playerPos.add(new Vec3i(1,spcoffset.get(),0));
-                        if (mc.world.getBlockState(ue1).isReplaceable() && mc.world.getBlockState(ue2).isReplaceable() && mc.world.getBlockState(ue3).isReplaceable() && mc.world.getBlockState(ue4).isReplaceable() && mc.world.getFluidState(ue1).isEmpty() && mc.world.getFluidState(ue2).isEmpty() && mc.world.getFluidState(ue3).isEmpty() && mc.world.getFluidState(ue4).isEmpty() && !mc.world.getBlockState(ue1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(ue2)){
-                            if (mc.world.getBlockState(pos).isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
+                if ((mouseT.get() && mc.player.getMotionDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {            //UP
+                    if (mc.options.keyJump.isDown() && !autolavamountain.get()){
+                        BlockPos ue1 = playerPos.offset(new Vec3i(0,spcoffset.get()+2,0));
+                        BlockPos ue2 = playerPos.offset(new Vec3i(+1,spcoffset.get()+1,0));
+                        BlockPos ue3 = playerPos.offset(new Vec3i(+1,spcoffset.get()+2,0));
+                        BlockPos ue4 = playerPos.offset(new Vec3i(+1,spcoffset.get()+3,0));
+                        BlockPos pos = playerPos.offset(new Vec3i(1,spcoffset.get(),0));
+                        if (mc.level.getBlockState(ue1).canBeReplaced() && mc.level.getBlockState(ue2).canBeReplaced() && mc.level.getBlockState(ue3).canBeReplaced() && mc.level.getBlockState(ue4).canBeReplaced() && mc.level.getFluidState(ue1).isEmpty() && mc.level.getFluidState(ue2).isEmpty() && mc.level.getFluidState(ue3).isEmpty() && mc.level.getFluidState(ue4).isEmpty() && !mc.level.getBlockState(ue1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(ue2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(ue3).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(ue4).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(ue2)){
+                            if (mc.level.getBlockState(pos).canBeReplaced()){
+                                mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                                mc.player.swing(InteractionHand.MAIN_HAND);
                             }
-                            mc.player.setPosition(mc.player.getX()+1,mc.player.getY()+1+spcoffset.get(),mc.player.getZ());
+                            mc.player.setPos(mc.player.getX()+1,mc.player.getY()+1+spcoffset.get(),mc.player.getZ());
                         } else {
                             if (InvertUpDir.get() && !autolavamountain.get()){
-                                if (mouseT.get())mc.player.setPitch(75);
+                                if (mouseT.get())mc.player.setXRot(75);
                                 if (!mouseT.get())prevPitch=75;
                             }
                         }
                     } else {
-                        BlockPos ue1 = playerPos.add(new Vec3i(0,2,0));
-                        BlockPos ue2 = playerPos.add(new Vec3i(+1,1,0));
-                        BlockPos ue3 = playerPos.add(new Vec3i(+1,2,0));
-                        BlockPos ue4 = playerPos.add(new Vec3i(+1,3,0));
-                        BlockPos pos = playerPos.add(new Vec3i(1,0,0));
-                        if (mc.world.getBlockState(ue1).isReplaceable() && mc.world.getBlockState(ue2).isReplaceable() && mc.world.getBlockState(ue3).isReplaceable() && mc.world.getBlockState(ue4).isReplaceable() && mc.world.getFluidState(ue1).isEmpty() && mc.world.getFluidState(ue2).isEmpty() && mc.world.getFluidState(ue3).isEmpty() && mc.world.getFluidState(ue4).isEmpty() && !mc.world.getBlockState(ue1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ue4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(ue2)){
-                            if (mc.world.getBlockState(pos).isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
+                        BlockPos ue1 = playerPos.offset(new Vec3i(0,2,0));
+                        BlockPos ue2 = playerPos.offset(new Vec3i(+1,1,0));
+                        BlockPos ue3 = playerPos.offset(new Vec3i(+1,2,0));
+                        BlockPos ue4 = playerPos.offset(new Vec3i(+1,3,0));
+                        BlockPos pos = playerPos.offset(new Vec3i(1,0,0));
+                        if (mc.level.getBlockState(ue1).canBeReplaced() && mc.level.getBlockState(ue2).canBeReplaced() && mc.level.getBlockState(ue3).canBeReplaced() && mc.level.getBlockState(ue4).canBeReplaced() && mc.level.getFluidState(ue1).isEmpty() && mc.level.getFluidState(ue2).isEmpty() && mc.level.getFluidState(ue3).isEmpty() && mc.level.getFluidState(ue4).isEmpty() && !mc.level.getBlockState(ue1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(ue2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(ue3).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(ue4).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(ue2)){
+                            if (mc.level.getBlockState(pos).canBeReplaced()){
+                                mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                                mc.player.swing(InteractionHand.MAIN_HAND);
                             }
-                            mc.player.setPosition(mc.player.getX()+1,mc.player.getY()+1,mc.player.getZ());
+                            mc.player.setPos(mc.player.getX()+1,mc.player.getY()+1,mc.player.getZ());
                         } else {
                             if (InvertUpDir.get() && !autolavamountain.get()){
-                                if (mouseT.get())mc.player.setPitch(75);
+                                if (mouseT.get())mc.player.setXRot(75);
                                 if (!mouseT.get())prevPitch=75;
                             }
                         }
                     }
                 }
-                if ((mouseT.get() && mc.player.getMovementDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {            //UP
-                    if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
-                        BlockPos us1 = playerPos.add(new Vec3i(0,spcoffset.get()+2,0));
-                        BlockPos us2 = playerPos.add(new Vec3i(0,spcoffset.get()+1,+1));
-                        BlockPos us3 = playerPos.add(new Vec3i(0,spcoffset.get()+2,+1));
-                        BlockPos us4 = playerPos.add(new Vec3i(0,spcoffset.get()+3,+1));
-                        BlockPos pos = playerPos.add(new Vec3i(0,spcoffset.get(),1));
-                        if (mc.world.getBlockState(us1).isReplaceable() && mc.world.getBlockState(us2).isReplaceable() && mc.world.getBlockState(us3).isReplaceable() && mc.world.getBlockState(us4).isReplaceable() && mc.world.getFluidState(us1).isEmpty() && mc.world.getFluidState(us2).isEmpty() && mc.world.getFluidState(us3).isEmpty() && mc.world.getFluidState(us4).isEmpty() && !mc.world.getBlockState(us1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(us2)){
-                            if (mc.world.getBlockState(pos).isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
+                if ((mouseT.get() && mc.player.getMotionDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {            //UP
+                    if (mc.options.keyJump.isDown() && !autolavamountain.get()){
+                        BlockPos us1 = playerPos.offset(new Vec3i(0,spcoffset.get()+2,0));
+                        BlockPos us2 = playerPos.offset(new Vec3i(0,spcoffset.get()+1,+1));
+                        BlockPos us3 = playerPos.offset(new Vec3i(0,spcoffset.get()+2,+1));
+                        BlockPos us4 = playerPos.offset(new Vec3i(0,spcoffset.get()+3,+1));
+                        BlockPos pos = playerPos.offset(new Vec3i(0,spcoffset.get(),1));
+                        if (mc.level.getBlockState(us1).canBeReplaced() && mc.level.getBlockState(us2).canBeReplaced() && mc.level.getBlockState(us3).canBeReplaced() && mc.level.getBlockState(us4).canBeReplaced() && mc.level.getFluidState(us1).isEmpty() && mc.level.getFluidState(us2).isEmpty() && mc.level.getFluidState(us3).isEmpty() && mc.level.getFluidState(us4).isEmpty() && !mc.level.getBlockState(us1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(us2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(us3).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(us4).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(us2)){
+                            if (mc.level.getBlockState(pos).canBeReplaced()){
+                                mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                                mc.player.swing(InteractionHand.MAIN_HAND);
                             }
-                            mc.player.setPosition(mc.player.getX(),mc.player.getY()+1+spcoffset.get(),mc.player.getZ()+1);
+                            mc.player.setPos(mc.player.getX(),mc.player.getY()+1+spcoffset.get(),mc.player.getZ()+1);
                         } else {
                             if (InvertUpDir.get() && !autolavamountain.get()){
-                                if (mouseT.get())mc.player.setPitch(75);
+                                if (mouseT.get())mc.player.setXRot(75);
                                 if (!mouseT.get())prevPitch=75;
                             }
                         }
                     } else {
-                        BlockPos us1 = playerPos.add(new Vec3i(0,2,0));
-                        BlockPos us2 = playerPos.add(new Vec3i(0,1,+1));
-                        BlockPos us3 = playerPos.add(new Vec3i(0,2,+1));
-                        BlockPos us4 = playerPos.add(new Vec3i(0,3,+1));
-                        BlockPos pos = playerPos.add(new Vec3i(0,0,1));
-                        if (mc.world.getBlockState(us1).isReplaceable() && mc.world.getBlockState(us2).isReplaceable() && mc.world.getBlockState(us3).isReplaceable() && mc.world.getBlockState(us4).isReplaceable() && mc.world.getFluidState(us1).isEmpty() && mc.world.getFluidState(us2).isEmpty() && mc.world.getFluidState(us3).isEmpty() && mc.world.getFluidState(us4).isEmpty() && !mc.world.getBlockState(us1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(us4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(us2)){
-                            if (mc.world.getBlockState(pos).isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
+                        BlockPos us1 = playerPos.offset(new Vec3i(0,2,0));
+                        BlockPos us2 = playerPos.offset(new Vec3i(0,1,+1));
+                        BlockPos us3 = playerPos.offset(new Vec3i(0,2,+1));
+                        BlockPos us4 = playerPos.offset(new Vec3i(0,3,+1));
+                        BlockPos pos = playerPos.offset(new Vec3i(0,0,1));
+                        if (mc.level.getBlockState(us1).canBeReplaced() && mc.level.getBlockState(us2).canBeReplaced() && mc.level.getBlockState(us3).canBeReplaced() && mc.level.getBlockState(us4).canBeReplaced() && mc.level.getFluidState(us1).isEmpty() && mc.level.getFluidState(us2).isEmpty() && mc.level.getFluidState(us3).isEmpty() && mc.level.getFluidState(us4).isEmpty() && !mc.level.getBlockState(us1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(us2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(us3).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(us4).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(us2)){
+                            if (mc.level.getBlockState(pos).canBeReplaced()){
+                                mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                                mc.player.swing(InteractionHand.MAIN_HAND);
                             }
-                            mc.player.setPosition(mc.player.getX(),mc.player.getY()+1,mc.player.getZ()+1);
+                            mc.player.setPos(mc.player.getX(),mc.player.getY()+1,mc.player.getZ()+1);
                         } else {
                             if (InvertUpDir.get() && !autolavamountain.get()){
-                                if (mouseT.get())mc.player.setPitch(75);
+                                if (mouseT.get())mc.player.setXRot(75);
                                 if (!mouseT.get())prevPitch=75;
                             }
                         }
                     }
                 }
-                if ((mouseT.get() && mc.player.getMovementDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {            //UP
-                    if (mc.options.jumpKey.isPressed() && !autolavamountain.get()){
-                        BlockPos uw1 = playerPos.add(new Vec3i(0,spcoffset.get()+2,0));
-                        BlockPos uw2 = playerPos.add(new Vec3i(-1,spcoffset.get()+1,0));
-                        BlockPos uw3 = playerPos.add(new Vec3i(-1,spcoffset.get()+2,0));
-                        BlockPos uw4 = playerPos.add(new Vec3i(-1,spcoffset.get()+3,0));
-                        BlockPos pos = playerPos.add(new Vec3i(-1,spcoffset.get(),0));
-                        if (mc.world.getBlockState(uw1).isReplaceable() && mc.world.getBlockState(uw2).isReplaceable() && mc.world.getBlockState(uw3).isReplaceable() && mc.world.getBlockState(uw4).isReplaceable() && mc.world.getFluidState(uw1).isEmpty() && mc.world.getFluidState(uw2).isEmpty() && mc.world.getFluidState(uw3).isEmpty() && mc.world.getFluidState(uw4).isEmpty() && !mc.world.getBlockState(uw1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(uw2)){
-                            if (mc.world.getBlockState(pos).isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
+                if ((mouseT.get() && mc.player.getMotionDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {            //UP
+                    if (mc.options.keyJump.isDown() && !autolavamountain.get()){
+                        BlockPos uw1 = playerPos.offset(new Vec3i(0,spcoffset.get()+2,0));
+                        BlockPos uw2 = playerPos.offset(new Vec3i(-1,spcoffset.get()+1,0));
+                        BlockPos uw3 = playerPos.offset(new Vec3i(-1,spcoffset.get()+2,0));
+                        BlockPos uw4 = playerPos.offset(new Vec3i(-1,spcoffset.get()+3,0));
+                        BlockPos pos = playerPos.offset(new Vec3i(-1,spcoffset.get(),0));
+                        if (mc.level.getBlockState(uw1).canBeReplaced() && mc.level.getBlockState(uw2).canBeReplaced() && mc.level.getBlockState(uw3).canBeReplaced() && mc.level.getBlockState(uw4).canBeReplaced() && mc.level.getFluidState(uw1).isEmpty() && mc.level.getFluidState(uw2).isEmpty() && mc.level.getFluidState(uw3).isEmpty() && mc.level.getFluidState(uw4).isEmpty() && !mc.level.getBlockState(uw1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(uw2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(uw3).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(uw4).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(uw2)){
+                            if (mc.level.getBlockState(pos).canBeReplaced()){
+                                mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                                mc.player.swing(InteractionHand.MAIN_HAND);
                             }
-                            mc.player.setPosition(mc.player.getX()-1,mc.player.getY()+1+spcoffset.get(),mc.player.getZ());
+                            mc.player.setPos(mc.player.getX()-1,mc.player.getY()+1+spcoffset.get(),mc.player.getZ());
                         } else {
                             if (InvertUpDir.get() && !autolavamountain.get()){
-                                if (mouseT.get())mc.player.setPitch(75);
+                                if (mouseT.get())mc.player.setXRot(75);
                                 if (!mouseT.get())prevPitch=75;
                             }
                         }
                     }else {
-                        BlockPos uw1 = playerPos.add(new Vec3i(0,2,0));
-                        BlockPos uw2 = playerPos.add(new Vec3i(-1,1,0));
-                        BlockPos uw3 = playerPos.add(new Vec3i(-1,2,0));
-                        BlockPos uw4 = playerPos.add(new Vec3i(-1,3,0));
-                        BlockPos pos = playerPos.add(new Vec3i(-1,0,0));
-                        if (mc.world.getBlockState(uw1).isReplaceable() && mc.world.getBlockState(uw2).isReplaceable() && mc.world.getBlockState(uw3).isReplaceable() && mc.world.getBlockState(uw4).isReplaceable() && mc.world.getFluidState(uw1).isEmpty() && mc.world.getFluidState(uw2).isEmpty() && mc.world.getFluidState(uw3).isEmpty() && mc.world.getFluidState(uw4).isEmpty() && !mc.world.getBlockState(uw1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw3).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(uw4).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(uw2)){
-                            if (mc.world.getBlockState(pos).isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
+                        BlockPos uw1 = playerPos.offset(new Vec3i(0,2,0));
+                        BlockPos uw2 = playerPos.offset(new Vec3i(-1,1,0));
+                        BlockPos uw3 = playerPos.offset(new Vec3i(-1,2,0));
+                        BlockPos uw4 = playerPos.offset(new Vec3i(-1,3,0));
+                        BlockPos pos = playerPos.offset(new Vec3i(-1,0,0));
+                        if (mc.level.getBlockState(uw1).canBeReplaced() && mc.level.getBlockState(uw2).canBeReplaced() && mc.level.getBlockState(uw3).canBeReplaced() && mc.level.getBlockState(uw4).canBeReplaced() && mc.level.getFluidState(uw1).isEmpty() && mc.level.getFluidState(uw2).isEmpty() && mc.level.getFluidState(uw3).isEmpty() && mc.level.getFluidState(uw4).isEmpty() && !mc.level.getBlockState(uw1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(uw2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(uw3).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(uw4).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(uw2)){
+                            if (mc.level.getBlockState(pos).canBeReplaced()){
+                                mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                                mc.player.swing(InteractionHand.MAIN_HAND);
                             }
-                            mc.player.setPosition(mc.player.getX()-1,mc.player.getY()+1,mc.player.getZ());
+                            mc.player.setPos(mc.player.getX()-1,mc.player.getY()+1,mc.player.getZ());
                         } else {
                             if (InvertUpDir.get() && !autolavamountain.get()){
-                                if (mouseT.get())mc.player.setPitch(75);
+                                if (mouseT.get())mc.player.setXRot(75);
                                 if (!mouseT.get())prevPitch=75;
                             }
                         }
                     }
                 }
                 if (mc.player.getY() >= limit.get()-1 && InvertUpDir.get() && !autolavamountain.get()){
-                    if (mouseT.get())mc.player.setPitch(75);
+                    if (mouseT.get())mc.player.setXRot(75);
                     if (!mouseT.get())prevPitch=75;
                 }
             } else if (mc.player.getY() <= downlimit.get() && !InvertDownDir.get()|| mc.player.getY() >= limit.get() && !InvertUpDir.get() && !autolavamountain.get()|| mc.player.getY() >= lowestblock.getY()+botlimit.get()+1 && autolavamountain.get()|| delayLeft <= 0 && offLeft <= 0) {
                 delayLeft = delay.get();
                 offLeft = offTime.get();
             }
-        } else if ((mouseT.get() && mc.player.getPitch() > 40 && !autolavamountain.get()) || (!mouseT.get() && prevPitch > 40)){
+        } else if ((mouseT.get() && mc.player.getXRot() > 40 && !autolavamountain.get()) || (!mouseT.get() && prevPitch > 40)){
             if (delayLeft > 0) delayLeft--;
             else if ((!lagpause.get() || timeSinceLastTick < lag.get()) && delayLeft <= 0 && offLeft > 0 && mc.player.getY() <= limit.get() && mc.player.getY() >= downlimit.get()) {
                 offLeft--;
-                if (mc.player == null || mc.world == null) {toggle(); return;}
-                if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack()) || !pause || !go) return;
-                if ((mouseT.get() && mc.player.getMovementDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {            //DOWN
-                    if (mc.options.jumpKey.isPressed()){
-                        BlockPos dn1 = playerPos.add(new Vec3i(0,-spcoffset.get()-1,-1));
-                        BlockPos dn2 = playerPos.add(new Vec3i(0,-spcoffset.get(),-1));
-                        BlockPos dn3 = playerPos.add(new Vec3i(0,-spcoffset.get()+1,-1));
-                        BlockPos pos = playerPos.add(new Vec3i(0,-spcoffset.get()-2,-1));
-                        if (mc.world.getBlockState(dn1).isReplaceable() && mc.world.getBlockState(dn2).isReplaceable() && mc.world.getBlockState(dn3).isReplaceable() && mc.world.getFluidState(dn1).isEmpty() && mc.world.getFluidState(dn2).isEmpty() && mc.world.getFluidState(dn3).isEmpty() && !mc.world.getBlockState(dn1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dn2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dn3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(dn2)) {
-                            if (mc.world.getBlockState(pos).isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
+                if (mc.player == null || mc.level == null) {toggle(); return;}
+                if ((lagpause.get() && timeSinceLastTick >= lag.get()) || isInvalidBlock(mc.player.getMainHandItem().getItem().getDefaultInstance()) || !pause || !go) return;
+                if ((mouseT.get() && mc.player.getMotionDirection()==Direction.NORTH) || (!mouseT.get() && wasfacing==Direction.NORTH)) {            //DOWN
+                    if (mc.options.keyJump.isDown()){
+                        BlockPos dn1 = playerPos.offset(new Vec3i(0,-spcoffset.get()-1,-1));
+                        BlockPos dn2 = playerPos.offset(new Vec3i(0,-spcoffset.get(),-1));
+                        BlockPos dn3 = playerPos.offset(new Vec3i(0,-spcoffset.get()+1,-1));
+                        BlockPos pos = playerPos.offset(new Vec3i(0,-spcoffset.get()-2,-1));
+                        if (mc.level.getBlockState(dn1).canBeReplaced() && mc.level.getBlockState(dn2).canBeReplaced() && mc.level.getBlockState(dn3).canBeReplaced() && mc.level.getFluidState(dn1).isEmpty() && mc.level.getFluidState(dn2).isEmpty() && mc.level.getFluidState(dn3).isEmpty() && !mc.level.getBlockState(dn1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(dn2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(dn3).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(dn2)) {
+                            if (mc.level.getBlockState(pos).canBeReplaced()){
+                                mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                                mc.player.swing(InteractionHand.MAIN_HAND);
                             }
-                            mc.player.setPosition(mc.player.getX(),mc.player.getY()-1-spcoffset.get(),mc.player.getZ()-1);
-                        } else {if (InvertDownDir.get()) mc.player.setPitch(35);}
+                            mc.player.setPos(mc.player.getX(),mc.player.getY()-1-spcoffset.get(),mc.player.getZ()-1);
+                        } else {if (InvertDownDir.get()) mc.player.setXRot(35);}
                     } else {
-                        BlockPos dn1 = playerPos.add(new Vec3i(0,-1,-1));
-                        BlockPos dn2 = playerPos.add(new Vec3i(0,0,-1));
-                        BlockPos dn3 = playerPos.add(new Vec3i(0,1,-1));
-                        BlockPos pos = playerPos.add(new Vec3i(0,-2,-1));
-                        if (mc.world.getBlockState(dn1).isReplaceable() && mc.world.getBlockState(dn2).isReplaceable() && mc.world.getBlockState(dn3).isReplaceable() && mc.world.getFluidState(dn1).isEmpty() && mc.world.getFluidState(dn2).isEmpty() && mc.world.getFluidState(dn3).isEmpty() && !mc.world.getBlockState(dn1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dn2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dn3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(dn2)) {
-                            if (mc.world.getBlockState(pos).isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
+                        BlockPos dn1 = playerPos.offset(new Vec3i(0,-1,-1));
+                        BlockPos dn2 = playerPos.offset(new Vec3i(0,0,-1));
+                        BlockPos dn3 = playerPos.offset(new Vec3i(0,1,-1));
+                        BlockPos pos = playerPos.offset(new Vec3i(0,-2,-1));
+                        if (mc.level.getBlockState(dn1).canBeReplaced() && mc.level.getBlockState(dn2).canBeReplaced() && mc.level.getBlockState(dn3).canBeReplaced() && mc.level.getFluidState(dn1).isEmpty() && mc.level.getFluidState(dn2).isEmpty() && mc.level.getFluidState(dn3).isEmpty() && !mc.level.getBlockState(dn1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(dn2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(dn3).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(dn2)) {
+                            if (mc.level.getBlockState(pos).canBeReplaced()){
+                                mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                                mc.player.swing(InteractionHand.MAIN_HAND);
                             }
-                            mc.player.setPosition(mc.player.getX(),mc.player.getY()-1,mc.player.getZ()-1);
+                            mc.player.setPos(mc.player.getX(),mc.player.getY()-1,mc.player.getZ()-1);
                         } else {
                             if (InvertDownDir.get()){
-                                if (mouseT.get())mc.player.setPitch(35);
+                                if (mouseT.get())mc.player.setXRot(35);
                                 if (!mouseT.get())prevPitch=35;
                             }
                         }
                     }
                 }
-                if ((mouseT.get() && mc.player.getMovementDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {            //DOWN
-                    if (mc.options.jumpKey.isPressed()){
-                        BlockPos de1 = playerPos.add(new Vec3i(1,-spcoffset.get()-1,0));
-                        BlockPos de2 = playerPos.add(new Vec3i(1,-spcoffset.get(),0));
-                        BlockPos de3 = playerPos.add(new Vec3i(1,-spcoffset.get()+1,0));
-                        BlockPos pos = playerPos.add(new Vec3i(1,-spcoffset.get()-2,0));
-                        if (mc.world.getBlockState(de1).isReplaceable() && mc.world.getBlockState(de2).isReplaceable() && mc.world.getBlockState(de3).isReplaceable() && mc.world.getFluidState(de1).isEmpty() && mc.world.getFluidState(de2).isEmpty() && mc.world.getFluidState(de3).isEmpty() && !mc.world.getBlockState(de1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(de2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(de3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(de2)) {
-                            if (mc.world.getBlockState(pos).isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
+                if ((mouseT.get() && mc.player.getMotionDirection()==Direction.EAST) || (!mouseT.get() && wasfacing==Direction.EAST)) {            //DOWN
+                    if (mc.options.keyJump.isDown()){
+                        BlockPos de1 = playerPos.offset(new Vec3i(1,-spcoffset.get()-1,0));
+                        BlockPos de2 = playerPos.offset(new Vec3i(1,-spcoffset.get(),0));
+                        BlockPos de3 = playerPos.offset(new Vec3i(1,-spcoffset.get()+1,0));
+                        BlockPos pos = playerPos.offset(new Vec3i(1,-spcoffset.get()-2,0));
+                        if (mc.level.getBlockState(de1).canBeReplaced() && mc.level.getBlockState(de2).canBeReplaced() && mc.level.getBlockState(de3).canBeReplaced() && mc.level.getFluidState(de1).isEmpty() && mc.level.getFluidState(de2).isEmpty() && mc.level.getFluidState(de3).isEmpty() && !mc.level.getBlockState(de1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(de2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(de3).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(de2)) {
+                            if (mc.level.getBlockState(pos).canBeReplaced()){
+                                mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                                mc.player.swing(InteractionHand.MAIN_HAND);
                             }
-                            mc.player.setPosition(mc.player.getX()+1,mc.player.getY()-1-spcoffset.get(),mc.player.getZ());
+                            mc.player.setPos(mc.player.getX()+1,mc.player.getY()-1-spcoffset.get(),mc.player.getZ());
                         } else {
                             if (InvertDownDir.get()){
-                                if (mouseT.get())mc.player.setPitch(35);
+                                if (mouseT.get())mc.player.setXRot(35);
                                 if (!mouseT.get())prevPitch=35;
                             }
                         }
                     } else {
-                        BlockPos de1 = playerPos.add(new Vec3i(1,-1,0));
-                        BlockPos de2 = playerPos.add(new Vec3i(1,0,0));
-                        BlockPos de3 = playerPos.add(new Vec3i(1,1,0));
-                        BlockPos pos = playerPos.add(new Vec3i(1,-2,0));
-                        if (mc.world.getBlockState(de1).isReplaceable() && mc.world.getBlockState(de2).isReplaceable() && mc.world.getBlockState(de3).isReplaceable() && mc.world.getFluidState(de1).isEmpty() && mc.world.getFluidState(de2).isEmpty() && mc.world.getFluidState(de3).isEmpty() && !mc.world.getBlockState(de1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(de2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(de3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(de2)) {
-                            if (mc.world.getBlockState(pos).isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
+                        BlockPos de1 = playerPos.offset(new Vec3i(1,-1,0));
+                        BlockPos de2 = playerPos.offset(new Vec3i(1,0,0));
+                        BlockPos de3 = playerPos.offset(new Vec3i(1,1,0));
+                        BlockPos pos = playerPos.offset(new Vec3i(1,-2,0));
+                        if (mc.level.getBlockState(de1).canBeReplaced() && mc.level.getBlockState(de2).canBeReplaced() && mc.level.getBlockState(de3).canBeReplaced() && mc.level.getFluidState(de1).isEmpty() && mc.level.getFluidState(de2).isEmpty() && mc.level.getFluidState(de3).isEmpty() && !mc.level.getBlockState(de1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(de2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(de3).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(de2)) {
+                            if (mc.level.getBlockState(pos).canBeReplaced()){
+                                mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                                mc.player.swing(InteractionHand.MAIN_HAND);
                             }
-                            mc.player.setPosition(mc.player.getX()+1,mc.player.getY()-1,mc.player.getZ());
+                            mc.player.setPos(mc.player.getX()+1,mc.player.getY()-1,mc.player.getZ());
                         } else {
                             if (InvertDownDir.get()){
-                                if (mouseT.get())mc.player.setPitch(35);
+                                if (mouseT.get())mc.player.setXRot(35);
                                 if (!mouseT.get())prevPitch=35;
                             }
                         }
                     }
                 }
-                if ((mouseT.get() && mc.player.getMovementDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {            //DOWN
-                    if (mc.options.jumpKey.isPressed()){
-                        BlockPos ds1 = playerPos.add(new Vec3i(0,-spcoffset.get()-1,1));
-                        BlockPos ds2 = playerPos.add(new Vec3i(0,-spcoffset.get(),1));
-                        BlockPos ds3 = playerPos.add(new Vec3i(0,-spcoffset.get()+1,1));
-                        BlockPos pos = playerPos.add(new Vec3i(0,-spcoffset.get()-2,1));
-                        if (mc.world.getBlockState(ds1).isReplaceable() && mc.world.getBlockState(ds2).isReplaceable() && mc.world.getBlockState(ds3).isReplaceable() && mc.world.getFluidState(ds1).isEmpty() && mc.world.getFluidState(ds2).isEmpty() && mc.world.getFluidState(ds3).isEmpty() && !mc.world.getBlockState(ds1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ds2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ds3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(ds2)) {
-                            if (mc.world.getBlockState(pos).isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
+                if ((mouseT.get() && mc.player.getMotionDirection()==Direction.SOUTH) || (!mouseT.get() && wasfacing==Direction.SOUTH)) {            //DOWN
+                    if (mc.options.keyJump.isDown()){
+                        BlockPos ds1 = playerPos.offset(new Vec3i(0,-spcoffset.get()-1,1));
+                        BlockPos ds2 = playerPos.offset(new Vec3i(0,-spcoffset.get(),1));
+                        BlockPos ds3 = playerPos.offset(new Vec3i(0,-spcoffset.get()+1,1));
+                        BlockPos pos = playerPos.offset(new Vec3i(0,-spcoffset.get()-2,1));
+                        if (mc.level.getBlockState(ds1).canBeReplaced() && mc.level.getBlockState(ds2).canBeReplaced() && mc.level.getBlockState(ds3).canBeReplaced() && mc.level.getFluidState(ds1).isEmpty() && mc.level.getFluidState(ds2).isEmpty() && mc.level.getFluidState(ds3).isEmpty() && !mc.level.getBlockState(ds1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(ds2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(ds3).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(ds2)) {
+                            if (mc.level.getBlockState(pos).canBeReplaced()){
+                                mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                                mc.player.swing(InteractionHand.MAIN_HAND);
                             }
-                            mc.player.setPosition(mc.player.getX(),mc.player.getY()-1- spcoffset.get(),mc.player.getZ()+1);
+                            mc.player.setPos(mc.player.getX(),mc.player.getY()-1- spcoffset.get(),mc.player.getZ()+1);
                         } else {
                             if (InvertDownDir.get()){
-                                if (mouseT.get())mc.player.setPitch(35);
+                                if (mouseT.get())mc.player.setXRot(35);
                                 if (!mouseT.get())prevPitch=35;
                             }
                         }
                     } else {
-                        BlockPos ds1 = playerPos.add(new Vec3i(0,-1,1));
-                        BlockPos ds2 = playerPos.add(new Vec3i(0,0,1));
-                        BlockPos ds3 = playerPos.add(new Vec3i(0,1,1));
-                        BlockPos pos = playerPos.add(new Vec3i(0,-2,1));
-                        if (mc.world.getBlockState(ds1).isReplaceable() && mc.world.getBlockState(ds2).isReplaceable() && mc.world.getBlockState(ds3).isReplaceable() && mc.world.getFluidState(ds1).isEmpty() && mc.world.getFluidState(ds2).isEmpty() && mc.world.getFluidState(ds3).isEmpty() && !mc.world.getBlockState(ds1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ds2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(ds3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(ds2)) {
-                            if (mc.world.getBlockState(pos).isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
+                        BlockPos ds1 = playerPos.offset(new Vec3i(0,-1,1));
+                        BlockPos ds2 = playerPos.offset(new Vec3i(0,0,1));
+                        BlockPos ds3 = playerPos.offset(new Vec3i(0,1,1));
+                        BlockPos pos = playerPos.offset(new Vec3i(0,-2,1));
+                        if (mc.level.getBlockState(ds1).canBeReplaced() && mc.level.getBlockState(ds2).canBeReplaced() && mc.level.getBlockState(ds3).canBeReplaced() && mc.level.getFluidState(ds1).isEmpty() && mc.level.getFluidState(ds2).isEmpty() && mc.level.getFluidState(ds3).isEmpty() && !mc.level.getBlockState(ds1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(ds2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(ds3).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(ds2)) {
+                            if (mc.level.getBlockState(pos).canBeReplaced()){
+                                mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                                mc.player.swing(InteractionHand.MAIN_HAND);
                             }
-                            mc.player.setPosition(mc.player.getX(),mc.player.getY()-1,mc.player.getZ()+1);
+                            mc.player.setPos(mc.player.getX(),mc.player.getY()-1,mc.player.getZ()+1);
                         } else {
                             if (InvertDownDir.get()){
-                                if (mouseT.get())mc.player.setPitch(35);
+                                if (mouseT.get())mc.player.setXRot(35);
                                 if (!mouseT.get())prevPitch=35;
                             }
                         }
                     }
                 }
-                if ((mouseT.get() && mc.player.getMovementDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {            //DOWN
-                    if (mc.options.jumpKey.isPressed()){
-                        BlockPos dw1 = playerPos.add(new Vec3i(-1,-spcoffset.get()-1,0));
-                        BlockPos dw2 = playerPos.add(new Vec3i(-1,-spcoffset.get(),0));
-                        BlockPos dw3 = playerPos.add(new Vec3i(-1,-spcoffset.get()+1,0));
-                        BlockPos pos = playerPos.add(new Vec3i(-1,-spcoffset.get()-2,0));
-                        if (mc.world.getBlockState(dw1).isReplaceable() && mc.world.getBlockState(dw2).isReplaceable() && mc.world.getBlockState(dw3).isReplaceable() && mc.world.getFluidState(dw1).isEmpty() && mc.world.getFluidState(dw2).isEmpty() && mc.world.getFluidState(dw3).isEmpty() && !mc.world.getBlockState(dw1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dw2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dw3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(dw2)) {
-                            if (mc.world.getBlockState(pos).isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
+                if ((mouseT.get() && mc.player.getMotionDirection()==Direction.WEST) || (!mouseT.get() && wasfacing==Direction.WEST)) {            //DOWN
+                    if (mc.options.keyJump.isDown()){
+                        BlockPos dw1 = playerPos.offset(new Vec3i(-1,-spcoffset.get()-1,0));
+                        BlockPos dw2 = playerPos.offset(new Vec3i(-1,-spcoffset.get(),0));
+                        BlockPos dw3 = playerPos.offset(new Vec3i(-1,-spcoffset.get()+1,0));
+                        BlockPos pos = playerPos.offset(new Vec3i(-1,-spcoffset.get()-2,0));
+                        if (mc.level.getBlockState(dw1).canBeReplaced() && mc.level.getBlockState(dw2).canBeReplaced() && mc.level.getBlockState(dw3).canBeReplaced() && mc.level.getFluidState(dw1).isEmpty() && mc.level.getFluidState(dw2).isEmpty() && mc.level.getFluidState(dw3).isEmpty() && !mc.level.getBlockState(dw1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(dw2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(dw3).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(dw2)) {
+                            if (mc.level.getBlockState(pos).canBeReplaced()){
+                                mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                                mc.player.swing(InteractionHand.MAIN_HAND);
                             }
-                            mc.player.setPosition(mc.player.getX()-1,mc.player.getY()-1-spcoffset.get(),mc.player.getZ());
+                            mc.player.setPos(mc.player.getX()-1,mc.player.getY()-1-spcoffset.get(),mc.player.getZ());
                         } else {
                             if (InvertDownDir.get()){
-                                if (mouseT.get())mc.player.setPitch(35);
+                                if (mouseT.get())mc.player.setXRot(35);
                                 if (!mouseT.get())prevPitch=35;
                             }
                         }
                     }else {
-                        BlockPos dw1 = playerPos.add(new Vec3i(-1,-1,0));
-                        BlockPos dw2 = playerPos.add(new Vec3i(-1,0,0));
-                        BlockPos dw3 = playerPos.add(new Vec3i(-1,1,0));
-                        BlockPos pos = playerPos.add(new Vec3i(-1,-2,0));
-                        if (mc.world.getBlockState(dw1).isReplaceable() && mc.world.getBlockState(dw2).isReplaceable() && mc.world.getBlockState(dw3).isReplaceable() && mc.world.getFluidState(dw1).isEmpty() && mc.world.getFluidState(dw2).isEmpty() && mc.world.getFluidState(dw3).isEmpty() && !mc.world.getBlockState(dw1).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dw2).isOf(Blocks.POWDER_SNOW) && !mc.world.getBlockState(dw3).isOf(Blocks.POWDER_SNOW) && mc.world.getWorldBorder().contains(dw2)) {
-                            if (mc.world.getBlockState(pos).isReplaceable()){
-                                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                                mc.player.swingHand(Hand.MAIN_HAND);
+                        BlockPos dw1 = playerPos.offset(new Vec3i(-1,-1,0));
+                        BlockPos dw2 = playerPos.offset(new Vec3i(-1,0,0));
+                        BlockPos dw3 = playerPos.offset(new Vec3i(-1,1,0));
+                        BlockPos pos = playerPos.offset(new Vec3i(-1,-2,0));
+                        if (mc.level.getBlockState(dw1).canBeReplaced() && mc.level.getBlockState(dw2).canBeReplaced() && mc.level.getBlockState(dw3).canBeReplaced() && mc.level.getFluidState(dw1).isEmpty() && mc.level.getFluidState(dw2).isEmpty() && mc.level.getFluidState(dw3).isEmpty() && !mc.level.getBlockState(dw1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(dw2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(dw3).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(dw2)) {
+                            if (mc.level.getBlockState(pos).canBeReplaced()){
+                                mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                                mc.player.swing(InteractionHand.MAIN_HAND);
                             }
-                            mc.player.setPosition(mc.player.getX()-1,mc.player.getY()-1,mc.player.getZ());
+                            mc.player.setPos(mc.player.getX()-1,mc.player.getY()-1,mc.player.getZ());
                         } else {
                             if (InvertDownDir.get()){
-                                if (mouseT.get())mc.player.setPitch(35);
+                                if (mouseT.get())mc.player.setXRot(35);
                                 if (!mouseT.get())prevPitch=35;
                             }
                         }
                     }
                 }
                 if (mc.player.getY() <= downlimit.get()+1 && InvertDownDir.get()){
-                    if (mouseT.get())mc.player.setPitch(35);
+                    if (mouseT.get())mc.player.setXRot(35);
                     if (!mouseT.get())prevPitch=35;
                 }
             } else if (mc.player.getY() <= downlimit.get() || mc.player.getY() >= limit.get() || delayLeft <= 0 && offLeft <= 0) {
@@ -1138,27 +1188,27 @@ public class AutoMountain extends Module {
         PlayerUtils.centerPlayer();
     }
     private void seekground() {
-        if (!(mc.world.getBlockState(lowestblock.add(new Vec3i(0,-1,0))).getBlock() ==Blocks.AIR)) groundY=lowestblock.getY();
+        if (!(mc.level.getBlockState(lowestblock.offset(new Vec3i(0,-1,0))).getBlock() ==Blocks.AIR)) groundY=lowestblock.getY();
         else {
             for (lowblockY = -2; lowblockY > -319;) {
-                BlockPos lowpos1= lowestblock.add(new Vec3i(0, lowblockY,0));
-                if (mc.world.getBlockState(lowpos1).getBlock()==Blocks.AIR && search) {
+                BlockPos lowpos1= lowestblock.offset(new Vec3i(0, lowblockY,0));
+                if (mc.level.getBlockState(lowpos1).getBlock()==Blocks.AIR && search) {
                     groundY=lowpos1.getY();
                 }
-                if (!(mc.world.getBlockState(lowpos1).getBlock()==Blocks.AIR)) search=false;
+                if (!(mc.level.getBlockState(lowpos1).getBlock()==Blocks.AIR)) search=false;
                 lowblockY--;
             }
         }
     }
     private void seekground2() {
-        if (!(mc.world.getBlockState(highestblock.add(new Vec3i(0,-1,0))).getBlock() ==Blocks.AIR)) groundY2=highestblock.getY();
+        if (!(mc.level.getBlockState(highestblock.offset(new Vec3i(0,-1,0))).getBlock() ==Blocks.AIR)) groundY2=highestblock.getY();
         else {
             for (highblockY = -2; highblockY > -319;) {
-                BlockPos lowpos1= highestblock.add(new Vec3i(0, highblockY,0));
-                if (mc.world.getBlockState(lowpos1).getBlock()==Blocks.AIR && search2) {
+                BlockPos lowpos1= highestblock.offset(new Vec3i(0, highblockY,0));
+                if (mc.level.getBlockState(lowpos1).getBlock()==Blocks.AIR && search2) {
                     groundY2=lowpos1.getY();
                 }
-                if (!(mc.world.getBlockState(lowpos1).getBlock()==Blocks.AIR)) search2=false;
+                if (!(mc.level.getBlockState(lowpos1).getBlock()==Blocks.AIR)) search2=false;
                 highblockY--;
             }
         }
@@ -1174,41 +1224,41 @@ public class AutoMountain extends Module {
     private void cascadingpileof() {
         FindItemResult findResult = InvUtils.findInHotbar(block -> !isInvalidBlock(block));
         if (!findResult.found() || findResult.slot() < 0 || findResult.slot() > 8) return;
-        mc.player.getInventory().selectedSlot = findResult.slot();
+        mc.player.getInventory().setSelectedSlot(findResult.slot());
     }
 
     private boolean isInvalidBlock(ItemStack stack) {
         if (!(stack.getItem() instanceof BlockItem blockItem)) return true;
         if (stack.getItem() instanceof BedItem) return true;
-        if (stack.getItem() instanceof PowderSnowBucketItem) return true;
-        if (stack.getItem() instanceof ScaffoldingItem) return true;
-        if (stack.getItem() instanceof TallBlockItem) return true;
-        if (stack.getItem() instanceof VerticallyAttachableBlockItem) return true;
-        if (stack.getItem() instanceof PlaceableOnWaterItem) return true;
+        if (stack.getItem() instanceof SolidBucketItem) return true;
+        if (stack.getItem() instanceof ScaffoldingBlockItem) return true;
+        if (stack.getItem() instanceof DoubleHighBlockItem) return true;
+        if (stack.getItem() instanceof StandingAndWallBlockItem) return true;
+        if (stack.getItem() instanceof PlaceOnWaterBlockItem) return true;
         Block block = blockItem.getBlock();
-        return block instanceof PlantBlock
+        return block instanceof VegetationBlock
                 || block instanceof TorchBlock
-                || block instanceof AbstractRedstoneGateBlock
-                || block instanceof RedstoneWireBlock
+                || block instanceof DiodeBlock
+                || block instanceof RedStoneWireBlock
                 || block instanceof FenceBlock
                 || block instanceof WallBlock
                 || block instanceof FenceGateBlock
                 || block instanceof FallingBlock
-                || block instanceof AbstractRailBlock
-                || block instanceof AbstractSignBlock
+                || block instanceof BaseRailBlock
+                || block instanceof SignBlock
                 || block instanceof BellBlock
                 || block instanceof CarpetBlock
                 || block instanceof ConduitBlock
                 || block instanceof CoralFanBlock
                 || block instanceof CoralWallFanBlock
-                || block instanceof DeadCoralFanBlock
-                || block instanceof DeadCoralWallFanBlock
-                || block instanceof TripwireHookBlock
+                || block instanceof BaseCoralFanBlock
+                || block instanceof BaseCoralWallFanBlock
+                || block instanceof TripWireHookBlock
                 || block instanceof PointedDripstoneBlock
-                || block instanceof TripwireBlock
-                || block instanceof SnowBlock
+                || block instanceof TripWireBlock
+                || block instanceof SnowLayerBlock
                 || block instanceof PressurePlateBlock
-                || block instanceof WallMountedBlock
+                || block instanceof FaceAttachedHorizontalDirectionalBlock
                 || block instanceof ShulkerBoxBlock
                 || block instanceof AmethystClusterBlock
                 || block instanceof BuddingAmethystBlock
@@ -1218,13 +1268,13 @@ public class AutoMountain extends Module {
                 || block instanceof CandleBlock
                 || block instanceof TntBlock
                 || block instanceof CakeBlock
-                || block instanceof CobwebBlock
+                || block instanceof WebBlock
                 || block instanceof SugarCaneBlock
                 || block instanceof SporeBlossomBlock
                 || block instanceof KelpBlock
                 || block instanceof GlowLichenBlock
                 || block instanceof CactusBlock
-                || block instanceof BambooBlock
+                || block instanceof BambooStalkBlock
                 || block instanceof FlowerPotBlock
                 || block instanceof LadderBlock
                 || skippableBlox.get().contains(block);

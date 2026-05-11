@@ -17,19 +17,70 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.*;
-import net.minecraft.client.gui.screen.DeathScreen;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.command.argument.EntityAnchorArgumentType;
-import net.minecraft.item.*;
-import net.minecraft.text.Text;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.client.gui.screens.DeathScreen;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.BedItem;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.DoubleHighBlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.PlaceOnWaterBlockItem;
+import net.minecraft.world.item.ScaffoldingBlockItem;
+import net.minecraft.world.item.SolidBucketItem;
+import net.minecraft.world.item.StandingAndWallBlockItem;
+import net.minecraft.world.level.block.AmethystClusterBlock;
+import net.minecraft.world.level.block.BambooStalkBlock;
+import net.minecraft.world.level.block.BaseCoralFanBlock;
+import net.minecraft.world.level.block.BaseCoralWallFanBlock;
+import net.minecraft.world.level.block.BaseRailBlock;
+import net.minecraft.world.level.block.BellBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BuddingAmethystBlock;
+import net.minecraft.world.level.block.CactusBlock;
+import net.minecraft.world.level.block.CakeBlock;
+import net.minecraft.world.level.block.CandleBlock;
+import net.minecraft.world.level.block.CarpetBlock;
+import net.minecraft.world.level.block.ChorusFlowerBlock;
+import net.minecraft.world.level.block.ChorusPlantBlock;
+import net.minecraft.world.level.block.ConduitBlock;
+import net.minecraft.world.level.block.CoralFanBlock;
+import net.minecraft.world.level.block.CoralWallFanBlock;
+import net.minecraft.world.level.block.DiodeBlock;
+import net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock;
+import net.minecraft.world.level.block.FallingBlock;
+import net.minecraft.world.level.block.FenceBlock;
+import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.FlowerPotBlock;
+import net.minecraft.world.level.block.GlowLichenBlock;
+import net.minecraft.world.level.block.KelpBlock;
+import net.minecraft.world.level.block.LadderBlock;
+import net.minecraft.world.level.block.LanternBlock;
+import net.minecraft.world.level.block.PointedDripstoneBlock;
+import net.minecraft.world.level.block.PressurePlateBlock;
+import net.minecraft.world.level.block.RedStoneWireBlock;
+import net.minecraft.world.level.block.ShulkerBoxBlock;
+import net.minecraft.world.level.block.SignBlock;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.block.SnowLayerBlock;
+import net.minecraft.world.level.block.SporeBlossomBlock;
+import net.minecraft.world.level.block.SugarCaneBlock;
+import net.minecraft.world.level.block.TntBlock;
+import net.minecraft.world.level.block.TorchBlock;
+import net.minecraft.world.level.block.TripWireBlock;
+import net.minecraft.world.level.block.TripWireHookBlock;
+import net.minecraft.world.level.block.VegetationBlock;
+import net.minecraft.world.level.block.WallBlock;
+import net.minecraft.world.level.block.WebBlock;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.List;
@@ -226,12 +277,12 @@ public class AutoLavaCaster extends Module {
             Modules.get().get(TPFly.class).toggle();
         }
         BlockPos hover = new BlockPos(mc.player.getBlockX(),mc.player.getBlockY()-1,mc.player.getBlockZ());
-        if (mc.world.getBlockState(hover).isReplaceable() && !aposition.get() && !aMountain.autocasttimenow==true){
-            if (mc.world.getBlockState(hover).isReplaceable()){
+        if (mc.level.getBlockState(hover).canBeReplaced() && !aposition.get() && !aMountain.autocasttimenow==true){
+            if (mc.level.getBlockState(hover).canBeReplaced()){
                 error("Not on a block, try again.");
             }
-            if (mc.options.sneakKey.isPressed()){
-                mc.options.sneakKey.setPressed(false);
+            if (mc.options.keyShift.isDown()){
+                mc.options.keyShift.setDown(false);
             }
             lavamountainticks = 0;
             mc.player.setNoGravity(false);
@@ -282,12 +333,12 @@ public class AutoLavaCaster extends Module {
             error("Timer off.");
             Modules.get().get(Timer.class).toggle();
         }
-        if (mc.player.getPitch()<=5){
-            if (mc.player.getPitch()<=5){
+        if (mc.player.getXRot()<=5){
+            if (mc.player.getXRot()<=5){
                 error("Aim Down at the Top of a Block");
             }
-            if (mc.options.sneakKey.isPressed()){
-                mc.options.sneakKey.setPressed(false);
+            if (mc.options.keyShift.isDown()){
+                mc.options.keyShift.setDown(false);
             }
             lavamountainticks = 0;
             toggle();
@@ -300,8 +351,8 @@ public class AutoLavaCaster extends Module {
             if (mc.player.getBlockX()==lava.getX() && mc.player.getBlockY()-1==lava.getY() && mc.player.getBlockZ()==lava.getZ()){
                 error("Don't lava yourself, that's silly.");
             }
-            if (mc.options.sneakKey.isPressed()){
-                mc.options.sneakKey.setPressed(false);
+            if (mc.options.keyShift.isDown()){
+                mc.options.keyShift.setDown(false);
             }
             lavamountainticks = 0;
             mc.player.setNoGravity(false);
@@ -310,16 +361,16 @@ public class AutoLavaCaster extends Module {
             return;
         }
         if (sneaky.get()){
-            mc.options.sneakKey.setPressed(true);
+            mc.options.keyShift.setDown(true);
         }
-        if (mc.world.getBlockState(lava).getBlock() == Blocks.AIR){
+        if (mc.level.getBlockState(lava).getBlock() == Blocks.AIR){
             lavamountainticks = 0;
             mc.player.setNoGravity(false);
             aMountain.autocasttimenow=false;
             toggle();
             return;
         }
-        if (!(mc.world.getBlockState(lava).getBlock() == Blocks.AIR) && !(mc.world.getBlockState(hover).getBlock() == Blocks.AIR) && !aposition.get() && !aMountain.autocasttimenow==true){
+        if (!(mc.level.getBlockState(lava).getBlock() == Blocks.AIR) && !(mc.level.getBlockState(hover).getBlock() == Blocks.AIR) && !aposition.get() && !aMountain.autocasttimenow==true){
             placeLava();
         }
         firstplace=true;
@@ -329,8 +380,8 @@ public class AutoLavaCaster extends Module {
         if (lowYrst.get()) aMountain.lowestblock=new BlockPos(666,666,666);
         aMountain.autocasttimenow=false;
         lavamountainticks = 0;
-        if (mc.options.sneakKey.isPressed()){
-            mc.options.sneakKey.setPressed(false);
+        if (mc.options.keyShift.isDown()){
+            mc.options.keyShift.setDown(false);
         }
     }
     @EventHandler
@@ -354,13 +405,13 @@ public class AutoLavaCaster extends Module {
         BlockPos ceiling = new BlockPos(mc.player.getBlockX(),mc.player.getBlockY()+2,mc.player.getBlockZ());
         BlockPos hover = new BlockPos(mc.player.getBlockX(),mc.player.getBlockY()-1,mc.player.getBlockZ());
         lavamountainticks++;
-        if (incY.get() && isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack())) {
+        if (incY.get() && isInvalidBlock(mc.player.getMainHandItem().getItem().getDefaultInstance())) {
             cascadingpileof();
         }
         PlayerUtils.centerPlayer();
-        mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(lava.getX()+0.5,lava.getY()+1.05,lava.getZ()+0.5));
+        mc.player.lookAt(EntityAnchorArgument.Anchor.EYES, new Vec3(lava.getX()+0.5,lava.getY()+1.05,lava.getZ()+0.5));
         if (sneaky.get()){
-            mc.options.sneakKey.setPressed(true);
+            mc.options.keyShift.setDown(true);
         }
 
         if (layers<lay.get()|!bstyle.get()){
@@ -368,8 +419,8 @@ public class AutoLavaCaster extends Module {
                 if (mc.player.getBlockX()==lava.getX() && mc.player.getBlockY()-1==lava.getY() && mc.player.getBlockZ()==lava.getZ()){
                     error("Don't lava yourself, that's silly.");
                 }
-                if (mc.options.sneakKey.isPressed()){
-                    mc.options.sneakKey.setPressed(false);
+                if (mc.options.keyShift.isDown()){
+                    mc.options.keyShift.setDown(false);
                 }
                 lavamountainticks = 0;
                 mc.player.setNoGravity(false);
@@ -383,18 +434,18 @@ public class AutoLavaCaster extends Module {
                 }
                 if (lavamountainticks == 2){
                     if (estlavatime.get() || aMountain.autocasttimenow==true){
-                        ChatUtils.sendMsg(Text.of("Starting layer 1. Lava will take "+estimatedlavatime+" more seconds to flow."));
+                        ChatUtils.sendMsg(Component.nullToEmpty("Starting layer 1. Lava will take "+estimatedlavatime+" more seconds to flow."));
                     }else
-                        ChatUtils.sendMsg(Text.of("Starting layer 1. Lava will take "+lavatime.get()+" more seconds to flow."));
+                        ChatUtils.sendMsg(Component.nullToEmpty("Starting layer 1. Lava will take "+lavatime.get()+" more seconds to flow."));
                 }
                 if (lavamountainticks >= 2){
-                    BlockPos pos = mc.player.getBlockPos().add(new Vec3i(0,-1,0));
-                    if (mc.world.getBlockState(pos).isReplaceable()) {
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    BlockPos pos = mc.player.blockPosition().offset(new Vec3i(0,-1,0));
+                    if (mc.level.getBlockState(pos).canBeReplaced()) {
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
             }else if (lavamountainticks==7 && firstplace == true && (aposition.get() || aMountain.autocasttimenow==true)){
-                if (!(mc.world.getBlockState(lava).getBlock() == Blocks.AIR) && !(mc.world.getBlockState(hover).getBlock() == Blocks.AIR)) placeLava();
+                if (!(mc.level.getBlockState(lava).getBlock() == Blocks.AIR) && !(mc.level.getBlockState(hover).getBlock() == Blocks.AIR)) placeLava();
             }
             else if (firstplace==false && lavamountainticks==55){
                 if (aMountain.autocasttimenow==true) {
@@ -427,15 +478,15 @@ public class AutoLavaCaster extends Module {
                 }
                 placeLava();
                 if (estlavatime.get() || aMountain.autocasttimenow==true){
-                    ChatUtils.sendMsg(Text.of("Starting layer "+layers+". Lava will take "+estimatedlavatime+" more seconds to flow."));
+                    ChatUtils.sendMsg(Component.nullToEmpty("Starting layer "+layers+". Lava will take "+estimatedlavatime+" more seconds to flow."));
                 }else
-                    ChatUtils.sendMsg(Text.of("Starting layer "+layers+". Lava will take "+lavatime.get()+" more seconds to flow."));
+                    ChatUtils.sendMsg(Component.nullToEmpty("Starting layer "+layers+". Lava will take "+lavatime.get()+" more seconds to flow."));
             }
             else if (MountainsOfLavaInc.get() && lavamountainticks==60 && layers>=layerstop.get()){
-                if (mc.options.sneakKey.isPressed()){
-                    mc.options.sneakKey.setPressed(false);
+                if (mc.options.keyShift.isDown()){
+                    mc.options.keyShift.setDown(false);
                 }
-                ChatUtils.sendMsg(Text.of("Done Building!"));
+                ChatUtils.sendMsg(Component.nullToEmpty("Done Building!"));
                 lavamountainticks = 0;
                 mc.player.setNoGravity(false);
                 aMountain.autocasttimenow=false;
@@ -448,7 +499,7 @@ public class AutoLavaCaster extends Module {
             }
             else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime1.get() || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime1.get()){
                 placeWater();
-                ChatUtils.sendMsg(Text.of("Finishing layer "+layers));
+                ChatUtils.sendMsg(Component.nullToEmpty("Finishing layer "+layers));
             }
             else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get() || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()){
                 pickupLiquid();
@@ -457,10 +508,10 @@ public class AutoLavaCaster extends Module {
                     layers++;
                 }
                 if (!MountainsOfLavaInc.get() && layers>=layerstop.get()){
-                    if (mc.options.sneakKey.isPressed()){
-                        mc.options.sneakKey.setPressed(false);
+                    if (mc.options.keyShift.isDown()){
+                        mc.options.keyShift.setDown(false);
                     }
-                    ChatUtils.sendMsg(Text.of("Done Building!"));
+                    ChatUtils.sendMsg(Component.nullToEmpty("Done Building!"));
                     lavamountainticks = 0;
                     mc.player.setNoGravity(false);
                     aMountain.autocasttimenow=false;
@@ -468,12 +519,12 @@ public class AutoLavaCaster extends Module {
                     return;
                 }
                 if (incY.get()){
-                    if (!mc.world.getBlockState(ceiling).isReplaceable()){
-                        if (!mc.world.getBlockState(ceiling).isReplaceable()){
+                    if (!mc.level.getBlockState(ceiling).canBeReplaced()){
+                        if (!mc.level.getBlockState(ceiling).canBeReplaced()){
                             error("Hit the ceiling");
                         }
-                        if (mc.options.sneakKey.isPressed()){
-                            mc.options.sneakKey.setPressed(false);
+                        if (mc.options.keyShift.isDown()){
+                            mc.options.keyShift.setDown(false);
                         }
                         lavamountainticks = 0;
                         mc.player.setNoGravity(false);
@@ -485,8 +536,8 @@ public class AutoLavaCaster extends Module {
                         if (mc.player.getY()>=buildlimit.get()){
                             error("Hit your Y Stop Value");
                         }
-                        if (mc.options.sneakKey.isPressed()){
-                            mc.options.sneakKey.setPressed(false);
+                        if (mc.options.keyShift.isDown()){
+                            mc.options.keyShift.setDown(false);
                         }
                         lavamountainticks = 0;
                         mc.player.setNoGravity(false);
@@ -495,7 +546,7 @@ public class AutoLavaCaster extends Module {
                         return;
                     }
                     cascadingpileof();
-                    if (incY.get() && isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack())) {
+                    if (incY.get() && isInvalidBlock(mc.player.getMainHandItem().getItem().getDefaultInstance())) {
                         error("Not Enough Suitable Blocks in Hand.");
                         lavamountainticks = 0;
                         mc.player.setNoGravity(false);
@@ -508,19 +559,19 @@ public class AutoLavaCaster extends Module {
             if (incY.get()){
                 if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+5 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+5){
                     BlockPos pos = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ());
-                    if (mc.world.getBlockState(pos).isReplaceable()) {
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (mc.level.getBlockState(pos).canBeReplaced()) {
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                     lava = new BlockPos(lava.getX(), lava.getY()+1, lava.getZ());
                 }
                 else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+10 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+10){
-                    mc.player.jump();
+                    mc.player.jumpFromGround();
                 }
                 else if ((estlavatime.get() || aMountain.autocasttimenow==true) && (lavamountainticks>=(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+10 && lavamountainticks<=(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+15) || !estlavatime.get() && !aMountain.autocasttimenow==true && (lavamountainticks>=(lavatime.get()*20)+watertime1.get()+waterdelay.get()+10 && lavamountainticks<=(lavatime.get()*20)+watertime1.get()+waterdelay.get()+15)) {
-                    BlockPos pos = mc.player.getBlockPos().add(new Vec3i(0,-1,0));
-                    if (mc.world.getBlockState(pos).isReplaceable()) {
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    BlockPos pos = mc.player.blockPosition().offset(new Vec3i(0,-1,0));
+                    if (mc.level.getBlockState(pos).canBeReplaced()) {
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+16 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+16){
                     lavamountainticks=0;
@@ -534,18 +585,18 @@ public class AutoLavaCaster extends Module {
                 }
                 if (lavamountainticks == 2){
                     if (estlavatime.get() || aMountain.autocasttimenow==true){
-                        ChatUtils.sendMsg(Text.of("Starting layer 1. Lava will take "+estimatedlavatime+" more seconds to flow."));
+                        ChatUtils.sendMsg(Component.nullToEmpty("Starting layer 1. Lava will take "+estimatedlavatime+" more seconds to flow."));
                     }else
-                        ChatUtils.sendMsg(Text.of("Starting layer 1. Lava will take "+lavatime.get()+" more seconds to flow."));
+                        ChatUtils.sendMsg(Component.nullToEmpty("Starting layer 1. Lava will take "+lavatime.get()+" more seconds to flow."));
                 }
                 if (lavamountainticks >= 2){
-                    BlockPos pos = mc.player.getBlockPos().add(new Vec3i(0,-1,0));
-                    if (mc.world.getBlockState(pos).isReplaceable()) {
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    BlockPos pos = mc.player.blockPosition().offset(new Vec3i(0,-1,0));
+                    if (mc.level.getBlockState(pos).canBeReplaced()) {
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
             }else if (lavamountainticks==7 && firstplace == true && (aposition.get() || aMountain.autocasttimenow==true)){
-                if (!(mc.world.getBlockState(lava).getBlock() == Blocks.AIR) && !(mc.world.getBlockState(hover).getBlock() == Blocks.AIR)) placeLava();
+                if (!(mc.level.getBlockState(lava).getBlock() == Blocks.AIR) && !(mc.level.getBlockState(hover).getBlock() == Blocks.AIR)) placeLava();
             }
             else if (firstplace==false && lavamountainticks==55){
                 if (aMountain.autocasttimenow==true) {
@@ -578,15 +629,15 @@ public class AutoLavaCaster extends Module {
                 }
                 placeLava();
                 if (estlavatime.get() || aMountain.autocasttimenow==true){
-                    ChatUtils.sendMsg(Text.of("Starting layer "+layers+". Lava will take "+estimatedlavatime+" more seconds to flow."));
+                    ChatUtils.sendMsg(Component.nullToEmpty("Starting layer "+layers+". Lava will take "+estimatedlavatime+" more seconds to flow."));
                 }else
-                    ChatUtils.sendMsg(Text.of("Starting layer "+layers+". Lava will take "+lavatime.get()+" more seconds to flow."));
+                    ChatUtils.sendMsg(Component.nullToEmpty("Starting layer "+layers+". Lava will take "+lavatime.get()+" more seconds to flow."));
             }
             else if (MountainsOfLavaInc.get() && lavamountainticks==60 && layers>=layerstop.get()+1){
-                if (mc.options.sneakKey.isPressed()){
-                    mc.options.sneakKey.setPressed(false);
+                if (mc.options.keyShift.isDown()){
+                    mc.options.keyShift.setDown(false);
                 }
-                ChatUtils.sendMsg(Text.of("Done Building!"));
+                ChatUtils.sendMsg(Component.nullToEmpty("Done Building!"));
                 lavamountainticks = 0;
                 mc.player.setNoGravity(false);
                 aMountain.autocasttimenow=false;
@@ -599,7 +650,7 @@ public class AutoLavaCaster extends Module {
             }
             else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime1.get() || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime1.get()){
                 placeWater();
-                ChatUtils.sendMsg(Text.of("Finishing layer "+layers));
+                ChatUtils.sendMsg(Component.nullToEmpty("Finishing layer "+layers));
             }
             else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get() || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()){
                 pickupLiquid();
@@ -608,10 +659,10 @@ public class AutoLavaCaster extends Module {
                     layers++;
                 }
                 if (!MountainsOfLavaInc.get() && layers>=layerstop.get()){
-                    if (mc.options.sneakKey.isPressed()){
-                        mc.options.sneakKey.setPressed(false);
+                    if (mc.options.keyShift.isDown()){
+                        mc.options.keyShift.setDown(false);
                     }
-                    ChatUtils.sendMsg(Text.of("Done Building!"));
+                    ChatUtils.sendMsg(Component.nullToEmpty("Done Building!"));
                     lavamountainticks = 0;
                     mc.player.setNoGravity(false);
                     aMountain.autocasttimenow=false;
@@ -619,12 +670,12 @@ public class AutoLavaCaster extends Module {
                     return;
                 }
                 if (incY.get()){
-                    if (!mc.world.getBlockState(ceiling).isReplaceable()){
-                        if (!mc.world.getBlockState(ceiling).isReplaceable()){
+                    if (!mc.level.getBlockState(ceiling).canBeReplaced()){
+                        if (!mc.level.getBlockState(ceiling).canBeReplaced()){
                             error("Hit the ceiling");
                         }
-                        if (mc.options.sneakKey.isPressed()){
-                            mc.options.sneakKey.setPressed(false);
+                        if (mc.options.keyShift.isDown()){
+                            mc.options.keyShift.setDown(false);
                         }
                         lavamountainticks = 0;
                         mc.player.setNoGravity(false);
@@ -636,8 +687,8 @@ public class AutoLavaCaster extends Module {
                         if (mc.player.getY()>=buildlimit.get()){
                             error("Hit your Y Stop Value");
                         }
-                        if (mc.options.sneakKey.isPressed()){
-                            mc.options.sneakKey.setPressed(false);
+                        if (mc.options.keyShift.isDown()){
+                            mc.options.keyShift.setDown(false);
                         }
                         lavamountainticks = 0;
                         mc.player.setNoGravity(false);
@@ -646,7 +697,7 @@ public class AutoLavaCaster extends Module {
                         return;
                     }
                     cascadingpileof();
-                    if (bstyle.get() && incY.get() && isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack())) {
+                    if (bstyle.get() && incY.get() && isInvalidBlock(mc.player.getMainHandItem().getItem().getDefaultInstance())) {
                         error("Not Enough Suitable Blocks in Hand.");
                         lavamountainticks = 0;
                         mc.player.setNoGravity(false);
@@ -658,49 +709,49 @@ public class AutoLavaCaster extends Module {
             }if (incY.get()){
                 if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+4 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+4){
                     BlockPos pos2 = new BlockPos(lava.getX()+1,lava.getY()+1,lava.getZ());
-                    if (mc.world.getBlockState(pos2).isReplaceable()) {
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos2), Direction.DOWN, pos2, false));
+                    if (mc.level.getBlockState(pos2).canBeReplaced()) {
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos2), Direction.DOWN, pos2, false));
                     }
                 }
                 else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+8 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+8) {
                     BlockPos pos3 = new BlockPos(lava.getX()-1,lava.getY()+1,lava.getZ());
-                    if (mc.world.getBlockState(pos3).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos3), Direction.DOWN, pos3, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);
+                    if (mc.level.getBlockState(pos3).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos3), Direction.DOWN, pos3, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);
                     }
                 }
                 else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+12 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+12) {
                     BlockPos pos4 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ()+1);
-                    if (mc.world.getBlockState(pos4).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos4), Direction.DOWN, pos4, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);
+                    if (mc.level.getBlockState(pos4).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos4), Direction.DOWN, pos4, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);
                     }
                 }
                 else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+16 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+16) {
                     BlockPos pos5 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ()-1);
-                    if (mc.world.getBlockState(pos5).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos5), Direction.DOWN, pos5, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);
+                    if (mc.level.getBlockState(pos5).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos5), Direction.DOWN, pos5, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);
                     }
                 }
                 else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+20 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+20){
                     BlockPos pos1 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ());
-                    if (mc.world.getBlockState(pos1).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos1), Direction.DOWN, pos1, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);
+                    if (mc.level.getBlockState(pos1).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos1), Direction.DOWN, pos1, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);
                     }
                 }
                 else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+21 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+21) {
                     lava = new BlockPos(lava.getX(), lava.getY()+1, lava.getZ());
                 }
                 else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+25 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+25){
-                    mc.player.jump();
+                    mc.player.jumpFromGround();
                 }
                 else if ((estlavatime.get() || aMountain.autocasttimenow==true) && (lavamountainticks>=(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+25 && lavamountainticks<=(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+30) || !estlavatime.get() && !aMountain.autocasttimenow==true && (lavamountainticks>=(lavatime.get()*20)+watertime1.get()+waterdelay.get()+25 && lavamountainticks<=(lavatime.get()*20)+watertime1.get()+waterdelay.get()+30)) {
-                    BlockPos pos = mc.player.getBlockPos().add(new Vec3i(0,-1,0));
-                    if (mc.world.getBlockState(pos).isReplaceable()) {
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    BlockPos pos = mc.player.blockPosition().offset(new Vec3i(0,-1,0));
+                    if (mc.level.getBlockState(pos).canBeReplaced()) {
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+31 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+31){
                     lavamountainticks=0;
@@ -715,18 +766,18 @@ public class AutoLavaCaster extends Module {
                 }
                 if (lavamountainticks == 2){
                     if (estlavatime.get() || aMountain.autocasttimenow==true){
-                        ChatUtils.sendMsg(Text.of("Starting layer 1. Lava will take "+estimatedlavatime+" more seconds to flow."));
+                        ChatUtils.sendMsg(Component.nullToEmpty("Starting layer 1. Lava will take "+estimatedlavatime+" more seconds to flow."));
                     }else
-                        ChatUtils.sendMsg(Text.of("Starting layer 1. Lava will take "+lavatime.get()+" more seconds to flow."));
+                        ChatUtils.sendMsg(Component.nullToEmpty("Starting layer 1. Lava will take "+lavatime.get()+" more seconds to flow."));
                 }
                 if (lavamountainticks >= 2){
-                    BlockPos pos = mc.player.getBlockPos().add(new Vec3i(0,-1,0));
-                    if (mc.world.getBlockState(pos).isReplaceable()) {
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    BlockPos pos = mc.player.blockPosition().offset(new Vec3i(0,-1,0));
+                    if (mc.level.getBlockState(pos).canBeReplaced()) {
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
             }else if (lavamountainticks==7 && firstplace == true && (aposition.get() || aMountain.autocasttimenow==true)){
-                if (!(mc.world.getBlockState(lava).getBlock() == Blocks.AIR) && !(mc.world.getBlockState(hover).getBlock() == Blocks.AIR)) placeLava();
+                if (!(mc.level.getBlockState(lava).getBlock() == Blocks.AIR) && !(mc.level.getBlockState(hover).getBlock() == Blocks.AIR)) placeLava();
             }
             else if (firstplace==false && lavamountainticks==55){
                 if (aMountain.autocasttimenow==true) {
@@ -759,15 +810,15 @@ public class AutoLavaCaster extends Module {
                 }
                 placeLava();
                 if (estlavatime.get() || aMountain.autocasttimenow==true){
-                    ChatUtils.sendMsg(Text.of("Starting layer "+layers+". Lava will take "+estimatedlavatime+" more seconds to flow."));
+                    ChatUtils.sendMsg(Component.nullToEmpty("Starting layer "+layers+". Lava will take "+estimatedlavatime+" more seconds to flow."));
                 }else
-                    ChatUtils.sendMsg(Text.of("Starting layer "+layers+". Lava will take "+lavatime.get()+" more seconds to flow."));
+                    ChatUtils.sendMsg(Component.nullToEmpty("Starting layer "+layers+". Lava will take "+lavatime.get()+" more seconds to flow."));
             }
             else if (MountainsOfLavaInc.get() && lavamountainticks==60 && layers>=layerstop.get()+1){
-                if (mc.options.sneakKey.isPressed()){
-                    mc.options.sneakKey.setPressed(false);
+                if (mc.options.keyShift.isDown()){
+                    mc.options.keyShift.setDown(false);
                 }
-                ChatUtils.sendMsg(Text.of("Done Building!"));
+                ChatUtils.sendMsg(Component.nullToEmpty("Done Building!"));
                 lavamountainticks = 0;
                 mc.player.setNoGravity(false);
                 aMountain.autocasttimenow=false;
@@ -780,7 +831,7 @@ public class AutoLavaCaster extends Module {
             }
             else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime2.get() || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime2.get()){
                 placeWater();
-                ChatUtils.sendMsg(Text.of("Finishing layer "+layers));
+                ChatUtils.sendMsg(Component.nullToEmpty("Finishing layer "+layers));
             }
             else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get() || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()){
                 pickupLiquid();
@@ -789,10 +840,10 @@ public class AutoLavaCaster extends Module {
                     layers++;
                 }
                 if (!MountainsOfLavaInc.get() && layers>=layerstop.get()){
-                    if (mc.options.sneakKey.isPressed()){
-                        mc.options.sneakKey.setPressed(false);
+                    if (mc.options.keyShift.isDown()){
+                        mc.options.keyShift.setDown(false);
                     }
-                    ChatUtils.sendMsg(Text.of("Done Building!"));
+                    ChatUtils.sendMsg(Component.nullToEmpty("Done Building!"));
                     lavamountainticks = 0;
                     mc.player.setNoGravity(false);
                     aMountain.autocasttimenow=false;
@@ -800,12 +851,12 @@ public class AutoLavaCaster extends Module {
                     return;
                 }
                 if (incY.get()){
-                    if (!mc.world.getBlockState(ceiling).isReplaceable()){
-                        if (!mc.world.getBlockState(ceiling).isReplaceable()){
+                    if (!mc.level.getBlockState(ceiling).canBeReplaced()){
+                        if (!mc.level.getBlockState(ceiling).canBeReplaced()){
                             error("Hit the ceiling");
                         }
-                        if (mc.options.sneakKey.isPressed()){
-                            mc.options.sneakKey.setPressed(false);
+                        if (mc.options.keyShift.isDown()){
+                            mc.options.keyShift.setDown(false);
                         }
                         lavamountainticks = 0;
                         mc.player.setNoGravity(false);
@@ -817,8 +868,8 @@ public class AutoLavaCaster extends Module {
                         if (mc.player.getY()>=buildlimit.get()){
                             error("Hit your Y Stop Value");
                         }
-                        if (mc.options.sneakKey.isPressed()){
-                            mc.options.sneakKey.setPressed(false);
+                        if (mc.options.keyShift.isDown()){
+                            mc.options.keyShift.setDown(false);
                         }
                         lavamountainticks = 0;
                         mc.player.setNoGravity(false);
@@ -827,7 +878,7 @@ public class AutoLavaCaster extends Module {
                         return;
                     }
                     cascadingpileof();
-                    if (bstyle.get() && incY.get() && isInvalidBlock(mc.player.getMainHandStack().getItem().getDefaultStack())) {
+                    if (bstyle.get() && incY.get() && isInvalidBlock(mc.player.getMainHandItem().getItem().getDefaultInstance())) {
                         error("Not Enough Suitable Blocks in Hand.");
                         lavamountainticks = 0;
                         mc.player.setNoGravity(false);
@@ -839,46 +890,46 @@ public class AutoLavaCaster extends Module {
             }if (incY.get()){
                 if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+4 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+4){
                     BlockPos pos2 = new BlockPos(lava.getX()+1,lava.getY()+1,lava.getZ());
-                    if (mc.world.getBlockState(pos2).isReplaceable()) {
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos2), Direction.DOWN, pos2, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (mc.level.getBlockState(pos2).canBeReplaced()) {
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos2), Direction.DOWN, pos2, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+8 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+8){
                     BlockPos pos3 = new BlockPos(lava.getX()-1,lava.getY()+1,lava.getZ());
-                    if (mc.world.getBlockState(pos3).isReplaceable()) {
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos3), Direction.DOWN, pos3, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (mc.level.getBlockState(pos3).canBeReplaced()) {
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos3), Direction.DOWN, pos3, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+12 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+12){
                     BlockPos pos4 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ()+1);
-                    if (mc.world.getBlockState(pos4).isReplaceable()) {
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos4), Direction.DOWN, pos4, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (mc.level.getBlockState(pos4).canBeReplaced()) {
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos4), Direction.DOWN, pos4, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+16 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+16){
                     BlockPos pos5 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ()-1);
-                    if (mc.world.getBlockState(pos5).isReplaceable()) {
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos5), Direction.DOWN, pos5, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    if (mc.level.getBlockState(pos5).canBeReplaced()) {
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos5), Direction.DOWN, pos5, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+20 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+20){
                     BlockPos pos1 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ());
-                    if (mc.world.getBlockState(pos1).isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos1), Direction.DOWN, pos1, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);
+                    if (mc.level.getBlockState(pos1).canBeReplaced()){
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos1), Direction.DOWN, pos1, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);
                     }
                 }
                 else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+21 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+21) {
                     lava = new BlockPos(lava.getX(), lava.getY()+1, lava.getZ());
                 }
                 else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+25 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+25){
-                    mc.player.jump();
+                    mc.player.jumpFromGround();
                 }
                 else if ((estlavatime.get() || aMountain.autocasttimenow==true) && (lavamountainticks>=(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+25 && lavamountainticks<=(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+30) || !estlavatime.get() && !aMountain.autocasttimenow==true && (lavamountainticks>=(lavatime.get()*20)+watertime2.get()+waterdelay.get()+25 && lavamountainticks<=(lavatime.get()*20)+watertime2.get()+waterdelay.get()+30)) {
-                    BlockPos pos = mc.player.getBlockPos().add(new Vec3i(0,-1,0));
-                    if (mc.world.getBlockState(pos).isReplaceable()) {
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(Vec3d.of(pos), Direction.DOWN, pos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);}
+                    BlockPos pos = mc.player.blockPosition().offset(new Vec3i(0,-1,0));
+                    if (mc.level.getBlockState(pos).canBeReplaced()) {
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
+                        mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
                 else if ((estlavatime.get() || aMountain.autocasttimenow==true) && lavamountainticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+31 || !estlavatime.get() && !aMountain.autocasttimenow==true && lavamountainticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+31){
                     lavamountainticks=0;
@@ -913,8 +964,8 @@ public class AutoLavaCaster extends Module {
         FindItemResult findItemResult = InvUtils.findInHotbar(Items.LAVA_BUCKET);
         if (!findItemResult.found()) {
             error("No lava bucket found.");
-            if (mc.options.sneakKey.isPressed()){
-                mc.options.sneakKey.setPressed(false);
+            if (mc.options.keyShift.isDown()){
+                mc.options.keyShift.setDown(false);
             }
             lavamountainticks = 0;
             mc.player.setNoGravity(false);
@@ -922,18 +973,18 @@ public class AutoLavaCaster extends Module {
             toggle();
             return;
         }
-        int prevSlot = mc.player.getInventory().selectedSlot;
-        mc.player.getInventory().selectedSlot = findItemResult.slot();
-        mc.interactionManager.interactItem(mc.player,Hand.MAIN_HAND);
-        mc.player.getInventory().selectedSlot = prevSlot;
+        int prevSlot = mc.player.getInventory().getSelectedSlot();
+        mc.player.getInventory().setSelectedSlot(findItemResult.slot());
+        mc.gameMode.useItem(mc.player, InteractionHand.MAIN_HAND);
+        mc.player.getInventory().setSelectedSlot(prevSlot);
     }
 
     private void placeWater() {
         FindItemResult findItemResult = InvUtils.findInHotbar(Items.WATER_BUCKET);
         if (!findItemResult.found()) {
             error("No water bucket found.");
-            if (mc.options.sneakKey.isPressed()){
-                mc.options.sneakKey.setPressed(false);
+            if (mc.options.keyShift.isDown()){
+                mc.options.keyShift.setDown(false);
             }
             lavamountainticks = 0;
             mc.player.setNoGravity(false);
@@ -941,18 +992,18 @@ public class AutoLavaCaster extends Module {
             toggle();
             return;
         }
-        int prevSlot = mc.player.getInventory().selectedSlot;
-        mc.player.getInventory().selectedSlot = findItemResult.slot();
-        mc.interactionManager.interactItem(mc.player,Hand.MAIN_HAND);
-        mc.player.getInventory().selectedSlot = prevSlot;
+        int prevSlot = mc.player.getInventory().getSelectedSlot();
+        mc.player.getInventory().setSelectedSlot(findItemResult.slot());
+        mc.gameMode.useItem(mc.player, InteractionHand.MAIN_HAND);
+        mc.player.getInventory().setSelectedSlot(prevSlot);
     }
 
     private void pickupLiquid() {
         FindItemResult findItemResult = InvUtils.findInHotbar(Items.BUCKET);
         if (!findItemResult.found()) {
             error("No bucket found.");
-            if (mc.options.sneakKey.isPressed()){
-                mc.options.sneakKey.setPressed(false);
+            if (mc.options.keyShift.isDown()){
+                mc.options.keyShift.setDown(false);
             }
             lavamountainticks = 0;
             mc.player.setNoGravity(false);
@@ -960,55 +1011,55 @@ public class AutoLavaCaster extends Module {
             toggle();
             return;
         }
-        int prevSlot = mc.player.getInventory().selectedSlot;
-        mc.player.getInventory().selectedSlot = findItemResult.slot();
-        mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
-        mc.player.getInventory().selectedSlot = prevSlot;
+        int prevSlot = mc.player.getInventory().getSelectedSlot();
+        mc.player.getInventory().setSelectedSlot(findItemResult.slot());
+        mc.gameMode.useItem(mc.player, InteractionHand.MAIN_HAND);
+        mc.player.getInventory().setSelectedSlot(prevSlot);
     }
 
     private BlockPos cast() {
-        HitResult blockHit = mc.getCameraEntity().raycast(reach.get(), 0, false);
-        if (((BlockHitResult) blockHit).getSide() == Direction.UP){
+        HitResult blockHit = mc.getCameraEntity().pick(reach.get(), 0, false);
+        if (((BlockHitResult) blockHit).getDirection() == Direction.UP){
             return ((BlockHitResult) blockHit).getBlockPos();}
         else{
             error("Target the Top of a block");
-            return ((BlockHitResult) blockHit).getBlockPos().add(6,6,6);}
+            return ((BlockHitResult) blockHit).getBlockPos().offset(6,6,6);}
     }
     private void autoposition() {
-        BlockPos pos = mc.player.getBlockPos().add(new Vec3i(0,-1,0));
-        if (mc.world.getBlockState(pos).isReplaceable()) {
-            if (aMountain.autocasttimenow==true && aMountain.wasfacingBOT==Direction.EAST|| aMountain.autocasttimenow==false && mc.player.getYaw()>=90 && mc.player.getYaw()<=180 || tryanotherpos==true){ //NORTHWEST
-                BlockPos isair = BlockPos.ofFloored(lava.getX()+2.5,lava.getY()+3,lava.getZ()+2.5);
-                BlockPos isair2 = BlockPos.ofFloored(lava.getX()+2.5,lava.getY()+4,lava.getZ()+2.5);
-                if (mc.world.getBlockState(isair).isReplaceable() && mc.world.getFluidState(isair).isEmpty() && !mc.world.getBlockState(isair).isOf(Blocks.POWDER_SNOW) && mc.world.getBlockState(isair2).isReplaceable() && mc.world.getFluidState(isair2).isEmpty() && !mc.world.getBlockState(isair2).isOf(Blocks.POWDER_SNOW)) {
-                    mc.player.setPos(lava.getX()+2.5,lava.getY()+3,lava.getZ()+2.5);
+        BlockPos pos = mc.player.blockPosition().offset(new Vec3i(0,-1,0));
+        if (mc.level.getBlockState(pos).canBeReplaced()) {
+            if (aMountain.autocasttimenow==true && aMountain.wasfacingBOT==Direction.EAST|| aMountain.autocasttimenow==false && mc.player.getYRot()>=90 && mc.player.getYRot()<=180 || tryanotherpos==true){ //NORTHWEST
+                BlockPos isair = BlockPos.containing(lava.getX()+2.5,lava.getY()+3,lava.getZ()+2.5);
+                BlockPos isair2 = BlockPos.containing(lava.getX()+2.5,lava.getY()+4,lava.getZ()+2.5);
+                if (mc.level.getBlockState(isair).canBeReplaced() && mc.level.getFluidState(isair).isEmpty() && !mc.level.getBlockState(isair).is(Blocks.POWDER_SNOW) && mc.level.getBlockState(isair2).canBeReplaced() && mc.level.getFluidState(isair2).isEmpty() && !mc.level.getBlockState(isair2).is(Blocks.POWDER_SNOW)) {
+                    mc.player.setPosRaw(lava.getX()+2.5,lava.getY()+3,lava.getZ()+2.5);
                     tryanotherpos=false;
                 } else {
                     error("Position is occupied, trying another.");
                     tryanotherpos=true;}
-            } else if (aMountain.autocasttimenow==true && aMountain.wasfacingBOT==Direction.SOUTH|| aMountain.autocasttimenow==false && mc.player.getYaw()>=-180 && mc.player.getYaw()<-90 || tryanotherpos==true){ //NORTHEAST
-                BlockPos isair = BlockPos.ofFloored(lava.getX()-1.5,lava.getY()+3,lava.getZ()+2.5);
-                BlockPos isair2 = BlockPos.ofFloored(lava.getX()-1.5,lava.getY()+4,lava.getZ()+2.5);
-                if (mc.world.getBlockState(isair).isReplaceable() && mc.world.getFluidState(isair).isEmpty() && !mc.world.getBlockState(isair).isOf(Blocks.POWDER_SNOW) && mc.world.getBlockState(isair2).isReplaceable() && mc.world.getFluidState(isair2).isEmpty() && !mc.world.getBlockState(isair2).isOf(Blocks.POWDER_SNOW)) {
-                    mc.player.setPos(lava.getX()-1.5,lava.getY()+3,lava.getZ()+2.5);
+            } else if (aMountain.autocasttimenow==true && aMountain.wasfacingBOT==Direction.SOUTH|| aMountain.autocasttimenow==false && mc.player.getYRot()>=-180 && mc.player.getYRot()<-90 || tryanotherpos==true){ //NORTHEAST
+                BlockPos isair = BlockPos.containing(lava.getX()-1.5,lava.getY()+3,lava.getZ()+2.5);
+                BlockPos isair2 = BlockPos.containing(lava.getX()-1.5,lava.getY()+4,lava.getZ()+2.5);
+                if (mc.level.getBlockState(isair).canBeReplaced() && mc.level.getFluidState(isair).isEmpty() && !mc.level.getBlockState(isair).is(Blocks.POWDER_SNOW) && mc.level.getBlockState(isair2).canBeReplaced() && mc.level.getFluidState(isair2).isEmpty() && !mc.level.getBlockState(isair2).is(Blocks.POWDER_SNOW)) {
+                    mc.player.setPosRaw(lava.getX()-1.5,lava.getY()+3,lava.getZ()+2.5);
                     tryanotherpos=false;
                 } else {
                     error("Position is occupied, trying another.");
                     tryanotherpos=true;}
-            } else if (aMountain.autocasttimenow==true && aMountain.wasfacingBOT==Direction.WEST|| aMountain.autocasttimenow==false && mc.player.getYaw()>=-90 && mc.player.getYaw()<0 || tryanotherpos==true){ //SOUTHEAST
-                BlockPos isair = BlockPos.ofFloored(lava.getX()-1.5,lava.getY()+3,lava.getZ()-1.5);
-                BlockPos isair2 = BlockPos.ofFloored(lava.getX()-1.5,lava.getY()+4,lava.getZ()-1.5);
-                if (mc.world.getBlockState(isair).isReplaceable() && mc.world.getFluidState(isair).isEmpty() && !mc.world.getBlockState(isair).isOf(Blocks.POWDER_SNOW) && mc.world.getBlockState(isair2).isReplaceable() && mc.world.getFluidState(isair2).isEmpty() && !mc.world.getBlockState(isair2).isOf(Blocks.POWDER_SNOW)) {
-                    mc.player.setPos(lava.getX()-1.5,lava.getY()+3,lava.getZ()-1.5);
+            } else if (aMountain.autocasttimenow==true && aMountain.wasfacingBOT==Direction.WEST|| aMountain.autocasttimenow==false && mc.player.getYRot()>=-90 && mc.player.getYRot()<0 || tryanotherpos==true){ //SOUTHEAST
+                BlockPos isair = BlockPos.containing(lava.getX()-1.5,lava.getY()+3,lava.getZ()-1.5);
+                BlockPos isair2 = BlockPos.containing(lava.getX()-1.5,lava.getY()+4,lava.getZ()-1.5);
+                if (mc.level.getBlockState(isair).canBeReplaced() && mc.level.getFluidState(isair).isEmpty() && !mc.level.getBlockState(isair).is(Blocks.POWDER_SNOW) && mc.level.getBlockState(isair2).canBeReplaced() && mc.level.getFluidState(isair2).isEmpty() && !mc.level.getBlockState(isair2).is(Blocks.POWDER_SNOW)) {
+                    mc.player.setPosRaw(lava.getX()-1.5,lava.getY()+3,lava.getZ()-1.5);
                     tryanotherpos=false;
                 } else {
                     error("Position is occupied, trying another.");
                     tryanotherpos=true;}
-            } else if (aMountain.autocasttimenow==true && aMountain.wasfacingBOT==Direction.NORTH|| aMountain.autocasttimenow==false && mc.player.getYaw()>=0 && mc.player.getYaw()<90 || tryanotherpos==true){ //SOUTHWEST
-                BlockPos isair = BlockPos.ofFloored(lava.getX()+2.5,lava.getY()+3,lava.getZ()-1.5);
-                BlockPos isair2 = BlockPos.ofFloored(lava.getX()+2.5,lava.getY()+4,lava.getZ()-1.5);
-                if (mc.world.getBlockState(isair).isReplaceable() && mc.world.getFluidState(isair).isEmpty() && !mc.world.getBlockState(isair).isOf(Blocks.POWDER_SNOW) && mc.world.getBlockState(isair2).isReplaceable() && mc.world.getFluidState(isair2).isEmpty() && !mc.world.getBlockState(isair2).isOf(Blocks.POWDER_SNOW)) {
-                    mc.player.setPos(lava.getX()+2.5,lava.getY()+3,lava.getZ()-1.5);
+            } else if (aMountain.autocasttimenow==true && aMountain.wasfacingBOT==Direction.NORTH|| aMountain.autocasttimenow==false && mc.player.getYRot()>=0 && mc.player.getYRot()<90 || tryanotherpos==true){ //SOUTHWEST
+                BlockPos isair = BlockPos.containing(lava.getX()+2.5,lava.getY()+3,lava.getZ()-1.5);
+                BlockPos isair2 = BlockPos.containing(lava.getX()+2.5,lava.getY()+4,lava.getZ()-1.5);
+                if (mc.level.getBlockState(isair).canBeReplaced() && mc.level.getFluidState(isair).isEmpty() && !mc.level.getBlockState(isair).is(Blocks.POWDER_SNOW) && mc.level.getBlockState(isair2).canBeReplaced() && mc.level.getFluidState(isair2).isEmpty() && !mc.level.getBlockState(isair2).is(Blocks.POWDER_SNOW)) {
+                    mc.player.setPosRaw(lava.getX()+2.5,lava.getY()+3,lava.getZ()-1.5);
                     tryanotherpos=false;
                 } else {
                     error("Position is occupied, trying another.");
@@ -1021,40 +1072,40 @@ public class AutoLavaCaster extends Module {
         if (!findResult.found()) {
             return;
         }
-        mc.player.getInventory().selectedSlot = findResult.slot();
+        mc.player.getInventory().setSelectedSlot(findResult.slot());
     }
 
     private boolean isInvalidBlock(ItemStack stack) {
         return !(stack.getItem() instanceof BlockItem)
                 || stack.getItem() instanceof BedItem
-                || stack.getItem() instanceof PowderSnowBucketItem
-                || stack.getItem() instanceof ScaffoldingItem
-                || stack.getItem() instanceof TallBlockItem
-                || stack.getItem() instanceof VerticallyAttachableBlockItem
-                || stack.getItem() instanceof PlaceableOnWaterItem
-                || ((BlockItem) stack.getItem()).getBlock() instanceof PlantBlock
+                || stack.getItem() instanceof SolidBucketItem
+                || stack.getItem() instanceof ScaffoldingBlockItem
+                || stack.getItem() instanceof DoubleHighBlockItem
+                || stack.getItem() instanceof StandingAndWallBlockItem
+                || stack.getItem() instanceof PlaceOnWaterBlockItem
+                || ((BlockItem) stack.getItem()).getBlock() instanceof VegetationBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof TorchBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof AbstractRedstoneGateBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof RedstoneWireBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof DiodeBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof RedStoneWireBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof FenceBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof WallBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof FenceGateBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof FallingBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof AbstractRailBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof AbstractSignBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof BaseRailBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof SignBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof BellBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof CarpetBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof ConduitBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof CoralFanBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof CoralWallFanBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof DeadCoralFanBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof DeadCoralWallFanBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof TripwireHookBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof BaseCoralFanBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof BaseCoralWallFanBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof TripWireHookBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof PointedDripstoneBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof TripwireBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof SnowBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof TripWireBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof SnowLayerBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof PressurePlateBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof WallMountedBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof FaceAttachedHorizontalDirectionalBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof ShulkerBoxBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof AmethystClusterBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof BuddingAmethystBlock
@@ -1064,16 +1115,16 @@ public class AutoLavaCaster extends Module {
                 || ((BlockItem) stack.getItem()).getBlock() instanceof CandleBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof TntBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof CakeBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof CobwebBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof WebBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof SugarCaneBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof SporeBlossomBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof KelpBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof GlowLichenBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof CactusBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof BambooBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof BambooStalkBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof FlowerPotBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof LadderBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof Waterloggable
+                || ((BlockItem) stack.getItem()).getBlock() instanceof SimpleWaterloggedBlock
                 || skippableBlox.get().contains(((BlockItem) stack.getItem()).getBlock());
     }
     public enum Modes {

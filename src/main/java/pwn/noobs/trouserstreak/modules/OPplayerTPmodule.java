@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import pwn.noobs.trouserstreak.Trouser;
 import pwn.noobs.trouserstreak.utils.PermissionUtils;
 
@@ -49,18 +49,18 @@ public class OPplayerTPmodule extends Module {
     }
 
     public static int currentplayer = 0;
-    private CopyOnWriteArrayList<PlayerListEntry> players;
+    private CopyOnWriteArrayList<PlayerInfo> players;
 
     @Override
     public void onActivate() {
-        if (mc.player != null && mc.world != null && notOP.get() && PermissionUtils.getPermissionLevel(mc.player) < 2 && mc.world.isChunkLoaded(mc.player.getChunkPos().x, mc.player.getChunkPos().z)) {
+        if (mc.player != null && mc.level != null && notOP.get() && PermissionUtils.getPermissionLevel(mc.player) < 2 && mc.level.hasChunk(mc.player.chunkPosition().x(), mc.player.chunkPosition().z())) {
             toggle();
             error("Must have permission level 2 or higher");
             return;
         }
-        players = new CopyOnWriteArrayList<>(mc.getNetworkHandler().getPlayerList());
-        for(PlayerListEntry player : players) {
-            if(player.getProfile().name().equals(mc.player.getName().getLiteralString())) players.remove(player);
+        players = new CopyOnWriteArrayList<>(mc.getConnection().getOnlinePlayers());
+        for(PlayerInfo player : players) {
+            if(player.getProfile().name().equals(mc.player.getName().tryCollapseToString())) players.remove(player);
             if(Friends.get().isFriend(player) && ignoreFriends.get()) players.remove(player);
         }
         if(currentplayer < players.size()) currentplayer++;
@@ -71,8 +71,8 @@ public class OPplayerTPmodule extends Module {
             return;
         }
         if(currentplayer >= players.size()) currentplayer = players.size();
-        if(tp2u.get()) ChatUtils.sendPlayerMsg("/tp " + players.get(currentplayer - 1).getProfile().name() + " " + mc.player.getName().getLiteralString());
-        if(!tp2u.get()) ChatUtils.sendPlayerMsg("/tp " + mc.player.getName().getLiteralString() + " " + players.get(currentplayer - 1).getProfile().name());
+        if(tp2u.get()) ChatUtils.sendPlayerMsg("/tp " + players.get(currentplayer - 1).getProfile().name() + " " + mc.player.getName().tryCollapseToString());
+        if(!tp2u.get()) ChatUtils.sendPlayerMsg("/tp " + mc.player.getName().tryCollapseToString() + " " + players.get(currentplayer - 1).getProfile().name());
         if(currentplayer >= players.size()) currentplayer = 0;
         toggle();
     }

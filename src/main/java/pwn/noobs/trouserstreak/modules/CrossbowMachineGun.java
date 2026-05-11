@@ -8,9 +8,9 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket;
-import net.minecraft.util.Hand;
+import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.Items;
 import pwn.noobs.trouserstreak.Trouser;
 
 public class CrossbowMachineGun extends Module {
@@ -40,25 +40,25 @@ public class CrossbowMachineGun extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (mc.player == null || mc.world == null || mc.getNetworkHandler() == null) return;
+        if (mc.player == null || mc.level == null || mc.getConnection() == null) return;
 
         if (delay.get() > 0) {
             if (timer++ < delay.get()) return;
             timer = 0;
         }
 
-        if (mc.player.getOffHandStack().getItem() != Items.CROSSBOW
-                && mc.player.getMainHandStack().getItem() != Items.CROSSBOW
-                || !mc.options.useKey.isPressed()) return;
+        if (mc.player.getOffhandItem().getItem() != Items.CROSSBOW
+                && mc.player.getMainHandItem().getItem() != Items.CROSSBOW
+                || !mc.options.keyUse.isDown()) return;
 
-        Hand crossbowHand = mc.player.getMainHandStack().getItem() == Items.CROSSBOW
-                ? Hand.MAIN_HAND
-                : Hand.OFF_HAND;
+        InteractionHand crossbowHand = mc.player.getMainHandItem().getItem() == Items.CROSSBOW
+                ? InteractionHand.MAIN_HAND
+                : InteractionHand.OFF_HAND;
 
-        int sequence = correctSequence.get() ? mc.world.pendingUpdateManager.getSequence() : 0;
+        int sequence = correctSequence.get() ? mc.level.blockStatePredictionHandler.currentSequence() : 0;
 
-        mc.getNetworkHandler().sendPacket(
-                new PlayerInteractItemC2SPacket(crossbowHand, sequence, mc.player.getYaw(), mc.player.getPitch())
+        mc.getConnection().send(
+                new ServerboundUseItemPacket(crossbowHand, sequence, mc.player.getYRot(), mc.player.getXRot())
         );
     }
 }

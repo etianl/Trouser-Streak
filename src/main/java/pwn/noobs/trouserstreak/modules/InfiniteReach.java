@@ -3,7 +3,7 @@ package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
+import meteordevelopment.meteorclient.mixininterface.IServerboundMovePlayerPacket;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -11,18 +11,22 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.NoFall;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ProjectileUtil;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.*;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.*;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.Arrays;
@@ -223,13 +227,13 @@ public class InfiniteReach extends Module {
     private boolean canItemUse = true;
     private int entityAttackTicks = 0;
     private boolean canEntityAttack = true;
-    private volatile Vec3d startPos = Vec3d.ZERO;
-    private volatile Vec3d finalPos = Vec3d.ZERO;
-    private volatile Vec3d aboveself = Vec3d.ZERO;
-    private volatile Vec3d abovetarget = Vec3d.ZERO;
-    private volatile Vec3d blockfinalPos = Vec3d.ZERO;
-    private volatile Vec3d blockaboveself = Vec3d.ZERO;
-    private volatile Vec3d blockabovetarget = Vec3d.ZERO;
+    private volatile Vec3 startPos = Vec3.ZERO;
+    private volatile Vec3 finalPos = Vec3.ZERO;
+    private volatile Vec3 aboveself = Vec3.ZERO;
+    private volatile Vec3 abovetarget = Vec3.ZERO;
+    private volatile Vec3 blockfinalPos = Vec3.ZERO;
+    private volatile Vec3 blockaboveself = Vec3.ZERO;
+    private volatile Vec3 blockabovetarget = Vec3.ZERO;
     public InfiniteReach() {
         super(Trouser.Main, "infinite-reach", "Gives you super long arms. Lets you Mace Smash at long range in Paper servers.");
     }
@@ -246,13 +250,13 @@ public class InfiniteReach extends Module {
         canItemUse = true;
         entityAttackTicks = 0;
         canEntityAttack = true;
-        startPos = Vec3d.ZERO;
-        finalPos = Vec3d.ZERO;
-        aboveself = Vec3d.ZERO;
-        abovetarget = Vec3d.ZERO;
-        blockfinalPos = Vec3d.ZERO;
-        blockaboveself = Vec3d.ZERO;
-        blockabovetarget = Vec3d.ZERO;
+        startPos = Vec3.ZERO;
+        finalPos = Vec3.ZERO;
+        aboveself = Vec3.ZERO;
+        abovetarget = Vec3.ZERO;
+        blockfinalPos = Vec3.ZERO;
+        blockaboveself = Vec3.ZERO;
+        blockabovetarget = Vec3.ZERO;
     }
     @Override
     public void onDeactivate() {
@@ -286,37 +290,37 @@ public class InfiniteReach extends Module {
     }
     @EventHandler
     private void onRender3D(Render3DEvent event) {
-        if (mc.player == null || mc.world == null || mc.getNetworkHandler() == null) return;
+        if (mc.player == null || mc.level == null || mc.getConnection() == null) return;
 
         if (mode.get() == Mode.Vanilla) maxDistance = Distance.get();
         else maxDistance = paperDistance.get();
 
-        Vec3d cameraPos = mc.player.getCameraPosVec(1.0f);
-        Vec3d rotation = mc.player.getRotationVec(1.0f);
-        Vec3d endVec = cameraPos.add(rotation.multiply(maxDistance));
+        Vec3 cameraPos = mc.player.getEyePosition(1.0f);
+        Vec3 rotation = mc.player.getViewVector(1.0f);
+        Vec3 endVec = cameraPos.add(rotation.scale(maxDistance));
 
-        EntityHitResult entityHit = ProjectileUtil.raycast(
+        EntityHitResult entityHit = ProjectileUtil.getEntityHitResult(
                 mc.player, cameraPos, endVec,
-                mc.player.getBoundingBox().expand(maxDistance),
+                mc.player.getBoundingBox().inflate(maxDistance),
                 e -> e.isAlive() && e.isAttackable() && !e.isInvulnerable() && e != mc.player,
                 maxDistance * maxDistance
         );
 
         BlockHitResult blockHit = null;
         if (entityHit == null) {
-            HitResult rawHit = mc.getCameraEntity().raycast(maxDistance, 0, false);
+            HitResult rawHit = mc.getCameraEntity().pick(maxDistance, 0, false);
             if (rawHit instanceof BlockHitResult) {
-                if (!mc.world.getBlockState(((BlockHitResult) rawHit).getBlockPos()).isAir()) blockHit = (BlockHitResult) rawHit;
+                if (!mc.level.getBlockState(((BlockHitResult) rawHit).getBlockPos()).isAir()) blockHit = (BlockHitResult) rawHit;
             }
         }
 
         if (entityHit != null) {
             hoveredTarget = entityHit.getEntity();
-            double x = MathHelper.lerp(event.tickDelta, hoveredTarget.lastRenderX, hoveredTarget.getX()) - hoveredTarget.getX();
-            double y = MathHelper.lerp(event.tickDelta, hoveredTarget.lastRenderY, hoveredTarget.getY()) - hoveredTarget.getY();
-            double z = MathHelper.lerp(event.tickDelta, hoveredTarget.lastRenderZ, hoveredTarget.getZ()) - hoveredTarget.getZ();
+            double x = Mth.lerp(event.tickDelta, hoveredTarget.xOld, hoveredTarget.getX()) - hoveredTarget.getX();
+            double y = Mth.lerp(event.tickDelta, hoveredTarget.yOld, hoveredTarget.getY()) - hoveredTarget.getY();
+            double z = Mth.lerp(event.tickDelta, hoveredTarget.zOld, hoveredTarget.getZ()) - hoveredTarget.getZ();
 
-            Box box = hoveredTarget.getBoundingBox();
+            AABB box = hoveredTarget.getBoundingBox();
             if (renderentity.get()) {
                 event.renderer.box(x + box.minX, y + box.minY, z + box.minZ,
                         x + box.maxX, y + box.maxY, z + box.maxZ,
@@ -337,19 +341,19 @@ public class InfiniteReach extends Module {
         }
 
         startPos = mc.player.getVehicle() == null
-                ? mc.player.getEntityPos()
-                : mc.player.getVehicle().getEntityPos();
+                ? mc.player.position()
+                : mc.player.getVehicle().position();
         if (blockHit != null){
-            Vec3d blocktargetPos = blockHit.getBlockPos().toCenterPos();
-            Box blockBox = new Box(blockHit.getBlockPos());
+            Vec3 blocktargetPos = blockHit.getBlockPos().getCenter();
+            AABB blockBox = new AABB(blockHit.getBlockPos());
 
-            BlockPos targetActionPos = blockHit.getBlockPos().offset(blockHit.getSide());
-            Box playerBox = mc.player.getBoundingBox();
-            Box targetActionPosBox = new Box(targetActionPos);
+            BlockPos targetActionPos = blockHit.getBlockPos().relative(blockHit.getDirection());
+            AABB playerBox = mc.player.getBoundingBox();
+            AABB targetActionPosBox = new AABB(targetActionPos);
 
             if (playerBox.intersects(targetActionPosBox)) return;
 
-            Vec3d diff = startPos.subtract(blocktargetPos);
+            Vec3 diff = startPos.subtract(blocktargetPos);
             double flatUp = Math.sqrt(maxDistance * maxDistance - (diff.x * diff.x + diff.z * diff.z));
             double targetUp = flatUp + diff.y;
 
@@ -357,7 +361,7 @@ public class InfiniteReach extends Module {
                     ? blockBox.maxY + 0.3
                     : blocktargetPos.y;
 
-            Vec3d insideTargetBlock = new Vec3d(blocktargetPos.x, yOffset, blocktargetPos.z);
+            Vec3 insideTargetBlock = new Vec3(blocktargetPos.x, yOffset, blocktargetPos.z);
 
             blockfinalPos = findNearestPosBLOCK(insideTargetBlock, targetActionPos, blockHit);
             if (blockfinalPos == null) return;
@@ -369,8 +373,8 @@ public class InfiniteReach extends Module {
         }
 
         if (hoveredTarget != null){
-            Vec3d targetPos = hoveredTarget.getEntityPos();
-            Vec3d diff = startPos.subtract(targetPos);
+            Vec3 targetPos = hoveredTarget.position();
+            Vec3 diff = startPos.subtract(targetPos);
 
             double flatUp = Math.sqrt(maxDistance * maxDistance - (diff.x * diff.x + diff.z * diff.z));
             double targetUp = flatUp + diff.y;
@@ -378,7 +382,7 @@ public class InfiniteReach extends Module {
                     ? hoveredTarget.getBoundingBox().maxY + 0.3
                     : targetPos.y;
 
-            Vec3d insideTarget = new Vec3d(targetPos.x, yOffset, targetPos.z);
+            Vec3 insideTarget = new Vec3(targetPos.x, yOffset, targetPos.z);
 
             finalPos = !invalid(insideTarget)
                     ? insideTarget
@@ -390,8 +394,8 @@ public class InfiniteReach extends Module {
             finalPos = aboveself = abovetarget = null;
         }
 
-        boolean attackPressed = mc.options.attackKey.isPressed();
-        boolean usePressed = mc.options.useKey.isPressed();
+        boolean attackPressed = mc.options.keyAttack.isDown();
+        boolean usePressed = mc.options.keyUse.isDown();
         boolean usingItem = mc.player.isUsingItem();
 
         if (!attackPressed && !usePressed) {
@@ -406,7 +410,7 @@ public class InfiniteReach extends Module {
             return;
         }
         BlockHitResult bhr = null;
-        if (mc.crosshairTarget instanceof BlockHitResult target) bhr = target;
+        if (mc.hitResult instanceof BlockHitResult target) bhr = target;
         if (entityHit != null && attackPressed && canEntityAttack && attackPacket.get()) {
             canEntityAttack = false; entityAttackTicks = 0;
             if (nonofall.get()) donofallstuff();
@@ -421,7 +425,7 @@ public class InfiniteReach extends Module {
             hitBlock(blockHit, true);
         } else if (entityHit == null && usePressed && canItemUse && !usingItem && itemUsePacket.get()) {
             canItemUse = false; itemUseTicks = 0;
-            if (bhr != null && mc.world.getBlockState(bhr.getBlockPos()).isAir()){
+            if (bhr != null && mc.level.getBlockState(bhr.getBlockPos()).isAir()){
                 if (nonofall.get()) donofallstuff();
                 hitBlock(blockHit, false);
             }
@@ -437,10 +441,10 @@ public class InfiniteReach extends Module {
         }
     }
     private void hitBlock(BlockHitResult bhr, Boolean attackpressed) {
-        if (mc.player == null || mc.getNetworkHandler() == null || mc.world == null) return;
-        if (mc.world.getChunk(bhr.getBlockPos()) == null) return;
+        if (mc.player == null || mc.getConnection() == null || mc.level == null) return;
+        if (mc.level.getChunk(bhr.getBlockPos()) == null) return;
         if (startPos == null || blockfinalPos == null || blockaboveself == null || blockabovetarget == null) return;
-        Entity entity = mc.player.hasVehicle() ? mc.player.getVehicle() : mc.player;
+        Entity entity = mc.player.isPassenger() ? mc.player.getVehicle() : mc.player;
 
         if (invalid(blockfinalPos) ||
                 (mode.get() == Mode.Paper && goUp.get() && (!hasClearPath(blockaboveself, blockabovetarget) || invalid(blockaboveself) || invalid(blockabovetarget)))) {
@@ -456,8 +460,8 @@ public class InfiniteReach extends Module {
 
         int amountOfPackets = mode.get() == Mode.Vanilla ? packets.get() : paperpackets.get();
         for (int i = 0; i < amountOfPackets; i++) {
-            if (mc.player.hasVehicle()) mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
-            else mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false, mc.player.horizontalCollision));
+            if (mc.player.isPassenger()) mc.player.connection.send(ServerboundMoveVehiclePacket.fromEntity(mc.player.getVehicle()));
+            else mc.player.connection.send(new ServerboundMovePlayerPacket.StatusOnly(false, mc.player.horizontalCollision));
         }
 
         if (mode.get() == Mode.Paper && goUp.get()) {
@@ -465,24 +469,24 @@ public class InfiniteReach extends Module {
             sendMove(entity, blockabovetarget);
         }
         sendMove(entity, blockfinalPos);
-        if (!phoneHome.get()) entity.setPosition(blockfinalPos);
+        if (!phoneHome.get()) entity.setPos(blockfinalPos);
 
         if (attackpressed){
-            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(
-                    PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, bhr.getBlockPos(), bhr.getSide()
+            mc.getConnection().send(new ServerboundPlayerActionPacket(
+                    ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, bhr.getBlockPos(), bhr.getDirection()
             ));
-            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(
-                    PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, bhr.getBlockPos(), bhr.getSide()
+            mc.getConnection().send(new ServerboundPlayerActionPacket(
+                    ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, bhr.getBlockPos(), bhr.getDirection()
             ));
         } else {
-            mc.getNetworkHandler().sendPacket(new PlayerInteractBlockC2SPacket(
-                    Hand.MAIN_HAND, bhr, 0
+            mc.getConnection().send(new ServerboundUseItemOnPacket(
+                    InteractionHand.MAIN_HAND, bhr, 0
             ));
         }
 
         if (swing.get()) {
-            mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
-            mc.player.swingHand(Hand.MAIN_HAND);
+            mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
+            mc.player.swing(InteractionHand.MAIN_HAND);
         }
 
         if (phoneHome.get()) {
@@ -491,19 +495,19 @@ public class InfiniteReach extends Module {
                 sendMove(entity, blockaboveself.add(0, 0.01, 0));
             }
             sendMove(entity, startPos);
-            Vec3d offset = getOffset(startPos);
+            Vec3 offset = getOffset(startPos);
             sendMove(entity, offset);
-            entity.setPosition(offset);
+            entity.setPos(offset);
         }
     }
     public void hitEntity(Entity target, Boolean attackpressed) {
-        if (mc.player == null || mc.getNetworkHandler() == null) return;
-        if (onlyMace.get() && mc.player.getMainHandStack().getItem() != Items.MACE) return;
-        if (onlyMace.get() && target instanceof PlayerEntity player && player.isBlocking()) return;
+        if (mc.player == null || mc.getConnection() == null) return;
+        if (onlyMace.get() && mc.player.getMainHandItem().getItem() != Items.MACE) return;
+        if (onlyMace.get() && target instanceof Player player && player.isBlocking()) return;
         if (startPos == null || finalPos == null || aboveself == null || abovetarget == null) return;
-        Entity entity = mc.player.hasVehicle() ? mc.player.getVehicle() : mc.player;
+        Entity entity = mc.player.isPassenger() ? mc.player.getVehicle() : mc.player;
 
-        double actualDistance = startPos.distanceTo(target.getEntityPos());
+        double actualDistance = startPos.distanceTo(target.position());
         if (actualDistance > maxDistance - 0.5) {
             return;
         }
@@ -521,8 +525,8 @@ public class InfiniteReach extends Module {
 
         int amountOfPackets = mode.get() == Mode.Vanilla ? packets.get() : paperpackets.get();
         for (int i = 0; i < amountOfPackets; i++) {
-            if (mc.player.hasVehicle()) mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
-            else mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false, mc.player.horizontalCollision));
+            if (mc.player.isPassenger()) mc.player.connection.send(ServerboundMoveVehiclePacket.fromEntity(mc.player.getVehicle()));
+            else mc.player.connection.send(new ServerboundMovePlayerPacket.StatusOnly(false, mc.player.horizontalCollision));
         }
 
         if (mode.get() == Mode.Paper && goUp.get()){
@@ -530,14 +534,14 @@ public class InfiniteReach extends Module {
             sendMove(entity, abovetarget);
         }
         sendMove(entity, finalPos);
-        if (!phoneHome.get()) entity.setPosition(finalPos);
+        if (!phoneHome.get()) entity.setPos(finalPos);
 
-        if (attackpressed)mc.getNetworkHandler().sendPacket(PlayerInteractEntityC2SPacket.attack(target, mc.player.isSneaking()));
-        else mc.getNetworkHandler().sendPacket(PlayerInteractEntityC2SPacket.interact(target, mc.player.isSneaking(), mc.player.getActiveHand()));
+        if (attackpressed)mc.getConnection().send(new ServerboundAttackPacket(target.getId()));
+        else mc.getConnection().send(new ServerboundInteractPacket(target.getId(), mc.player.getUsedItemHand(), target.position(), true));
 
         if (swing.get()) {
-            mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
-            mc.player.swingHand(Hand.MAIN_HAND);
+            mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
+            mc.player.swing(InteractionHand.MAIN_HAND);
         }
         if (phoneHome.get()){
             if (mode.get() == Mode.Paper && goUp.get()){
@@ -545,24 +549,24 @@ public class InfiniteReach extends Module {
                 sendMove(entity, aboveself.add(0, 0.01, 0));
             }
             sendMove(entity, startPos);
-            Vec3d offset = getOffset(startPos);
+            Vec3 offset = getOffset(startPos);
             sendMove(entity, offset);
-            entity.setPosition(offset);
+            entity.setPos(offset);
         }
     }
-    private Vec3d findNearestPos(Vec3d desired) {
+    private Vec3 findNearestPos(Vec3 desired) {
         if (!invalid(desired)) return desired;
 
-        Vec3d best = null;
+        Vec3 best = null;
         double bestDist = Double.MAX_VALUE;
 
         for (int dx = -3; dx <= 3; dx++) {
             for (int dz = -3; dz <= 3; dz++) {
                 for (int dy = -3; dy <= 3; dy++) {
-                    Vec3d test = desired.add(dx, dy, dz);
+                    Vec3 test = desired.add(dx, dy, dz);
                     if (invalid(test)) continue;
 
-                    double dist = test.squaredDistanceTo(desired);
+                    double dist = test.distanceToSqr(desired);
                     if (dist < bestDist) {
                         bestDist = dist;
                         best = test;
@@ -572,24 +576,24 @@ public class InfiniteReach extends Module {
         }
         return best;
     }
-    private Vec3d findNearestPosBLOCK(Vec3d preferredInsideTarget, BlockPos actionBlockPos, BlockHitResult blockHit) {
-        if (!invalid(preferredInsideTarget) && !BlockPos.ofFloored(preferredInsideTarget).equals(actionBlockPos)) {
+    private Vec3 findNearestPosBLOCK(Vec3 preferredInsideTarget, BlockPos actionBlockPos, BlockHitResult blockHit) {
+        if (!invalid(preferredInsideTarget) && !BlockPos.containing(preferredInsideTarget).equals(actionBlockPos)) {
             return preferredInsideTarget;
         }
 
-        Vec3d best = null;
+        Vec3 best = null;
         double bestDist = Double.MAX_VALUE;
 
         for (int dx = -3; dx <= 3; dx++) {
             for (int dz = -3; dz <= 3; dz++) {
                 for (int dy = -3; dy <= 3; dy++) {
-                    Vec3d test = preferredInsideTarget.add(dx * 0.4, dy * 0.4, dz * 0.4);
+                    Vec3 test = preferredInsideTarget.add(dx * 0.4, dy * 0.4, dz * 0.4);
 
-                    if (BlockPos.ofFloored(test).equals(actionBlockPos)) continue;
+                    if (BlockPos.containing(test).equals(actionBlockPos)) continue;
 
                     if (invalid(test)) continue;
 
-                    double dist = test.squaredDistanceTo(preferredInsideTarget);
+                    double dist = test.distanceToSqr(preferredInsideTarget);
                     if (dist < bestDist) {
                         bestDist = dist;
                         best = test;
@@ -600,36 +604,36 @@ public class InfiniteReach extends Module {
 
         if (best == null) {
             for (Direction dir : Direction.values()) {
-                if (dir == blockHit.getSide()) continue;
+                if (dir == blockHit.getDirection()) continue;
 
-                Vec3d fallback = preferredInsideTarget.add(
-                        dir.getOffsetX() * 0.5,
-                        dir.getOffsetY() * 0.5,
-                        dir.getOffsetZ() * 0.5
+                Vec3 fallback = preferredInsideTarget.add(
+                        dir.getStepX() * 0.5,
+                        dir.getStepY() * 0.5,
+                        dir.getStepZ() * 0.5
                 );
 
-                if (!invalid(fallback) && !BlockPos.ofFloored(fallback).equals(actionBlockPos)) {
+                if (!invalid(fallback) && !BlockPos.containing(fallback).equals(actionBlockPos)) {
                     return fallback;
                 }
             }
         }
         return best;
     }
-    private void sendMove(Entity entity, Vec3d pos) {
-        if (mc.getNetworkHandler() == null) return;
+    private void sendMove(Entity entity, Vec3 pos) {
+        if (mc.getConnection() == null) return;
         if (entity == mc.player) {
-            PlayerMoveC2SPacket movepacket = new PlayerMoveC2SPacket.PositionAndOnGround(pos.x, pos.y, pos.z, false, false);
-            ((IPlayerMoveC2SPacket) movepacket).meteor$setTag(1337);
-            mc.player.networkHandler.sendPacket(movepacket);
+            ServerboundMovePlayerPacket movepacket = new ServerboundMovePlayerPacket.Pos(pos.x, pos.y, pos.z, false, false);
+            ((IServerboundMovePlayerPacket) movepacket).meteor$setTag(1337);
+            mc.player.connection.send(movepacket);
         } else {
-            mc.getNetworkHandler().sendPacket(new VehicleMoveC2SPacket(pos, mc.player.getVehicle().getYaw(), mc.player.getVehicle().getPitch(), false));
+            mc.getConnection().send(new ServerboundMoveVehiclePacket(pos, mc.player.getVehicle().getYRot(), mc.player.getVehicle().getXRot(), false));
         }
     }
-    private Vec3d getOffset(Vec3d base) {
+    private Vec3 getOffset(Vec3 base) {
         double dx = offsethorizontal.get();
         double dy = offsetY.get();
 
-        Vec3d[] shuffledOffsets = new Vec3d[] {
+        Vec3[] shuffledOffsets = new Vec3[] {
                 base.add( dx, dy,  0),
                 base.add(-dx, dy,  0),
                 base.add( 0, dy,  dx),
@@ -642,65 +646,65 @@ public class InfiniteReach extends Module {
 
         Collections.shuffle(Arrays.asList(shuffledOffsets));
 
-        for (Vec3d pos : shuffledOffsets) {
+        for (Vec3 pos : shuffledOffsets) {
             if (!invalid(pos)) return pos;
         }
 
-        Vec3d noHorizontal = base.add(0, dy, 0);
+        Vec3 noHorizontal = base.add(0, dy, 0);
         if (!invalid(noHorizontal)) return noHorizontal;
 
         return base;
     }
 
-    private boolean invalid(Vec3d pos) {
-        if (mc.world == null) return true;
-        if (mc.world.getChunk(BlockPos.ofFloored(pos)) == null) return true;
+    private boolean invalid(Vec3 pos) {
+        if (mc.level == null) return true;
+        if (mc.level.getChunk(BlockPos.containing(pos)) == null) return true;
 
-        Entity entity = mc.player.hasVehicle() ? mc.player.getVehicle() : mc.player;
+        Entity entity = mc.player.isPassenger() ? mc.player.getVehicle() : mc.player;
 
-        Box targetBox = entity.getBoundingBox().offset(
+        AABB targetBox = entity.getBoundingBox().move(
                 pos.x - entity.getX(),
                 pos.y - entity.getY(),
                 pos.z - entity.getZ()
         );
         Module boatNoclip = Modules.get().get(BoatNoclip.class);
         if (skipCollisionCheck.get() && entity != mc.player && boatNoclip != null && boatNoclip.isActive()) {
-            for (BlockPos bp : BlockPos.iterate(
-                    BlockPos.ofFloored(targetBox.minX, targetBox.minY, targetBox.minZ),
-                    BlockPos.ofFloored(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
+            for (BlockPos bp : BlockPos.betweenClosed(
+                    BlockPos.containing(targetBox.minX, targetBox.minY, targetBox.minZ),
+                    BlockPos.containing(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
             )) {
-                BlockState state = mc.world.getBlockState(bp);
-                if (state.isOf(Blocks.LAVA)) {
+                BlockState state = mc.level.getBlockState(bp);
+                if (state.is(Blocks.LAVA)) {
                     return true;
                 }
             }
         } else {
-            for (BlockPos bp : BlockPos.iterate(
-                    BlockPos.ofFloored(targetBox.minX, targetBox.minY, targetBox.minZ),
-                    BlockPos.ofFloored(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
+            for (BlockPos bp : BlockPos.betweenClosed(
+                    BlockPos.containing(targetBox.minX, targetBox.minY, targetBox.minZ),
+                    BlockPos.containing(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
             )) {
-                BlockState state = mc.world.getBlockState(bp);
-                if (state.isOf(Blocks.LAVA) || !state.getCollisionShape(mc.world, bp).isEmpty()) {
+                BlockState state = mc.level.getBlockState(bp);
+                if (state.is(Blocks.LAVA) || !state.getCollisionShape(mc.level, bp).isEmpty()) {
                     return true;
                 }
             }
         }
 
-        for (Entity e : mc.world.getOtherEntities(entity, targetBox)) {
-            if (e.isCollidable(entity)) return true;
+        for (Entity e : mc.level.getEntities(entity, targetBox)) {
+            if (e.canBeCollidedWith(entity)) return true;
         }
 
         return false;
     }
 
-    private boolean hasClearPath(Vec3d start, Vec3d end) {
+    private boolean hasClearPath(Vec3 start, Vec3 end) {
         if (invalid(start) || invalid(end)) return false;
 
         int steps = Math.max(10, (int)(start.distanceTo(end) * 2.5));
 
         for (int i = 1; i < steps; i++) {
             double t = i / (double)steps;
-            Vec3d sample = start.lerp(end, t);
+            Vec3 sample = start.lerp(end, t);
 
             if (invalid(sample)) return false;
         }

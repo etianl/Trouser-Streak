@@ -30,24 +30,24 @@ import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.MobSpawnerBlockEntity;
-import net.minecraft.block.entity.TrialSpawnerBlockEntity;
-import net.minecraft.block.enums.TrialSpawnerState;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.client.gui.screen.world.LevelLoadingScreen;
-import net.minecraft.entity.vehicle.ChestMinecartEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.chunk.Palette;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
+import net.minecraft.client.gui.screens.LevelLoadingScreen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.vehicle.minecart.MinecartChest;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
+import net.minecraft.world.level.block.entity.TrialSpawnerBlockEntity;
+import net.minecraft.world.level.block.entity.trialspawner.TrialSpawnerState;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.Palette;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.io.BufferedReader;
@@ -350,16 +350,16 @@ public class ActivatedSpawnerDetector extends Module {
             Blocks.MEDIUM_AMETHYST_BUD,
             Blocks.SMALL_AMETHYST_BUD
     );
-    private boolean chunkContainsGeodeBlocks(WorldChunk chunk, int sectionsToCheck) {
-        ChunkSection[] sections = chunk.getSectionArray();
+    private boolean chunkContainsGeodeBlocks(LevelChunk chunk, int sectionsToCheck) {
+        LevelChunkSection[] sections = chunk.getSections();
         for (int i = 0; i < sectionsToCheck; i++) {
-            ChunkSection section = sections[i];
-            if (!section.isEmpty()) {
-                var blockStatesContainer = section.getBlockStateContainer();
+            LevelChunkSection section = sections[i];
+            if (!section.hasOnlyAir()) {
+                var blockStatesContainer = section.getStates();
                 Palette<BlockState> blockStatePalette = blockStatesContainer.data.palette();
                 int blockPaletteLength = blockStatePalette.getSize();
                 for (int i2 = 0; i2 < blockPaletteLength; i2++) {
-                    BlockState blockPaletteEntry = blockStatePalette.get(i2);
+                    BlockState blockPaletteEntry = blockStatePalette.valueFor(i2);
                     if (GEODE_BLOCKS.contains(blockPaletteEntry.getBlock())) return true;
                 }
             }
@@ -368,12 +368,12 @@ public class ActivatedSpawnerDetector extends Module {
     }
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (mc.world == null || mc.player == null) return;
-        AtomicReferenceArray<WorldChunk> chunks = mc.world.getChunkManager().chunks.chunks;
-        Set<WorldChunk> chunkSet = new HashSet<>();
+        if (mc.level == null || mc.player == null) return;
+        AtomicReferenceArray<LevelChunk> chunks = mc.level.getChunkSource().storage.chunks;
+        Set<LevelChunk> chunkSet = new HashSet<>();
 
         for (int i = 0; i < chunks.length(); i++) {
-            WorldChunk chunk = chunks.get(i);
+            LevelChunk chunk = chunks.get(i);
             if (chunk != null) {
                 chunkSet.add(chunk);
             }
@@ -382,24 +382,24 @@ public class ActivatedSpawnerDetector extends Module {
             List<BlockEntity> blockEntities = new ArrayList<>(chunk.getBlockEntities().values());
 
             for (BlockEntity blockEntity : blockEntities) {
-                if (blockEntity instanceof MobSpawnerBlockEntity) {
+                if (blockEntity instanceof SpawnerBlockEntity) {
                     activatedSpawnerFound = false;
-                    MobSpawnerBlockEntity spawner = (MobSpawnerBlockEntity) blockEntity;
-                    BlockPos pos = spawner.getPos();
+                    SpawnerBlockEntity spawner = (SpawnerBlockEntity) blockEntity;
+                    BlockPos pos = spawner.getBlockPos();
                     String monster = null;
-                    if (spawner.getLogic().spawnEntry != null && spawner.getLogic().spawnEntry.getNbt().get("id") != null)
-                        monster = spawner.getLogic().spawnEntry.getNbt().get("id").toString();
+                    if (spawner.getSpawner().nextSpawnData != null && spawner.getSpawner().nextSpawnData.getEntityToSpawn().get("id") != null)
+                        monster = spawner.getSpawner().nextSpawnData.getEntityToSpawn().get("id").toString();
                     if (!trialspawnerPositions.contains(pos) && !noRenderPositions.contains(pos) && !deactivatedSpawnerPositions.contains(pos) && !spawnerPositions.contains(pos)) {
-                        if (airChecker.get() && (spawner.getLogic().spawnDelay == 20 || spawner.getLogic().spawnDelay == 0)) {
+                        if (airChecker.get() && (spawner.getSpawner().spawnDelay == 20 || spawner.getSpawner().spawnDelay == 0)) {
                             boolean airFound = false;
                             boolean caveAirFound = false;
                             boolean geodeNearby = false;
-                            if (ignoreGeodes.get() && chunkContainsGeodeBlocks(chunk, Math.min(chunk.getSectionArray().length, 20))) { //thank you to FaxHack for this block https://github.com/FaxHack/PathSeeker/commit/a424a743297350147754ec3f90f1a5ee5643b7e7
+                            if (ignoreGeodes.get() && chunkContainsGeodeBlocks(chunk, Math.min(chunk.getSections().length, 20))) { //thank you to FaxHack for this block https://github.com/FaxHack/PathSeeker/commit/a424a743297350147754ec3f90f1a5ee5643b7e7
                                 for (int x = -5; x <= 5; x++) {
                                     for (int y = -5; y <= 5; y++) {
                                         for (int z = -5; z <= 5; z++) {
-                                            BlockPos bpos = pos.add(x, y, z);
-                                            if (GEODE_BLOCKS.contains(mc.world.getBlockState(bpos).getBlock())) {
+                                            BlockPos bpos = pos.offset(x, y, z);
+                                            if (GEODE_BLOCKS.contains(mc.level.getBlockState(bpos).getBlock())) {
                                                 geodeNearby = true;
                                                 break;
                                             }
@@ -415,9 +415,9 @@ public class ActivatedSpawnerDetector extends Module {
                                         for (int y = -1; y < 3; y++) {
                                             for (int z = -2; z < 2; z++) {
                                                 BlockPos bpos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
-                                                if (mc.world.getBlockState(bpos).getBlock() == Blocks.AIR)
+                                                if (mc.level.getBlockState(bpos).getBlock() == Blocks.AIR)
                                                     airFound = true;
-                                                if (mc.world.getBlockState(bpos).getBlock() == Blocks.CAVE_AIR)
+                                                if (mc.level.getBlockState(bpos).getBlock() == Blocks.CAVE_AIR)
                                                     caveAirFound = true;
                                                 if (caveAirFound && airFound) break;
                                             }
@@ -432,9 +432,9 @@ public class ActivatedSpawnerDetector extends Module {
                                         for (int y = 0; y < 2; y++) {
                                             for (int z = -1; z < 2; z++) {
                                                 BlockPos bpos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
-                                                if (mc.world.getBlockState(bpos).getBlock() == Blocks.AIR)
+                                                if (mc.level.getBlockState(bpos).getBlock() == Blocks.AIR)
                                                     airFound = true;
-                                                if (mc.world.getBlockState(bpos).getBlock() == Blocks.CAVE_AIR)
+                                                if (mc.level.getBlockState(bpos).getBlock() == Blocks.CAVE_AIR)
                                                     caveAirFound = true;
                                                 if (caveAirFound && airFound) break;
                                             }
@@ -448,9 +448,9 @@ public class ActivatedSpawnerDetector extends Module {
                                         for (int y = -2; y < 3 + 1; y++) {
                                             for (int z = -3; z < 3 + 1; z++) {
                                                 BlockPos bpos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
-                                                if (mc.world.getBlockState(bpos).getBlock() == Blocks.AIR)
+                                                if (mc.level.getBlockState(bpos).getBlock() == Blocks.AIR)
                                                     airFound = true;
-                                                if (mc.world.getBlockState(bpos).getBlock() == Blocks.CAVE_AIR)
+                                                if (mc.level.getBlockState(bpos).getBlock() == Blocks.CAVE_AIR)
                                                     caveAirFound = true;
                                                 if (caveAirFound && airFound) break;
                                             }
@@ -462,8 +462,8 @@ public class ActivatedSpawnerDetector extends Module {
                                 }
                             }
                             scannedPositions.add(pos);
-                        } else if (spawner.getLogic().spawnDelay != 20) {
-                            if (mc.world.getRegistryKey() == World.NETHER && spawner.getLogic().spawnDelay == 0) return;
+                        } else if (spawner.getSpawner().spawnDelay != 20) {
+                            if (mc.level.dimension() == Level.NETHER && spawner.getSpawner().spawnDelay == 0) return;
                             if (chatFeedback.get()) {
                                 if (monster != null) {
                                     if (monster.contains("zombie") || monster.contains("skeleton") || monster.contains(":spider")) {
@@ -479,16 +479,16 @@ public class ActivatedSpawnerDetector extends Module {
                                         displayMessage("magma", pos, "null");
                                     } else {
                                         if (displaycoords.get())
-                                            ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated Spawner! Block Position: " + pos));
-                                        else ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated Spawner!"));
+                                            ChatUtils.sendMsg(Component.nullToEmpty("§cASD§r | Detected Activated Spawner! Block Position: " + pos));
+                                        else ChatUtils.sendMsg(Component.nullToEmpty("§cASD§r | Detected Activated Spawner!"));
                                         spawnerPositions.add(pos);
                                         activatedSpawnerFound = true;
                                         if (locLogging.get()) logSpawner(pos);
                                     }
                                 } else {
                                     if (displaycoords.get())
-                                        ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated Spawner! Block Position: " + pos));
-                                    else ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated Spawner!"));
+                                        ChatUtils.sendMsg(Component.nullToEmpty("§cASD§r | Detected Activated Spawner! Block Position: " + pos));
+                                    else ChatUtils.sendMsg(Component.nullToEmpty("§cASD§r | Detected Activated Spawner!"));
                                     spawnerPositions.add(pos);
                                     activatedSpawnerFound = true;
                                     if (locLogging.get()) logSpawner(pos);
@@ -502,7 +502,7 @@ public class ActivatedSpawnerDetector extends Module {
                                     for (int y = -deactivatedSpawnerdistance.get(); y < deactivatedSpawnerdistance.get() + 1; y++) {
                                         for (int z = -deactivatedSpawnerdistance.get(); z < deactivatedSpawnerdistance.get() + 1; z++) {
                                             BlockPos bpos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
-                                            if (mc.world.getBlockState(bpos).getBlock() == Blocks.TORCH || mc.world.getBlockState(bpos).getBlock() == Blocks.SOUL_TORCH || mc.world.getBlockState(bpos).getBlock() == Blocks.REDSTONE_TORCH || mc.world.getBlockState(bpos).getBlock() == Blocks.JACK_O_LANTERN || mc.world.getBlockState(bpos).getBlock() == Blocks.GLOWSTONE || mc.world.getBlockState(bpos).getBlock() == Blocks.SHROOMLIGHT || mc.world.getBlockState(bpos).getBlock() == Blocks.OCHRE_FROGLIGHT || mc.world.getBlockState(bpos).getBlock() == Blocks.PEARLESCENT_FROGLIGHT || mc.world.getBlockState(bpos).getBlock() == Blocks.PEARLESCENT_FROGLIGHT || mc.world.getBlockState(bpos).getBlock() == Blocks.SEA_LANTERN || mc.world.getBlockState(bpos).getBlock() == Blocks.LANTERN || mc.world.getBlockState(bpos).getBlock() == Blocks.SOUL_LANTERN || mc.world.getBlockState(bpos).getBlock() == Blocks.CAMPFIRE || mc.world.getBlockState(bpos).getBlock() == Blocks.SOUL_CAMPFIRE) {
+                                            if (mc.level.getBlockState(bpos).getBlock() == Blocks.TORCH || mc.level.getBlockState(bpos).getBlock() == Blocks.SOUL_TORCH || mc.level.getBlockState(bpos).getBlock() == Blocks.REDSTONE_TORCH || mc.level.getBlockState(bpos).getBlock() == Blocks.JACK_O_LANTERN || mc.level.getBlockState(bpos).getBlock() == Blocks.GLOWSTONE || mc.level.getBlockState(bpos).getBlock() == Blocks.SHROOMLIGHT || mc.level.getBlockState(bpos).getBlock() == Blocks.OCHRE_FROGLIGHT || mc.level.getBlockState(bpos).getBlock() == Blocks.PEARLESCENT_FROGLIGHT || mc.level.getBlockState(bpos).getBlock() == Blocks.PEARLESCENT_FROGLIGHT || mc.level.getBlockState(bpos).getBlock() == Blocks.SEA_LANTERN || mc.level.getBlockState(bpos).getBlock() == Blocks.LANTERN || mc.level.getBlockState(bpos).getBlock() == Blocks.SOUL_LANTERN || mc.level.getBlockState(bpos).getBlock() == Blocks.CAMPFIRE || mc.level.getBlockState(bpos).getBlock() == Blocks.SOUL_CAMPFIRE) {
                                                 lightsFound = true;
                                                 deactivatedSpawnerPositions.add(pos);
                                                 break;
@@ -511,7 +511,7 @@ public class ActivatedSpawnerDetector extends Module {
                                     }
                                 }
                                 if (chatFeedback.get() && lightsFound == true)
-                                    ChatUtils.sendMsg(Text.of("The Spawner has torches or other light blocks!"));
+                                    ChatUtils.sendMsg(Component.nullToEmpty("The Spawner has torches or other light blocks!"));
                             }
 
                             boolean chestfound = false;
@@ -519,12 +519,12 @@ public class ActivatedSpawnerDetector extends Module {
                                 for (int y = -16; y < 17; y++) {
                                     for (int z = -16; z < 17; z++) {
                                         BlockPos bpos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
-                                        if (blocks.get().contains(mc.world.getBlockState(bpos).getBlock())) {
+                                        if (blocks.get().contains(mc.level.getBlockState(bpos).getBlock())) {
                                             chestfound = true;
                                             break;
                                         }
-                                        Box box = new Box(bpos);
-                                        List<ChestMinecartEntity> minecarts = mc.world.getEntitiesByClass(ChestMinecartEntity.class, box, entity -> true);
+                                        AABB box = new AABB(bpos);
+                                        List<MinecartChest> minecarts = mc.level.getEntitiesOfClass(MinecartChest.class, box, entity -> true);
                                         if (!minecarts.isEmpty()) {
                                             chestfound = true;
                                             break;
@@ -548,12 +548,12 @@ public class ActivatedSpawnerDetector extends Module {
                 }
                 if (blockEntity instanceof TrialSpawnerBlockEntity) {
                     TrialSpawnerBlockEntity trialspawner = (TrialSpawnerBlockEntity) blockEntity;
-                    BlockPos tPos = trialspawner.getPos();
-                    if (trialSpawner.get() && !trialspawnerPositions.contains(tPos) && !noRenderPositions.contains(tPos) && !deactivatedSpawnerPositions.contains(tPos) && !spawnerPositions.contains(tPos) && trialspawner.getSpawnerState() != TrialSpawnerState.WAITING_FOR_PLAYERS) {
+                    BlockPos tPos = trialspawner.getBlockPos();
+                    if (trialSpawner.get() && !trialspawnerPositions.contains(tPos) && !noRenderPositions.contains(tPos) && !deactivatedSpawnerPositions.contains(tPos) && !spawnerPositions.contains(tPos) && trialspawner.getState() != TrialSpawnerState.WAITING_FOR_PLAYERS) {
                         if (chatFeedback.get()) {
                             if (displaycoords.get())
-                                ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cTRIAL§r Spawner! Block Position: " + tPos));
-                            else ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cTRIAL§r Spawner!"));
+                                ChatUtils.sendMsg(Component.nullToEmpty("§cASD§r | Detected Activated §cTRIAL§r Spawner! Block Position: " + tPos));
+                            else ChatUtils.sendMsg(Component.nullToEmpty("§cASD§r | Detected Activated §cTRIAL§r Spawner!"));
                         }
                         trialspawnerPositions.add(tPos);
                         boolean chestfound = false;
@@ -561,12 +561,12 @@ public class ActivatedSpawnerDetector extends Module {
                             for (int y = -14; y < 15; y++) {
                                 for (int z = -14; z < 15; z++) {
                                     BlockPos bpos = new BlockPos(tPos.getX() + x, tPos.getY() + y, tPos.getZ() + z);
-                                    if (blocks.get().contains(mc.world.getBlockState(bpos).getBlock())) {
+                                    if (blocks.get().contains(mc.level.getBlockState(bpos).getBlock())) {
                                         chestfound = true;
                                         break;
                                     }
-                                    Box box = new Box(bpos);
-                                    List<ChestMinecartEntity> minecarts = mc.world.getEntitiesByClass(ChestMinecartEntity.class, box, entity -> true);
+                                    AABB box = new AABB(bpos);
+                                    List<MinecartChest> minecarts = mc.level.getEntitiesOfClass(MinecartChest.class, box, entity -> true);
                                     if (!minecarts.isEmpty()) {
                                         chestfound = true;
                                         break;
@@ -620,7 +620,7 @@ public class ActivatedSpawnerDetector extends Module {
             synchronized (spawnerPositions) {
                 for (BlockPos pos : spawnerPositions) {
                     BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
-                    if (pos != null && playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
+                    if (pos != null && playerPos.closerThan(pos, renderDistance.get() * 16)) {
                         int startX = pos.getX();
                         int startY = pos.getY();
                         int startZ = pos.getZ();
@@ -628,16 +628,16 @@ public class ActivatedSpawnerDetector extends Module {
                         int endY = pos.getY();
                         int endZ = pos.getZ();
                         if (!nearesttrcr.get()) {
-                            if (rangerendering.get() && !lessRenderSpam.get())renderRange(new Box(new Vec3d(startX+17, startY+17, startZ+17), new Vec3d(endX-16, endY-16, endZ-16)), rangeSideColor.get(), rangeLineColor.get(), shapeMode.get(), event);
-                            else if (rangerendering.get() && lessRenderSpam.get() && !noRenderPositions.contains(pos))renderRange(new Box(new Vec3d(startX+17, startY+17, startZ+17), new Vec3d(endX-16, endY-16, endZ-16)), rangeSideColor.get(), rangeLineColor.get(), shapeMode.get(), event);
-                            if (deactivatedSpawnerPositions.contains(pos)) render(new Box(new Vec3d(startX+1, startY+1, startZ+1), new Vec3d(endX, endY, endZ)), despawnerSideColor.get(), despawnerLineColor.get(), shapeMode.get(), event);
-                            else render(new Box(new Vec3d(startX+1, startY+1, startZ+1), new Vec3d(endX, endY, endZ)), spawnerSideColor.get(), spawnerLineColor.get(), shapeMode.get(), event);
+                            if (rangerendering.get() && !lessRenderSpam.get())renderRange(new AABB(new Vec3(startX+17, startY+17, startZ+17), new Vec3(endX-16, endY-16, endZ-16)), rangeSideColor.get(), rangeLineColor.get(), shapeMode.get(), event);
+                            else if (rangerendering.get() && lessRenderSpam.get() && !noRenderPositions.contains(pos))renderRange(new AABB(new Vec3(startX+17, startY+17, startZ+17), new Vec3(endX-16, endY-16, endZ-16)), rangeSideColor.get(), rangeLineColor.get(), shapeMode.get(), event);
+                            if (deactivatedSpawnerPositions.contains(pos)) render(new AABB(new Vec3(startX+1, startY+1, startZ+1), new Vec3(endX, endY, endZ)), despawnerSideColor.get(), despawnerLineColor.get(), shapeMode.get(), event);
+                            else render(new AABB(new Vec3(startX+1, startY+1, startZ+1), new Vec3(endX, endY, endZ)), spawnerSideColor.get(), spawnerLineColor.get(), shapeMode.get(), event);
                         } else if (nearesttrcr.get()) {
-                            if (rangerendering.get() && !lessRenderSpam.get())renderRange(new Box(new Vec3d(startX+17, startY+17, startZ+17), new Vec3d(endX-16, endY-16, endZ-16)), rangeSideColor.get(), rangeLineColor.get(), shapeMode.get(), event);
-                            else if (rangerendering.get() && lessRenderSpam.get() && !noRenderPositions.contains(pos))renderRange(new Box(new Vec3d(startX+17, startY+17, startZ+17), new Vec3d(endX-16, endY-16, endZ-16)), rangeSideColor.get(), rangeLineColor.get(), shapeMode.get(), event);
-                            if (deactivatedSpawnerPositions.contains(pos)) render(new Box(new Vec3d(startX+1, startY+1, startZ+1), new Vec3d(endX, endY, endZ)), despawnerSideColor.get(), despawnerLineColor.get(), shapeMode.get(), event);
-                            else render(new Box(new Vec3d(startX+1, startY+1, startZ+1), new Vec3d(endX, endY, endZ)), spawnerSideColor.get(), spawnerLineColor.get(), shapeMode.get(), event);
-                            render2(new Box(new Vec3d(closestSpawnerX, closestSpawnerY, closestSpawnerZ), new Vec3d (closestSpawnerX, closestSpawnerY, closestSpawnerZ)), spawnerSideColor.get(), spawnerLineColor.get(),ShapeMode.Sides, event);
+                            if (rangerendering.get() && !lessRenderSpam.get())renderRange(new AABB(new Vec3(startX+17, startY+17, startZ+17), new Vec3(endX-16, endY-16, endZ-16)), rangeSideColor.get(), rangeLineColor.get(), shapeMode.get(), event);
+                            else if (rangerendering.get() && lessRenderSpam.get() && !noRenderPositions.contains(pos))renderRange(new AABB(new Vec3(startX+17, startY+17, startZ+17), new Vec3(endX-16, endY-16, endZ-16)), rangeSideColor.get(), rangeLineColor.get(), shapeMode.get(), event);
+                            if (deactivatedSpawnerPositions.contains(pos)) render(new AABB(new Vec3(startX+1, startY+1, startZ+1), new Vec3(endX, endY, endZ)), despawnerSideColor.get(), despawnerLineColor.get(), shapeMode.get(), event);
+                            else render(new AABB(new Vec3(startX+1, startY+1, startZ+1), new Vec3(endX, endY, endZ)), spawnerSideColor.get(), spawnerLineColor.get(), shapeMode.get(), event);
+                            render2(new AABB(new Vec3(closestSpawnerX, closestSpawnerY, closestSpawnerZ), new Vec3 (closestSpawnerX, closestSpawnerY, closestSpawnerZ)), spawnerSideColor.get(), spawnerLineColor.get(),ShapeMode.Sides, event);
                         }
                     }
                 }
@@ -645,7 +645,7 @@ public class ActivatedSpawnerDetector extends Module {
             synchronized (trialspawnerPositions) {
                 for (BlockPos pos : trialspawnerPositions) {
                     BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
-                    if (pos != null && playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
+                    if (pos != null && playerPos.closerThan(pos, renderDistance.get() * 16)) {
                         int startX = pos.getX();
                         int startY = pos.getY();
                         int startZ = pos.getZ();
@@ -653,16 +653,16 @@ public class ActivatedSpawnerDetector extends Module {
                         int endY = pos.getY();
                         int endZ = pos.getZ();
                         if (!nearesttrcr.get()) {
-                            if (trialSpawner.get() && rangerendering.get() && !lessRenderSpam.get())renderRange(new Box(new Vec3d(startX+15, startY+15, startZ+15), new Vec3d(endX-14, endY-14, endZ-14)), trangeSideColor.get(), trangeLineColor.get(), shapeMode.get(), event);
-                            else if (trialSpawner.get() && rangerendering.get() && lessRenderSpam.get() && !noRenderPositions.contains(pos))renderRange(new Box(new Vec3d(startX+15, startY+15, startZ+15), new Vec3d(endX-14, endY-14, endZ-14)), trangeSideColor.get(), trangeLineColor.get(), shapeMode.get(), event);
-                            if (deactivatedSpawnerPositions.contains(pos)) render(new Box(new Vec3d(startX+1, startY+1, startZ+1), new Vec3d(endX, endY, endZ)), despawnerSideColor.get(), despawnerLineColor.get(), shapeMode.get(), event);
-                            else render(new Box(new Vec3d(startX+1, startY+1, startZ+1), new Vec3d(endX, endY, endZ)), trialSideColor.get(), trialLineColor.get(), shapeMode.get(), event);
+                            if (trialSpawner.get() && rangerendering.get() && !lessRenderSpam.get())renderRange(new AABB(new Vec3(startX+15, startY+15, startZ+15), new Vec3(endX-14, endY-14, endZ-14)), trangeSideColor.get(), trangeLineColor.get(), shapeMode.get(), event);
+                            else if (trialSpawner.get() && rangerendering.get() && lessRenderSpam.get() && !noRenderPositions.contains(pos))renderRange(new AABB(new Vec3(startX+15, startY+15, startZ+15), new Vec3(endX-14, endY-14, endZ-14)), trangeSideColor.get(), trangeLineColor.get(), shapeMode.get(), event);
+                            if (deactivatedSpawnerPositions.contains(pos)) render(new AABB(new Vec3(startX+1, startY+1, startZ+1), new Vec3(endX, endY, endZ)), despawnerSideColor.get(), despawnerLineColor.get(), shapeMode.get(), event);
+                            else render(new AABB(new Vec3(startX+1, startY+1, startZ+1), new Vec3(endX, endY, endZ)), trialSideColor.get(), trialLineColor.get(), shapeMode.get(), event);
                         } else if (nearesttrcr.get()) {
-                            if (trialSpawner.get() && rangerendering.get() && !lessRenderSpam.get())renderRange(new Box(new Vec3d(startX+15, startY+15, startZ+15), new Vec3d(endX-14, endY-14, endZ-14)), trangeSideColor.get(), trangeLineColor.get(), shapeMode.get(), event);
-                            else if (trialSpawner.get() && rangerendering.get() && lessRenderSpam.get() && !noRenderPositions.contains(pos))renderRange(new Box(new Vec3d(startX+15, startY+15, startZ+15), new Vec3d(endX-14, endY-14, endZ-14)), trangeSideColor.get(), trangeLineColor.get(), shapeMode.get(), event);
-                            if (deactivatedSpawnerPositions.contains(pos)) render(new Box(new Vec3d(startX+1, startY+1, startZ+1), new Vec3d(endX, endY, endZ)), despawnerSideColor.get(), despawnerLineColor.get(), shapeMode.get(), event);
-                            else render(new Box(new Vec3d(startX+1, startY+1, startZ+1), new Vec3d(endX, endY, endZ)), trialSideColor.get(), trialLineColor.get(), shapeMode.get(), event);
-                            render2(new Box(new Vec3d(closestSpawnerX, closestSpawnerY, closestSpawnerZ), new Vec3d (closestSpawnerX, closestSpawnerY, closestSpawnerZ)), trialSideColor.get(), trialLineColor.get(),ShapeMode.Sides, event);
+                            if (trialSpawner.get() && rangerendering.get() && !lessRenderSpam.get())renderRange(new AABB(new Vec3(startX+15, startY+15, startZ+15), new Vec3(endX-14, endY-14, endZ-14)), trangeSideColor.get(), trangeLineColor.get(), shapeMode.get(), event);
+                            else if (trialSpawner.get() && rangerendering.get() && lessRenderSpam.get() && !noRenderPositions.contains(pos))renderRange(new AABB(new Vec3(startX+15, startY+15, startZ+15), new Vec3(endX-14, endY-14, endZ-14)), trangeSideColor.get(), trangeLineColor.get(), shapeMode.get(), event);
+                            if (deactivatedSpawnerPositions.contains(pos)) render(new AABB(new Vec3(startX+1, startY+1, startZ+1), new Vec3(endX, endY, endZ)), despawnerSideColor.get(), despawnerLineColor.get(), shapeMode.get(), event);
+                            else render(new AABB(new Vec3(startX+1, startY+1, startZ+1), new Vec3(endX, endY, endZ)), trialSideColor.get(), trialLineColor.get(), shapeMode.get(), event);
+                            render2(new AABB(new Vec3(closestSpawnerX, closestSpawnerY, closestSpawnerZ), new Vec3 (closestSpawnerX, closestSpawnerY, closestSpawnerZ)), trialSideColor.get(), trialLineColor.get(),ShapeMode.Sides, event);
                         }
                     }
                 }
@@ -673,82 +673,82 @@ public class ActivatedSpawnerDetector extends Module {
         if (chatFeedback.get()) {
             if (key=="dungeon") {
                 if (key2==":spider") {
-                    if (mc.world.getBlockState(pos.down()).getBlock() == Blocks.BIRCH_PLANKS && enableWoodlandMansion.get()) {
+                    if (mc.level.getBlockState(pos.below()).getBlock() == Blocks.BIRCH_PLANKS && enableWoodlandMansion.get()) {
                         activatedSpawnerFound = true;
                         spawnerPositions.add(pos);
-                        if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cWOODLAND MANSION§r Spawner! Block Position: " + pos));
-                        else ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cWOODLAND MANSION§r Spawner!"));
+                        if (displaycoords.get()) ChatUtils.sendMsg(Component.nullToEmpty("§cASD§r | Detected Activated §cWOODLAND MANSION§r Spawner! Block Position: " + pos));
+                        else ChatUtils.sendMsg(Component.nullToEmpty("§cASD§r | Detected Activated §cWOODLAND MANSION§r Spawner!"));
                     } else {
                         if (enableDungeon.get()) {
                             activatedSpawnerFound = true;
                             spawnerPositions.add(pos);
-                            if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cDUNGEON§r Spawner! Block Position: " + pos));
-                            else ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cDUNGEON§r Spawner!"));
+                            if (displaycoords.get()) ChatUtils.sendMsg(Component.nullToEmpty("§cASD§r | Detected Activated §cDUNGEON§r Spawner! Block Position: " + pos));
+                            else ChatUtils.sendMsg(Component.nullToEmpty("§cASD§r | Detected Activated §cDUNGEON§r Spawner!"));
                         }
                     }
                 } else {
                     if (enableDungeon.get()) {
                         activatedSpawnerFound = true;
                         spawnerPositions.add(pos);
-                        if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cDUNGEON§r Spawner! Block Position: " + pos));
-                        else ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cDUNGEON§r Spawner!"));
+                        if (displaycoords.get()) ChatUtils.sendMsg(Component.nullToEmpty("§cASD§r | Detected Activated §cDUNGEON§r Spawner! Block Position: " + pos));
+                        else ChatUtils.sendMsg(Component.nullToEmpty("§cASD§r | Detected Activated §cDUNGEON§r Spawner!"));
                     }
                 }
             } else if (key=="cave_spider" && enableMineshaft.get()) {
                 activatedSpawnerFound = true;
                 spawnerPositions.add(pos);
-                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cMINESHAFT§r Spawner! Block Position: " + pos));
-                else ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cMINESHAFT§r Spawner!"));
+                if (displaycoords.get()) ChatUtils.sendMsg(Component.nullToEmpty("§cASD§r | Detected Activated §cMINESHAFT§r Spawner! Block Position: " + pos));
+                else ChatUtils.sendMsg(Component.nullToEmpty("§cASD§r | Detected Activated §cMINESHAFT§r Spawner!"));
             } else if (key=="silverfish" && enableStronghold.get()) {
                 activatedSpawnerFound = true;
                 spawnerPositions.add(pos);
-                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cSTRONGHOLD§r Spawner! Block Position: " + pos));
-                else ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cSTRONGHOLD§r Spawner!"));
+                if (displaycoords.get()) ChatUtils.sendMsg(Component.nullToEmpty("§cASD§r | Detected Activated §cSTRONGHOLD§r Spawner! Block Position: " + pos));
+                else ChatUtils.sendMsg(Component.nullToEmpty("§cASD§r | Detected Activated §cSTRONGHOLD§r Spawner!"));
             } else if (key=="blaze" && enableFortress.get()) {
                 activatedSpawnerFound = true;
                 spawnerPositions.add(pos);
-                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cFORTRESS§r Spawner! Block Position: " + pos));
-                else ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cFORTRESS§r Spawner!"));
+                if (displaycoords.get()) ChatUtils.sendMsg(Component.nullToEmpty("§cASD§r | Detected Activated §cFORTRESS§r Spawner! Block Position: " + pos));
+                else ChatUtils.sendMsg(Component.nullToEmpty("§cASD§r | Detected Activated §cFORTRESS§r Spawner!"));
             } else if (key=="magma" && enableBastion.get()) {
                 activatedSpawnerFound = true;
                 spawnerPositions.add(pos);
-                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cBASTION§r Spawner! Block Position: " + pos));
-                else ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated §cBASTION§r Spawner!"));
+                if (displaycoords.get()) ChatUtils.sendMsg(Component.nullToEmpty("§cASD§r | Detected Activated §cBASTION§r Spawner! Block Position: " + pos));
+                else ChatUtils.sendMsg(Component.nullToEmpty("§cASD§r | Detected Activated §cBASTION§r Spawner!"));
             } else {
                 activatedSpawnerFound = true;
                 spawnerPositions.add(pos);
-                if (displaycoords.get()) ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated Spawner! Block Position: " + pos));
-                else ChatUtils.sendMsg(Text.of("§cASD§r | Detected Activated Spawner!"));
+                if (displaycoords.get()) ChatUtils.sendMsg(Component.nullToEmpty("§cASD§r | Detected Activated Spawner! Block Position: " + pos));
+                else ChatUtils.sendMsg(Component.nullToEmpty("§cASD§r | Detected Activated Spawner!"));
             }
             if (locLogging.get())logSpawner(pos);
         }
     }
-    private void render(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
+    private void render(AABB box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
         if (trcr.get())
             if (!nearesttrcr.get())
                 event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
         event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
     }
-    private void render2(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
+    private void render2(AABB box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
         if (trcr.get())
             event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
         event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
     }
-    private void renderRange(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
+    private void renderRange(AABB box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
         event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, lines, shapeMode, 0);
     }
-    private void removeChunksOutsideRenderDistance(Set<WorldChunk> chunks) {
+    private void removeChunksOutsideRenderDistance(Set<LevelChunk> chunks) {
         removeBlockPosOutsideRenderDistance(scannedPositions, chunks);
         removeBlockPosOutsideRenderDistance(spawnerPositions, chunks);
         removeBlockPosOutsideRenderDistance(deactivatedSpawnerPositions, chunks);
         removeBlockPosOutsideRenderDistance(trialspawnerPositions, chunks);
         removeBlockPosOutsideRenderDistance(noRenderPositions, chunks);
     }
-    private void removeBlockPosOutsideRenderDistance(Set<BlockPos> blockSet, Set<WorldChunk> worldChunks) {
+    private void removeBlockPosOutsideRenderDistance(Set<BlockPos> blockSet, Set<LevelChunk> worldChunks) {
         blockSet.removeIf(blockpos -> {
             BlockPos boxPos = new BlockPos((int)Math.floor(blockpos.getX()), (int)Math.floor(blockpos.getY()), (int)Math.floor(blockpos.getZ()));
-            assert mc.world != null;
-            return !worldChunks.contains(mc.world.getChunk(boxPos));
+            assert mc.level != null;
+            return !worldChunks.contains(mc.level.getChunk(boxPos));
         });
     }
 

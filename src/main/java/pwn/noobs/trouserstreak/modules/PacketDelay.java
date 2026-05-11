@@ -9,7 +9,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.network.PacketUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.network.packet.Packet;
+import net.minecraft.network.protocol.Packet;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.ArrayDeque;
@@ -109,7 +109,7 @@ public class PacketDelay extends Module {
                 DelayedPacket dp = it.next();
                 dp.remainingTicks--;
                 if (dp.remainingTicks <= 0) {
-                    mc.getNetworkHandler().getConnection().handlePacket(dp.packet, mc.getNetworkHandler());
+                    mc.getConnection().getConnection().genericsFtw(dp.packet, mc.getConnection());
                     it.remove();
                 }
             }
@@ -121,7 +121,7 @@ public class PacketDelay extends Module {
                 DelayedPacket dp = it.next();
                 dp.remainingTicks--;
                 if (dp.remainingTicks <= 0) {
-                    mc.getNetworkHandler().sendPacket(dp.packet);
+                    mc.getConnection().send(dp.packet);
                     it.remove();
                 }
             }

@@ -2,21 +2,24 @@
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
+import meteordevelopment.meteorclient.mixininterface.IServerboundMovePlayerPacket;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.packet.c2s.play.*;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.*;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.Arrays;
@@ -181,7 +184,7 @@ public class TPAura extends Module {
     }
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (mc.player == null || mc.world == null || mc.getNetworkHandler() == null) return;
+        if (mc.player == null || mc.level == null || mc.getConnection() == null) return;
 
         maxDistance = mode.get() == Mode.Vanilla ? Distance.get() : paperDistance.get();
         entityAttackTicks++;
@@ -196,16 +199,16 @@ public class TPAura extends Module {
         double bestValue = Double.MAX_VALUE;
         double maxDistSq = maxDistance * maxDistance;
 
-        for (Entity entity : mc.world.getEntities()) {
-            if (entity.squaredDistanceTo(mc.player) > maxDistSq) continue;
+        for (Entity entity : mc.level.entitiesForRendering()) {
+            if (entity.distanceToSqr(mc.player) > maxDistSq) continue;
             if (!isValidListTarget(entity)) continue;
-            if (friends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) continue;
+            if (friends.get() && entity instanceof Player && Friends.get().isFriend((Player) entity)) continue;
 
             double value;
             if (targetPriority.get() == TargetPriority.LowestHealth && entity instanceof LivingEntity living) {
                 value = living.getHealth();
             } else {
-                value = entity.squaredDistanceTo(mc.player);
+                value = entity.distanceToSqr(mc.player);
             }
 
             if (value < bestValue) {
@@ -224,23 +227,23 @@ public class TPAura extends Module {
                 && entity != mc.player;
     }
     private boolean isValidTarget(Entity entity) {
-        Entity playerentity = mc.player.hasVehicle() ? mc.player.getVehicle() : mc.player;
+        Entity playerentity = mc.player.isPassenger() ? mc.player.getVehicle() : mc.player;
         return entity.isAlive()
                 && playerentity.distanceTo(entity) <= maxDistance;
     }
     public void hitEntity() {
-        if (mc.player == null || mc.getNetworkHandler() == null) return;
-        Entity entity = mc.player.hasVehicle() ? mc.player.getVehicle() : mc.player;
+        if (mc.player == null || mc.getConnection() == null) return;
+        Entity entity = mc.player.isPassenger() ? mc.player.getVehicle() : mc.player;
         Entity target = findClosestTarget();
-        if (target instanceof PlayerEntity player && player.isBlocking()) return;
+        if (target instanceof Player player && player.isBlocking()) return;
 
         if (target == null || !isValidTarget(target)) {
             entityAttackTicks = 0;
             return;
         }
 
-        Vec3d startPos = entity.getEntityPos();
-        Vec3d targetPos = target.getEntityPos();
+        Vec3 startPos = entity.position();
+        Vec3 targetPos = target.position();
 
         double actualDist = startPos.distanceTo(targetPos);
         if (actualDist > maxDistance - 0.5) return;
@@ -249,19 +252,19 @@ public class TPAura extends Module {
                 ? target.getBoundingBox().maxY + 0.3
                 : target.getBoundingBox().getCenter().y;
 
-        Vec3d insideTarget = new Vec3d(targetPos.x, yOffset, targetPos.z);
+        Vec3 insideTarget = new Vec3(targetPos.x, yOffset, targetPos.z);
 
-        Vec3d finalPos = !invalid(insideTarget)
+        Vec3 finalPos = !invalid(insideTarget)
                 ? insideTarget
                 : findNearestPos(insideTarget);
         if (finalPos == null) return;
 
-        Vec3d highPos = startPos.add(0, maxDistance, 0);
-        Vec3d abovetarget = finalPos.add(0, maxDistance, 0);
+        Vec3 highPos = startPos.add(0, maxDistance, 0);
+        Vec3 abovetarget = finalPos.add(0, maxDistance, 0);
         boolean doGoUp = mode.get() == Mode.Paper && goUp.get();
 
         boolean aboveTargetInvalid = doGoUp && (attackSpam.get()
-                ? (mc.world == null || abovetarget.y > mc.world.getTopYInclusive() - 1)
+                ? (mc.level == null || abovetarget.y > mc.level.getMaxY() - 1)
                 : (invalid(highPos) || invalid(abovetarget) || !hasClearPath(highPos, abovetarget)));
         if (invalid(finalPos) || aboveTargetInvalid) {
             if (chatFeedback) {
@@ -276,8 +279,8 @@ public class TPAura extends Module {
 
         int amountOfPackets = mode.get() == Mode.Vanilla ? packets.get() : paperpackets.get();
         for (int i2 = 0; i2 < amountOfPackets; i2++) {
-            if (mc.player.hasVehicle()) mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
-            else mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(mc.player.getYaw(), mc.player.getPitch(), false, mc.player.horizontalCollision));
+            if (mc.player.isPassenger()) mc.player.connection.send(ServerboundMoveVehiclePacket.fromEntity(mc.player.getVehicle()));
+            else mc.player.connection.send(new ServerboundMovePlayerPacket.Rot(mc.player.getYRot(), mc.player.getXRot(), false, mc.player.horizontalCollision));
         }
 
         int attackCount = attacks.get();
@@ -287,15 +290,15 @@ public class TPAura extends Module {
         for (int i = 0; i < attackCount; i++) {
             int blocks = (i == 0) ? (int)maxDistance : currentHeight;
 
-            if (attackSpam.get() && mc.world != null) {
-                int worldTop = mc.world.getTopYInclusive() - 1;
+            if (attackSpam.get() && mc.level != null) {
+                int worldTop = mc.level.getMaxY() - 1;
                 if (finalPos.y + blocks > worldTop) {
                     blocks = (int)(worldTop - finalPos.y);
                     if (blocks < 1) break;
                 }
             }
 
-            Vec3d progressiveAboveTarget = finalPos.add(0, blocks, 0);
+            Vec3 progressiveAboveTarget = finalPos.add(0, blocks, 0);
 
             if (doGoUp && invalid(progressiveAboveTarget)) {
                 if (chatFeedback) error("Invalid progressive height positions at " + blocks + " blocks.");
@@ -318,20 +321,20 @@ public class TPAura extends Module {
             sendMove(entity, finalPos);
 
             if (rotateToTarget.get()) {
-                Vec3d toTarget = target.getBoundingBox().getCenter().subtract(mc.player.getEyePos()).normalize();
+                Vec3 toTarget = target.getBoundingBox().getCenter().subtract(mc.player.getEyePosition()).normalize();
                 float yaw = (float)(Math.toDegrees(Math.atan2(toTarget.z, toTarget.x)) - 90.0);
-                float pitch = (float)-Math.toDegrees(Math.asin(MathHelper.clamp(toTarget.y, -1.0, 1.0)));
-                PlayerMoveC2SPacket rotPacket = new PlayerMoveC2SPacket.LookAndOnGround(yaw, pitch, false, mc.player.horizontalCollision);
-                ((IPlayerMoveC2SPacket) rotPacket).meteor$setTag(1337);
-                mc.player.networkHandler.sendPacket(rotPacket);
+                float pitch = (float)-Math.toDegrees(Math.asin(Mth.clamp(toTarget.y, -1.0, 1.0)));
+                ServerboundMovePlayerPacket rotPacket = new ServerboundMovePlayerPacket.Rot(yaw, pitch, false, mc.player.horizontalCollision);
+                ((IServerboundMovePlayerPacket) rotPacket).meteor$setTag(1337);
+                mc.player.connection.send(rotPacket);
             }
 
             if (swing.get()) {
-                mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
-                mc.player.swingHand(Hand.MAIN_HAND);
+                mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
+                mc.player.swing(InteractionHand.MAIN_HAND);
             }
 
-            mc.getNetworkHandler().sendPacket(PlayerInteractEntityC2SPacket.attack(target, mc.player.isSneaking()));
+            mc.getConnection().send(new ServerboundAttackPacket(target.getId()));
 
             if (attackCount == 1 && doGoUp) {
                 sendMove(entity, progressiveAboveTarget);
@@ -349,23 +352,23 @@ public class TPAura extends Module {
             sendMove(entity, startPos);
         }
 
-        Vec3d offset = getOffset(startPos);
+        Vec3 offset = getOffset(startPos);
         sendMove(entity, offset);
-        entity.setPosition(offset);
+        entity.setPos(offset);
     }
-    private Vec3d findNearestPos(Vec3d desired) {
+    private Vec3 findNearestPos(Vec3 desired) {
         if (!invalid(desired)) return desired;
 
-        Vec3d best = null;
+        Vec3 best = null;
         double bestDist = Double.MAX_VALUE;
 
         for (int dx = -2; dx <= 2; dx++) {
             for (int dz = -2; dz <= 2; dz++) {
                 for (int dy = -2; dy <= 2; dy++) {
-                    Vec3d test = desired.add(dx, dy, dz);
+                    Vec3 test = desired.add(dx, dy, dz);
                     if (invalid(test)) continue;
 
-                    double dist = test.squaredDistanceTo(desired);
+                    double dist = test.distanceToSqr(desired);
                     if (dist < bestDist) {
                         bestDist = dist;
                         best = test;
@@ -375,21 +378,21 @@ public class TPAura extends Module {
         }
         return best;
     }
-    private void sendMove(Entity entity, Vec3d pos) {
-        if (mc.getNetworkHandler() == null) return;
+    private void sendMove(Entity entity, Vec3 pos) {
+        if (mc.getConnection() == null) return;
         if (entity == mc.player) {
-            PlayerMoveC2SPacket movepacket = new PlayerMoveC2SPacket.Full(pos,mc.player.getYaw(),mc.player.getPitch(), false, mc.player.horizontalCollision);
-            ((IPlayerMoveC2SPacket) movepacket).meteor$setTag(1337);
-            mc.player.networkHandler.sendPacket(movepacket);
+            ServerboundMovePlayerPacket movepacket = new ServerboundMovePlayerPacket.PosRot(pos,mc.player.getYRot(),mc.player.getXRot(), false, mc.player.horizontalCollision);
+            ((IServerboundMovePlayerPacket) movepacket).meteor$setTag(1337);
+            mc.player.connection.send(movepacket);
         } else {
-            mc.getNetworkHandler().sendPacket(new VehicleMoveC2SPacket(pos, mc.player.getVehicle().getYaw(), mc.player.getVehicle().getPitch(), false));
+            mc.getConnection().send(new ServerboundMoveVehiclePacket(pos, mc.player.getVehicle().getYRot(), mc.player.getVehicle().getXRot(), false));
         }
     }
-    private Vec3d getOffset(Vec3d base) {
+    private Vec3 getOffset(Vec3 base) {
         double dx = offsethorizontal.get();
         double dy = offsetY.get();
 
-        Vec3d[] shuffledOffsets = new Vec3d[] {
+        Vec3[] shuffledOffsets = new Vec3[] {
                 base.add( dx, dy,  0),
                 base.add(-dx, dy,  0),
                 base.add( 0, dy,  dx),
@@ -402,63 +405,63 @@ public class TPAura extends Module {
 
         Collections.shuffle(Arrays.asList(shuffledOffsets));
 
-        for (Vec3d pos : shuffledOffsets) {
+        for (Vec3 pos : shuffledOffsets) {
             if (!invalid(pos)) return pos;
         }
 
-        Vec3d noHorizontal = base.add(0, dy, 0);
+        Vec3 noHorizontal = base.add(0, dy, 0);
         if (!invalid(noHorizontal)) return noHorizontal;
 
         return base;
     }
-    private boolean invalid(Vec3d pos) {
-        if (mc.world == null) return true;
-        if (mc.world.getChunk(BlockPos.ofFloored(pos)) == null) return true;
+    private boolean invalid(Vec3 pos) {
+        if (mc.level == null) return true;
+        if (mc.level.getChunk(BlockPos.containing(pos)) == null) return true;
 
-        Entity entity = mc.player.hasVehicle() ? mc.player.getVehicle() : mc.player;
+        Entity entity = mc.player.isPassenger() ? mc.player.getVehicle() : mc.player;
 
-        Box targetBox = entity.getBoundingBox().offset(
+        AABB targetBox = entity.getBoundingBox().move(
                 pos.x - entity.getX(),
                 pos.y - entity.getY(),
                 pos.z - entity.getZ()
         );
         Module boatNoclip = Modules.get().get(BoatNoclip.class);
         if (skipCollisionCheck.get() && entity != mc.player && boatNoclip != null && boatNoclip.isActive()) {
-            for (BlockPos bp : BlockPos.iterate(
-                    BlockPos.ofFloored(targetBox.minX, targetBox.minY, targetBox.minZ),
-                    BlockPos.ofFloored(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
+            for (BlockPos bp : BlockPos.betweenClosed(
+                    BlockPos.containing(targetBox.minX, targetBox.minY, targetBox.minZ),
+                    BlockPos.containing(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
             )) {
-                BlockState state = mc.world.getBlockState(bp);
-                if (state.isOf(Blocks.LAVA)) {
+                BlockState state = mc.level.getBlockState(bp);
+                if (state.is(Blocks.LAVA)) {
                     return true;
                 }
             }
         } else {
-            for (BlockPos bp : BlockPos.iterate(
-                    BlockPos.ofFloored(targetBox.minX, targetBox.minY, targetBox.minZ),
-                    BlockPos.ofFloored(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
+            for (BlockPos bp : BlockPos.betweenClosed(
+                    BlockPos.containing(targetBox.minX, targetBox.minY, targetBox.minZ),
+                    BlockPos.containing(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
             )) {
-                BlockState state = mc.world.getBlockState(bp);
-                if (state.isOf(Blocks.LAVA) || !state.getCollisionShape(mc.world, bp).isEmpty()) {
+                BlockState state = mc.level.getBlockState(bp);
+                if (state.is(Blocks.LAVA) || !state.getCollisionShape(mc.level, bp).isEmpty()) {
                     return true;
                 }
             }
         }
 
-        for (Entity e : mc.world.getOtherEntities(entity, targetBox)) {
-            if (e.isCollidable(entity)) return true;
+        for (Entity e : mc.level.getEntities(entity, targetBox)) {
+            if (e.canBeCollidedWith(entity)) return true;
         }
 
         return false;
     }
-    private boolean hasClearPath(Vec3d start, Vec3d end) {
+    private boolean hasClearPath(Vec3 start, Vec3 end) {
         if (invalid(start) || invalid(end)) return false;
 
         int steps = Math.max(10, (int)(start.distanceTo(end) * 2.5));
 
         for (int i = 1; i < steps; i++) {
             double t = i / (double)steps;
-            Vec3d sample = start.lerp(end, t);
+            Vec3 sample = start.lerp(end, t);
 
             if (invalid(sample)) return false;
         }

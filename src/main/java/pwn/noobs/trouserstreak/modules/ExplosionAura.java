@@ -7,23 +7,22 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.TypedEntityData;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtDouble;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.TypedEntityData;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
 public class ExplosionAura extends Module {
@@ -95,60 +94,60 @@ public class ExplosionAura extends Module {
 
     @EventHandler
     private void onMouseButton(MouseClickEvent event) {
-        if (mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player.getAbilities().creativeMode) {
+        if (mc.options.keyAttack.isDown() && mc.screen == null && mc.player.getAbilities().instabuild) {
             if (click.get()) {
-                ItemStack rst = mc.player.getMainHandStack();
-                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
+                ItemStack rst = mc.player.getMainHandItem();
+                BlockHitResult bhr = new BlockHitResult(mc.player.getEyePosition(), Direction.DOWN, BlockPos.containing(mc.player.getEyePosition()), false);
                 ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
-                var changes = ComponentChanges.builder()
-                        .add(DataComponentTypes.ENTITY_DATA, createEntityData(true))
+                var changes = DataComponentPatch.builder()
+                        .set(DataComponents.ENTITY_DATA, createEntityData(true))
                         .build();
-                Creeper.applyChanges(changes);
+                Creeper.applyComponentsAndValidate(changes);
 
-                mc.interactionManager.clickCreativeStack(Creeper, 36 + mc.player.getInventory().selectedSlot);
-                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
+                mc.gameMode.handleCreativeModeItemAdd(Creeper, 36 + mc.player.getInventory().getSelectedSlot());
+                mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, bhr);
+                mc.gameMode.handleCreativeModeItemAdd(rst, 36 + mc.player.getInventory().getSelectedSlot());
             }
         }
     }
     @EventHandler
     public void onTick(TickEvent.Post event) {
-        if (mc.player != null && mc.interactionManager != null && mc.player.getAbilities().creativeMode) {
-            if (auto.get() && mc.options.attackKey.isPressed() && mc.currentScreen == null && mc.player.getAbilities().creativeMode) {
+        if (mc.player != null && mc.gameMode != null && mc.player.getAbilities().instabuild) {
+            if (auto.get() && mc.options.keyAttack.isDown() && mc.screen == null && mc.player.getAbilities().instabuild) {
                 if (click.get()) {
                     if (aticks<=atickdelay.get()){
                         aticks++;
                     } else if (aticks>atickdelay.get()) {
-                        ItemStack rst = mc.player.getMainHandStack();
-                        BlockHitResult bhr = new BlockHitResult(mc.player.getEyePos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEyePos()), false);
+                        ItemStack rst = mc.player.getMainHandItem();
+                        BlockHitResult bhr = new BlockHitResult(mc.player.getEyePosition(), Direction.DOWN, BlockPos.containing(mc.player.getEyePosition()), false);
                         ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
-                        var changes = ComponentChanges.builder()
-                                .add(DataComponentTypes.ENTITY_DATA, createEntityData(true))
+                        var changes = DataComponentPatch.builder()
+                                .set(DataComponents.ENTITY_DATA, createEntityData(true))
                                 .build();
-                        Creeper.applyChanges(changes);
+                        Creeper.applyComponentsAndValidate(changes);
 
-                        mc.interactionManager.clickCreativeStack(Creeper, 36 + mc.player.getInventory().selectedSlot);
-                        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                        mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
+                        mc.gameMode.handleCreativeModeItemAdd(Creeper, 36 + mc.player.getInventory().getSelectedSlot());
+                        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, bhr);
+                        mc.gameMode.handleCreativeModeItemAdd(rst, 36 + mc.player.getInventory().getSelectedSlot());
                         aticks=0;
                     }
                 }
             }
-            if (mc.options.forwardKey.isPressed()||mc.options.jumpKey.isPressed()||mc.options.sneakKey.isPressed()||mc.options.leftKey.isPressed()||mc.options.rightKey.isPressed()||mc.options.backKey.isPressed()) {
+            if (mc.options.keyUp.isDown()||mc.options.keyJump.isDown()||mc.options.keyShift.isDown()||mc.options.keyLeft.isDown()||mc.options.keyRight.isDown()||mc.options.keyDown.isDown()) {
                 if (ticks<=tickdelay.get()){
                     ticks++;
                 } else if (ticks>tickdelay.get()){
-                    ItemStack rst = mc.player.getMainHandStack();
-                    BlockHitResult bhr = new BlockHitResult(mc.player.getEntityPos(), Direction.DOWN, BlockPos.ofFloored(mc.player.getEntityPos()), false);
+                    ItemStack rst = mc.player.getMainHandItem();
+                    BlockHitResult bhr = new BlockHitResult(mc.player.position(), Direction.DOWN, BlockPos.containing(mc.player.position()), false);
                     ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
-                    var changes = ComponentChanges.builder()
-                            .add(DataComponentTypes.ENTITY_DATA, createEntityData(false))
+                    var changes = DataComponentPatch.builder()
+                            .set(DataComponents.ENTITY_DATA, createEntityData(false))
                             .build();
-                    Creeper.applyChanges(changes);
+                    Creeper.applyComponentsAndValidate(changes);
 
-                    mc.interactionManager.clickCreativeStack(Creeper, 36 + mc.player.getInventory().selectedSlot);
-                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, bhr);
-                    mc.interactionManager.clickCreativeStack(rst, 36 + mc.player.getInventory().selectedSlot);
+                    mc.gameMode.handleCreativeModeItemAdd(Creeper, 36 + mc.player.getInventory().getSelectedSlot());
+                    mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, bhr);
+                    mc.gameMode.handleCreativeModeItemAdd(rst, 36 + mc.player.getInventory().getSelectedSlot());
                     ticks=0;
                 }
             }
@@ -158,23 +157,23 @@ public class ExplosionAura extends Module {
         }
     }
     private TypedEntityData<EntityType<?>> createEntityData(boolean click) {
-        NbtCompound entityTag = new NbtCompound();
+        CompoundTag entityTag = new CompoundTag();
         entityTag.putString("id", "minecraft:creeper");
         if (click) {
-            HitResult hr = mc.getCameraEntity().raycast(600, 0, true);
-            Vec3d owo = hr.getPos();
-            BlockPos pos = BlockPos.ofFloored(owo);
-            NbtList Pos = new NbtList();
-            Pos.add(NbtDouble.of(pos.getX()));
-            Pos.add(NbtDouble.of(pos.getY()));
-            Pos.add(NbtDouble.of(pos.getZ()));
+            HitResult hr = mc.getCameraEntity().pick(600, 0, true);
+            Vec3 owo = hr.getLocation();
+            BlockPos pos = BlockPos.containing(owo);
+            ListTag Pos = new ListTag();
+            Pos.add(DoubleTag.valueOf(pos.getX()));
+            Pos.add(DoubleTag.valueOf(pos.getY()));
+            Pos.add(DoubleTag.valueOf(pos.getZ()));
             entityTag.put("Pos", Pos);
         }
         entityTag.putBoolean("ignited", true);
         entityTag.putBoolean("Invulnerable", true);
         entityTag.putInt("Fuse", 0);
         entityTag.putBoolean("NoGravity", true);
-        entityTag.putInt("ExplosionRadius", cpower.get());
-        return TypedEntityData.create(EntityType.CREEPER, entityTag);
+        entityTag.putInt("ExplosionRadius", click ? cpower.get() : power.get());
+        return TypedEntityData.of(EntityType.CREEPER, entityTag);
     }
 }
