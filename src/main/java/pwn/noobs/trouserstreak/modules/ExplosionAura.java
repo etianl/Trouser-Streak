@@ -174,7 +174,7 @@ public class ExplosionAura extends Module {
         entityTag.putBoolean("Invulnerable", true);
         entityTag.putInt("Fuse", 0);
         entityTag.putBoolean("NoGravity", true);
-        entityTag.putInt("ExplosionRadius", cpower.get());
+        entityTag.putInt("ExplosionRadius", click ? cpower.get() : power.get());
         return TypedEntityData.create(EntityType.CREEPER, entityTag);
     }
 }

@@ -161,8 +161,8 @@ public class PotESP extends Module {
                         if (!potLocations.contains(potLocation) && !naturalPot.contains(potItem) && !junkItemList.get().contains(potItem)) {
                             if (potMessage.get()) {
                                 if (displaycoords.get())
-                                    ChatUtils.sendMsg(Text.of("Found a dank pot! It contains: " + potItem + " Location: " + potLocation));
-                                else ChatUtils.sendMsg(Text.of("Found a dank pot! It contains: " + potItem));
+                                    ChatUtils.sendMsg(Text.of("Found a dank pot! It contains: §e" + potItem.getName().getString() + "§r Location: " + potLocation));
+                                else ChatUtils.sendMsg(Text.of("Found a dank pot! It contains: §e" + potItem.getName().getString()+"§r"));
                             }
                             potLocations.add(potLocation);
                         }
