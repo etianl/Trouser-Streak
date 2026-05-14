@@ -22,6 +22,7 @@ public class Trouser extends MeteorAddon {
         public void onInitialize() {
                 LOG.info("Initializing PantsMod!");
                 Modules.get().add(new ActivatedSpawnerDetector());
+                Modules.get().add(new SpawnerHunt());
                 Modules.get().add(new AdvancedItemESP());
                 Modules.get().add(new AimBot());
                 Modules.get().add(new AirstrikePlus());
