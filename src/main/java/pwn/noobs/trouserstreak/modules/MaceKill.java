@@ -41,7 +41,7 @@ public class MaceKill extends Module {
             .name("Fall height")
             .description("Simulates a fall from this distance")
             .defaultValue(22)
-            .sliderRange(1, 169)
+            .sliderRange(1, 400)
             .min(1)
             .max(169)
             .build());
