@@ -4,6 +4,7 @@ import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.modules.Category;
+import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import net.minecraft.world.item.Items;
 import org.slf4j.Logger;
@@ -14,8 +15,8 @@ import pwn.noobs.trouserstreak.modules.*;
 
 public class Trouser extends MeteorAddon {
         public static final Logger LOG = LoggerFactory.getLogger(Trouser.class);
-        public static final Category Main = new Category("TrouserStreak", Items.LEATHER_LEGGINGS::getDefaultInstance);
-        public static final Category baseHunting = new Category("TrouserHunting", Items.SPYGLASS::getDefaultInstance);
+        public static final Category Main = Categories.Misc;
+        public static final Category baseHunting = Categories.Render;
         public static final Category operator = new Category("TrouserOP/Creative", Items.NETHER_STAR::getDefaultInstance);
 
         @Override
@@ -121,8 +122,6 @@ public class Trouser extends MeteorAddon {
 
         @Override
         public void onRegisterCategories() {
-                Modules.registerCategory(Main);
-                Modules.registerCategory(baseHunting);
                 Modules.registerCategory(operator);
         }
 

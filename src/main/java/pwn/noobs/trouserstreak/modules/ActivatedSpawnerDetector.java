@@ -295,7 +295,7 @@ public class ActivatedSpawnerDetector extends Module {
     );
     private final List<LoggedSpawner> loggedSpawners = new ArrayList<>();
     private final Set<BlockPos> loggedSpawnerPositions = new HashSet<>();
-
+    private boolean start = true;
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private final Set<BlockPos> scannedPositions = Collections.synchronizedSet(new HashSet<>());
@@ -314,6 +314,7 @@ public class ActivatedSpawnerDetector extends Module {
     }
     @Override
     public void onActivate() {
+        start = true;
         clearChunkData();
         loadLogs();
     }
@@ -493,6 +494,12 @@ public class ActivatedSpawnerDetector extends Module {
                                     activatedSpawnerFound = true;
                                     if (locLogging.get()) logSpawner(pos);
                                 }
+                                ChatUtils.info("§fDelay: §e"+spawner.getSpawner().spawnDelay);
+                            }
+                        }else if (spawner.getSpawner().spawnDelay == 20){
+                            if (chatFeedback.get()&& start) {
+                                start=false;
+                                ChatUtils.info("§fDelay: §e"+spawner.getSpawner().spawnDelay);
                             }
                         }
                         if (activatedSpawnerFound == true) {
