@@ -5,6 +5,7 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
+import net.minecraft.network.protocol.PacketType;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.network.PacketUtils;
 import meteordevelopment.orbit.EventHandler;
@@ -19,16 +20,16 @@ import java.util.Set;
 
 public class PacketDelay extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final Setting<Set<Class<? extends Packet<?>>>> c2sPackets = sgGeneral.add(new PacketListSetting.Builder()
+    private final Setting<Set<PacketType<? extends Packet<?>>>> c2sPackets = sgGeneral.add(new PacketListSetting.Builder()
             .name("SEND-packets")
             .description("Client-to-server packets to cancel.")
-            .filter(aClass -> PacketUtils.getC2SPackets().contains(aClass))
+            .filter(aClass -> PacketUtils.getServerboundPackets().contains(aClass))
             .build()
     );
-    private final Setting<Set<Class<? extends Packet<?>>>> s2cPackets = sgGeneral.add(new PacketListSetting.Builder()
+    private final Setting<Set<PacketType<? extends Packet<?>>>> s2cPackets = sgGeneral.add(new PacketListSetting.Builder()
             .name("RECEIVE-packets")
             .description("Server-to-client packets to cancel.")
-            .filter(aClass -> PacketUtils.getS2CPackets().contains(aClass))
+            .filter(aClass -> PacketUtils.getServerboundPackets().contains(aClass))
             .build()
     );
     public final Setting<Integer> sdelay = sgGeneral.add(new IntSetting.Builder()
