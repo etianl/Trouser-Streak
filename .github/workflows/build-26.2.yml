@@ -1,0 +1,45 @@
+name: Build Minecraft 26.2
+
+on:
+  push:
+    branches:
+      - agent/minecraft-26.2
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Java 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x gradlew
+
+      - name: Build
+        run: ./gradlew clean build --stacktrace
+
+      - name: Upload compiled mod
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trouser-streak-1.6.1-mc26.2
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+            !build/libs/*-dev.jar
+          if-no-files-found: error
