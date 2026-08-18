@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Java 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "25"
@@ -31,7 +31,21 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build
-        run: ./gradlew clean build --stacktrace
+        shell: bash
+        run: |
+          set +e
+          ./gradlew clean build --stacktrace 2>&1 | tee build.log
+          result=${PIPESTATUS[0]}
+          exit "$result"
+
+      - name: Upload compiler log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiler-log
+          path: build.log
+          if-no-files-found: error
+          retention-days: 3
 
       - name: Upload compiled mod
         if: success()
