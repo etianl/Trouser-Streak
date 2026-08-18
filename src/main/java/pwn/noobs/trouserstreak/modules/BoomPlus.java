@@ -182,7 +182,7 @@ public class BoomPlus extends Module {
             toggle();
         }
 
-        if (auto.get() && mc.options.keyAttack.isDown() && mc.screen == null && mc.player.getAbilities().instabuild) {
+        if (auto.get() && mc.options.keyAttack.isDown() && mc.gui.screen() == null && mc.player.getAbilities().instabuild) {
             if (aticks<=atickdelay.get()){
                 aticks++;
             } else if (aticks>atickdelay.get()) {
@@ -207,7 +207,7 @@ public class BoomPlus extends Module {
 
     @EventHandler
     private void onMouseButton(MouseClickEvent event) {
-        if (mc.options.keyAttack.isDown() && mc.screen == null && mc.player.getAbilities().instabuild) {
+        if (mc.options.keyAttack.isDown() && mc.gui.screen() == null && mc.player.getAbilities().instabuild) {
             customName = nom.get();
             namecolour = nomcolor.get().toString();
             ItemStack rst = mc.player.getMainHandItem();
@@ -298,7 +298,7 @@ public class BoomPlus extends Module {
         Identifier entityId = Identifier.tryParse("minecraft:" + entityName);
         EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.getValue(entityId);
         if (entityType == null) {
-            entityType = EntityType.PIG;
+            entityType = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("pig"));
         }
 
         return TypedEntityData.of(entityType, entityTag);

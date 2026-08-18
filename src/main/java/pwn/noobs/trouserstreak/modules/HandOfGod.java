@@ -504,7 +504,7 @@ public class HandOfGod extends Module {
         if (notOP.get() && PermissionUtils.getPermissionLevel(mc.player) < 2 && mc.level.hasChunk(mc.player.chunkPosition().x(), mc.player.chunkPosition().z())) {
             return;
         }
-        if (mc.options.keyAttack.isDown() && mc.screen == null && mc.gameMode != null) {
+        if (mc.options.keyAttack.isDown() && mc.gui.screen() == null && mc.gameMode != null) {
             HitResult hr = mc.getCameraEntity().pick(900, 0, fluids.get());
             Vec3 god = hr.getLocation();
             BlockPos pos = BlockPos.containing(god);
@@ -573,7 +573,7 @@ public class HandOfGod extends Module {
                 asaveticks=0;
             }
         }
-        if (auto.get() && mc.options.keyAttack.isDown() && mc.screen == null) {
+        if (auto.get() && mc.options.keyAttack.isDown() && mc.gui.screen() == null) {
             if (aticks<=atickdelay.get()){
                 aticks++;
             } else if (aticks>atickdelay.get()){

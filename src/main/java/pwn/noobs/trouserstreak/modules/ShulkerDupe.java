@@ -75,7 +75,7 @@ public class ShulkerDupe extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (mc.screen instanceof ShulkerBoxScreen && mc.player != null && mc.gameMode != null) {
+        if (mc.gui.screen() instanceof ShulkerBoxScreen && mc.player != null && mc.gameMode != null) {
             HitResult wow = mc.hitResult;
             BlockHitResult a = (BlockHitResult) wow;
             if (shouldDupe| shouldDupeAll){

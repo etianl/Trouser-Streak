@@ -235,7 +235,7 @@ public class AutoTexts extends Module {
             }
         }
 
-        return TypedEntityData.of(EntityType.ARMOR_STAND, entityTag);
+        return TypedEntityData.of(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("armor_stand")), entityTag);
     }
     private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
         if (serverVersion == null) return false;

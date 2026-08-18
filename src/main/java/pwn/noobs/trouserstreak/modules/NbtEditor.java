@@ -442,7 +442,7 @@ public class NbtEditor extends Module {
         Identifier entityId = Identifier.tryParse("minecraft:" + entityName);
         EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.getValue(entityId);
         if (entityType == null) {
-            entityType = EntityType.PIG;
+            entityType = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("pig"));
         }
 
         return TypedEntityData.of(entityType, entityTag);

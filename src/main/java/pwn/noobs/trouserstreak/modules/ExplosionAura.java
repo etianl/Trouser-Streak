@@ -94,7 +94,7 @@ public class ExplosionAura extends Module {
 
     @EventHandler
     private void onMouseButton(MouseClickEvent event) {
-        if (mc.options.keyAttack.isDown() && mc.screen == null && mc.player.getAbilities().instabuild) {
+        if (mc.options.keyAttack.isDown() && mc.gui.screen() == null && mc.player.getAbilities().instabuild) {
             if (click.get()) {
                 ItemStack rst = mc.player.getMainHandItem();
                 BlockHitResult bhr = new BlockHitResult(mc.player.getEyePosition(), Direction.DOWN, BlockPos.containing(mc.player.getEyePosition()), false);
@@ -113,7 +113,7 @@ public class ExplosionAura extends Module {
     @EventHandler
     public void onTick(TickEvent.Post event) {
         if (mc.player != null && mc.gameMode != null && mc.player.getAbilities().instabuild) {
-            if (auto.get() && mc.options.keyAttack.isDown() && mc.screen == null && mc.player.getAbilities().instabuild) {
+            if (auto.get() && mc.options.keyAttack.isDown() && mc.gui.screen() == null && mc.player.getAbilities().instabuild) {
                 if (click.get()) {
                     if (aticks<=atickdelay.get()){
                         aticks++;

@@ -416,7 +416,7 @@ public class RedstoneNuker extends Module {
         if (mode.get() == Mode.Flatten){
             pos1.setY((int) Math.floor(pY));
         }
-        box = new AABB(pos1.getCenter(), pos2.getCenter());
+        box = new AABB(Vec3.atCenterOf(pos1), Vec3.atCenterOf(pos2));
 
 
         // Find blocks to break

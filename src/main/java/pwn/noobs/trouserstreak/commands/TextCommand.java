@@ -294,6 +294,6 @@ public class TextCommand extends Command {
         entityTag.putBoolean("CustomNameVisible", true);
         entityTag.put("CustomName", nbt);
 
-        return TypedEntityData.of(EntityType.ARMOR_STAND, entityTag);
+        return TypedEntityData.of(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("armor_stand")), entityTag);
     }
 }

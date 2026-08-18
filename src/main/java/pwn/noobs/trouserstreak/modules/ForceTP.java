@@ -201,7 +201,7 @@ public class ForceTP extends Module {
         entityUUID = null;
         aticks = 0;
         ticks = 0;
-        if (!clicksummon.get() && mc.screen == null) {
+        if (!clicksummon.get() && mc.gui.screen() == null) {
             spawnPearlAtTarget();
         }
     }
@@ -216,7 +216,7 @@ public class ForceTP extends Module {
             return;
         }
 
-        if (clicksummon.get() && auto.get() && mc.options.keyAttack.isDown() && mc.screen == null) {
+        if (clicksummon.get() && auto.get() && mc.options.keyAttack.isDown() && mc.gui.screen() == null) {
             if (aticks <= atickdelay.get()) {
                 aticks++;
             } else {
@@ -224,7 +224,7 @@ public class ForceTP extends Module {
                 aticks = 0;
             }
         }
-        if (!clicksummon.get() && mc.screen == null) {
+        if (!clicksummon.get() && mc.gui.screen() == null) {
             if (ticks <= tickdelay.get()) {
                 ticks++;
             } else {
@@ -238,17 +238,17 @@ public class ForceTP extends Module {
     private void onMouseButton(MouseClickEvent event) {
         if (mc.player == null || mc.level == null) return;
 
-        if (clicksummon.get() && mc.options.keyAttack.isDown() && mc.screen == null && mc.player.getAbilities().instabuild) {
+        if (clicksummon.get() && mc.options.keyAttack.isDown() && mc.gui.screen() == null && mc.player.getAbilities().instabuild) {
             spawnPearlAtTarget();
         }
-        if (uuidCollectionMode.get() == uuidCollectionModes.RightClick && mc.options.keyUse.isDown() && mc.screen == null) {
+        if (uuidCollectionMode.get() == uuidCollectionModes.RightClick && mc.options.keyUse.isDown() && mc.gui.screen() == null) {
             Entity targetEntity = target();
             if (targetEntity != null && targetEntity.isAlive() && targetEntity != mc.player) {
                 entityUUID = targetEntity.getUUID();
                 if (chatFeedback)info("Target entity UUID saved: " + targetEntity.getName().getString() + ". UUID: " + targetEntity.getUUID());
             }
         }
-        if (uuidCollectionMode.get() == uuidCollectionModes.RightClick && resetUUID.get().isPressed() && mc.screen == null){
+        if (uuidCollectionMode.get() == uuidCollectionModes.RightClick && resetUUID.get().isPressed() && mc.gui.screen() == null){
             if (chatFeedback)info("Resetting saved entity.");
             entityUUID = null;
         }

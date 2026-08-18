@@ -586,7 +586,7 @@ public class ArmorStandImages extends Module {
         equipment.put("head", head);
         entityTag.put("equipment", equipment);
 
-        return TypedEntityData.of(EntityType.ARMOR_STAND, entityTag);
+        return TypedEntityData.of(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("armor_stand")), entityTag);
     }
     private String findClosestConcreteColor(int color) {
         int targetRed = (color >> 16) & 0xFF;

@@ -120,7 +120,7 @@ public class AutoWither extends Module {
     }
     @EventHandler
     private void onMouseButton(MouseClickEvent event){
-        if(mc.screen != null) return;//Stop working in GUI
+        if(mc.gui.screen() != null) return;//Stop working in GUI
         if(event.button() != 1) return;
         if (isBuilding) return;
         if(event.action == KeyAction.Press){
