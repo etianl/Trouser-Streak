@@ -502,7 +502,7 @@ public class InfiniteReach extends Module {
     }
     public void hitEntity(Entity target, Boolean attackpressed) {
         if (mc.player == null || mc.getConnection() == null) return;
-        if (onlyMace.get() && mc.player.getMainHandItem().getItem() != Items.MACE) return;
+        if (onlyMace.get() && mc.player.getMainHandItem().getItem() != net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("mace"))) return;
         if (onlyMace.get() && target instanceof Player player && player.isBlocking()) return;
         if (startPos == null || finalPos == null || aboveself == null || abovetarget == null) return;
         Entity entity = mc.player.isPassenger() ? mc.player.getVehicle() : mc.player;
@@ -674,7 +674,7 @@ public class InfiniteReach extends Module {
                     BlockPos.containing(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
             )) {
                 BlockState state = mc.level.getBlockState(bp);
-                if (state.is(Blocks.LAVA)) {
+                if (state.is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")))) {
                     return true;
                 }
             }
@@ -684,7 +684,7 @@ public class InfiniteReach extends Module {
                     BlockPos.containing(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
             )) {
                 BlockState state = mc.level.getBlockState(bp);
-                if (state.is(Blocks.LAVA) || !state.getCollisionShape(mc.level, bp).isEmpty()) {
+                if (state.is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))) || !state.getCollisionShape(mc.level, bp).isEmpty()) {
                     return true;
                 }
             }

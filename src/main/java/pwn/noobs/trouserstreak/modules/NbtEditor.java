@@ -69,7 +69,7 @@ public class NbtEditor extends Module {
     private final Setting<Item> itemlist = sgOptions.add(new ItemSetting.Builder()
             .name("Item to create.")
             .description("Pick one. If you aren't already holding an item this is what you get.")
-            .defaultValue(Items.COD)
+            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("cod")))
             .visible(() -> (mode.get() == Modes.Item))
             .build());
     public final Setting<Boolean> customname = sgOptions.add(new BoolSetting.Builder()
@@ -272,7 +272,7 @@ public class NbtEditor extends Module {
         if (mc.player != null  && mc.gameMode != null && mc.level != null && mc.player.getAbilities().instabuild) {
             switch (mode.get()) {
                 case Entity -> {
-                    ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
+                    ItemStack item = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("bee_spawn_egg")));
                     var changes = DataComponentPatch.builder()
                             .set(DataComponents.CUSTOM_NAME, Component.literal(nom.get()).withStyle(ChatFormatting.valueOf(nomcolor.get().toString().toUpperCase())))
                             .set(DataComponents.ITEM_NAME, Component.literal(nom.get()).withStyle(ChatFormatting.valueOf(nomcolor.get().toString().toUpperCase())))
@@ -304,9 +304,9 @@ public class NbtEditor extends Module {
                     ItemStack item;
 
                     if (!mc.player.getMainHandItem().isEmpty()) {
-                        if (mc.player.getMainHandItem().getItem() != Items.SPLASH_POTION && potionmode.get() == pModes.Splash) item =  new ItemStack(Items.SPLASH_POTION);
-                        else if (mc.player.getMainHandItem().getItem() != Items.LINGERING_POTION && potionmode.get() == pModes.Lingering) item =  new ItemStack(Items.LINGERING_POTION);
-                        else if (mc.player.getMainHandItem().getItem() != Items.POTION && potionmode.get() == pModes.Normal) item =  new ItemStack(Items.POTION);
+                        if (mc.player.getMainHandItem().getItem() != net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("splash_potion")) && potionmode.get() == pModes.Splash) item =  new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("splash_potion")));
+                        else if (mc.player.getMainHandItem().getItem() != net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lingering_potion")) && potionmode.get() == pModes.Lingering) item =  new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lingering_potion")));
+                        else if (mc.player.getMainHandItem().getItem() != net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("potion")) && potionmode.get() == pModes.Normal) item =  new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("potion")));
                         else item = mc.player.getMainHandItem().copy();
                         var changes = DataComponentPatch.builder()
                                 .set(DataComponents.CUSTOM_NAME, Component.literal(nom.get()).withStyle(ChatFormatting.valueOf(nomcolor.get().toString().toUpperCase())))
@@ -317,7 +317,7 @@ public class NbtEditor extends Module {
                     }
                     else switch (potionmode.get()) {
                         case Normal -> {
-                            item =  new ItemStack(Items.POTION);
+                            item =  new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("potion")));
                             var changes = DataComponentPatch.builder()
                                     .set(DataComponents.CUSTOM_NAME, Component.literal(nom.get()).withStyle(ChatFormatting.valueOf(nomcolor.get().toString().toUpperCase())))
                                     .set(DataComponents.POTION_CONTENTS, new PotionContents(Optional.empty(), Optional.empty(), pileOfStatusEffects(), Optional.ofNullable(nom.get())))
@@ -326,7 +326,7 @@ public class NbtEditor extends Module {
                             createItem(item);
                         }
                         case Splash -> {
-                            item =  new ItemStack(Items.SPLASH_POTION);
+                            item =  new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("splash_potion")));
                             var changes = DataComponentPatch.builder()
                                     .set(DataComponents.CUSTOM_NAME, Component.literal(nom.get()).withStyle(ChatFormatting.valueOf(nomcolor.get().toString().toUpperCase())))
                                     .set(DataComponents.POTION_CONTENTS, new PotionContents(Optional.empty(), Optional.empty(), pileOfStatusEffects(), Optional.ofNullable(nom.get())))
@@ -335,7 +335,7 @@ public class NbtEditor extends Module {
                             createItem(item);
                         }
                         case Lingering -> {
-                            item =  new ItemStack(Items.LINGERING_POTION);
+                            item =  new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lingering_potion")));
                             var changes = DataComponentPatch.builder()
                                     .set(DataComponents.CUSTOM_NAME, Component.literal(nom.get()).withStyle(ChatFormatting.valueOf(nomcolor.get().toString().toUpperCase())))
                                     .set(DataComponents.POTION_CONTENTS, new PotionContents(Optional.empty(), Optional.empty(), pileOfStatusEffects(), Optional.ofNullable(nom.get())))
@@ -361,7 +361,7 @@ public class NbtEditor extends Module {
                     }
                     else if (!copyStack.get()){
                         if (offHandStack.isEmpty()) {
-                            offHandStack = new ItemStack(Items.CARROT_ON_A_STICK);
+                            offHandStack = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("carrot_on_a_stick")));
                         }
                     }
                     offHandStack.applyComponents(mainHandComponents);

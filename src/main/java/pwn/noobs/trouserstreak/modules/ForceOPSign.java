@@ -130,7 +130,7 @@ public class ForceOPSign extends Module {
     private final Setting<Block> terminateblock = commandParameters.add(new BlockSetting.Builder()
             .name("TerminationBlock PLAYERS")
             .description("What is created around the Players (Default: Lava)")
-            .defaultValue(Blocks.LAVA)
+            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")))
             .visible(skynet::get)
             .build());
     public final Setting<Integer> terminateheight1 = commandParameters.add(new IntSetting.Builder()
@@ -168,7 +168,7 @@ public class ForceOPSign extends Module {
     private final Setting<Block> eterminateblock = commandParameters.add(new BlockSetting.Builder()
             .name("TerminationBlock ENTITIES")
             .description("What is created around the Entities (Default: Lava)")
-            .defaultValue(Blocks.LAVA)
+            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")))
             .visible(skynet::get)
             .build());
     public final Setting<Integer> eterminateheight1 = commandParameters.add(new IntSetting.Builder()
@@ -216,7 +216,7 @@ public class ForceOPSign extends Module {
             toggle();
             return;
         }
-        ItemStack stack = new ItemStack(Items.OAK_SIGN);
+        ItemStack stack = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("oak_sign")));
 
 
         var changes = DataComponentPatch.builder()

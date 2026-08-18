@@ -98,7 +98,7 @@ public class ExplosionAura extends Module {
             if (click.get()) {
                 ItemStack rst = mc.player.getMainHandItem();
                 BlockHitResult bhr = new BlockHitResult(mc.player.getEyePosition(), Direction.DOWN, BlockPos.containing(mc.player.getEyePosition()), false);
-                ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
+                ItemStack Creeper = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("creeper_spawn_egg")));
                 var changes = DataComponentPatch.builder()
                         .set(DataComponents.ENTITY_DATA, createEntityData(true))
                         .build();
@@ -120,7 +120,7 @@ public class ExplosionAura extends Module {
                     } else if (aticks>atickdelay.get()) {
                         ItemStack rst = mc.player.getMainHandItem();
                         BlockHitResult bhr = new BlockHitResult(mc.player.getEyePosition(), Direction.DOWN, BlockPos.containing(mc.player.getEyePosition()), false);
-                        ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
+                        ItemStack Creeper = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("creeper_spawn_egg")));
                         var changes = DataComponentPatch.builder()
                                 .set(DataComponents.ENTITY_DATA, createEntityData(true))
                                 .build();
@@ -139,7 +139,7 @@ public class ExplosionAura extends Module {
                 } else if (ticks>tickdelay.get()){
                     ItemStack rst = mc.player.getMainHandItem();
                     BlockHitResult bhr = new BlockHitResult(mc.player.position(), Direction.DOWN, BlockPos.containing(mc.player.position()), false);
-                    ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
+                    ItemStack Creeper = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("creeper_spawn_egg")));
                     var changes = DataComponentPatch.builder()
                             .set(DataComponents.ENTITY_DATA, createEntityData(false))
                             .build();

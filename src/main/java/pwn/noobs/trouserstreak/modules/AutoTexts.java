@@ -183,7 +183,7 @@ public class AutoTexts extends Module {
     }
 
     private void spawnArmorStand() {
-        ItemStack armorStand = new ItemStack(Items.ARMOR_STAND);
+        ItemStack armorStand = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("armor_stand")));
         ItemStack current = mc.player.getMainHandItem();
         Vec3 pos = pickRandomPos();
         String selectedText = texts.get().get(random.nextInt(texts.get().size()));

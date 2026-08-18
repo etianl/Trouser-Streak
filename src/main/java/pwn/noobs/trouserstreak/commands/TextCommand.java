@@ -261,7 +261,7 @@ public class TextCommand extends Command {
             return;
         }
 
-        ItemStack armorStand = new ItemStack(Items.ARMOR_STAND);
+        ItemStack armorStand = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("armor_stand")));
         ItemStack current = mc.player.getMainHandItem();
         Vec3 pos = mc.player.position().add(mc.player.getLookAngle().scale(2)).add(0, yOffset, 0);
 

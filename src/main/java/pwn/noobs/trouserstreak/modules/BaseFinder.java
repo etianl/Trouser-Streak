@@ -949,7 +949,7 @@ public class BaseFinder extends Module {
                                 if ((entity instanceof ItemFrame || entity instanceof GlowItemFrame) && frameFinder.get()) {
                                     ItemFrame itemFrame = (ItemFrame) entity;
                                     Item heldItem = itemFrame.getItem().getItem();
-                                    if (heldItem != Items.ELYTRA) {
+                                    if (heldItem != net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("elytra"))) {
                                         baseChunks.add(chunk.getPos());
                                         if (save.get()) {
                                             saveBaseChunkData(chunk.getPos());

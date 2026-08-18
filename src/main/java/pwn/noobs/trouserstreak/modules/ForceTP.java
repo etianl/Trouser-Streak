@@ -356,7 +356,7 @@ public class ForceTP extends Module {
             if (chatFeedback)warning("No target UUID");
             return;
         }
-        ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
+        ItemStack item = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("bee_spawn_egg")));
         var changes = DataComponentPatch.builder()
                 .set(DataComponents.ENTITY_DATA, createEnderPearlData(entityuuid))
                 .build();

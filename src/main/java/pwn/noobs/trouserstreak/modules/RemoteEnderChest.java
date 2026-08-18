@@ -49,7 +49,7 @@ public class RemoteEnderChest extends Module {
     private void onPreTick(TickEvent.Pre event) {
         if (mc.hitResult instanceof BlockHitResult bhr) {
             potentialEChestPos = bhr.getBlockPos();
-            if (mc.level.getBlockState(bhr.getBlockPos()).getBlock() == Blocks.ENDER_CHEST
+            if (mc.level.getBlockState(bhr.getBlockPos()).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("ender_chest"))
                     && mc.options.keyUse.isDown() && !isEnderChestScreen(potentialEChestPos) && !guiHidden) {
                 mc.startUseItem();
                 mc.startUseItem();
@@ -109,7 +109,7 @@ public class RemoteEnderChest extends Module {
     private boolean isEnderChestScreen(BlockPos echest) {
         return mc.gui.screen() instanceof ContainerScreen screen &&
                 screen.getMenu().getType() == MenuType.GENERIC_9x3 &&
-                mc.level.getBlockState(echest).getBlock() == Blocks.ENDER_CHEST;
+                mc.level.getBlockState(echest).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("ender_chest"));
     }
 
     private void resetStuff() {

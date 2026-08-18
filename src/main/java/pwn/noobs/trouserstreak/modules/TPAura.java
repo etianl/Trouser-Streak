@@ -432,7 +432,7 @@ public class TPAura extends Module {
                     BlockPos.containing(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
             )) {
                 BlockState state = mc.level.getBlockState(bp);
-                if (state.is(Blocks.LAVA)) {
+                if (state.is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")))) {
                     return true;
                 }
             }
@@ -442,7 +442,7 @@ public class TPAura extends Module {
                     BlockPos.containing(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
             )) {
                 BlockState state = mc.level.getBlockState(bp);
-                if (state.is(Blocks.LAVA) || !state.getCollisionShape(mc.level, bp).isEmpty()) {
+                if (state.is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))) || !state.getCollisionShape(mc.level, bp).isEmpty()) {
                     return true;
                 }
             }

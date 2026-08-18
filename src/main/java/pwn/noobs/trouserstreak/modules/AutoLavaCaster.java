@@ -363,14 +363,14 @@ public class AutoLavaCaster extends Module {
         if (sneaky.get()){
             mc.options.keyShift.setDown(true);
         }
-        if (mc.level.getBlockState(lava).getBlock() == Blocks.AIR){
+        if (mc.level.getBlockState(lava).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))){
             lavamountainticks = 0;
             mc.player.setNoGravity(false);
             aMountain.autocasttimenow=false;
             toggle();
             return;
         }
-        if (!(mc.level.getBlockState(lava).getBlock() == Blocks.AIR) && !(mc.level.getBlockState(hover).getBlock() == Blocks.AIR) && !aposition.get() && !aMountain.autocasttimenow==true){
+        if (!(mc.level.getBlockState(lava).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) && !(mc.level.getBlockState(hover).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) && !aposition.get() && !aMountain.autocasttimenow==true){
             placeLava();
         }
         firstplace=true;
@@ -445,7 +445,7 @@ public class AutoLavaCaster extends Module {
                         mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
             }else if (lavamountainticks==7 && firstplace == true && (aposition.get() || aMountain.autocasttimenow==true)){
-                if (!(mc.level.getBlockState(lava).getBlock() == Blocks.AIR) && !(mc.level.getBlockState(hover).getBlock() == Blocks.AIR)) placeLava();
+                if (!(mc.level.getBlockState(lava).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) && !(mc.level.getBlockState(hover).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")))) placeLava();
             }
             else if (firstplace==false && lavamountainticks==55){
                 if (aMountain.autocasttimenow==true) {
@@ -596,7 +596,7 @@ public class AutoLavaCaster extends Module {
                         mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
             }else if (lavamountainticks==7 && firstplace == true && (aposition.get() || aMountain.autocasttimenow==true)){
-                if (!(mc.level.getBlockState(lava).getBlock() == Blocks.AIR) && !(mc.level.getBlockState(hover).getBlock() == Blocks.AIR)) placeLava();
+                if (!(mc.level.getBlockState(lava).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) && !(mc.level.getBlockState(hover).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")))) placeLava();
             }
             else if (firstplace==false && lavamountainticks==55){
                 if (aMountain.autocasttimenow==true) {
@@ -777,7 +777,7 @@ public class AutoLavaCaster extends Module {
                         mc.player.swing(InteractionHand.MAIN_HAND);}
                 }
             }else if (lavamountainticks==7 && firstplace == true && (aposition.get() || aMountain.autocasttimenow==true)){
-                if (!(mc.level.getBlockState(lava).getBlock() == Blocks.AIR) && !(mc.level.getBlockState(hover).getBlock() == Blocks.AIR)) placeLava();
+                if (!(mc.level.getBlockState(lava).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) && !(mc.level.getBlockState(hover).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")))) placeLava();
             }
             else if (firstplace==false && lavamountainticks==55){
                 if (aMountain.autocasttimenow==true) {
@@ -961,7 +961,7 @@ public class AutoLavaCaster extends Module {
         toggle();
     }
     private void placeLava() {
-        FindItemResult findItemResult = InvUtils.findInHotbar(Items.LAVA_BUCKET);
+        FindItemResult findItemResult = InvUtils.findInHotbar(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava_bucket")));
         if (!findItemResult.found()) {
             error("No lava bucket found.");
             if (mc.options.keyShift.isDown()){
@@ -980,7 +980,7 @@ public class AutoLavaCaster extends Module {
     }
 
     private void placeWater() {
-        FindItemResult findItemResult = InvUtils.findInHotbar(Items.WATER_BUCKET);
+        FindItemResult findItemResult = InvUtils.findInHotbar(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("water_bucket")));
         if (!findItemResult.found()) {
             error("No water bucket found.");
             if (mc.options.keyShift.isDown()){
@@ -999,7 +999,7 @@ public class AutoLavaCaster extends Module {
     }
 
     private void pickupLiquid() {
-        FindItemResult findItemResult = InvUtils.findInHotbar(Items.BUCKET);
+        FindItemResult findItemResult = InvUtils.findInHotbar(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("bucket")));
         if (!findItemResult.found()) {
             error("No bucket found.");
             if (mc.options.keyShift.isDown()){
@@ -1031,7 +1031,7 @@ public class AutoLavaCaster extends Module {
             if (aMountain.autocasttimenow==true && aMountain.wasfacingBOT==Direction.EAST|| aMountain.autocasttimenow==false && mc.player.getYRot()>=90 && mc.player.getYRot()<=180 || tryanotherpos==true){ //NORTHWEST
                 BlockPos isair = BlockPos.containing(lava.getX()+2.5,lava.getY()+3,lava.getZ()+2.5);
                 BlockPos isair2 = BlockPos.containing(lava.getX()+2.5,lava.getY()+4,lava.getZ()+2.5);
-                if (mc.level.getBlockState(isair).canBeReplaced() && mc.level.getFluidState(isair).isEmpty() && !mc.level.getBlockState(isair).is(Blocks.POWDER_SNOW) && mc.level.getBlockState(isair2).canBeReplaced() && mc.level.getFluidState(isair2).isEmpty() && !mc.level.getBlockState(isair2).is(Blocks.POWDER_SNOW)) {
+                if (mc.level.getBlockState(isair).canBeReplaced() && mc.level.getFluidState(isair).isEmpty() && !mc.level.getBlockState(isair).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("powder_snow"))) && mc.level.getBlockState(isair2).canBeReplaced() && mc.level.getFluidState(isair2).isEmpty() && !mc.level.getBlockState(isair2).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("powder_snow")))) {
                     mc.player.setPosRaw(lava.getX()+2.5,lava.getY()+3,lava.getZ()+2.5);
                     tryanotherpos=false;
                 } else {
@@ -1040,7 +1040,7 @@ public class AutoLavaCaster extends Module {
             } else if (aMountain.autocasttimenow==true && aMountain.wasfacingBOT==Direction.SOUTH|| aMountain.autocasttimenow==false && mc.player.getYRot()>=-180 && mc.player.getYRot()<-90 || tryanotherpos==true){ //NORTHEAST
                 BlockPos isair = BlockPos.containing(lava.getX()-1.5,lava.getY()+3,lava.getZ()+2.5);
                 BlockPos isair2 = BlockPos.containing(lava.getX()-1.5,lava.getY()+4,lava.getZ()+2.5);
-                if (mc.level.getBlockState(isair).canBeReplaced() && mc.level.getFluidState(isair).isEmpty() && !mc.level.getBlockState(isair).is(Blocks.POWDER_SNOW) && mc.level.getBlockState(isair2).canBeReplaced() && mc.level.getFluidState(isair2).isEmpty() && !mc.level.getBlockState(isair2).is(Blocks.POWDER_SNOW)) {
+                if (mc.level.getBlockState(isair).canBeReplaced() && mc.level.getFluidState(isair).isEmpty() && !mc.level.getBlockState(isair).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("powder_snow"))) && mc.level.getBlockState(isair2).canBeReplaced() && mc.level.getFluidState(isair2).isEmpty() && !mc.level.getBlockState(isair2).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("powder_snow")))) {
                     mc.player.setPosRaw(lava.getX()-1.5,lava.getY()+3,lava.getZ()+2.5);
                     tryanotherpos=false;
                 } else {
@@ -1049,7 +1049,7 @@ public class AutoLavaCaster extends Module {
             } else if (aMountain.autocasttimenow==true && aMountain.wasfacingBOT==Direction.WEST|| aMountain.autocasttimenow==false && mc.player.getYRot()>=-90 && mc.player.getYRot()<0 || tryanotherpos==true){ //SOUTHEAST
                 BlockPos isair = BlockPos.containing(lava.getX()-1.5,lava.getY()+3,lava.getZ()-1.5);
                 BlockPos isair2 = BlockPos.containing(lava.getX()-1.5,lava.getY()+4,lava.getZ()-1.5);
-                if (mc.level.getBlockState(isair).canBeReplaced() && mc.level.getFluidState(isair).isEmpty() && !mc.level.getBlockState(isair).is(Blocks.POWDER_SNOW) && mc.level.getBlockState(isair2).canBeReplaced() && mc.level.getFluidState(isair2).isEmpty() && !mc.level.getBlockState(isair2).is(Blocks.POWDER_SNOW)) {
+                if (mc.level.getBlockState(isair).canBeReplaced() && mc.level.getFluidState(isair).isEmpty() && !mc.level.getBlockState(isair).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("powder_snow"))) && mc.level.getBlockState(isair2).canBeReplaced() && mc.level.getFluidState(isair2).isEmpty() && !mc.level.getBlockState(isair2).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("powder_snow")))) {
                     mc.player.setPosRaw(lava.getX()-1.5,lava.getY()+3,lava.getZ()-1.5);
                     tryanotherpos=false;
                 } else {
@@ -1058,7 +1058,7 @@ public class AutoLavaCaster extends Module {
             } else if (aMountain.autocasttimenow==true && aMountain.wasfacingBOT==Direction.NORTH|| aMountain.autocasttimenow==false && mc.player.getYRot()>=0 && mc.player.getYRot()<90 || tryanotherpos==true){ //SOUTHWEST
                 BlockPos isair = BlockPos.containing(lava.getX()+2.5,lava.getY()+3,lava.getZ()-1.5);
                 BlockPos isair2 = BlockPos.containing(lava.getX()+2.5,lava.getY()+4,lava.getZ()-1.5);
-                if (mc.level.getBlockState(isair).canBeReplaced() && mc.level.getFluidState(isair).isEmpty() && !mc.level.getBlockState(isair).is(Blocks.POWDER_SNOW) && mc.level.getBlockState(isair2).canBeReplaced() && mc.level.getFluidState(isair2).isEmpty() && !mc.level.getBlockState(isair2).is(Blocks.POWDER_SNOW)) {
+                if (mc.level.getBlockState(isair).canBeReplaced() && mc.level.getFluidState(isair).isEmpty() && !mc.level.getBlockState(isair).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("powder_snow"))) && mc.level.getBlockState(isair2).canBeReplaced() && mc.level.getFluidState(isair2).isEmpty() && !mc.level.getBlockState(isair2).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("powder_snow")))) {
                     mc.player.setPosRaw(lava.getX()+2.5,lava.getY()+3,lava.getZ()-1.5);
                     tryanotherpos=false;
                 } else {

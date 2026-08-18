@@ -14,9 +14,9 @@ import pwn.noobs.trouserstreak.modules.*;
 
 public class Trouser extends MeteorAddon {
         public static final Logger LOG = LoggerFactory.getLogger(Trouser.class);
-        public static final Category Main = new Category("TrouserStreak", Items.LEATHER_LEGGINGS::getDefaultInstance);
-        public static final Category baseHunting = new Category("TrouserHunting", Items.SPYGLASS::getDefaultInstance);
-        public static final Category operator = new Category("TrouserOP/Creative", Items.NETHER_STAR::getDefaultInstance);
+        public static final Category Main = new Category("TrouserStreak", net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("leather_leggings"))::getDefaultInstance);
+        public static final Category baseHunting = new Category("TrouserHunting", net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("spyglass"))::getDefaultInstance);
+        public static final Category operator = new Category("TrouserOP/Creative", net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("nether_star"))::getDefaultInstance);
 
         @Override
         public void onInitialize() {

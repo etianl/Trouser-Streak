@@ -47,11 +47,11 @@ public class CrossbowMachineGun extends Module {
             timer = 0;
         }
 
-        if (mc.player.getOffhandItem().getItem() != Items.CROSSBOW
-                && mc.player.getMainHandItem().getItem() != Items.CROSSBOW
+        if (mc.player.getOffhandItem().getItem() != net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("crossbow"))
+                && mc.player.getMainHandItem().getItem() != net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("crossbow"))
                 || !mc.options.keyUse.isDown()) return;
 
-        InteractionHand crossbowHand = mc.player.getMainHandItem().getItem() == Items.CROSSBOW
+        InteractionHand crossbowHand = mc.player.getMainHandItem().getItem() == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("crossbow"))
                 ? InteractionHand.MAIN_HAND
                 : InteractionHand.OFF_HAND;
 

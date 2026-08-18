@@ -32,37 +32,37 @@ public class WorldInfoCommand extends Command {
 
     private static final Set<Block> NEW_OVERWORLD_BLOCKS = new HashSet<>();
     static {
-        NEW_OVERWORLD_BLOCKS.add(Blocks.DEEPSLATE);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.AMETHYST_BLOCK);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.AZALEA);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.BIG_DRIPLEAF);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.BIG_DRIPLEAF_STEM);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.SMALL_DRIPLEAF);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.CAVE_VINES);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.CAVE_VINES_PLANT);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.SPORE_BLOSSOM);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.COPPER_ORE);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.DEEPSLATE_COPPER_ORE);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.DEEPSLATE_IRON_ORE);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.DEEPSLATE_COAL_ORE);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.DEEPSLATE_REDSTONE_ORE);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.DEEPSLATE_EMERALD_ORE);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.DEEPSLATE_GOLD_ORE);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.DEEPSLATE_LAPIS_ORE);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.DEEPSLATE_DIAMOND_ORE);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.GLOW_LICHEN);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.RAW_COPPER_BLOCK);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.RAW_IRON_BLOCK);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.DRIPSTONE_BLOCK);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.MOSS_BLOCK);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.POINTED_DRIPSTONE);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.SMOOTH_BASALT);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.TUFF);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.CALCITE);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.HANGING_ROOTS);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.ROOTED_DIRT);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.AZALEA_LEAVES);
-        NEW_OVERWORLD_BLOCKS.add(Blocks.FLOWERING_AZALEA_LEAVES);
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("amethyst_block")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("azalea")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("big_dripleaf")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("big_dripleaf_stem")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("small_dripleaf")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("cave_vines")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("cave_vines_plant")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("spore_blossom")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("copper_ore")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_copper_ore")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_iron_ore")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_coal_ore")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_redstone_ore")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_emerald_ore")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_gold_ore")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_lapis_ore")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_diamond_ore")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("glow_lichen")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("raw_copper_block")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("raw_iron_block")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("dripstone_block")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("moss_block")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("pointed_dripstone")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("smooth_basalt")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("tuff")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("calcite")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("hanging_roots")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("rooted_dirt")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("azalea_leaves")));
+        NEW_OVERWORLD_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("flowering_azalea_leaves")));
     }
 
     @Override
@@ -147,7 +147,7 @@ public class WorldInfoCommand extends Command {
                             if (!foundAnyOre && isOreBlock(chunk.getBlockState(new BlockPos(x, y, z)).getBlock()) && mc.level.dimension().identifier().toString().toLowerCase().contains("overworld")) {
                                 foundAnyOre = true;
                             }
-                            if (!isNewGeneration && y < 256 && y >= 0 && (chunk.getBlockState(new BlockPos(x, y, z)).getBlock() == Blocks.COPPER_ORE || chunk.getBlockState(new BlockPos(x, y, z)).getBlock() == Blocks.DEEPSLATE_COPPER_ORE) && mc.level.dimension().identifier().toString().toLowerCase().contains("overworld")) {
+                            if (!isNewGeneration && y < 256 && y >= 0 && (chunk.getBlockState(new BlockPos(x, y, z)).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("copper_ore")) || chunk.getBlockState(new BlockPos(x, y, z)).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_copper_ore"))) && mc.level.dimension().identifier().toString().toLowerCase().contains("overworld")) {
                                 isNewGeneration = true;
                             }
                         }
@@ -215,20 +215,20 @@ public class WorldInfoCommand extends Command {
         }));
     }
     private boolean isOreBlock(Block block) {
-        return block == Blocks.COAL_ORE
-                || block == Blocks.COPPER_ORE
-                || block == Blocks.DEEPSLATE_COPPER_ORE
-                || block == Blocks.IRON_ORE
-                || block == Blocks.DEEPSLATE_IRON_ORE
-                || block == Blocks.GOLD_ORE
-                || block == Blocks.DEEPSLATE_GOLD_ORE
-                || block == Blocks.LAPIS_ORE
-                || block == Blocks.DEEPSLATE_LAPIS_ORE
-                || block == Blocks.DIAMOND_ORE
-                || block == Blocks.DEEPSLATE_DIAMOND_ORE
-                || block == Blocks.REDSTONE_ORE
-                || block == Blocks.DEEPSLATE_REDSTONE_ORE
-                || block == Blocks.EMERALD_ORE
-                || block == Blocks.DEEPSLATE_EMERALD_ORE;
+        return block == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("coal_ore"))
+                || block == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("copper_ore"))
+                || block == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_copper_ore"))
+                || block == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("iron_ore"))
+                || block == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_iron_ore"))
+                || block == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("gold_ore"))
+                || block == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_gold_ore"))
+                || block == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lapis_ore"))
+                || block == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_lapis_ore"))
+                || block == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("diamond_ore"))
+                || block == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_diamond_ore"))
+                || block == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("redstone_ore"))
+                || block == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_redstone_ore"))
+                || block == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("emerald_ore"))
+                || block == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_emerald_ore"));
     }
 }

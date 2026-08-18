@@ -74,7 +74,7 @@ public class HandOfGod extends Module {
     private final Setting<Block> block = sgClick.add(new BlockSetting.Builder()
             .name("ClickBlock")
             .description("What is created when clicking (Default: Lava)")
-            .defaultValue(Blocks.LAVA)
+            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")))
             .build());
     public final Setting<Boolean> replace = sgClick.add(new BoolSetting.Builder()
             .name("Replace Blocks")
@@ -85,7 +85,7 @@ public class HandOfGod extends Module {
     private final Setting<Block> blocktoreplace = sgClick.add(new BlockSetting.Builder()
             .name("Block to Replace.")
             .description("What is replaced when clicking or using the Sweep Away option")
-            .defaultValue(Blocks.GRASS_BLOCK)
+            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("grass_block")))
             .visible(replace::get)
             .build());
 
@@ -147,7 +147,7 @@ public class HandOfGod extends Module {
     private final Setting<Block> sweepblock = sgClick.add(new BlockSetting.Builder()
             .name("SweepBlock")
             .description("What is created when sweeping (Default: Air)")
-            .defaultValue(Blocks.AIR)
+            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")))
             .visible(SwpAway::get)
             .build());
     private final Setting<Integer> sweepradius = sgClick.add(new IntSetting.Builder()
@@ -173,13 +173,13 @@ public class HandOfGod extends Module {
     private final Setting<Block> pblocktoreplace = sgPcentered.add(new BlockSetting.Builder()
             .name("Block to Replace.")
             .description("What is replaced around the character")
-            .defaultValue(Blocks.GRASS_BLOCK)
+            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("grass_block")))
             .visible(pReplace::get)
             .build());
     private final Setting<Block> pblock = sgPcentered.add(new BlockSetting.Builder()
             .name("Replacement Block")
             .description("What is put in place of the replaced blocks (Default: Lava)")
-            .defaultValue(Blocks.LAVA)
+            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")))
             .visible(pReplace::get)
             .build());
     public final Setting<Boolean> rndplyr = sgPcentered.add(new BoolSetting.Builder()
@@ -274,7 +274,7 @@ public class HandOfGod extends Module {
     private final Setting<Block> roofblock = sgPcentered.add(new BlockSetting.Builder()
             .name("RooferBlock")
             .description("What is created.")
-            .defaultValue(Blocks.OBSIDIAN)
+            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("obsidian")))
             .visible(roofer::get)
             .build());
     private final Setting<Integer> roofradius = sgPcentered.add(new IntSetting.Builder()
@@ -332,7 +332,7 @@ public class HandOfGod extends Module {
     private final Setting<Block> trollblock = sgTroll.add(new BlockSetting.Builder()
             .name("OtherPlayersBlock")
             .description("What is created around the players (Default: Lava)")
-            .defaultValue(Blocks.LAVA)
+            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")))
             .visible(troll::get)
             .build());
     public final Setting<Boolean> trollreplace = sgTroll.add(new BoolSetting.Builder()
@@ -345,7 +345,7 @@ public class HandOfGod extends Module {
     private final Setting<Block> trollblocktoreplace = sgTroll.add(new BlockSetting.Builder()
             .name("Block to Replace.")
             .description("What is replaced around the players.")
-            .defaultValue(Blocks.GRASS_BLOCK)
+            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("grass_block")))
             .visible(() -> troll.get() && trollreplace.get())
             .build());
     public final Setting<Integer> trollwidth = sgTroll.add(new IntSetting.Builder()
@@ -400,7 +400,7 @@ public class HandOfGod extends Module {
     private final Setting<Block> terminateblock = sgTerminate.add(new BlockSetting.Builder()
             .name("EntitiesBlock")
             .description("What is created around the Entities (Default: Lava)")
-            .defaultValue(Blocks.LAVA)
+            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")))
             .visible(terminate::get)
             .build());
     public final Setting<Boolean> terminatereplace = sgTerminate.add(new BoolSetting.Builder()
@@ -413,7 +413,7 @@ public class HandOfGod extends Module {
     private final Setting<Block> terminateblocktoreplace = sgTerminate.add(new BlockSetting.Builder()
             .name("Block to Replace.")
             .description("What is replaced around the entities.")
-            .defaultValue(Blocks.GRASS_BLOCK)
+            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("grass_block")))
             .visible(() -> terminate.get() && terminatereplace.get())
             .build());
     public final Setting<Integer> terminatewidth = sgTerminate.add(new IntSetting.Builder()
@@ -511,7 +511,7 @@ public class HandOfGod extends Module {
             if (lightning.get()) {
                 ItemStack rst = mc.player.getMainHandItem();
                 BlockHitResult bhr = new BlockHitResult(mc.player.getEyePosition(), Direction.DOWN, BlockPos.containing(mc.player.getEyePosition()), false);
-                ItemStack Lightning = new ItemStack(Items.SALMON_SPAWN_EGG);
+                ItemStack Lightning = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("salmon_spawn_egg")));
                 var changes = DataComponentPatch.builder()
                         .set(DataComponents.ENTITY_DATA, createEntityData(pos))
                         .build();
@@ -583,7 +583,7 @@ public class HandOfGod extends Module {
                 if (lightning.get()) {
                     ItemStack rst = mc.player.getMainHandItem();
                     BlockHitResult bhr = new BlockHitResult(mc.player.getEyePosition(), Direction.DOWN, BlockPos.containing(mc.player.getEyePosition()), false);
-                    ItemStack Lightning = new ItemStack(Items.SALMON_SPAWN_EGG);
+                    ItemStack Lightning = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("salmon_spawn_egg")));
                     var changes = DataComponentPatch.builder()
                             .set(DataComponents.ENTITY_DATA, createEntityData(pos))
                             .build();

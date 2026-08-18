@@ -393,7 +393,7 @@ public class AutoDisplays extends Module {
     }
 
     private ItemStack createTextDisplayEgg(String text, int brightness, int argbColor, BlockPos pos) {
-        ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
+        ItemStack item = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("bee_spawn_egg")));
 
         ListTag Pos = new ListTag();
         Pos.add(DoubleTag.valueOf(pos.getX()));
