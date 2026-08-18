@@ -249,7 +249,7 @@ public class BlockListMineCommand extends Module {
             String[] blockNames = blockListString.split(" ");
             Set<String> uniqueBlockNames = new HashSet<>(Arrays.asList(blockNames));
             blockListString = String.join(" ", uniqueBlockNames);
-            mc.gui.getChat().addRecentChat("#mine " + blockListString);
+            mc.gui.hud.getChat().addRecentChat("#mine " + blockListString);
             ChatUtils.sendMsg(Component.nullToEmpty("Press T, then the up key, then ENTER to execute the #mine command. **REQUIRES BARITONE**"));
         } else if (blockListString.isEmpty()) error("No blocks in the list within range.");
         toggle();

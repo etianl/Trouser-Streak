@@ -452,7 +452,7 @@ public class ForceOPSign extends Module {
             else blockEntityTag.putString("id", "minecraft:oak_sign");
         }
 
-        return TypedEntityData.of(Blocknet.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("sign")), blockEntityTag);
+        return TypedEntityData.of(net.minecraft.core.registries.BuiltInRegistries.BLOCK_ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("sign")), blockEntityTag);
     }
     private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
         if (serverVersion == null) return false;

@@ -280,7 +280,6 @@ public class MobGearESP extends Module {
     }
 
     private void drawTracer(Render3DEvent event, Entity entity) {
-        if (mc.options.hideGui) return;
 
         Color baseColor = monstersColor.get();
         if (distance.get()){
