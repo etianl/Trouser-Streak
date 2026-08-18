@@ -944,6 +944,6 @@ public class HandOfGod extends Module {
         Pos.add(DoubleTag.valueOf(pos.getZ()));
         entityTag.put("Pos", Pos);
         entityTag.putString("id", "minecraft:lightning_bolt");
-        return TypedEntityData.of(EntityType.LIGHTNING_BOLT, entityTag);
+        return TypedEntityData.of(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lightning_bolt")), entityTag);
     }
 }

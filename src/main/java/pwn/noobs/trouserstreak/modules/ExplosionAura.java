@@ -174,6 +174,6 @@ public class ExplosionAura extends Module {
         entityTag.putInt("Fuse", 0);
         entityTag.putBoolean("NoGravity", true);
         entityTag.putInt("ExplosionRadius", click ? cpower.get() : power.get());
-        return TypedEntityData.of(EntityType.CREEPER, entityTag);
+        return TypedEntityData.of(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("creeper")), entityTag);
     }
 }

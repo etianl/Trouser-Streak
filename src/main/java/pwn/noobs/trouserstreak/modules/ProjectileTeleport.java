@@ -95,7 +95,7 @@ public class ProjectileTeleport extends Module {
                     .name("entities")
                     .description("Entities to target.")
                     .onlyAttackable()
-                    .defaultValue(EntityType.PLAYER)
+                    .defaultValue(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("player")))
                     .build()
     );
     public final Setting<Boolean> friends = sgTargeting.add(new BoolSetting.Builder()

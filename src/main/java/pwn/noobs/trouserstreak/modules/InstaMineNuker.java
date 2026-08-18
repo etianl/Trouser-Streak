@@ -183,10 +183,10 @@ public class InstaMineNuker extends Module {
                 for (int y = bottomlimit; y <= (mc.player.getBlockY()+1) + Math.round(Math.ceil(reach)); y++) {
                     for (int z = (int) (mc.player.getBlockZ() - Math.round(Math.ceil(reach))); z <= mc.player.getBlockZ() + Math.round(Math.ceil(reach)); z++) {
                         BlockPos blockPos = new BlockPos(x, y, z);
-                        Vec3 playerPos1 = new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ()).getCenter();
-                        Vec3 playerPos2 = new BlockPos(mc.player.getBlockX(), mc.player.getBlockY()+1, mc.player.getBlockZ()).getCenter();
-                        double distance1 = playerPos1.distanceTo(blockPos.getCenter());
-                        double distance2 = playerPos2.distanceTo(blockPos.getCenter());
+                        Vec3 playerPos1 = Vec3.atCenterOf(new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ()));
+                        Vec3 playerPos2 = Vec3.atCenterOf(new BlockPos(mc.player.getBlockX(), mc.player.getBlockY()+1, mc.player.getBlockZ()));
+                        double distance1 = playerPos1.distanceTo(Vec3.atCenterOf(blockPos));
+                        double distance2 = playerPos2.distanceTo(Vec3.atCenterOf(blockPos));
                         switch (mode.get()) {
                             case Sphere -> {
                                 if (!blocks.contains(blockPos) && distance1 <= reach || distance2 <= reach) blocks.add(blockPos);

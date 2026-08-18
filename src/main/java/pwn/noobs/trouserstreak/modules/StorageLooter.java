@@ -725,10 +725,10 @@ public class StorageLooter extends Module {
             for (int y = bottomlimit; y <= (mc.player.getBlockY() + 1) + Math.round(Math.ceil(reach)); y++) {
                 for (int z = (int) (mc.player.getBlockZ() - Math.round(Math.ceil(reach))); z <= mc.player.getBlockZ() + Math.round(Math.ceil(reach)); z++) {
                     BlockPos blockPos = new BlockPos(x, y, z);
-                    Vec3 playerPos1 = new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ()).getCenter();
-                    Vec3 playerPos2 = new BlockPos(mc.player.getBlockX(), mc.player.getBlockY() + 1, mc.player.getBlockZ()).getCenter();
-                    double distance1 = playerPos1.distanceTo(blockPos.getCenter());
-                    double distance2 = playerPos2.distanceTo(blockPos.getCenter());
+                    Vec3 playerPos1 = Vec3.atCenterOf(new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ()));
+                    Vec3 playerPos2 = Vec3.atCenterOf(new BlockPos(mc.player.getBlockX(), mc.player.getBlockY() + 1, mc.player.getBlockZ()));
+                    double distance1 = playerPos1.distanceTo(Vec3.atCenterOf(blockPos));
+                    double distance2 = playerPos2.distanceTo(Vec3.atCenterOf(blockPos));
                     if (mode.get() == Modes.Sphere && (distance1 <= reach || distance2 <= reach)) {
                         blocks.add(blockPos);
                     } else if (mode.get() == Modes.Box) {
@@ -755,7 +755,7 @@ public class StorageLooter extends Module {
             mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
             mc.player.swing(InteractionHand.MAIN_HAND);
         }
-        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(blockPos.getCenter(), Direction.UP, blockPos, true));
+        mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(blockPos), Direction.UP, blockPos, true));
         chestsToProcess.put(blockPos, opendelay.get());
         processedChests.add(blockPos);
         isChestOpen = true;

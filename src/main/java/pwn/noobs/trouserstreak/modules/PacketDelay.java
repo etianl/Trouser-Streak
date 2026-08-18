@@ -6,10 +6,11 @@ import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.network.PacketUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketType;
+import org.jspecify.annotations.NonNull;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.ArrayDeque;
@@ -19,16 +20,16 @@ import java.util.Set;
 
 public class PacketDelay extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final Setting<Set<Class<? extends Packet<?>>>> c2sPackets = sgGeneral.add(new PacketListSetting.Builder()
+    private final Setting<Set<PacketType<? extends @NonNull Packet<?>>>> c2sPackets = sgGeneral.add(new PacketListSetting.Builder()
             .name("SEND-packets")
             .description("Client-to-server packets to cancel.")
-            .filter(aClass -> PacketUtils.getC2SPackets().contains(aClass))
+            .serverbound()
             .build()
     );
-    private final Setting<Set<Class<? extends Packet<?>>>> s2cPackets = sgGeneral.add(new PacketListSetting.Builder()
+    private final Setting<Set<PacketType<? extends @NonNull Packet<?>>>> s2cPackets = sgGeneral.add(new PacketListSetting.Builder()
             .name("RECEIVE-packets")
             .description("Server-to-client packets to cancel.")
-            .filter(aClass -> PacketUtils.getS2CPackets().contains(aClass))
+            .clientbound()
             .build()
     );
     public final Setting<Integer> sdelay = sgGeneral.add(new IntSetting.Builder()
@@ -76,7 +77,7 @@ public class PacketDelay extends Module {
 
     @EventHandler(priority = EventPriority.HIGHEST + 1)
     private void onReceivePacket(PacketEvent.Receive event) {
-        if (s2cPackets.get().contains(event.packet.getClass())
+        if (s2cPackets.get().contains(event.packet.type())
                 && !isPacketInQueue(receiveQueue, event.packet)) {
             receiveQueue.add(new DelayedPacket(event.packet, rdelay.get()));
             event.cancel();
@@ -85,7 +86,7 @@ public class PacketDelay extends Module {
 
     @EventHandler(priority = EventPriority.HIGHEST + 1)
     private void onSendPacket(PacketEvent.Send event) {
-        if (c2sPackets.get().contains(event.packet.getClass())
+        if (c2sPackets.get().contains(event.packet.type())
                 && !isPacketInQueue(sendQueue, event.packet)) {
             sendQueue.add(new DelayedPacket(event.packet, sdelay.get()));
             event.cancel();

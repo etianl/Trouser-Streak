@@ -579,7 +579,7 @@ public class AirstrikePlus extends Module {
         Identifier entityId = Identifier.tryParse("minecraft:" + entityName);
         EntityType<?> entityType = (entityId != null)
                 ? BuiltInRegistries.ENTITY_TYPE.getValue(entityId)
-                : EntityType.FIREBALL;
+                : net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("fireball"));
 
         return TypedEntityData.of(entityType, entityTag);
     }

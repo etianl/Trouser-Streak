@@ -344,7 +344,7 @@ public class InfiniteReach extends Module {
                 ? mc.player.position()
                 : mc.player.getVehicle().position();
         if (blockHit != null){
-            Vec3 blocktargetPos = blockHit.getBlockPos().getCenter();
+            Vec3 blocktargetPos = Vec3.atCenterOf(blockHit.getBlockPos());
             AABB blockBox = new AABB(blockHit.getBlockPos());
 
             BlockPos targetActionPos = blockHit.getBlockPos().relative(blockHit.getDirection());

@@ -53,7 +53,7 @@ public class TPAura extends Module {
     private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Entities to attack.")
-            .defaultValue(EntityType.PLAYER)
+            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("player")))
             .build()
     );
     public final Setting<Boolean> friends = sgGeneral.add(new BoolSetting.Builder()

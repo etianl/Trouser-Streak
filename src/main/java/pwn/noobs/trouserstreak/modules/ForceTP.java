@@ -449,7 +449,7 @@ public class ForceTP extends Module {
 
         Identifier entityId = Identifier.tryParse("minecraft:ender_pearl");
         EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.getValue(entityId);
-        if (entityType == null) entityType = EntityType.ENDER_PEARL;
+        if (entityType == null) entityType = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("ender_pearl"));
 
         return TypedEntityData.of(entityType, entityTag);
     }
