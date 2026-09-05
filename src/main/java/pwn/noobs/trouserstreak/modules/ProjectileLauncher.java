@@ -87,25 +87,25 @@ public class ProjectileLauncher extends Module {
             .name("projectile-items")
             .description("Which items to apply extra velocity to.")
             .defaultValue(
-                    Items.ENDER_PEARL,
-                    Items.SPLASH_POTION,
-                    Items.LINGERING_POTION,
-                    Items.EXPERIENCE_BOTTLE,
-                    Items.SNOWBALL,
-                    Items.EGG,
-                    Items.WIND_CHARGE,
-                    Items.BOW,
-                    Items.TRIDENT
+                    net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("ender_pearl")),
+                    net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("splash_potion")),
+                    net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lingering_potion")),
+                    net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("experience_bottle")),
+                    net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("snowball")),
+                    net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("egg")),
+                    net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("wind_charge")),
+                    net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("bow")),
+                    net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("trident"))
             )
-            .filter(item -> item == Items.ENDER_PEARL
-                    || item == Items.SPLASH_POTION
-                    || item == Items.LINGERING_POTION
-                    || item == Items.EXPERIENCE_BOTTLE
-                    || item == Items.SNOWBALL
-                    || item == Items.EGG
-                    || item == Items.WIND_CHARGE
-                    || item == Items.BOW
-                    || item == Items.TRIDENT
+            .filter(item -> item == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("ender_pearl"))
+                    || item == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("splash_potion"))
+                    || item == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lingering_potion"))
+                    || item == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("experience_bottle"))
+                    || item == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("snowball"))
+                    || item == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("egg"))
+                    || item == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("wind_charge"))
+                    || item == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("bow"))
+                    || item == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("trident"))
             )
             .build()
     );
@@ -277,7 +277,7 @@ public class ProjectileLauncher extends Module {
                 } else {
                     sendlegacypackets();
                 }
-            } else if ((item instanceof BowItem && projectileItems.get().contains(Items.BOW)) || (item instanceof TridentItem && projectileItems.get().contains(Items.TRIDENT))){
+            } else if ((item instanceof BowItem && projectileItems.get().contains(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("bow")))) || (item instanceof TridentItem && projectileItems.get().contains(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("trident"))))){
                 isChargingBow = true;
             }
             return;
@@ -309,13 +309,13 @@ public class ProjectileLauncher extends Module {
         if (antihungerWasEnabled) Modules.get().get(AntiHunger.class).toggle();
     }
     private boolean isValidProjectile(Item item) {
-        return (item instanceof EnderpearlItem && projectileItems.get().contains(Items.ENDER_PEARL)) ||
-                (item instanceof SplashPotionItem && projectileItems.get().contains(Items.SPLASH_POTION)) ||
-                (item instanceof LingeringPotionItem && projectileItems.get().contains(Items.LINGERING_POTION)) ||
-                (item instanceof ExperienceBottleItem && projectileItems.get().contains(Items.EXPERIENCE_BOTTLE)) ||
-                (item instanceof SnowballItem && projectileItems.get().contains(Items.SNOWBALL)) ||
-                (item instanceof WindChargeItem && projectileItems.get().contains(Items.WIND_CHARGE)) ||
-                (item instanceof EggItem && projectileItems.get().contains(Items.EGG));
+        return (item instanceof EnderpearlItem && projectileItems.get().contains(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("ender_pearl")))) ||
+                (item instanceof SplashPotionItem && projectileItems.get().contains(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("splash_potion")))) ||
+                (item instanceof LingeringPotionItem && projectileItems.get().contains(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lingering_potion")))) ||
+                (item instanceof ExperienceBottleItem && projectileItems.get().contains(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("experience_bottle")))) ||
+                (item instanceof SnowballItem && projectileItems.get().contains(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("snowball")))) ||
+                (item instanceof WindChargeItem && projectileItems.get().contains(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("wind_charge")))) ||
+                (item instanceof EggItem && projectileItems.get().contains(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("egg"))));
     }
     private void executeTeleport(Packet<?> packetToSend) {
         if (mc.player == null || mc.level == null) return;
@@ -468,7 +468,7 @@ public class ProjectileLauncher extends Module {
                     BlockPos.containing(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
             )) {
                 BlockState state = mc.level.getBlockState(bp);
-                if (state.is(Blocks.LAVA)) {
+                if (state.is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")))) {
                     return true;
                 }
             }
@@ -478,7 +478,7 @@ public class ProjectileLauncher extends Module {
                     BlockPos.containing(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
             )) {
                 BlockState state = mc.level.getBlockState(bp);
-                if (state.is(Blocks.LAVA) || !state.getCollisionShape(mc.level, bp).isEmpty()) {
+                if (state.is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))) || !state.getCollisionShape(mc.level, bp).isEmpty()) {
                     return true;
                 }
             }

@@ -266,7 +266,7 @@ public class AirstrikePlus extends Module {
     private final Setting<Block> blockstate = sgnormal.add(new BlockSetting.Builder()
             .name("falling_block entity block")
             .description("What is created when specifying falling_block as the entity.")
-            .defaultValue(Blocks.BEDROCK)
+            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("bedrock")))
             .visible(() -> !airstrikeEveryone.get() && blockstateSpecify.get())
             .build());
     public final Setting<Boolean> Ecustomname = sgeveryone.add(new BoolSetting.Builder()
@@ -410,7 +410,7 @@ public class AirstrikePlus extends Module {
     private final Setting<Block> Eblockstate = sgeveryone.add(new BlockSetting.Builder()
             .name("falling_block entity block")
             .description("What is created when specifying falling_block as the entity.")
-            .defaultValue(Blocks.BEDROCK)
+            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("bedrock")))
             .visible(() -> airstrikeEveryone.get() && EblockstateSpecify.get())
             .build());
 
@@ -489,7 +489,7 @@ public class AirstrikePlus extends Module {
                     int index = r.nextInt(colorCodes.length);
                     namecolour = colorCodes[index];
                 } else namecolour = nomcolor.get().toString();
-                ItemStack bomb = new ItemStack(Items.SALMON_SPAWN_EGG);
+                ItemStack bomb = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("salmon_spawn_egg")));
                 ItemStack bfr = mc.player.getMainHandItem();
                 BlockHitResult bhr = new BlockHitResult(mc.player.position().add(0, 1, 0), Direction.UP, new BlockPos(mc.player.blockPosition().offset(0, 1, 0)), false);
                 i++;
@@ -579,7 +579,7 @@ public class AirstrikePlus extends Module {
         Identifier entityId = Identifier.tryParse("minecraft:" + entityName);
         EntityType<?> entityType = (entityId != null)
                 ? BuiltInRegistries.ENTITY_TYPE.getValue(entityId)
-                : EntityType.FIREBALL;
+                : net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("fireball"));
 
         return TypedEntityData.of(entityType, entityTag);
     }

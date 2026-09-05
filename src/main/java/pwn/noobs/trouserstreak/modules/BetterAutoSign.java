@@ -410,13 +410,13 @@ public class BetterAutoSign extends Module {
         if(autoGlow.get()) {
             int slot = -1;
             for (int i = 0; i < 36; i++) {
-                if (mc.player.getInventory().getItem(i).getItem() == Items.GLOW_INK_SAC) {
+                if (mc.player.getInventory().getItem(i).getItem() == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("glow_ink_sac"))) {
                     slot = i;
                     break;
                 }
             }
 
-            if (slot == -1 && mc.player.getOffhandItem().getItem() == Items.GLOW_INK_SAC) slot = 45;
+            if (slot == -1 && mc.player.getOffhandItem().getItem() == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("glow_ink_sac"))) slot = 45;
             if (slot != -1) {
                 InvUtils.move().from(slot).to(mc.player.getInventory().getSelectedSlot());
 
@@ -485,21 +485,21 @@ public class BetterAutoSign extends Module {
         }
     }
     private boolean filter(Item item) {
-        return Items.WHITE_DYE.equals(item)
-                || Items.BLACK_DYE.equals(item)
-                || Items.BLUE_DYE.equals(item)
-                || Items.BROWN_DYE.equals(item)
-                || Items.CYAN_DYE.equals(item)
-                || Items.GRAY_DYE.equals(item)
-                || Items.YELLOW_DYE.equals(item)
-                || Items.RED_DYE.equals(item)
-                || Items.GREEN_DYE.equals(item)
-                || Items.LIGHT_BLUE_DYE.equals(item)
-                || Items.ORANGE_DYE.equals(item)
-                || Items.LIME_DYE.equals(item)
-                || Items.PURPLE_DYE.equals(item)
-                || Items.PINK_DYE.equals(item)
-                || Items.MAGENTA_DYE.equals(item)
-                || Items.LIGHT_GRAY_DYE.equals(item);
+        return net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("white_dye")).equals(item)
+                || net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("black_dye")).equals(item)
+                || net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("blue_dye")).equals(item)
+                || net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("brown_dye")).equals(item)
+                || net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("cyan_dye")).equals(item)
+                || net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("gray_dye")).equals(item)
+                || net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("yellow_dye")).equals(item)
+                || net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("red_dye")).equals(item)
+                || net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("green_dye")).equals(item)
+                || net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("light_blue_dye")).equals(item)
+                || net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("orange_dye")).equals(item)
+                || net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lime_dye")).equals(item)
+                || net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("purple_dye")).equals(item)
+                || net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("pink_dye")).equals(item)
+                || net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("magenta_dye")).equals(item)
+                || net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("light_gray_dye")).equals(item);
     }
 }

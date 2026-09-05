@@ -219,17 +219,17 @@ public class NoSpawnerDetector extends Module {
         }
         chunkSet.forEach(chunk -> {
             if (!chunk.isEmpty() && !scannedChunks.contains(chunk.getPos())){
-                if ((enableDungeon.get() && mc.level.dimension() == Level.OVERWORLD && chunkContainsBlock(chunk, Blocks.MOSSY_COBBLESTONE, Math.min(chunk.getSections().length, 20))) || (enableMineshaft.get() && mc.level.dimension() == Level.OVERWORLD && chunkContainsBlock(chunk, Blocks.COBWEB, Math.min(chunk.getSections().length, 20)))) {
+                if ((enableDungeon.get() && mc.level.dimension() == Level.OVERWORLD && chunkContainsBlock(chunk, net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("mossy_cobblestone")), Math.min(chunk.getSections().length, 20))) || (enableMineshaft.get() && mc.level.dimension() == Level.OVERWORLD && chunkContainsBlock(chunk, net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("cobweb")), Math.min(chunk.getSections().length, 20)))) {
                     for (int x = 0; x < 16; x++) {
                         for (int y = mc.level.getMinY(); y < mc.level.getMaxY(); y++) {
                             for (int z = 0; z < 16; z++) {
                                 BlockPos blockPos = new BlockPos(x + chunk.getPos().x() * 16, y, z + chunk.getPos().z() * 16);
-                                if (enableDungeon.get() && mc.level.getBlockState(blockPos).getBlock() == Blocks.MOSSY_COBBLESTONE) {
+                                if (enableDungeon.get() && mc.level.getBlockState(blockPos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("mossy_cobblestone"))) {
                                     if (!scannedBlocks.contains(blockPos) && !checkedBlocks.contains(blockPos))
                                         scanForDungeonFloor(blockPos);
                                     checkedBlocks.add(blockPos);
                                 }
-                                if (enableMineshaft.get() && mc.level.getBlockState(blockPos).getBlock() == Blocks.COBWEB) {
+                                if (enableMineshaft.get() && mc.level.getBlockState(blockPos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("cobweb"))) {
                                     if (!scannedBlocks.contains(blockPos) && !checkedBlocks.contains(blockPos))
                                         scanForMineshaftSpawner(blockPos);
                                     checkedBlocks.add(blockPos);
@@ -280,12 +280,12 @@ public class NoSpawnerDetector extends Module {
         for (int x = minX; x <= maxX; x++) {
             for (int z = minZ; z <= maxZ; z++) {
                 BlockPos scanPos = new BlockPos(x, y, z);
-                if (mc.level.getBlockState(scanPos).getBlock() == Blocks.MOSSY_COBBLESTONE) mossyCobbleCount++;
-                else if (mc.level.getBlockState(scanPos).getBlock() == Blocks.COBBLESTONE) cobbleCount++;
+                if (mc.level.getBlockState(scanPos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("mossy_cobblestone"))) mossyCobbleCount++;
+                else if (mc.level.getBlockState(scanPos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("cobblestone"))) cobbleCount++;
                 BlockPos extraScanPos = new BlockPos(x, y+1, z);
-                if (!foundCaveAir) if (mc.level.getBlockState(extraScanPos).getBlock() == Blocks.CAVE_AIR)foundCaveAir=true;
-                if (chestDetect.get() && !foundChests) if (mc.level.getBlockState(extraScanPos).getBlock() == Blocks.CHEST)foundChests=true;
-                if (spawnerDetect.get() && !foundSpawner) if (mc.level.getBlockState(extraScanPos).getBlock() == Blocks.SPAWNER)foundSpawner=true;
+                if (!foundCaveAir) if (mc.level.getBlockState(extraScanPos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("cave_air")))foundCaveAir=true;
+                if (chestDetect.get() && !foundChests) if (mc.level.getBlockState(extraScanPos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("chest")))foundChests=true;
+                if (spawnerDetect.get() && !foundSpawner) if (mc.level.getBlockState(extraScanPos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("spawner")))foundSpawner=true;
                 potentialBlocks.add(scanPos);
             }
         }
@@ -324,13 +324,13 @@ public class NoSpawnerDetector extends Module {
             for (int z = minZ; z <= maxZ; z++) {
                 for (int y = minY; y <= maxY; y++) {
                     BlockPos scanPos = new BlockPos(x, y, z);
-                    if (mc.level.getBlockState(scanPos).getBlock() == Blocks.COBWEB) cobwebCount++;
+                    if (mc.level.getBlockState(scanPos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("cobweb"))) cobwebCount++;
                     if (!foundCaveAir)
-                        if (mc.level.getBlockState(scanPos).getBlock() == Blocks.CAVE_AIR) foundCaveAir = true;
+                        if (mc.level.getBlockState(scanPos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("cave_air"))) foundCaveAir = true;
                     if (!foundAir)
-                        if (mc.level.getBlockState(scanPos).getBlock() == Blocks.AIR) foundAir = true;
+                        if (mc.level.getBlockState(scanPos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) foundAir = true;
                     if (!foundSpawner)
-                        if (mc.level.getBlockState(scanPos).getBlock() == Blocks.SPAWNER) foundSpawner = true;
+                        if (mc.level.getBlockState(scanPos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("spawner"))) foundSpawner = true;
                     potentialBlocks.add(scanPos);
                 }
             }
@@ -347,8 +347,8 @@ public class NoSpawnerDetector extends Module {
             for (int x = minX2; x <= maxX2; x++) {
                 for (int z = minZ2; z <= maxZ2; z++) {
                     BlockPos scanPos = new BlockPos(x, y, z);
-                    if (!doublechecknospawner) if (mc.level.getBlockState(scanPos).getBlock() == Blocks.SPAWNER)doublechecknospawner=true;
-                    if (!doublechecknospawner) if (mc.level.getBlockState(scanPos).getBlock() == Blocks.VOID_AIR)doublechecknospawner=true;
+                    if (!doublechecknospawner) if (mc.level.getBlockState(scanPos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("spawner")))doublechecknospawner=true;
+                    if (!doublechecknospawner) if (mc.level.getBlockState(scanPos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("void_air")))doublechecknospawner=true;
                 }
             }
         }

@@ -25,6 +25,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -80,6 +81,9 @@ import java.util.stream.Collectors;
     updated and modified by etianll :D
 */
 public class BaseFinder extends Module {
+    private static Block block(String id) {
+        return BuiltInRegistries.BLOCK.getValue(Identifier.withDefaultNamespace(id));
+    }
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgDetectors = settings.createGroup("Block Detectors");
     private final SettingGroup sgEDetectors = settings.createGroup("Entity Detectors");
@@ -242,38 +246,38 @@ public class BaseFinder extends Module {
             .name("Block List #1 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
             .defaultValue(
-                    Blocks.CRAFTER, Blocks.SPRUCE_SAPLING, Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING, Blocks.JUNGLE_SAPLING, Blocks.CHERRY_SAPLING, Blocks.BAMBOO_SAPLING,
-                    Blocks.CHERRY_BUTTON, Blocks.CHERRY_DOOR, Blocks.CHERRY_FENCE, Blocks.CHERRY_FENCE_GATE, Blocks.CHERRY_PLANKS, Blocks.CHERRY_PRESSURE_PLATE, Blocks.CHERRY_STAIRS, Blocks.CHERRY_WOOD, Blocks.CHERRY_TRAPDOOR, Blocks.CHERRY_SLAB,
-                    Blocks.MANGROVE_PLANKS, Blocks.MANGROVE_BUTTON, Blocks.MANGROVE_DOOR, Blocks.MANGROVE_FENCE, Blocks.MANGROVE_FENCE_GATE, Blocks.MANGROVE_STAIRS, Blocks.MANGROVE_SLAB, Blocks.MANGROVE_TRAPDOOR,
-                    Blocks.BIRCH_DOOR, Blocks.BIRCH_FENCE_GATE, Blocks.BIRCH_BUTTON, Blocks.ACACIA_BUTTON, Blocks.DARK_OAK_BUTTON, Blocks.POLISHED_BLACKSTONE_BUTTON, Blocks.SPRUCE_BUTTON,
-                    Blocks.BAMBOO_BLOCK, Blocks.BAMBOO_BUTTON, Blocks.BAMBOO_DOOR, Blocks.BAMBOO_FENCE, Blocks.BAMBOO_FENCE_GATE, Blocks.BAMBOO_MOSAIC, Blocks.BAMBOO_MOSAIC_SLAB, Blocks.BAMBOO_MOSAIC_STAIRS, Blocks.BAMBOO_PLANKS, Blocks.BAMBOO_PRESSURE_PLATE, Blocks.BAMBOO_SLAB, Blocks.BAMBOO_STAIRS, Blocks.BAMBOO_TRAPDOOR, Blocks.CHISELED_BOOKSHELF,
-                    Blocks.BLACK_CONCRETE, Blocks.BLUE_CONCRETE, Blocks.CYAN_CONCRETE, Blocks.BROWN_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.MAGENTA_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE, Blocks.PINK_CONCRETE, Blocks.GRAY_CONCRETE, Blocks.LIGHT_GRAY_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.GREEN_CONCRETE,
-                    Blocks.BLACK_CONCRETE_POWDER, Blocks.BLUE_CONCRETE_POWDER, Blocks.CYAN_CONCRETE_POWDER, Blocks.BROWN_CONCRETE_POWDER, Blocks.WHITE_CONCRETE_POWDER, Blocks.ORANGE_CONCRETE_POWDER, Blocks.MAGENTA_CONCRETE_POWDER, Blocks.LIGHT_BLUE_CONCRETE_POWDER, Blocks.YELLOW_CONCRETE_POWDER, Blocks.LIME_CONCRETE_POWDER, Blocks.PINK_CONCRETE_POWDER, Blocks.GRAY_CONCRETE_POWDER, Blocks.LIGHT_GRAY_CONCRETE_POWDER, Blocks.PURPLE_CONCRETE_POWDER, Blocks.GREEN_CONCRETE_POWDER, Blocks.RED_CONCRETE_POWDER,
-                    Blocks.PURPLE_TERRACOTTA, Blocks.MAGENTA_TERRACOTTA, Blocks.PINK_TERRACOTTA, Blocks.MAGENTA_GLAZED_TERRACOTTA, Blocks.PINK_GLAZED_TERRACOTTA, Blocks.GRAY_GLAZED_TERRACOTTA, Blocks.BLUE_GLAZED_TERRACOTTA, Blocks.BROWN_GLAZED_TERRACOTTA, Blocks.GREEN_GLAZED_TERRACOTTA,
-                    Blocks.OXIDIZED_COPPER, Blocks.CUT_COPPER, Blocks.EXPOSED_CUT_COPPER, Blocks.WEATHERED_CUT_COPPER, Blocks.CUT_COPPER_SLAB, Blocks.CUT_COPPER_STAIRS, Blocks.EXPOSED_CUT_COPPER_SLAB, Blocks.EXPOSED_CUT_COPPER_STAIRS, Blocks.WEATHERED_CUT_COPPER_SLAB, Blocks.WEATHERED_CUT_COPPER_STAIRS, Blocks.OXIDIZED_CUT_COPPER_SLAB, Blocks.OXIDIZED_CUT_COPPER_STAIRS, Blocks.COPPER_BULB, Blocks.EXPOSED_COPPER_BULB, Blocks.WEATHERED_COPPER_BULB, Blocks.OXIDIZED_COPPER_BULB, Blocks.CHISELED_COPPER, Blocks.EXPOSED_CHISELED_COPPER, Blocks.WEATHERED_CHISELED_COPPER, Blocks.OXIDIZED_CHISELED_COPPER, Blocks.COPPER_DOOR, Blocks.EXPOSED_COPPER_DOOR, Blocks.WEATHERED_COPPER_DOOR, Blocks.OXIDIZED_COPPER_DOOR, Blocks.COPPER_GRATE, Blocks.EXPOSED_COPPER_GRATE, Blocks.WEATHERED_COPPER_GRATE, Blocks.OXIDIZED_COPPER_GRATE, Blocks.COPPER_TRAPDOOR, Blocks.EXPOSED_COPPER_TRAPDOOR, Blocks.WEATHERED_COPPER_TRAPDOOR,
-                    Blocks.WAXED_EXPOSED_COPPER, Blocks.WAXED_WEATHERED_COPPER, Blocks.WAXED_EXPOSED_CUT_COPPER, Blocks.WAXED_WEATHERED_CUT_COPPER, Blocks.WAXED_EXPOSED_CUT_COPPER_SLAB, Blocks.WAXED_EXPOSED_CUT_COPPER_STAIRS, Blocks.WAXED_WEATHERED_CUT_COPPER_SLAB, Blocks.WAXED_WEATHERED_CUT_COPPER_STAIRS, Blocks.WAXED_EXPOSED_CHISELED_COPPER, Blocks.WAXED_WEATHERED_CHISELED_COPPER, Blocks.WAXED_EXPOSED_COPPER_DOOR, Blocks.WAXED_WEATHERED_COPPER_DOOR, Blocks.WAXED_EXPOSED_COPPER_GRATE, Blocks.WAXED_WEATHERED_COPPER_GRATE, Blocks.WAXED_COPPER_TRAPDOOR, Blocks.WAXED_EXPOSED_COPPER_TRAPDOOR, Blocks.WAXED_WEATHERED_COPPER_TRAPDOOR,
-                    Blocks.SOUL_TORCH, Blocks.SOUL_WALL_TORCH, Blocks.POTTED_MANGROVE_PROPAGULE, Blocks.POTTED_AZALEA, Blocks.POTTED_CHERRY_SAPLING, Blocks.POTTED_FERN, Blocks.POTTED_ACACIA_SAPLING, Blocks.POTTED_WARPED_FUNGUS, Blocks.POTTED_WARPED_ROOTS, Blocks.POTTED_CRIMSON_FUNGUS, Blocks.POTTED_CRIMSON_ROOTS, Blocks.POTTED_OAK_SAPLING, Blocks.POTTED_WITHER_ROSE, Blocks.WITHER_ROSE,
-                    Blocks.CAKE, Blocks.CANDLE_CAKE, Blocks.BLUE_CANDLE_CAKE, Blocks.BLACK_CANDLE_CAKE, Blocks.BROWN_CANDLE_CAKE, Blocks.CYAN_CANDLE_CAKE, Blocks.GRAY_CANDLE_CAKE, Blocks.GREEN_CANDLE_CAKE, Blocks.LIGHT_BLUE_CANDLE_CAKE, Blocks.LIGHT_GRAY_CANDLE_CAKE, Blocks.LIME_CANDLE_CAKE, Blocks.MAGENTA_CANDLE_CAKE, Blocks.ORANGE_CANDLE_CAKE, Blocks.PINK_CANDLE_CAKE, Blocks.PURPLE_CANDLE_CAKE, Blocks.RED_CANDLE_CAKE, Blocks.WHITE_CANDLE_CAKE, Blocks.YELLOW_CANDLE_CAKE,
-                    Blocks.BLUE_CANDLE, Blocks.BLACK_CANDLE, Blocks.BROWN_CANDLE, Blocks.CYAN_CANDLE, Blocks.GRAY_CANDLE, Blocks.GREEN_CANDLE, Blocks.LIGHT_BLUE_CANDLE, Blocks.LIGHT_GRAY_CANDLE, Blocks.LIME_CANDLE, Blocks.MAGENTA_CANDLE, Blocks.ORANGE_CANDLE, Blocks.PINK_CANDLE, Blocks.PURPLE_CANDLE, Blocks.YELLOW_CANDLE,
-                    Blocks.SMOOTH_RED_SANDSTONE, Blocks.CHISELED_RED_SANDSTONE, Blocks.CUT_RED_SANDSTONE, Blocks.SMOOTH_RED_SANDSTONE_SLAB, Blocks.SMOOTH_RED_SANDSTONE_STAIRS, Blocks.CUT_RED_SANDSTONE_SLAB, Blocks.RED_SANDSTONE_SLAB, Blocks.RED_SANDSTONE_STAIRS, Blocks.RED_SANDSTONE_WALL,
-                    Blocks.ANDESITE_STAIRS, Blocks.ANDESITE_SLAB, Blocks.ANDESITE_WALL, Blocks.POLISHED_ANDESITE_SLAB, Blocks.POLISHED_ANDESITE_STAIRS, Blocks.POLISHED_GRANITE_SLAB, Blocks.POLISHED_GRANITE_STAIRS, Blocks.POLISHED_DIORITE_SLAB, Blocks.POLISHED_DIORITE_STAIRS,
-                    Blocks.TUFF_SLAB, Blocks.TUFF_STAIRS, Blocks.TUFF_WALL, Blocks.TUFF_BRICK_SLAB, Blocks.TUFF_BRICK_STAIRS, Blocks.TUFF_BRICK_WALL,
-                    Blocks.CRACKED_NETHER_BRICKS, Blocks.CHISELED_NETHER_BRICKS, Blocks.RED_NETHER_BRICKS, Blocks.NETHER_BRICK_SLAB, Blocks.NETHER_BRICK_WALL, Blocks.RED_NETHER_BRICKS, Blocks.RED_NETHER_BRICK_SLAB, Blocks.RED_NETHER_BRICK_STAIRS, Blocks.RED_NETHER_BRICK_WALL,
-                    Blocks.ORANGE_STAINED_GLASS, Blocks.LIGHT_BLUE_STAINED_GLASS, Blocks.YELLOW_STAINED_GLASS, Blocks.LIME_STAINED_GLASS, Blocks.PINK_STAINED_GLASS, Blocks.CYAN_STAINED_GLASS, Blocks.PURPLE_STAINED_GLASS, Blocks.BLUE_STAINED_GLASS, Blocks.GREEN_STAINED_GLASS, Blocks.RED_STAINED_GLASS,
-                    Blocks.CRIMSON_PRESSURE_PLATE, Blocks.CRIMSON_BUTTON, Blocks.CRIMSON_DOOR, Blocks.CRIMSON_FENCE, Blocks.CRIMSON_FENCE_GATE, Blocks.CRIMSON_PLANKS, Blocks.CRIMSON_SIGN, Blocks.CRIMSON_WALL_SIGN, Blocks.CRIMSON_SLAB, Blocks.CRIMSON_STAIRS, Blocks.CRIMSON_TRAPDOOR,
-                    Blocks.WARPED_PRESSURE_PLATE, Blocks.WARPED_BUTTON, Blocks.WARPED_DOOR, Blocks.WARPED_FENCE, Blocks.WARPED_FENCE_GATE, Blocks.WARPED_PLANKS, Blocks.WARPED_SIGN, Blocks.WARPED_WALL_SIGN, Blocks.WARPED_SLAB, Blocks.WARPED_STAIRS, Blocks.WARPED_TRAPDOOR,
-                    Blocks.SCAFFOLDING, Blocks.CHERRY_SIGN, Blocks.CHERRY_WALL_SIGN, Blocks.OAK_SIGN, Blocks.SPRUCE_SIGN, Blocks.ACACIA_SIGN, Blocks.ACACIA_WALL_SIGN, Blocks.BIRCH_SIGN, Blocks.BIRCH_WALL_SIGN, Blocks.DARK_OAK_SIGN, Blocks.DARK_OAK_WALL_SIGN, Blocks.JUNGLE_SIGN, Blocks.JUNGLE_WALL_SIGN, Blocks.MANGROVE_SIGN, Blocks.MANGROVE_WALL_SIGN, Blocks.SLIME_BLOCK, Blocks.SPONGE, Blocks.TINTED_GLASS,
-                    Blocks.ACACIA_HANGING_SIGN, Blocks.ACACIA_WALL_HANGING_SIGN, Blocks.BAMBOO_HANGING_SIGN, Blocks.BAMBOO_WALL_HANGING_SIGN, Blocks.BIRCH_HANGING_SIGN, Blocks.BIRCH_WALL_HANGING_SIGN, Blocks.CHERRY_HANGING_SIGN, Blocks.CHERRY_WALL_HANGING_SIGN, Blocks.CRIMSON_HANGING_SIGN, Blocks.CRIMSON_WALL_HANGING_SIGN, Blocks.DARK_OAK_HANGING_SIGN, Blocks.DARK_OAK_WALL_HANGING_SIGN, Blocks.JUNGLE_HANGING_SIGN, Blocks.JUNGLE_WALL_HANGING_SIGN, Blocks.MANGROVE_HANGING_SIGN, Blocks.MANGROVE_WALL_HANGING_SIGN, Blocks.OAK_HANGING_SIGN, Blocks.OAK_WALL_HANGING_SIGN, Blocks.SPRUCE_HANGING_SIGN, Blocks.SPRUCE_WALL_HANGING_SIGN, Blocks.WARPED_HANGING_SIGN, Blocks.WARPED_WALL_HANGING_SIGN,
-                    Blocks.CHISELED_QUARTZ_BLOCK, Blocks.QUARTZ_PILLAR, Blocks.QUARTZ_BRICKS, Blocks.QUARTZ_STAIRS, Blocks.OCHRE_FROGLIGHT, Blocks.PEARLESCENT_FROGLIGHT, Blocks.VERDANT_FROGLIGHT, Blocks.PETRIFIED_OAK_SLAB,
-                    Blocks.STRIPPED_BAMBOO_BLOCK, Blocks.STRIPPED_CHERRY_LOG, Blocks.STRIPPED_CHERRY_WOOD, Blocks.STRIPPED_ACACIA_WOOD, Blocks.BIRCH_WOOD, Blocks.STRIPPED_BIRCH_LOG, Blocks.STRIPPED_BIRCH_WOOD, Blocks.CRIMSON_HYPHAE, Blocks.STRIPPED_CRIMSON_HYPHAE, Blocks.STRIPPED_CRIMSON_STEM, Blocks.DARK_OAK_WOOD, Blocks.STRIPPED_DARK_OAK_LOG, Blocks.STRIPPED_DARK_OAK_WOOD, Blocks.STRIPPED_JUNGLE_LOG, Blocks.STRIPPED_JUNGLE_WOOD, Blocks.STRIPPED_MANGROVE_LOG, Blocks.STRIPPED_MANGROVE_WOOD, Blocks.WARPED_HYPHAE, Blocks.STRIPPED_WARPED_HYPHAE, Blocks.STRIPPED_WARPED_STEM,
-                    Blocks.SHULKER_BOX, Blocks.BLACK_SHULKER_BOX, Blocks.BLUE_SHULKER_BOX, Blocks.BROWN_SHULKER_BOX, Blocks.CYAN_SHULKER_BOX, Blocks.GRAY_SHULKER_BOX, Blocks.GREEN_SHULKER_BOX, Blocks.LIGHT_BLUE_SHULKER_BOX, Blocks.LIGHT_GRAY_SHULKER_BOX, Blocks.LIME_SHULKER_BOX, Blocks.MAGENTA_SHULKER_BOX, Blocks.ORANGE_SHULKER_BOX, Blocks.PINK_SHULKER_BOX, Blocks.PURPLE_SHULKER_BOX, Blocks.RED_SHULKER_BOX, Blocks.WHITE_SHULKER_BOX, Blocks.YELLOW_SHULKER_BOX,
-                    Blocks.LAVA_CAULDRON, Blocks.POWDER_SNOW_CAULDRON, Blocks.ACTIVATOR_RAIL, Blocks.BEACON, Blocks.BEEHIVE, Blocks.REPEATING_COMMAND_BLOCK, Blocks.COMMAND_BLOCK, Blocks.CHAIN_COMMAND_BLOCK, Blocks.EMERALD_BLOCK, Blocks.IRON_BLOCK, Blocks.NETHERITE_BLOCK, Blocks.RAW_GOLD_BLOCK, Blocks.CONDUIT, Blocks.DAYLIGHT_DETECTOR, Blocks.DETECTOR_RAIL, Blocks.DRIED_KELP_BLOCK, Blocks.DROPPER, Blocks.ENCHANTING_TABLE,
-                    Blocks.PIGLIN_HEAD, Blocks.PIGLIN_WALL_HEAD, Blocks.CREEPER_HEAD, Blocks.CREEPER_WALL_HEAD, Blocks.DRAGON_WALL_HEAD, Blocks.DRAGON_HEAD, Blocks.PLAYER_HEAD, Blocks.PLAYER_WALL_HEAD, Blocks.ZOMBIE_HEAD, Blocks.ZOMBIE_WALL_HEAD, Blocks.SKELETON_WALL_SKULL, Blocks.WITHER_SKELETON_SKULL, Blocks.WITHER_SKELETON_WALL_SKULL, Blocks.HEAVY_CORE,
-                    Blocks.HONEY_BLOCK, Blocks.HONEYCOMB_BLOCK, Blocks.JUKEBOX, Blocks.LIGHTNING_ROD, Blocks.LODESTONE, Blocks.OBSERVER, Blocks.POWERED_RAIL, Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Blocks.LIGHT_WEIGHTED_PRESSURE_PLATE, Blocks.POLISHED_BLACKSTONE_PRESSURE_PLATE, Blocks.BIRCH_PRESSURE_PLATE, Blocks.JUNGLE_PRESSURE_PLATE, Blocks.DARK_OAK_PRESSURE_PLATE, Blocks.MANGROVE_PRESSURE_PLATE, Blocks.CRIMSON_PRESSURE_PLATE, Blocks.WARPED_PRESSURE_PLATE, Blocks.RESPAWN_ANCHOR, Blocks.CALIBRATED_SCULK_SENSOR, Blocks.SNIFFER_EGG,
-                    Blocks.RESIN_BLOCK, Blocks.RESIN_BRICKS, Blocks.RESIN_BRICK_SLAB, Blocks.RESIN_BRICK_WALL, Blocks.RESIN_BRICK_STAIRS, Blocks.CHISELED_RESIN_BRICKS, Blocks.POTTED_CLOSED_EYEBLOSSOM, Blocks.POTTED_OPEN_EYEBLOSSOM, Blocks.POTTED_PALE_OAK_SAPLING, Blocks.PALE_OAK_SAPLING, Blocks.PALE_OAK_BUTTON, Blocks.PALE_OAK_DOOR, Blocks.PALE_OAK_FENCE, Blocks.PALE_OAK_FENCE_GATE, Blocks.PALE_OAK_PLANKS, Blocks.PALE_OAK_PRESSURE_PLATE, Blocks.PALE_OAK_HANGING_SIGN, Blocks.PALE_OAK_SIGN, Blocks.PALE_OAK_WALL_SIGN, Blocks.PALE_OAK_WALL_HANGING_SIGN, Blocks.PALE_OAK_SLAB, Blocks.PALE_OAK_STAIRS, Blocks.PALE_OAK_TRAPDOOR, Blocks.PALE_OAK_WOOD, Blocks.STRIPPED_PALE_OAK_WOOD,
-                    Blocks.COPPER_BARS.unaffected(),Blocks.COPPER_BARS.waxed(),Blocks.COPPER_BARS.exposed(),Blocks.COPPER_BARS.waxedExposed(),Blocks.COPPER_BARS.weathered(),Blocks.COPPER_BARS.waxedWeathered(),Blocks.COPPER_BARS.oxidized(),Blocks.COPPER_BARS.waxedOxidized(), Blocks.COPPER_CHAIN.unaffected(),Blocks.COPPER_CHAIN.waxed(),Blocks.COPPER_CHAIN.exposed(),Blocks.COPPER_CHAIN.waxedExposed(),Blocks.COPPER_CHAIN.weathered(),Blocks.COPPER_CHAIN.waxedWeathered(),Blocks.COPPER_CHAIN.oxidized(),Blocks.COPPER_CHAIN.waxedOxidized(), Blocks.COPPER_LANTERN.unaffected(), Blocks.COPPER_LANTERN.waxed(), Blocks.COPPER_LANTERN.exposed(), Blocks.COPPER_LANTERN.waxedExposed(), Blocks.COPPER_LANTERN.weathered(), Blocks.COPPER_LANTERN.waxedWeathered(), Blocks.COPPER_LANTERN.oxidized(), Blocks.COPPER_LANTERN.waxedOxidized(),
-                    Blocks.COPPER_CHEST,Blocks.EXPOSED_COPPER_CHEST,Blocks.OXIDIZED_COPPER_CHEST,Blocks.WEATHERED_COPPER_CHEST, Blocks.WAXED_COPPER_CHEST,Blocks.WAXED_EXPOSED_COPPER_CHEST,Blocks.WAXED_OXIDIZED_COPPER_CHEST,Blocks.WAXED_WEATHERED_COPPER_CHEST, Blocks.COPPER_GOLEM_STATUE, Blocks.EXPOSED_COPPER_GOLEM_STATUE, Blocks.WEATHERED_COPPER_GOLEM_STATUE, Blocks.OXIDIZED_COPPER_GOLEM_STATUE, Blocks.WAXED_COPPER_GOLEM_STATUE, Blocks.WAXED_EXPOSED_COPPER_GOLEM_STATUE, Blocks.WAXED_WEATHERED_COPPER_GOLEM_STATUE, Blocks.WAXED_OXIDIZED_COPPER_GOLEM_STATUE, Blocks.COPPER_TORCH, Blocks.COPPER_WALL_TORCH,
-                    Blocks.OAK_SHELF, Blocks.DARK_OAK_SHELF, Blocks.PALE_OAK_SHELF, Blocks.ACACIA_SHELF, Blocks.BAMBOO_SHELF, Blocks.BIRCH_SHELF, Blocks.CHERRY_SHELF, Blocks.CRIMSON_SHELF, Blocks.JUNGLE_SHELF, Blocks.MANGROVE_SHELF, Blocks.SPRUCE_SHELF, Blocks.WARPED_SHELF
+                    block("crafter"), block("spruce_sapling"), block("oak_sapling"), block("birch_sapling"), block("jungle_sapling"), block("cherry_sapling"), block("bamboo_sapling"),
+                    block("cherry_button"), block("cherry_door"), block("cherry_fence"), block("cherry_fence_gate"), block("cherry_planks"), block("cherry_pressure_plate"), block("cherry_stairs"), block("cherry_wood"), block("cherry_trapdoor"), block("cherry_slab"),
+                    block("mangrove_planks"), block("mangrove_button"), block("mangrove_door"), block("mangrove_fence"), block("mangrove_fence_gate"), block("mangrove_stairs"), block("mangrove_slab"), block("mangrove_trapdoor"),
+                    block("birch_door"), block("birch_fence_gate"), block("birch_button"), block("acacia_button"), block("dark_oak_button"), block("polished_blackstone_button"), block("spruce_button"),
+                    block("bamboo_block"), block("bamboo_button"), block("bamboo_door"), block("bamboo_fence"), block("bamboo_fence_gate"), block("bamboo_mosaic"), block("bamboo_mosaic_slab"), block("bamboo_mosaic_stairs"), block("bamboo_planks"), block("bamboo_pressure_plate"), block("bamboo_slab"), block("bamboo_stairs"), block("bamboo_trapdoor"), block("chiseled_bookshelf"),
+                    block("black_concrete"), block("blue_concrete"), block("cyan_concrete"), block("brown_concrete"), block("orange_concrete"), block("magenta_concrete"), block("light_blue_concrete"), block("yellow_concrete"), block("lime_concrete"), block("pink_concrete"), block("gray_concrete"), block("light_gray_concrete"), block("purple_concrete"), block("green_concrete"),
+                    block("black_concrete_powder"), block("blue_concrete_powder"), block("cyan_concrete_powder"), block("brown_concrete_powder"), block("white_concrete_powder"), block("orange_concrete_powder"), block("magenta_concrete_powder"), block("light_blue_concrete_powder"), block("yellow_concrete_powder"), block("lime_concrete_powder"), block("pink_concrete_powder"), block("gray_concrete_powder"), block("light_gray_concrete_powder"), block("purple_concrete_powder"), block("green_concrete_powder"), block("red_concrete_powder"),
+                    block("purple_terracotta"), block("magenta_terracotta"), block("pink_terracotta"), block("magenta_glazed_terracotta"), block("pink_glazed_terracotta"), block("gray_glazed_terracotta"), block("blue_glazed_terracotta"), block("brown_glazed_terracotta"), block("green_glazed_terracotta"),
+                    block("oxidized_copper"), block("cut_copper"), block("exposed_cut_copper"), block("weathered_cut_copper"), block("cut_copper_slab"), block("cut_copper_stairs"), block("exposed_cut_copper_slab"), block("exposed_cut_copper_stairs"), block("weathered_cut_copper_slab"), block("weathered_cut_copper_stairs"), block("oxidized_cut_copper_slab"), block("oxidized_cut_copper_stairs"), block("copper_bulb"), block("exposed_copper_bulb"), block("weathered_copper_bulb"), block("oxidized_copper_bulb"), block("chiseled_copper"), block("exposed_chiseled_copper"), block("weathered_chiseled_copper"), block("oxidized_chiseled_copper"), block("copper_door"), block("exposed_copper_door"), block("weathered_copper_door"), block("oxidized_copper_door"), block("copper_grate"), block("exposed_copper_grate"), block("weathered_copper_grate"), block("oxidized_copper_grate"), block("copper_trapdoor"), block("exposed_copper_trapdoor"), block("weathered_copper_trapdoor"),
+                    block("waxed_exposed_copper"), block("waxed_weathered_copper"), block("waxed_exposed_cut_copper"), block("waxed_weathered_cut_copper"), block("waxed_exposed_cut_copper_slab"), block("waxed_exposed_cut_copper_stairs"), block("waxed_weathered_cut_copper_slab"), block("waxed_weathered_cut_copper_stairs"), block("waxed_exposed_chiseled_copper"), block("waxed_weathered_chiseled_copper"), block("waxed_exposed_copper_door"), block("waxed_weathered_copper_door"), block("waxed_exposed_copper_grate"), block("waxed_weathered_copper_grate"), block("waxed_copper_trapdoor"), block("waxed_exposed_copper_trapdoor"), block("waxed_weathered_copper_trapdoor"),
+                    block("soul_torch"), block("soul_wall_torch"), block("potted_mangrove_propagule"), block("potted_azalea"), block("potted_cherry_sapling"), block("potted_fern"), block("potted_acacia_sapling"), block("potted_warped_fungus"), block("potted_warped_roots"), block("potted_crimson_fungus"), block("potted_crimson_roots"), block("potted_oak_sapling"), block("potted_wither_rose"), block("wither_rose"),
+                    block("cake"), block("candle_cake"), block("blue_candle_cake"), block("black_candle_cake"), block("brown_candle_cake"), block("cyan_candle_cake"), block("gray_candle_cake"), block("green_candle_cake"), block("light_blue_candle_cake"), block("light_gray_candle_cake"), block("lime_candle_cake"), block("magenta_candle_cake"), block("orange_candle_cake"), block("pink_candle_cake"), block("purple_candle_cake"), block("red_candle_cake"), block("white_candle_cake"), block("yellow_candle_cake"),
+                    block("blue_candle"), block("black_candle"), block("brown_candle"), block("cyan_candle"), block("gray_candle"), block("green_candle"), block("light_blue_candle"), block("light_gray_candle"), block("lime_candle"), block("magenta_candle"), block("orange_candle"), block("pink_candle"), block("purple_candle"), block("yellow_candle"),
+                    block("smooth_red_sandstone"), block("chiseled_red_sandstone"), block("cut_red_sandstone"), block("smooth_red_sandstone_slab"), block("smooth_red_sandstone_stairs"), block("cut_red_sandstone_slab"), block("red_sandstone_slab"), block("red_sandstone_stairs"), block("red_sandstone_wall"),
+                    block("andesite_stairs"), block("andesite_slab"), block("andesite_wall"), block("polished_andesite_slab"), block("polished_andesite_stairs"), block("polished_granite_slab"), block("polished_granite_stairs"), block("polished_diorite_slab"), block("polished_diorite_stairs"),
+                    block("tuff_slab"), block("tuff_stairs"), block("tuff_wall"), block("tuff_brick_slab"), block("tuff_brick_stairs"), block("tuff_brick_wall"),
+                    block("cracked_nether_bricks"), block("chiseled_nether_bricks"), block("red_nether_bricks"), block("nether_brick_slab"), block("nether_brick_wall"), block("red_nether_bricks"), block("red_nether_brick_slab"), block("red_nether_brick_stairs"), block("red_nether_brick_wall"),
+                    block("orange_stained_glass"), block("light_blue_stained_glass"), block("yellow_stained_glass"), block("lime_stained_glass"), block("pink_stained_glass"), block("cyan_stained_glass"), block("purple_stained_glass"), block("blue_stained_glass"), block("green_stained_glass"), block("red_stained_glass"),
+                    block("crimson_pressure_plate"), block("crimson_button"), block("crimson_door"), block("crimson_fence"), block("crimson_fence_gate"), block("crimson_planks"), block("crimson_sign"), block("crimson_wall_sign"), block("crimson_slab"), block("crimson_stairs"), block("crimson_trapdoor"),
+                    block("warped_pressure_plate"), block("warped_button"), block("warped_door"), block("warped_fence"), block("warped_fence_gate"), block("warped_planks"), block("warped_sign"), block("warped_wall_sign"), block("warped_slab"), block("warped_stairs"), block("warped_trapdoor"),
+                    block("scaffolding"), block("cherry_sign"), block("cherry_wall_sign"), block("oak_sign"), block("spruce_sign"), block("acacia_sign"), block("acacia_wall_sign"), block("birch_sign"), block("birch_wall_sign"), block("dark_oak_sign"), block("dark_oak_wall_sign"), block("jungle_sign"), block("jungle_wall_sign"), block("mangrove_sign"), block("mangrove_wall_sign"), block("slime_block"), block("sponge"), block("tinted_glass"),
+                    block("acacia_hanging_sign"), block("acacia_wall_hanging_sign"), block("bamboo_hanging_sign"), block("bamboo_wall_hanging_sign"), block("birch_hanging_sign"), block("birch_wall_hanging_sign"), block("cherry_hanging_sign"), block("cherry_wall_hanging_sign"), block("crimson_hanging_sign"), block("crimson_wall_hanging_sign"), block("dark_oak_hanging_sign"), block("dark_oak_wall_hanging_sign"), block("jungle_hanging_sign"), block("jungle_wall_hanging_sign"), block("mangrove_hanging_sign"), block("mangrove_wall_hanging_sign"), block("oak_hanging_sign"), block("oak_wall_hanging_sign"), block("spruce_hanging_sign"), block("spruce_wall_hanging_sign"), block("warped_hanging_sign"), block("warped_wall_hanging_sign"),
+                    block("chiseled_quartz_block"), block("quartz_pillar"), block("quartz_bricks"), block("quartz_stairs"), block("ochre_froglight"), block("pearlescent_froglight"), block("verdant_froglight"), block("petrified_oak_slab"),
+                    block("stripped_bamboo_block"), block("stripped_cherry_log"), block("stripped_cherry_wood"), block("stripped_acacia_wood"), block("birch_wood"), block("stripped_birch_log"), block("stripped_birch_wood"), block("crimson_hyphae"), block("stripped_crimson_hyphae"), block("stripped_crimson_stem"), block("dark_oak_wood"), block("stripped_dark_oak_log"), block("stripped_dark_oak_wood"), block("stripped_jungle_log"), block("stripped_jungle_wood"), block("stripped_mangrove_log"), block("stripped_mangrove_wood"), block("warped_hyphae"), block("stripped_warped_hyphae"), block("stripped_warped_stem"),
+                    block("shulker_box"), block("black_shulker_box"), block("blue_shulker_box"), block("brown_shulker_box"), block("cyan_shulker_box"), block("gray_shulker_box"), block("green_shulker_box"), block("light_blue_shulker_box"), block("light_gray_shulker_box"), block("lime_shulker_box"), block("magenta_shulker_box"), block("orange_shulker_box"), block("pink_shulker_box"), block("purple_shulker_box"), block("red_shulker_box"), block("white_shulker_box"), block("yellow_shulker_box"),
+                    block("lava_cauldron"), block("powder_snow_cauldron"), block("activator_rail"), block("beacon"), block("beehive"), block("repeating_command_block"), block("command_block"), block("chain_command_block"), block("emerald_block"), block("iron_block"), block("netherite_block"), block("raw_gold_block"), block("conduit"), block("daylight_detector"), block("detector_rail"), block("dried_kelp_block"), block("dropper"), block("enchanting_table"),
+                    block("piglin_head"), block("piglin_wall_head"), block("creeper_head"), block("creeper_wall_head"), block("dragon_wall_head"), block("dragon_head"), block("player_head"), block("player_wall_head"), block("zombie_head"), block("zombie_wall_head"), block("skeleton_wall_skull"), block("wither_skeleton_skull"), block("wither_skeleton_wall_skull"), block("heavy_core"),
+                    block("honey_block"), block("honeycomb_block"), block("jukebox"), block("lightning_rod"), block("lodestone"), block("observer"), block("powered_rail"), block("heavy_weighted_pressure_plate"), block("light_weighted_pressure_plate"), block("polished_blackstone_pressure_plate"), block("birch_pressure_plate"), block("jungle_pressure_plate"), block("dark_oak_pressure_plate"), block("mangrove_pressure_plate"), block("crimson_pressure_plate"), block("warped_pressure_plate"), block("respawn_anchor"), block("calibrated_sculk_sensor"), block("sniffer_egg"),
+                    block("resin_block"), block("resin_bricks"), block("resin_brick_slab"), block("resin_brick_wall"), block("resin_brick_stairs"), block("chiseled_resin_bricks"), block("potted_closed_eyeblossom"), block("potted_open_eyeblossom"), block("potted_pale_oak_sapling"), block("pale_oak_sapling"), block("pale_oak_button"), block("pale_oak_door"), block("pale_oak_fence"), block("pale_oak_fence_gate"), block("pale_oak_planks"), block("pale_oak_pressure_plate"), block("pale_oak_hanging_sign"), block("pale_oak_sign"), block("pale_oak_wall_sign"), block("pale_oak_wall_hanging_sign"), block("pale_oak_slab"), block("pale_oak_stairs"), block("pale_oak_trapdoor"), block("pale_oak_wood"), block("stripped_pale_oak_wood"),
+                    block("copper_bars"),block("waxed_copper_bars"),block("exposed_copper_bars"),block("waxed_exposed_copper_bars"),block("weathered_copper_bars"),block("waxed_weathered_copper_bars"),block("oxidized_copper_bars"),block("waxed_oxidized_copper_bars"), block("copper_chain"),block("waxed_copper_chain"),block("exposed_copper_chain"),block("waxed_exposed_copper_chain"),block("weathered_copper_chain"),block("waxed_weathered_copper_chain"),block("oxidized_copper_chain"),block("waxed_oxidized_copper_chain"), block("copper_lantern"), block("waxed_copper_lantern"), block("exposed_copper_lantern"), block("waxed_exposed_copper_lantern"), block("weathered_copper_lantern"), block("waxed_weathered_copper_lantern"), block("oxidized_copper_lantern"), block("waxed_oxidized_copper_lantern"),
+                    block("copper_chest"),block("exposed_copper_chest"),block("oxidized_copper_chest"),block("weathered_copper_chest"), block("waxed_copper_chest"),block("waxed_exposed_copper_chest"),block("waxed_oxidized_copper_chest"),block("waxed_weathered_copper_chest"), block("copper_golem_statue"), block("exposed_copper_golem_statue"), block("weathered_copper_golem_statue"), block("oxidized_copper_golem_statue"), block("waxed_copper_golem_statue"), block("waxed_exposed_copper_golem_statue"), block("waxed_weathered_copper_golem_statue"), block("waxed_oxidized_copper_golem_statue"), block("copper_torch"), block("copper_wall_torch"),
+                    block("oak_shelf"), block("dark_oak_shelf"), block("pale_oak_shelf"), block("acacia_shelf"), block("bamboo_shelf"), block("birch_shelf"), block("cherry_shelf"), block("crimson_shelf"), block("jungle_shelf"), block("mangrove_shelf"), block("spruce_shelf"), block("warped_shelf")
             )
             .visible(list1Activar::get)
             .filter(this::filterBlocks)
@@ -287,7 +291,7 @@ public class BaseFinder extends Module {
     private final Setting<List<Block>> Blawcks2 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #2 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
-            .defaultValue(Blocks.SPRUCE_WALL_SIGN, Blocks.POLISHED_DIORITE, Blocks.NOTE_BLOCK, Blocks.MANGROVE_WOOD, Blocks.WEATHERED_COPPER)
+            .defaultValue(block("spruce_wall_sign"), block("polished_diorite"), block("note_block"), block("mangrove_wood"), block("weathered_copper"))
             .visible(list2Activar::get)
             .filter(this::filterBlocks)
             .build()
@@ -300,7 +304,7 @@ public class BaseFinder extends Module {
     private final Setting<List<Block>> Blawcks3 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #3 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
-            .defaultValue(Blocks.CRAFTING_TABLE, Blocks.BREWING_STAND, Blocks.ENDER_CHEST, Blocks.SMOOTH_QUARTZ, Blocks.REDSTONE_BLOCK, Blocks.DIAMOND_BLOCK, Blocks.BROWN_STAINED_GLASS)
+            .defaultValue(block("crafting_table"), block("brewing_stand"), block("ender_chest"), block("smooth_quartz"), block("redstone_block"), block("diamond_block"), block("brown_stained_glass"))
             .visible(list3Activar::get)
             .filter(this::filterBlocks)
             .build()
@@ -313,7 +317,7 @@ public class BaseFinder extends Module {
     private final Setting<List<Block>> Blawcks4 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #4 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
-            .defaultValue(Blocks.OAK_WALL_SIGN, Blocks.TRAPPED_CHEST, Blocks.IRON_TRAPDOOR, Blocks.LAPIS_BLOCK)
+            .defaultValue(block("oak_wall_sign"), block("trapped_chest"), block("iron_trapdoor"), block("lapis_block"))
             .visible(list4Activar::get)
             .filter(this::filterBlocks)
             .build()
@@ -326,7 +330,7 @@ public class BaseFinder extends Module {
     private final Setting<List<Block>> Blawcks5 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #5 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
-            .defaultValue(Blocks.QUARTZ_BLOCK, Blocks.FURNACE, Blocks.BLACK_BED, Blocks.GRAY_BED, Blocks.LIGHT_BLUE_BED, Blocks.LIGHT_GRAY_BED, Blocks.PINK_BED, Blocks.RED_BED, Blocks.WHITE_BED, Blocks.YELLOW_BED, Blocks.ORANGE_BED, Blocks.BLUE_BED, Blocks.CYAN_BED, Blocks.GREEN_BED, Blocks.LIME_BED, Blocks.PURPLE_BED, Blocks.MAGENTA_BED, Blocks.BROWN_BED, Blocks.WHITE_CONCRETE)
+            .defaultValue(block("quartz_block"), block("furnace"), block("black_bed"), block("gray_bed"), block("light_blue_bed"), block("light_gray_bed"), block("pink_bed"), block("red_bed"), block("white_bed"), block("yellow_bed"), block("orange_bed"), block("blue_bed"), block("cyan_bed"), block("green_bed"), block("lime_bed"), block("purple_bed"), block("magenta_bed"), block("brown_bed"), block("white_concrete"))
             .visible(list5Activar::get)
             .filter(this::filterBlocks)
             .build()
@@ -339,7 +343,7 @@ public class BaseFinder extends Module {
     private final Setting<List<Block>> Blawcks6 = sglists.add(new BlockListSetting.Builder()
             .name("Block List #6 (Default)")
             .description("If the total amount of any of these found is greater than the Number specified, throw a base location.")
-            .defaultValue(Blocks.REDSTONE_TORCH, Blocks.HOPPER)
+            .defaultValue(block("redstone_torch"), block("hopper"))
             .visible(list6Activar::get)
             .filter(this::filterBlocks)
             .build()
@@ -945,7 +949,7 @@ public class BaseFinder extends Module {
                                 if ((entity instanceof ItemFrame || entity instanceof GlowItemFrame) && frameFinder.get()) {
                                     ItemFrame itemFrame = (ItemFrame) entity;
                                     Item heldItem = itemFrame.getItem().getItem();
-                                    if (heldItem != Items.ELYTRA) {
+                                    if (heldItem != net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("elytra"))) {
                                         baseChunks.add(chunk.getPos());
                                         if (save.get()) {
                                             saveBaseChunkData(chunk.getPos());
@@ -1127,8 +1131,8 @@ public class BaseFinder extends Module {
                                         if (currentY <= Ymin || currentY >= Ymax) continue;
                                         blockposi=new BlockPos(x, currentY, z);
                                         BlockState blerks = section.getBlockState(x,y,z);
-                                        if (blerks.getBlock()!=Blocks.AIR && blerks.getBlock()!=Blocks.STONE){
-                                            if (!(blerks.getBlock()==Blocks.DEEPSLATE) && !(blerks.getBlock()==Blocks.DIRT) && !(blerks.getBlock()==Blocks.GRASS_BLOCK) && !(blerks.getBlock()==Blocks.WATER) && !(blerks.getBlock()==Blocks.SAND) && !(blerks.getBlock()==Blocks.GRAVEL)  && !(blerks.getBlock()==Blocks.BEDROCK)&& !(blerks.getBlock()==Blocks.NETHERRACK) && !(blerks.getBlock()==Blocks.LAVA)){
+                                        if (blerks.getBlock()!=block("air") && blerks.getBlock()!=block("stone")){
+                                            if (!(blerks.getBlock()==block("deepslate")) && !(blerks.getBlock()==block("dirt")) && !(blerks.getBlock()==block("grass_block")) && !(blerks.getBlock()==block("water")) && !(blerks.getBlock()==block("sand")) && !(blerks.getBlock()==block("gravel"))  && !(blerks.getBlock()==block("bedrock"))&& !(blerks.getBlock()==block("netherrack")) && !(blerks.getBlock()==block("lava"))){
                                                 if (signFinder.get() && blerks.getBlock() instanceof StandingSignBlock || blerks.getBlock() instanceof CeilingHangingSignBlock) {
                                                     for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
                                                         Boolean signtextfound = false;
@@ -1219,7 +1223,7 @@ public class BaseFinder extends Module {
                                                         }
                                                     }
                                                 }
-                                                if (portalFinder.get() && (blerks.getBlock()==Blocks.NETHER_PORTAL || blerks.getBlock()==Blocks.END_PORTAL)) {
+                                                if (portalFinder.get() && (blerks.getBlock()==block("nether_portal") || blerks.getBlock()==block("end_portal"))) {
                                                     if (!baseChunks.contains(basepos)){
                                                         baseChunks.add(basepos);
                                                         if (save.get()) {
@@ -1235,7 +1239,7 @@ public class BaseFinder extends Module {
                                                         }
                                                     }
                                                 }
-                                                if (bedrockfind.get() && blerks.getBlock()==Blocks.BEDROCK && ((currentY>mc.level.getMinY()+bedrockint.get() && mc.level.dimension() == Level.OVERWORLD) || (currentY>mc.level.getMinY()+bedrockint.get() && (currentY < 123 || currentY > 127) && mc.level.dimension() == Level.NETHER))) {
+                                                if (bedrockfind.get() && blerks.getBlock()==block("bedrock") && ((currentY>mc.level.getMinY()+bedrockint.get() && mc.level.dimension() == Level.OVERWORLD) || (currentY>mc.level.getMinY()+bedrockint.get() && (currentY < 123 || currentY > 127) && mc.level.dimension() == Level.NETHER))) {
                                                     if (!baseChunks.contains(basepos)){
                                                         baseChunks.add(basepos);
                                                         if (save.get()) {
@@ -1251,7 +1255,7 @@ public class BaseFinder extends Module {
                                                         }
                                                     }
                                                 }
-                                                if (roofDetector.get() && blerks.getBlock()!=Blocks.RED_MUSHROOM && blerks.getBlock()!=Blocks.BROWN_MUSHROOM && currentY>=128 && mc.level.dimension() == Level.NETHER){
+                                                if (roofDetector.get() && blerks.getBlock()!=block("red_mushroom") && blerks.getBlock()!=block("brown_mushroom") && currentY>=128 && mc.level.dimension() == Level.NETHER){
                                                     if (!baseChunks.contains(basepos)){
                                                         baseChunks.add(basepos);
                                                         if (save.get()) {
@@ -1268,13 +1272,13 @@ public class BaseFinder extends Module {
                                                     }
                                                 }
                                                 if (spawner.get()){
-                                                    if (blerks.getBlock()==Blocks.SPAWNER){
+                                                    if (blerks.getBlock()==block("spawner")){
                                                         spawnerY=currentY;
                                                         spawnerfound=true;
                                                     }
                                                     //dungeon MOSSY_COBBLESTONE, mineshaft COBWEB, fortress NETHER_BRICK_FENCE, stronghold STONE_BRICK_STAIRS, bastion CHAIN
-                                                    if (mc.level.dimension() == Level.OVERWORLD && (blerks.getBlock()==Blocks.MOSSY_COBBLESTONE || blerks.getBlock()==Blocks.COBWEB || blerks.getBlock()==Blocks.STONE_BRICK_STAIRS || blerks.getBlock()==Blocks.BUDDING_AMETHYST))spawnernaturalblocks=true;
-                                                    else if (mc.level.dimension() == Level.NETHER && (blerks.getBlock()==Blocks.NETHER_BRICK_FENCE || blerks.getBlock()==Blocks.IRON_CHAIN))spawnernaturalblocks=true;
+                                                    if (mc.level.dimension() == Level.OVERWORLD && (blerks.getBlock()==block("mossy_cobblestone") || blerks.getBlock()==block("cobweb") || blerks.getBlock()==block("stone_brick_stairs") || blerks.getBlock()==block("budding_amethyst")))spawnernaturalblocks=true;
+                                                    else if (mc.level.dimension() == Level.NETHER && (blerks.getBlock()==block("nether_brick_fence") || blerks.getBlock()==block("iron_chain")))spawnernaturalblocks=true;
                                                 }
                                                 if (list1Activar.get() && !Blawcks1.get().isEmpty()){
                                                     if (Blawcks1.get().contains(blerks.getBlock())) {
@@ -1599,16 +1603,16 @@ public class BaseFinder extends Module {
     }
     private boolean isNaturalLagCausingBlock(Block block) {
         return  block instanceof Block &&
-                !(block ==Blocks.AIR) &&
-                !(block ==Blocks.STONE) &&
-                !(block ==Blocks.DIRT) &&
-                !(block ==Blocks.GRASS_BLOCK) &&
-                !(block ==Blocks.SAND) &&
-                !(block ==Blocks.GRAVEL) &&
-                !(block ==Blocks.DEEPSLATE) &&
-                !(block ==Blocks.WATER) &&
-                !(block ==Blocks.NETHERRACK) &&
-                !(block ==Blocks.LAVA);
+                !(block ==block("air")) &&
+                !(block ==block("stone")) &&
+                !(block ==block("dirt")) &&
+                !(block ==block("grass_block")) &&
+                !(block ==block("sand")) &&
+                !(block ==block("gravel")) &&
+                !(block ==block("deepslate")) &&
+                !(block ==block("water")) &&
+                !(block ==block("netherrack")) &&
+                !(block ==block("lava"));
     }
     private void removeChunksOutsideRenderDistance() {
         int topY = renderHeightY.get();

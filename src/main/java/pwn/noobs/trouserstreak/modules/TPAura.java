@@ -53,7 +53,7 @@ public class TPAura extends Module {
     private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Entities to attack.")
-            .defaultValue(EntityType.PLAYER)
+            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("player")))
             .build()
     );
     public final Setting<Boolean> friends = sgGeneral.add(new BoolSetting.Builder()
@@ -432,7 +432,7 @@ public class TPAura extends Module {
                     BlockPos.containing(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
             )) {
                 BlockState state = mc.level.getBlockState(bp);
-                if (state.is(Blocks.LAVA)) {
+                if (state.is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")))) {
                     return true;
                 }
             }
@@ -442,7 +442,7 @@ public class TPAura extends Module {
                     BlockPos.containing(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
             )) {
                 BlockState state = mc.level.getBlockState(bp);
-                if (state.is(Blocks.LAVA) || !state.getCollisionShape(mc.level, bp).isEmpty()) {
+                if (state.is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))) || !state.getCollisionShape(mc.level, bp).isEmpty()) {
                     return true;
                 }
             }

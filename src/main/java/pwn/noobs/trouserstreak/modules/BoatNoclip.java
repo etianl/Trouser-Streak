@@ -136,8 +136,8 @@ public class BoatNoclip extends Module {
             velZ = vel.z;
         }
 
-        if (mc.screen == null && Input.isPressed(mc.options.keyJump)) velY += verticalSpeed.get() / 20;
-        if (mc.screen == null && Input.isPressed(mc.options.keySprint)) velY -= verticalSpeed.get() / 20;
+        if (mc.gui.screen() == null && Input.isPressed(mc.options.keyJump)) velY += verticalSpeed.get() / 20;
+        if (mc.gui.screen() == null && Input.isPressed(mc.options.keySprint)) velY -= verticalSpeed.get() / 20;
         else velY -= fallSpeed.get() / 20;
 
         entity.setYRot(mc.player.getYRot());

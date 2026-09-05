@@ -155,7 +155,7 @@ public class ActivatedSpawnerDetector extends Module {
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
             .name("Storage Blocks")
             .description("Storage Blocks the module checks for when considering displaying messages and renders.")
-            .defaultValue(Blocks.CHEST, Blocks.BARREL, Blocks.HOPPER, Blocks.DISPENSER)
+            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("chest")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("barrel")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("hopper")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("dispenser")))
             .build()
     );
     private final Setting<Boolean> deactivatedSpawner = sgGeneral.add(new BoolSetting.Builder()
@@ -341,14 +341,14 @@ public class ActivatedSpawnerDetector extends Module {
         SpawnerDistance = 2000000000;
     }
     private static final Set<Block> GEODE_BLOCKS = Set.of(
-            Blocks.AMETHYST_BLOCK,
-            Blocks.BUDDING_AMETHYST,
-            Blocks.CALCITE,
-            Blocks.SMOOTH_BASALT,
-            Blocks.AMETHYST_CLUSTER,
-            Blocks.LARGE_AMETHYST_BUD,
-            Blocks.MEDIUM_AMETHYST_BUD,
-            Blocks.SMALL_AMETHYST_BUD
+            net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("amethyst_block")),
+            net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("budding_amethyst")),
+            net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("calcite")),
+            net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("smooth_basalt")),
+            net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("amethyst_cluster")),
+            net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("large_amethyst_bud")),
+            net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("medium_amethyst_bud")),
+            net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("small_amethyst_bud"))
     );
     private boolean chunkContainsGeodeBlocks(LevelChunk chunk, int sectionsToCheck) {
         LevelChunkSection[] sections = chunk.getSections();
@@ -415,9 +415,9 @@ public class ActivatedSpawnerDetector extends Module {
                                         for (int y = -1; y < 3; y++) {
                                             for (int z = -2; z < 2; z++) {
                                                 BlockPos bpos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
-                                                if (mc.level.getBlockState(bpos).getBlock() == Blocks.AIR)
+                                                if (mc.level.getBlockState(bpos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")))
                                                     airFound = true;
-                                                if (mc.level.getBlockState(bpos).getBlock() == Blocks.CAVE_AIR)
+                                                if (mc.level.getBlockState(bpos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("cave_air")))
                                                     caveAirFound = true;
                                                 if (caveAirFound && airFound) break;
                                             }
@@ -432,9 +432,9 @@ public class ActivatedSpawnerDetector extends Module {
                                         for (int y = 0; y < 2; y++) {
                                             for (int z = -1; z < 2; z++) {
                                                 BlockPos bpos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
-                                                if (mc.level.getBlockState(bpos).getBlock() == Blocks.AIR)
+                                                if (mc.level.getBlockState(bpos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")))
                                                     airFound = true;
-                                                if (mc.level.getBlockState(bpos).getBlock() == Blocks.CAVE_AIR)
+                                                if (mc.level.getBlockState(bpos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("cave_air")))
                                                     caveAirFound = true;
                                                 if (caveAirFound && airFound) break;
                                             }
@@ -448,9 +448,9 @@ public class ActivatedSpawnerDetector extends Module {
                                         for (int y = -2; y < 3 + 1; y++) {
                                             for (int z = -3; z < 3 + 1; z++) {
                                                 BlockPos bpos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
-                                                if (mc.level.getBlockState(bpos).getBlock() == Blocks.AIR)
+                                                if (mc.level.getBlockState(bpos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")))
                                                     airFound = true;
-                                                if (mc.level.getBlockState(bpos).getBlock() == Blocks.CAVE_AIR)
+                                                if (mc.level.getBlockState(bpos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("cave_air")))
                                                     caveAirFound = true;
                                                 if (caveAirFound && airFound) break;
                                             }
@@ -502,7 +502,7 @@ public class ActivatedSpawnerDetector extends Module {
                                     for (int y = -deactivatedSpawnerdistance.get(); y < deactivatedSpawnerdistance.get() + 1; y++) {
                                         for (int z = -deactivatedSpawnerdistance.get(); z < deactivatedSpawnerdistance.get() + 1; z++) {
                                             BlockPos bpos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
-                                            if (mc.level.getBlockState(bpos).getBlock() == Blocks.TORCH || mc.level.getBlockState(bpos).getBlock() == Blocks.SOUL_TORCH || mc.level.getBlockState(bpos).getBlock() == Blocks.REDSTONE_TORCH || mc.level.getBlockState(bpos).getBlock() == Blocks.JACK_O_LANTERN || mc.level.getBlockState(bpos).getBlock() == Blocks.GLOWSTONE || mc.level.getBlockState(bpos).getBlock() == Blocks.SHROOMLIGHT || mc.level.getBlockState(bpos).getBlock() == Blocks.OCHRE_FROGLIGHT || mc.level.getBlockState(bpos).getBlock() == Blocks.PEARLESCENT_FROGLIGHT || mc.level.getBlockState(bpos).getBlock() == Blocks.PEARLESCENT_FROGLIGHT || mc.level.getBlockState(bpos).getBlock() == Blocks.SEA_LANTERN || mc.level.getBlockState(bpos).getBlock() == Blocks.LANTERN || mc.level.getBlockState(bpos).getBlock() == Blocks.SOUL_LANTERN || mc.level.getBlockState(bpos).getBlock() == Blocks.CAMPFIRE || mc.level.getBlockState(bpos).getBlock() == Blocks.SOUL_CAMPFIRE) {
+                                            if (mc.level.getBlockState(bpos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("torch")) || mc.level.getBlockState(bpos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("soul_torch")) || mc.level.getBlockState(bpos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("redstone_torch")) || mc.level.getBlockState(bpos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("jack_o_lantern")) || mc.level.getBlockState(bpos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("glowstone")) || mc.level.getBlockState(bpos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("shroomlight")) || mc.level.getBlockState(bpos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("ochre_froglight")) || mc.level.getBlockState(bpos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("pearlescent_froglight")) || mc.level.getBlockState(bpos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("pearlescent_froglight")) || mc.level.getBlockState(bpos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("sea_lantern")) || mc.level.getBlockState(bpos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lantern")) || mc.level.getBlockState(bpos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("soul_lantern")) || mc.level.getBlockState(bpos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("campfire")) || mc.level.getBlockState(bpos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("soul_campfire"))) {
                                                 lightsFound = true;
                                                 deactivatedSpawnerPositions.add(pos);
                                                 break;
@@ -673,7 +673,7 @@ public class ActivatedSpawnerDetector extends Module {
         if (chatFeedback.get()) {
             if (key=="dungeon") {
                 if (key2==":spider") {
-                    if (mc.level.getBlockState(pos.below()).getBlock() == Blocks.BIRCH_PLANKS && enableWoodlandMansion.get()) {
+                    if (mc.level.getBlockState(pos.below()).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("birch_planks")) && enableWoodlandMansion.get()) {
                         activatedSpawnerFound = true;
                         spawnerPositions.add(pos);
                         if (displaycoords.get()) ChatUtils.sendMsg(Component.nullToEmpty("§cASD§r | Detected Activated §cWOODLAND MANSION§r Spawner! Block Position: " + pos));

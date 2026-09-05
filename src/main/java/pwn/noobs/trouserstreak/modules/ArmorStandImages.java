@@ -549,7 +549,7 @@ public class ArmorStandImages extends Module {
             case Spawn_Egg -> {
                 ItemStack rst = mc.player.getMainHandItem();
                 BlockHitResult bhr = new BlockHitResult(mc.player.getEyePosition(), Direction.DOWN, BlockPos.containing(mc.player.getEyePosition()), false);
-                ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
+                ItemStack item = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("bee_spawn_egg")));
                 var changes = DataComponentPatch.builder()
                         .set(DataComponents.ENTITY_DATA, createEntityData(pixel, concreteId))
                         .build();
@@ -586,7 +586,7 @@ public class ArmorStandImages extends Module {
         equipment.put("head", head);
         entityTag.put("equipment", equipment);
 
-        return TypedEntityData.of(EntityType.ARMOR_STAND, entityTag);
+        return TypedEntityData.of(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("armor_stand")), entityTag);
     }
     private String findClosestConcreteColor(int color) {
         int targetRed = (color >> 16) & 0xFF;

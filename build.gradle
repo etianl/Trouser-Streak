@@ -1,17 +1,13 @@
 plugins {
-    id 'net.fabricmc.fabric-loom' version '1.16.1'
+    id 'net.fabricmc.fabric-loom' version '1.16.3'
 }
 
-//sourceCompatibility = JavaVersion.VERSION_25
-//targetCompatibility = JavaVersion.VERSION_25
-
-//archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
 repositories {
     mavenCentral()
-    maven { url "https://maven.meteordev.org/releases"}
+    maven { url "https://maven.meteordev.org/releases" }
     maven { url "https://maven.meteordev.org/snapshots" }
 }
 
@@ -42,4 +38,10 @@ processResources {
 
 tasks.withType(JavaCompile).configureEach {
     it.options.encoding("UTF-8")
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
 }

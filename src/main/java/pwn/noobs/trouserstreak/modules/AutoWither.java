@@ -102,9 +102,9 @@ public class AutoWither extends Module {
             ItemStack stack = mc.player.getInventory().getItem(i);
             if (stack.isEmpty()) continue;
 
-            if (stack.getItem() == Items.SOUL_SAND) {
+            if (stack.getItem() == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("soul_sand"))) {
                 soulSandCount += stack.getCount();
-            } else if (stack.getItem() == Items.WITHER_SKELETON_SKULL) {
+            } else if (stack.getItem() == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("wither_skeleton_skull"))) {
                 skullCount += stack.getCount();
             }
         }
@@ -120,7 +120,7 @@ public class AutoWither extends Module {
     }
     @EventHandler
     private void onMouseButton(MouseClickEvent event){
-        if(mc.screen != null) return;//Stop working in GUI
+        if(mc.gui.screen() != null) return;//Stop working in GUI
         if(event.button() != 1) return;
         if (isBuilding) return;
         if(event.action == KeyAction.Press){
@@ -232,7 +232,7 @@ public class AutoWither extends Module {
                 placeSoulBlock(pos);
             }
             for (BlockPos pos : skullPositions) {
-                placeBlock(pos, Items.WITHER_SKELETON_SKULL);
+                placeBlock(pos, net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("wither_skeleton_skull")));
             }
             mc.player.getInventory().setSelectedSlot(originalSlot);
             onComplete.run();
@@ -298,7 +298,7 @@ public class AutoWither extends Module {
         return entities.isEmpty();
     }
     private void placeSoulBlock(BlockPos pos){
-        Item soulBlock = hasSoulSandHotbar() ? Items.SOUL_SAND : Items.SOUL_SOIL;
+        Item soulBlock = hasSoulSandHotbar() ? net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("soul_sand")) : net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("soul_soil"));
         placeBlock(pos, soulBlock);
     }
     private void placeBlock(BlockPos pos, Item item){
@@ -330,9 +330,9 @@ public class AutoWither extends Module {
 
             Item item = stack.getItem();
 
-            if (item == Items.SOUL_SAND || item == Items.SOUL_SOIL) {
+            if (item == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("soul_sand")) || item == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("soul_soil"))) {
                 soulBlockCount += stack.getCount();
-            } else if (item == Items.WITHER_SKELETON_SKULL) {
+            } else if (item == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("wither_skeleton_skull"))) {
                 skullCount += stack.getCount();
             }
 
@@ -349,7 +349,7 @@ public class AutoWither extends Module {
     private boolean hasSoulSandHotbar() {
         assert mc.player != null;
         for (int i = 0; i < 9; i++) {
-            if (mc.player.getInventory().getItem(i).getItem() == Items.SOUL_SAND) return true;
+            if (mc.player.getInventory().getItem(i).getItem() == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("soul_sand"))) return true;
         }
         return false;
     }

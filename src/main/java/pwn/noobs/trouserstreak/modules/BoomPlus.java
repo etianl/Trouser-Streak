@@ -140,7 +140,7 @@ public class BoomPlus extends Module {
     private final Setting<Block> blockstate = sgOptions.add(new BlockSetting.Builder()
             .name("falling_block entity block")
             .description("What is created when specifying falling_block as the entity.")
-            .defaultValue(Blocks.BEDROCK)
+            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("bedrock")))
             .build());
     public final Setting<Boolean> target = sgGeneral.add(new BoolSetting.Builder()
             .name("OnTarget")
@@ -182,7 +182,7 @@ public class BoomPlus extends Module {
             toggle();
         }
 
-        if (auto.get() && mc.options.keyAttack.isDown() && mc.screen == null && mc.player.getAbilities().instabuild) {
+        if (auto.get() && mc.options.keyAttack.isDown() && mc.gui.screen() == null && mc.player.getAbilities().instabuild) {
             if (aticks<=atickdelay.get()){
                 aticks++;
             } else if (aticks>atickdelay.get()) {
@@ -190,7 +190,7 @@ public class BoomPlus extends Module {
                 namecolour = nomcolor.get().toString();
                 ItemStack rst = mc.player.getMainHandItem();
                 BlockHitResult bhr = new BlockHitResult(mc.player.getEyePosition(), Direction.DOWN, BlockPos.containing(mc.player.getEyePosition()), false);
-                ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
+                ItemStack item = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("bee_spawn_egg")));
                 var changes = DataComponentPatch.builder()
                         .set(DataComponents.CUSTOM_NAME, Component.literal(customName).withStyle(ChatFormatting.valueOf(namecolour.toUpperCase())))
                         .set(DataComponents.ITEM_NAME, Component.literal(customName).withStyle(ChatFormatting.valueOf(namecolour.toUpperCase())))
@@ -207,12 +207,12 @@ public class BoomPlus extends Module {
 
     @EventHandler
     private void onMouseButton(MouseClickEvent event) {
-        if (mc.options.keyAttack.isDown() && mc.screen == null && mc.player.getAbilities().instabuild) {
+        if (mc.options.keyAttack.isDown() && mc.gui.screen() == null && mc.player.getAbilities().instabuild) {
             customName = nom.get();
             namecolour = nomcolor.get().toString();
             ItemStack rst = mc.player.getMainHandItem();
             BlockHitResult bhr = new BlockHitResult(mc.player.getEyePosition(), Direction.DOWN, BlockPos.containing(mc.player.getEyePosition()), false);
-            ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
+            ItemStack item = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("bee_spawn_egg")));
             var changes = DataComponentPatch.builder()
                     .set(DataComponents.CUSTOM_NAME, Component.literal(customName).withStyle(ChatFormatting.valueOf(namecolour.toUpperCase())))
                     .set(DataComponents.ITEM_NAME, Component.literal(customName).withStyle(ChatFormatting.valueOf(namecolour.toUpperCase())))
@@ -298,7 +298,7 @@ public class BoomPlus extends Module {
         Identifier entityId = Identifier.tryParse("minecraft:" + entityName);
         EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.getValue(entityId);
         if (entityType == null) {
-            entityType = EntityType.PIG;
+            entityType = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("pig"));
         }
 
         return TypedEntityData.of(entityType, entityTag);

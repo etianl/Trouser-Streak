@@ -187,7 +187,7 @@ public class CaveDisturbanceDetector extends Module {
 					BlockPos blockPos = new BlockPos(chunk.getPos().getMinBlockX() + x, y, chunk.getPos().getMinBlockZ() + z);
 					BlockState blockState = chunk.getBlockState(blockPos);
 
-					if (blockState.getBlock() == Blocks.CAVE_AIR) {
+					if (blockState.getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("cave_air"))) {
 						isSurroundingBlockRegAir(blockPos);
 					}
 				}
@@ -203,11 +203,11 @@ public class CaveDisturbanceDetector extends Module {
 					BlockPos Air = bPos.north();
 					if (!scannedAir.contains(Air)) {
 						BlockPos BlockPastTheAir = Air.offset(0,0,-1);
-						if (mc.level.getBlockState(Air).getBlock() == Blocks.AIR && mc.level.getBlockState(BlockPastTheAir).getBlock() != Blocks.AIR) {
-							if (mc.level.getBlockState(Air.offset(1,0,0)).getBlock() != Blocks.AIR &&
-									mc.level.getBlockState(Air.offset(-1,0,0)).getBlock() != Blocks.AIR &&
-									mc.level.getBlockState(Air.offset(0,1,0)).getBlock() != Blocks.AIR &&
-									mc.level.getBlockState(Air.offset(0,-1,0)).getBlock() != Blocks.AIR)
+						if (mc.level.getBlockState(Air).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) && mc.level.getBlockState(BlockPastTheAir).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) {
+							if (mc.level.getBlockState(Air.offset(1,0,0)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) &&
+									mc.level.getBlockState(Air.offset(-1,0,0)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) &&
+									mc.level.getBlockState(Air.offset(0,1,0)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) &&
+									mc.level.getBlockState(Air.offset(0,-1,0)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")))
 							{
 								if (!FPcheck(Air))disturbanceFound(Air);
 							}
@@ -219,11 +219,11 @@ public class CaveDisturbanceDetector extends Module {
 					BlockPos Air = bPos.south();
 					if (!scannedAir.contains(Air)) {
 						BlockPos BlockPastTheAir = Air.offset(0,0,1);
-						if (mc.level.getBlockState(Air).getBlock() == Blocks.AIR && mc.level.getBlockState(BlockPastTheAir).getBlock() != Blocks.AIR) {
-							if (mc.level.getBlockState(Air.offset(1,0,0)).getBlock() != Blocks.AIR &&
-									mc.level.getBlockState(Air.offset(-1,0,0)).getBlock() != Blocks.AIR &&
-									mc.level.getBlockState(Air.offset(0,1,0)).getBlock() != Blocks.AIR &&
-									mc.level.getBlockState(Air.offset(0,-1,0)).getBlock() != Blocks.AIR)
+						if (mc.level.getBlockState(Air).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) && mc.level.getBlockState(BlockPastTheAir).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) {
+							if (mc.level.getBlockState(Air.offset(1,0,0)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) &&
+									mc.level.getBlockState(Air.offset(-1,0,0)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) &&
+									mc.level.getBlockState(Air.offset(0,1,0)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) &&
+									mc.level.getBlockState(Air.offset(0,-1,0)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")))
 							{
 								if (!FPcheck(Air))disturbanceFound(Air);
 							}
@@ -235,11 +235,11 @@ public class CaveDisturbanceDetector extends Module {
 					BlockPos Air = bPos.west();
 					if (!scannedAir.contains(Air)) {
 						BlockPos BlockPastTheAir = Air.offset(-1,0,0);
-						if (mc.level.getBlockState(Air).getBlock() == Blocks.AIR && mc.level.getBlockState(BlockPastTheAir).getBlock() != Blocks.AIR) {
-							if (mc.level.getBlockState(Air.offset(0,1,0)).getBlock() != Blocks.AIR &&
-									mc.level.getBlockState(Air.offset(0,-1,0)).getBlock() != Blocks.AIR &&
-									mc.level.getBlockState(Air.offset(0,0,1)).getBlock() != Blocks.AIR &&
-									mc.level.getBlockState(Air.offset(0,0,-1)).getBlock() != Blocks.AIR)
+						if (mc.level.getBlockState(Air).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) && mc.level.getBlockState(BlockPastTheAir).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) {
+							if (mc.level.getBlockState(Air.offset(0,1,0)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) &&
+									mc.level.getBlockState(Air.offset(0,-1,0)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) &&
+									mc.level.getBlockState(Air.offset(0,0,1)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) &&
+									mc.level.getBlockState(Air.offset(0,0,-1)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")))
 							{
 								if (!FPcheck(Air))disturbanceFound(Air);
 							}
@@ -251,11 +251,11 @@ public class CaveDisturbanceDetector extends Module {
 					BlockPos Air = bPos.east();
 					if (!scannedAir.contains(Air)) {
 						BlockPos BlockPastTheAir = Air.offset(1,0,0);
-						if (mc.level.getBlockState(Air).getBlock() == Blocks.AIR && mc.level.getBlockState(BlockPastTheAir).getBlock() != Blocks.AIR) {
-							if (mc.level.getBlockState(Air.offset(0,1,0)).getBlock() != Blocks.AIR &&
-									mc.level.getBlockState(Air.offset(0,-1,0)).getBlock() != Blocks.AIR &&
-									mc.level.getBlockState(Air.offset(0,0,1)).getBlock() != Blocks.AIR &&
-									mc.level.getBlockState(Air.offset(0,0,-1)).getBlock() != Blocks.AIR)
+						if (mc.level.getBlockState(Air).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) && mc.level.getBlockState(BlockPastTheAir).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) {
+							if (mc.level.getBlockState(Air.offset(0,1,0)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) &&
+									mc.level.getBlockState(Air.offset(0,-1,0)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) &&
+									mc.level.getBlockState(Air.offset(0,0,1)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) &&
+									mc.level.getBlockState(Air.offset(0,0,-1)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")))
 							{
 								if (!FPcheck(Air))disturbanceFound(Air);
 							}
@@ -267,11 +267,11 @@ public class CaveDisturbanceDetector extends Module {
 					BlockPos Air = bPos.above();
 					if (!scannedAir.contains(Air)) {
 						BlockPos BlockPastTheAir = Air.offset(0,1,0);
-						if (mc.level.getBlockState(Air).getBlock() == Blocks.AIR && mc.level.getBlockState(BlockPastTheAir).getBlock() != Blocks.AIR) {
-							if (mc.level.getBlockState(Air.offset(1,0,0)).getBlock() != Blocks.AIR &&
-									mc.level.getBlockState(Air.offset(-1,0,0)).getBlock() != Blocks.AIR &&
-									mc.level.getBlockState(Air.offset(0,0,1)).getBlock() != Blocks.AIR &&
-									mc.level.getBlockState(Air.offset(0,0,-1)).getBlock() != Blocks.AIR)
+						if (mc.level.getBlockState(Air).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) && mc.level.getBlockState(BlockPastTheAir).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) {
+							if (mc.level.getBlockState(Air.offset(1,0,0)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) &&
+									mc.level.getBlockState(Air.offset(-1,0,0)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) &&
+									mc.level.getBlockState(Air.offset(0,0,1)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) &&
+									mc.level.getBlockState(Air.offset(0,0,-1)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")))
 							{
 								if (!FPcheck(Air))disturbanceFound(Air);
 							}
@@ -283,11 +283,11 @@ public class CaveDisturbanceDetector extends Module {
 					BlockPos Air = bPos.below();
 					if (!scannedAir.contains(Air)) {
 						BlockPos BlockPastTheAir = Air.offset(0,-1,0);
-						if (mc.level.getBlockState(Air).getBlock() == Blocks.AIR && mc.level.getBlockState(BlockPastTheAir).getBlock() != Blocks.AIR) {
-							if (mc.level.getBlockState(Air.offset(1,0,0)).getBlock() != Blocks.AIR &&
-									mc.level.getBlockState(Air.offset(-1,0,0)).getBlock() != Blocks.AIR &&
-									mc.level.getBlockState(Air.offset(0,0,1)).getBlock() != Blocks.AIR &&
-									mc.level.getBlockState(Air.offset(0,0,-1)).getBlock() != Blocks.AIR)
+						if (mc.level.getBlockState(Air).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) && mc.level.getBlockState(BlockPastTheAir).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) {
+							if (mc.level.getBlockState(Air.offset(1,0,0)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) &&
+									mc.level.getBlockState(Air.offset(-1,0,0)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) &&
+									mc.level.getBlockState(Air.offset(0,0,1)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) &&
+									mc.level.getBlockState(Air.offset(0,0,-1)).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")))
 							{
 								if (!FPcheck(Air))disturbanceFound(Air);
 							}
@@ -305,7 +305,7 @@ public class CaveDisturbanceDetector extends Module {
 				for (int z = -FPdistance.get(); z < FPdistance.get()+1; z++) {
 					BlockPos bpos = new BlockPos(disturbance.offset(x,y,z));
 					if (bpos.equals(disturbance))continue;
-					if (mc.level.getBlockState(bpos).getBlock() == Blocks.AIR){
+					if (mc.level.getBlockState(bpos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))){
 						extraAirFound = true;
 						break;
 					}

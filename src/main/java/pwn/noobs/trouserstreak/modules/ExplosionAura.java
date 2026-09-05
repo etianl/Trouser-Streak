@@ -94,11 +94,11 @@ public class ExplosionAura extends Module {
 
     @EventHandler
     private void onMouseButton(MouseClickEvent event) {
-        if (mc.options.keyAttack.isDown() && mc.screen == null && mc.player.getAbilities().instabuild) {
+        if (mc.options.keyAttack.isDown() && mc.gui.screen() == null && mc.player.getAbilities().instabuild) {
             if (click.get()) {
                 ItemStack rst = mc.player.getMainHandItem();
                 BlockHitResult bhr = new BlockHitResult(mc.player.getEyePosition(), Direction.DOWN, BlockPos.containing(mc.player.getEyePosition()), false);
-                ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
+                ItemStack Creeper = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("creeper_spawn_egg")));
                 var changes = DataComponentPatch.builder()
                         .set(DataComponents.ENTITY_DATA, createEntityData(true))
                         .build();
@@ -113,14 +113,14 @@ public class ExplosionAura extends Module {
     @EventHandler
     public void onTick(TickEvent.Post event) {
         if (mc.player != null && mc.gameMode != null && mc.player.getAbilities().instabuild) {
-            if (auto.get() && mc.options.keyAttack.isDown() && mc.screen == null && mc.player.getAbilities().instabuild) {
+            if (auto.get() && mc.options.keyAttack.isDown() && mc.gui.screen() == null && mc.player.getAbilities().instabuild) {
                 if (click.get()) {
                     if (aticks<=atickdelay.get()){
                         aticks++;
                     } else if (aticks>atickdelay.get()) {
                         ItemStack rst = mc.player.getMainHandItem();
                         BlockHitResult bhr = new BlockHitResult(mc.player.getEyePosition(), Direction.DOWN, BlockPos.containing(mc.player.getEyePosition()), false);
-                        ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
+                        ItemStack Creeper = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("creeper_spawn_egg")));
                         var changes = DataComponentPatch.builder()
                                 .set(DataComponents.ENTITY_DATA, createEntityData(true))
                                 .build();
@@ -139,7 +139,7 @@ public class ExplosionAura extends Module {
                 } else if (ticks>tickdelay.get()){
                     ItemStack rst = mc.player.getMainHandItem();
                     BlockHitResult bhr = new BlockHitResult(mc.player.position(), Direction.DOWN, BlockPos.containing(mc.player.position()), false);
-                    ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
+                    ItemStack Creeper = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("creeper_spawn_egg")));
                     var changes = DataComponentPatch.builder()
                             .set(DataComponents.ENTITY_DATA, createEntityData(false))
                             .build();
@@ -174,6 +174,6 @@ public class ExplosionAura extends Module {
         entityTag.putInt("Fuse", 0);
         entityTag.putBoolean("NoGravity", true);
         entityTag.putInt("ExplosionRadius", click ? cpower.get() : power.get());
-        return TypedEntityData.of(EntityType.CREEPER, entityTag);
+        return TypedEntityData.of(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("creeper")), entityTag);
     }
 }

@@ -183,7 +183,7 @@ public class AutoTexts extends Module {
     }
 
     private void spawnArmorStand() {
-        ItemStack armorStand = new ItemStack(Items.ARMOR_STAND);
+        ItemStack armorStand = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("armor_stand")));
         ItemStack current = mc.player.getMainHandItem();
         Vec3 pos = pickRandomPos();
         String selectedText = texts.get().get(random.nextInt(texts.get().size()));
@@ -235,7 +235,7 @@ public class AutoTexts extends Module {
             }
         }
 
-        return TypedEntityData.of(EntityType.ARMOR_STAND, entityTag);
+        return TypedEntityData.of(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("armor_stand")), entityTag);
     }
     private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
         if (serverVersion == null) return false;

@@ -49,7 +49,7 @@ public class RemoteEnderChest extends Module {
     private void onPreTick(TickEvent.Pre event) {
         if (mc.hitResult instanceof BlockHitResult bhr) {
             potentialEChestPos = bhr.getBlockPos();
-            if (mc.level.getBlockState(bhr.getBlockPos()).getBlock() == Blocks.ENDER_CHEST
+            if (mc.level.getBlockState(bhr.getBlockPos()).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("ender_chest"))
                     && mc.options.keyUse.isDown() && !isEnderChestScreen(potentialEChestPos) && !guiHidden) {
                 mc.startUseItem();
                 mc.startUseItem();
@@ -57,9 +57,9 @@ public class RemoteEnderChest extends Module {
         }
 
         if (isEnderChestScreen(potentialEChestPos) && savedScreen == null && !guiWasOpen && !guiHidden) {
-            savedScreen = (ContainerScreen) mc.screen;
+            savedScreen = (ContainerScreen) mc.gui.screen();
             savedSyncId = mc.player.containerMenu.containerId;
-            mc.setScreen(null);
+            mc.gui.setScreen(null);
             guiHidden = true;
             guiWasOpen = true;
             lastWorld = mc.level;
@@ -72,15 +72,15 @@ public class RemoteEnderChest extends Module {
 
         if (keyJustPressed && savedScreen != null) {
             if (guiHidden) {
-                mc.setScreen(savedScreen);
+                mc.gui.setScreen(savedScreen);
                 guiHidden = false;
             } else {
-                mc.setScreen(null);
+                mc.gui.setScreen(null);
                 guiHidden = true;
             }
         }
 
-        if (savedScreen != null && mc.screen == null && !guiHidden && guiWasOpen) {
+        if (savedScreen != null && mc.gui.screen() == null && !guiHidden && guiWasOpen) {
             resetStuff();
             if (chatFeedback) error("Ender Chest GUI closed. EChest link broken.");
             return;
@@ -107,9 +107,9 @@ public class RemoteEnderChest extends Module {
     }
 
     private boolean isEnderChestScreen(BlockPos echest) {
-        return mc.screen instanceof ContainerScreen screen &&
+        return mc.gui.screen() instanceof ContainerScreen screen &&
                 screen.getMenu().getType() == MenuType.GENERIC_9x3 &&
-                mc.level.getBlockState(echest).getBlock() == Blocks.ENDER_CHEST;
+                mc.level.getBlockState(echest).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("ender_chest"));
     }
 
     private void resetStuff() {

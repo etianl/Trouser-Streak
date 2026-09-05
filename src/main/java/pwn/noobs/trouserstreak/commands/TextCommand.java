@@ -261,7 +261,7 @@ public class TextCommand extends Command {
             return;
         }
 
-        ItemStack armorStand = new ItemStack(Items.ARMOR_STAND);
+        ItemStack armorStand = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("armor_stand")));
         ItemStack current = mc.player.getMainHandItem();
         Vec3 pos = mc.player.position().add(mc.player.getLookAngle().scale(2)).add(0, yOffset, 0);
 
@@ -294,6 +294,6 @@ public class TextCommand extends Command {
         entityTag.putBoolean("CustomNameVisible", true);
         entityTag.put("CustomName", nbt);
 
-        return TypedEntityData.of(EntityType.ARMOR_STAND, entityTag);
+        return TypedEntityData.of(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("armor_stand")), entityTag);
     }
 }
