@@ -8,8 +8,10 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -130,7 +132,7 @@ public class ForceOPSign extends Module {
     private final Setting<Block> terminateblock = commandParameters.add(new BlockSetting.Builder()
             .name("TerminationBlock PLAYERS")
             .description("What is created around the Players (Default: Lava)")
-            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")))
+            .defaultValue(Blocks.LAVA)
             .visible(skynet::get)
             .build());
     public final Setting<Integer> terminateheight1 = commandParameters.add(new IntSetting.Builder()
@@ -168,7 +170,7 @@ public class ForceOPSign extends Module {
     private final Setting<Block> eterminateblock = commandParameters.add(new BlockSetting.Builder()
             .name("TerminationBlock ENTITIES")
             .description("What is created around the Entities (Default: Lava)")
-            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")))
+            .defaultValue(Blocks.LAVA)
             .visible(skynet::get)
             .build());
     public final Setting<Integer> eterminateheight1 = commandParameters.add(new IntSetting.Builder()
@@ -216,7 +218,7 @@ public class ForceOPSign extends Module {
             toggle();
             return;
         }
-        ItemStack stack = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("oak_sign")));
+        ItemStack stack = new ItemStack(Items.OAK_SIGN);
 
 
         var changes = DataComponentPatch.builder()
@@ -452,7 +454,7 @@ public class ForceOPSign extends Module {
             else blockEntityTag.putString("id", "minecraft:oak_sign");
         }
 
-        return TypedEntityData.of(net.minecraft.core.registries.BuiltInRegistries.BLOCK_ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("sign")), blockEntityTag);
+        return TypedEntityData.of(BuiltInRegistries.BLOCK_ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("sign")), blockEntityTag);
     }
     private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
         if (serverVersion == null) return false;

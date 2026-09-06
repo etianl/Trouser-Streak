@@ -220,7 +220,8 @@ public class InfiniteReach extends Module {
     private double maxDistance;
     private boolean wasNoFallEnabled = false;
     private boolean noFallToggled = false;
-    public Entity hoveredTarget = null;
+    private Entity hoveredTarget = null;
+    private BlockHitResult blockHit = null;
     private int blockAttackTicks = 0;
     private boolean canBlockAttack = true;
     private int itemUseTicks = 0;
@@ -265,7 +266,7 @@ public class InfiniteReach extends Module {
         }
     }
     @EventHandler
-    private void onTick(TickEvent.Post event) {
+    private void onTick(TickEvent.Pre event) {
         if (!canBlockAttack) {
             blockAttackTicks++;
             if (blockAttackTicks >= blockAttackDelay.get()) {
@@ -287,10 +288,7 @@ public class InfiniteReach extends Module {
                 entityAttackTicks = 0;
             }
         }
-    }
-    @EventHandler
-    private void onRender3D(Render3DEvent event) {
-        if (mc.player == null || mc.level == null || mc.getConnection() == null) return;
+
 
         if (mode.get() == Mode.Vanilla) maxDistance = Distance.get();
         else maxDistance = paperDistance.get();
@@ -306,7 +304,7 @@ public class InfiniteReach extends Module {
                 maxDistance * maxDistance
         );
 
-        BlockHitResult blockHit = null;
+        blockHit = null;
         if (entityHit == null) {
             HitResult rawHit = mc.getCameraEntity().pick(maxDistance, 0, false);
             if (rawHit instanceof BlockHitResult) {
@@ -316,16 +314,6 @@ public class InfiniteReach extends Module {
 
         if (entityHit != null) {
             hoveredTarget = entityHit.getEntity();
-            double x = Mth.lerp(event.tickDelta, hoveredTarget.xOld, hoveredTarget.getX()) - hoveredTarget.getX();
-            double y = Mth.lerp(event.tickDelta, hoveredTarget.yOld, hoveredTarget.getY()) - hoveredTarget.getY();
-            double z = Mth.lerp(event.tickDelta, hoveredTarget.zOld, hoveredTarget.getZ()) - hoveredTarget.getZ();
-
-            AABB box = hoveredTarget.getBoundingBox();
-            if (renderentity.get()) {
-                event.renderer.box(x + box.minX, y + box.minY, z + box.minZ,
-                        x + box.maxX, y + box.maxY, z + box.maxZ,
-                        sideColor.get(), lineColor.get(), ShapeMode.Both, 0);
-            }
         } else {
             hoveredTarget = null;
         }
@@ -334,10 +322,6 @@ public class InfiniteReach extends Module {
             startPos = finalPos = aboveself = abovetarget = null;
             blockfinalPos = blockaboveself = blockabovetarget = null;
             return;
-        }
-
-        if (entityHit == null && renderblock.get()) {
-            event.renderer.box(blockHit.getBlockPos(), bsideColor.get(), blineColor.get(), ShapeMode.Both, 0);
         }
 
         startPos = mc.player.getVehicle() == null
@@ -431,6 +415,27 @@ public class InfiniteReach extends Module {
             }
         }
     }
+    @EventHandler
+    private void onRender3D(Render3DEvent event) {
+        if (mc.player == null || mc.level == null) return;
+
+        if (hoveredTarget != null) {
+            double x = Mth.lerp(event.tickDelta, hoveredTarget.xOld, hoveredTarget.getX()) - hoveredTarget.getX();
+            double y = Mth.lerp(event.tickDelta, hoveredTarget.yOld, hoveredTarget.getY()) - hoveredTarget.getY();
+            double z = Mth.lerp(event.tickDelta, hoveredTarget.zOld, hoveredTarget.getZ()) - hoveredTarget.getZ();
+
+            AABB box = hoveredTarget.getBoundingBox();
+            if (renderentity.get()) {
+                event.renderer.box(x + box.minX, y + box.minY, z + box.minZ,
+                        x + box.maxX, y + box.maxY, z + box.maxZ,
+                        sideColor.get(), lineColor.get(), ShapeMode.Both, 0);
+            }
+        }
+
+        if (hoveredTarget == null && renderblock.get() && blockHit != null) {
+            event.renderer.box(blockHit.getBlockPos(), bsideColor.get(), blineColor.get(), ShapeMode.Both, 0);
+        }
+    }
     private void donofallstuff(){
         if (!noFallToggled) {
             wasNoFallEnabled = Modules.get().get(NoFall.class).isActive();
@@ -441,7 +446,7 @@ public class InfiniteReach extends Module {
         }
     }
     private void hitBlock(BlockHitResult bhr, Boolean attackpressed) {
-        if (mc.player == null || mc.getConnection() == null || mc.level == null) return;
+        if (mc.player == null || mc.level == null || mc.getConnection() == null) return;
         if (mc.level.getChunk(bhr.getBlockPos()) == null) return;
         if (startPos == null || blockfinalPos == null || blockaboveself == null || blockabovetarget == null) return;
         Entity entity = mc.player.isPassenger() ? mc.player.getVehicle() : mc.player;
@@ -479,8 +484,12 @@ public class InfiniteReach extends Module {
                     ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, bhr.getBlockPos(), bhr.getDirection()
             ));
         } else {
+            int sequence = mc.level.blockStatePredictionHandler.currentSequence();
+
             mc.getConnection().send(new ServerboundUseItemOnPacket(
-                    InteractionHand.MAIN_HAND, bhr, 0
+                    InteractionHand.MAIN_HAND,
+                    bhr,
+                    sequence
             ));
         }
 
@@ -502,7 +511,7 @@ public class InfiniteReach extends Module {
     }
     public void hitEntity(Entity target, Boolean attackpressed) {
         if (mc.player == null || mc.getConnection() == null) return;
-        if (onlyMace.get() && mc.player.getMainHandItem().getItem() != net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("mace"))) return;
+        if (onlyMace.get() && mc.player.getMainHandItem().getItem() != Items.MACE) return;
         if (onlyMace.get() && target instanceof Player player && player.isBlocking()) return;
         if (startPos == null || finalPos == null || aboveself == null || abovetarget == null) return;
         Entity entity = mc.player.isPassenger() ? mc.player.getVehicle() : mc.player;
@@ -674,7 +683,7 @@ public class InfiniteReach extends Module {
                     BlockPos.containing(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
             )) {
                 BlockState state = mc.level.getBlockState(bp);
-                if (state.is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")))) {
+                if (state.is(Blocks.LAVA)) {
                     return true;
                 }
             }
@@ -684,7 +693,7 @@ public class InfiniteReach extends Module {
                     BlockPos.containing(targetBox.maxX, targetBox.maxY, targetBox.maxZ)
             )) {
                 BlockState state = mc.level.getBlockState(bp);
-                if (state.is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))) || !state.getCollisionShape(mc.level, bp).isEmpty()) {
+                if (state.is(Blocks.LAVA) || !state.getCollisionShape(mc.level, bp).isEmpty()) {
                     return true;
                 }
             }

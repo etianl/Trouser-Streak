@@ -130,7 +130,7 @@ public class Teleport extends Module {
                 BlockPos tptarget= new BlockPos(location.getX(), location.getY()+1, location.getZ());
                 if (!mc.level.getBlockState(location).canBeReplaced() && !mc.level.getBlockState(tptarget).canBeReplaced() && ticks==2 && !notponactivateplz){
                     error("Blocks in the target zone.");
-                } else if (liquids.get() && !mc.level.getBlockState(location).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) && !mc.level.getBlockState(tptarget).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) && ticks==2 && !notponactivateplz){
+                } else if (liquids.get() && !mc.level.getBlockState(location).is(Blocks.AIR) && !mc.level.getBlockState(tptarget).is(Blocks.AIR) && ticks==2 && !notponactivateplz){
                     error("Blocks in the target zone.");
                 }
                 else if (ticks==2 && !notponactivateplz){
@@ -164,7 +164,7 @@ public class Teleport extends Module {
                     mc.player.setPosRaw(startpos.x()+((location.getX()+0.5-startpos.x())*0.5), startpos.y()+(((location.getY()+0.5-startpos.y()+0.5)*0.5)+1.05), startpos.z()+((location.getZ()+0.5-startpos.z())*0.5));
                     mc.player.setDeltaMovement(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
-                } else if (liquids.get() && !mc.level.getBlockState(location).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) && !mc.level.getBlockState(tptarget).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) && ticks==3 && !notponactivateplz){
+                } else if (liquids.get() && !mc.level.getBlockState(location).is(Blocks.AIR) && !mc.level.getBlockState(tptarget).is(Blocks.AIR) && ticks==3 && !notponactivateplz){
                     mc.player.setPosRaw(startpos.x()+((location.getX()+0.5-startpos.x())*0.5), startpos.y()+(((location.getY()+0.5-startpos.y()+0.5)*0.5)+1.05), startpos.z()+((location.getZ()+0.5-startpos.z())*0.5));
                     mc.player.setDeltaMovement(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
@@ -206,7 +206,7 @@ public class Teleport extends Module {
                     mc.player.setPosRaw(startpos.x()+((location.getX()+0.5-startpos.x())*0.75), startpos.y()+(((location.getY()+0.5-startpos.y()+0.5)*0.75)+1.075), startpos.z()+((location.getZ()+0.5-startpos.z())*0.75));
                     mc.player.setDeltaMovement(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
-                } else if (liquids.get() && !mc.level.getBlockState(location).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) && !mc.level.getBlockState(tptarget).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) && ticks==5 && !notponactivateplz){
+                } else if (liquids.get() && !mc.level.getBlockState(location).is(Blocks.AIR) && !mc.level.getBlockState(tptarget).is(Blocks.AIR) && ticks==5 && !notponactivateplz){
                     mc.player.setPosRaw(startpos.x()+((location.getX()+0.5-startpos.x())*0.75), startpos.y()+(((location.getY()+0.5-startpos.y()+0.5)*0.75)+1.075), startpos.z()+((location.getZ()+0.5-startpos.z())*0.75));
                     mc.player.setDeltaMovement(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
@@ -260,7 +260,7 @@ public class Teleport extends Module {
                     mc.player.setPosRaw(startpos.x()+((location.getX()+0.5-startpos.x())*0.875), startpos.y()+(((location.getY()+0.5-startpos.y()+0.5)*0.875)+1.0875), startpos.z()+((location.getZ()+0.5-startpos.z())*0.875));
                     mc.player.setDeltaMovement(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
-                } else if (liquids.get() && !mc.level.getBlockState(location).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) && !mc.level.getBlockState(tptarget).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) && ticks==9 && !notponactivateplz){
+                } else if (liquids.get() && !mc.level.getBlockState(location).is(Blocks.AIR) && !mc.level.getBlockState(tptarget).is(Blocks.AIR) && ticks==9 && !notponactivateplz){
                     mc.player.setPosRaw(startpos.x()+((location.getX()+0.5-startpos.x())*0.875), startpos.y()+(((location.getY()+0.5-startpos.y()+0.5)*0.875)+1.0875), startpos.z()+((location.getZ()+0.5-startpos.z())*0.875));
                     mc.player.setDeltaMovement(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
@@ -326,7 +326,7 @@ public class Teleport extends Module {
                     mc.player.setPosRaw(startpos.x()+((location.getX()+0.5-startpos.x())*0.9166666666666667), startpos.y()+(((location.getY()+0.5-startpos.y()+0.5)*0.9166666666666667)+1.09166666666666667), startpos.z()+((location.getZ()+0.5-startpos.z())*0.9166666666666667));
                     mc.player.setDeltaMovement(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
-                } else if (liquids.get() && !mc.level.getBlockState(location).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) && !mc.level.getBlockState(tptarget).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) && ticks==13 && !notponactivateplz){
+                } else if (liquids.get() && !mc.level.getBlockState(location).is(Blocks.AIR) && !mc.level.getBlockState(tptarget).is(Blocks.AIR) && ticks==13 && !notponactivateplz){
                     mc.player.setPosRaw(startpos.x()+((location.getX()+0.5-startpos.x())*0.9166666666666667), startpos.y()+(((location.getY()+0.5-startpos.y()+0.5)*0.9166666666666667)+1.09166666666666667), startpos.z()+((location.getZ()+0.5-startpos.z())*0.9166666666666667));
                     mc.player.setDeltaMovement(0,0.2,0);
                     error("Blocks in the target zone. Teleporting you near the target.");
@@ -369,15 +369,15 @@ public class Teleport extends Module {
 
         if (render.get()){
             if (!liquids.get()){
-                if (!mc.level.getBlockState(location).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) && !mc.level.getFluidState(location).isEmpty()){
+                if (!mc.level.getBlockState(location).is(Blocks.AIR) && !mc.level.getFluidState(location).isEmpty()){
                     event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                }else if (mc.level.getBlockState(location).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) || mc.level.getFluidState(location).isEmpty()){
+                }else if (mc.level.getBlockState(location).is(Blocks.AIR) || mc.level.getFluidState(location).isEmpty()){
                     event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor2.get(), lineColor2.get(), shapeMode.get(), 0);
                 }
             }else if (liquids.get()) {
-                if (!mc.level.getBlockState(location).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")))){
+                if (!mc.level.getBlockState(location).is(Blocks.AIR)){
                     event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                }else if (mc.level.getBlockState(location).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")))){
+                }else if (mc.level.getBlockState(location).is(Blocks.AIR)){
                     event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor2.get(), lineColor2.get(), shapeMode.get(), 0);
                 }
             }

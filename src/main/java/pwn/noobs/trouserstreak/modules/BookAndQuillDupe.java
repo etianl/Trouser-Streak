@@ -50,7 +50,7 @@ public class BookAndQuillDupe extends Module {
     }
     @Override
     public void onActivate() {
-        if (mc.player.getMainHandItem().getItem() != net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("writable_book"))) {
+        if (mc.player.getMainHandItem().getItem() != Items.WRITABLE_BOOK) {
             error("You must be holding a writable book to use this.");
             toggle();
             return;

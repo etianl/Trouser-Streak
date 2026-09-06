@@ -140,7 +140,7 @@ public class BoomPlus extends Module {
     private final Setting<Block> blockstate = sgOptions.add(new BlockSetting.Builder()
             .name("falling_block entity block")
             .description("What is created when specifying falling_block as the entity.")
-            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("bedrock")))
+            .defaultValue(Blocks.BEDROCK)
             .build());
     public final Setting<Boolean> target = sgGeneral.add(new BoolSetting.Builder()
             .name("OnTarget")
@@ -190,7 +190,7 @@ public class BoomPlus extends Module {
                 namecolour = nomcolor.get().toString();
                 ItemStack rst = mc.player.getMainHandItem();
                 BlockHitResult bhr = new BlockHitResult(mc.player.getEyePosition(), Direction.DOWN, BlockPos.containing(mc.player.getEyePosition()), false);
-                ItemStack item = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("bee_spawn_egg")));
+                ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
                 var changes = DataComponentPatch.builder()
                         .set(DataComponents.CUSTOM_NAME, Component.literal(customName).withStyle(ChatFormatting.valueOf(namecolour.toUpperCase())))
                         .set(DataComponents.ITEM_NAME, Component.literal(customName).withStyle(ChatFormatting.valueOf(namecolour.toUpperCase())))
@@ -212,7 +212,7 @@ public class BoomPlus extends Module {
             namecolour = nomcolor.get().toString();
             ItemStack rst = mc.player.getMainHandItem();
             BlockHitResult bhr = new BlockHitResult(mc.player.getEyePosition(), Direction.DOWN, BlockPos.containing(mc.player.getEyePosition()), false);
-            ItemStack item = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("bee_spawn_egg")));
+            ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
             var changes = DataComponentPatch.builder()
                     .set(DataComponents.CUSTOM_NAME, Component.literal(customName).withStyle(ChatFormatting.valueOf(namecolour.toUpperCase())))
                     .set(DataComponents.ITEM_NAME, Component.literal(customName).withStyle(ChatFormatting.valueOf(namecolour.toUpperCase())))
@@ -298,7 +298,7 @@ public class BoomPlus extends Module {
         Identifier entityId = Identifier.tryParse("minecraft:" + entityName);
         EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.getValue(entityId);
         if (entityType == null) {
-            entityType = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("pig"));
+            entityType = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("pig"));
         }
 
         return TypedEntityData.of(entityType, entityTag);

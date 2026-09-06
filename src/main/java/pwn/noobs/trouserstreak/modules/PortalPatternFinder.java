@@ -255,7 +255,7 @@ public class PortalPatternFinder extends Module {
 					BlockPos blockPos = new BlockPos(chunk.getPos().getMinBlockX() + x, y, chunk.getPos().getMinBlockZ() + z);
 					BlockState blockState = chunk.getBlockState(blockPos);
 
-					if (blockState.getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("cave_air"))) {
+					if (blockState.getBlock() == Blocks.CAVE_AIR) {
 						isSurroundingBlockRegAir(blockPos);
 					}
 				}
@@ -285,7 +285,7 @@ public class PortalPatternFinder extends Module {
 					blockPastTheAir = bPos.east().offset(1, 0, 0);
 				}
 			}
-			if (mc.level.getBlockState(airPos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) && mc.level.getBlockState(blockPastTheAir).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) findAirShape(airPos);
+			if (mc.level.getBlockState(airPos).getBlock() == Blocks.AIR && mc.level.getBlockState(blockPastTheAir).getBlock() != Blocks.AIR) findAirShape(airPos);
 		}
 	}
 
@@ -305,14 +305,14 @@ public class PortalPatternFinder extends Module {
 		for (int x = -areaWidth; x <= areaWidth; x++) {
 			for (int y = -areaHeight; y <= areaHeight; y++) {
 				BlockPos bPos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ());
-				if (mc.level.getBlockState(bPos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) {
+				if (mc.level.getBlockState(bPos).getBlock() == Blocks.AIR) {
 					int nonairblockonsides = 0;
 					BlockPos[] surroundingPositions = new BlockPos[] {
 							bPos.north(),
 							bPos.south()
 					};
 					for (BlockPos posi : surroundingPositions) {
-						if (mc.level.getBlockState(posi).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) {
+						if (mc.level.getBlockState(posi).getBlock() != Blocks.AIR) {
 							nonairblockonsides++;
 						}
 					}
@@ -321,7 +321,7 @@ public class PortalPatternFinder extends Module {
 						AirBlockPatternWEastREJECT++;
 						AirBlockPatternWEast.add(bPos);
 					}
-				} else if (mc.level.getBlockState(bPos).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) && mc.level.getBlockState(bPos).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("cave_air"))) {
+				} else if (mc.level.getBlockState(bPos).getBlock() != Blocks.AIR && mc.level.getBlockState(bPos).getBlock() != Blocks.CAVE_AIR) {
 					AirBlockPatternWEastREJECT2++;
 					AirBlockPatternWEast.add(bPos);
 				}
@@ -330,14 +330,14 @@ public class PortalPatternFinder extends Module {
 		for (int z = -areaWidth; z <= areaWidth; z++) {
 			for (int y = -areaHeight; y <= areaHeight; y++) {
 				BlockPos bPos = new BlockPos(pos.getX(), pos.getY() + y, pos.getZ() + z);
-				if (mc.level.getBlockState(bPos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) {
+				if (mc.level.getBlockState(bPos).getBlock() == Blocks.AIR) {
 					int nonairblockonsides = 0;
 					BlockPos[] surroundingPositions = new BlockPos[] {
 							bPos.west(),
 							bPos.east()
 					};
 					for (BlockPos posi : surroundingPositions) {
-						if (mc.level.getBlockState(posi).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) {
+						if (mc.level.getBlockState(posi).getBlock() != Blocks.AIR) {
 							nonairblockonsides++;
 						}
 					}
@@ -346,7 +346,7 @@ public class PortalPatternFinder extends Module {
 						AirBlockPatternNouthREJECT++;
 						AirBlockPatternNouth.add(bPos);
 					}
-				} else if (mc.level.getBlockState(bPos).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) && mc.level.getBlockState(bPos).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("cave_air"))) {
+				} else if (mc.level.getBlockState(bPos).getBlock() != Blocks.AIR && mc.level.getBlockState(bPos).getBlock() != Blocks.CAVE_AIR) {
 					AirBlockPatternNouthREJECT2++;
 					AirBlockPatternNouth.add(bPos);
 				}
@@ -365,11 +365,11 @@ public class PortalPatternFinder extends Module {
 							if (falsepositives1.get()) {
 								for (int x = 0; x < currentWidth; x++) {
 									BlockPos blockPos = boxStart.offset(x, -1, 0);
-									if (mc.level.getBlockState(blockPos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) airfoundaboveorbelow = true;
+									if (mc.level.getBlockState(blockPos).getBlock() == Blocks.AIR) airfoundaboveorbelow = true;
 								}
 								for (int x = 0; x < currentWidth; x++) {
 									BlockPos blockPos = boxStart.offset(x, currentHeight + 1, 0);
-									if (mc.level.getBlockState(blockPos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air"))) airfoundaboveorbelow = true;
+									if (mc.level.getBlockState(blockPos).getBlock() == Blocks.AIR) airfoundaboveorbelow = true;
 								}
 								if (airfoundaboveorbelow) continue;
 							}
@@ -409,12 +409,12 @@ public class PortalPatternFinder extends Module {
 							if (falsepositives1.get()) {
 								for (int z = 0; z < currentWidth; z++) {
 									BlockPos blockPos = boxStart.offset(0, -1, z);
-									if (mc.level.getBlockState(blockPos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")))
+									if (mc.level.getBlockState(blockPos).getBlock() == Blocks.AIR)
 										airfoundaboveorbelow = true;
 								}
 								for (int z = 0; z < currentWidth; z++) {
 									BlockPos blockPos = boxStart.offset(0, currentHeight + 1, z);
-									if (mc.level.getBlockState(blockPos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")))
+									if (mc.level.getBlockState(blockPos).getBlock() == Blocks.AIR)
 										airfoundaboveorbelow = true;
 								}
 								if (airfoundaboveorbelow) continue;

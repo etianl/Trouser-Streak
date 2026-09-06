@@ -69,8 +69,8 @@ public class ForceOPBook extends Module {
             toggle();
             return;
         }
-        ItemStack stack = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("writable_book")));
-        if (bmode.get() == bookModes.WrittenBook)stack = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("written_book")));
+        ItemStack stack = new ItemStack(Items.WRITABLE_BOOK);
+        if (bmode.get() == bookModes.WrittenBook)stack = new ItemStack(Items.WRITTEN_BOOK);
         Filterable<String> Title = Filterable.passThrough(title.get());
         List<Filterable<Component>> pages = new ArrayList<>();
         if (mode.get() == Modes.ForceOP){

@@ -356,7 +356,7 @@ public class ForceTP extends Module {
             if (chatFeedback)warning("No target UUID");
             return;
         }
-        ItemStack item = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("bee_spawn_egg")));
+        ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
         var changes = DataComponentPatch.builder()
                 .set(DataComponents.ENTITY_DATA, createEnderPearlData(entityuuid))
                 .build();
@@ -449,7 +449,7 @@ public class ForceTP extends Module {
 
         Identifier entityId = Identifier.tryParse("minecraft:ender_pearl");
         EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.getValue(entityId);
-        if (entityType == null) entityType = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("ender_pearl"));
+        if (entityType == null) entityType = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("ender_pearl"));
 
         return TypedEntityData.of(entityType, entityTag);
     }

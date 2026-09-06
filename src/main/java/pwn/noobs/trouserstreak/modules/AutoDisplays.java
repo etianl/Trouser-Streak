@@ -114,7 +114,7 @@ public class AutoDisplays extends Module {
     private final Setting<Block> block = sgBlock.add(new BlockSetting.Builder()
             .name("Block")
             .description("The block to be displayed.")
-            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("black_concrete")))
+            .defaultValue(Blocks.CONCRETE.black())
             .visible(() -> displayMode.get() == Modes.BLOCK)
             .build());
     private final Setting<Integer> blockbrightness = sgBlock.add(new IntSetting.Builder()
@@ -393,7 +393,7 @@ public class AutoDisplays extends Module {
     }
 
     private ItemStack createTextDisplayEgg(String text, int brightness, int argbColor, BlockPos pos) {
-        ItemStack item = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("bee_spawn_egg")));
+        ItemStack item = new ItemStack(Items.BEE_SPAWN_EGG);
 
         ListTag Pos = new ListTag();
         Pos.add(DoubleTag.valueOf(pos.getX()));
@@ -419,7 +419,7 @@ public class AutoDisplays extends Module {
 
         Identifier entityId = Identifier.tryParse("minecraft:text_display");
         EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.getValue(entityId);
-        if (entityType == null) entityType = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("text_display"));
+        if (entityType == null) entityType = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("text_display"));
 
         TypedEntityData<EntityType<?>> data = TypedEntityData.of(entityType, entityTag);
 

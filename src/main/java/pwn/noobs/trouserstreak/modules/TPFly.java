@@ -202,25 +202,25 @@ public class TPFly extends Module {
         if (mode.get() == Modes.WASDFly && mc.options.keyUp.isDown()){
             if (mc.player.getMotionDirection() == Direction.NORTH) {
                 BlockPos pos12 = playerPos.offset(new Vec3i(0,0,-Range));
-                if (mc.level.getBlockState(pos12).canBeReplaced() && mc.level.getBlockState(pos12).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))){
+                if (mc.level.getBlockState(pos12).canBeReplaced() && mc.level.getBlockState(pos12).getBlock() != Blocks.LAVA){
                     mc.player.setPosRaw(mc.player.getX(),mc.player.getY(),mc.player.getZ()-Range);
                 }
             }
             if (mc.player.getMotionDirection() == Direction.SOUTH) {
                 BlockPos pos13 = playerPos.offset(new Vec3i(0,0,Range));
-                if (mc.level.getBlockState(pos13).canBeReplaced() && mc.level.getBlockState(pos13).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))){
+                if (mc.level.getBlockState(pos13).canBeReplaced() && mc.level.getBlockState(pos13).getBlock() != Blocks.LAVA){
                     mc.player.setPosRaw(mc.player.getX(),mc.player.getY(),mc.player.getZ()+Range);
                 }
             }
             if (mc.player.getMotionDirection() == Direction.EAST) {
                 BlockPos pos14 = playerPos.offset(new Vec3i(Range,0,0));
-                if (mc.level.getBlockState(pos14).canBeReplaced() && mc.level.getBlockState(pos14).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))){
+                if (mc.level.getBlockState(pos14).canBeReplaced() && mc.level.getBlockState(pos14).getBlock() != Blocks.LAVA){
                     mc.player.setPosRaw(mc.player.getX()+Range,mc.player.getY(),mc.player.getZ());
                 }
             }
             if (mc.player.getMotionDirection() == Direction.WEST) {
                 BlockPos pos15 = playerPos.offset(new Vec3i(-Range,0,0));
-                if (mc.level.getBlockState(pos15).canBeReplaced() && mc.level.getBlockState(pos15).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))){
+                if (mc.level.getBlockState(pos15).canBeReplaced() && mc.level.getBlockState(pos15).getBlock() != Blocks.LAVA){
                     mc.player.setPosRaw(mc.player.getX()-Range,mc.player.getY(),mc.player.getZ());
                 }
             }
@@ -229,25 +229,25 @@ public class TPFly extends Module {
         if (mode.get() != Modes.Normal && mc.options.keyDown.isDown()){
             if (mc.player.getMotionDirection() == Direction.NORTH) {
                 BlockPos pos16 = playerPos.offset(new Vec3i(0,0,Range));
-                if (mc.level.getBlockState(pos16).canBeReplaced() && mc.level.getBlockState(pos16).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))){
+                if (mc.level.getBlockState(pos16).canBeReplaced() && mc.level.getBlockState(pos16).getBlock() != Blocks.LAVA){
                     mc.player.setPosRaw(mc.player.getX(),mc.player.getY(),mc.player.getZ()+Range);
                 }
             }
             if (mc.player.getMotionDirection() == Direction.SOUTH) {
                 BlockPos pos17 = playerPos.offset(new Vec3i(0,0,-Range));
-                if (mc.level.getBlockState(pos17).canBeReplaced() && mc.level.getBlockState(pos17).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))){
+                if (mc.level.getBlockState(pos17).canBeReplaced() && mc.level.getBlockState(pos17).getBlock() != Blocks.LAVA){
                     mc.player.setPosRaw(mc.player.getX(),mc.player.getY(),mc.player.getZ()-Range);
                 }
             }
             if (mc.player.getMotionDirection() == Direction.EAST) {
                 BlockPos pos18 = playerPos.offset(new Vec3i(-Range,0,0));
-                if (mc.level.getBlockState(pos18).canBeReplaced() && mc.level.getBlockState(pos18).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))){
+                if (mc.level.getBlockState(pos18).canBeReplaced() && mc.level.getBlockState(pos18).getBlock() != Blocks.LAVA){
                     mc.player.setPosRaw(mc.player.getX()-Range,mc.player.getY(),mc.player.getZ());
                 }
             }
             if (mc.player.getMotionDirection() == Direction.WEST) {
                 BlockPos pos19 = playerPos.offset(new Vec3i(Range,0,0));
-                if (mc.level.getBlockState(pos19).canBeReplaced() && mc.level.getBlockState(pos19).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))){
+                if (mc.level.getBlockState(pos19).canBeReplaced() && mc.level.getBlockState(pos19).getBlock() != Blocks.LAVA){
                     mc.player.setPosRaw(mc.player.getX()+Range,mc.player.getY(),mc.player.getZ());
                 }
             }
@@ -256,25 +256,25 @@ public class TPFly extends Module {
         if (mode.get() == Modes.WASDFly && mc.options.keyLeft.isDown()){
             if (mc.player.getMotionDirection() == Direction.NORTH) {
                 BlockPos pos20 = playerPos.offset(new Vec3i(0,0,-Range));
-                if (mc.level.getBlockState(pos20).canBeReplaced() && mc.level.getBlockState(pos20).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))){
+                if (mc.level.getBlockState(pos20).canBeReplaced() && mc.level.getBlockState(pos20).getBlock() != Blocks.LAVA){
                     mc.player.setPosRaw(mc.player.getX()-Range,mc.player.getY(),mc.player.getZ());
                 }
             }
             if (mc.player.getMotionDirection() == Direction.SOUTH) {
                 BlockPos pos21 = playerPos.offset(new Vec3i(0,0,Range));
-                if (mc.level.getBlockState(pos21).canBeReplaced() && mc.level.getBlockState(pos21).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))){
+                if (mc.level.getBlockState(pos21).canBeReplaced() && mc.level.getBlockState(pos21).getBlock() != Blocks.LAVA){
                     mc.player.setPosRaw(mc.player.getX()+Range,mc.player.getY(),mc.player.getZ());
                 }
             }
             if (mc.player.getMotionDirection() == Direction.EAST) {
                 BlockPos pos22 = playerPos.offset(new Vec3i(Range,0,0));
-                if (mc.level.getBlockState(pos22).canBeReplaced() && mc.level.getBlockState(pos22).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))){
+                if (mc.level.getBlockState(pos22).canBeReplaced() && mc.level.getBlockState(pos22).getBlock() != Blocks.LAVA){
                     mc.player.setPosRaw(mc.player.getX(),mc.player.getY(),mc.player.getZ()-Range);
                 }
             }
             if (mc.player.getMotionDirection() == Direction.WEST) {
                 BlockPos pos23 = playerPos.offset(new Vec3i(-Range,0,0));
-                if (mc.level.getBlockState(pos23).canBeReplaced() && mc.level.getBlockState(pos23).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))){
+                if (mc.level.getBlockState(pos23).canBeReplaced() && mc.level.getBlockState(pos23).getBlock() != Blocks.LAVA){
                     mc.player.setPosRaw(mc.player.getX(),mc.player.getY(),mc.player.getZ()+Range);
                 }
             }
@@ -283,25 +283,25 @@ public class TPFly extends Module {
         if (mode.get() == Modes.WASDFly && mc.options.keyRight.isDown()){
             if (mc.player.getMotionDirection() == Direction.NORTH) {
                 BlockPos pos24 = playerPos.offset(new Vec3i(0,0,-Range));
-                if (mc.level.getBlockState(pos24).canBeReplaced() && mc.level.getBlockState(pos24).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))){
+                if (mc.level.getBlockState(pos24).canBeReplaced() && mc.level.getBlockState(pos24).getBlock() != Blocks.LAVA){
                     mc.player.setPosRaw(mc.player.getX()+Range,mc.player.getY(),mc.player.getZ());
                 }
             }
             if (mc.player.getMotionDirection() == Direction.SOUTH) {
                 BlockPos pos25 = playerPos.offset(new Vec3i(0,0,Range));
-                if (mc.level.getBlockState(pos25).canBeReplaced() && mc.level.getBlockState(pos25).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))){
+                if (mc.level.getBlockState(pos25).canBeReplaced() && mc.level.getBlockState(pos25).getBlock() != Blocks.LAVA){
                     mc.player.setPosRaw(mc.player.getX()-Range,mc.player.getY(),mc.player.getZ());
                 }
             }
             if (mc.player.getMotionDirection() == Direction.EAST) {
                 BlockPos pos26 = playerPos.offset(new Vec3i(Range,0,0));
-                if (mc.level.getBlockState(pos26).canBeReplaced() && mc.level.getBlockState(pos26).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))){
+                if (mc.level.getBlockState(pos26).canBeReplaced() && mc.level.getBlockState(pos26).getBlock() != Blocks.LAVA){
                     mc.player.setPosRaw(mc.player.getX(),mc.player.getY(),mc.player.getZ()+Range);
                 }
             }
             if (mc.player.getMotionDirection() == Direction.WEST) {
                 BlockPos pos27 = playerPos.offset(new Vec3i(-Range,0,0));
-                if (mc.level.getBlockState(pos27).canBeReplaced() && mc.level.getBlockState(pos27).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))){
+                if (mc.level.getBlockState(pos27).canBeReplaced() && mc.level.getBlockState(pos27).getBlock() != Blocks.LAVA){
                     mc.player.setPosRaw(mc.player.getX(),mc.player.getY(),mc.player.getZ()-Range);
                 }
             }
@@ -315,7 +315,7 @@ public class TPFly extends Module {
             BlockPos pos9 = playerPos.offset(new Vec3i(0,4,0));
             BlockPos pos10 = playerPos.offset(new Vec3i(0,5,0));
             BlockPos pos11 = playerPos.offset(new Vec3i(0,6,0));
-            if (mc.level.getBlockState(pos6).canBeReplaced() && mc.level.getBlockState(pos7).canBeReplaced() && mc.level.getBlockState(pos8).canBeReplaced() && mc.level.getBlockState(pos9).canBeReplaced() && mc.level.getBlockState(pos10).canBeReplaced() && mc.level.getBlockState(pos11).canBeReplaced() && mc.level.getBlockState(pos6).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")) && mc.level.getBlockState(pos7).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")) && mc.level.getBlockState(pos8).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")) && mc.level.getBlockState(pos9).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")) && mc.level.getBlockState(pos10).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")) && mc.level.getBlockState(pos11).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))){
+            if (mc.level.getBlockState(pos6).canBeReplaced() && mc.level.getBlockState(pos7).canBeReplaced() && mc.level.getBlockState(pos8).canBeReplaced() && mc.level.getBlockState(pos9).canBeReplaced() && mc.level.getBlockState(pos10).canBeReplaced() && mc.level.getBlockState(pos11).canBeReplaced() && mc.level.getBlockState(pos6).getBlock() != Blocks.LAVA && mc.level.getBlockState(pos7).getBlock() != Blocks.LAVA && mc.level.getBlockState(pos8).getBlock() != Blocks.LAVA && mc.level.getBlockState(pos9).getBlock() != Blocks.LAVA && mc.level.getBlockState(pos10).getBlock() != Blocks.LAVA && mc.level.getBlockState(pos11).getBlock() != Blocks.LAVA){
                 mc.player.setPosRaw(mc.player.getX(),mc.player.getY()+upRange,mc.player.getZ());
             }
 
@@ -357,7 +357,7 @@ public class TPFly extends Module {
             BlockPos pos3 = playerPos.offset(new Vec3i(0,-4,0));
             BlockPos pos4 = playerPos.offset(new Vec3i(0,-5,0));
             BlockPos pos5 = playerPos.offset(new Vec3i(0,-6,0));
-            if (mc.level.getBlockState(pos).canBeReplaced() && mc.level.getBlockState(pos1).canBeReplaced() && mc.level.getBlockState(pos2).canBeReplaced() && mc.level.getBlockState(pos3).canBeReplaced() && mc.level.getBlockState(pos4).canBeReplaced() && mc.level.getBlockState(pos5).canBeReplaced() && mc.level.getBlockState(pos).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")) && mc.level.getBlockState(pos1).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")) && mc.level.getBlockState(pos2).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")) && mc.level.getBlockState(pos3).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")) && mc.level.getBlockState(pos4).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")) && mc.level.getBlockState(pos5).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))){
+            if (mc.level.getBlockState(pos).canBeReplaced() && mc.level.getBlockState(pos1).canBeReplaced() && mc.level.getBlockState(pos2).canBeReplaced() && mc.level.getBlockState(pos3).canBeReplaced() && mc.level.getBlockState(pos4).canBeReplaced() && mc.level.getBlockState(pos5).canBeReplaced() && mc.level.getBlockState(pos).getBlock() != Blocks.LAVA && mc.level.getBlockState(pos1).getBlock() != Blocks.LAVA && mc.level.getBlockState(pos2).getBlock() != Blocks.LAVA && mc.level.getBlockState(pos3).getBlock() != Blocks.LAVA && mc.level.getBlockState(pos4).getBlock() != Blocks.LAVA && mc.level.getBlockState(pos5).getBlock() != Blocks.LAVA){
                 mc.player.setPosRaw(mc.player.getX(),mc.player.getY()-downRange,mc.player.getZ());
             }
         } else if (mode.get() == Modes.WASDFly && mc.options.keyShift.isDown() && mc.options.keyDown.isDown()){
@@ -486,7 +486,7 @@ public class TPFly extends Module {
             BlockPos pos9 = playerPos.offset(new Vec3i(0,4,0));
             BlockPos pos10 = playerPos.offset(new Vec3i(0,5,0));
             BlockPos pos11 = playerPos.offset(new Vec3i(0,6,0));
-            if (mc.level.getBlockState(pos6).canBeReplaced() && mc.level.getBlockState(pos7).canBeReplaced() && mc.level.getBlockState(pos8).canBeReplaced() && mc.level.getBlockState(pos9).canBeReplaced() && mc.level.getBlockState(pos10).canBeReplaced() && mc.level.getBlockState(pos11).canBeReplaced() && mc.level.getBlockState(pos6).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")) && mc.level.getBlockState(pos7).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")) && mc.level.getBlockState(pos8).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")) && mc.level.getBlockState(pos9).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")) && mc.level.getBlockState(pos10).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")) && mc.level.getBlockState(pos11).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))){
+            if (mc.level.getBlockState(pos6).canBeReplaced() && mc.level.getBlockState(pos7).canBeReplaced() && mc.level.getBlockState(pos8).canBeReplaced() && mc.level.getBlockState(pos9).canBeReplaced() && mc.level.getBlockState(pos10).canBeReplaced() && mc.level.getBlockState(pos11).canBeReplaced() && mc.level.getBlockState(pos6).getBlock() != Blocks.LAVA && mc.level.getBlockState(pos7).getBlock() != Blocks.LAVA && mc.level.getBlockState(pos8).getBlock() != Blocks.LAVA && mc.level.getBlockState(pos9).getBlock() != Blocks.LAVA && mc.level.getBlockState(pos10).getBlock() != Blocks.LAVA && mc.level.getBlockState(pos11).getBlock() != Blocks.LAVA){
                 mc.player.setPosRaw(mc.player.getX(),mc.player.getY()+upRange,mc.player.getZ());
             }
         }
@@ -498,7 +498,7 @@ public class TPFly extends Module {
             BlockPos pos3 = playerPos.offset(new Vec3i(0,-4,0));
             BlockPos pos4 = playerPos.offset(new Vec3i(0,-5,0));
             BlockPos pos5 = playerPos.offset(new Vec3i(0,-6,0));
-            if (mc.level.getBlockState(pos).canBeReplaced() && mc.level.getBlockState(pos1).canBeReplaced() && mc.level.getBlockState(pos2).canBeReplaced() && mc.level.getBlockState(pos3).canBeReplaced() && mc.level.getBlockState(pos4).canBeReplaced() && mc.level.getBlockState(pos5).canBeReplaced() && mc.level.getBlockState(pos).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")) && mc.level.getBlockState(pos1).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")) && mc.level.getBlockState(pos2).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")) && mc.level.getBlockState(pos3).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")) && mc.level.getBlockState(pos4).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")) && mc.level.getBlockState(pos5).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))){
+            if (mc.level.getBlockState(pos).canBeReplaced() && mc.level.getBlockState(pos1).canBeReplaced() && mc.level.getBlockState(pos2).canBeReplaced() && mc.level.getBlockState(pos3).canBeReplaced() && mc.level.getBlockState(pos4).canBeReplaced() && mc.level.getBlockState(pos5).canBeReplaced() && mc.level.getBlockState(pos).getBlock() != Blocks.LAVA && mc.level.getBlockState(pos1).getBlock() != Blocks.LAVA && mc.level.getBlockState(pos2).getBlock() != Blocks.LAVA && mc.level.getBlockState(pos3).getBlock() != Blocks.LAVA && mc.level.getBlockState(pos4).getBlock() != Blocks.LAVA && mc.level.getBlockState(pos5).getBlock() != Blocks.LAVA){
                 mc.player.setPosRaw(mc.player.getX(),mc.player.getY()-downRange,mc.player.getZ());
             }
         }

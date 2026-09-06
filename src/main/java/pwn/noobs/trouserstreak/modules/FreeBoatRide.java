@@ -94,7 +94,7 @@ public class FreeBoatRide extends Module {
             BlockPos newopenair2 = isopenair1.above(1);
 
             if (!mc.level.getBlockState(isopenair1).canBeReplaced() ||
-                    mc.level.getBlockState(isopenair1).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("powder_snow"))) ||
+                    mc.level.getBlockState(isopenair1).is(Blocks.POWDER_SNOW) ||
                     !mc.level.getFluidState(isopenair1).isEmpty()) {
 
                 double targetY = newopenair2.getY();

@@ -25,7 +25,7 @@ public class TrailMaker extends Module {
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("Trail Blocks")
         .description("Selected blocks for building trails. If you are holding any of these, they will be placed.")
-            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("tnt")))
+            .defaultValue(Blocks.TNT)
         .build()
     );
 

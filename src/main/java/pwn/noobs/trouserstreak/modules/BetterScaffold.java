@@ -40,7 +40,7 @@ public class BetterScaffold extends Module {
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
             .name("blocks")
             .description("Selected blocks.")
-            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("tnt")))
+            .defaultValue(Blocks.TNT)
             .build()
     );
 

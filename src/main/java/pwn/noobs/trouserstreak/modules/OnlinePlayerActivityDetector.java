@@ -53,15 +53,15 @@ public class OnlinePlayerActivityDetector extends Module {
             .name("OVERWORLD False Positive blocks")
             .description("Exclude these blocks from the detection.")
             .defaultValue(
-                    net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("bedrock")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("grass_block")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("dirt")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("snow_block")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("blue_ice")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("sand")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("gravel")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("suspicious_gravel")),
-                    net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("diorite")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("granite")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("andesite")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("tuff")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("stone")),
-                    net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("raw_iron_block")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("budding_amethyst")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("small_amethyst_bud")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("medium_amethyst_bud")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("large_amethyst_bud")),
-                    net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("waxed_weathered_copper_bulb")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("waxed_oxidized_copper_bulb")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("waxed_copper_block")),
-                    net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("cobweb")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("oak_fence")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("dark_oak_fence")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("rail")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("sculk_vein")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("sculk_sensor")),
-                    net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("acacia_leaves")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("birch_leaves")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("oak_leaves")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("spruce_leaves")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("dark_oak_leaves")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("cherry_leaves")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("jungle_leaves")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("cactus")),
-                    net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("cave_vines")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("sugar_cane")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("tall_grass")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("short_grass")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("seagrass")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("tall_seagrass")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("vine")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("fern")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("large_fern")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("kelp")),
-                    net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("moss_block")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("big_dripleaf")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("big_dripleaf_stem")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("glow_lichen")),
-                    net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("brown_mushroom")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("red_mushroom")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("fire")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("cave_air")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("barrier")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("water")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("bubble_column"))
+                    Blocks.BEDROCK, Blocks.GRASS_BLOCK, Blocks.DIRT, Blocks.SNOW_BLOCK, Blocks.BLUE_ICE, Blocks.SAND, Blocks.GRAVEL, Blocks.SUSPICIOUS_GRAVEL,
+                    Blocks.DIORITE, Blocks.GRANITE, Blocks.ANDESITE, Blocks.TUFF, Blocks.DEEPSLATE, Blocks.STONE,
+                    Blocks.RAW_IRON_BLOCK, Blocks.BUDDING_AMETHYST, Blocks.SMALL_AMETHYST_BUD, Blocks.MEDIUM_AMETHYST_BUD, Blocks.LARGE_AMETHYST_BUD,
+                    Blocks.COPPER_BULB.waxed().weathered(), Blocks.COPPER_BULB.waxed().oxidized(), Blocks.COPPER_BLOCK.waxed().unaffected(),
+                    Blocks.COBWEB, Blocks.OAK_FENCE, Blocks.DARK_OAK_FENCE, Blocks.RAIL, Blocks.SCULK_VEIN, Blocks.SCULK_SENSOR,
+                    Blocks.ACACIA_LEAVES, Blocks.BIRCH_LEAVES, Blocks.OAK_LEAVES, Blocks.SPRUCE_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.CHERRY_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.CACTUS,
+                    Blocks.CAVE_VINES, Blocks.SUGAR_CANE, Blocks.TALL_GRASS, Blocks.SHORT_GRASS, Blocks.SEAGRASS, Blocks.TALL_SEAGRASS, Blocks.VINE, Blocks.FERN, Blocks.LARGE_FERN, Blocks.KELP,
+                    Blocks.MOSS_BLOCK, Blocks.BIG_DRIPLEAF, Blocks.BIG_DRIPLEAF_STEM, Blocks.GLOW_LICHEN,
+                    Blocks.BROWN_MUSHROOM, Blocks.RED_MUSHROOM, Blocks.FIRE, Blocks.CAVE_AIR, Blocks.BARRIER, Blocks.AIR, Blocks.WATER, Blocks.LAVA, Blocks.BUBBLE_COLUMN
             )
             .build()
     );
@@ -69,8 +69,8 @@ public class OnlinePlayerActivityDetector extends Module {
             .name("NETHER False Positive blocks")
             .description("Exclude these blocks from the detection.")
             .defaultValue(
-                    net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("barrier")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("cave_air")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("fire")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("netherrack")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("magma_block")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("soul_sand")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("soul_soil")), Blocks. NETHER_BRICK_FENCE,
-                    net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("crimson_nylium")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("crimson_roots")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("weeping_vines_plant")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("weeping_vines")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("red_mushroom")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("brown_mushroom")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("crimson_fungus")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("warped_fungus"))
+                    Blocks.BARRIER, Blocks.AIR, Blocks.CAVE_AIR, Blocks.LAVA, Blocks.FIRE, Blocks.NETHERRACK, Blocks.MAGMA_BLOCK, Blocks.SOUL_SAND, Blocks.SOUL_SOIL, Blocks. NETHER_BRICK_FENCE,
+                    Blocks.CRIMSON_NYLIUM, Blocks.CRIMSON_ROOTS, Blocks.WEEPING_VINES_PLANT, Blocks.WEEPING_VINES, Blocks.RED_MUSHROOM, Blocks.BROWN_MUSHROOM, Blocks.CRIMSON_FUNGUS, Blocks.WARPED_FUNGUS
             )
             .build()
     );
@@ -78,7 +78,7 @@ public class OnlinePlayerActivityDetector extends Module {
             .name("END False Positive blocks")
             .description("Exclude these blocks from the detection.")
             .defaultValue(
-                    net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("barrier")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("chorus_plant")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("purpur_stairs"))
+                    Blocks.AIR, Blocks.BARRIER, Blocks.CHORUS_PLANT, Blocks.PURPUR_STAIRS
             )
             .build()
     );
@@ -117,28 +117,28 @@ public class OnlinePlayerActivityDetector extends Module {
     private static final Set<Block> FalsePositivesEND = new HashSet<>();
     private static final Set<Block> ORE_BLOCKS = new HashSet<>();
     static {
-        ORE_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("coal_ore")));
-        ORE_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_coal_ore")));
-        ORE_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("copper_ore")));
-        ORE_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_copper_ore")));
-        ORE_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("iron_ore")));
-        ORE_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_iron_ore")));
-        ORE_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("gold_ore")));
-        ORE_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_gold_ore")));
-        ORE_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lapis_ore")));
-        ORE_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_lapis_ore")));
-        ORE_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("diamond_ore")));
-        ORE_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_diamond_ore")));
-        ORE_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("redstone_ore")));
-        ORE_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_redstone_ore")));
-        ORE_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("emerald_ore")));
-        ORE_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("deepslate_emerald_ore")));
+        ORE_BLOCKS.add(Blocks.COAL_ORE);
+        ORE_BLOCKS.add(Blocks.DEEPSLATE_COAL_ORE);
+        ORE_BLOCKS.add(Blocks.COPPER_ORE);
+        ORE_BLOCKS.add(Blocks.DEEPSLATE_COPPER_ORE);
+        ORE_BLOCKS.add(Blocks.IRON_ORE);
+        ORE_BLOCKS.add(Blocks.DEEPSLATE_IRON_ORE);
+        ORE_BLOCKS.add(Blocks.GOLD_ORE);
+        ORE_BLOCKS.add(Blocks.DEEPSLATE_GOLD_ORE);
+        ORE_BLOCKS.add(Blocks.LAPIS_ORE);
+        ORE_BLOCKS.add(Blocks.DEEPSLATE_LAPIS_ORE);
+        ORE_BLOCKS.add(Blocks.DIAMOND_ORE);
+        ORE_BLOCKS.add(Blocks.DEEPSLATE_DIAMOND_ORE);
+        ORE_BLOCKS.add(Blocks.REDSTONE_ORE);
+        ORE_BLOCKS.add(Blocks.DEEPSLATE_REDSTONE_ORE);
+        ORE_BLOCKS.add(Blocks.EMERALD_ORE);
+        ORE_BLOCKS.add(Blocks.DEEPSLATE_EMERALD_ORE);
     }
     private static final Set<Block> NETHER_ORE_BLOCKS = new HashSet<>();
     static {
-        ORE_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("nether_gold_ore")));
-        ORE_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("nether_quartz_ore")));
-        ORE_BLOCKS.add(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("gilded_blackstone")));
+        ORE_BLOCKS.add(Blocks.NETHER_GOLD_ORE);
+        ORE_BLOCKS.add(Blocks.NETHER_QUARTZ_ORE);
+        ORE_BLOCKS.add(Blocks.GILDED_BLACKSTONE);
     }
     public OnlinePlayerActivityDetector() {
         super(Trouser.baseHunting,"OnlinePlayerActivityDetector", "Detects if an online player is still nearby if there are blocks missing from a BlockState palette and your render distances are overlapping.");
@@ -244,7 +244,7 @@ public class OnlinePlayerActivityDetector extends Module {
                         int blockPaletteLength = blockStatePalette.getSize();
                         for (int i2 = 0; i2 < blockPaletteLength; i2++) {
                             BlockState blockPaletteEntry = blockStatePalette.valueFor(i2);
-                            if (i2 == 0 && i == 0 && blockPaletteEntry.getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) && mc.level.dimension() != Level.END){
+                            if (i2 == 0 && i == 0 && blockPaletteEntry.getBlock() == Blocks.AIR && mc.level.dimension() != Level.END){
                                 firstsectionappearsnew = true;
                                 break;
                             }

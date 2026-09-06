@@ -85,22 +85,22 @@ public class InfiniteElytra extends Module {
 
         if (currentPhaseTick < elytraOnTicks.get()) {
             glidingTime = true;
-            if (chestStack.getItem() != net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("elytra"))) {
+            if (chestStack.getItem() != Items.ELYTRA) {
                 for (int i = 0; i < mc.player.getInventory().getNonEquipmentItems().size(); i++) {
                     ItemStack stack = mc.player.getInventory().getNonEquipmentItems().get(i);
-                    if (stack.getItem() == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("elytra"))) {
+                    if (stack.getItem() == Items.ELYTRA) {
                         InvUtils.move().from(i).toArmor(2);
                         break;
                     }
                 }
             }
 
-            if (chestStack.getItem() == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("elytra")) && !mc.player.onGround() && !mc.player.isFallFlying()) {
+            if (chestStack.getItem() == Items.ELYTRA && !mc.player.onGround() && !mc.player.isFallFlying()) {
                 mc.player.connection.send(new ServerboundPlayerCommandPacket(mc.player, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
             }
         } else {
             glidingTime = false;
-            if (chestStack.getItem() == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("elytra"))) {
+            if (chestStack.getItem() == Items.ELYTRA) {
                 int emptySlot = -1;
                 for (int i = 0; i < 36; i++) {
                     if (mc.player.getInventory().getItem(i).isEmpty()) {
@@ -120,7 +120,7 @@ public class InfiniteElytra extends Module {
 
                 for (int i = 0; i < 9; i++) {
                     ItemStack stack = mc.player.getInventory().getItem(i);
-                    if (stack.getItem() == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("firework_rocket"))) {
+                    if (stack.getItem() == Items.FIREWORK_ROCKET) {
                         rocketSlot = i;
                         break;
                     }
@@ -146,7 +146,7 @@ public class InfiniteElytra extends Module {
 
         ItemStack stack = mc.player.getItemInHand(event.hand);
 
-        if (stack != null && stack.getItem() == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("firework_rocket"))) {
+        if (stack != null && stack.getItem() == Items.FIREWORK_ROCKET) {
             ticksSinceLastRocket = 0;
         }
     }

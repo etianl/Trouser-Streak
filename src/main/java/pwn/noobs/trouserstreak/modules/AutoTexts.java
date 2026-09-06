@@ -14,10 +14,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
@@ -183,7 +185,7 @@ public class AutoTexts extends Module {
     }
 
     private void spawnArmorStand() {
-        ItemStack armorStand = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("armor_stand")));
+        ItemStack armorStand = new ItemStack(Items.ARMOR_STAND);
         ItemStack current = mc.player.getMainHandItem();
         Vec3 pos = pickRandomPos();
         String selectedText = texts.get().get(random.nextInt(texts.get().size()));
@@ -235,7 +237,7 @@ public class AutoTexts extends Module {
             }
         }
 
-        return TypedEntityData.of(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("armor_stand")), entityTag);
+        return TypedEntityData.of(BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("armor_stand")), entityTag);
     }
     private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
         if (serverVersion == null) return false;

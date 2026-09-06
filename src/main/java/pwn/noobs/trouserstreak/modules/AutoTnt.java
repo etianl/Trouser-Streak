@@ -79,8 +79,8 @@ public class AutoTnt extends Module {
             BlockPos clicked = hit.getBlockPos();
             BlockPos offset  = clicked.relative(hit.getDirection());
 
-            boolean clickedIsTnt = mc.level.getBlockState(clicked).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("tnt")));
-            boolean offsetIsTnt  = mc.level.getBlockState(offset).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("tnt")));
+            boolean clickedIsTnt = mc.level.getBlockState(clicked).is(Blocks.TNT);
+            boolean offsetIsTnt  = mc.level.getBlockState(offset).is(Blocks.TNT);
 
             if (clickedIsTnt) candidatePositions.add(clicked);
             if (offsetIsTnt)  candidatePositions.add(offset);
@@ -90,7 +90,7 @@ public class AutoTnt extends Module {
             Iterator<BlockPos> it = candidatePositions.iterator();
             while (it.hasNext()) {
                 BlockPos pos = it.next();
-                if (mc.level.getBlockState(pos).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("tnt"))) {
+                if (mc.level.getBlockState(pos).getBlock() == Blocks.TNT) {
                     if (ignitionQueue.stream().anyMatch(task -> task.pos().equals(pos))) {
                         it.remove();
                         continue;
@@ -117,7 +117,7 @@ public class AutoTnt extends Module {
                 originalSlot = mc.player.getInventory().getSelectedSlot();
             }
 
-            flintSlot = InvUtils.findInHotbar(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("flint_and_steel"))).slot();
+            flintSlot = InvUtils.findInHotbar(Items.FLINT_AND_STEEL).slot();
             if (flintSlot == -1 || flintSlot == 40) {
                 error("No flint and steel found in hotbar!");
                 ignitePos = null;
@@ -167,7 +167,7 @@ public class AutoTnt extends Module {
 
         ignitionQueue.addAll(updated);
 
-        int flintSlot = InvUtils.findInHotbar(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("flint_and_steel"))).slot();
+        int flintSlot = InvUtils.findInHotbar(Items.FLINT_AND_STEEL).slot();
         if (flintSlot == -1 || flintSlot == 40) {
             error("No flint and steel found in hotbar!");
             readyList.clear();

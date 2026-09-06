@@ -12,9 +12,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
@@ -98,7 +100,7 @@ public class ExplosionAura extends Module {
             if (click.get()) {
                 ItemStack rst = mc.player.getMainHandItem();
                 BlockHitResult bhr = new BlockHitResult(mc.player.getEyePosition(), Direction.DOWN, BlockPos.containing(mc.player.getEyePosition()), false);
-                ItemStack Creeper = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("creeper_spawn_egg")));
+                ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
                 var changes = DataComponentPatch.builder()
                         .set(DataComponents.ENTITY_DATA, createEntityData(true))
                         .build();
@@ -120,7 +122,7 @@ public class ExplosionAura extends Module {
                     } else if (aticks>atickdelay.get()) {
                         ItemStack rst = mc.player.getMainHandItem();
                         BlockHitResult bhr = new BlockHitResult(mc.player.getEyePosition(), Direction.DOWN, BlockPos.containing(mc.player.getEyePosition()), false);
-                        ItemStack Creeper = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("creeper_spawn_egg")));
+                        ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
                         var changes = DataComponentPatch.builder()
                                 .set(DataComponents.ENTITY_DATA, createEntityData(true))
                                 .build();
@@ -139,7 +141,7 @@ public class ExplosionAura extends Module {
                 } else if (ticks>tickdelay.get()){
                     ItemStack rst = mc.player.getMainHandItem();
                     BlockHitResult bhr = new BlockHitResult(mc.player.position(), Direction.DOWN, BlockPos.containing(mc.player.position()), false);
-                    ItemStack Creeper = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("creeper_spawn_egg")));
+                    ItemStack Creeper = new ItemStack(Items.CREEPER_SPAWN_EGG);
                     var changes = DataComponentPatch.builder()
                             .set(DataComponents.ENTITY_DATA, createEntityData(false))
                             .build();
@@ -174,6 +176,6 @@ public class ExplosionAura extends Module {
         entityTag.putInt("Fuse", 0);
         entityTag.putBoolean("NoGravity", true);
         entityTag.putInt("ExplosionRadius", click ? cpower.get() : power.get());
-        return TypedEntityData.of(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("creeper")), entityTag);
+        return TypedEntityData.of(BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("creeper")), entityTag);
     }
 }

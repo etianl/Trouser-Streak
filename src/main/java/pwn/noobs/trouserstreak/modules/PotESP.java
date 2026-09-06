@@ -100,16 +100,16 @@ public class PotESP extends Module {
     private final Set<BlockPos> potLocations = Collections.synchronizedSet(new HashSet<>());
     private static final Set<Item> naturalPot = new HashSet<>();
     static {
-        naturalPot.add(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")));
-        naturalPot.add(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("string")));
-        naturalPot.add(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("emerald")));
-        naturalPot.add(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("emerald_block")));
-        naturalPot.add(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("raw_iron_block")));
-        naturalPot.add(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("iron_ingot")));
-        naturalPot.add(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("trial_key")));
-        naturalPot.add(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("diamond")));
-        naturalPot.add(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("diamond_block")));
-        naturalPot.add(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("music_disc_creator_music_box")));
+        naturalPot.add(Items.AIR);
+        naturalPot.add(Items.STRING);
+        naturalPot.add(Items.EMERALD);
+        naturalPot.add(Items.EMERALD_BLOCK);
+        naturalPot.add(Items.RAW_IRON_BLOCK);
+        naturalPot.add(Items.IRON_INGOT);
+        naturalPot.add(Items.TRIAL_KEY);
+        naturalPot.add(Items.DIAMOND);
+        naturalPot.add(Items.DIAMOND_BLOCK);
+        naturalPot.add(Items.MUSIC_DISC_CREATOR_MUSIC_BOX);
     }
     private int closestPotX=2000000000;
     private int closestPotY=2000000000;

@@ -12,6 +12,8 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -116,7 +118,7 @@ public class LavaAura extends Module {
     private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Entities to Lava.")
-            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("player")), net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("villager")))
+            .defaultValue(BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("player")), BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("villager")))
             .build()
     );
     public final Setting<Boolean> trollfriends = sgGeneral.add(new BoolSetting.Builder()
@@ -236,7 +238,7 @@ public class LavaAura extends Module {
     private final Setting<List<Block>> skippableBlox = sgBurnEverything.add(new BlockListSetting.Builder()
             .name("Blocks to Skip")
             .description("Skips burning these blocks.")
-            .defaultValue(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("short_grass")), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("tall_grass")))
+            .defaultValue(Blocks.SHORT_GRASS, Blocks.TALL_GRASS)
             .visible(lavaeverything::get)
             .build()
     );
@@ -302,7 +304,7 @@ public class LavaAura extends Module {
                             if (distance <= range.get() && distance > noburnrange.get()) {
                                 BlockPos targetBlockPos = BlockPos.containing(targetPos);
 
-                                if (mc.level.getBlockState(targetBlockPos).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("water")) && mc.level.getBlockState(targetBlockPos).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))) {
+                                if (mc.level.getBlockState(targetBlockPos).getBlock() != Blocks.WATER && mc.level.getBlockState(targetBlockPos).getBlock() != Blocks.LAVA) {
                                     Block blockBelow = mc.level.getBlockState(targetBlockPos.below()).getBlock();
                                     if (mode.get() == Mode.LAVA) {
                                         if (nolavaburning.get() && !entity.isOnFire() && placementTicks >= placelavatickdelay.get()){
@@ -431,12 +433,12 @@ public class LavaAura extends Module {
                                             blockBelow instanceof TntBlock ||
                                             blockBelow instanceof TrapDoorBlock ||
                                             blockBelow instanceof WallHangingSignBlock) &&
-                                    mc.level.getBlockState(targetBlockPos).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("water")) &&
-                                    mc.level.getBlockState(targetBlockPos).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")) &&
+                                    mc.level.getBlockState(targetBlockPos).getBlock() != Blocks.WATER &&
+                                    mc.level.getBlockState(targetBlockPos).getBlock() != Blocks.LAVA &&
                                     !blockHasOnUseMethod(mc.level.getBlockState(targetBlockPos).getBlock())) ||
                                     (mc.player.isShiftKeyDown() &&
-                                            mc.level.getBlockState(targetBlockPos).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("water")) &&
-                                            mc.level.getBlockState(targetBlockPos).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava")))) {
+                                            mc.level.getBlockState(targetBlockPos).getBlock() != Blocks.WATER &&
+                                            mc.level.getBlockState(targetBlockPos).getBlock() != Blocks.LAVA)) {
                                 if (placementTicks >= placefiretickdelay.get()){
                                     if (!norotate.get())
                                         mc.player.lookAt(EntityAnchorArgument.Anchor.EYES, targetPos);
@@ -462,7 +464,7 @@ public class LavaAura extends Module {
                         BlockPos blockPos = playerPos.offset(x, y, z);
                         double distance = mc.player.position().distanceTo(Vec3.atCenterOf(blockPos));
                         if (distance <= range.get() && distance > noburnrange.get()) {
-                            if (mc.level.getBlockState(blockPos).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("air")) && mc.level.getBlockState(blockPos).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("water")) && mc.level.getBlockState(blockPos).getBlock() != net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava"))) {
+                            if (mc.level.getBlockState(blockPos).getBlock() != Blocks.AIR && mc.level.getBlockState(blockPos).getBlock() != Blocks.WATER && mc.level.getBlockState(blockPos).getBlock() != Blocks.LAVA) {
 
                                 if (burnflammableonly.get() && !mc.level.getBlockState(blockPos).ignitedByLava()) continue;
                                 if (ignorebelowplayer.get() && blockPos.getY()<mc.player.getBlockY()+3) continue;
@@ -571,7 +573,7 @@ public class LavaAura extends Module {
         }
     }
     private void placeLava() {
-        FindItemResult findItemResult = InvUtils.findInHotbar(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("lava_bucket")));
+        FindItemResult findItemResult = InvUtils.findInHotbar(Items.LAVA_BUCKET);
         if (!findItemResult.found()) {
             return;
         }
@@ -581,9 +583,9 @@ public class LavaAura extends Module {
         mc.player.getInventory().setSelectedSlot(prevSlot);
     }
     private void placeFire(BlockPos targetBlockPos) {
-        FindItemResult findItemResult = InvUtils.findInHotbar(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("flint_and_steel")));;
+        FindItemResult findItemResult = InvUtils.findInHotbar(Items.FLINT_AND_STEEL);;
         if (fireMode.get() == FireMode.FIRE_CHARGE) {
-            findItemResult = InvUtils.findInHotbar(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("fire_charge")));
+            findItemResult = InvUtils.findInHotbar(Items.FIRE_CHARGE);
         }
 
         if (!findItemResult.found() || mc.player == null || mc.gameMode == null) {
@@ -640,7 +642,7 @@ public class LavaAura extends Module {
                     BlockState blockState = mc.level.getBlockState(blockPos);
                     double distance = mc.player.position().distanceTo(Vec3.atCenterOf(blockPos));
                     if (distance <= range.get()) {
-                        if (blockState.getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("fire"))) {
+                        if (blockState.getBlock() == Blocks.FIRE) {
                             if (!ignorewalls.get()){
                                 // Perform a raycast to check for obstructions
                                 BlockHitResult blockHitResult = mc.level.clip(new ClipContext(
@@ -666,7 +668,7 @@ public class LavaAura extends Module {
         }
     }
     private void pickupLiquid() {
-        FindItemResult findItemResult = InvUtils.findInHotbar(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("bucket")));
+        FindItemResult findItemResult = InvUtils.findInHotbar(Items.BUCKET);
         if (!findItemResult.found() || mc.player == null || mc.gameMode == null) {
             return;
         }

@@ -1,28 +1,81 @@
 package pwn.noobs.trouserstreak.modules;
 
+import meteordevelopment.meteorclient.events.meteor.KeyInputEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
+import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import pwn.noobs.trouserstreak.Trouser;
 
+import java.util.List;
+
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_ALT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT_ALT;
 
 public class RemoteEnderChest extends Module {
     private final SettingGroup sgGeneral = settings.createGroup("RemoteEnderChest");
+    private final SettingGroup sgItemSaver = settings.createGroup("ItemSaver");
 
     private final Setting<Keybind> toggleGui = sgGeneral.add(new KeybindSetting(
             "GUI Key (Press it)",
             "Key to toggle Ender Chest GUI.",
             Keybind.fromKey(GLFW_KEY_LEFT_ALT),
+            value -> {},
+            value -> {},
+            null,
+            () -> {}
+    ));
+    private final Setting<Boolean> invKeyBlocker = sgGeneral.add(new BoolSetting.Builder()
+            .name("inventory-key-modifier")
+            .description("Make the Inventory Key open the EnderChest GUI when you have one saved. This helps to prevent you accidentally breaking the link.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Boolean> enableItemSaver = sgItemSaver.add(new BoolSetting.Builder()
+            .name("enable-item-saver")
+            .description("Automatically moves items in your inventory into the linked Ender Chest when low health.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Double> healthThreshold = sgItemSaver.add(new DoubleSetting.Builder()
+            .name("health-threshold")
+            .description("Move the items to the open Ender Chest when health is equal to or less than this value (2.0 = 1 heart).")
+            .defaultValue(4.0)
+            .min(0.0)
+            .max(20.0)
+            .sliderRange(0.0, 20.0)
+            .visible(enableItemSaver::get)
+            .build()
+    );
+    private final Setting<List<Item>> items = sgItemSaver.add(new ItemListSetting.Builder()
+            .name("Items to save")
+            .description("These items will be stored.")
+            .visible(enableItemSaver::get)
+            .build()
+    );
+    private final Setting<Boolean> keepInv = sgItemSaver.add(new BoolSetting.Builder()
+            .name("keep-inventory")
+            .description("Try to save the whole inventory. The Items to save list will be prioritized.")
+            .defaultValue(true)
+            .visible(enableItemSaver::get)
+            .build()
+    );
+    private final Setting<Keybind> itemSaverHotkey = sgItemSaver.add(new KeybindSetting(
+            "Item Saver HotKey",
+            "You can quickly store items when pressing this button.",
+            Keybind.fromKey(GLFW_KEY_RIGHT_ALT),
             value -> {},
             value -> {},
             null,
@@ -46,15 +99,42 @@ public class RemoteEnderChest extends Module {
     }
 
     @EventHandler
+    private void onKey(KeyInputEvent event) {
+        if (savedScreen == null) return;
+        if (event.action != KeyAction.Press) return;
+
+        int inventoryKeyCode = mc.options.keyInventory.getDefaultKey().getValue();
+
+        if (!guiHidden) {
+            if (event.key() == inventoryKeyCode) {
+                event.cancel();
+                mc.gui.setScreen(null);
+                guiHidden = true;
+                return;
+            }
+        }
+
+        if (guiHidden && invKeyBlocker.get()) {
+            if (event.key() == inventoryKeyCode) {
+                event.cancel();
+                mc.gui.setScreen(savedScreen);
+                guiHidden = false;
+            }
+        }
+    }
+
+    @EventHandler
     private void onPreTick(TickEvent.Pre event) {
+        if (mc.player == null || mc.level == null) return;
+
         if (mc.hitResult instanceof BlockHitResult bhr) {
             potentialEChestPos = bhr.getBlockPos();
-            if (mc.level.getBlockState(bhr.getBlockPos()).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("ender_chest"))
+            if (mc.level.getBlockState(bhr.getBlockPos()).getBlock() == Blocks.ENDER_CHEST
                     && mc.options.keyUse.isDown() && !isEnderChestScreen(potentialEChestPos) && !guiHidden) {
                 mc.startUseItem();
                 mc.startUseItem();
             }
-        }
+        } else potentialEChestPos = null;
 
         if (isEnderChestScreen(potentialEChestPos) && savedScreen == null && !guiWasOpen && !guiHidden) {
             savedScreen = (ContainerScreen) mc.gui.screen();
@@ -80,36 +160,82 @@ public class RemoteEnderChest extends Module {
             }
         }
 
-        if (savedScreen != null && mc.gui.screen() == null && !guiHidden && guiWasOpen) {
-            resetStuff();
-            if (chatFeedback) error("Ender Chest GUI closed. EChest link broken.");
-            return;
-        }
-
-        if (savedScreen != null && savedSyncId != -1) {
-            boolean handlerValid = mc.player.containerMenu != null &&
-                    mc.player.containerMenu.containerId == savedSyncId;
-            if (!handlerValid) {
+        if (savedScreen != null){
+            if (mc.gui.screen() == null && !guiHidden && guiWasOpen) {
                 resetStuff();
-                if (chatFeedback) error("Ender chest handler invalid. EChest link broken.");
+                if (chatFeedback) error("Ender Chest GUI closed. EChest link broken.");
                 return;
             }
-        }
 
-        if (savedScreen != null && mc.level != lastWorld) {
-            resetStuff();
-            lastWorld = mc.level;
-            if (chatFeedback) error("World changed. EChest link broken.");
-            return;
+            if (savedSyncId != -1) {
+                boolean handlerValid = mc.player.containerMenu != null &&
+                        mc.player.containerMenu.containerId == savedSyncId;
+                if (!handlerValid) {
+                    resetStuff();
+                    if (chatFeedback) error("Ender chest handler invalid. EChest link broken.");
+                    return;
+                }
+            }
+
+            if (mc.level != lastWorld) {
+                resetStuff();
+                lastWorld = mc.level;
+                if (chatFeedback) error("World changed. EChest link broken.");
+                return;
+            }
+
+            checkAndSaveItems();
         }
 
         lastWorld = mc.level;
     }
 
+    private void checkAndSaveItems() {
+        if (!enableItemSaver.get()) return;
+
+        boolean triggerAuto = mc.player.getHealth() <= healthThreshold.get();
+        boolean triggerManual = itemSaverHotkey.get().isPressed();
+
+        if (!triggerAuto && !triggerManual) return;
+
+        if (!(mc.player.containerMenu instanceof ChestMenu handler)) return;
+        if (handler.containerId != savedSyncId) return;
+
+        List<Item> targetItems = items.get();
+        if (targetItems.isEmpty()) return;
+
+        int containerSlots = handler.getRowCount() * 9;
+        boolean movedAny = false;
+
+        for (int i = containerSlots; i < handler.slots.size(); i++) {
+            var stack = handler.slots.get(i).getItem();
+            if (stack == null || stack.isEmpty()) continue;
+
+            if (targetItems.contains(stack.getItem())) {
+                mc.gameMode.handleContainerInput(handler.containerId, i, 0, ContainerInput.QUICK_MOVE, mc.player);
+                movedAny = true;
+            }
+        }
+        if (keepInv.get()){
+            for (int i = containerSlots; i < handler.slots.size(); i++) {
+                var stack = handler.slots.get(i).getItem();
+                if (stack == null || stack.isEmpty()) continue;
+
+                mc.gameMode.handleContainerInput(handler.containerId, i, 0, ContainerInput.QUICK_MOVE, mc.player);
+                movedAny = true;
+            }
+        }
+
+        if (movedAny) {
+            if (chatFeedback) warning("Items saved into Ender Chest!");
+        }
+    }
+
     private boolean isEnderChestScreen(BlockPos echest) {
+        if (echest == null || mc.level == null) return false;
         return mc.gui.screen() instanceof ContainerScreen screen &&
                 screen.getMenu().getType() == MenuType.GENERIC_9x3 &&
-                mc.level.getBlockState(echest).getBlock() == net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("ender_chest"));
+                mc.level.getBlockState(echest).getBlock() == Blocks.ENDER_CHEST;
     }
 
     private void resetStuff() {
