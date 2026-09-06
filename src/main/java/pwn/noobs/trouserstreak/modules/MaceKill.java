@@ -118,11 +118,7 @@ public class MaceKill extends Module {
         if (packetDisable.get() && (targetEntity.isBlocking() || targetEntity.isInvulnerable() || targetEntity.isInCreativeMode())) return;
         if (!targetEntity.isAlive()) return;
 
-        int baseBlocks = getMaxHeightAbovePlayer();
-        if (baseBlocks == 0) {
-            error("No valid space above you to attack from.");
-            return;
-        }
+        int baseBlocks = fallHeight.get();
 
         event.cancel();
 
@@ -138,11 +134,6 @@ public class MaceKill extends Module {
             boolean targetposvalid = true;
             for (int i = 0; i < attackCount; i++) {
                 int blocks = (i == 0) ? baseBlocks : currentHeight;
-
-                if (mc.world == null || mc.player.getY() + blocks > mc.world.getTopYInclusive() - 1) {
-                    targetposvalid = false;
-                    continue;
-                }
 
                 Vec3d targetPos = new Vec3d(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ());
 
@@ -215,9 +206,6 @@ public class MaceKill extends Module {
     private boolean invalid(Vec3d pos) {
         if (mc.world == null) return true;
 
-        double clampedY = MathHelper.clamp(pos.y, mc.world.getBottomY(), mc.world.getTopYInclusive() - 1);
-        if (clampedY != pos.y) return true;
-
         BlockPos floored = BlockPos.ofFloored(pos);
         int chunkX = floored.getX() >> 4;
         int chunkZ = floored.getZ() >> 4;
@@ -257,11 +245,5 @@ public class MaceKill extends Module {
         boolean collides = mc.world.getBlockCollisions(entity, box).iterator().hasNext();
         positionCache.put(pos, collides);
         return collides;
-    }
-    private int getMaxHeightAbovePlayer() {
-        if (mc.world == null) return 0;
-        int worldTop = mc.world.getTopYInclusive() - 1;
-        int maxBlocks = (int)(worldTop - mc.player.getY());
-        return Math.min(fallHeight.get(), maxBlocks);
     }
 }

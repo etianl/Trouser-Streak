@@ -1,5 +1,5 @@
 /*
- *  This file is part of the Meteor Tweaks distribution (https://github.com/Declipsonator/Meteor-Tweaks/).
+ *  This file was part of the Meteor Tweaks distribution (https://github.com/Declipsonator/Meteor-Tweaks/).
  *  Copyright (c) 2022 Meteor Tweaks.
  *  Licensed Under the GNU Lesser General Public License v3.0
  */
@@ -46,6 +46,7 @@ public class BetterAutoSign extends Module {
     final SettingGroup sgSignAura = settings.createGroup("Sign Aura");
     final SettingGroup sgExtra = settings.createGroup("Visible");
     private final SettingGroup sgPlace = settings.createGroup("Auto Place");
+
     private final Setting<Boolean> autoPlace = sgPlace.add(new BoolSetting.Builder()
             .name("auto-place")
             .description("Places a sign on the last block you placed or interacted with.")
@@ -82,109 +83,92 @@ public class BetterAutoSign extends Module {
     );
     private final Setting<String> lineOne = sgSign.add(new StringSetting.Builder()
             .name("line-one")
-            .description("What to put on the first line of the sign.")
             .defaultValue("Steve")
             .build()
     );
     private final Setting<String> lineTwo = sgSign.add(new StringSetting.Builder()
             .name("line-two")
-            .description("What to put on the second line of the sign.")
             .defaultValue("did")
             .build()
     );
     private final Setting<String> lineThree = sgSign.add(new StringSetting.Builder()
             .name("line-three")
-            .description("What to put on the third line of the sign.")
             .defaultValue("nothing")
             .build()
     );
     private final Setting<String> lineFour = sgSign.add(new StringSetting.Builder()
             .name("line-four")
-            .description("What to put on the fourth line of the sign.")
             .defaultValue("wrong.")
             .build()
     );
     private final Setting<String> lineOnedif = sgSign.add(new StringSetting.Builder()
             .name("rear-line-one")
-            .description("What to put on the first line of the sign.")
             .defaultValue("WATCH")
             .visible(differentText::get)
             .build()
     );
     private final Setting<String> lineTwodif = sgSign.add(new StringSetting.Builder()
             .name("rear-line-two")
-            .description("What to put on the second line of the sign.")
             .defaultValue("MOUNTAINS")
             .visible(differentText::get)
             .build()
     );
     private final Setting<String> lineThreedif = sgSign.add(new StringSetting.Builder()
             .name("rear-line-three")
-            .description("What to put on the third line of the sign.")
             .defaultValue("OF LAVA INC")
             .visible(differentText::get)
             .build()
     );
     private final Setting<String> lineFourdif = sgSign.add(new StringSetting.Builder()
             .name("rear-line-four")
-            .description("What to put on the fourth line of the sign.")
             .defaultValue("ON YOUTUBE")
             .visible(differentText::get)
             .build()
     );
     private final Setting<String> HlineOne = sgHang.add(new StringSetting.Builder()
             .name("line-one")
-            .description("What to put on the first line of the hanging sign.")
             .defaultValue("Steve")
             .build()
     );
     private final Setting<String> HlineTwo = sgHang.add(new StringSetting.Builder()
             .name("line-two")
-            .description("What to put on the second line of the hanging sign.")
             .defaultValue("did")
             .build()
     );
     private final Setting<String> HlineThree = sgHang.add(new StringSetting.Builder()
             .name("line-three")
-            .description("What to put on the third line of the hanging sign.")
             .defaultValue("nothing")
             .build()
     );
     private final Setting<String> HlineFour = sgHang.add(new StringSetting.Builder()
             .name("line-four")
-            .description("What to put on the fourth line of the hanging sign.")
             .defaultValue("wrong.")
             .build()
     );
     private final Setting<String> HlineOnedif = sgHang.add(new StringSetting.Builder()
             .name("rear-line-one")
-            .description("What to put on the first line of the hanging sign.")
             .defaultValue("WATCH")
             .visible(differentText::get)
             .build()
     );
     private final Setting<String> HlineTwodif = sgHang.add(new StringSetting.Builder()
             .name("rear-line-two")
-            .description("What to put on the second line of the hanging sign.")
             .defaultValue("MOUNTAINS")
             .visible(differentText::get)
             .build()
     );
     private final Setting<String> HlineThreedif = sgHang.add(new StringSetting.Builder()
             .name("rear-line-three")
-            .description("What to put on the third line of the hanging sign.")
             .defaultValue("OF LAVA INC")
             .visible(differentText::get)
             .build()
     );
     private final Setting<String> HlineFourdif = sgHang.add(new StringSetting.Builder()
             .name("rear-line-four")
-            .description("What to put on the fourth line of the hanging sign.")
             .defaultValue("ON YOUTUBE")
             .visible(differentText::get)
             .build()
     );
-    // based on ChestAura from Meteor Rejects
     private final Setting<Boolean> signAura = sgSignAura.add(new BoolSetting.Builder()
             .name("sign-aura")
             .description("Automatically edits signs for you")
@@ -201,7 +185,7 @@ public class BetterAutoSign extends Module {
     private final Setting<Double> signAuraRange = sgSignAura.add(new DoubleSetting.Builder()
             .name("sign-aura-range")
             .description("The interact range")
-            .defaultValue(4)
+            .defaultValue(4.0)
             .min(0)
             .max(6)
             .sliderRange(0,6)
@@ -236,61 +220,88 @@ public class BetterAutoSign extends Module {
             .build()
     );
 
-    private boolean editrear = false;
-    private BlockPos signPos = new BlockPos(99999999,99999999,99999999);
-    private BlockPos prevsignPos = new BlockPos(99999999,99999999,99999999);
+    private BlockPos editRearPos = null;
     private final ArrayList<BlockPos> openedSigns = new ArrayList<>();
     private int timer = 0;
-    private int warningticks = 0;
+    private Boolean warned = false;
     private BlockPos lastPlacedBlock = null;
+    private Direction lastPlacedSide = Direction.UP;
     private int placeTimer = 0;
     private boolean interactingsign = false;
+
     public BetterAutoSign() {
-        super(Trouser.Main, "Better-auto-sign", "Automatically writes signs and can dye them as well. Credits to MeteorTweaks.");
+        super(Trouser.Main, "Better-auto-sign", "Automatically writes signs and can dye them as well. Credits to MeteorTweaks for the original!");
     }
 
     @Override
     public void onActivate() {
-        lastPlacedBlock = null;
-        interactingsign = false;
-        placeTimer = 0;
-        warningticks = 0;
-        timer = 0;
-        openedSigns.clear();
-        editrear=false;
+        resetState();
     }
+
     @Override
     public void onDeactivate() {
+        resetState();
+    }
+
+    private void resetState() {
         lastPlacedBlock = null;
+        lastPlacedSide = Direction.UP;
         interactingsign = false;
         placeTimer = 0;
-        warningticks = 0;
+        warned = false;
         timer = 0;
         openedSigns.clear();
-        editrear=false;
+        editRearPos = null;
     }
-    private void placeSign(BlockPos targetPos) {
+
+    private void placeSign(BlockPos targetPos, Direction lastHitSide) {
         if (mc.player == null || mc.interactionManager == null) return;
 
         FindItemResult signSlot = InvUtils.findInHotbar(itemStack ->
-                itemStack.getItem() instanceof SignItem && !signTypes.get().contains(itemStack.getItem()));
-        if (signSlot.slot() == -1 || signSlot.slot() == 40) signSlot = InvUtils.findInHotbar(itemStack ->
-                itemStack.getItem() instanceof HangingSignItem && !signTypes.get().contains(itemStack.getItem()));
-        if (signSlot.slot() == -1 || signSlot.slot() == 40) {
+                itemStack.getItem() instanceof SignItem && !(itemStack.getItem() instanceof HangingSignItem) && !signTypes.get().contains(itemStack.getItem()));
+
+        if (!signSlot.found()) {
+            signSlot = InvUtils.findInHotbar(itemStack ->
+                    itemStack.getItem() instanceof HangingSignItem && !signTypes.get().contains(itemStack.getItem()));
+        }
+
+        if (!signSlot.found()) {
             info("No sign in hotbar!");
             return;
         }
 
-        int oldSlot = mc.player.getInventory().selectedSlot;
+        Item itemInSlot = mc.player.getInventory().getStack(signSlot.slot()).getItem();
+        boolean isHangingItem = itemInSlot instanceof HangingSignItem;
 
+        Direction sideToClick;
+        BlockPos placeOnPos;
+
+        if (isHangingItem) {
+            placeOnPos = targetPos;
+            if (lastHitSide == Direction.UP) {
+                sideToClick = Direction.DOWN;
+            } else {
+                sideToClick = lastHitSide;
+            }
+        } else {
+            placeOnPos = targetPos.up();
+            sideToClick = Direction.UP;
+        }
+
+        int oldSlot = mc.player.getInventory().selectedSlot;
         InvUtils.swap(signSlot.slot(), true);
 
-        Vec3d hitVec = Vec3d.ofCenter(targetPos).add(0, 1, 0);
-        BlockHitResult hitResult = new BlockHitResult(hitVec, Direction.UP, targetPos, false);
+        Vec3d hitVec = isHangingItem
+                ? Vec3d.ofCenter(placeOnPos).add(
+                sideToClick.getOffsetX() * 0.5,
+                sideToClick.getOffsetY() * 0.5,
+                sideToClick.getOffsetZ() * 0.5)
+                : Vec3d.ofCenter(placeOnPos).add(0, 1, 0);
+
+        BlockHitResult hitResult = new BlockHitResult(hitVec, sideToClick, placeOnPos, false);
 
         interactingsign = true;
-        mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(
-                Hand.MAIN_HAND, hitResult, 0));
+        mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, hitResult, 0));
         interactingsign = false;
 
         InvUtils.swap(oldSlot, true);
@@ -302,9 +313,9 @@ public class BetterAutoSign extends Module {
 
         if (event.packet instanceof PlayerInteractBlockC2SPacket packet) {
             BlockHitResult hit = packet.getBlockHitResult();
-
             if (hit.getType() == BlockHitResult.Type.BLOCK) {
-                lastPlacedBlock = hit.getBlockPos().up();
+                lastPlacedBlock = hit.getBlockPos();
+                lastPlacedSide = hit.getSide();
                 placeTimer = placeDelay.get();
             }
         }
@@ -313,32 +324,32 @@ public class BetterAutoSign extends Module {
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         if (mc.player == null) return;
-        if (signAura.get() && mc.player.getMainHandStack().getItem() instanceof HangingSignItem && warningticks<=3){
-            warningticks++;
-            if (warningticks==2)error("Sign Aura does not work properly with hanging signs when holding a hanging sign.");
-        }
+        if (signAura.get() && mc.player.getMainHandStack().getItem() instanceof HangingSignItem && !warned) {
+            error("Sign Aura does not work properly with hanging signs when holding a hanging sign.");
+            warned = true;
+        } else if (!(mc.player.getMainHandStack().getItem() instanceof HangingSignItem)) warned = false;
 
         if (autoPlace.get()) {
             placeTimer--;
             if (placeTimer <= 0 && lastPlacedBlock != null) {
-                placeSign(lastPlacedBlock);
+                placeSign(lastPlacedBlock, lastPlacedSide);
                 lastPlacedBlock = null;
                 placeTimer = placeDelay.get();
             }
         }
 
         timer--;
-        if(!signAura.get() || timer > 0) return;
+        if (!signAura.get() || timer > 0) return;
 
-        for(BlockEntity block : Utils.blockEntities()) {
-            if(!(block instanceof SignBlockEntity) || mc.player.getEyePos().distanceTo(Vec3d.ofCenter(block.getPos())) >= signAuraRange.get()) continue;
+        for (BlockEntity block : Utils.blockEntities()) {
+            if (!(block instanceof SignBlockEntity) || mc.player.getEyePos().distanceTo(Vec3d.ofCenter(block.getPos())) >= signAuraRange.get()) continue;
 
             BlockPos pos = block.getPos();
-            if(openedSigns.contains(pos)) continue;
+            if (openedSigns.contains(pos)) continue;
 
             interactingsign = true;
             Runnable click = () -> mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(pos.getX(), pos.getY(), pos.getZ()), Direction.UP, pos, false));
-            if(signAuraRotate.get()) Rotations.rotate(Rotations.getYaw(pos), Rotations.getPitch(pos), click);
+            if (signAuraRotate.get()) Rotations.rotate(Rotations.getYaw(pos), Rotations.getPitch(pos), click);
             else click.run();
             interactingsign = false;
 
@@ -350,42 +361,65 @@ public class BetterAutoSign extends Module {
 
     @EventHandler
     private void onOpenScreen(OpenScreenEvent event) {
-        if(!(event.screen instanceof SignEditScreen) && !(event.screen instanceof HangingSignEditScreen)) return;
+        if (!(event.screen instanceof SignEditScreen) && !(event.screen instanceof HangingSignEditScreen)) return;
 
         SignBlockEntity sign = ((AbstractSignEditScreenAccessor) event.screen).getSign();
-        if (!(mc.world.getBlockState(sign.getPos()).getBlock().asItem() instanceof HangingSignItem) && mc.world.getBlockState(sign.getPos()).getBlock().asItem() instanceof SignItem){
-            mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(),true,
-                    MeteorStarscript.run(MeteorStarscript.compile(lineOne.get())),
-                    MeteorStarscript.run(MeteorStarscript.compile(lineTwo.get())),
-                    MeteorStarscript.run(MeteorStarscript.compile(lineThree.get())),
-                    MeteorStarscript.run(MeteorStarscript.compile(lineFour.get()))
+        BlockPos pos = sign.getPos();
+        boolean isHanging = mc.world.getBlockState(pos).getBlock().asItem() instanceof HangingSignItem;
+
+        boolean isFront = (editRearPos == null || !editRearPos.equals(pos));
+
+        if (isFront) {
+            mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(pos, true,
+                    MeteorStarscript.run(MeteorStarscript.compile(isHanging ? HlineOne.get() : lineOne.get())),
+                    MeteorStarscript.run(MeteorStarscript.compile(isHanging ? HlineTwo.get() : lineTwo.get())),
+                    MeteorStarscript.run(MeteorStarscript.compile(isHanging ? HlineThree.get() : lineThree.get())),
+                    MeteorStarscript.run(MeteorStarscript.compile(isHanging ? HlineFour.get() : lineFour.get()))
             ));
-            if (bothside.get()){
-                editrear = true;
-                if (prevsignPos != sign.getPos())signPos = sign.getPos();
+
+            if (bothside.get()) {
+                editRearPos = pos;
+
+                BlockState state = mc.world.getBlockState(pos);
+                Direction interactSide = Direction.DOWN;
+
+                if (state.getBlock() instanceof WallHangingSignBlock) {
+                    interactSide = state.get(WallHangingSignBlock.FACING).getOpposite();
+                } else if (state.getBlock() instanceof HangingSignBlock) {
+                    int rotation = state.get(HangingSignBlock.ROTATION);
+                    interactSide = Direction.fromHorizontalDegrees(rotation).getOpposite();
+                }
+
+                interactingsign = true;
+                mc.interactionManager.interactBlock(
+                        mc.player,
+                        Hand.MAIN_HAND,
+                        new BlockHitResult(new Vec3d(pos.getX(), pos.getY(), pos.getZ()), interactSide, pos, false)
+                );
+                interactingsign = false;
             }
-        } else if (mc.world.getBlockState(sign.getPos()).getBlock().asItem() instanceof HangingSignItem){
-            mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(),true,
-                    MeteorStarscript.run(MeteorStarscript.compile(HlineOne.get())),
-                    MeteorStarscript.run(MeteorStarscript.compile(HlineTwo.get())),
-                    MeteorStarscript.run(MeteorStarscript.compile(HlineThree.get())),
-                    MeteorStarscript.run(MeteorStarscript.compile(HlineFour.get()))
+        } else {
+            boolean diff = differentText.get();
+            mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(pos, false,
+                    MeteorStarscript.run(MeteorStarscript.compile(isHanging ? (diff ? HlineOnedif.get() : HlineOne.get()) : (diff ? lineOnedif.get() : lineOne.get()))),
+                    MeteorStarscript.run(MeteorStarscript.compile(isHanging ? (diff ? HlineTwodif.get() : HlineTwo.get()) : (diff ? lineTwodif.get() : lineTwo.get()))),
+                    MeteorStarscript.run(MeteorStarscript.compile(isHanging ? (diff ? HlineThreedif.get() : HlineThree.get()) : (diff ? lineThreedif.get() : lineThree.get()))),
+                    MeteorStarscript.run(MeteorStarscript.compile(isHanging ? (diff ? HlineFourdif.get() : HlineFour.get()) : (diff ? lineFourdif.get() : lineFour.get())))
             ));
-            if (bothside.get()){
-                editrear = true;
-                if (prevsignPos != sign.getPos())signPos = sign.getPos();
-            }
+
+            editRearPos = null;
         }
 
         event.cancel();
 
-        BlockHitResult thesign = new BlockHitResult (
-                new Vec3d(sign.getPos().getX(), sign.getPos().getY(), sign.getPos().getZ()),
+        BlockHitResult signHitResult = new BlockHitResult(
+                new Vec3d(pos.getX(), pos.getY(), pos.getZ()),
                 Direction.UP,
-                sign.getPos(),
+                pos,
                 true
         );
-        if(autoDye.get()) {
+
+        if (autoDye.get()) {
             int slot = -1;
             for (int i = 0; i < 36; i++) {
                 if (dyeColors.get().contains(mc.player.getInventory().getStack(i).getItem())) {
@@ -393,19 +427,17 @@ public class BetterAutoSign extends Module {
                     break;
                 }
             }
-
             if (slot == -1 && dyeColors.get().contains(mc.player.getOffHandStack().getItem())) slot = 45;
             if (slot != -1) {
                 InvUtils.move().from(slot).to(mc.player.getInventory().selectedSlot);
-
                 interactingsign = true;
-                mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, thesign, 1));
+                mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, signHitResult, 1));
                 interactingsign = false;
-
                 InvUtils.move().from(mc.player.getInventory().selectedSlot).toHotbar(slot);
             }
         }
-        if(autoGlow.get()) {
+
+        if (autoGlow.get()) {
             int slot = -1;
             for (int i = 0; i < 36; i++) {
                 if (mc.player.getInventory().getStack(i).getItem() == Items.GLOW_INK_SAC) {
@@ -413,75 +445,17 @@ public class BetterAutoSign extends Module {
                     break;
                 }
             }
-
             if (slot == -1 && mc.player.getOffHandStack().getItem() == Items.GLOW_INK_SAC) slot = 45;
             if (slot != -1) {
                 InvUtils.move().from(slot).to(mc.player.getInventory().selectedSlot);
-
                 interactingsign = true;
-                mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, thesign, 2));
+                mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, signHitResult, 2));
                 interactingsign = false;
-
                 InvUtils.move().from(mc.player.getInventory().selectedSlot).toHotbar(slot);
             }
         }
     }
-    @EventHandler
-    private void onPostTick(TickEvent.Post event) {
-        if (!editrear || !bothside.get() || prevsignPos == signPos) return;
-        if (!(mc.world.getBlockState(signPos).getBlock().asItem() instanceof HangingSignItem) && mc.world.getBlockState(signPos).getBlock().asItem() instanceof SignItem){
-            interactingsign = true;
-            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(signPos.getX(), signPos.getY(), signPos.getZ()), Direction.DOWN, signPos, false));
-            interactingsign = false;
-            if (differentText.get())
-                mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
-                        MeteorStarscript.run(MeteorStarscript.compile(lineOnedif.get())),
-                        MeteorStarscript.run(MeteorStarscript.compile(lineTwodif.get())),
-                        MeteorStarscript.run(MeteorStarscript.compile(lineThreedif.get())),
-                        MeteorStarscript.run(MeteorStarscript.compile(lineFourdif.get()))
-                ));
-            else
-                mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
-                        MeteorStarscript.run(MeteorStarscript.compile(lineOne.get())),
-                        MeteorStarscript.run(MeteorStarscript.compile(lineTwo.get())),
-                        MeteorStarscript.run(MeteorStarscript.compile(lineThree.get())),
-                        MeteorStarscript.run(MeteorStarscript.compile(lineFour.get()))
-                ));
-            prevsignPos = signPos;
 
-            editrear=false;
-        } else if (mc.world.getBlockState(signPos).getBlock().asItem() instanceof HangingSignItem){
-            BlockState blockState = mc.world.getBlockState(signPos);
-            if (blockState.getBlock() instanceof WallHangingSignBlock) {
-                Direction facing = blockState.get(WallHangingSignBlock.FACING);
-                interactingsign = true;
-                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(signPos.getX(), signPos.getY(), signPos.getZ()), facing, signPos, false));
-                interactingsign = false;
-            } else if (blockState.getBlock() instanceof HangingSignBlock) {
-                int rotation = blockState.get(HangingSignBlock.ROTATION);
-                Direction direction = Direction.fromHorizontalDegrees(rotation);
-                interactingsign = true;
-                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(signPos.getX(), signPos.getY(), signPos.getZ()), direction, signPos, false));
-                interactingsign = false;
-            }
-            if (differentText.get())
-                mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
-                        MeteorStarscript.run(MeteorStarscript.compile(HlineOnedif.get())),
-                        MeteorStarscript.run(MeteorStarscript.compile(HlineTwodif.get())),
-                        MeteorStarscript.run(MeteorStarscript.compile(HlineThreedif.get())),
-                        MeteorStarscript.run(MeteorStarscript.compile(HlineFourdif.get()))
-                ));
-            else
-                mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(signPos,false,
-                        MeteorStarscript.run(MeteorStarscript.compile(HlineOne.get())),
-                        MeteorStarscript.run(MeteorStarscript.compile(HlineTwo.get())),
-                        MeteorStarscript.run(MeteorStarscript.compile(HlineThree.get())),
-                        MeteorStarscript.run(MeteorStarscript.compile(HlineFour.get()))
-                ));
-            prevsignPos = signPos;
-            editrear=false;
-        }
-    }
     private boolean filter(Item item) {
         return Items.WHITE_DYE.equals(item)
                 || Items.BLACK_DYE.equals(item)

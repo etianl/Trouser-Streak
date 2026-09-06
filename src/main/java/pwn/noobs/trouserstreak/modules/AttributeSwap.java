@@ -1,16 +1,17 @@
-/*Thank you to [DonKisser](https://github.com/DonKisser) for making this module for us!
+/*Thank you to [DonKisser](https://github.com/DonKisser) for making the original module for us!
         Their inspiration was this Youtube video by @scilangaming:
         https://www.youtube.com/watch?v=q99eqD_fBqo*/
 
 package pwn.noobs.trouserstreak.modules;
 
-import net.minecraft.enchantment.Enchantment;
+import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import meteordevelopment.meteorclient.mixininterface.IPlayerInteractEntityC2SPacket;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registry;
+import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import pwn.noobs.trouserstreak.Trouser;
-import meteordevelopment.meteorclient.events.entity.player.AttackEntityEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.IntSetting;
@@ -58,22 +59,48 @@ public class AttributeSwap extends Module {
     private int prevSlot = -1;
     private int dDelay = 0;
     private boolean didSwap = false;
-    private Registry<Enchantment> enchantmentRegistry;
 
     public AttributeSwap() {
         super(Trouser.Main, "AttributeSwap", "Swaps attributes of the main hand item with the target slot on attack");
     }
 
     @EventHandler
-    private void onAttack(AttackEntityEvent event) {
+    private void onPacketSend(PacketEvent.Send event) {
         if (mc.player == null || mc.world == null) return;
+
+        if (event.packet instanceof PlayerInteractEntityC2SPacket interact) {
+            int entityId = ((IPlayerInteractEntityC2SPacket) interact).meteor$getEntity().getId();
+
+            Entity entity = mc.world.getEntityById(entityId);
+
+            if (entity != null) {
+                interact.handle(new PlayerInteractEntityC2SPacket.Handler() {
+                    @Override
+                    public void interact(net.minecraft.util.Hand hand) {}
+
+                    @Override
+                    public void interactAt(net.minecraft.util.Hand hand, net.minecraft.util.math.Vec3d pos) {}
+
+                    @Override
+                    public void attack() {
+                        performAttributeSwap(entity);
+                    }
+                });
+            }
+        }
+    }
+
+    private void performAttributeSwap(Entity targetEntity) {
+        if (mc.player == null || mc.world == null) return;
+
         if (swapBack.get()) {
             prevSlot = mc.player.getInventory().selectedSlot;
         }
         didSwap = false;
+
         if (shieldBreaker.get()) {
-            if (event.entity != null && event.entity instanceof PlayerEntity player){
-                if (player.isBlocking()){
+            if (targetEntity instanceof PlayerEntity player) {
+                if (player.isBlocking()) {
                     for (int i = 0; i < 9; i++) {
                         ItemStack stack = mc.player.getInventory().getStack(i);
                         if (stack.getItem() instanceof AxeItem) {
@@ -83,15 +110,15 @@ public class AttributeSwap extends Module {
                         }
                     }
                 } else if (!noswap.get()) {
-                    InvUtils.swap(targetSlot.get()-1, false);
+                    InvUtils.swap(targetSlot.get() - 1, false);
                     didSwap = true;
                 }
             } else {
-                InvUtils.swap(targetSlot.get()-1, false);
+                InvUtils.swap(targetSlot.get() - 1, false);
                 didSwap = true;
             }
         } else {
-            InvUtils.swap(targetSlot.get()-1, false);
+            InvUtils.swap(targetSlot.get() - 1, false);
             didSwap = true;
         }
 
@@ -99,6 +126,7 @@ public class AttributeSwap extends Module {
             dDelay = delay.get();
         }
     }
+
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (dDelay > 0) {
