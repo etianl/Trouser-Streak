@@ -34,8 +34,8 @@ public class ElytraCount extends HudElement {
             .name("min-durability")
             .description("Durability threshold to count elytras.")
             .defaultValue(300)
-            .range(1, net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("elytra")).components().get(DataComponents.MAX_DAMAGE) - 1)
-            .sliderRange(1, net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("elytra")).components().get(DataComponents.MAX_DAMAGE) - 1)
+            .range(1, Items.ELYTRA.components().get(DataComponents.MAX_DAMAGE) - 1)
+            .sliderRange(1, Items.ELYTRA.components().get(DataComponents.MAX_DAMAGE) - 1)
             .build()
     );
 
@@ -99,8 +99,8 @@ public class ElytraCount extends HudElement {
     @Override
     public void render(HudRenderer renderer) {
 
-        ItemStack itemStack = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("elytra")), InvUtils.find(stack ->
-                stack.getItem() == net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("elytra")) &&
+        ItemStack itemStack = new ItemStack(Items.ELYTRA, InvUtils.find(stack ->
+                stack.getItem() == Items.ELYTRA &&
                         (stack.getMaxDamage() - stack.getDamageValue()) > minDurability.get()
         ).count());
 

@@ -31,7 +31,7 @@ public class AutoVaultClipCommand extends Command {
             for (int i = 0; i < 199; i++) {
                 BlockPos isopenair1 = (player.blockPosition().offset(0,i+2,0));
                 BlockPos isopenair2 = (player.blockPosition().offset(0,i+3,0));
-                if (mc.level.getBlockState(isopenair1).canBeReplaced() && mc.level.getFluidState(isopenair1).isEmpty() && !mc.level.getBlockState(isopenair1).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("powder_snow"))) && mc.level.getBlockState(isopenair2).canBeReplaced() && mc.level.getFluidState(isopenair2).isEmpty() && !mc.level.getBlockState(isopenair2).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("powder_snow")))){
+                if (mc.level.getBlockState(isopenair1).canBeReplaced() && mc.level.getFluidState(isopenair1).isEmpty() && !mc.level.getBlockState(isopenair1).is(Blocks.POWDER_SNOW) && mc.level.getBlockState(isopenair2).canBeReplaced() && mc.level.getFluidState(isopenair2).isEmpty() && !mc.level.getBlockState(isopenair2).is(Blocks.POWDER_SNOW)){
                     int packetsRequired = computePacketsRequired(player.getY(), isopenair1.getY());
                     if (player.isPassenger()) {
                         Entity vehicle = player.getVehicle();
@@ -59,7 +59,7 @@ public class AutoVaultClipCommand extends Command {
             for (int i = 0; i > -199; i--) {
                 BlockPos isopenair1 = (player.blockPosition().offset(0,i,0));
                 BlockPos isopenair2 = (player.blockPosition().offset(0,i-1,0));
-                if (mc.level.getBlockState(isopenair1).canBeReplaced() && mc.level.getFluidState(isopenair1).isEmpty() && !mc.level.getBlockState(isopenair1).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("powder_snow"))) && mc.level.getBlockState(isopenair2).canBeReplaced() && mc.level.getFluidState(isopenair2).isEmpty() && !mc.level.getBlockState(isopenair2).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("powder_snow")))){
+                if (mc.level.getBlockState(isopenair1).canBeReplaced() && mc.level.getFluidState(isopenair1).isEmpty() && !mc.level.getBlockState(isopenair1).is(Blocks.POWDER_SNOW) && mc.level.getBlockState(isopenair2).canBeReplaced() && mc.level.getFluidState(isopenair2).isEmpty() && !mc.level.getBlockState(isopenair2).is(Blocks.POWDER_SNOW)){
                     int packetsRequired = computePacketsRequired(player.getY(), isopenair2.getY());
                     if (player.isPassenger()) {
                         Entity vehicle = player.getVehicle();
@@ -91,7 +91,7 @@ public class AutoVaultClipCommand extends Command {
             for (int i = 199; i > 0; i--) {
                 BlockPos isopenair1 = (player.blockPosition().offset(0,i,0));
                 BlockPos newopenair2 = isopenair1.above(1);
-                if (!mc.level.getBlockState(isopenair1).canBeReplaced() || mc.level.getBlockState(isopenair1).is(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("powder_snow"))) || !mc.level.getFluidState(isopenair1).isEmpty()) {
+                if (!mc.level.getBlockState(isopenair1).canBeReplaced() || mc.level.getBlockState(isopenair1).is(Blocks.POWDER_SNOW) || !mc.level.getFluidState(isopenair1).isEmpty()) {
                     int packetsRequired = computePacketsRequired(player.getY(), newopenair2.getY());
                     if (player.isPassenger()) {
                         Entity vehicle = player.getVehicle();

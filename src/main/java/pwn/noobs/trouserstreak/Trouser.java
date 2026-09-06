@@ -14,9 +14,9 @@ import pwn.noobs.trouserstreak.modules.*;
 
 public class Trouser extends MeteorAddon {
         public static final Logger LOG = LoggerFactory.getLogger(Trouser.class);
-        public static final Category Main = new Category("TrouserStreak", net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("leather_leggings"))::getDefaultInstance);
-        public static final Category baseHunting = new Category("TrouserHunting", net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("spyglass"))::getDefaultInstance);
-        public static final Category operator = new Category("TrouserOP/Creative", net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.withDefaultNamespace("nether_star"))::getDefaultInstance);
+        public static final Category Main = new Category("TrouserStreak", Items.LEATHER_LEGGINGS::getDefaultInstance);
+        public static final Category baseHunting = new Category("TrouserHunting", Items.SPYGLASS::getDefaultInstance);
+        public static final Category operator = new Category("TrouserOP/Creative", Items.NETHER_STAR::getDefaultInstance);
 
         @Override
         public void onInitialize() {
@@ -52,6 +52,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new CaveDisturbanceDetector());
                 Modules.get().add(new CollectibleESP());
                 Modules.get().add(new CrossbowMachineGun());
+                Modules.get().add(new CubePrimer());
                 Modules.get().add(new ExplosionAura());
                 Modules.get().add(new FreeBoatRide());
                 Modules.get().add(new FlightAntikick());
@@ -78,6 +79,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new NbtEditor());
                 Modules.get().add(new NewerNewChunks());
                 Modules.get().add(new NoSpawnerDetector());
+                Modules.get().add(new NoTelemetry());
                 Modules.get().add(new OnlinePlayerActivityDetector());
                 Modules.get().add(new OPplayerTPmodule());
                 Modules.get().add(new OPServerKillModule());
