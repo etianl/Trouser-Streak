@@ -1,21 +1,24 @@
-/*Thank you to [DonKisser](https://github.com/DonKisser) for making this module for us!
+/*Thank you to [DonKisser](https://github.com/DonKisser) for making the original module for us!
         Their inspiration was this Youtube video by @scilangaming:
         https://www.youtube.com/watch?v=q99eqD_fBqo*/
 
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
+import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import meteordevelopment.meteorclient.mixininterface.IPlayerInteractEntityC2SPacket;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
 import pwn.noobs.trouserstreak.Trouser;
-import meteordevelopment.meteorclient.events.entity.player.AttackEntityEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.IntSetting;
@@ -69,6 +72,7 @@ public class AttributeSwap extends Module {
     private int prevSlot = -1;
     private int dDelay = 0;
     private boolean didSwap = false;
+    private boolean isSwapping = false;
     private Registry<Enchantment> enchantmentRegistry;
 
     public AttributeSwap() {
@@ -82,6 +86,7 @@ public class AttributeSwap extends Module {
         if (swapBack.get()) {
             prevSlot = mc.player.getInventory().selectedSlot;
         }
+
         didSwap = false;
 
         if (enchantmentRegistry == null) enchantmentRegistry = mc.world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
@@ -115,40 +120,95 @@ public class AttributeSwap extends Module {
     }
 
     @EventHandler
-    private void onAttack(AttackEntityEvent event) {
-        if (mc.player == null || mc.world == null) return;
-        if (swapBack.get()) {
-            prevSlot = mc.player.getInventory().selectedSlot;
-        }
-        didSwap = false;
-        if (shieldBreaker.get()) {
-            if (event.entity != null && event.entity instanceof PlayerEntity player){
-                if (player.isBlocking()){
-                    for (int i = 0; i < 9; i++) {
-                        ItemStack stack = mc.player.getInventory().getMainStacks().get(i);
-                        if (stack.getItem() instanceof AxeItem) {
-                            InvUtils.swap(i, false);
-                            didSwap = true;
-                            break;
-                        }
+    private void onPacketSend(PacketEvent.Send event) {
+        if (mc.player == null || mc.world == null || isSwapping || autoLunge.get()) return;
+
+        if (event.packet instanceof PlayerInteractEntityC2SPacket interact) {
+            int entityId = ((IPlayerInteractEntityC2SPacket) interact).meteor$getEntity().getId();
+
+            Entity entity = mc.world.getEntityById(entityId);
+
+            if (entity != null) {
+                interact.handle(new PlayerInteractEntityC2SPacket.Handler() {
+                    @Override
+                    public void interact(net.minecraft.util.Hand hand) {}
+
+                    @Override
+                    public void interactAt(net.minecraft.util.Hand hand, net.minecraft.util.math.Vec3d pos) {}
+
+                    @Override
+                    public void attack() {
+                        performAttributeSwap(entity, false);
                     }
-                } else if (!noswap.get()) {
-                    InvUtils.swap(targetSlot.get()-1, false);
+                });
+            }
+        }
+
+        if (event.packet instanceof PlayerActionC2SPacket action) {
+            if (action.getAction() == PlayerActionC2SPacket.Action.STAB) {
+                Entity targetEntity = (mc.crosshairTarget instanceof net.minecraft.util.hit.EntityHitResult hit) ? hit.getEntity() : null;
+
+                if (targetEntity != null) {
+                    performAttributeSwap(targetEntity,true);
+                }
+            }
+        }
+    }
+
+    private void performAttributeSwap(Entity targetEntity, Boolean stabbed) {
+        if (mc.player == null || mc.world == null) return;
+
+        isSwapping = true;
+        try {
+            if (swapBack.get()) {
+                prevSlot = mc.player.getInventory().selectedSlot;
+            }
+            didSwap = false;
+
+            if (shieldBreaker.get()) {
+                if (targetEntity instanceof PlayerEntity player) {
+                    if (player.isBlocking()) {
+                        for (int i = 0; i < 9; i++) {
+                            ItemStack stack = mc.player.getInventory().getMainStacks().get(i);
+                            if (stack.getItem() instanceof AxeItem) {
+                                InvUtils.swap(i, false);
+                                if (stabbed) {
+                                    mc.getNetworkHandler().sendPacket(PlayerInteractEntityC2SPacket.attack(targetEntity, mc.player.isSneaking()));
+                                }
+                                didSwap = true;
+                                break;
+                            }
+                        }
+                    } else if (!noswap.get()) {
+                        InvUtils.swap(targetSlot.get() - 1, false);
+                        if (stabbed) {
+                            mc.getNetworkHandler().sendPacket(PlayerInteractEntityC2SPacket.attack(targetEntity, mc.player.isSneaking()));
+                        }
+                        didSwap = true;
+                    }
+                } else {
+                    InvUtils.swap(targetSlot.get() - 1, false);
+                    if (stabbed) {
+                        mc.getNetworkHandler().sendPacket(PlayerInteractEntityC2SPacket.attack(targetEntity, mc.player.isSneaking()));
+                    }
                     didSwap = true;
                 }
             } else {
-                InvUtils.swap(targetSlot.get()-1, false);
+                InvUtils.swap(targetSlot.get() - 1, false);
+                if (stabbed) {
+                    mc.getNetworkHandler().sendPacket(PlayerInteractEntityC2SPacket.attack(targetEntity, mc.player.isSneaking()));
+                }
                 didSwap = true;
             }
-        } else {
-            InvUtils.swap(targetSlot.get()-1, false);
-            didSwap = true;
-        }
 
-        if (swapBack.get() && didSwap) {
-            dDelay = delay.get();
+            if (swapBack.get() && didSwap) {
+                dDelay = delay.get();
+            }
+        } finally {
+            isSwapping = false;
         }
     }
+
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (dDelay > 0) {

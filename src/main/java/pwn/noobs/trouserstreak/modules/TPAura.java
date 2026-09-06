@@ -7,6 +7,8 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.utils.player.FindItemResult;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -14,6 +16,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.*;
@@ -21,6 +24,7 @@ import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 public class TPAura extends Module {
@@ -37,6 +41,25 @@ public class TPAura extends Module {
             .name("Rotate to Target")
             .description("Sends a look packet aimed at the target before attacking. Helps hit registration on servers that check facing direction.")
             .defaultValue(false)
+            .build()
+    );
+    private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
+            .name("auto-switch")
+            .description("Switches to a weapon of your choosing when attacking.")
+            .defaultValue(false)
+            .build()
+    );
+    private final Setting<List<Item>> weapons = sgGeneral.add(new ItemListSetting.Builder()
+            .name("Weapons to use")
+            .description("The weapons will be looked for with priority ordered from top to bottom of the list.")
+            .visible(autoSwitch::get)
+            .build()
+    );
+    private final Setting<Boolean> swapBack = sgGeneral.add(new BoolSetting.Builder()
+            .name("swap-back")
+            .description("Switch to your previous slot when done attacking.")
+            .defaultValue(false)
+            .visible(autoSwitch::get)
             .build()
     );
     private final Setting<Integer> entityAttackDelay = sgGeneral.add(new IntSetting.Builder()
@@ -170,6 +193,8 @@ public class TPAura extends Module {
     );
 
     private double maxDistance;
+    private boolean swappedItem;
+    private int previousslot;
     private int entityAttackTicks = 0;
 
     public TPAura() {
@@ -177,6 +202,8 @@ public class TPAura extends Module {
     }
     @Override
     public void onActivate() {
+        previousslot = -1;
+        swappedItem = false;
         maxDistance = mode.get() == Mode.Vanilla ? Distance.get() : paperDistance.get();
     }
     @EventHandler
@@ -260,9 +287,9 @@ public class TPAura extends Module {
         Vec3d abovetarget = finalPos.add(0, maxDistance, 0);
         boolean doGoUp = mode.get() == Mode.Paper && goUp.get();
 
-        boolean aboveTargetInvalid = doGoUp && (attackSpam.get()
-                ? (mc.world == null || abovetarget.y > mc.world.getTopYInclusive() - 1)
-                : (invalid(highPos) || invalid(abovetarget) || !hasClearPath(highPos, abovetarget)));
+        boolean aboveTargetInvalid = doGoUp && !attackSpam.get()
+                && (invalid(highPos) || invalid(abovetarget) || !hasClearPath(highPos, abovetarget));
+
         if (invalid(finalPos) || aboveTargetInvalid) {
             if (chatFeedback) {
                 if (doGoUp && !attackSpam.get() && !hasClearPath(highPos, abovetarget)) {
@@ -272,6 +299,24 @@ public class TPAura extends Module {
                 }
             }
             return;
+        }
+
+        if (autoSwitch.get()) {
+            FindItemResult weapon = new FindItemResult(mc.player.getInventory().getSelectedSlot(), -1);
+
+            for (Item wpn: weapons.get()) {
+                weapon = InvUtils.findInHotbar(wpn);
+                if (weapon.found()) break;
+            }
+            if (!weapon.found()) {
+                error("No valid weapon found for Auto Switch");
+                return;
+            }
+            if (!swappedItem) {
+                previousslot = mc.player.getInventory().getSelectedSlot();
+                swappedItem = true;
+                InvUtils.swap(weapon.slot(), false);
+            }
         }
 
         int amountOfPackets = mode.get() == Mode.Vanilla ? packets.get() : paperpackets.get();
@@ -286,14 +331,6 @@ public class TPAura extends Module {
         int currentHeight = (int) maxDistance;
         for (int i = 0; i < attackCount; i++) {
             int blocks = (i == 0) ? (int)maxDistance : currentHeight;
-
-            if (attackSpam.get() && mc.world != null) {
-                int worldTop = mc.world.getTopYInclusive() - 1;
-                if (finalPos.y + blocks > worldTop) {
-                    blocks = (int)(worldTop - finalPos.y);
-                    if (blocks < 1) break;
-                }
-            }
 
             Vec3d progressiveAboveTarget = finalPos.add(0, blocks, 0);
 
@@ -343,6 +380,11 @@ public class TPAura extends Module {
             }
 
             currentHeight += increase.get();
+        }
+
+        if (swapBack.get() && swappedItem) {
+            InvUtils.swap(previousslot, false);
+            swappedItem = false;
         }
 
         if (attackCount > 1) {
