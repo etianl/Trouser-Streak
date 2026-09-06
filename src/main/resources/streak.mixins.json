@@ -19,6 +19,7 @@
     "StringEncodingMixin",
     "AbstractBlockMixin",
     "AbstractBoatEntityMixin",
-    "LoadingTerrainScreenMixin"
+    "LoadingTerrainScreenMixin",
+    "TelemetryManagerMixin"
   ]
 }
