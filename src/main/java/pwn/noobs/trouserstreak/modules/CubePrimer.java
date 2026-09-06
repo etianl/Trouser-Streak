@@ -57,7 +57,7 @@ public class CubePrimer extends Module {
             interacting = true;
             mc.getConnection().send(new ServerboundInteractPacket(
                     sulfurCube.getId(),
-                    hand,
+                    mc.player.getUsedItemHand(),
                     sulfurCube.position(),
                     true
             ));
