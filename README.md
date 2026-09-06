@@ -49,7 +49,6 @@ In no particular order
 
 - All of these people [https://github.com/etianl/Trouser-Streak/graphs/contributors](https://github.com/etianl/Trouser-Streak/graphs/contributors)
 - [Meteor Client](https://github.com/meteordevelopment/meteor-client)
-- [Allah-Hack](https://github.com/TaxEvasiqn/allah-hack)
 - [Meteor-Tweaks](https://github.com/Declipsonator/Meteor-Tweaks)
 - [Meteor-Rejects](https://github.com/AntiCope/meteor-rejects)
 - [Frostburn Client](https://github.com/evaan/FrostBurn)
