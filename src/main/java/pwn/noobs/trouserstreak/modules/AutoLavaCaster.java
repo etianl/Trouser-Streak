@@ -292,7 +292,7 @@ public class AutoLavaCaster extends Module {
 
         }
         if (aMountain.autocasttimenow==true) {
-            if (aMountain.lowestblock.getY()==666){
+            if (aMountain.lowestblock.getY()==-666){
                 toggle();
                 error("Use AutoMountain first to get the timings for the last Mountain.");
                 return;
@@ -306,7 +306,7 @@ public class AutoLavaCaster extends Module {
         }else if (estlavatime.get() && !aMountain.autocasttimenow==true){
             switch (mode.get()) {
                 case UseLastMountain -> {
-                    if (aMountain.lowestblock.getY()==666){
+                    if (aMountain.lowestblock.getY()==-666){
                         toggle();
                         error("Use AutoMountain first to get the timings for the last Mountain.");
                         return;
@@ -377,7 +377,7 @@ public class AutoLavaCaster extends Module {
     }
     @Override
     public void onDeactivate() {
-        if (lowYrst.get()) aMountain.lowestblock=new BlockPos(666,666,666);
+        if (lowYrst.get()) aMountain.lowestblock=new BlockPos(666,-666,666);
         aMountain.autocasttimenow=false;
         lavamountainticks = 0;
         if (mc.options.keyShift.isDown()){
@@ -449,7 +449,7 @@ public class AutoLavaCaster extends Module {
             }
             else if (firstplace==false && lavamountainticks==55){
                 if (aMountain.autocasttimenow==true) {
-                    if (aMountain.lowestblock.getY()==666){
+                    if (aMountain.lowestblock.getY()==-666){
                         toggle();
                         error("Use AutoMountain first to get the timings for the last Mountain.");
                         return;
@@ -458,7 +458,7 @@ public class AutoLavaCaster extends Module {
                 }else if (estlavatime.get() && !aMountain.autocasttimenow==true){
                     switch (mode.get()) {
                         case UseLastMountain -> {
-                            if (aMountain.lowestblock.getY()==666){
+                            if (aMountain.lowestblock.getY()==-666){
                                 toggle();
                                 error("Use AutoMountain first to get the timings for the last Mountain.");
                                 return;
@@ -600,7 +600,7 @@ public class AutoLavaCaster extends Module {
             }
             else if (firstplace==false && lavamountainticks==55){
                 if (aMountain.autocasttimenow==true) {
-                    if (aMountain.lowestblock.getY()==666){
+                    if (aMountain.lowestblock.getY()==-666){
                         toggle();
                         error("Use AutoMountain first to get the timings for the last Mountain.");
                         return;
@@ -609,7 +609,7 @@ public class AutoLavaCaster extends Module {
                 }else if (estlavatime.get() && !aMountain.autocasttimenow==true){
                     switch (mode.get()) {
                         case UseLastMountain -> {
-                            if (aMountain.lowestblock.getY()==666){
+                            if (aMountain.lowestblock.getY()==-666){
                                 toggle();
                                 error("Use AutoMountain first to get the timings for the last Mountain.");
                                 return;
@@ -781,7 +781,7 @@ public class AutoLavaCaster extends Module {
             }
             else if (firstplace==false && lavamountainticks==55){
                 if (aMountain.autocasttimenow==true) {
-                    if (aMountain.lowestblock.getY()==666){
+                    if (aMountain.lowestblock.getY()==-666){
                         toggle();
                         error("Use AutoMountain first to get the timings for the last Mountain.");
                         return;
@@ -790,7 +790,7 @@ public class AutoLavaCaster extends Module {
                 }else if (estlavatime.get() && !aMountain.autocasttimenow==true){
                     switch (mode.get()) {
                         case UseLastMountain -> {
-                            if (aMountain.lowestblock.getY()==666){
+                            if (aMountain.lowestblock.getY()==-666){
                                 toggle();
                                 error("Use AutoMountain first to get the timings for the last Mountain.");
                                 return;

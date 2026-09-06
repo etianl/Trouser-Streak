@@ -1,12 +1,13 @@
-/*Thank you to [DonKisser](https://github.com/DonKisser) for making this module for us!
+/*Thank you to [DonKisser](https://github.com/DonKisser) for making the original module for us!
         Their inspiration was this Youtube video by @scilangaming:
         https://www.youtube.com/watch?v=q99eqD_fBqo*/
 
 package pwn.noobs.trouserstreak.modules;
 
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
+import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import net.minecraft.network.protocol.game.ServerboundAttackPacket;
 import pwn.noobs.trouserstreak.Trouser;
-import meteordevelopment.meteorclient.events.entity.player.AttackEntityEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.IntSetting;
@@ -17,7 +18,9 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
@@ -69,6 +72,7 @@ public class AttributeSwap extends Module {
     private int prevSlot = -1;
     private int dDelay = 0;
     private boolean didSwap = false;
+    private boolean isSwapping = false;
     private Registry<Enchantment> enchantmentRegistry;
 
     public AttributeSwap() {
@@ -82,6 +86,7 @@ public class AttributeSwap extends Module {
         if (swapBack.get()) {
             prevSlot = mc.player.getInventory().getSelectedSlot();
         }
+
         didSwap = false;
 
         if (enchantmentRegistry == null) enchantmentRegistry = mc.level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
@@ -115,40 +120,84 @@ public class AttributeSwap extends Module {
     }
 
     @EventHandler
-    private void onAttack(AttackEntityEvent event) {
-        if (mc.player == null || mc.level == null) return;
-        if (swapBack.get()) {
-            prevSlot = mc.player.getInventory().getSelectedSlot();
+    private void onPacketSend(PacketEvent.Send event) {
+        if (mc.player == null || mc.level == null || isSwapping || autoLunge.get()) return;
+
+        if (event.packet instanceof ServerboundAttackPacket interact) {
+            int entityId = interact.entityId();
+
+            Entity entity = mc.level.getEntity(entityId);
+
+            if (entity != null) {
+                performAttributeSwap(entity, false);
+            }
         }
-        didSwap = false;
-        if (shieldBreaker.get()) {
-            if (event.entity != null && event.entity instanceof Player player){
-                if (player.isBlocking()){
-                    for (int i = 0; i < 9; i++) {
-                        ItemStack stack = mc.player.getInventory().getNonEquipmentItems().get(i);
-                        if (stack.getItem() instanceof AxeItem) {
-                            InvUtils.swap(i, false);
-                            didSwap = true;
-                            break;
+
+        if (event.packet instanceof ServerboundPlayerActionPacket action) {
+            if (action.getAction() == ServerboundPlayerActionPacket.Action.STAB) {
+                Entity targetEntity = (mc.hitResult instanceof net.minecraft.world.phys.EntityHitResult hit) ? hit.getEntity() : null;
+
+                if (targetEntity != null) {
+                    performAttributeSwap(targetEntity,true);
+                }
+            }
+        }
+    }
+
+    private void performAttributeSwap(Entity targetEntity, Boolean stabbed) {
+        if (mc.player == null || mc.level == null) return;
+
+        isSwapping = true;
+        try {
+            if (swapBack.get()) {
+                prevSlot = mc.player.getInventory().getSelectedSlot();
+            }
+            didSwap = false;
+
+            if (shieldBreaker.get()) {
+                if (targetEntity instanceof Player player) {
+                    if (player.isBlocking()) {
+                        for (int i = 0; i < 9; i++) {
+                            ItemStack stack = mc.player.getInventory().getNonEquipmentItems().get(i);
+                            if (stack.getItem() instanceof AxeItem) {
+                                InvUtils.swap(i, false);
+                                if (stabbed) {
+                                    mc.getConnection().send(new ServerboundAttackPacket(targetEntity.getId()));
+                                }
+                                didSwap = true;
+                                break;
+                            }
                         }
+                    } else if (!noswap.get()) {
+                        InvUtils.swap(targetSlot.get() - 1, false);
+                        if (stabbed) {
+                            mc.getConnection().send(new ServerboundAttackPacket(targetEntity.getId()));
+                        }
+                        didSwap = true;
                     }
-                } else if (!noswap.get()) {
-                    InvUtils.swap(targetSlot.get()-1, false);
+                } else {
+                    InvUtils.swap(targetSlot.get() - 1, false);
+                    if (stabbed) {
+                        mc.getConnection().send(new ServerboundAttackPacket(targetEntity.getId()));
+                    }
                     didSwap = true;
                 }
             } else {
-                InvUtils.swap(targetSlot.get()-1, false);
+                InvUtils.swap(targetSlot.get() - 1, false);
+                if (stabbed) {
+                    mc.getConnection().send(new ServerboundAttackPacket(targetEntity.getId()));
+                }
                 didSwap = true;
             }
-        } else {
-            InvUtils.swap(targetSlot.get()-1, false);
-            didSwap = true;
-        }
 
-        if (swapBack.get() && didSwap) {
-            dDelay = delay.get();
+            if (swapBack.get() && didSwap) {
+                dDelay = delay.get();
+            }
+        } finally {
+            isSwapping = false;
         }
     }
+
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (dDelay > 0) {

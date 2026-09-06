@@ -7,10 +7,8 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ServerboundAttackPacket;
-import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundSwingPacket;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -118,11 +116,7 @@ public class MaceKill extends Module {
         if (packetDisable.get() && (targetEntity.isBlocking() || targetEntity.isInvulnerable() || targetEntity.hasInfiniteMaterials())) return;
         if (!targetEntity.isAlive()) return;
 
-        int baseBlocks = getMaxHeightAbovePlayer();
-        if (baseBlocks == 0) {
-            error("No valid space above you to attack from.");
-            return;
-        }
+        int baseBlocks = fallHeight.get();
 
         event.cancel();
 
@@ -138,11 +132,6 @@ public class MaceKill extends Module {
             boolean targetposvalid = true;
             for (int i = 0; i < attackCount; i++) {
                 int blocks = (i == 0) ? baseBlocks : currentHeight;
-
-                if (mc.level == null || mc.player.getY() + blocks > mc.level.getMaxY() - 1) {
-                    targetposvalid = false;
-                    continue;
-                }
 
                 Vec3 targetPos = new Vec3(mc.player.getX(), mc.player.getY() + blocks, mc.player.getZ());
 
@@ -215,9 +204,6 @@ public class MaceKill extends Module {
     private boolean invalid(Vec3 pos) {
         if (mc.level == null) return true;
 
-        double clampedY = Mth.clamp(pos.y, mc.level.getMinY(), mc.level.getMaxY() - 1);
-        if (clampedY != pos.y) return true;
-
         BlockPos floored = BlockPos.containing(pos);
         int chunkX = floored.getX() >> 4;
         int chunkZ = floored.getZ() >> 4;
@@ -257,11 +243,5 @@ public class MaceKill extends Module {
         boolean collides = mc.level.getBlockCollisions(entity, box).iterator().hasNext();
         positionCache.put(pos, collides);
         return collides;
-    }
-    private int getMaxHeightAbovePlayer() {
-        if (mc.level == null) return 0;
-        int worldTop = mc.level.getMaxY() - 1;
-        int maxBlocks = (int)(worldTop - mc.player.getY());
-        return Math.min(fallHeight.get(), maxBlocks);
     }
 }
