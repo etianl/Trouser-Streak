@@ -14,6 +14,7 @@ import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
@@ -56,6 +57,13 @@ public class RemoteEnderChest extends Module {
             .min(0.0)
             .max(20.0)
             .sliderRange(0.0, 20.0)
+            .visible(enableItemSaver::get)
+            .build()
+    );
+    private final Setting<Boolean> totemCheck = sgItemSaver.add(new BoolSetting.Builder()
+            .name("check-for-totem")
+            .description("If you are low health and are holding a Totem of Undying, do not store the items.")
+            .defaultValue(true)
             .visible(enableItemSaver::get)
             .build()
     );
@@ -193,7 +201,12 @@ public class RemoteEnderChest extends Module {
     private void checkAndSaveItems() {
         if (!enableItemSaver.get()) return;
 
-        boolean triggerAuto = mc.player.getHealth() <= healthThreshold.get();
+        boolean hasTotem = mc.player.getMainHandItem().is(Items.TOTEM_OF_UNDYING) ||
+                mc.player.getOffhandItem().is(Items.TOTEM_OF_UNDYING);
+
+        boolean shouldCheckTotem = totemCheck.get() && hasTotem;
+
+        boolean triggerAuto = mc.player.getHealth() <= healthThreshold.get() && !shouldCheckTotem;
         boolean triggerManual = itemSaverHotkey.get().isPressed();
 
         if (!triggerAuto && !triggerManual) return;
