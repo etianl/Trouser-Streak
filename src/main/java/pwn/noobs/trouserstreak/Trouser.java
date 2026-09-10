@@ -78,6 +78,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new MultiverseAnnihilator());
                 Modules.get().add(new NbtEditor());
                 Modules.get().add(new NewerNewChunks());
+                Modules.get().add(new NoModDetection());
                 Modules.get().add(new NoSpawnerDetector());
                 Modules.get().add(new NoTelemetry());
                 Modules.get().add(new OnlinePlayerActivityDetector());

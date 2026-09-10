@@ -21,6 +21,7 @@
     "AbstractBoatEntityMixin",
     "LoadingTerrainScreenMixin",
     "StorageLooterItemFilterMixin",
-    "TelemetryManagerMixin"
+    "TelemetryManagerMixin",
+    "TranslationStorageMixin"
   ]
 }
