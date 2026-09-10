@@ -10,6 +10,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.ingame.*;
 import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
@@ -56,6 +57,13 @@ public class RemoteEnderChest extends Module {
             .min(0.0)
             .max(20.0)
             .sliderRange(0.0, 20.0)
+            .visible(enableItemSaver::get)
+            .build()
+    );
+    private final Setting<Boolean> totemCheck = sgItemSaver.add(new BoolSetting.Builder()
+            .name("check-for-totem")
+            .description("If you are low health and are holding a Totem of Undying, do not store the items.")
+            .defaultValue(true)
             .visible(enableItemSaver::get)
             .build()
     );
@@ -193,7 +201,12 @@ public class RemoteEnderChest extends Module {
     private void checkAndSaveItems() {
         if (!enableItemSaver.get()) return;
 
-        boolean triggerAuto = mc.player.getHealth() <= healthThreshold.get();
+        boolean hasTotem = mc.player.getMainHandStack().isOf(Items.TOTEM_OF_UNDYING) ||
+                mc.player.getOffHandStack().isOf(Items.TOTEM_OF_UNDYING);
+
+        boolean shouldCheckTotem = totemCheck.get() && hasTotem;
+
+        boolean triggerAuto = mc.player.getHealth() <= healthThreshold.get() && !shouldCheckTotem;
         boolean triggerManual = itemSaverHotkey.get().isPressed();
 
         if (!triggerAuto && !triggerManual) return;
