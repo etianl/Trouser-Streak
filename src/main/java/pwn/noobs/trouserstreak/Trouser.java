@@ -41,6 +41,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new AutoTitles());
                 Modules.get().add(new AutoWither());
                 Modules.get().add(new BaseFinder());
+                Modules.get().add(new BeeCoordExploit());
                 Modules.get().add(new BetterAutoSign());
                 Modules.get().add(new BetterScaffold());
                 Modules.get().add(new BlockListMineCommand());
