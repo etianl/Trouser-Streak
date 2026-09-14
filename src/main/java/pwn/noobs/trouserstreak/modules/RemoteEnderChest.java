@@ -13,7 +13,9 @@ import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -217,11 +219,14 @@ public class RemoteEnderChest extends Module {
         List<Item> targetItems = items.get();
         if (targetItems.isEmpty()) return;
 
-        int containerSlots = handler.getRowCount() * 9;
         boolean movedAny = false;
 
-        for (int i = containerSlots; i < handler.slots.size(); i++) {
-            var stack = handler.slots.get(i).getItem();
+        for (int i = 0; i < handler.slots.size(); i++) {
+            Slot slot = handler.slots.get(i);
+
+            if (slot.container != mc.player.getInventory()) continue;
+
+            ItemStack stack = handler.slots.get(i).getItem();
             if (stack == null || stack.isEmpty()) continue;
 
             if (targetItems.contains(stack.getItem())) {
@@ -230,8 +235,12 @@ public class RemoteEnderChest extends Module {
             }
         }
         if (keepInv.get()){
-            for (int i = containerSlots; i < handler.slots.size(); i++) {
-                var stack = handler.slots.get(i).getItem();
+            for (int i = 0; i < handler.slots.size(); i++) {
+                Slot slot = handler.slots.get(i);
+
+                if (slot.container != mc.player.getInventory()) continue;
+
+                ItemStack stack = handler.slots.get(i).getItem();
                 if (stack == null || stack.isEmpty()) continue;
 
                 mc.gameMode.handleContainerInput(handler.containerId, i, 0, ContainerInput.QUICK_MOVE, mc.player);

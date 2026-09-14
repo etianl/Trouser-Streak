@@ -6,6 +6,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
@@ -34,7 +35,7 @@ public class CubePrimer extends Module {
             .name("blocks")
             .description("Blocks to insert into sulfur cubes.")
             .defaultValue(Items.MAGMA_BLOCK, Items.SOUL_SAND, Items.SOUL_SOIL)
-            .filter(item -> item.getDefaultInstance().is(ItemTags.SULFUR_CUBE_SWALLOWABLE))
+            .filter(item -> BuiltInRegistries.ITEM.wrapAsHolder(item).is(ItemTags.SULFUR_CUBE_SWALLOWABLE))
             .visible(insertBlock::get)
             .build()
     );
