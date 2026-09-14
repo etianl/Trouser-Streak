@@ -10,10 +10,13 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.ingame.*;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -214,24 +217,30 @@ public class RemoteEnderChest extends Module {
         if (!(mc.player.currentScreenHandler instanceof GenericContainerScreenHandler handler)) return;
         if (handler.syncId != savedSyncId) return;
 
-        List<Item> targetItems = items.get();
-        if (targetItems.isEmpty()) return;
+        if (items.get().isEmpty()) return;
 
-        int containerSlots = handler.getRows() * 9;
         boolean movedAny = false;
 
-        for (int i = containerSlots; i < handler.slots.size(); i++) {
-            var stack = handler.slots.get(i).getStack();
+        for (int i = 0; i < handler.slots.size(); i++) {
+            Slot slot = handler.slots.get(i);
+
+            if (slot.inventory != mc.player.getInventory()) continue;
+
+            ItemStack stack = handler.slots.get(i).getStack();
             if (stack == null || stack.isEmpty()) continue;
 
-            if (targetItems.contains(stack.getItem())) {
+            if (items.get().contains(stack.getItem())) {
                 mc.interactionManager.clickSlot(handler.syncId, i, 0, SlotActionType.QUICK_MOVE, mc.player);
                 movedAny = true;
             }
         }
         if (keepInv.get()){
-            for (int i = containerSlots; i < handler.slots.size(); i++) {
-                var stack = handler.slots.get(i).getStack();
+            for (int i = 0; i < handler.slots.size(); i++) {
+                Slot slot = handler.slots.get(i);
+
+                if (slot.inventory != mc.player.getInventory()) continue;
+
+                ItemStack stack = handler.slots.get(i).getStack();
                 if (stack == null || stack.isEmpty()) continue;
 
                 mc.interactionManager.clickSlot(handler.syncId, i, 0, SlotActionType.QUICK_MOVE, mc.player);
