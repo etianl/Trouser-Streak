@@ -12,10 +12,11 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import pwn.noobs.trouserstreak.Trouser;
 
 public class HorseInfo extends HudElement {
     public static final HudElementInfo<HorseInfo> INFO = new HudElementInfo<>(
-            Hud.GROUP, "HorseInfo", "Displays horse stats while riding.", HorseInfo::new
+            Trouser.HUD_GROUP, "HorseInfo", "Displays horse stats while riding.", HorseInfo::new
     );
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
