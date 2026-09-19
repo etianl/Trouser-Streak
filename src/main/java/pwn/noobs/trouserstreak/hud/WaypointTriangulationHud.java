@@ -7,13 +7,14 @@ import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import pwn.noobs.trouserstreak.Trouser;
 import pwn.noobs.trouserstreak.modules.WaypointCoordExploit;
 
 import java.util.*;
 
 public class WaypointTriangulationHud extends HudElement {
     public static final HudElementInfo<WaypointTriangulationHud> INFO =
-            new HudElementInfo<>(Hud.GROUP, "waypoint-triangulations", "Shows triangulated player positions from WayPointScanner.", WaypointTriangulationHud::new);
+            new HudElementInfo<>(Trouser.HUD_GROUP, "waypoint-triangulations", "Shows triangulated player positions from WayPointScanner.", WaypointTriangulationHud::new);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final Setting<Boolean> showBackground = sgGeneral.add(new BoolSetting.Builder()

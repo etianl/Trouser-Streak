@@ -3,6 +3,7 @@ package pwn.noobs.trouserstreak;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.systems.hud.Hud;
+import meteordevelopment.meteorclient.systems.hud.HudGroup;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import net.minecraft.world.item.Items;
@@ -17,6 +18,8 @@ public class Trouser extends MeteorAddon {
         public static final Category Main = new Category("TrouserStreak", Items.LEATHER_LEGGINGS::getDefaultInstance);
         public static final Category baseHunting = new Category("TrouserHunting", Items.SPYGLASS::getDefaultInstance);
         public static final Category operator = new Category("TrouserOP/Creative", Items.NETHER_STAR::getDefaultInstance);
+
+        public static final HudGroup HUD_GROUP = new HudGroup("Trouser Streak");
 
         @Override
         public void onInitialize() {
@@ -121,6 +124,7 @@ public class Trouser extends MeteorAddon {
                 Hud.get().register(WaypointTriangulationHud.INFO);
                 Hud.get().register(ElytraCount.INFO);
                 Hud.get().register(HorseInfo.INFO);
+                Hud.get().register(Censor.INFO);
         }
 
         @Override
