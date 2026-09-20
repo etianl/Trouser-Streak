@@ -4,7 +4,6 @@ import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.ColorSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
-import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
@@ -12,10 +11,11 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.passive.AbstractHorseEntity;
+import pwn.noobs.trouserstreak.Trouser;
 
 public class HorseInfo extends HudElement {
     public static final HudElementInfo<HorseInfo> INFO = new HudElementInfo<>(
-            Hud.GROUP, "HorseInfo", "Displays horse stats while riding.", HorseInfo::new
+            Trouser.HUD_GROUP, "HorseInfo", "Displays horse stats while riding.", HorseInfo::new
     );
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
