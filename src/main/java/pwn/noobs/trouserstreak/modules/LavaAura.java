@@ -29,7 +29,6 @@ import pwn.noobs.trouserstreak.Trouser;
 import pwn.noobs.trouserstreak.utils.PermissionUtils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class LavaAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -201,7 +200,7 @@ public class LavaAura extends Module {
     public LavaAura() {
         super(Trouser.Main, "lava-aura", "Places lava buckets around you repeatedly.");
     }
-    private Set<BlockPos> lavaPlaced = new HashSet<>();
+    private final Set<BlockPos> lavaPlaced = new HashSet<>();
     private int ticks = 0;
     private int fireticks = 0;
     private int placementTicks = 0;
@@ -212,31 +211,42 @@ public class LavaAura extends Module {
         float originalYaw = mc.player.getYaw();
         float originalPitch = mc.player.getPitch();
         placementTicks++;
-        // Convert the Iterable to a List and then stream it
-        List<Entity> targetedEntities = new ArrayList<>();
-        for (Entity entity : this.mc.world.getEntities()) {
-            targetedEntities.add(entity);
+
+        List<Entity> sortedEntities = new ArrayList<>();
+
+        double maxRangeSquared = range.get() * range.get();
+
+        this.mc.world.getEntities().forEach(entity -> {
+            if (entity == null || entity == mc.player) return;
+
+            boolean validType = entities.get().contains(entity.getType());
+            boolean validFriend = trollfriends.get()
+                    && entity instanceof PlayerEntity
+                    && !Friends.get().isFriend((PlayerEntity) entity);
+
+            if (!validType && !validFriend) return;
+            if (mc.player.distanceTo(entity) > maxRangeSquared) return;
+
+            sortedEntities.add(entity);
+        });
+
+        sortedEntities.sort(Comparator.comparingDouble(entity ->
+                mc.player.distanceTo(entity)));
+
+        if (sortedEntities.size() > maxtargets.get()) {
+            sortedEntities.subList(maxtargets.get(), sortedEntities.size()).clear();
         }
 
-        // Sort entities based on distance to the player
-        List<Entity> sortedEntities = targetedEntities.stream()
-                .filter(entity -> entity instanceof Entity && entity != mc.player
-                        && (entities.get().contains(entity.getType()) || (trollfriends.get() && entity instanceof PlayerEntity && !Friends.get().isFriend((PlayerEntity) entity))))
-                .sorted(Comparator.comparingDouble(entity -> mc.player.getEntityPos().distanceTo(entity.getEntityPos())))
-                .collect(Collectors.toList());
-
-        // Limit the number of targets based on the maxtargets setting
         int targets = 0;
         if (!lavaeverything.get()){
             for (Entity entity : sortedEntities) {
                 if (targets >= maxtargets.get()) {
                     break;
                 }
-                if (entity instanceof Entity && entity != mc.player) {
+                if (entity != null && entity != mc.player) {
                     if (!entities.get().contains(entity.getType()) || (!trollfriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)))
                         continue;
-                    Entity targetEntity = entity;
-                    Vec3d targetPos = targetEntity.getEntityPos();
+                    Vec3d targetPos = entity.getEntityPos();
 
                     double distance = mc.player.getEntityPos().distanceTo(entity.getEntityPos());
 
@@ -314,7 +324,7 @@ public class LavaAura extends Module {
                                                     blockBelow instanceof TntBlock ||
                                                     blockBelow instanceof TrapdoorBlock ||
                                                     blockBelow instanceof WallHangingSignBlock) &&
-                                            !blockHasOnUseMethod(mc.world.getBlockState(targetBlockPos).getBlock()) && mode.get() == Mode.FIRE) ||
+                                            blockHasOnUseMethod(mc.world.getBlockState(targetBlockPos).getBlock()) && mode.get() == Mode.FIRE) ||
                                             mc.player.isSneaking() && mode.get() == Mode.FIRE) {
                                         if (placementTicks >= placefiretickdelay.get()){
                                             if (!norotate.get())
@@ -384,7 +394,7 @@ public class LavaAura extends Module {
                                             blockBelow instanceof WallHangingSignBlock) &&
                                     mc.world.getBlockState(targetBlockPos).getBlock() != Blocks.WATER &&
                                     mc.world.getBlockState(targetBlockPos).getBlock() != Blocks.LAVA &&
-                                    !blockHasOnUseMethod(mc.world.getBlockState(targetBlockPos).getBlock())) ||
+                                    blockHasOnUseMethod(mc.world.getBlockState(targetBlockPos).getBlock())) ||
                                     (mc.player.isSneaking() &&
                                             mc.world.getBlockState(targetBlockPos).getBlock() != Blocks.WATER &&
                                             mc.world.getBlockState(targetBlockPos).getBlock() != Blocks.LAVA)) {
@@ -476,7 +486,7 @@ public class LavaAura extends Module {
                                                         blockBelow instanceof TntBlock ||
                                                         blockBelow instanceof TrapdoorBlock ||
                                                         blockBelow instanceof WallHangingSignBlock) &&
-                                                !blockHasOnUseMethod(mc.world.getBlockState(blockPos).getBlock())) || mc.player.isSneaking()) {
+                                                blockHasOnUseMethod(mc.world.getBlockState(blockPos).getBlock())) || mc.player.isSneaking()) {
                                             if (placementTicks >= placefiretickdelay.get()){
                                                 if (!norotate.get())mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
                                                 placeFire(blockPos.up());
@@ -484,7 +494,7 @@ public class LavaAura extends Module {
                                                 lavaPlaced.add(blockPos);
                                             }
                                         }
-                                    };
+                                    }
                                 }
                             }
                         }
@@ -516,9 +526,9 @@ public class LavaAura extends Module {
     private boolean blockHasOnUseMethod(Block block) {
         try {
             block.getClass().getDeclaredMethod("onUse", BlockState.class, World.class, BlockPos.class, PlayerEntity.class, Hand.class, BlockHitResult.class);
-            return true;
-        } catch (NoSuchMethodException e) {
             return false;
+        } catch (NoSuchMethodException e) {
+            return true;
         }
     }
     private void placeLava() {
@@ -532,7 +542,7 @@ public class LavaAura extends Module {
         mc.player.getInventory().selectedSlot = prevSlot;
     }
     private void placeFire(BlockPos targetBlockPos) {
-        FindItemResult findItemResult = InvUtils.findInHotbar(Items.FLINT_AND_STEEL);;
+        FindItemResult findItemResult = InvUtils.findInHotbar(Items.FLINT_AND_STEEL);
         if (fireMode.get() == FireMode.FIRE_CHARGE) {
             findItemResult = InvUtils.findInHotbar(Items.FIRE_CHARGE);
         }
