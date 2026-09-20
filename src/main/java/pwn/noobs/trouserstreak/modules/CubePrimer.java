@@ -12,6 +12,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.monster.cubemob.SulfurCube;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import pwn.noobs.trouserstreak.Trouser;
 
@@ -43,7 +44,7 @@ public class CubePrimer extends Module {
     public CubePrimer() {
         super(Trouser.Main, "CubePrimer", "Use a Flint and Steel or Fire Charge on a TNT Sulfur Cube while Shears are in your hotbar to make it primed and ready to explode the moment it absorbs a TNT item. If it absorbs any other dropped block in this state it will become unkillable.");
     }
-    
+
     private int previousslot;
     private boolean interacting;
 
@@ -55,15 +56,14 @@ public class CubePrimer extends Module {
     }
     @EventHandler
     private void onInteract(InteractEntityEvent event) {
+        if (mc.player == null || mc.level == null) return;
         if (!(event.entity instanceof SulfurCube sulfurCube) || interacting) return;
         if (sulfurCube.getBodyArmorItem().getItem() != Items.TNT) return;
         InteractionHand hand = event.hand;
         if (hand == null) return;
 
-        var stack = mc.player.getItemInHand(hand);
+        ItemStack stack = mc.player.getItemInHand(hand);
         if (stack.getItem() != Items.FLINT_AND_STEEL && stack.getItem() != Items.FIRE_CHARGE) return;
-
-        previousslot = mc.player.getInventory().getSelectedSlot();
 
         FindItemResult shearsResult = InvUtils.findInHotbar(Items.SHEARS);
 
@@ -82,11 +82,14 @@ public class CubePrimer extends Module {
             }
             if (blockResult == null || !blockResult.found()) {
                 if (chatFeedback)error("Block for Sulfur Cube not found.");
+                event.cancel();
+                return;
             }
         }
 
         try {
             interacting = true;
+            previousslot = mc.player.getInventory().getSelectedSlot();
             InvUtils.swap(shearsResult.slot(), false);
             mc.getConnection().send(new ServerboundInteractPacket(
                     sulfurCube.getId(),
