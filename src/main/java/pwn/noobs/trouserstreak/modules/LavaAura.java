@@ -12,6 +12,8 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -78,7 +80,6 @@ import pwn.noobs.trouserstreak.Trouser;
 import pwn.noobs.trouserstreak.utils.PermissionUtils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class LavaAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -116,7 +117,7 @@ public class LavaAura extends Module {
     private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Entities to Lava.")
-            .defaultValue(EntityType.PLAYER, EntityType.VILLAGER)
+            .defaultValue(BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("player")), BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("villager")))
             .build()
     );
     public final Setting<Boolean> trollfriends = sgGeneral.add(new BoolSetting.Builder()
@@ -250,7 +251,7 @@ public class LavaAura extends Module {
     public LavaAura() {
         super(Trouser.Main, "lava-aura", "Places lava buckets around you repeatedly.");
     }
-    private Set<BlockPos> lavaPlaced = new HashSet<>();
+    private final Set<BlockPos> lavaPlaced = new HashSet<>();
     private int ticks = 0;
     private int fireticks = 0;
     private int placementTicks = 0;
@@ -261,31 +262,42 @@ public class LavaAura extends Module {
         float originalYaw = mc.player.getYRot();
         float originalPitch = mc.player.getXRot();
         placementTicks++;
-        // Convert the Iterable to a List and then stream it
-        List<Entity> targetedEntities = new ArrayList<>();
-        for (Entity entity : this.mc.level.entitiesForRendering()) {
-            targetedEntities.add(entity);
+
+        List<Entity> sortedEntities = new ArrayList<>();
+
+        double maxRangeSquared = range.get() * range.get();
+
+        this.mc.level.entitiesForRendering().forEach(entity -> {
+            if (entity == null || entity == mc.player) return;
+
+            boolean validType = entities.get().contains(entity.getType());
+            boolean validFriend = trollfriends.get()
+                    && entity instanceof Player
+                    && !Friends.get().isFriend((Player) entity);
+
+            if (!validType && !validFriend) return;
+            if (mc.player.distanceToSqr(entity) > maxRangeSquared) return;
+
+            sortedEntities.add(entity);
+        });
+
+        sortedEntities.sort(Comparator.comparingDouble(entity ->
+                mc.player.distanceToSqr(entity)));
+
+        if (sortedEntities.size() > maxtargets.get()) {
+            sortedEntities.subList(maxtargets.get(), sortedEntities.size()).clear();
         }
 
-        // Sort entities based on distance to the player
-        List<Entity> sortedEntities = targetedEntities.stream()
-                .filter(entity -> entity instanceof Entity && entity != mc.player
-                        && (entities.get().contains(entity.getType()) || (trollfriends.get() && entity instanceof Player && !Friends.get().isFriend((Player) entity))))
-                .sorted(Comparator.comparingDouble(entity -> mc.player.position().distanceTo(entity.position())))
-                .collect(Collectors.toList());
-
-        // Limit the number of targets based on the maxtargets setting
         int targets = 0;
         if (!lavaeverything.get()){
             for (Entity entity : sortedEntities) {
                 if (targets >= maxtargets.get()) {
                     break;
                 }
-                if (entity instanceof Entity && entity != mc.player) {
+                if (entity != null && entity != mc.player) {
                     if (!entities.get().contains(entity.getType()) || (!trollfriends.get() && entity instanceof Player && Friends.get().isFriend((Player) entity)))
                         continue;
-                    Entity targetEntity = entity;
-                    Vec3 targetPos = targetEntity.position();
+                    Vec3 targetPos = entity.position();
 
                     double distance = mc.player.position().distanceTo(entity.position());
 
@@ -363,7 +375,7 @@ public class LavaAura extends Module {
                                                     blockBelow instanceof TntBlock ||
                                                     blockBelow instanceof TrapDoorBlock ||
                                                     blockBelow instanceof WallHangingSignBlock) &&
-                                            !blockHasOnUseMethod(mc.level.getBlockState(targetBlockPos).getBlock()) && mode.get() == Mode.FIRE) ||
+                                            blockHasOnUseMethod(mc.level.getBlockState(targetBlockPos).getBlock()) && mode.get() == Mode.FIRE) ||
                                             mc.player.isShiftKeyDown() && mode.get() == Mode.FIRE) {
                                         if (placementTicks >= placefiretickdelay.get()){
                                             if (!norotate.get())
@@ -433,7 +445,7 @@ public class LavaAura extends Module {
                                             blockBelow instanceof WallHangingSignBlock) &&
                                     mc.level.getBlockState(targetBlockPos).getBlock() != Blocks.WATER &&
                                     mc.level.getBlockState(targetBlockPos).getBlock() != Blocks.LAVA &&
-                                    !blockHasOnUseMethod(mc.level.getBlockState(targetBlockPos).getBlock())) ||
+                                    blockHasOnUseMethod(mc.level.getBlockState(targetBlockPos).getBlock())) ||
                                     (mc.player.isShiftKeyDown() &&
                                             mc.level.getBlockState(targetBlockPos).getBlock() != Blocks.WATER &&
                                             mc.level.getBlockState(targetBlockPos).getBlock() != Blocks.LAVA)) {
@@ -460,7 +472,7 @@ public class LavaAura extends Module {
                     for (int z = (int) -Math.round(range.get()+1); z <= range.get()+1; z++) {
 
                         BlockPos blockPos = playerPos.offset(x, y, z);
-                        double distance = mc.player.position().distanceTo(blockPos.getCenter());
+                        double distance = mc.player.position().distanceTo(Vec3.atCenterOf(blockPos));
                         if (distance <= range.get() && distance > noburnrange.get()) {
                             if (mc.level.getBlockState(blockPos).getBlock() != Blocks.AIR && mc.level.getBlockState(blockPos).getBlock() != Blocks.WATER && mc.level.getBlockState(blockPos).getBlock() != Blocks.LAVA) {
 
@@ -525,7 +537,7 @@ public class LavaAura extends Module {
                                                         blockBelow instanceof TntBlock ||
                                                         blockBelow instanceof TrapDoorBlock ||
                                                         blockBelow instanceof WallHangingSignBlock) &&
-                                                !blockHasOnUseMethod(mc.level.getBlockState(blockPos).getBlock())) || mc.player.isShiftKeyDown()) {
+                                                blockHasOnUseMethod(mc.level.getBlockState(blockPos).getBlock())) || mc.player.isShiftKeyDown()) {
                                             if (placementTicks >= placefiretickdelay.get()){
                                                 if (!norotate.get())mc.player.lookAt(EntityAnchorArgument.Anchor.EYES, new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
                                                 placeFire(blockPos.above());
@@ -533,7 +545,7 @@ public class LavaAura extends Module {
                                                 lavaPlaced.add(blockPos);
                                             }
                                         }
-                                    };
+                                    }
                                 }
                             }
                         }
@@ -565,9 +577,9 @@ public class LavaAura extends Module {
     private boolean blockHasOnUseMethod(Block block) {
         try {
             block.getClass().getDeclaredMethod("onUse", BlockState.class, Level.class, BlockPos.class, Player.class, InteractionHand.class, BlockHitResult.class);
-            return true;
-        } catch (NoSuchMethodException e) {
             return false;
+        } catch (NoSuchMethodException e) {
+            return true;
         }
     }
     private void placeLava() {
@@ -581,7 +593,7 @@ public class LavaAura extends Module {
         mc.player.getInventory().setSelectedSlot(prevSlot);
     }
     private void placeFire(BlockPos targetBlockPos) {
-        FindItemResult findItemResult = InvUtils.findInHotbar(Items.FLINT_AND_STEEL);;
+        FindItemResult findItemResult = InvUtils.findInHotbar(Items.FLINT_AND_STEEL);
         if (fireMode.get() == FireMode.FIRE_CHARGE) {
             findItemResult = InvUtils.findInHotbar(Items.FIRE_CHARGE);
         }
@@ -608,7 +620,7 @@ public class LavaAura extends Module {
                 for (int z = (int) -Math.round(range.get()+1); z <= range.get()+1; z++) {
                     BlockPos blockPos = playerPos.offset(x, y, z);
                     BlockState blockState = mc.level.getBlockState(blockPos);
-                    double distance = mc.player.position().distanceTo(blockPos.getCenter());
+                    double distance = mc.player.position().distanceTo(Vec3.atCenterOf(blockPos));
                     if (distance <= range.get()) {
                         if (blockState.getFluidState().is(Fluids.LAVA)) {
                             // Perform a raycast to check for obstructions
@@ -638,7 +650,7 @@ public class LavaAura extends Module {
                 for (int z = (int) -Math.round(range.get()+1); z <= range.get()+1; z++) {
                     BlockPos blockPos = playerPos.offset(x, y, z);
                     BlockState blockState = mc.level.getBlockState(blockPos);
-                    double distance = mc.player.position().distanceTo(blockPos.getCenter());
+                    double distance = mc.player.position().distanceTo(Vec3.atCenterOf(blockPos));
                     if (distance <= range.get()) {
                         if (blockState.getBlock() == Blocks.FIRE) {
                             if (!ignorewalls.get()){
