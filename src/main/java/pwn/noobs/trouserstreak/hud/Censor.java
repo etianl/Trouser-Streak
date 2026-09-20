@@ -4,10 +4,8 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
-import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import pwn.noobs.trouserstreak.Trouser;
-import pwn.noobs.trouserstreak.modules.AutoNames;
 
 public class Censor extends HudElement {
     public static final HudElementInfo<Censor> INFO = new HudElementInfo<>(Trouser.HUD_GROUP, "Censor", "Place a box on your screen to cover parts of it.", Censor::new);
@@ -68,7 +66,5 @@ public class Censor extends HudElement {
                 textColor.get(),
                 true
         );
-
-
     }
 }
