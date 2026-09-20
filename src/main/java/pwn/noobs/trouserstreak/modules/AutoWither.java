@@ -22,7 +22,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.*;
-import org.lwjgl.glfw.GLFW;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.ArrayList;
@@ -32,6 +31,14 @@ public class AutoWither extends Module {
     private final SettingGroup sgGeneral = this.settings.getDefaultGroup();
     private final SettingGroup sgVisuals = this.settings.createGroup("Visuals");
     private final SettingGroup sgColors = this.settings.createGroup("Colors");
+    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
+            .name("delay")
+            .description("Tick delay between placing blocks.")
+            .defaultValue(0)
+            .min(0)
+            .sliderMax(10)
+            .build()
+    );
     private final Setting<Boolean> airPlace = sgGeneral.add(new BoolSetting.Builder()
             .name("Air Place")
             .description("Allow air placing.")
@@ -89,6 +96,10 @@ public class AutoWither extends Module {
     private BlockPos previewPos;
     private Boolean isBuilding = false;
     private Boolean hasMaterials = false;
+    private final List<BlockPos> pendingBlocks = new ArrayList<>();
+    private final List<BlockPos> pendingSkulls = new ArrayList<>();
+    private int tickDelay = 0;
+    private Runnable currentOnComplete = null;
     @Override
     public void onActivate() {
         info("Press Usekey (RightClick) to build a wither");
@@ -120,7 +131,7 @@ public class AutoWither extends Module {
     @EventHandler
     private void onMouseButton(MouseButtonEvent event){
         if(mc.currentScreen != null) return;//Stop working in GUI
-        if(event.button != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return;
+        if(event.button != 1) return;
         if (isBuilding) return;
         if(event.action == KeyAction.Press){
             event.cancel();
@@ -139,6 +150,51 @@ public class AutoWither extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         hasMaterials = hasWitherMaterials();
+
+        if (!isBuilding) return;
+
+        if (tickDelay > 0) {
+            tickDelay--;
+            return;
+        }
+
+        assert mc.player != null;
+        int originalSlot = mc.player.getInventory().selectedSlot;
+
+        if (delay.get() == 0) {
+            while (!pendingBlocks.isEmpty()) {
+                BlockPos pos = pendingBlocks.remove(0);
+                placeSoulBlock(pos);
+            }
+            while (!pendingSkulls.isEmpty()) {
+                BlockPos pos = pendingSkulls.remove(0);
+                placeBlock(pos, Items.WITHER_SKELETON_SKULL);
+            }
+            mc.player.getInventory().setSelectedSlot(originalSlot);
+            isBuilding = false;
+            if (currentOnComplete != null) {
+                currentOnComplete.run();
+                currentOnComplete = null;
+            }
+        } else {
+            if (!pendingBlocks.isEmpty()) {
+                BlockPos pos = pendingBlocks.remove(0);
+                placeSoulBlock(pos);
+                mc.player.getInventory().setSelectedSlot(originalSlot);
+                tickDelay = delay.get();
+            } else if (!pendingSkulls.isEmpty()) {
+                BlockPos pos = pendingSkulls.remove(0);
+                placeBlock(pos, Items.WITHER_SKELETON_SKULL);
+                mc.player.getInventory().setSelectedSlot(originalSlot);
+                tickDelay = delay.get();
+            } else {
+                isBuilding = false;
+                if (currentOnComplete != null) {
+                    currentOnComplete.run();
+                    currentOnComplete = null;
+                }
+            }
+        }
     }
     @EventHandler
     private void onRender3d(Render3DEvent event) {
@@ -193,50 +249,42 @@ public class AutoWither extends Module {
             previewPos = null;
         }
     }
-    private void placeWither(BlockPos basePos,Runnable onComplete){
-        if(!checkWitherBlocks(basePos)) {
+    private void placeWither(BlockPos basePos, Runnable onComplete) {
+        if (!checkWitherBlocks(basePos)) {
             info("Obstruction prevented wither from being placed");
             onComplete.run();
             return;
         }
-        assert mc.player != null;
-        int originalSlot = mc.player.getInventory().selectedSlot;
+
         Direction direction;
-        if(lockRotation.get()){
+        if (lockRotation.get()) {
             direction = chosenDirection.get().toMcDirection();
-        }else{
+        } else {
             direction = mc.player.getHorizontalFacing();
         }
-        List<BlockPos> blockPositions = new ArrayList<>();
-        List<BlockPos> skullPositions = new ArrayList<>();
-        if(direction == Direction.NORTH||direction == Direction.SOUTH){
-            blockPositions.add(basePos.up().west());
-            blockPositions.add(basePos.up().east());
-            skullPositions.add(basePos.up().west());
-            skullPositions.add(basePos.up().east());
-        }else{
-            blockPositions.add(basePos.up().south());
-            blockPositions.add(basePos.up().north());
-            skullPositions.add(basePos.up().south());
-            skullPositions.add(basePos.up().north());
+
+        pendingBlocks.clear();
+        pendingSkulls.clear();
+
+        if (direction == Direction.NORTH || direction == Direction.SOUTH) {
+            pendingBlocks.add(basePos.up().west());
+            pendingBlocks.add(basePos.up().east());
+            pendingSkulls.add(basePos.up().west());
+            pendingSkulls.add(basePos.up().east());
+        } else {
+            pendingBlocks.add(basePos.up().south());
+            pendingBlocks.add(basePos.up().north());
+            pendingSkulls.add(basePos.up().south());
+            pendingSkulls.add(basePos.up().north());
         }
-        blockPositions.add(basePos);
-        blockPositions.add(basePos.up());
-        if(placeCenterSkull.get()){
-            skullPositions.add(basePos.up());
+        pendingBlocks.add(basePos);
+        pendingBlocks.add(basePos.up());
+        if (placeCenterSkull.get()) {
+            pendingSkulls.add(basePos.up());
         }
 
-        mc.execute(() -> {
-            for (BlockPos pos : blockPositions) {
-                placeSoulBlock(pos);
-            }
-            for (BlockPos pos : skullPositions) {
-                placeBlock(pos, Items.WITHER_SKELETON_SKULL);
-            }
-            mc.player.getInventory().setSelectedSlot(originalSlot);
-            onComplete.run();
-        });
-
+        currentOnComplete = onComplete;
+        tickDelay = 0;
     }
     private boolean checkWitherBlocks(BlockPos basePos){
         List<BlockPos> blockPositions = new ArrayList<>();
