@@ -11,7 +11,6 @@
 package pwn.noobs.trouserstreak.hud;
 
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
@@ -21,9 +20,10 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import pwn.noobs.trouserstreak.Trouser;
 
 public class ElytraCount extends HudElement {
-    public static final HudElementInfo<ElytraCount> INFO = new HudElementInfo<>(Hud.GROUP, "elytra-count", "Displays a count of elytra's in inventory with configurable minimum durability.", ElytraCount::new);
+    public static final HudElementInfo<ElytraCount> INFO = new HudElementInfo<>(Trouser.HUD_GROUP, "elytra-count", "Displays a count of elytra's in inventory with configurable minimum durability.", ElytraCount::new);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgBackground = settings.createGroup("Background");
