@@ -53,7 +53,13 @@ public abstract class TranslationStorageMixin {
             cancellable = true
     )
     private void onGet(String key, String fallback, CallbackInfoReturnable<String> cir) {
-        NoModDetection module = Modules.get().get(NoModDetection.class);
+        // Translations can be requested before Meteor's module system is initialized.
+        Modules modules = Modules.get();
+        if (modules == null) {
+            return;
+        }
+
+        NoModDetection module = modules.get(NoModDetection.class);
         if (module == null || !module.isActive()) {
             return;
         }
