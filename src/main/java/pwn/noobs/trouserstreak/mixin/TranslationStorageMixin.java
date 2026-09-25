@@ -53,6 +53,8 @@ public abstract class TranslationStorageMixin {
             cancellable = true
     )
     private void onGet(String key, String fallback, CallbackInfoReturnable<String> cir) {
+        if (Modules.get() == null) return;
+
         NoModDetection module = Modules.get().get(NoModDetection.class);
         if (module == null || !module.isActive()) {
             return;
