@@ -113,14 +113,14 @@ public class CubePrimer extends Module {
             .defaultValue(420)
             .min(0)
             .sliderRange(0, 1000)
-            .visible(() -> tAura.get() || pAura.get())
+            .visible(() -> stopfuckingupthefarm.get() && (tAura.get() || pAura.get()))
             .build()
     );
     private final Setting<BlockPos> farmCoordinates = sgAuto.add(new BlockPosSetting.Builder()
             .name("farm-coordinate")
             .description("Roughly the center of the Sulfur Cube production.")
             .defaultValue(new BlockPos(694206767, 694206767, 694206767))
-            .visible(() -> tAura.get() || pAura.get())
+            .visible(() -> stopfuckingupthefarm.get() && (tAura.get() || pAura.get()))
             .build()
     );
     private final Setting<Integer> maxEntities = sgAuto.add(new IntSetting.Builder()
