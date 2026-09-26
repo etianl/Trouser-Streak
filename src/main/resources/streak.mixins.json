@@ -21,6 +21,6 @@
     "AbstractBoatEntityMixin",
     "LoadingTerrainScreenMixin",
     "TelemetryManagerMixin",
-    "TranslationStorageMixin"
+    "AbstractSignEditScreenMixin"
   ]
 }
