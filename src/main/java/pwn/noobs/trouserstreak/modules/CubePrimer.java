@@ -102,14 +102,14 @@ public class CubePrimer extends Module {
             .build());
     private final Setting<Boolean> stopfuckingupthefarm = sgAuto.add(new BoolSetting.Builder()
             .name("disable-near-farm")
-            .description("Do not run TNT and Primer Aura code when near a specified coordinate.")
+            .description("Do not run TNT and Ignition Aura code when near a specified coordinate.")
             .defaultValue(true)
             .visible(() -> tAura.get() || pAura.get())
             .build()
     );
     private final Setting<Double> farmDist = sgAuto.add(new DoubleSetting.Builder()
             .name("safe-distance-from-farm")
-            .description("Cubes will not be affected by TNT and Primer aura within this distance of the Farm Coordinate")
+            .description("Cubes will not be affected by TNT and Ignition aura within this distance of the Farm Coordinate")
             .defaultValue(420)
             .min(0)
             .sliderRange(0, 1000)
@@ -154,7 +154,7 @@ public class CubePrimer extends Module {
 
     @Override
     public void onActivate() {
-        if (chatFeedback)error("Use a Flint and Steel or Fire Charge while Shears are in your hotbar to prime a TNT Sulfur Cube.");
+        if (chatFeedback)info("Use a Flint and Steel or Fire Charge while Shears are in your hotbar to prime a TNT Sulfur Cube.");
         dumperTicks = 0;
         tntTicks = 0;
         primerTicks = 0;
@@ -313,12 +313,12 @@ public class CubePrimer extends Module {
         Iterable<Entity> entities = mc.level.entitiesForRendering();
         int processed = 0;
 
+        boolean tnterror = false;
+        boolean ignitionerror = false;
         for (Entity entity : entities) {
             if (processed >= maxEntities.get()) break;
             if (!(entity instanceof SulfurCube sulfurCube)) continue;
             if (sulfurCube.distanceToSqr(mc.player) > range * range) continue;
-
-            boolean acted = false;
 
             if (tAura.get()
                     && sulfurCube.getBodyArmorItem().isEmpty()
@@ -326,29 +326,33 @@ public class CubePrimer extends Module {
 
                 FindItemResult tntResult = InvUtils.findInHotbar(Items.TNT);
 
-                if (tntResult.found()) {
-                    int previousSlot = mc.player.getInventory().getSelectedSlot();
-
-                    try {
-                        InvUtils.swap(tntResult.slot(), false);
-
-                        mc.getConnection().send(new ServerboundInteractPacket(
-                                sulfurCube.getId(),
-                                mc.player.getUsedItemHand(),
-                                sulfurCube.position(),
-                                true
-                        ));
-                    } finally {
-                        if (swapBack.get()) InvUtils.swap(previousSlot, false);
-                    }
-
-                    tntTicks = 0;
-                    acted = true;
+                if (!tntResult.found() && !tnterror) {
+                    if (chatFeedback) error("You need a TNT in your hotbar.");
+                    tnterror = true;
+                    continue;
                 }
+
+                int previousSlot = mc.player.getInventory().getSelectedSlot();
+
+                try {
+                    InvUtils.swap(tntResult.slot(), false);
+
+                    mc.getConnection().send(new ServerboundInteractPacket(
+                            sulfurCube.getId(),
+                            mc.player.getUsedItemHand(),
+                            sulfurCube.position(),
+                            true
+                    ));
+                } finally {
+                    if (swapBack.get()) InvUtils.swap(previousSlot, false);
+                }
+
+                tntTicks = 0;
+                processed++;
+                continue;
             }
 
-            if (!acted
-                    && pAura.get()
+            if (pAura.get()
                     && sulfurCube.getBodyArmorItem().getItem() == Items.TNT
                     && primerTicks >= ignitiontickDelay.get()) {
 
@@ -356,9 +360,10 @@ public class CubePrimer extends Module {
                         ? InvUtils.findInHotbar(Items.FLINT_AND_STEEL, Items.FIRE_CHARGE)
                         : InvUtils.findInHotbar(Items.FIRE_CHARGE, Items.FLINT_AND_STEEL);
 
-                if (!ignitionResult.found()) {
+                if (!ignitionResult.found() && !ignitionerror) {
                     if (chatFeedback) error("You need an ignition method in your hotbar.");
-                    return;
+                    ignitionerror = true;
+                    continue;
                 }
 
                 int previousSlot = mc.player.getInventory().getSelectedSlot();
@@ -380,10 +385,8 @@ public class CubePrimer extends Module {
                 }
 
                 primerTicks = 0;
-                acted = true;
+                processed++;
             }
-
-            if (acted) processed++;
         }
     }
 }
