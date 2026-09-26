@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Random;
 
 public class AutoTexts extends Module {
-    public enum ColorModes {
+    private enum ColorModes {
         aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green,
         dark_purple, dark_red, gold, gray, green, italic, light_purple,
         red, white, yellow

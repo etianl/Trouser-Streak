@@ -68,12 +68,12 @@ public class AirstrikePlus extends Module {
             .description("Name the Entity")
             .defaultValue("MOUNTAINSOFLAVAINC")
             .build());
-    private final Setting<BoomPlus.ColorModes> nomcolor = sgGeneral.add(new EnumSetting.Builder<BoomPlus.ColorModes>()
+    private final Setting<ColorModes> nomcolor = sgGeneral.add(new EnumSetting.Builder<ColorModes>()
             .name("Custom Name Color")
             .description("Color the Name")
-            .defaultValue(BoomPlus.ColorModes.red)
+            .defaultValue(ColorModes.red)
             .build());
-    public enum ColorModes { aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green, dark_purple, dark_red, gold, gray, green, italic, light_purple, red, white, yellow }
+    private enum ColorModes { aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green, dark_purple, dark_red, gold, gray, green, italic, light_purple, red, white, yellow }
     public final Setting<Boolean> randomnomcolor = sgGeneral.add(new BoolSetting.Builder()
             .name("Rainbow Name Colors")
             .description("Name Colors are randomly selected.")
