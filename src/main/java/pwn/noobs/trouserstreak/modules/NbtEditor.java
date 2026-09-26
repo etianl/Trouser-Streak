@@ -47,12 +47,12 @@ public class NbtEditor extends Module {
             .defaultValue("MOUNTAINSOFLAVAINC")
             .visible(() -> mode.get() == Modes.Entity || mode.get() == Modes.Item || mode.get() == Modes.Potion)
             .build());
-    private final Setting<BoomPlus.ColorModes> nomcolor = sgGeneral.add(new EnumSetting.Builder<BoomPlus.ColorModes>()
+    private final Setting<ColorModes> nomcolor = sgGeneral.add(new EnumSetting.Builder<ColorModes>()
             .name("Custom Name Color")
             .description("Color the Name")
-            .defaultValue(BoomPlus.ColorModes.red)
+            .defaultValue(ColorModes.red)
             .build());
-    public enum ColorModes { aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green, dark_purple, dark_red, gold, gray, green, italic, light_purple, red, white, yellow }
+    private enum ColorModes { aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green, dark_purple, dark_red, gold, gray, green, italic, light_purple, red, white, yellow }
     private final Setting<String> entity = sgOptions.add(new StringSetting.Builder()
             .name("Entity to Spawn")
             .description("What is created. Ex: fireball, villager, minecart, lightning_bolt, magma cube, area effect cloud")

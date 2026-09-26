@@ -41,7 +41,7 @@ public class BoomPlus extends Module {
             .description("Color the Name")
             .defaultValue(ColorModes.red)
             .build());
-    public enum ColorModes { aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green, dark_purple, dark_red, gold, gray, green, italic, light_purple, red, white, yellow }
+    private enum ColorModes { aqua, black, blue, dark_aqua, dark_blue, dark_gray, dark_green, dark_purple, dark_red, gold, gray, green, italic, light_purple, red, white, yellow }
     public final Setting<Boolean> customname = sgOptions.add(new BoolSetting.Builder()
             .name("CustomNameVisible")
             .description("CustomNameVisible or not.")
