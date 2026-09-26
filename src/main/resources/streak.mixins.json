@@ -22,6 +22,6 @@
     "LoadingTerrainScreenMixin",
     "StorageLooterItemFilterMixin",
     "TelemetryManagerMixin",
-    "TranslationStorageMixin"
+    "AbstractSignEditScreenMixin"
   ]
 }
