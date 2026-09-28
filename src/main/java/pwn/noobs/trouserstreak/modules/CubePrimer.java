@@ -358,7 +358,7 @@ public class CubePrimer extends Module {
                 return;
             }
 
-            if (ignitionReady && sulfurCube.getBodyArmorItem().getItem() == Items.TNT) {
+            if (ignitionReady && sulfurCube.getBodyArmorItem().getItem() == Items.TNT && !sulfurCube.isPrimed()) {
 
                 FindItemResult ignitionResult = mode.get() == Modes.PreferFlintAndSteel
                         ? InvUtils.findInHotbar(Items.FLINT_AND_STEEL, Items.FIRE_CHARGE)
@@ -369,7 +369,18 @@ public class CubePrimer extends Module {
                     primerTicks = 0;
                     return;
                 }
+                FindItemResult blockResult = null;
 
+                if (insertBlock.get()){
+                    for (Item block : blocks.get()){
+                        blockResult = InvUtils.findInHotbar(block);
+                        if (blockResult.found()) break;
+                    }
+                    if (blockResult == null || !blockResult.found()) {
+                        if (chatFeedback)error("Block for Sulfur Cube not found.");
+                        return;
+                    }
+                }
                 int previousSlot = mc.player.getInventory().getSelectedSlot();
                 try {
                     if (rotateToTarget.get()) rotateTo(sulfurCube);
