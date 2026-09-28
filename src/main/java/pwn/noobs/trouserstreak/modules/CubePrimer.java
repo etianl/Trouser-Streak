@@ -170,6 +170,7 @@ public class CubePrimer extends Module {
         if (mc.player == null || mc.level == null) return;
 
         if (!(mc.level.getEntity(interactPacket.entityId()) instanceof SulfurCube sulfurCube) || interacting) return;
+        if (sulfurCube.isBaby()) return;
         if (sulfurCube.getBodyArmorItem().getItem() != Items.TNT) return;
         InteractionHand hand = interactPacket.hand();
         if (hand == null) return;
@@ -208,7 +209,7 @@ public class CubePrimer extends Module {
                     sulfurCube.getId(),
                     mc.player.getUsedItemHand(),
                     sulfurCube.position(),
-                    true
+                    mc.player.isShiftKeyDown()
             ));
             if (insertBlock.get() && blockResult.found()){
                 InvUtils.swap(blockResult.slot(), false);
@@ -216,7 +217,7 @@ public class CubePrimer extends Module {
                         sulfurCube.getId(),
                         mc.player.getUsedItemHand(),
                         sulfurCube.position(),
-                        true
+                        mc.player.isShiftKeyDown()
                 ));
             }
         } finally {
@@ -257,7 +258,7 @@ public class CubePrimer extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (mc.player == null || mc.level == null || mc.getConnection() == null) return;
+        if (mc.player == null || mc.level == null) return;
 
 
         if (pendingSwapSlot != -1) {
@@ -318,6 +319,7 @@ public class CubePrimer extends Module {
         for (Entity entity : entities) {
             if (processed >= maxEntities.get()) break;
             if (!(entity instanceof SulfurCube sulfurCube)) continue;
+            if (sulfurCube.isBaby()) return;
             if (sulfurCube.distanceToSqr(mc.player) > range * range) continue;
 
             if (tAura.get()
@@ -339,9 +341,9 @@ public class CubePrimer extends Module {
 
                     mc.getConnection().send(new ServerboundInteractPacket(
                             sulfurCube.getId(),
-                            mc.player.getUsedItemHand(),
+                            InteractionHand.MAIN_HAND,
                             sulfurCube.position(),
-                            true
+                            mc.player.isShiftKeyDown()
                     ));
                 } finally {
                     if (swapBack.get()) InvUtils.swap(previousSlot, false);
@@ -371,14 +373,13 @@ public class CubePrimer extends Module {
                 try {
                     InvUtils.swap(ignitionResult.slot(), false);
 
-                    InteractionHand hand = mc.player.getUsedItemHand();
                     Vec3 hitPos = sulfurCube.position();
 
                     mc.getConnection().send(new ServerboundInteractPacket(
                             sulfurCube.getId(),
-                            hand,
+                            InteractionHand.MAIN_HAND,
                             hitPos,
-                            true
+                            mc.player.isShiftKeyDown()
                     ));
                 } finally {
                     if (swapBack.get()) InvUtils.swap(previousSlot, false);
