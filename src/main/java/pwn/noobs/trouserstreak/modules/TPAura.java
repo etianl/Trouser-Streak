@@ -355,12 +355,24 @@ public class TPAura extends Module {
             sendMove(entity, finalPos);
 
             if (rotateToTarget.get()) {
-                Vec3d toTarget = target.getBoundingBox().getCenter().subtract(mc.player.getEyePos()).normalize();
-                float yaw = (float)(Math.toDegrees(Math.atan2(toTarget.z, toTarget.x)) - 90.0);
-                float pitch = (float)-Math.toDegrees(Math.asin(MathHelper.clamp(toTarget.y, -1.0, 1.0)));
-                PlayerMoveC2SPacket rotPacket = new PlayerMoveC2SPacket.LookAndOnGround(yaw, pitch, false, mc.player.horizontalCollision);
-                ((IPlayerMoveC2SPacket) rotPacket).meteor$setTag(1337);
-                mc.player.networkHandler.sendPacket(rotPacket);
+                Vec3d delta = target.getBoundingBox().getCenter()
+                        .subtract(mc.player.getEyePos());
+
+                double horizontal = Math.sqrt(delta.x * delta.x + delta.z * delta.z);
+
+                float yaw = (float) (Math.toDegrees(Math.atan2(delta.z, delta.x)) - 90.0);
+                float pitch = (float) -Math.toDegrees(Math.atan2(delta.y, horizontal));
+
+                PlayerMoveC2SPacket packet =
+                        new PlayerMoveC2SPacket.LookAndOnGround(
+                                yaw,
+                                pitch,
+                                mc.player.isOnGround(),
+                                mc.player.horizontalCollision
+                        );
+
+                ((IPlayerMoveC2SPacket) packet).meteor$setTag(1337);
+                mc.player.networkHandler.sendPacket(packet);
             }
 
             if (swing.get()) {
