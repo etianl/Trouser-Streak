@@ -3,6 +3,7 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.events.entity.player.InteractBlockEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixininterface.IServerboundMovePlayerPacket;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
@@ -11,13 +12,15 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.cubemob.SulfurCube;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
 
@@ -100,6 +103,19 @@ public class CubePrimer extends Module {
             .defaultValue(Modes.PreferFlintAndSteel)
             .visible(pAura::get)
             .build());
+    private final Setting<Boolean> swing = sgGeneral.add(new BoolSetting.Builder()
+            .name("swing arm")
+            .defaultValue(true)
+            .visible(() -> tAura.get() || pAura.get())
+            .build()
+    );
+    private final Setting<Boolean> rotateToTarget = sgGeneral.add(new BoolSetting.Builder()
+            .name("Rotate to Target")
+            .description("Sends a look packet aimed at the target before doing things. Helps hit registration on servers that check facing direction.")
+            .defaultValue(true)
+            .visible(() -> tAura.get() || pAura.get())
+            .build()
+    );
     private final Setting<Boolean> stopfuckingupthefarm = sgAuto.add(new BoolSetting.Builder()
             .name("disable-near-farm")
             .description("Do not run TNT and Ignition Aura code when near a specified coordinate.")
@@ -123,15 +139,6 @@ public class CubePrimer extends Module {
             .visible(() -> stopfuckingupthefarm.get() && (tAura.get() || pAura.get()))
             .build()
     );
-    private final Setting<Integer> maxEntities = sgAuto.add(new IntSetting.Builder()
-            .name("max-entities")
-            .description("Max amount of entities to try to do things to per tick.")
-            .defaultValue(1)
-            .min(1)
-            .sliderRange(1, 20)
-            .visible(() -> tAura.get() || pAura.get())
-            .build()
-    );
     private final Setting<Double> reach = sgAuto.add(new DoubleSetting.Builder()
             .name("Reach (blocks)")
             .description("Cube must be within this range")
@@ -151,6 +158,7 @@ public class CubePrimer extends Module {
     private int primerTicks;
     private int pendingSwapSlot = -1;
     private boolean interacting;
+    private boolean sendingTNTPacket;
 
     @Override
     public void onActivate() {
@@ -160,10 +168,12 @@ public class CubePrimer extends Module {
         primerTicks = 0;
         pendingSwapSlot = -1;
         interacting = false;
+        sendingTNTPacket = false;
     }
     //Cube Primer
     @EventHandler
     private void onPacket(PacketEvent.Send event) {
+        if (sendingTNTPacket) return;
         if (!(event.packet instanceof ServerboundInteractPacket interactPacket)) return;
 
         if (interactPacket.hand() == null) return;
@@ -200,25 +210,14 @@ public class CubePrimer extends Module {
             }
         }
 
-        int previousslot = -1;
+        int previousslot = mc.player.getInventory().getSelectedSlot();
         try {
             interacting = true;
-            previousslot = mc.player.getInventory().getSelectedSlot();
             InvUtils.swap(shearsResult.slot(), false);
-            mc.getConnection().send(new ServerboundInteractPacket(
-                    sulfurCube.getId(),
-                    mc.player.getUsedItemHand(),
-                    sulfurCube.position(),
-                    mc.player.isShiftKeyDown()
-            ));
+            sendCubePacket(sulfurCube);
             if (insertBlock.get() && blockResult.found()){
                 InvUtils.swap(blockResult.slot(), false);
-                mc.getConnection().send(new ServerboundInteractPacket(
-                        sulfurCube.getId(),
-                        mc.player.getUsedItemHand(),
-                        sulfurCube.position(),
-                        mc.player.isShiftKeyDown()
-                ));
+                sendCubePacket(sulfurCube);
             }
         } finally {
             interacting = false;
@@ -309,85 +308,117 @@ public class CubePrimer extends Module {
             primerTicks = 0;
         }
 
+        boolean tntReady = tAura.get() && tntTicks >= tnttickDelay.get();
+        boolean ignitionReady = pAura.get() && primerTicks >= ignitiontickDelay.get();
+
+        if (!tntReady && !ignitionReady) return;
+
         double range = reach.get();
+        double rangeSq = range * range;
 
-        Iterable<Entity> entities = mc.level.entitiesForRendering();
-        int processed = 0;
+        AABB searchBox = mc.player.getBoundingBox().inflate(range);
 
-        boolean tnterror = false;
-        boolean ignitionerror = false;
-        for (Entity entity : entities) {
-            if (processed >= maxEntities.get()) break;
-            if (!(entity instanceof SulfurCube sulfurCube)) continue;
-            if (sulfurCube.isBaby()) return;
-            if (sulfurCube.distanceToSqr(mc.player) > range * range) continue;
+        List<SulfurCube> cubes = mc.level.getEntitiesOfClass(
+                SulfurCube.class,
+                searchBox,
+                cube -> !cube.isBaby()
+        );
 
-            if (tAura.get()
-                    && sulfurCube.getBodyArmorItem().isEmpty()
-                    && tntTicks >= tnttickDelay.get()) {
+        for (SulfurCube sulfurCube : cubes) {
+            if (sulfurCube.distanceToSqr(mc.player) > rangeSq) continue;
+            if (tntReady && sulfurCube.getBodyArmorItem().isEmpty()) {
 
                 FindItemResult tntResult = InvUtils.findInHotbar(Items.TNT);
 
-                if (!tntResult.found() && !tnterror) {
+                if (!tntResult.found()) {
                     if (chatFeedback) error("You need a TNT in your hotbar.");
-                    tnterror = true;
-                    continue;
+                    tntTicks = 0;
+                    return;
                 }
 
                 int previousSlot = mc.player.getInventory().getSelectedSlot();
-
+                sendingTNTPacket = true;
                 try {
+                    if (rotateToTarget.get()) rotateTo(sulfurCube);
+
                     InvUtils.swap(tntResult.slot(), false);
 
-                    mc.getConnection().send(new ServerboundInteractPacket(
-                            sulfurCube.getId(),
-                            InteractionHand.MAIN_HAND,
-                            sulfurCube.position(),
-                            mc.player.isShiftKeyDown()
-                    ));
+                    if (swing.get()) {
+                        mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
+                        mc.player.swing(InteractionHand.MAIN_HAND);
+                    }
+
+                    sendCubePacket(sulfurCube);
                 } finally {
+                    sendingTNTPacket = false;
                     if (swapBack.get()) InvUtils.swap(previousSlot, false);
                 }
 
                 tntTicks = 0;
-                processed++;
-                continue;
+                return;
             }
 
-            if (pAura.get()
-                    && sulfurCube.getBodyArmorItem().getItem() == Items.TNT
-                    && primerTicks >= ignitiontickDelay.get()) {
+            if (ignitionReady && sulfurCube.getBodyArmorItem().getItem() == Items.TNT) {
 
                 FindItemResult ignitionResult = mode.get() == Modes.PreferFlintAndSteel
                         ? InvUtils.findInHotbar(Items.FLINT_AND_STEEL, Items.FIRE_CHARGE)
                         : InvUtils.findInHotbar(Items.FIRE_CHARGE, Items.FLINT_AND_STEEL);
 
-                if (!ignitionResult.found() && !ignitionerror) {
+                if (!ignitionResult.found()) {
                     if (chatFeedback) error("You need an ignition method in your hotbar.");
-                    ignitionerror = true;
-                    continue;
+                    primerTicks = 0;
+                    return;
                 }
 
                 int previousSlot = mc.player.getInventory().getSelectedSlot();
-
                 try {
+                    if (rotateToTarget.get()) rotateTo(sulfurCube);
+
                     InvUtils.swap(ignitionResult.slot(), false);
 
-                    Vec3 hitPos = sulfurCube.position();
+                    if (swing.get()) {
+                        mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
+                        mc.player.swing(InteractionHand.MAIN_HAND);
+                    }
 
-                    mc.getConnection().send(new ServerboundInteractPacket(
-                            sulfurCube.getId(),
-                            InteractionHand.MAIN_HAND,
-                            hitPos,
-                            mc.player.isShiftKeyDown()
-                    ));
+                    sendCubePacket(sulfurCube);
                 } finally {
                     if (swapBack.get()) InvUtils.swap(previousSlot, false);
                 }
 
                 primerTicks = 0;
-                processed++;
+                return;
             }
         }
+    }
+    private void rotateTo(SulfurCube cube) {
+        Vec3 delta = cube.getBoundingBox().getCenter()
+                .subtract(mc.player.getEyePosition());
+
+        double horizontal = Math.sqrt(delta.x * delta.x + delta.z * delta.z);
+
+        float yaw = (float) (Math.toDegrees(Math.atan2(delta.z, delta.x)) - 90.0);
+        float pitch = (float) -Math.toDegrees(Math.atan2(delta.y, horizontal));
+
+        ServerboundMovePlayerPacket packet =
+                new ServerboundMovePlayerPacket.Rot(
+                        yaw,
+                        pitch,
+                        mc.player.onGround(),
+                        mc.player.horizontalCollision
+                );
+
+        ((IServerboundMovePlayerPacket) packet).meteor$setTag(1337);
+        mc.player.connection.send(packet);
+    }
+    private void sendCubePacket(SulfurCube sulfurCube) {
+        if (mc.player == null || mc.getConnection() == null) return;
+
+        mc.getConnection().send(new ServerboundInteractPacket(
+                sulfurCube.getId(),
+                InteractionHand.MAIN_HAND,
+                sulfurCube.position(),
+                mc.player.isShiftKeyDown()
+        ));
     }
 }

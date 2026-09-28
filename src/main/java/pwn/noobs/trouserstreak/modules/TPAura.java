@@ -14,7 +14,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -360,12 +359,24 @@ public class TPAura extends Module {
             sendMove(entity, finalPos);
 
             if (rotateToTarget.get()) {
-                Vec3 toTarget = target.getBoundingBox().getCenter().subtract(mc.player.getEyePosition()).normalize();
-                float yaw = (float)(Math.toDegrees(Math.atan2(toTarget.z, toTarget.x)) - 90.0);
-                float pitch = (float)-Math.toDegrees(Math.asin(Mth.clamp(toTarget.y, -1.0, 1.0)));
-                ServerboundMovePlayerPacket rotPacket = new ServerboundMovePlayerPacket.Rot(yaw, pitch, false, mc.player.horizontalCollision);
-                ((IServerboundMovePlayerPacket) rotPacket).meteor$setTag(1337);
-                mc.player.connection.send(rotPacket);
+                Vec3 delta = target.getBoundingBox().getCenter()
+                        .subtract(mc.player.getEyePosition());
+
+                double horizontal = Math.sqrt(delta.x * delta.x + delta.z * delta.z);
+
+                float yaw = (float) (Math.toDegrees(Math.atan2(delta.z, delta.x)) - 90.0);
+                float pitch = (float) -Math.toDegrees(Math.atan2(delta.y, horizontal));
+
+                ServerboundMovePlayerPacket packet =
+                        new ServerboundMovePlayerPacket.Rot(
+                                yaw,
+                                pitch,
+                                mc.player.onGround(),
+                                mc.player.horizontalCollision
+                        );
+
+                ((IServerboundMovePlayerPacket) packet).meteor$setTag(1337);
+                mc.player.connection.send(packet);
             }
 
             if (swing.get()) {
