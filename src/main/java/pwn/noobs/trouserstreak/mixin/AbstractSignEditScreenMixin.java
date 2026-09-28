@@ -28,7 +28,7 @@ public abstract class AbstractSignEditScreenMixin {
     ) {
         NoModDetection module = Modules.get().get(NoModDetection.class);
 
-        if (module == null || !module.isActive()) {
+        if (module == null || !module.isActive() || !module.filterSign.get()) {
             return stream.map(originalMapper);
         }
 
