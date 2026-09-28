@@ -8,20 +8,22 @@
     "defaultRequire": 1
   },
   "mixins": [
-    "InventoryScreenMixin",
-    "LecternScreenMixin",
-    "accessor.ClientConnectionAccessor",
-    "ShulkerBoxScreenMixin",
-    "PlayerEntityMixin",
-    "TrouserSplashTextMixin",
-    "TrouserHandshakeC2SMixin",
-    "PacketCodecsMixin",
-    "StringEncodingMixin",
     "AbstractBlockMixin",
     "AbstractBoatEntityMixin",
+    "AbstractSignEditScreenMixin",
+    "AnvilScreenHandlerMixin",
+    "AnvilScreenMixin",
+    "InventoryScreenMixin",
+    "LecternScreenMixin",
     "LoadingTerrainScreenMixin",
+    "PacketCodecsMixin",
+    "PlayerEntityMixin",
+    "ShulkerBoxScreenMixin",
     "StorageLooterItemFilterMixin",
+    "StringEncodingMixin",
     "TelemetryManagerMixin",
-    "AbstractSignEditScreenMixin"
+    "TrouserHandshakeC2SMixin",
+    "TrouserSplashTextMixin",
+    "accessor.ClientConnectionAccessor"
   ]
 }
