@@ -256,8 +256,7 @@ public class RemoteEnderChest extends Module {
 
     private boolean isEnderChestScreen(BlockPos echest) {
         if (echest == null || mc.world == null) return false;
-        return mc.currentScreen instanceof GenericContainerScreen screen &&
-                screen.getScreenHandler().getType() == ScreenHandlerType.GENERIC_9X3 &&
+        return mc.currentScreen instanceof GenericContainerScreen &&
                 mc.world.getBlockState(echest).getBlock() == Blocks.ENDER_CHEST;
     }
 
