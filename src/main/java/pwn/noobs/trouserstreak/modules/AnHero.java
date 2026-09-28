@@ -39,6 +39,12 @@ public class AnHero extends Module {
             .defaultValue("I Regret Nothing.")
             .visible(chatmsg::get)
             .build());
+    public final Setting<Boolean> anHeroPreventionDisable = sgGeneral.add(new BoolSetting.Builder()
+            .name("Disable AnHero prevention")
+            .description("Ensures that you become an hero. Without it you may not become an hero to us all.")
+            .defaultValue(true)
+            .build()
+    );
 
     public AnHero() {
         super(Trouser.Main, "AnHero", "Become An Hero!");
@@ -86,7 +92,7 @@ public class AnHero extends Module {
         if (Modules.get().get(TPFly.class).isActive()) {
             Modules.get().get(TPFly.class).toggle();
         }
-        if (Modules.get().get(NoFall.class).isActive()) {
+        if (Modules.get().get(NoFall.class).isActive() && anHeroPreventionDisable.get()) {
             nofallwason=true;
             Modules.get().get(NoFall.class).toggle();
         } else if (!Modules.get().get(NoFall.class).isActive()){
@@ -96,7 +102,7 @@ public class AnHero extends Module {
     }
     @Override
     public void onDeactivate() {
-        if (nofallwason && !Modules.get().get(NoFall.class).isActive()){
+        if (nofallwason && !Modules.get().get(NoFall.class).isActive() && anHeroPreventionDisable.get()){
             Modules.get().get(NoFall.class).toggle();
         }
         Modules.get().get(Timer.class).setOverride(Timer.OFF);
@@ -104,8 +110,9 @@ public class AnHero extends Module {
     }
     @EventHandler
     public void onPreTick(TickEvent.Pre event) {
+        if (mc.player == null) return;
         if (mc.player.getHealth()==0) {
-            if (nofallwason==true && !Modules.get().get(NoFall.class).isActive()){
+            if (nofallwason && !Modules.get().get(NoFall.class).isActive() && anHeroPreventionDisable.get()){
                 Modules.get().get(NoFall.class).toggle();
             }
             Modules.get().get(Timer.class).setOverride(Timer.OFF);
