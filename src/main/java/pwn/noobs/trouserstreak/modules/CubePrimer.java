@@ -196,6 +196,9 @@ public class CubePrimer extends Module {
     private int pendingSwapSlot = -1;
     private boolean interacting;
     private boolean sendingTNTPacket;
+    private boolean tntErrorShown;
+    private boolean shearsErrorShown;
+    private boolean ignitionErrorShown;
 
     @Override
     public void onActivate() {
@@ -209,6 +212,9 @@ public class CubePrimer extends Module {
         pendingSwapSlot = -1;
         interacting = false;
         sendingTNTPacket = false;
+        tntErrorShown = false;
+        shearsErrorShown = false;
+        ignitionErrorShown = false;
     }
     //Cube Primer
     @EventHandler
@@ -410,38 +416,6 @@ public class CubePrimer extends Module {
             }
         }
 
-        if (tntReady && !tntResult.found()) {
-            if (chatFeedback) {
-                error("You need TNT in your hotbar for TNT Aura.");
-            }
-            tntTicks = 0;
-            tntReady = false;
-        }
-
-        if (shearsReady && !shearResult.found()) {
-            if (chatFeedback) {
-                error("You need Shears in your hotbar for Shears Aura.");
-            }
-            shearTicks = 0;
-            shearsReady = false;
-        }
-
-        if (ignitionReady && !ignitionResult.found()) {
-            if (chatFeedback) {
-                error("You need an ignition method in your hotbar for Ignition Aura.");
-            }
-            primerTicks = 0;
-            ignitionReady = false;
-        } else if (ignitionReady && insertBlock.get() && (blockResultForIgnition == null || !blockResultForIgnition.found())) {
-            if (chatFeedback) {
-                error("Block for Sulfur Cube not found for Ignition Aura.");
-            }
-            primerTicks = 0;
-            ignitionReady = false;
-        }
-
-        if (!tntReady && !ignitionReady && !shearsReady) return;
-
         double range = reach.get();
         double rangeSq = range * range;
 
@@ -454,6 +428,61 @@ public class CubePrimer extends Module {
                         && !cube.isDeadOrDying()
                         && !cube.isPrimed()
         );
+
+        cubes.removeIf(cube -> cube.distanceToSqr(mc.player) > rangeSq);
+
+        if (cubes.isEmpty()) {
+            if (tAura.get()) tntTicks = 0;
+            if (pAura.get()) primerTicks = 0;
+            if (sAura.get()) shearTicks = 0;
+            return;
+        }
+
+        if (tntReady && !tntResult.found()) {
+            if (chatFeedback && !tntErrorShown) {
+                error("You need TNT in your hotbar for TNT Aura.");
+                tntErrorShown = true;
+            }
+            tntTicks = 0;
+            tntReady = false;
+        } else if (tntReady) {
+            tntErrorShown = false;
+        }
+
+        if (shearsReady && !shearResult.found()) {
+            if (chatFeedback && !shearsErrorShown) {
+                error("You need Shears in your hotbar for Shears Aura.");
+                shearsErrorShown = true;
+            }
+            shearTicks = 0;
+            shearsReady = false;
+        } else if (shearsReady) {
+            shearsErrorShown = false;
+        }
+
+        if (ignitionReady && !ignitionResult.found()) {
+            if (chatFeedback && !ignitionErrorShown) {
+                error("You need an ignition method in your hotbar for Ignition Aura.");
+                ignitionErrorShown = true;
+            }
+            primerTicks = 0;
+            ignitionReady = false;
+        } else if (ignitionReady) {
+            ignitionErrorShown = false;
+        }
+
+        if (ignitionReady && insertBlock.get() && (blockResultForIgnition == null || !blockResultForIgnition.found())) {
+            if (chatFeedback && !ignitionErrorShown) {
+                error("Block for Sulfur Cube not found for Ignition Aura.");
+                ignitionErrorShown = true;
+            }
+            primerTicks = 0;
+            ignitionReady = false;
+        } else if (ignitionReady && insertBlock.get() && blockResultForIgnition != null && blockResultForIgnition.found()) {
+            ignitionErrorShown = false;
+        }
+
+        if (!tntReady && !ignitionReady && !shearsReady) return;
 
         for (SulfurCube sulfurCube : cubes) {
             if (sulfurCube.distanceToSqr(mc.player) > rangeSq) continue;
