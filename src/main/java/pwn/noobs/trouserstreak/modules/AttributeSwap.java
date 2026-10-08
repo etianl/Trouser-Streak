@@ -32,7 +32,7 @@ public class AttributeSwap extends Module {
             .name("Shield Breaker No Swap")
             .description("Do not attribute swap to another item after shield is broken")
             .defaultValue(true)
-            .visible(() -> shieldBreaker.get())
+            .visible(shieldBreaker::get)
             .build());
     private final Setting<Integer> targetSlot = sgGeneral.add(new IntSetting.Builder()
             .name("target-slot")
@@ -58,7 +58,6 @@ public class AttributeSwap extends Module {
 
     private int prevSlot = -1;
     private int dDelay = 0;
-    private boolean didSwap = false;
 
     public AttributeSwap() {
         super(Trouser.Main, "AttributeSwap", "Swaps attributes of the main hand item with the target slot on attack");
@@ -96,7 +95,7 @@ public class AttributeSwap extends Module {
         if (swapBack.get()) {
             prevSlot = mc.player.getInventory().selectedSlot;
         }
-        didSwap = false;
+        boolean didSwap = false;
 
         if (shieldBreaker.get()) {
             if (targetEntity instanceof PlayerEntity player) {
