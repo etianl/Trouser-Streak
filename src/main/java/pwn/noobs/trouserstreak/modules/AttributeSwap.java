@@ -7,7 +7,6 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.mixininterface.IPlayerInteractEntityC2SPacket;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
@@ -16,7 +15,6 @@ import net.minecraft.item.AxeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
-import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
 import pwn.noobs.trouserstreak.Trouser;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -73,7 +71,6 @@ public class AttributeSwap extends Module {
     private int dDelay = 0;
     private boolean didSwap = false;
     private boolean isSwapping = false;
-    private Registry<Enchantment> enchantmentRegistry;
 
     public AttributeSwap() {
         super(Trouser.Main, "AttributeSwap", "Swaps attributes of the main hand item with the target slot on attack");
@@ -89,15 +86,15 @@ public class AttributeSwap extends Module {
 
         didSwap = false;
 
-        if (enchantmentRegistry == null) enchantmentRegistry = mc.world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
+        var registryLookup = mc.world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
+        var lungeEnchant = registryLookup.getOrThrow(Enchantments.LUNGE);
 
         int bestSlot = -1;
         int bestLevel = 0;
 
         for (int i = 0; i < 9; i++) {
             ItemStack stack = mc.player.getInventory().getMainStacks().get(i);
-
-            int level = EnchantmentHelper.getLevel(enchantmentRegistry.getOrThrow(Enchantments.LUNGE), stack);
+            int level = EnchantmentHelper.getLevel(lungeEnchant, stack);
             if (level > 0 && level >= bestLevel) {
                 bestSlot = i;
                 bestLevel = level;
