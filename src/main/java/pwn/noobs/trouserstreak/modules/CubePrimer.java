@@ -169,7 +169,7 @@ public class CubePrimer extends Module {
             .build()
     );
     public final Setting<Boolean> lagpause = sgAuto.add(new BoolSetting.Builder()
-            .name("Pause if Server Lagging")
+            .name("Pause if No Ticks")
             .description("Pause TNT aura and Ignition aura and Shears aura if server is not ticking")
             .defaultValue(true)
             .visible(() -> tAura.get() || pAura.get() || sAura.get())
@@ -186,7 +186,7 @@ public class CubePrimer extends Module {
     );
 
     public CubePrimer() {
-        super(Trouser.Main, "CubePrimer", "Use a Flint and Steel or Fire Charge on a TNT Sulfur Cube while Shears are in your hotbar to make it primed and ready to explode the moment it absorbs a TNT item. If it absorbs any other dropped block in this state it will become unkillable.");
+        super(Trouser.Main, "CubePrimer", "Use a Flint and Steel, Fire Charge, or Fire Aspect enchanted item on a TNT Sulfur Cube while Shears are in your hotbar to make it primed and ready to explode the moment it absorbs a TNT item. If it absorbs any other dropped block in this state it will become unkillable.");
     }
 
     private int dumperTicks;
