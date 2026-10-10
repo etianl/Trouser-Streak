@@ -54,7 +54,6 @@ public class TrouserSplashTextMixin {
                 "wtf is happening to this server today",
                 "whos building a lag mashines",
                 "!why tps so smalling",
-                "no tps october",
                 "Sulfur cube party at 0, 0",
                 "fdrgeafqrRESGJTURYKJRTDSRGHR!!!!!!",
                 "ehuewifgewiudhyiewqiofyhfliuweqgfouiwq3tgodiwayghfeoiewhjikhlewhfwkuagfdlalihbflo;sdl;pihfehw083yr0328whefoiwuy3prhfjewoiyufhildwshiofc"
