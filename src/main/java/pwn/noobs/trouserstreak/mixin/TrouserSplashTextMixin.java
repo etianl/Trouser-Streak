@@ -51,6 +51,11 @@ public class TrouserSplashTextMixin {
                 "If at first you don't succeed, just use more TNT.",
                 "If at first you don't succeed, grief, grief again",
                 "Stop and take time to smell the explosions.",
+                "wtf is happening to this server today",
+                "whos building a lag mashines",
+                "!why tps so smalling",
+                "no tps october",
+                "Sulfur cube party at 0, 0",
                 "fdrgeafqrRESGJTURYKJRTDSRGHR!!!!!!",
                 "ehuewifgewiudhyiewqiofyhfliuweqgfouiwq3tgodiwayghfeoiewhjikhlewhfwkuagfdlalihbflo;sdl;pihfehw083yr0328whefoiwuy3prhfjewoiyufhildwshiofc"
         );
