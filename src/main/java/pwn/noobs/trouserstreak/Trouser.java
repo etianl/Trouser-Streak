@@ -108,7 +108,6 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new TrouserBuild());
                 Modules.get().add(new UUIDBan());
                 Modules.get().add(new VoiderPlus());
-                Modules.get().add(new WorldEventCoords());
                 Commands.add(new AutoVaultClipCommand());
                 Commands.add(new AutoVclipCommand());
                 Commands.add(new CasterTimer());
