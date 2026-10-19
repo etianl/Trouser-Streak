@@ -41,7 +41,6 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.Palette;
 import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.AABB;
@@ -1123,7 +1122,7 @@ public class NewerNewChunks extends Module {
 				boolean isNewOverworldGeneration = false;
 				boolean isNewNetherGeneration = false;
 				LevelChunkSection[] sections = chunk.getSections();
-				int safeamountofsectionstoscan = Math.min(sections.length, 17);
+                int safeamountofsectionstoscan = Math.min(sections.length, 17);
 				if (overworldOldChunksDetector.get() && mc.level.dimension() == Level.OVERWORLD && chunk.getPersistedStatus().isOrAfter(ChunkStatus.FULL) && !chunk.isEmpty()) {
 					for (int i = 0; i < safeamountofsectionstoscan; i++) {
 						LevelChunkSection section = sections[i];
