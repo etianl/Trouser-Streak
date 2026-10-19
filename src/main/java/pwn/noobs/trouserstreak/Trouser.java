@@ -58,7 +58,6 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new CrossbowMachineGun());
                 Modules.get().add(new CubePrimer());
                 Modules.get().add(new ExplosionAura());
-                Modules.get().add(new EventCoordExploit());
                 Modules.get().add(new FreeBoatRide());
                 Modules.get().add(new FlightAntikick());
                 Modules.get().add(new ForceOPBook());
@@ -123,7 +122,6 @@ public class Trouser extends MeteorAddon {
                 Commands.add(new AutoVaultHclipCommand());
                 Commands.add(new ViewNbtCommand());
                 Commands.add(new WorldInfoCommand());
-                Commands.add(new TriangulateEventsCommand());
                 Hud.get().register(WaypointTriangulationHud.INFO);
                 Hud.get().register(ElytraCount.INFO);
                 Hud.get().register(HorseInfo.INFO);
