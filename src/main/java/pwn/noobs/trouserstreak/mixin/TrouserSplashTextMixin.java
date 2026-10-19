@@ -55,7 +55,6 @@ public class TrouserSplashTextMixin {
                 "whos building a lag mashines",
                 "!why tps so smalling",
                 "Sulfur cube party at 0, 0",
-                "!",
                 "fdrgeafqrRESGJTURYKJRTDSRGHR!!!!!!",
                 "ehuewifgewiudhyiewqiofyhfliuweqgfouiwq3tgodiwayghfeoiewhjikhlewhfwkuagfdlalihbflo;sdl;pihfehw083yr0328whefoiwuy3prhfjewoiyufhildwshiofc"
         );
