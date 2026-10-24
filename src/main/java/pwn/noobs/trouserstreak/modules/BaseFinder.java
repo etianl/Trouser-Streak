@@ -47,6 +47,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.HangingSignBlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
+import net.minecraft.world.level.block.entity.SignTextSlot;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
@@ -1088,9 +1089,9 @@ public class BaseFinder extends Module {
         if (event.packet instanceof ServerboundMovePlayerPacket) return; //this keeps getting cast to the chunkdata for no reason
         if (!(event.packet instanceof ServerboundMovePlayerPacket) && event.packet instanceof ClientboundLevelChunkWithLightPacket packet && mc.level != null) {
 
-            basepos = new ChunkPos(packet.getX(), packet.getZ());
+            basepos = new ChunkPos(packet.x(), packet.z());
 
-            if (mc.level.getChunkSource().getChunkForLighting(packet.getX(), packet.getZ()) == null) {
+            if (mc.level.getChunkSource().getChunkForLighting(packet.x(), packet.z()) == null) {
                 LevelChunk chunk = new LevelChunk(mc.level, basepos);
                 try {
                     Map<Heightmap.Types, long[]> heightmaps = new EnumMap<>(Heightmap.Types.class);
@@ -1100,8 +1101,7 @@ public class BaseFinder extends Module {
                     heightmaps.put(type, emptyHeightmapData);
 
                     CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-                        chunk.replaceWithPacketData(packet.getChunkData().getReadBuffer(), heightmaps,
-                                packet.getChunkData().getBlockEntitiesTagsConsumer(packet.getX(), packet.getZ()));
+                        chunk.replaceWithPacketData(packet.x(), packet.z(), packet.chunkData());
                     }, taskExecutor);
                     future.join();
                 } catch (CompletionException e) {e.printStackTrace();}
@@ -1137,10 +1137,10 @@ public class BaseFinder extends Module {
                                                     for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
                                                         Boolean signtextfound = false;
                                                         if (blockEntity instanceof SignBlockEntity){
-                                                            SignText signText = ((SignBlockEntity) blockEntity).getFrontText();
-                                                            SignText signText2 = ((SignBlockEntity) blockEntity).getBackText();
-                                                            Component[] lines = signText.getMessages(false);
-                                                            Component[] lines2 = signText2.getMessages(false);
+                                                            SignText signText = ((SignBlockEntity) blockEntity).getText(SignTextSlot.FRONT);
+                                                            SignText signText2 = ((SignBlockEntity) blockEntity).getText(SignTextSlot.BACK);
+                                                            List<Component> lines = signText.getMessages(false);
+                                                            List<Component> lines2 = signText2.getMessages(false);
                                                             int i = 0;
                                                             for (Component line : lines) {
                                                                 if (line.tryCollapseToString().length() != 0 && (line.getString() != "<----" && i == 1) && (line.getString() != "---->" && i == 2)){ //handling for arrows is for igloos
@@ -1157,10 +1157,10 @@ public class BaseFinder extends Module {
                                                                 }
                                                             }
                                                         } else if (blockEntity instanceof HangingSignBlockEntity) {
-                                                            SignText signText = ((HangingSignBlockEntity) blockEntity).getFrontText();
-                                                            SignText signText2 = ((HangingSignBlockEntity) blockEntity).getBackText();
-                                                            Component[] lines = signText.getMessages(false);
-                                                            Component[] lines2 = signText2.getMessages(false);
+                                                            SignText signText = ((HangingSignBlockEntity) blockEntity).getText(SignTextSlot.FRONT);
+                                                            SignText signText2 = ((HangingSignBlockEntity) blockEntity).getText(SignTextSlot.BACK);
+                                                            List<Component> lines = signText.getMessages(false);
+                                                            List<Component> lines2 = signText2.getMessages(false);
                                                             for (Component line : lines) {
                                                                 if (line.tryCollapseToString().length() != 0){ //handling for arrows is for igloos
                                                                     signtextfound = true;

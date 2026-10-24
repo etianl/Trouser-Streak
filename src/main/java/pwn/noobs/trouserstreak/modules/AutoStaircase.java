@@ -22,6 +22,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.item.component.SwingAnimation;
 import pwn.noobs.trouserstreak.Trouser;
 
 /**
@@ -72,7 +73,7 @@ public class AutoStaircase extends Module {
         BlockPos pos = mc.player.blockPosition().offset(0,-1,0);
         if (mc.level.getBlockState(pos).canBeReplaced()) {;
             mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-            mc.player.swing(InteractionHand.MAIN_HAND);}
+            mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);}
         if (Modules.get().get(Flight.class).isActive()) {
             Modules.get().get(Flight.class).toggle();
         }
@@ -153,7 +154,7 @@ public class AutoStaircase extends Module {
         if (mc.level.getBlockState(pos).canBeReplaced()) {
             mc.options.keyUp.setDown(false);
             mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-            mc.player.swing(InteractionHand.MAIN_HAND);
+            mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
         }
         if (!mc.level.getBlockState(pos).canBeReplaced()) {
             mc.options.keyUp.setDown(true);

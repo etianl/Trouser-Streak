@@ -106,7 +106,7 @@ public class BoatNoclip extends Module {
             boat.noPhysics = true;
             if (sentPacket) {
                 ServerboundMoveVehiclePacket packet = ServerboundMoveVehiclePacket.fromEntity(boat);
-                ((IVec3) packet.position()).meteor$setY(lastPacketY);
+                ((IVec3) packet.movingTo().position()).meteor$setY(lastPacketY);
                 mc.player.connection.send(packet);
                 sentPacket = false;
             }
@@ -150,10 +150,10 @@ public class BoatNoclip extends Module {
         if (!antiKick.get()) return;
         if (!(mc.player.getVehicle() instanceof AbstractBoat)) return;
 
-        double currentY = packet.position().y;
+        double currentY = packet.movingTo().position().y;
 
         if (delayLeft <= 0 && !sentPacket && shouldFlyDown(currentY) && EntityUtils.isOnAir(mc.player.getVehicle())) {
-            ((IVec3) packet.position()).meteor$setY(lastPacketY - 0.03130D);
+            ((IVec3) packet.movingTo().position()).meteor$setY(lastPacketY - 0.03130D);
             sentPacket = true;
             delayLeft = delay.get();
         }

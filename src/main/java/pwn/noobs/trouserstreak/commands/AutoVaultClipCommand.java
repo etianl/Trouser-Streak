@@ -8,6 +8,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
+import net.minecraft.core.PositionAndRotation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
@@ -38,7 +39,7 @@ public class AutoVaultClipCommand extends Command {
                         for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
                             player.connection.send(ServerboundMoveVehiclePacket.fromEntity(player.getVehicle()));
                         }
-                        mc.getConnection().send(new ServerboundMoveVehiclePacket(new Vec3(vehicle.getX(), isopenair1.getY(), vehicle.getZ()), vehicle.getYRot(), vehicle.getXRot(), false));
+                        mc.getConnection().send(new ServerboundMoveVehiclePacket(PositionAndRotation.of(new Vec3(vehicle.getX(), isopenair1.getY(), vehicle.getZ()), vehicle.getYRot(), vehicle.getXRot()), false));
                         vehicle.setPos(vehicle.getX(), isopenair1.getY(), vehicle.getZ());
                     } else {
                         for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
@@ -66,7 +67,7 @@ public class AutoVaultClipCommand extends Command {
                         for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
                             player.connection.send(ServerboundMoveVehiclePacket.fromEntity(player.getVehicle()));
                         }
-                        mc.getConnection().send(new ServerboundMoveVehiclePacket(new Vec3(vehicle.getX(), isopenair2.getY(), vehicle.getZ()), vehicle.getYRot(), vehicle.getXRot(), false));
+                        mc.getConnection().send(new ServerboundMoveVehiclePacket(PositionAndRotation.of(new Vec3(vehicle.getX(), isopenair2.getY(), vehicle.getZ()), vehicle.getYRot(), vehicle.getXRot()), false));
                         vehicle.setPos(vehicle.getX(), isopenair2.getY(), vehicle.getZ());
                     } else {
                         for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
@@ -98,7 +99,7 @@ public class AutoVaultClipCommand extends Command {
                         for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {
                             player.connection.send(ServerboundMoveVehiclePacket.fromEntity(player.getVehicle()));
                         }
-                        mc.getConnection().send(new ServerboundMoveVehiclePacket(new Vec3(vehicle.getX(), newopenair2.getY(), vehicle.getZ()), vehicle.getYRot(), vehicle.getXRot(), false));
+                        mc.getConnection().send(new ServerboundMoveVehiclePacket(PositionAndRotation.of(new Vec3(vehicle.getX(), newopenair2.getY(), vehicle.getZ()), vehicle.getYRot(), vehicle.getXRot()), false));
                         vehicle.setPos(vehicle.getX(), newopenair2.getY(), vehicle.getZ());
                     } else {
                         for (int packetNumber = 0; packetNumber < (packetsRequired - 1); packetNumber++) {

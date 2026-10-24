@@ -9,6 +9,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
+import net.minecraft.core.PositionAndRotation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -101,7 +102,7 @@ public class AutoVaultHclipCommand extends Command {
         if (entity == mc.player) {
             mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(pos.x, pos.y, pos.z, false, false));
         } else {
-            mc.getConnection().send(new ServerboundMoveVehiclePacket(pos, mc.player.getVehicle().getYRot(), mc.player.getVehicle().getXRot(), false));
+            mc.getConnection().send(new ServerboundMoveVehiclePacket(PositionAndRotation.of(pos, mc.player.getVehicle().getYRot(), mc.player.getVehicle().getXRot()), false));
         }
     }
 

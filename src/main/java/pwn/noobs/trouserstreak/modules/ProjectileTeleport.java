@@ -15,6 +15,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
+import net.minecraft.core.PositionAndRotation;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
 import net.minecraft.resources.Identifier;
@@ -240,7 +241,7 @@ public class ProjectileTeleport extends Module {
     private void onPacketSend(PacketEvent.Send event) {
         if (mc.player == null || mc.level == null || mc.getConnection() == null) return;
         if (event.packet instanceof ServerboundUseItemPacket packet) {
-            ItemStack stack = packet.getHand() == InteractionHand.MAIN_HAND
+            ItemStack stack = packet.hand() == InteractionHand.MAIN_HAND
                     ? mc.player.getMainHandItem()
                     : mc.player.getOffhandItem();
 
@@ -251,7 +252,7 @@ public class ProjectileTeleport extends Module {
                 executingInteract = true;
                 event.cancel();
                 try {
-                    interact(packet.getHand());
+                    interact(packet.hand());
                 } finally {
                     executingInteract = false;
                 }
@@ -395,7 +396,7 @@ public class ProjectileTeleport extends Module {
             ((IServerboundMovePlayerPacket) packet).meteor$setTag(1337);
             mc.player.connection.send(packet);
         } else {
-            mc.player.connection.send(new ServerboundMoveVehiclePacket(pos, entity.getYRot(), entity.getXRot(), false));
+            mc.player.connection.send(new ServerboundMoveVehiclePacket(PositionAndRotation.of(pos, entity.getYRot(), entity.getXRot()), false));
         }
         entity.setPos(pos);
     }

@@ -60,7 +60,7 @@ import net.minecraft.world.level.block.LightBlock;
 import net.minecraft.world.level.block.LoomBlock;
 import net.minecraft.world.level.block.NoteBlock;
 import net.minecraft.world.level.block.RedStoneOreBlock;
-import net.minecraft.world.level.block.RedStoneWireBlock;
+import net.minecraft.world.level.block.RedstoneWireBlock;
 import net.minecraft.world.level.block.RepeaterBlock;
 import net.minecraft.world.level.block.RespawnAnchorBlock;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
@@ -365,7 +365,7 @@ public class LavaAura extends Module {
                                                     blockBelow instanceof LoomBlock ||
                                                     blockBelow instanceof NoteBlock ||
                                                     blockBelow instanceof RedStoneOreBlock ||
-                                                    blockBelow instanceof RedStoneWireBlock ||
+                                                    blockBelow instanceof RedstoneWireBlock ||
                                                     blockBelow instanceof RepeaterBlock ||
                                                     blockBelow instanceof RespawnAnchorBlock ||
                                                     blockBelow instanceof ShulkerBoxBlock ||
@@ -433,7 +433,7 @@ public class LavaAura extends Module {
                                             blockBelow instanceof LoomBlock ||
                                             blockBelow instanceof NoteBlock ||
                                             blockBelow instanceof RedStoneOreBlock ||
-                                            blockBelow instanceof RedStoneWireBlock ||
+                                            blockBelow instanceof RedstoneWireBlock ||
                                             blockBelow instanceof RepeaterBlock ||
                                             blockBelow instanceof RespawnAnchorBlock ||
                                             blockBelow instanceof ShulkerBoxBlock ||
@@ -527,7 +527,7 @@ public class LavaAura extends Module {
                                                         blockBelow instanceof LoomBlock ||
                                                         blockBelow instanceof NoteBlock ||
                                                         blockBelow instanceof RedStoneOreBlock ||
-                                                        blockBelow instanceof RedStoneWireBlock ||
+                                                        blockBelow instanceof RedstoneWireBlock ||
                                                         blockBelow instanceof RepeaterBlock ||
                                                         blockBelow instanceof RespawnAnchorBlock ||
                                                         blockBelow instanceof ShulkerBoxBlock ||

@@ -48,7 +48,7 @@ import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.LightningRodBlock;
 import net.minecraft.world.level.block.ObserverBlock;
 import net.minecraft.world.level.block.PoweredBlock;
-import net.minecraft.world.level.block.RedStoneWireBlock;
+import net.minecraft.world.level.block.RedstoneWireBlock;
 import net.minecraft.world.level.block.RedstoneTorchBlock;
 import net.minecraft.world.level.block.RepeaterBlock;
 import net.minecraft.world.level.block.SculkSensorBlock;
@@ -607,7 +607,7 @@ public class RedstoneNuker extends Module {
                 block instanceof RedstoneTorchBlock ||
                 block instanceof BasePressurePlateBlock ||
                 block instanceof DaylightDetectorBlock ||
-                block instanceof RedStoneWireBlock ||
+                block instanceof RedstoneWireBlock ||
                 block instanceof ComparatorBlock ||
                 block instanceof RepeaterBlock ||
                 block instanceof ButtonBlock ||

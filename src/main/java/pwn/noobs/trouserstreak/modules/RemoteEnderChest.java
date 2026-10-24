@@ -24,8 +24,7 @@ import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.List;
 
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_ALT;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT_ALT;
+import com.mojang.blaze3d.platform.InputConstants;
 
 public class RemoteEnderChest extends Module {
     private final SettingGroup sgGeneral = settings.createGroup("RemoteEnderChest");
@@ -34,7 +33,7 @@ public class RemoteEnderChest extends Module {
     private final Setting<Keybind> toggleGui = sgGeneral.add(new KeybindSetting(
             "GUI Key (Press it)",
             "Key to toggle Ender Chest GUI.",
-            Keybind.fromKey(GLFW_KEY_LEFT_ALT),
+            Keybind.fromKey(InputConstants.KEY_LALT),
             value -> {},
             value -> {},
             null,
@@ -85,7 +84,7 @@ public class RemoteEnderChest extends Module {
     private final Setting<Keybind> itemSaverHotkey = sgItemSaver.add(new KeybindSetting(
             "Item Saver HotKey",
             "You can quickly store items when pressing this button.",
-            Keybind.fromKey(GLFW_KEY_RIGHT_ALT),
+            Keybind.fromKey(InputConstants.KEY_RALT),
             value -> {},
             value -> {},
             null,

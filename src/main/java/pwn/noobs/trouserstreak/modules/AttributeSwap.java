@@ -20,7 +20,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.AxeItem;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -155,7 +155,7 @@ public class AttributeSwap extends Module {
                     if (player.isBlocking()) {
                         for (int i = 0; i < 9; i++) {
                             ItemStack stack = mc.player.getInventory().getNonEquipmentItems().get(i);
-                            if (stack.getItem() instanceof AxeItem) {
+                            if (stack.is(ItemTags.AXES)) {
                                 InvUtils.swap(i, false);
                                 if (stabbed) {
                                     mc.getConnection().send(new ServerboundAttackPacket(targetEntity.getId()));

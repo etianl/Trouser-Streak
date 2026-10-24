@@ -303,7 +303,7 @@ public class CaveDisturbanceDetector extends Module {
 		for (int x = -FPdistance.get(); x < FPdistance.get()+1; x++) {
 			for (int y = -FPdistance.get(); y < FPdistance.get()+1; y++) {
 				for (int z = -FPdistance.get(); z < FPdistance.get()+1; z++) {
-					BlockPos bpos = new BlockPos(disturbance.offset(x,y,z));
+					BlockPos bpos = disturbance.offset(x, y, z);
 					if (bpos.equals(disturbance))continue;
 					if (mc.level.getBlockState(bpos).getBlock() == Blocks.AIR){
 						extraAirFound = true;

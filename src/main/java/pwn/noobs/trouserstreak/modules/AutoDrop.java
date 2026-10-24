@@ -113,7 +113,7 @@ public class AutoDrop extends Module {
                 ItemStack offhandStack = inv.getItem(Inventory.SLOT_OFFHAND);
 
                 if (throwmainhand.get() && (!tool.get() || !isTool(inv.getSelectedItem()))) {
-                    mc.player.drop(true);
+                    mc.gameMode.dropItem(mc.player, true);
                 }
 
                 if (throwoffhand.get() && !offhandStack.isEmpty() && (!tool.get() || !isTool(offhandStack))) {

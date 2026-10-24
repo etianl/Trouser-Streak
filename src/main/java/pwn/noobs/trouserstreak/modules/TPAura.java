@@ -13,6 +13,8 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.*;
+import net.minecraft.core.PositionAndRotation;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -380,8 +382,8 @@ public class TPAura extends Module {
             }
 
             if (swing.get()) {
-                mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
-                mc.player.swing(InteractionHand.MAIN_HAND);
+                mc.getConnection().send(ServerboundPunchPacket.INSTANCE);
+                mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
             }
 
             mc.getConnection().send(new ServerboundAttackPacket(target.getId()));
@@ -440,7 +442,7 @@ public class TPAura extends Module {
             ((IServerboundMovePlayerPacket) movepacket).meteor$setTag(1337);
             mc.player.connection.send(movepacket);
         } else {
-            mc.getConnection().send(new ServerboundMoveVehiclePacket(pos, mc.player.getVehicle().getYRot(), mc.player.getVehicle().getXRot(), false));
+            mc.getConnection().send(new ServerboundMoveVehiclePacket(PositionAndRotation.of(pos, mc.player.getVehicle().getYRot(), mc.player.getVehicle().getXRot()), false));
         }
     }
     private Vec3 getOffset(Vec3 base) {
