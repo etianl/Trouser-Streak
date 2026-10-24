@@ -14,6 +14,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
+import net.minecraft.core.PositionAndRotation;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
@@ -265,7 +266,7 @@ public class ProjectileLauncher extends Module {
         Packet<?> packetToSend = event.packet;
 
         if (event.packet instanceof ServerboundUseItemPacket packet) {
-            ItemStack stack = packet.getHand() == InteractionHand.MAIN_HAND
+            ItemStack stack = packet.hand() == InteractionHand.MAIN_HAND
                     ? mc.player.getMainHandItem()
                     : mc.player.getOffhandItem();
 
@@ -419,7 +420,7 @@ public class ProjectileLauncher extends Module {
             ((IServerboundMovePlayerPacket) movepacket).meteor$setTag(1337);
             mc.player.connection.send(movepacket);
         } else {
-            mc.getConnection().send(new ServerboundMoveVehiclePacket(pos, entity.getYRot(), entity.getXRot(), false));
+            mc.getConnection().send(new ServerboundMoveVehiclePacket(PositionAndRotation.of(pos, entity.getYRot(), entity.getXRot()), false));
         }
     }
 

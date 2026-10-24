@@ -16,7 +16,8 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
-import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.network.protocol.game.ServerboundPunchPacket;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
@@ -387,7 +388,7 @@ public class StorageLooter extends Module {
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
         if (event.packet instanceof ServerboundUseItemOnPacket) {
-            lastInteractedBlockPos = ((ServerboundUseItemOnPacket) event.packet).getHitResult().getBlockPos();
+            lastInteractedBlockPos = ((ServerboundUseItemOnPacket) event.packet).hitResult().getBlockPos();
         }
         else if (event.packet instanceof ServerboundInteractPacket packet) {
             Entity entity = mc.level.getEntity(getEntityId(packet));
@@ -480,8 +481,8 @@ public class StorageLooter extends Module {
                                 mc.player.lookAt(EntityAnchorArgument.Anchor.EYES, new Vec3(entity.getX(), entity.getY(), entity.getZ()));
                             }
                             if (swing.get()){
-                                mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
-                                mc.player.swing(InteractionHand.MAIN_HAND);
+                                mc.getConnection().send(ServerboundPunchPacket.INSTANCE);
+                                mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
                             }
                             EntityHitResult hitResult = new EntityHitResult(entity, Vec3.atCenterOf(entity.blockPosition()));
                             mc.gameMode.interact(mc.player, entity, hitResult, InteractionHand.MAIN_HAND);
@@ -752,8 +753,8 @@ public class StorageLooter extends Module {
             mc.player.lookAt(EntityAnchorArgument.Anchor.EYES, new Vec3(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
         }
         if (swing.get()){
-            mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
-            mc.player.swing(InteractionHand.MAIN_HAND);
+            mc.getConnection().send(ServerboundPunchPacket.INSTANCE);
+            mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
         }
         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(blockPos), Direction.UP, blockPos, true));
         chestsToProcess.put(blockPos, opendelay.get());

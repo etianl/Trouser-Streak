@@ -15,7 +15,8 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
-import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.network.protocol.game.ServerboundPunchPacket;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
@@ -212,8 +213,8 @@ public class InstaMineNuker extends Module {
                         if (direction != null) {
                             Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, blockPos, direction)));
                             if (swing.get()){
-                                mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
-                                mc.player.swing(InteractionHand.MAIN_HAND);
+                                mc.getConnection().send(ServerboundPunchPacket.INSTANCE);
+                                mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
                             }
                         }
                     }
@@ -221,8 +222,8 @@ public class InstaMineNuker extends Module {
                         renderBlocks.add(renderBlockPool.get().set(blockPos));
                         mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                         if (swing.get()){
-                            mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
-                            mc.player.swing(InteractionHand.MAIN_HAND);
+                            mc.getConnection().send(ServerboundPunchPacket.INSTANCE);
+                            mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
                         }
                     }
                     if (((listmode.get()== listModes.whitelist && nonskippableBlox.get().contains(mc.level.getBlockState(blockPos).getBlock())) || (listmode.get()== listModes.blacklist && !skippableBlox.get().contains(mc.level.getBlockState(blockPos).getBlock()))) && rotate.get() && BlockUtils.canBreak(blockPos) && BlockUtils.canInstaBreak(blockPos)){
@@ -241,8 +242,8 @@ public class InstaMineNuker extends Module {
                         if (direction != null) {
                             Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, blockPos, direction)));
                             if (swing.get()){
-                                mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
-                                mc.player.swing(InteractionHand.MAIN_HAND);
+                                mc.getConnection().send(ServerboundPunchPacket.INSTANCE);
+                                mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
                             }
                         }
                     }
@@ -250,8 +251,8 @@ public class InstaMineNuker extends Module {
                         renderBlocks.add(renderBlockPool.get().set(blockPos));
                         mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
                         if (swing.get()){
-                            mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
-                            mc.player.swing(InteractionHand.MAIN_HAND);
+                            mc.getConnection().send(ServerboundPunchPacket.INSTANCE);
+                            mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
                         }
                     }
                     if (((listmode.get()== listModes.whitelist && nonskippableBlox.get().contains(mc.level.getBlockState(blockPos).getBlock())) || (listmode.get()== listModes.blacklist && !skippableBlox.get().contains(mc.level.getBlockState(blockPos).getBlock()))) && rotate.get() && BlockUtils.canBreak(blockPos)){

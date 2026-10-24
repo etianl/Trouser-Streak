@@ -8,7 +8,8 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ServerboundAttackPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
-import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.network.protocol.game.ServerboundPunchPacket;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -141,8 +142,8 @@ public class MaceKill extends Module {
 
                 sendingAttacks = true;
                 if (swing.get()) {
-                    mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
-                    mc.player.swing(InteractionHand.MAIN_HAND);
+                    mc.getConnection().send(ServerboundPunchPacket.INSTANCE);
+                    mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
                 }
                 mc.player.connection.send(
                         new ServerboundAttackPacket(targetEntity.getId())

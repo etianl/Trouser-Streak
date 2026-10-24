@@ -15,7 +15,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.ServerboundAttackPacket;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
-import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.network.protocol.game.ServerboundPunchPacket;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.monster.cubemob.SulfurCube;
@@ -494,8 +495,8 @@ public class CubePrimer extends Module {
                     if (rotateToTarget.get()) rotateTo(sulfurCube);
                     InvUtils.swap(tntResult.slot(), false);
                     if (swing.get()) {
-                        mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
-                        mc.player.swing(InteractionHand.MAIN_HAND);
+                        mc.getConnection().send(ServerboundPunchPacket.INSTANCE);
+                        mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
                     }
                     sendCubePacket(sulfurCube);
                 } finally {
@@ -512,8 +513,8 @@ public class CubePrimer extends Module {
                     if (rotateToTarget.get()) rotateTo(sulfurCube);
                     InvUtils.swap(shearResult.slot(), false);
                     if (swing.get()) {
-                        mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
-                        mc.player.swing(InteractionHand.MAIN_HAND);
+                        mc.getConnection().send(ServerboundPunchPacket.INSTANCE);
+                        mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
                     }
                     sendCubePacket(sulfurCube);
                 } finally {
@@ -529,8 +530,8 @@ public class CubePrimer extends Module {
                     if (rotateToTarget.get()) rotateTo(sulfurCube);
                     InvUtils.swap(ignitionResult.slot(), false);
                     if (swing.get()) {
-                        mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
-                        mc.player.swing(InteractionHand.MAIN_HAND);
+                        mc.getConnection().send(ServerboundPunchPacket.INSTANCE);
+                        mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
                     }
                     if (mode.get() == Modes.FireAspectOnly){
                         mc.getConnection().send(new ServerboundAttackPacket(

@@ -10,6 +10,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
+import net.minecraft.core.PositionAndRotation;
 import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Input;
@@ -120,7 +121,7 @@ public class FreeBoatRide extends Module {
                 ? mc.player.getVehicle()
                 : mc.player;
         targetPos = entity.position().add(0,-distance.get(),0);
-        mc.getConnection().send(new ServerboundMoveVehiclePacket(targetPos, mc.player.getVehicle().getYRot(), mc.player.getVehicle().getXRot(), false));
+        mc.getConnection().send(new ServerboundMoveVehiclePacket(PositionAndRotation.of(targetPos, mc.player.getVehicle().getYRot(), mc.player.getVehicle().getXRot()), false));
         entity.setPos(targetPos);
     }
 }

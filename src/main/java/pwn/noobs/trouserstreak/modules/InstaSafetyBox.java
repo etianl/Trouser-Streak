@@ -14,7 +14,8 @@ import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.item.BedItem;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DoubleHighBlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -52,7 +53,7 @@ import net.minecraft.world.level.block.LadderBlock;
 import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.block.PointedDripstoneBlock;
 import net.minecraft.world.level.block.PressurePlateBlock;
-import net.minecraft.world.level.block.RedStoneWireBlock;
+import net.minecraft.world.level.block.RedstoneWireBlock;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.SlabBlock;
@@ -218,7 +219,7 @@ public class InstaSafetyBox extends Module {
 
                 if (!Objects.equals(blockPos, new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ())) && blockPos != new BlockPos(mc.player.getBlockX(), mc.player.getBlockY()+1, mc.player.getBlockZ()) && mc.level.getBlockState(blockPos).getBlock().defaultBlockState().canBeReplaced() && !isInvalidBlock(mc.player.getMainHandItem().getItem().getDefaultInstance())) {
                     if (rotate.get())Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos));
-                    if (swing.get())mc.player.swing(InteractionHand.MAIN_HAND);
+                    if (swing.get())mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
                     mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(blockPos), Direction.DOWN, blockPos, false));
                     count++;
                 }
@@ -269,7 +270,7 @@ public class InstaSafetyBox extends Module {
     }
     private boolean isInvalidBlock(ItemStack stack) {
         return !(stack.getItem() instanceof BlockItem)
-                || stack.getItem() instanceof BedItem
+                || stack.is(ItemTags.BEDS)
                 || stack.getItem() instanceof SolidBucketItem
                 || stack.getItem() instanceof ScaffoldingBlockItem
                 || stack.getItem() instanceof DoubleHighBlockItem
@@ -278,7 +279,7 @@ public class InstaSafetyBox extends Module {
                 || ((BlockItem) stack.getItem()).getBlock() instanceof VegetationBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof TorchBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof DiodeBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof RedStoneWireBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof RedstoneWireBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof FenceBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof WallBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof FenceGateBlock

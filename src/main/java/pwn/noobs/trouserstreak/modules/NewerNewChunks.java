@@ -1102,16 +1102,16 @@ public class NewerNewChunks extends Module {
 			}
 		}
 		else if (!(event.packet instanceof ServerboundMovePlayerPacket) && event.packet instanceof ClientboundLevelChunkWithLightPacket packet && mc.level != null) {
-			ChunkPos oldpos = new ChunkPos(packet.getX(), packet.getZ());
+			ChunkPos oldpos = new ChunkPos(packet.x(), packet.z());
 
-			if (mc.level.getChunkSource().getChunkForLighting(packet.getX(), packet.getZ()) == null) {
+			if (mc.level.getChunkSource().getChunkForLighting(packet.x(), packet.z()) == null) {
 				LevelChunk chunk = new LevelChunk(mc.level, oldpos);
 				try {
-					CompletableFuture<Void> future = CompletableFuture.runAsync(() -> chunk.replaceWithPacketData(packet.getChunkData().getReadBuffer(), packet.getChunkData().getHeightmaps(), packet.getChunkData().getBlockEntitiesTagsConsumer(packet.getX(), packet.getZ())), taskExecutor);
+					CompletableFuture<Void> future = CompletableFuture.runAsync(() -> chunk.replaceWithPacketData(packet.x(), packet.z(), packet.chunkData()), taskExecutor);
 					future.join();
 				} catch (CompletionException e) {
 					Throwable cause = e.getCause() != null ? e.getCause() : e;
-					LOGGER.error("Failed to apply chunk packet data for chunk [{}, {}]", packet.getX(), packet.getZ(), cause);
+					LOGGER.error("Failed to apply chunk packet data for chunk [{}, {}]", packet.x(), packet.z(), cause);
 					return;
 				}
 
