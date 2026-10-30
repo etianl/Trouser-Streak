@@ -11,6 +11,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
@@ -157,7 +158,7 @@ public class TrailMaker extends Module {
                         if (mc.level.getBlockState(new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-2)).canBeReplaced())
                             mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(new Vec3(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-2), Direction.DOWN, new BlockPos(rememberedblock.getX(), rememberedblock.getY() + ph, rememberedblock.getZ()-2), false));
                     }
-                    mc.player.swing(InteractionHand.MAIN_HAND);
+                    mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                 }
                     }
             if (placeticks>=Math.round(placetickdelay.get()*20)){

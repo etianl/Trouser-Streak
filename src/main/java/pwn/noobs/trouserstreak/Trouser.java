@@ -118,7 +118,7 @@ public class Trouser extends MeteorAddon {
                 Commands.add(new GarbageCleanerCommand());
                 Commands.add(new LavaTimeCalculator());
                 Commands.add(new TextCommand());
-                Commands.add(new vaultHclipCommand());
+                Commands.add(new VaultHclipCommand());
                 Commands.add(new AutoVaultHclipCommand());
                 Commands.add(new ViewNbtCommand());
                 Commands.add(new WorldInfoCommand());

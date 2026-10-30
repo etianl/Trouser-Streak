@@ -5,15 +5,15 @@ import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
-import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.PositionAndRotation;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-public class vaultHclipCommand extends Command {
-    public vaultHclipCommand() {
+public class VaultHclipCommand extends Command {
+    public VaultHclipCommand() {
         super("vault-hclip", "Uses vault clip to \"hclip\" through blocks");
     }
 
@@ -72,7 +72,7 @@ public class vaultHclipCommand extends Command {
         if (entity == mc.player) {
             mc.getConnection().send(new ServerboundMovePlayerPacket.Pos(pos.x, pos.y, pos.z, false, false));
         } else {
-            mc.getConnection().send(new ServerboundMoveVehiclePacket(pos, mc.player.getVehicle().getYRot(), mc.player.getVehicle().getXRot(), false));
+            mc.getConnection().send(new ServerboundMoveVehiclePacket(new PositionAndRotation.Immutable(pos, mc.player.getVehicle().getYRot(), mc.player.getVehicle().getXRot()), false));
         }
     }
 

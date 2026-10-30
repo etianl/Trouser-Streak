@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.PositionAndRotation;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.resources.Identifier;
@@ -20,6 +21,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -380,8 +382,8 @@ public class TPAura extends Module {
             }
 
             if (swing.get()) {
-                mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
-                mc.player.swing(InteractionHand.MAIN_HAND);
+                mc.getConnection().send(new ServerboundPunchPacket());
+                mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
             }
 
             mc.getConnection().send(new ServerboundAttackPacket(target.getId()));
@@ -440,7 +442,7 @@ public class TPAura extends Module {
             ((IServerboundMovePlayerPacket) movepacket).meteor$setTag(1337);
             mc.player.connection.send(movepacket);
         } else {
-            mc.getConnection().send(new ServerboundMoveVehiclePacket(pos, mc.player.getVehicle().getYRot(), mc.player.getVehicle().getXRot(), false));
+            mc.getConnection().send(new ServerboundMoveVehiclePacket(new PositionAndRotation.Immutable(pos, mc.player.getVehicle().getYRot(), mc.player.getVehicle().getXRot()), false));
         }
     }
     private Vec3 getOffset(Vec3 base) {

@@ -238,7 +238,7 @@ public class BetterScaffold extends Module {
                             assert mc.level != null;
                             for (int y = (int) Math.max(mc.level.getMinY(), mc.player.getY() - placeRange.get()); y < Math.min(mc.level.getMaxY(), mc.player.getY() + placeRange.get()); y++) {
                                 bp.set(x, y, z);
-                                if (!mc.level.getBlockState(bp).isAir()) blockPosArray.add(new BlockPos(bp));
+                                if (!mc.level.getBlockState(bp).isAir()) blockPosArray.add(bp.immutable());
                             }
                         }
                     }

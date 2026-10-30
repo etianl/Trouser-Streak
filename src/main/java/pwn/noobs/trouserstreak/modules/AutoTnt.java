@@ -11,6 +11,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -75,7 +76,7 @@ public class AutoTnt extends Module {
         if (mc.player == null || mc.level == null || igniting) return;
 
         if (event.packet instanceof ServerboundUseItemOnPacket packet) {
-            BlockHitResult hit = packet.getHitResult();
+            BlockHitResult hit = packet.hitResult();
             BlockPos clicked = hit.getBlockPos();
             BlockPos offset  = clicked.relative(hit.getDirection());
 
@@ -135,7 +136,7 @@ public class AutoTnt extends Module {
             Vec3 hitVec = Vec3.atCenterOf(ignitePos);
             BlockHitResult hit = new BlockHitResult(hitVec, Direction.UP, ignitePos, false);
             mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, hit);
-            mc.player.swing(InteractionHand.MAIN_HAND);
+            mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 
             mc.player.getInventory().setSelectedSlot(originalSlot);
             ignitePos = null;
@@ -186,7 +187,7 @@ public class AutoTnt extends Module {
         Vec3 hitVec = Vec3.atCenterOf(pos);
         BlockHitResult hit = new BlockHitResult(hitVec, Direction.UP, pos, false);
         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, hit);
-        mc.player.swing(InteractionHand.MAIN_HAND);
+        mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 
         mc.player.getInventory().setSelectedSlot(prevSlot);
         igniting = false;

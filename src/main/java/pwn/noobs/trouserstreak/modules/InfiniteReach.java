@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.PositionAndRotation;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -20,6 +21,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -494,8 +496,8 @@ public class InfiniteReach extends Module {
         }
 
         if (swing.get()) {
-            mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
-            mc.player.swing(InteractionHand.MAIN_HAND);
+            mc.getConnection().send(new ServerboundPunchPacket());
+            mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
         }
 
         if (phoneHome.get()) {
@@ -549,8 +551,8 @@ public class InfiniteReach extends Module {
         else mc.getConnection().send(new ServerboundInteractPacket(target.getId(), mc.player.getUsedItemHand(), target.position(), true));
 
         if (swing.get()) {
-            mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
-            mc.player.swing(InteractionHand.MAIN_HAND);
+            mc.getConnection().send(new ServerboundPunchPacket());
+            mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
         }
         if (phoneHome.get()){
             if (mode.get() == Mode.Paper && goUp.get()){
@@ -635,7 +637,7 @@ public class InfiniteReach extends Module {
             ((IServerboundMovePlayerPacket) movepacket).meteor$setTag(1337);
             mc.player.connection.send(movepacket);
         } else {
-            mc.getConnection().send(new ServerboundMoveVehiclePacket(pos, mc.player.getVehicle().getYRot(), mc.player.getVehicle().getXRot(), false));
+            mc.getConnection().send(new ServerboundMoveVehiclePacket(new PositionAndRotation.Immutable(pos, mc.player.getVehicle().getYRot(), mc.player.getVehicle().getXRot()), false));
         }
     }
     private Vec3 getOffset(Vec3 base) {

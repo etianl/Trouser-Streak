@@ -8,6 +8,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.PositionAndRotation;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
@@ -120,7 +121,7 @@ public class FreeBoatRide extends Module {
                 ? mc.player.getVehicle()
                 : mc.player;
         targetPos = entity.position().add(0,-distance.get(),0);
-        mc.getConnection().send(new ServerboundMoveVehiclePacket(targetPos, mc.player.getVehicle().getYRot(), mc.player.getVehicle().getXRot(), false));
+        mc.getConnection().send(new ServerboundMoveVehiclePacket(new PositionAndRotation.Immutable(targetPos, mc.player.getVehicle().getYRot(), mc.player.getVehicle().getXRot()), false));
         entity.setPos(targetPos);
     }
 }

@@ -491,7 +491,7 @@ public class AirstrikePlus extends Module {
                 } else namecolour = nomcolor.get().toString();
                 ItemStack bomb = new ItemStack(Items.SALMON_SPAWN_EGG);
                 ItemStack bfr = mc.player.getMainHandItem();
-                BlockHitResult bhr = new BlockHitResult(mc.player.position().add(0, 1, 0), Direction.UP, new BlockPos(mc.player.blockPosition().offset(0, 1, 0)), false);
+                BlockHitResult bhr = new BlockHitResult(mc.player.position().add(0, 1, 0), Direction.UP, mc.player.blockPosition().offset(0, 1, 0), false);
                 i++;
                 if (mc.player.getAbilities().instabuild) {
                     if (i >= delay.get()) {

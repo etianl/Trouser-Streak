@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.systems.modules.player.AntiHunger;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.PositionAndRotation;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
@@ -265,7 +266,7 @@ public class ProjectileLauncher extends Module {
         Packet<?> packetToSend = event.packet;
 
         if (event.packet instanceof ServerboundUseItemPacket packet) {
-            ItemStack stack = packet.getHand() == InteractionHand.MAIN_HAND
+            ItemStack stack = packet.hand() == InteractionHand.MAIN_HAND
                     ? mc.player.getMainHandItem()
                     : mc.player.getOffhandItem();
 
@@ -419,7 +420,7 @@ public class ProjectileLauncher extends Module {
             ((IServerboundMovePlayerPacket) movepacket).meteor$setTag(1337);
             mc.player.connection.send(movepacket);
         } else {
-            mc.getConnection().send(new ServerboundMoveVehiclePacket(pos, entity.getYRot(), entity.getXRot(), false));
+            mc.getConnection().send(new ServerboundMoveVehiclePacket(new PositionAndRotation.Immutable(pos, entity.getYRot(), entity.getXRot()), false));
         }
     }
 
