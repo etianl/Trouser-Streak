@@ -19,33 +19,33 @@ public abstract class ClientCommonPacketListenerImplMixin {
     public abstract void sendPacket(Packet<?> packet);
 
     @Unique
-    private static final ThreadLocal<Boolean> trouser$sendingTickEnd =
-            ThreadLocal.withInitial(() -> false);
+    private static final ThreadLocal<Boolean> trouser$sendingTickEnd = ThreadLocal.withInitial(() -> false);
 
     @Unique
-    private boolean trouser$lastPacketWasTickEnd;
+    private boolean trouser$positionSentSinceTickEnd;
 
     @Inject(
             method = "sendPacket(Lnet/minecraft/network/packet/Packet;)V",
             at = @At("HEAD")
     )
-    private void trouser$sendTickEndBeforePositionMove(Packet<?> packet, CallbackInfo ci) {
-        trouser$lastPacketWasTickEnd = packet instanceof ClientTickEndC2SPacket;
 
-        if (!MovementPatch.isEnabled()) {
+    private void trouser$sendTickEndBeforeDuplicatePosition(Packet<?> packet, CallbackInfo ci) {
+        if (packet instanceof ClientTickEndC2SPacket) {
+            trouser$positionSentSinceTickEnd = false;
             return;
         }
 
-        if (!(packet instanceof PlayerMoveC2SPacket movePacket) || !movePacket.changesPosition()) {
+        if (!MovementPatch.isEnabled()) return;
+
+        if (!(packet instanceof PlayerMoveC2SPacket movePacket)
+                || !movePacket.changesPosition()) {
             return;
         }
 
-        if (trouser$sendingTickEnd.get()) {
-            return;
-        }
+        if (trouser$sendingTickEnd.get()) return;
 
-        if (trouser$lastPacketWasTickEnd) {
-            trouser$lastPacketWasTickEnd = false;
+        if (!trouser$positionSentSinceTickEnd) {
+            trouser$positionSentSinceTickEnd = true;
             return;
         }
 
@@ -55,7 +55,8 @@ public abstract class ClientCommonPacketListenerImplMixin {
             sendPacket(ClientTickEndC2SPacket.INSTANCE);
         } finally {
             trouser$sendingTickEnd.set(false);
-            trouser$lastPacketWasTickEnd = false;
         }
+
+        trouser$positionSentSinceTickEnd = true;
     }
 }
