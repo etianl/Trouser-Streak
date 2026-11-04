@@ -15,3 +15,4 @@ accessible class net/minecraft/world/waypoints/TrackedWaypoint$Vec3iWaypoint
 accessible field net/minecraft/world/waypoints/TrackedWaypoint$Vec3iWaypoint vector Lnet/minecraft/core/Vec3i;
 accessible method net/minecraft/network/Connection genericsFtw (Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;)V
 accessible field net/minecraft/client/multiplayer/ClientLevel blockStatePredictionHandler Lnet/minecraft/client/multiplayer/prediction/BlockStatePredictionHandler;
+accessible field net/minecraft/world/level/block/entity/TheEndGatewayBlockEntity exitPortal Lnet/minecraft/core/BlockPos;
