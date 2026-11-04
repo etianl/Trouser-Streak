@@ -19,33 +19,33 @@ public abstract class ClientCommonPacketListenerImplMixin {
     public abstract void send(Packet<?> packet);
 
     @Unique
-    private static final ThreadLocal<Boolean> trouser$sendingTickEnd =
-            ThreadLocal.withInitial(() -> false);
+    private static final ThreadLocal<Boolean> trouser$sendingTickEnd = ThreadLocal.withInitial(() -> false);
 
     @Unique
-    private boolean trouser$lastPacketWasTickEnd;
+    private boolean trouser$positionSentSinceTickEnd;
 
     @Inject(
             method = "send(Lnet/minecraft/network/protocol/Packet;)V",
             at = @At("HEAD")
     )
-    private void trouser$sendTickEndBeforePositionMove(Packet<?> packet, CallbackInfo ci) {
-        trouser$lastPacketWasTickEnd = packet instanceof ServerboundClientTickEndPacket;
 
-        if (!MovementPatch.isEnabled()) {
+    private void trouser$sendTickEndBeforeDuplicatePosition(Packet<?> packet, CallbackInfo ci) {
+        if (packet instanceof ServerboundClientTickEndPacket) {
+            trouser$positionSentSinceTickEnd = false;
             return;
         }
 
-        if (!(packet instanceof ServerboundMovePlayerPacket movePacket) || !movePacket.hasPosition()) {
+        if (!MovementPatch.isEnabled()) return;
+
+        if (!(packet instanceof ServerboundMovePlayerPacket movePacket)
+                || !movePacket.hasPosition()) {
             return;
         }
 
-        if (trouser$sendingTickEnd.get()) {
-            return;
-        }
+        if (trouser$sendingTickEnd.get()) return;
 
-        if (trouser$lastPacketWasTickEnd) {
-            trouser$lastPacketWasTickEnd = false;
+        if (!trouser$positionSentSinceTickEnd) {
+            trouser$positionSentSinceTickEnd = true;
             return;
         }
 
@@ -55,7 +55,8 @@ public abstract class ClientCommonPacketListenerImplMixin {
             send(ServerboundClientTickEndPacket.INSTANCE);
         } finally {
             trouser$sendingTickEnd.set(false);
-            trouser$lastPacketWasTickEnd = false;
         }
+
+        trouser$positionSentSinceTickEnd = true;
     }
 }
