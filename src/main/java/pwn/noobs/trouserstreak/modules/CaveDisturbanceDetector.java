@@ -115,7 +115,6 @@ public class CaveDisturbanceDetector extends Module {
 		clearChunkData();
 	}
 	private void scanTheAir() {
-		if (mc.world == null) return;
 		List<ChunkPos> chunksToProcess = new ArrayList<>();
 		AtomicReferenceArray<WorldChunk> chunks = mc.world.getChunkManager().chunks.chunks;
 		for (int i = 0; i < chunks.length(); i++) {
@@ -155,10 +154,11 @@ public class CaveDisturbanceDetector extends Module {
 	}
 	@EventHandler
 	private void onPreTick(TickEvent.Pre event) {
+		if (mc.world == null || mc.player == null) return;
 		scanTheAir();
 		if (nearesttrcr.get()){
 			try {
-				if (disturbanceLocations.stream().toList().size() > 0) {
+				if (!disturbanceLocations.stream().toList().isEmpty()) {
 					for (int b = 0; b < disturbanceLocations.stream().toList().size(); b++) {
 						if (distance > Math.sqrt(Math.pow(disturbanceLocations.stream().toList().get(b).getX() - mc.player.getBlockX(), 2) + Math.pow(disturbanceLocations.stream().toList().get(b).getZ() - mc.player.getBlockZ(), 2))) {
 							closestX = disturbanceLocations.stream().toList().get(b).getX();
@@ -197,7 +197,7 @@ public class CaveDisturbanceDetector extends Module {
 
 	private void isSurroundingBlockRegAir(BlockPos bPos) {
 		scannedAir = Collections.synchronizedSet(new HashSet<>());
-		for (int dir = 1; dir < 6; dir++) {
+		for (int dir = 1; dir < 7; dir++) {
 			switch (dir){
 				case 1 -> {
 					BlockPos Air = bPos.north();
@@ -209,7 +209,7 @@ public class CaveDisturbanceDetector extends Module {
 									mc.world.getBlockState(Air.add(0,1,0)).getBlock() != Blocks.AIR &&
 									mc.world.getBlockState(Air.add(0,-1,0)).getBlock() != Blocks.AIR)
 							{
-								if (!FPcheck(Air))disturbanceFound(Air);
+								if (FPcheck(Air))disturbanceFound(Air);
 							}
 						}
 					}
@@ -225,7 +225,7 @@ public class CaveDisturbanceDetector extends Module {
 									mc.world.getBlockState(Air.add(0,1,0)).getBlock() != Blocks.AIR &&
 									mc.world.getBlockState(Air.add(0,-1,0)).getBlock() != Blocks.AIR)
 							{
-								if (!FPcheck(Air))disturbanceFound(Air);
+								if (FPcheck(Air))disturbanceFound(Air);
 							}
 						}
 					}
@@ -241,7 +241,7 @@ public class CaveDisturbanceDetector extends Module {
 									mc.world.getBlockState(Air.add(0,0,1)).getBlock() != Blocks.AIR &&
 									mc.world.getBlockState(Air.add(0,0,-1)).getBlock() != Blocks.AIR)
 							{
-								if (!FPcheck(Air))disturbanceFound(Air);
+								if (FPcheck(Air))disturbanceFound(Air);
 							}
 						}
 					}
@@ -257,7 +257,7 @@ public class CaveDisturbanceDetector extends Module {
 									mc.world.getBlockState(Air.add(0,0,1)).getBlock() != Blocks.AIR &&
 									mc.world.getBlockState(Air.add(0,0,-1)).getBlock() != Blocks.AIR)
 							{
-								if (!FPcheck(Air))disturbanceFound(Air);
+								if (FPcheck(Air))disturbanceFound(Air);
 							}
 						}
 					}
@@ -273,7 +273,7 @@ public class CaveDisturbanceDetector extends Module {
 									mc.world.getBlockState(Air.add(0,0,1)).getBlock() != Blocks.AIR &&
 									mc.world.getBlockState(Air.add(0,0,-1)).getBlock() != Blocks.AIR)
 							{
-								if (!FPcheck(Air))disturbanceFound(Air);
+								if (FPcheck(Air))disturbanceFound(Air);
 							}
 						}
 					}
@@ -289,7 +289,7 @@ public class CaveDisturbanceDetector extends Module {
 									mc.world.getBlockState(Air.add(0,0,1)).getBlock() != Blocks.AIR &&
 									mc.world.getBlockState(Air.add(0,0,-1)).getBlock() != Blocks.AIR)
 							{
-								if (!FPcheck(Air))disturbanceFound(Air);
+								if (FPcheck(Air))disturbanceFound(Air);
 							}
 						}
 					}
@@ -312,7 +312,7 @@ public class CaveDisturbanceDetector extends Module {
 				}
 			}
 		}
-		return extraAirFound;
+		return !extraAirFound;
 	}
 	private void disturbanceFound(BlockPos disturbance){
 		if (!disturbanceLocations.contains(disturbance)){
@@ -332,7 +332,7 @@ public class CaveDisturbanceDetector extends Module {
 				if (!nearesttrcr.get()) {
 					for (BlockPos pos : disturbanceLocations) {
 						BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
-						if (pos != null && playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
+						if (playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
 							int startX = pos.getX();
 							int startY = pos.getY();
 							int startZ = pos.getZ();
@@ -345,7 +345,7 @@ public class CaveDisturbanceDetector extends Module {
 				} else if (nearesttrcr.get()){
 					for (BlockPos pos : disturbanceLocations) {
 						BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
-						if (pos != null && playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
+						if (playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
 							int startX = pos.getX();
 							int startY = pos.getY();
 							int startZ = pos.getZ();
@@ -355,7 +355,7 @@ public class CaveDisturbanceDetector extends Module {
 							render(new Box(new Vec3d(startX+1, startY+1, startZ+1), new Vec3d(endX, endY, endZ)), sideColor.get(), lineColor.get(), shapeMode.get(), event);
 						}
 					}
-					render2(new Box(new Vec3d(closestX+1, closestY+1, closestZ+1), new Vec3d (closestX, closestY, closestZ)), sideColor.get(), lineColor.get(),ShapeMode.Sides, event);
+					render2(new Box(new Vec3d(closestX+1, closestY+1, closestZ+1), new Vec3d (closestX, closestY, closestZ)), sideColor.get(), lineColor.get(), event);
 				}
 			}
 		}
@@ -366,34 +366,23 @@ public class CaveDisturbanceDetector extends Module {
 				event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
 		event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
 	}
-	private void render2(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
+	private void render2(Box box, Color sides, Color lines, Render3DEvent event) {
 		if (trcr.get() && Math.abs(box.minX-RenderUtils.center.x)<=renderDistance.get()*16 && Math.abs(box.minZ-RenderUtils.center.z)<=renderDistance.get()*16)
 			event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
-		event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
+		event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), ShapeMode.Sides, 0);
 	}
 	private void removeChunksOutsideRenderDistance() {
 		AtomicReferenceArray<WorldChunk> chunks = mc.world.getChunkManager().chunks.chunks;
-		Set<WorldChunk> chunkSet = new HashSet<>();
 
+		Set<ChunkPos> loadedChunkPositions = new HashSet<>();
 		for (int i = 0; i < chunks.length(); i++) {
 			WorldChunk chunk = chunks.get(i);
 			if (chunk != null) {
-				chunkSet.add(chunk);
+				loadedChunkPositions.add(chunk.getPos());
 			}
 		}
-		removechunksOutsideRenderDistance(scannedChunks, chunkSet);
-		removeChunksOutsideRenderDistance(disturbanceLocations, chunkSet);
-	}
-	private void removeChunksOutsideRenderDistance(Set<BlockPos> boxSet, Set<WorldChunk> worldChunks) {
-		boxSet.removeIf(box -> {
-			assert mc.world != null;
-			return !worldChunks.contains(mc.world.getChunk(box));
-		});
-	}
-	private void removechunksOutsideRenderDistance(Set<ChunkPos> chunkSet, Set<WorldChunk> worldChunks) {
-		chunkSet.removeIf(c -> {
-			assert mc.world != null;
-			return !worldChunks.contains(mc.world.getChunk(c.x, c.z));
-		});
+
+		scannedChunks.removeIf(c -> !loadedChunkPositions.contains(c));
+		disturbanceLocations.removeIf(pos -> !loadedChunkPositions.contains(new ChunkPos(pos.getX() >> 4, pos.getZ() >> 4)));
 	}
 }

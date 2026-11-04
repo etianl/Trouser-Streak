@@ -9,14 +9,11 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.ingame.*;
-import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.screen.GenericContainerScreenHandler;
-import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.hit.BlockHitResult;
@@ -33,15 +30,12 @@ public class RemoteEnderChest extends Module {
     private final SettingGroup sgGeneral = settings.createGroup("RemoteEnderChest");
     private final SettingGroup sgItemSaver = settings.createGroup("ItemSaver");
 
-    private final Setting<Keybind> toggleGui = sgGeneral.add(new KeybindSetting(
-            "GUI Key (Press it)",
-            "Key to toggle Ender Chest GUI.",
-            Keybind.fromKey(GLFW_KEY_LEFT_ALT),
-            value -> {},
-            value -> {},
-            null,
-            () -> {}
-    ));
+    private final Setting<Keybind> toggleGui = sgGeneral.add(new KeybindSetting.Builder()
+            .name("GUI Key (Press it)")
+            .description("Key to toggle Ender Chest GUI.")
+            .defaultValue(Keybind.fromKey(GLFW_KEY_LEFT_ALT))
+            .build()
+    );
     private final Setting<Boolean> invKeyBlocker = sgGeneral.add(new BoolSetting.Builder()
             .name("inventory-key-modifier")
             .description("Make the Inventory Key open the EnderChest GUI when you have one saved. This helps to prevent you accidentally breaking the link.")
@@ -84,15 +78,12 @@ public class RemoteEnderChest extends Module {
             .visible(enableItemSaver::get)
             .build()
     );
-    private final Setting<Keybind> itemSaverHotkey = sgItemSaver.add(new KeybindSetting(
-            "Item Saver HotKey",
-            "You can quickly store items when pressing this button.",
-            Keybind.fromKey(GLFW_KEY_RIGHT_ALT),
-            value -> {},
-            value -> {},
-            null,
-            () -> {}
-    ));
+    private final Setting<Keybind> itemSaverHotkey = sgGeneral.add(new KeybindSetting.Builder()
+            .name("Item Saver HotKey")
+            .description("You can quickly store items when pressing this button.")
+            .defaultValue(Keybind.fromKey(GLFW_KEY_RIGHT_ALT))
+            .build()
+    );
 
     public RemoteEnderChest() {
         super(Trouser.Main, "RemoteEnderChest", "Access your enderchest anywhere and move freely while it is open.");

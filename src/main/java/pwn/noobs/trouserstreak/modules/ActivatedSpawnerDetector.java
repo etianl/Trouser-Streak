@@ -746,7 +746,7 @@ public class ActivatedSpawnerDetector extends Module {
             Set<BlockPos> blockSet,
             Set<WorldChunk> worldChunks
     ) {
-        assert mc.world != null;
+        if (mc.world == null) return;
 
         blockSet.removeIf(blockpos ->
                 !worldChunks.contains(mc.world.getWorldChunk(blockpos))

@@ -26,6 +26,8 @@ import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.*;
 
+import static pwn.noobs.trouserstreak.utils.VersionUtils.isVersionLessThan;
+
 public class NbtEditor extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgOptions = settings.createGroup("Nbt Options");
@@ -441,32 +443,6 @@ public class NbtEditor extends Module {
         }
 
         return TypedEntityData.create(entityType, entityTag);
-    }
-    private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
-        if (serverVersion == null) return false;
-
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)");
-        java.util.regex.Matcher matcher = pattern.matcher(serverVersion);
-
-        if (matcher.find()) {
-            try {
-                int serverMajor = Integer.parseInt(matcher.group(1));
-                int serverMinor = Integer.parseInt(matcher.group(2));
-                int serverPatch = Integer.parseInt(matcher.group(3));
-
-                if (serverMajor < major) return true;
-                if (serverMajor > major) return false;
-
-                if (serverMinor < minor) return true;
-                if (serverMinor > minor) return false;
-
-                return serverPatch < patch;
-
-            } catch (NumberFormatException e) {
-                return false;
-            }
-        }
-        return false;
     }
 
     public enum Modes {

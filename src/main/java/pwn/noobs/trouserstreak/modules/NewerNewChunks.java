@@ -24,21 +24,23 @@ import net.minecraft.client.gui.screen.world.LevelLoadingScreen;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.network.packet.c2s.play.AcknowledgeChunksC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.s2c.play.*;
+import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
+import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
+import net.minecraft.network.packet.s2c.play.ChunkDeltaUpdateS2CPacket;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.*;
-import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeKeys;
 import net.minecraft.world.chunk.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -51,6 +53,7 @@ import java.util.concurrent.*;
     updated by etianl :D
 */
 public class NewerNewChunks extends Module {
+	private static final Logger LOGGER = LoggerFactory.getLogger("trouserstreak");
 	public enum DetectMode {
 		Normal,
 		IgnoreBlockExploit,
@@ -170,7 +173,7 @@ public class NewerNewChunks extends Module {
 			.defaultValue(1)
 			.sliderRange(1, 10)
 			.min(1)
-			.visible(() -> alarms.get())
+			.visible(alarms::get)
 			.build()
 	);
 
@@ -180,7 +183,7 @@ public class NewerNewChunks extends Module {
 			.defaultValue(20)
 			.sliderRange(1, 100)
 			.min(1)
-			.visible(() -> alarms.get())
+			.visible(alarms::get)
 			.build()
 	);
 	public final Setting<Double> volume = sgAlarm.add(new DoubleSetting.Builder()
@@ -188,7 +191,7 @@ public class NewerNewChunks extends Module {
 			.description("The volume of the sound.")
 			.defaultValue(1.0)
 			.sliderRange(0.0, 1.0)
-			.visible(() -> alarms.get())
+			.visible(alarms::get)
 			.build()
 	);
 
@@ -197,7 +200,7 @@ public class NewerNewChunks extends Module {
 			.description("The pitch of the sound.")
 			.defaultValue(1.0)
 			.sliderRange(0.5, 2.0)
-			.visible(() -> alarms.get())
+			.visible(alarms::get)
 			.build()
 	);
 
@@ -205,7 +208,7 @@ public class NewerNewChunks extends Module {
 			.name("Sound to play (pick one)")
 			.description("The sound to play. Just pick one.")
 			.defaultValue(SoundEvents.BLOCK_BELL_USE)
-			.visible(() -> alarms.get())
+			.visible(alarms::get)
 			.build()
 	);
 	private final Setting<Boolean> oldalarms = sgAlarm.add(new BoolSetting.Builder()
@@ -220,7 +223,7 @@ public class NewerNewChunks extends Module {
 			.defaultValue(1)
 			.sliderRange(1, 10)
 			.min(1)
-			.visible(() -> oldalarms.get())
+			.visible(oldalarms::get)
 			.build()
 	);
 
@@ -230,7 +233,7 @@ public class NewerNewChunks extends Module {
 			.defaultValue(20)
 			.sliderRange(1, 100)
 			.min(1)
-			.visible(() -> oldalarms.get())
+			.visible(oldalarms::get)
 			.build()
 	);
 	public final Setting<Double> oldvolume = sgAlarm.add(new DoubleSetting.Builder()
@@ -238,7 +241,7 @@ public class NewerNewChunks extends Module {
 			.description("The volume of the sound.")
 			.defaultValue(1.0)
 			.sliderRange(0.0, 1.0)
-			.visible(() -> oldalarms.get())
+			.visible(oldalarms::get)
 			.build()
 	);
 
@@ -247,7 +250,7 @@ public class NewerNewChunks extends Module {
 			.description("The pitch of the sound.")
 			.defaultValue(1.0)
 			.sliderRange(0.5, 2.0)
-			.visible(() -> oldalarms.get())
+			.visible(oldalarms::get)
 			.build()
 	);
 
@@ -255,7 +258,7 @@ public class NewerNewChunks extends Module {
 			.name("Sound to play (pick one)")
 			.description("The sound to play. Just pick one.")
 			.defaultValue(SoundEvents.BLOCK_BELL_USE)
-			.visible(() -> oldalarms.get())
+			.visible(oldalarms::get)
 			.build()
 	);
 	private final Setting<Boolean> beingupdatedchunksalarms = sgAlarm.add(new BoolSetting.Builder()
@@ -270,7 +273,7 @@ public class NewerNewChunks extends Module {
 			.defaultValue(1)
 			.sliderRange(1, 10)
 			.min(1)
-			.visible(() -> beingupdatedchunksalarms.get())
+			.visible(beingupdatedchunksalarms::get)
 			.build()
 	);
 
@@ -280,7 +283,7 @@ public class NewerNewChunks extends Module {
 			.defaultValue(20)
 			.sliderRange(1, 100)
 			.min(1)
-			.visible(() -> beingupdatedchunksalarms.get())
+			.visible(beingupdatedchunksalarms::get)
 			.build()
 	);
 	public final Setting<Double> beingupdatedchunksvolume = sgAlarm.add(new DoubleSetting.Builder()
@@ -288,7 +291,7 @@ public class NewerNewChunks extends Module {
 			.description("The volume of the sound.")
 			.defaultValue(1.0)
 			.sliderRange(0.0, 1.0)
-			.visible(() -> beingupdatedchunksalarms.get())
+			.visible(beingupdatedchunksalarms::get)
 			.build()
 	);
 
@@ -297,7 +300,7 @@ public class NewerNewChunks extends Module {
 			.description("The pitch of the sound.")
 			.defaultValue(1.0)
 			.sliderRange(0.5, 2.0)
-			.visible(() -> beingupdatedchunksalarms.get())
+			.visible(beingupdatedchunksalarms::get)
 			.build()
 	);
 
@@ -305,7 +308,7 @@ public class NewerNewChunks extends Module {
 			.name("Sound to play (pick one)")
 			.description("The sound to play. Just pick one.")
 			.defaultValue(SoundEvents.BLOCK_BELL_USE)
-			.visible(() -> beingupdatedchunksalarms.get())
+			.visible(beingupdatedchunksalarms::get)
 			.build()
 	);
 	private final Setting<Boolean> oldversionchunksalarms = sgAlarm.add(new BoolSetting.Builder()
@@ -320,7 +323,7 @@ public class NewerNewChunks extends Module {
 			.defaultValue(1)
 			.sliderRange(1, 10)
 			.min(1)
-			.visible(() -> oldversionchunksalarms.get())
+			.visible(oldversionchunksalarms::get)
 			.build()
 	);
 
@@ -330,7 +333,7 @@ public class NewerNewChunks extends Module {
 			.defaultValue(20)
 			.sliderRange(1, 100)
 			.min(1)
-			.visible(() -> oldversionchunksalarms.get())
+			.visible(oldversionchunksalarms::get)
 			.build()
 	);
 	public final Setting<Double> oldversionchunksvolume = sgAlarm.add(new DoubleSetting.Builder()
@@ -338,7 +341,7 @@ public class NewerNewChunks extends Module {
 			.description("The volume of the sound.")
 			.defaultValue(1.0)
 			.sliderRange(0.0, 1.0)
-			.visible(() -> oldversionchunksalarms.get())
+			.visible(oldversionchunksalarms::get)
 			.build()
 	);
 
@@ -347,7 +350,7 @@ public class NewerNewChunks extends Module {
 			.description("The pitch of the sound.")
 			.defaultValue(1.0)
 			.sliderRange(0.5, 2.0)
-			.visible(() -> oldversionchunksalarms.get())
+			.visible(oldversionchunksalarms::get)
 			.build()
 	);
 
@@ -355,7 +358,7 @@ public class NewerNewChunks extends Module {
 			.name("Sound to play (pick one)")
 			.description("The sound to play. Just pick one.")
 			.defaultValue(SoundEvents.BLOCK_BELL_USE)
-			.visible(() -> oldversionchunksalarms.get())
+			.visible(oldversionchunksalarms::get)
 			.build()
 	);
 	private final Setting<Boolean> blockexploitchunksalarms = sgAlarm.add(new BoolSetting.Builder()
@@ -370,7 +373,7 @@ public class NewerNewChunks extends Module {
 			.defaultValue(1)
 			.sliderRange(1, 10)
 			.min(1)
-			.visible(() -> blockexploitchunksalarms.get())
+			.visible(blockexploitchunksalarms::get)
 			.build()
 	);
 
@@ -380,7 +383,7 @@ public class NewerNewChunks extends Module {
 			.defaultValue(20)
 			.sliderRange(1, 100)
 			.min(1)
-			.visible(() -> blockexploitchunksalarms.get())
+			.visible(blockexploitchunksalarms::get)
 			.build()
 	);
 	public final Setting<Double> blockexploitchunksvolume = sgAlarm.add(new DoubleSetting.Builder()
@@ -388,7 +391,7 @@ public class NewerNewChunks extends Module {
 			.description("The volume of the sound.")
 			.defaultValue(1.0)
 			.sliderRange(0.0, 1.0)
-			.visible(() -> blockexploitchunksalarms.get())
+			.visible(blockexploitchunksalarms::get)
 			.build()
 	);
 
@@ -397,7 +400,7 @@ public class NewerNewChunks extends Module {
 			.description("The pitch of the sound.")
 			.defaultValue(1.0)
 			.sliderRange(0.5, 2.0)
-			.visible(() -> blockexploitchunksalarms.get())
+			.visible(blockexploitchunksalarms::get)
 			.build()
 	);
 
@@ -405,7 +408,7 @@ public class NewerNewChunks extends Module {
 			.name("Sound to play (pick one)")
 			.description("The sound to play. Just pick one.")
 			.defaultValue(SoundEvents.BLOCK_BELL_USE)
-			.visible(() -> blockexploitchunksalarms.get())
+			.visible(blockexploitchunksalarms::get)
 			.build()
 	);
 
@@ -684,7 +687,7 @@ public class NewerNewChunks extends Module {
 			try {
 				Files.createDirectories(FabricLoader.getInstance().getGameDir().resolve("TrouserStreak").resolve("NewChunks").resolve(serverip).resolve(world));
 			} catch (IOException e) {
-				e.printStackTrace();
+				LOGGER.error("Failed to create NewChunks save directory for server '{}' in dimension '{}'", serverip, world, e);
 			}
 		}
 		if (save.get() || load.get()) {
@@ -702,7 +705,7 @@ public class NewerNewChunks extends Module {
 						Files.createFile(fullPath);
 					}
 				} catch (IOException e) {
-					e.printStackTrace();
+					LOGGER.error("Failed to initialize NewChunks data file '{}'", fullPath, e);
 				}
 			}
 		}
@@ -801,10 +804,11 @@ public class NewerNewChunks extends Module {
 				Files.deleteIfExists(baseDir.resolve("BeingUpdatedChunkData.txt"));
 				Files.deleteIfExists(baseDir.resolve("OldGenerationChunkData.txt"));
 				Files.deleteIfExists(baseDir.resolve("BlockExploitChunkData.txt"));
+				error("Chunk Data deleted for this Dimension.");
 			} catch (IOException e) {
-				e.printStackTrace();
+				LOGGER.error("Failed to delete NewChunks data files for server '{}' in dimension '{}'", serverip, world, e);
+				error("Failed to delete chunk data for this dimension. Check the log for details.");
 			}
-			error("Chunk Data deleted for this Dimension.");
 			deletewarning=0;
 		}
 
@@ -1011,12 +1015,17 @@ public class NewerNewChunks extends Module {
 	private void render(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
 		try {
 			event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, lines, shapeMode, 0);
-		} catch (Exception e) {e.printStackTrace();}
+		} catch (Exception e) {
+			LOGGER.debug("Failed to render NewChunks box {}", box, e);
+		}
 	}
 
 	@EventHandler
 	private void onReadPacket(PacketEvent.Receive event) {
+		if (mc.world == null) return;
 		if (event.packet instanceof AcknowledgeChunksC2SPacket) return; //for some reason this packet keeps getting cast to other packets
+		final
+		Path savedDataLocation = Paths.get("NewChunkData.txt");
 		if (event.packet instanceof ChunkDeltaUpdateS2CPacket packet && liquidexploit.get()) {
 
 			packet.visitUpdates((pos, state) -> {
@@ -1024,7 +1033,7 @@ public class NewerNewChunks extends Module {
 				if (!state.getFluidState().isEmpty() && !state.getFluidState().isStill()) {
 					for (Direction dir: searchDirs) {
 						try {
-							if (mc.world != null && mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!OldGenerationOldChunks.contains(chunkPos) && !beingUpdatedOldChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+							if (mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!OldGenerationOldChunks.contains(chunkPos) && !beingUpdatedOldChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 								tickexploitChunks.remove(chunkPos);
 								newChunks.add(chunkPos);
 								if (alarms.get()) {
@@ -1032,11 +1041,13 @@ public class NewerNewChunks extends Module {
 									ringsLeft = amountofrings.get();
 								}
 								if (save.get()){
-									saveData(Paths.get("NewChunkData.txt"), chunkPos);
+									saveData(savedDataLocation, chunkPos);
 								}
 								return;
 							}
-						} catch (Exception e) {e.printStackTrace();}
+						} catch (Exception e) {
+							LOGGER.error("Failed while checking liquid-exploit update at block {} in chunk {}", pos, chunkPos, e);
+						}
 					}
 				}
 			});
@@ -1056,12 +1067,14 @@ public class NewerNewChunks extends Module {
 						}
 					}
 				}
-				catch (Exception e){e.printStackTrace();}
+				catch (Exception e){
+					LOGGER.error("Failed to process block-update exploit data for block {} in chunk {}", packet.getPos(), chunkPos, e);
+				}
 			}
 			if (!packet.getState().getFluidState().isEmpty() && !packet.getState().getFluidState().isStill() && liquidexploit.get()) {
 				for (Direction dir: searchDirs) {
 					try {
-						if (mc.world != null && mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!OldGenerationOldChunks.contains(chunkPos) && !beingUpdatedOldChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
+						if (mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!OldGenerationOldChunks.contains(chunkPos) && !beingUpdatedOldChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
 							tickexploitChunks.remove(chunkPos);
 							newChunks.add(chunkPos);
 							if (alarms.get()) {
@@ -1069,11 +1082,13 @@ public class NewerNewChunks extends Module {
 								ringsLeft = amountofrings.get();
 							}
 							if (save.get()){
-								saveData(Paths.get("NewChunkData.txt"), chunkPos);
+								saveData(savedDataLocation, chunkPos);
 							}
 							return;
 						}
-					} catch (Exception e) {e.printStackTrace();}
+					} catch (Exception e) {
+						LOGGER.error("Failed while checking liquid-exploit block update at {} in chunk {}", packet.getPos(), chunkPos, e);
+					}
 				}
 			}
 		}
@@ -1083,18 +1098,13 @@ public class NewerNewChunks extends Module {
 			if (mc.world.getChunkManager().getChunk(packet.getChunkX(), packet.getChunkZ()) == null) {
 				WorldChunk chunk = new WorldChunk(mc.world, oldpos);
 				try {
-					Map<Heightmap.Type, long[]> heightmaps = new EnumMap<>(Heightmap.Type.class);
-
-					Heightmap.Type type = Heightmap.Type.MOTION_BLOCKING;
-					long[] emptyHeightmapData = new long[37];
-					heightmaps.put(type, emptyHeightmapData);
-
-					CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-						chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), heightmaps,
-								packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ()));
-					}, taskExecutor);
+					CompletableFuture<Void> future = CompletableFuture.runAsync(() -> chunk.loadFromPacket(packet.getChunkData().getSectionsDataBuf(), packet.getChunkData().getHeightmap(), packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ())), taskExecutor);
 					future.join();
-				} catch (CompletionException e) {e.printStackTrace();}
+				} catch (CompletionException e) {
+					Throwable cause = e.getCause() != null ? e.getCause() : e;
+					LOGGER.error("Failed to apply chunk packet data for chunk [{}, {}]", packet.getChunkX(), packet.getChunkZ(), cause);
+					return;
+				}
 
 				boolean isNewChunk = false;
 				boolean isOldGeneration = false;
@@ -1103,8 +1113,7 @@ public class NewerNewChunks extends Module {
 				boolean isNewOverworldGeneration = false;
 				boolean isNewNetherGeneration = false;
 				ChunkSection[] sections = chunk.getSectionArray();
-				int safeamountofsectionstoscan = 17;
-				if (sections.length < 17) safeamountofsectionstoscan = sections.length;
+				int safeamountofsectionstoscan = Math.min(sections.length, 17);
 				if (overworldOldChunksDetector.get() && mc.world.getRegistryKey() == World.OVERWORLD && chunk.getStatus().isAtLeast(ChunkStatus.FULL) && !chunk.isEmpty()) {
 					for (int i = 0; i < safeamountofsectionstoscan; i++) {
 						ChunkSection section = sections[i];
@@ -1122,7 +1131,7 @@ public class NewerNewChunks extends Module {
 							}
 						}
 					}
-					if (foundAnyOre && !isOldGeneration && !isNewOverworldGeneration) isOldGeneration = true;
+					if (foundAnyOre && !isNewOverworldGeneration) isOldGeneration = true;
 				}
 
 				if (netherOldChunksDetector.get() && mc.world.getRegistryKey() == World.NETHER && chunk.getStatus().isAtLeast(ChunkStatus.FULL) && !chunk.isEmpty()) {
@@ -1150,7 +1159,7 @@ public class NewerNewChunks extends Module {
 					if (biomesContainer instanceof PalettedContainer<RegistryEntry<Biome>> biomesPaletteContainer) {
 						Palette<RegistryEntry<Biome>> biomePalette = biomesPaletteContainer.data.palette();
 						for (int i = 0; i < biomePalette.getSize(); i++) {
-							if (biomePalette.get(i).getKey().get() == BiomeKeys.THE_END) {
+							if (biomePalette.get(i).getKey().filter(BiomeKeys.THE_END::equals).isPresent()) {
 								isOldGeneration = true;
 								break;
 							}
@@ -1158,6 +1167,7 @@ public class NewerNewChunks extends Module {
 					}
 				}
 
+				final Path savedDataLocationOld = Paths.get("OldChunkData.txt");
 				if (PaletteExploit.get()) {
 					boolean firstchunkappearsnew = false;
 					int loops = 0;
@@ -1215,7 +1225,7 @@ public class NewerNewChunks extends Module {
 									if (biomesContainer instanceof PalettedContainer<RegistryEntry<Biome>> biomesPaletteContainer) {
 										Palette<RegistryEntry<Biome>> biomePalette = biomesPaletteContainer.data.palette();
 										for (int i3 = 0; i3 < biomePalette.getSize(); i3++) {
-											if (i3 == 0 && biomePalette.get(i3).getKey().get() == BiomeKeys.PLAINS) isNewChunk = true;
+											if (i3 == 0 && biomePalette.get(i3).getKey().map(key -> key == BiomeKeys.PLAINS).orElse(false)) isNewChunk = true;
 										}
 									}
 								}
@@ -1255,12 +1265,12 @@ public class NewerNewChunks extends Module {
 									ringsLeft = amountofrings.get();
 								}
 								if (save.get()) {
-									saveData(Paths.get("NewChunkData.txt"), oldpos);
+									saveData(savedDataLocation, oldpos);
 								}
 								return;
 							}
 						} catch (Exception e) {
-							e.printStackTrace();
+							LOGGER.error("Failed to record new chunk {}", oldpos, e);
 						}
 					}
 					else if (!isNewChunk && !chunkIsBeingUpdated && isOldGeneration) {
@@ -1277,7 +1287,7 @@ public class NewerNewChunks extends Module {
 								return;
 							}
 						} catch (Exception e) {
-							e.printStackTrace();
+							LOGGER.error("Failed to record old-generation chunk {}", oldpos, e);
 						}
 					}
 					else if (chunkIsBeingUpdated) {
@@ -1294,7 +1304,7 @@ public class NewerNewChunks extends Module {
 								return;
 							}
 						} catch (Exception e) {
-							e.printStackTrace();
+							LOGGER.error("Failed to record being-updated chunk {}", oldpos, e);
 						}
 					}
 					else if (!isNewChunk) {
@@ -1306,37 +1316,38 @@ public class NewerNewChunks extends Module {
 									oldringsLeft = oldamountofrings.get();
 								}
 								if (save.get()) {
-									saveData(Paths.get("OldChunkData.txt"), oldpos);
+									saveData(savedDataLocationOld, oldpos);
 								}
 								return;
 							}
 						} catch (Exception e) {
-							e.printStackTrace();
+							LOGGER.error("Failed to record old chunk {}", oldpos, e);
 						}
 					}
 				}
 				if (liquidexploit.get()) {
-					for (int x = 0; x < 16; x++) {
-						for (int y = mc.world.getBottomY(); y < mc.world.getTopYInclusive(); y++) {
-							for (int z = 0; z < 16; z++) {
-								FluidState fluid = chunk.getFluidState(x, y, z);
-								try {
+					try {
+						for (int x = 0; x < 16; x++) {
+							for (int y = mc.world.getBottomY(); y < mc.world.getTopYInclusive(); y++) {
+								for (int z = 0; z < 16; z++) {
+									FluidState fluid = chunk.getFluidState(x, y, z);
+
 									if (!OldGenerationOldChunks.contains(oldpos) && !beingUpdatedOldChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos) && !fluid.isEmpty() && !fluid.isStill()) {
 										oldChunks.add(oldpos);
+
 										if (oldalarms.get()) {
 											oldringring = true;
 											oldringsLeft = oldamountofrings.get();
 										}
-										if (save.get()){
-											saveData(Paths.get("OldChunkData.txt"), oldpos);
-										}
+
+										if (save.get()) saveData(savedDataLocationOld, oldpos);
 										return;
 									}
-								} catch (Exception e) {
-									e.printStackTrace();
 								}
 							}
 						}
+					} catch (Exception e) {
+						LOGGER.error("Failed to scan fluids in chunk {}", oldpos, e);
 					}
 				}
 			}
@@ -1354,42 +1365,63 @@ public class NewerNewChunks extends Module {
 	}
 
 	private void loadChunkData(Path savedDataLocation, Set<ChunkPos> chunkSet) {
+		if (Files.notExists(savedDataLocation)) {
+			return;
+		}
+
+		final List<String> allLines;
 		try {
-			if (!Files.exists(savedDataLocation)) return;
+			allLines = Files.readAllLines(savedDataLocation);
+		} catch (IOException e) {
+			LOGGER.error("Failed to read saved NewChunks data from '{}'", savedDataLocation, e);
+			return;
+		}
 
-			List<String> allLines = Files.readAllLines(savedDataLocation);
+		for (int lineIndex = 0; lineIndex < allLines.size(); lineIndex++) {
+			String line = allLines.get(lineIndex);
 
-			for (String line : allLines) {
-				if (line != null && !line.isEmpty()) {
-					String[] array = line.split(",");
-					if (array.length == 2) {
-						int X = Integer.parseInt(array[0].trim());
-						int Z = Integer.parseInt(array[1].trim());
-						ChunkPos chunkPos = new ChunkPos(X, Z);
-						if (!OldGenerationOldChunks.contains(chunkPos) && !beingUpdatedOldChunks.contains(chunkPos) && !tickexploitChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)) {
-							chunkSet.add(chunkPos);
-						}
-					}
-				}
+			if (line == null || line.isBlank()) continue;
+
+			String[] array = line.split(",");
+
+			if (array.length != 2) {
+				LOGGER.warn("Skipping malformed chunk-data line {} in '{}': '{}'", lineIndex + 1, savedDataLocation, line);
+				continue;
 			}
-		} catch (IOException | NumberFormatException e) {
-			e.printStackTrace();
+
+			try {
+				int x = Integer.parseInt(array[0].trim());
+				int z = Integer.parseInt(array[1].trim());
+				ChunkPos chunkPos = new ChunkPos(x, z);
+
+				if (!OldGenerationOldChunks.contains(chunkPos) && !beingUpdatedOldChunks.contains(chunkPos) && !tickexploitChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos)) {
+					chunkSet.add(chunkPos);
+				}
+			} catch (NumberFormatException e) {
+				LOGGER.warn("Skipping invalid coordinates on line {} in '{}': '{}'", lineIndex + 1, savedDataLocation, line);
+			}
 		}
 	}
 
+	private final Object saveLock = new Object();
+
 	private void saveData(Path savedDataLocation, ChunkPos chunkpos) {
 		taskExecutor.submit(() -> {
+			Path filePath = null;
+
 			try {
-				Path baseDir = FabricLoader.getInstance().getGameDir()
-						.resolve("TrouserStreak").resolve("NewChunks").resolve(serverip).resolve(world);
+				Path baseDir = FabricLoader.getInstance().getGameDir().resolve("TrouserStreak").resolve("NewChunks").resolve(serverip).resolve(world);
+
 				Files.createDirectories(baseDir);
-				Path filePath = baseDir.resolve(savedDataLocation);
+				filePath = baseDir.resolve(savedDataLocation);
+
 				String data = chunkpos.x + "," + chunkpos.z + System.lineSeparator();
-				Files.write(filePath, data.getBytes(StandardCharsets.UTF_8),
-						StandardOpenOption.CREATE,
-						StandardOpenOption.APPEND);
+
+				synchronized (saveLock) {
+					Files.writeString(filePath, data, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				LOGGER.error("Failed to save chunk {} to '{}'", chunkpos, filePath != null ? filePath : savedDataLocation, e);
 			}
 		});
 	}
@@ -1411,14 +1443,34 @@ public class NewerNewChunks extends Module {
 	private void playSound(int soundtype) {
 		if (mc.player != null) {
 			Vec3d pos = mc.player.getEntityPos();
-			SoundEvent sound = soundtouse.get().get(0);
-			if (soundtype == 2) sound = oldsoundtouse.get().get(0);
-			else if (soundtype == 3) sound = beingupdatedchunkssoundtouse.get().get(0);
-			else if (soundtype == 4) sound = oldversionchunkssoundtouse.get().get(0);
-			else if (soundtype == 5) sound = blockexploitchunkssoundtouse.get().get(0);
+			SoundEvent sound = SoundEvents.BLOCK_BELL_USE;
 			float volumeSetting = volume.get().floatValue();
 			float pitchSetting = pitch.get().floatValue();
-
+			switch (soundtype){
+				case 1 -> {
+					if (!soundtouse.get().isEmpty()) sound = soundtouse.get().get(0);
+				}
+				case 2 -> {
+					if (!oldsoundtouse.get().isEmpty()) sound = oldsoundtouse.get().get(0);
+					volumeSetting = oldvolume.get().floatValue();
+					pitchSetting = oldpitch.get().floatValue();
+				}
+				case 3 -> {
+					if (!beingupdatedchunkssoundtouse.get().isEmpty()) sound = beingupdatedchunkssoundtouse.get().get(0);
+					volumeSetting = beingupdatedchunksvolume.get().floatValue();
+					pitchSetting = beingupdatedchunkspitch.get().floatValue();
+				}
+				case 4 -> {
+					if (!oldversionchunkssoundtouse.get().isEmpty()) sound = oldversionchunkssoundtouse.get().get(0);
+					volumeSetting = oldversionchunksvolume.get().floatValue();
+					pitchSetting = oldversionchunkspitch.get().floatValue();
+				}
+				case 5 -> {
+					if (!blockexploitchunkssoundtouse.get().isEmpty()) sound = blockexploitchunkssoundtouse.get().get(0);
+					volumeSetting = blockexploitchunksvolume.get().floatValue();
+					pitchSetting = blockexploitchunkspitch.get().floatValue();
+				}
+			}
 			mc.world.playSoundClient(pos.x, pos.y, pos.z, sound, mc.player.getSoundCategory(), volumeSetting, pitchSetting, false);
 		}
 	}

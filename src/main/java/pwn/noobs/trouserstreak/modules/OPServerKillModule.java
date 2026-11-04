@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static pwn.noobs.trouserstreak.utils.VersionUtils.isVersionLessThan;
+
 public class OPServerKillModule extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     public final Setting<Boolean> autoCompat = sgGeneral.add(new BoolSetting.Builder()
@@ -268,31 +270,5 @@ public class OPServerKillModule extends Module {
         } else {
             ChatUtils.sendPlayerMsg("/gamerule log_admin_commands false");
         }
-    }
-    private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
-        if (serverVersion == null) return false;
-
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)");
-        java.util.regex.Matcher matcher = pattern.matcher(serverVersion);
-
-        if (matcher.find()) {
-            try {
-                int serverMajor = Integer.parseInt(matcher.group(1));
-                int serverMinor = Integer.parseInt(matcher.group(2));
-                int serverPatch = Integer.parseInt(matcher.group(3));
-
-                if (serverMajor < major) return true;
-                if (serverMajor > major) return false;
-
-                if (serverMinor < minor) return true;
-                if (serverMinor > minor) return false;
-
-                return serverPatch < patch;
-
-            } catch (NumberFormatException e) {
-                return false;
-            }
-        }
-        return false;
     }
 }
