@@ -11,6 +11,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
+import net.minecraft.util.Hand;
+import net.minecraft.util.math.Vec3d;
 import pwn.noobs.trouserstreak.Trouser;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
@@ -75,10 +77,10 @@ public class AttributeSwap extends Module {
             if (entity != null) {
                 interact.handle(new PlayerInteractEntityC2SPacket.Handler() {
                     @Override
-                    public void interact(net.minecraft.util.Hand hand) {}
+                    public void interact(Hand hand) {}
 
                     @Override
-                    public void interactAt(net.minecraft.util.Hand hand, net.minecraft.util.math.Vec3d pos) {}
+                    public void interactAt(Hand hand, Vec3d pos) {}
 
                     @Override
                     public void attack() {
