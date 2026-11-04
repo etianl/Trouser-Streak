@@ -195,7 +195,6 @@ public class BetterScaffold extends Module {
         initialY = mc.player.getBlockY()-1;
         lastWasSneaking = mc.options.keyShift.isDown();
         if (lastWasSneaking) {
-            assert mc.player != null;
             lastSneakingY = mc.player.getY();
         }
 
@@ -211,17 +210,15 @@ public class BetterScaffold extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-
+        if (mc.player == null || mc.level == null) return;
         // Ticking fade animation
         renderBlocks.forEach(RenderBlock::tick);
         renderBlocks.removeIf(renderBlock -> renderBlock.ticks <= 0);
         if (airPlace.get()) {
-            assert mc.player != null;
             Vec3 vec = mc.player.position().add(mc.player.getDeltaMovement()).add(0, -0.5f, 0);
             bp.set(vec.x(), vec.y(), vec.z());
 
         } else {
-            assert mc.player != null;
             if (BlockUtils.getPlaceSide(mc.player.blockPosition().below()) != null) {
                 bp.set(mc.player.blockPosition().below());
 
@@ -235,7 +232,6 @@ public class BetterScaffold extends Module {
 
                     for (int x = (int) (mc.player.getX() - placeRange.get()); x < mc.player.getX() + placeRange.get(); x++) {
                         for (int z = (int) (mc.player.getZ() - placeRange.get()); z < mc.player.getZ() + placeRange.get(); z++) {
-                            assert mc.level != null;
                             for (int y = (int) Math.max(mc.level.getMinY(), mc.player.getY() - placeRange.get()); y < Math.min(mc.level.getMaxY(), mc.player.getY() + placeRange.get()); y++) {
                                 bp.set(x, y, z);
                                 if (!mc.level.getBlockState(bp).isAir()) blockPosArray.add(new BlockPos(bp));
@@ -315,7 +311,6 @@ public class BetterScaffold extends Module {
 
             // Move player down so they are on top of the placed block ready to jump again
             if (mc.options.keyJump.isDown() && !mc.options.keyShift.isDown() && !mc.player.onGround()) {
-                assert mc.level != null;
                 if (!mc.level.getBlockState(bp).isAir() && fastTower.get()) {
                     mc.player.setDeltaMovement(0, -0.28f, 0);
                 }
@@ -324,7 +319,6 @@ public class BetterScaffold extends Module {
             horizontalAndVertical(new BlockPos.MutableBlockPos(mc.player.getX(), mc.player.getY() - 1, mc.player.getZ()), item);
         }
 
-        assert mc.level != null;
         if (!mc.level.getBlockState(bp).isAir()) {
             prevBp.set(bp);
         }
@@ -340,7 +334,6 @@ public class BetterScaffold extends Module {
 
         if (!Block.isShapeFullBlock(block.defaultBlockState().getCollisionShape(mc.level, pos))) return false;
         if (!(block instanceof FallingBlock)) return true;
-        assert mc.level != null;
         return !FallingBlock.isFree(mc.level.getBlockState(pos));
     }
 
@@ -457,8 +450,8 @@ public class BetterScaffold extends Module {
             int preSideA = sides.a;
             int preLineA = lines.a;
 
-            sides.a *= (double) ticks / 8;
-            lines.a *= (double) ticks / 8;
+            sides.a *= (int) ((double) ticks / 8);
+            lines.a *= (int) ((double) ticks / 8);
 
             event.renderer.box(pos, sides, lines, shapeMode, 0);
 

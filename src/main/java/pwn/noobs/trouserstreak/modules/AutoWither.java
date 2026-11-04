@@ -63,7 +63,7 @@ public class AutoWither extends Module {
             .name("Direction")
             .description("The direction to be locked to (North means the withers arms will be west-east)")
             .defaultValue(CardinalDirection.North)
-            .visible(() -> lockRotation.get())
+            .visible(lockRotation::get)
             .build()
     );
     private final Setting<Boolean> renderPreview = sgVisuals.add(new BoolSetting.Builder()
@@ -104,12 +104,11 @@ public class AutoWither extends Module {
     private Runnable currentOnComplete = null;
     @Override
     public void onActivate() {
+        if (mc.player == null) return;
         info("Press Usekey (RightClick) to build a wither");
         int soulSandCount = 0;
         int skullCount = 0;
 
-        // Check the entire
-        assert mc.player != null;
         for (int i = 0; i < mc.player.getInventory().getContainerSize(); i++) {
             ItemStack stack = mc.player.getInventory().getItem(i);
             if (stack.isEmpty()) continue;
@@ -132,6 +131,7 @@ public class AutoWither extends Module {
     }
     @EventHandler
     private void onMouseButton(MouseClickEvent event){
+        if (mc.player == null || mc.level == null || mc.gameMode == null) return;
         if(mc.gui.screen() != null) return;//Stop working in GUI
         if(event.button() != 1) return;
         if (isBuilding) return;
@@ -151,6 +151,7 @@ public class AutoWither extends Module {
     }
     @EventHandler
     private void onTick(TickEvent.Pre event) {
+        if (mc.player == null || mc.level == null || mc.gameMode == null) return;
         hasMaterials = hasWitherMaterials();
 
         if (!isBuilding) return;
@@ -160,7 +161,6 @@ public class AutoWither extends Module {
             return;
         }
 
-        assert mc.player != null;
         int originalSlot = mc.player.getInventory().getSelectedSlot();
 
         if (delay.get() == 0) {
@@ -200,13 +200,13 @@ public class AutoWither extends Module {
     }
     @EventHandler
     private void onRender3d(Render3DEvent event) {
-        if(renderPreview.get() == false||!hasMaterials) return;
+        if (mc.player == null || mc.level == null || mc.gameMode == null) return;
+        if(!renderPreview.get() ||!hasMaterials) return;
         if (previewPos != null) {
             Direction direction;
             if(lockRotation.get()){
                 direction = chosenDirection.get().toMcDirection();
             }else{
-                assert mc.player != null;
                 direction = mc.player.getDirection();
             }
             event.renderer.box(previewPos, previewColor.get(), previewOutlineColor.get(), ShapeMode.Both, 0);
@@ -229,10 +229,10 @@ public class AutoWither extends Module {
     }
     @EventHandler
     private void onTick(TickEvent.Post event) {
+        if (mc.player == null || mc.level == null || mc.gameMode == null) return;
         if(!renderPreview.get()) return;
         if(mc.hitResult instanceof BlockHitResult hit) {
             BlockPos pos = hit.getBlockPos();
-            assert mc.level != null;
             BlockState state = mc.level.getBlockState(pos);
             if (airPlace.get()){
                 if (state.isRedstoneConductor(mc.level, pos)) {
@@ -252,6 +252,7 @@ public class AutoWither extends Module {
         }
     }
     private void placeWither(BlockPos basePos, Runnable onComplete) {
+        if (mc.player == null) return;
         if (!checkWitherBlocks(basePos)) {
             info("Obstruction prevented wither from being placed");
             onComplete.run();
@@ -294,7 +295,6 @@ public class AutoWither extends Module {
         if(lockRotation.get()){
             direction = chosenDirection.get().toMcDirection();
         }else{
-            assert mc.player != null;
             direction = mc.player.getDirection();
         }
         if(direction == Direction.NORTH||direction == Direction.SOUTH){
@@ -332,13 +332,9 @@ public class AutoWither extends Module {
         return true;
     }
     private boolean checkBlockPlaceable(BlockPos pos){
-        //returns false if no block can be placed
-        assert mc.level != null;
         return mc.level.getBlockState(pos).isAir();
     }
     private boolean checkBlockForEntity(BlockPos pos){
-        //returns false if no block can be placed
-        assert mc.level != null;
         List<Entity> entities = mc.level.getEntitiesOfClass(
                 Entity.class,
                 new AABB(pos),
@@ -353,23 +349,18 @@ public class AutoWither extends Module {
     private void placeBlock(BlockPos pos, Item item){
         int slot = findHotbarSlot(item);
         if (slot == -1) return; // player doesn't have item
-        assert mc.player != null;
         mc.player.getInventory().setSelectedSlot(slot);
-        assert mc.gameMode != null;
         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false));
         if(!swingHand.get()) return;
         mc.player.swing(InteractionHand.MAIN_HAND);
     }
     private int findHotbarSlot(Item item){
         for (int i = 0; i < 9; i++) {
-            assert mc.player != null;
             if (mc.player.getInventory().getItem(i).getItem() == item) return i;
         }
         return -1;
     }
     private boolean hasWitherMaterials() {
-        assert mc.player != null;
-
         int soulBlockCount = 0;
         int skullCount = 0;
 
@@ -396,7 +387,6 @@ public class AutoWither extends Module {
         return false;
     }
     private boolean hasSoulSandHotbar() {
-        assert mc.player != null;
         for (int i = 0; i < 9; i++) {
             if (mc.player.getInventory().getItem(i).getItem() == Items.SOUL_SAND) return true;
         }

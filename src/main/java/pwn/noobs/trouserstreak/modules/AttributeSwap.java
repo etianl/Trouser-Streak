@@ -7,6 +7,7 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import net.minecraft.network.protocol.game.ServerboundAttackPacket;
+import net.minecraft.world.phys.EntityHitResult;
 import pwn.noobs.trouserstreak.Trouser;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
@@ -106,7 +107,7 @@ public class AttributeSwap extends Module {
             mc.player.connection.send(new ServerboundPlayerActionPacket(
                     ServerboundPlayerActionPacket.Action.STAB,
                     mc.player.blockPosition(),
-                    mc.player.getNearestViewDirection()
+                    mc.player.getDirection()
             ));
         }
 
@@ -131,7 +132,7 @@ public class AttributeSwap extends Module {
 
         if (event.packet instanceof ServerboundPlayerActionPacket action) {
             if (action.getAction() == ServerboundPlayerActionPacket.Action.STAB) {
-                Entity targetEntity = (mc.hitResult instanceof net.minecraft.world.phys.EntityHitResult hit) ? hit.getEntity() : null;
+                Entity targetEntity = (mc.hitResult instanceof EntityHitResult hit) ? hit.getEntity() : null;
 
                 if (targetEntity != null) {
                     performAttributeSwap(targetEntity,true);
