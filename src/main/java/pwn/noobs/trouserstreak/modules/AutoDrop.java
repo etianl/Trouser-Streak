@@ -9,6 +9,7 @@ import net.minecraft.network.HashedPatchMap;
 import net.minecraft.network.HashedStack;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.BucketItem;
@@ -111,9 +112,12 @@ public class AutoDrop extends Module {
                 if (mc.player == null) return;
                 Inventory inv = mc.player.getInventory();
                 ItemStack offhandStack = inv.getItem(Inventory.SLOT_OFFHAND);
+                ItemStack selected = inv.getSelectedItem();
 
-                if (throwmainhand.get() && (!tool.get() || !isTool(inv.getSelectedItem()))) {
-                    mc.player.drop(true);
+                if (throwmainhand.get() && (!tool.get() || !isTool(selected))) {
+                    if (!selected.isEmpty()) {
+                        mc.player.drop(selected, true, Prediction.PREDICTED);
+                    }
                 }
 
                 if (throwoffhand.get() && !offhandStack.isEmpty() && (!tool.get() || !isTool(offhandStack))) {

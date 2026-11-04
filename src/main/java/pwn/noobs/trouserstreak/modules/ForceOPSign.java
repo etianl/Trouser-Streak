@@ -11,19 +11,26 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Unit;
 import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.TypedEntityData;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.SignText;
 import pwn.noobs.trouserstreak.Trouser;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import static pwn.noobs.trouserstreak.utils.VersionUtils.isVersionLessThan;
 
 public class ForceOPSign extends Module {
     private final SettingGroup commandModes = settings.createGroup("Command Modes");
@@ -33,6 +40,19 @@ public class ForceOPSign extends Module {
             .name("Version Warning")
             .description("Warns you about the module not working in MC server versions less than 1.20.5.")
             .defaultValue(true)
+            .build()
+    );
+    public final Setting<Boolean> twosixthree = commandModes.add(new BoolSetting.Builder()
+            .name("26.3-sign-formatting")
+            .description("Makes NBT data compatible for 26.3.")
+            .defaultValue(true)
+            .build()
+    );
+    public final Setting<Boolean> allowWriting = commandModes.add(new BoolSetting.Builder()
+            .name("26.3-allow-sign-write")
+            .description("Allow the sign to be written on when placed.")
+            .defaultValue(true)
+            .visible(twosixthree::get)
             .build()
     );
     public final Setting<Boolean> autoCompat = commandModes.add(new BoolSetting.Builder()
@@ -220,10 +240,38 @@ public class ForceOPSign extends Module {
         }
         ItemStack stack = new ItemStack(Items.OAK_SIGN);
 
+        if (autoCompat.get()) {
+            if (mc.hasSingleplayerServer()) {
+                serverVersion = mc.getSingleplayerServer().getServerVersion();
+            } else if (mc.getCurrentServer() != null) {
+                serverVersion = mc.getCurrentServer().version.tryCollapseToString();
+            } else {
+                serverVersion = null;
+            }
+        }
+
+        TypedEntityData<BlockEntityType<?>> entityData = createEntityData(twosixthree.get());
 
         var changes = DataComponentPatch.builder()
-                .set(DataComponents.BLOCK_ENTITY_DATA, createEntityData())
+                .set(DataComponents.BLOCK_ENTITY_DATA, entityData)
                 .build();
+
+        if (twosixthree.get()) {
+            if (allowWriting.get()) {
+                changes = DataComponentPatch.builder()
+                        .set(DataComponents.BLOCK_ENTITY_DATA, entityData)
+                        .set(DataComponents.SIGN_TEXT_FRONT, createSignText())
+                        .set(DataComponents.SIGN_TEXT_BACK, createSignText())
+                        .build();
+            } else {
+                changes = DataComponentPatch.builder()
+                        .set(DataComponents.BLOCK_ENTITY_DATA, entityData)
+                        .set(DataComponents.SIGN_TEXT_FRONT, createSignText())
+                        .set(DataComponents.SIGN_TEXT_BACK, createSignText())
+                        .set(DataComponents.WAXED, Unit.INSTANCE)
+                        .build();
+            }
+        }
 
         stack.applyComponentsAndValidate(changes);
 
@@ -235,8 +283,19 @@ public class ForceOPSign extends Module {
 
         toggle();
     }
-    private TypedEntityData<BlockEntityType<?>> createEntityData() {
+    private TypedEntityData<BlockEntityType<?>> createEntityData(boolean modernSignFormat) {
         CompoundTag blockEntityTag = new CompoundTag();
+
+        if (modernSignFormat) {
+            blockEntityTag.putString("id", "minecraft:sign");
+            blockEntityTag.putBoolean("allow_op_features", true);
+
+            return TypedEntityData.of(
+                    BuiltInRegistries.BLOCK_ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("sign")),
+                    blockEntityTag
+            );
+        }
+
         CompoundTag text = new CompoundTag();
         CompoundTag text2 = new CompoundTag();
         ListTag messages = new ListTag();
@@ -335,12 +394,6 @@ public class ForceOPSign extends Module {
             } else commandValue4 = thecommand4.get();
         }
         if (autoCompat.get()){
-            if (mc.hasSingleplayerServer()) {
-                serverVersion = mc.getSingleplayerServer().getServerVersion();
-            } else {
-                serverVersion = mc.getCurrentServer().version.tryCollapseToString();
-            }
-
             if (serverVersion == null) {
                 error("Version could not be read. Using Version Compatibility setting instead...");
                 if (compatmode.get() == compatModes.LatestVersion){
@@ -456,31 +509,188 @@ public class ForceOPSign extends Module {
 
         return TypedEntityData.of(BuiltInRegistries.BLOCK_ENTITY_TYPE.getValue(Identifier.withDefaultNamespace("sign")), blockEntityTag);
     }
-    private boolean isVersionLessThan(String serverVersion, int major, int minor, int patch) {
-        if (serverVersion == null) return false;
+    private SignText createSignText() {
+        String commandValue1 = thecommand1.get();
+        String commandValue2 = thecommand2.get();
+        String commandValue3 = thecommand3.get();
+        String commandValue4 = thecommand4.get();
 
-        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)");
-        java.util.regex.Matcher matcher = pattern.matcher(serverVersion);
-
-        if (matcher.find()) {
-            try {
-                int serverMajor = Integer.parseInt(matcher.group(1));
-                int serverMinor = Integer.parseInt(matcher.group(2));
-                int serverPatch = Integer.parseInt(matcher.group(3));
-
-                if (serverMajor < major) return true;
-                if (serverMajor > major) return false;
-
-                if (serverMinor < minor) return true;
-                if (serverMinor > minor) return false;
-
-                return serverPatch < patch;
-
-            } catch (NumberFormatException e) {
-                return false;
+        if (mode.get() == Modes.ForceOP) {
+            commandValue1 = "op " + mc.player.getName().tryCollapseToString();
+        } else if (mode.get() == Modes.CloneSign) {
+            commandValue1 = "clone ~ ~ ~ ~ ~ ~ to minecraft:overworld ~ " + cloneSignYlevel.get() + " ~ replace force";
+        } else if (mode.get() == Modes.AnyCommand) {
+            if (commandValue1.startsWith("/")) {
+                commandValue1 = commandValue1.substring(1);
             }
         }
-        return false;
+
+        String theCommand = "execute as @a[name=!" + mc.player.getName().tryCollapseToString()
+                + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @s[name=!"
+                + mc.player.getName().tryCollapseToString() + "]";
+
+        if (blockskynet.get()) {
+            theCommand = "setblock ~ " + (blockskynetYlevel.get() - 2)
+                    + " ~ minecraft:repeating_command_block{auto:1b,Command:\"execute as @a[name=!"
+                    + mc.player.getName().tryCollapseToString()
+                    + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @s[name=!"
+                    + mc.player.getName().tryCollapseToString() + "]\"}";
+        }
+
+        CopyOnWriteArrayList<PlayerInfo> players;
+
+        if (nocrashfrend.get()) {
+            players = new CopyOnWriteArrayList<>(mc.getConnection().getOnlinePlayers());
+            List<String> friendNames = new ArrayList<>();
+            friendNames.add("name=!" + mc.player.getName().tryCollapseToString());
+
+            for (PlayerInfo player : players) {
+                if (Friends.get().isFriend(player)) {
+                    friendNames.add("name=!" + player.getProfile().name());
+                }
+            }
+
+            String friendsString = String.join(",", friendNames);
+            theCommand = "execute as @a[" + friendsString
+                    + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @s[" + friendsString + "]";
+
+            if (blockskynet.get()) {
+                theCommand = "setblock ~ " + (blockskynetYlevel.get() - 2)
+                        + " ~ minecraft:repeating_command_block{auto:1b,Command:\"execute as @a["
+                        + friendsString + "] run particle ash ~ ~ ~ 1 1 1 1 2147483647 force @s["
+                        + friendsString + "]\"}";
+            }
+        }
+
+        if (skynet.get() && crashpeople.get()) {
+            commandValue2 = theCommand;
+        } else if (commandValue2.startsWith("/")) {
+            commandValue2 = commandValue2.substring(1);
+        }
+
+        String tfullString = eterminateblock.get().toString();
+        String[] tparts = tfullString.split(":");
+        String tBlockName = tparts[1].replace("}", "");
+
+        String theCommand2 = "execute as @e at @s[name=!" + mc.player.getName().tryCollapseToString()
+                + ", type=!minecraft:player, type=!minecraft:wither, type=!minecraft:item] run fill ~"
+                + eterminatewidth.get() + " ~" + eterminateheight1.get() + " ~" + eterminatedepth.get()
+                + " ~-" + eterminatewidth.get() + " ~-" + eterminateheight2.get() + " ~-"
+                + eterminatedepth.get() + " " + tBlockName;
+
+        if (blockskynet.get()) {
+            theCommand2 = "setblock ~ " + (blockskynetYlevel.get() - 1)
+                    + " ~ minecraft:repeating_command_block{auto:1b,Command:\"execute as @e at @s[name=!"
+                    + mc.player.getName().tryCollapseToString()
+                    + ", type=!minecraft:player, type=!minecraft:wither, type=!minecraft:item] run fill ~"
+                    + eterminatewidth.get() + " ~" + eterminateheight1.get() + " ~" + eterminatedepth.get()
+                    + " ~-" + eterminatewidth.get() + " ~-" + eterminateheight2.get() + " ~-"
+                    + eterminatedepth.get() + " " + tBlockName + "\"}";
+        }
+
+        if (noterminatefrend.get()) {
+            players = new CopyOnWriteArrayList<>(mc.getConnection().getOnlinePlayers());
+            List<String> friendNames = new ArrayList<>();
+            friendNames.add("name=!" + mc.player.getName().tryCollapseToString());
+
+            for (PlayerInfo player : players) {
+                if (Friends.get().isFriend(player)) {
+                    friendNames.add("name=!" + player.getProfile().name());
+                }
+            }
+
+            String friendsString = String.join(",", friendNames);
+            theCommand2 = "execute as @e at @s[" + friendsString
+                    + ", type=!minecraft:player, type=!minecraft:wither, type=!minecraft:item] run fill ~"
+                    + eterminatewidth.get() + " ~" + eterminateheight1.get() + " ~" + eterminatedepth.get()
+                    + " ~-" + eterminatewidth.get() + " ~-" + eterminateheight2.get() + " ~-"
+                    + eterminatedepth.get() + " " + tBlockName;
+
+            if (blockskynet.get()) {
+                theCommand2 = "setblock ~ " + (blockskynetYlevel.get() - 1)
+                        + " ~ minecraft:repeating_command_block{auto:1b,Command:\"execute as @e at @s["
+                        + friendsString
+                        + ", type=!minecraft:player, type=!minecraft:wither, type=!minecraft:item] run fill ~"
+                        + eterminatewidth.get() + " ~" + eterminateheight1.get() + " ~" + eterminatedepth.get()
+                        + " ~-" + eterminatewidth.get() + " ~-" + eterminateheight2.get() + " ~-"
+                        + eterminatedepth.get() + " " + tBlockName + "\"}";
+            }
+        }
+
+        if (skynet.get()) {
+            commandValue3 = theCommand2;
+        } else if (commandValue3.startsWith("/")) {
+            commandValue3 = commandValue3.substring(1);
+        }
+
+        String tfullString2 = terminateblock.get().toString();
+        String[] tparts2 = tfullString2.split(":");
+        String tBlockName2 = tparts2[1].replace("}", "");
+
+        String theCommand3 = "execute as @a at @s[name=!" + mc.player.getName().tryCollapseToString()
+                + "] run fill ~" + terminatewidth.get() + " ~" + terminateheight1.get() + " ~"
+                + terminatedepth.get() + " ~-" + terminatewidth.get() + " ~-" + terminateheight2.get()
+                + " ~-" + terminatedepth.get() + " " + tBlockName2;
+
+        if (blockskynet.get()) {
+            theCommand3 = "setblock ~ " + blockskynetYlevel.get()
+                    + " ~ minecraft:repeating_command_block{auto:1b,Command:\"execute as @a at @s[name=!"
+                    + mc.player.getName().tryCollapseToString() + "] run fill ~" + terminatewidth.get()
+                    + " ~" + terminateheight1.get() + " ~" + terminatedepth.get() + " ~-"
+                    + terminatewidth.get() + " ~-" + terminateheight2.get() + " ~-" + terminatedepth.get()
+                    + " " + tBlockName2 + "\"}";
+        }
+
+        if (noterminatefrend.get()) {
+            players = new CopyOnWriteArrayList<>(mc.getConnection().getOnlinePlayers());
+            List<String> friendNames = new ArrayList<>();
+            friendNames.add("name=!" + mc.player.getName().tryCollapseToString());
+
+            for (PlayerInfo player : players) {
+                if (Friends.get().isFriend(player)) {
+                    friendNames.add("name=!" + player.getProfile().name());
+                }
+            }
+
+            String friendsString = String.join(",", friendNames);
+            theCommand3 = "execute as @a at @s[" + friendsString + "] run fill ~" + terminatewidth.get()
+                    + " ~" + terminateheight1.get() + " ~" + terminatedepth.get() + " ~-"
+                    + terminatewidth.get() + " ~-" + terminateheight2.get() + " ~-" + terminatedepth.get()
+                    + " " + tBlockName2;
+
+            if (blockskynet.get()) {
+                theCommand3 = "setblock ~ " + blockskynetYlevel.get()
+                        + " ~ minecraft:repeating_command_block{auto:1b,Command:\"execute as @a at @s["
+                        + friendsString + "] run fill ~" + terminatewidth.get() + " ~"
+                        + terminateheight1.get() + " ~" + terminatedepth.get() + " ~-"
+                        + terminatewidth.get() + " ~-" + terminateheight2.get() + " ~-"
+                        + terminatedepth.get() + " " + tBlockName2 + "\"}";
+            }
+        }
+
+        if (skynet.get()) {
+            commandValue4 = theCommand3;
+        } else if (commandValue4.startsWith("/")) {
+            commandValue4 = commandValue4.substring(1);
+        }
+
+        String cmd1 = commandValue1;
+        String cmd2 = commandValue2;
+        String cmd3 = commandValue3;
+        String cmd4 = commandValue4;
+
+        Component line1 = Component.literal("").withStyle(style ->
+                style.withClickEvent(new ClickEvent.RunCommand(cmd1)));
+        Component line2 = Component.literal("").withStyle(style ->
+                style.withClickEvent(new ClickEvent.RunCommand(cmd2)));
+        Component line3 = Component.literal("").withStyle(style ->
+                style.withClickEvent(new ClickEvent.RunCommand(cmd3)));
+        Component line4 = Component.literal("").withStyle(style ->
+                style.withClickEvent(new ClickEvent.RunCommand(cmd4)));
+
+        List<Component> messages = List.of(line1, line2, line3, line4);
+
+        return new SignText(messages, messages, DyeColor.BLACK, false);
     }
     public enum Modes {
         ForceOP, CloneSign, AnyCommand

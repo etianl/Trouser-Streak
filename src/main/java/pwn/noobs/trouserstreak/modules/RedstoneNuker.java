@@ -33,29 +33,7 @@ import net.minecraft.world.item.ShearsItem;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.block.BambooSaplingBlock;
-import net.minecraft.world.level.block.BambooStalkBlock;
-import net.minecraft.world.level.block.BasePressurePlateBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.ButtonBlock;
-import net.minecraft.world.level.block.ComparatorBlock;
-import net.minecraft.world.level.block.DaylightDetectorBlock;
-import net.minecraft.world.level.block.DetectorRailBlock;
-import net.minecraft.world.level.block.FireBlock;
-import net.minecraft.world.level.block.LecternBlock;
-import net.minecraft.world.level.block.LeverBlock;
-import net.minecraft.world.level.block.LightningRodBlock;
-import net.minecraft.world.level.block.ObserverBlock;
-import net.minecraft.world.level.block.PoweredBlock;
-import net.minecraft.world.level.block.RedStoneWireBlock;
-import net.minecraft.world.level.block.RedstoneTorchBlock;
-import net.minecraft.world.level.block.RepeaterBlock;
-import net.minecraft.world.level.block.SculkSensorBlock;
-import net.minecraft.world.level.block.TargetBlock;
-import net.minecraft.world.level.block.TrappedChestBlock;
-import net.minecraft.world.level.block.TripWireBlock;
-import net.minecraft.world.level.block.TripWireHookBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -607,7 +585,7 @@ public class RedstoneNuker extends Module {
                 block instanceof RedstoneTorchBlock ||
                 block instanceof BasePressurePlateBlock ||
                 block instanceof DaylightDetectorBlock ||
-                block instanceof RedStoneWireBlock ||
+                block instanceof RedstoneWireBlock ||
                 block instanceof ComparatorBlock ||
                 block instanceof RepeaterBlock ||
                 block instanceof ButtonBlock ||

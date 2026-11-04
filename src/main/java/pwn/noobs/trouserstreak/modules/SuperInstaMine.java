@@ -13,11 +13,12 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
-import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.network.protocol.game.ServerboundPunchPacket;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShearsItem;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.block.Block;
 import pwn.noobs.trouserstreak.Trouser;
 
@@ -323,8 +324,8 @@ public class SuperInstaMine extends Module {
     private void doRotatingBreakPacketWithSwing(){
         if (!shouldBreak(bPos[0])) return;
         if (swing.get()) {
-            mc.getConnection().send(new ServerboundSwingPacket(InteractionHand.MAIN_HAND));
-            mc.player.swing(InteractionHand.MAIN_HAND);
+            mc.getConnection().send(new ServerboundPunchPacket());
+            mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
         }
         if (rotate.get())Rotations.rotate(Rotations.getYaw(bPos[0]), Rotations.getPitch(bPos[0]), () -> mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, bPos[0], direction)));
         else if (!rotate.get())mc.getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, bPos[0], direction));

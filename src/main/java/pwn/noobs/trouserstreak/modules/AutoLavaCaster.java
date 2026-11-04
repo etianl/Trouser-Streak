@@ -24,8 +24,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.item.BedItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DoubleHighBlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -34,50 +34,8 @@ import net.minecraft.world.item.PlaceOnWaterBlockItem;
 import net.minecraft.world.item.ScaffoldingBlockItem;
 import net.minecraft.world.item.SolidBucketItem;
 import net.minecraft.world.item.StandingAndWallBlockItem;
-import net.minecraft.world.level.block.AmethystClusterBlock;
-import net.minecraft.world.level.block.BambooStalkBlock;
-import net.minecraft.world.level.block.BaseCoralFanBlock;
-import net.minecraft.world.level.block.BaseCoralWallFanBlock;
-import net.minecraft.world.level.block.BaseRailBlock;
-import net.minecraft.world.level.block.BellBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.BuddingAmethystBlock;
-import net.minecraft.world.level.block.CactusBlock;
-import net.minecraft.world.level.block.CakeBlock;
-import net.minecraft.world.level.block.CandleBlock;
-import net.minecraft.world.level.block.CarpetBlock;
-import net.minecraft.world.level.block.ChorusFlowerBlock;
-import net.minecraft.world.level.block.ChorusPlantBlock;
-import net.minecraft.world.level.block.ConduitBlock;
-import net.minecraft.world.level.block.CoralFanBlock;
-import net.minecraft.world.level.block.CoralWallFanBlock;
-import net.minecraft.world.level.block.DiodeBlock;
-import net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock;
-import net.minecraft.world.level.block.FallingBlock;
-import net.minecraft.world.level.block.FenceBlock;
-import net.minecraft.world.level.block.FenceGateBlock;
-import net.minecraft.world.level.block.FlowerPotBlock;
-import net.minecraft.world.level.block.GlowLichenBlock;
-import net.minecraft.world.level.block.KelpBlock;
-import net.minecraft.world.level.block.LadderBlock;
-import net.minecraft.world.level.block.LanternBlock;
-import net.minecraft.world.level.block.PointedDripstoneBlock;
-import net.minecraft.world.level.block.PressurePlateBlock;
-import net.minecraft.world.level.block.RedStoneWireBlock;
-import net.minecraft.world.level.block.ShulkerBoxBlock;
-import net.minecraft.world.level.block.SignBlock;
-import net.minecraft.world.level.block.SimpleWaterloggedBlock;
-import net.minecraft.world.level.block.SnowLayerBlock;
-import net.minecraft.world.level.block.SporeBlossomBlock;
-import net.minecraft.world.level.block.SugarCaneBlock;
-import net.minecraft.world.level.block.TntBlock;
-import net.minecraft.world.level.block.TorchBlock;
-import net.minecraft.world.level.block.TripWireBlock;
-import net.minecraft.world.level.block.TripWireHookBlock;
-import net.minecraft.world.level.block.VegetationBlock;
-import net.minecraft.world.level.block.WallBlock;
-import net.minecraft.world.level.block.WebBlock;
+import net.minecraft.world.item.component.SwingAnimation;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -447,7 +405,8 @@ public class AutoLavaCaster extends Module {
                     BlockPos pos = mc.player.blockPosition().offset(new Vec3i(0,-1,0));
                     if (mc.level.getBlockState(pos).canBeReplaced()) {
                         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                        mc.player.swing(InteractionHand.MAIN_HAND);}
+                        mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+                    }
                 }
             }else if (lavamountainticks==7 && firstplace && (aposition.get() || AutoMountain.autocasttimenow)){
                 if (!(mc.level.getBlockState(lava).getBlock() == Blocks.AIR) && !(mc.level.getBlockState(hover).getBlock() == Blocks.AIR)) placeLava();
@@ -564,7 +523,7 @@ public class AutoLavaCaster extends Module {
                     BlockPos pos = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ());
                     if (mc.level.getBlockState(pos).canBeReplaced()) {
                         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                        mc.player.swing(InteractionHand.MAIN_HAND);}
+                        mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);}
                     lava = new BlockPos(lava.getX(), lava.getY()+1, lava.getZ());
                 }
                 else if ((estlavatime.get() || AutoMountain.autocasttimenow) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+10 || !estlavatime.get() && !AutoMountain.autocasttimenow && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+10){
@@ -574,7 +533,7 @@ public class AutoLavaCaster extends Module {
                     BlockPos pos = mc.player.blockPosition().offset(new Vec3i(0,-1,0));
                     if (mc.level.getBlockState(pos).canBeReplaced()) {
                         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                        mc.player.swing(InteractionHand.MAIN_HAND);}
+                        mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);}
                 }
                 else if ((estlavatime.get() || AutoMountain.autocasttimenow) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+16 || !estlavatime.get() && !AutoMountain.autocasttimenow && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+16){
                     if (fillMissing.get() && !fillMissingBlocks()) {
@@ -600,7 +559,7 @@ public class AutoLavaCaster extends Module {
                     BlockPos pos = mc.player.blockPosition().offset(new Vec3i(0,-1,0));
                     if (mc.level.getBlockState(pos).canBeReplaced()) {
                         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                        mc.player.swing(InteractionHand.MAIN_HAND);}
+                        mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);}
                 }
             }else if (lavamountainticks==7 && firstplace && (aposition.get() || AutoMountain.autocasttimenow)){
                 if (!(mc.level.getBlockState(lava).getBlock() == Blocks.AIR) && !(mc.level.getBlockState(hover).getBlock() == Blocks.AIR)) placeLava();
@@ -722,28 +681,28 @@ public class AutoLavaCaster extends Module {
                     BlockPos pos3 = new BlockPos(lava.getX()-1,lava.getY()+1,lava.getZ());
                     if (mc.level.getBlockState(pos3).canBeReplaced()){
                         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos3), Direction.DOWN, pos3, false));
-                        mc.player.swing(InteractionHand.MAIN_HAND);
+                        mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                     }
                 }
                 else if ((estlavatime.get() || AutoMountain.autocasttimenow) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+12 || !estlavatime.get() && !AutoMountain.autocasttimenow && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+12) {
                     BlockPos pos4 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ()+1);
                     if (mc.level.getBlockState(pos4).canBeReplaced()){
                         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos4), Direction.DOWN, pos4, false));
-                        mc.player.swing(InteractionHand.MAIN_HAND);
+                        mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                     }
                 }
                 else if ((estlavatime.get() || AutoMountain.autocasttimenow) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+16 || !estlavatime.get() && !AutoMountain.autocasttimenow && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+16) {
                     BlockPos pos5 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ()-1);
                     if (mc.level.getBlockState(pos5).canBeReplaced()){
                         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos5), Direction.DOWN, pos5, false));
-                        mc.player.swing(InteractionHand.MAIN_HAND);
+                        mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                     }
                 }
                 else if ((estlavatime.get() || AutoMountain.autocasttimenow) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+20 || !estlavatime.get() && !AutoMountain.autocasttimenow && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+20){
                     BlockPos pos1 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ());
                     if (mc.level.getBlockState(pos1).canBeReplaced()){
                         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos1), Direction.DOWN, pos1, false));
-                        mc.player.swing(InteractionHand.MAIN_HAND);
+                        mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                     }
                 }
                 else if ((estlavatime.get() || AutoMountain.autocasttimenow) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+21 || !estlavatime.get() && !AutoMountain.autocasttimenow && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+21) {
@@ -756,7 +715,7 @@ public class AutoLavaCaster extends Module {
                     BlockPos pos = mc.player.blockPosition().offset(new Vec3i(0,-1,0));
                     if (mc.level.getBlockState(pos).canBeReplaced()) {
                         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                        mc.player.swing(InteractionHand.MAIN_HAND);}
+                        mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);}
                 }
                 else if ((estlavatime.get() || AutoMountain.autocasttimenow) && lavamountainticks==(estimatedlavatime*20)+watertime1.get()+waterdelay.get()+31 || !estlavatime.get() && !AutoMountain.autocasttimenow && lavamountainticks==(lavatime.get()*20)+watertime1.get()+waterdelay.get()+31){
                     if (fillMissing.get() && !fillMissingBlocks()) {
@@ -783,7 +742,7 @@ public class AutoLavaCaster extends Module {
                     BlockPos pos = mc.player.blockPosition().offset(new Vec3i(0,-1,0));
                     if (mc.level.getBlockState(pos).canBeReplaced()) {
                         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                        mc.player.swing(InteractionHand.MAIN_HAND);}
+                        mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);}
                 }
             }else if (lavamountainticks==7 && firstplace && (aposition.get() || AutoMountain.autocasttimenow)){
                 if (!(mc.level.getBlockState(lava).getBlock() == Blocks.AIR) && !(mc.level.getBlockState(hover).getBlock() == Blocks.AIR)) placeLava();
@@ -899,31 +858,31 @@ public class AutoLavaCaster extends Module {
                     BlockPos pos2 = new BlockPos(lava.getX()+1,lava.getY()+1,lava.getZ());
                     if (mc.level.getBlockState(pos2).canBeReplaced()) {
                         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos2), Direction.DOWN, pos2, false));
-                        mc.player.swing(InteractionHand.MAIN_HAND);}
+                        mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);}
                 }
                 if ((estlavatime.get() || AutoMountain.autocasttimenow) && lavamountainticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+8 || !estlavatime.get() && !AutoMountain.autocasttimenow && lavamountainticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+8){
                     BlockPos pos3 = new BlockPos(lava.getX()-1,lava.getY()+1,lava.getZ());
                     if (mc.level.getBlockState(pos3).canBeReplaced()) {
                         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos3), Direction.DOWN, pos3, false));
-                        mc.player.swing(InteractionHand.MAIN_HAND);}
+                        mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);}
                 }
                 if ((estlavatime.get() || AutoMountain.autocasttimenow) && lavamountainticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+12 || !estlavatime.get() && !AutoMountain.autocasttimenow && lavamountainticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+12){
                     BlockPos pos4 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ()+1);
                     if (mc.level.getBlockState(pos4).canBeReplaced()) {
                         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos4), Direction.DOWN, pos4, false));
-                        mc.player.swing(InteractionHand.MAIN_HAND);}
+                        mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);}
                 }
                 if ((estlavatime.get() || AutoMountain.autocasttimenow) && lavamountainticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+16 || !estlavatime.get() && !AutoMountain.autocasttimenow && lavamountainticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+16){
                     BlockPos pos5 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ()-1);
                     if (mc.level.getBlockState(pos5).canBeReplaced()) {
                         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos5), Direction.DOWN, pos5, false));
-                        mc.player.swing(InteractionHand.MAIN_HAND);}
+                        mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);}
                 }
                 else if ((estlavatime.get() || AutoMountain.autocasttimenow) && lavamountainticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+20 || !estlavatime.get() && !AutoMountain.autocasttimenow && lavamountainticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+20){
                     BlockPos pos1 = new BlockPos(lava.getX(),lava.getY()+1,lava.getZ());
                     if (mc.level.getBlockState(pos1).canBeReplaced()){
                         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos1), Direction.DOWN, pos1, false));
-                        mc.player.swing(InteractionHand.MAIN_HAND);
+                        mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                     }
                 }
                 else if ((estlavatime.get() || AutoMountain.autocasttimenow) && lavamountainticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+21 || !estlavatime.get() && !AutoMountain.autocasttimenow && lavamountainticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+21) {
@@ -936,7 +895,7 @@ public class AutoLavaCaster extends Module {
                     BlockPos pos = mc.player.blockPosition().offset(new Vec3i(0,-1,0));
                     if (mc.level.getBlockState(pos).canBeReplaced()) {
                         mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                        mc.player.swing(InteractionHand.MAIN_HAND);}
+                        mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);}
                 }
                 else if ((estlavatime.get() || AutoMountain.autocasttimenow) && lavamountainticks==(estimatedlavatime*20)+watertime2.get()+waterdelay.get()+31 || !estlavatime.get() && !AutoMountain.autocasttimenow && lavamountainticks==(lavatime.get()*20)+watertime2.get()+waterdelay.get()+31){
                     if (fillMissing.get() && !fillMissingBlocks()) {
@@ -1117,7 +1076,7 @@ public class AutoLavaCaster extends Module {
             if (mc.level.getBlockState(pos).canBeReplaced()) {
                 allPlaced = false;
                 mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                mc.player.swing(InteractionHand.MAIN_HAND);
+                mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                 break; // Patch one missing block per tick to prevent packet spam
             }
         }
@@ -1126,7 +1085,7 @@ public class AutoLavaCaster extends Module {
 
     private boolean isInvalidBlock(ItemStack stack) {
         return !(stack.getItem() instanceof BlockItem)
-                || stack.getItem() instanceof BedItem
+                || stack.is(ItemTags.BEDS)
                 || stack.getItem() instanceof SolidBucketItem
                 || stack.getItem() instanceof ScaffoldingBlockItem
                 || stack.getItem() instanceof DoubleHighBlockItem
@@ -1135,7 +1094,7 @@ public class AutoLavaCaster extends Module {
                 || ((BlockItem) stack.getItem()).getBlock() instanceof VegetationBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof TorchBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof DiodeBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof RedStoneWireBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof RedstoneWireBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof FenceBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof WallBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof FenceGateBlock

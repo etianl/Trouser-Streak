@@ -31,8 +31,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.item.BedItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DoubleHighBlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -41,49 +41,8 @@ import net.minecraft.world.item.PlaceOnWaterBlockItem;
 import net.minecraft.world.item.ScaffoldingBlockItem;
 import net.minecraft.world.item.SolidBucketItem;
 import net.minecraft.world.item.StandingAndWallBlockItem;
-import net.minecraft.world.level.block.AmethystClusterBlock;
-import net.minecraft.world.level.block.BambooStalkBlock;
-import net.minecraft.world.level.block.BaseCoralFanBlock;
-import net.minecraft.world.level.block.BaseCoralWallFanBlock;
-import net.minecraft.world.level.block.BaseRailBlock;
-import net.minecraft.world.level.block.BellBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.BuddingAmethystBlock;
-import net.minecraft.world.level.block.CactusBlock;
-import net.minecraft.world.level.block.CakeBlock;
-import net.minecraft.world.level.block.CandleBlock;
-import net.minecraft.world.level.block.CarpetBlock;
-import net.minecraft.world.level.block.ChorusFlowerBlock;
-import net.minecraft.world.level.block.ChorusPlantBlock;
-import net.minecraft.world.level.block.ConduitBlock;
-import net.minecraft.world.level.block.CoralFanBlock;
-import net.minecraft.world.level.block.CoralWallFanBlock;
-import net.minecraft.world.level.block.DiodeBlock;
-import net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock;
-import net.minecraft.world.level.block.FallingBlock;
-import net.minecraft.world.level.block.FenceBlock;
-import net.minecraft.world.level.block.FenceGateBlock;
-import net.minecraft.world.level.block.FlowerPotBlock;
-import net.minecraft.world.level.block.GlowLichenBlock;
-import net.minecraft.world.level.block.KelpBlock;
-import net.minecraft.world.level.block.LadderBlock;
-import net.minecraft.world.level.block.LanternBlock;
-import net.minecraft.world.level.block.PointedDripstoneBlock;
-import net.minecraft.world.level.block.PressurePlateBlock;
-import net.minecraft.world.level.block.RedStoneWireBlock;
-import net.minecraft.world.level.block.ShulkerBoxBlock;
-import net.minecraft.world.level.block.SignBlock;
-import net.minecraft.world.level.block.SnowLayerBlock;
-import net.minecraft.world.level.block.SporeBlossomBlock;
-import net.minecraft.world.level.block.SugarCaneBlock;
-import net.minecraft.world.level.block.TntBlock;
-import net.minecraft.world.level.block.TorchBlock;
-import net.minecraft.world.level.block.TripWireBlock;
-import net.minecraft.world.level.block.TripWireHookBlock;
-import net.minecraft.world.level.block.VegetationBlock;
-import net.minecraft.world.level.block.WallBlock;
-import net.minecraft.world.level.block.WebBlock;
+import net.minecraft.world.item.component.SwingAnimation;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
@@ -398,7 +357,7 @@ public class AutoMountain extends Module {
         BlockPos pos = playerPos.offset(new Vec3i(0,-1,0));
         if (mc.level.getBlockState(pos).canBeReplaced()) {
             mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-            mc.player.swing(InteractionHand.MAIN_HAND);
+            mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
         }
     }
 
@@ -427,7 +386,7 @@ public class AutoMountain extends Module {
             BlockPos pos = playerPos.offset(new Vec3i(0,-1,0));
             if (mc.level.getBlockState(pos).canBeReplaced()) {
                 mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                mc.player.swing(InteractionHand.MAIN_HAND);}
+                mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);}
         }
     }
 
@@ -572,7 +531,7 @@ public class AutoMountain extends Module {
                 BlockPos pos = playerPos.offset(new Vec3i(0,-1,0));
                 if (mc.level.getBlockState(pos).canBeReplaced()) {
                     mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                    mc.player.swing(InteractionHand.MAIN_HAND);}
+                    mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);}
             }
             if (!pause)mc.player.setPosRaw(mc.player.getX(),Math.ceil(mc.player.getY()),mc.player.getZ());
             pause = !pause;
@@ -873,7 +832,7 @@ public class AutoMountain extends Module {
                         if (mc.level.getBlockState(un1).canBeReplaced() && mc.level.getBlockState(un2).canBeReplaced() && mc.level.getBlockState(un3).canBeReplaced() && mc.level.getBlockState(un4).canBeReplaced() && mc.level.getFluidState(un1).isEmpty() && mc.level.getFluidState(un2).isEmpty() && mc.level.getFluidState(un3).isEmpty() && mc.level.getFluidState(un4).isEmpty() && !mc.level.getBlockState(un1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(un2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(un3).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(un4).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(un2)){
                             if (mc.level.getBlockState(pos).canBeReplaced()){
                                 mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                                mc.player.swing(InteractionHand.MAIN_HAND);
+                                mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                             }
                             mc.player.setPos(mc.player.getX(),mc.player.getY()+1+spcoffset.get(),mc.player.getZ()-1);
                         } else {
@@ -891,7 +850,7 @@ public class AutoMountain extends Module {
                         if (mc.level.getBlockState(un1).canBeReplaced() && mc.level.getBlockState(un2).canBeReplaced() && mc.level.getBlockState(un3).canBeReplaced() && mc.level.getBlockState(un4).canBeReplaced() && mc.level.getFluidState(un1).isEmpty() && mc.level.getFluidState(un2).isEmpty() && mc.level.getFluidState(un3).isEmpty() && mc.level.getFluidState(un4).isEmpty() && !mc.level.getBlockState(un1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(un2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(un3).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(un4).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(un2)){
                             if (mc.level.getBlockState(pos).canBeReplaced()){
                                 mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                                mc.player.swing(InteractionHand.MAIN_HAND);
+                                mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                             }
                             mc.player.setPos(mc.player.getX(),mc.player.getY()+1,mc.player.getZ()-1);
                         } else {
@@ -912,7 +871,7 @@ public class AutoMountain extends Module {
                         if (mc.level.getBlockState(ue1).canBeReplaced() && mc.level.getBlockState(ue2).canBeReplaced() && mc.level.getBlockState(ue3).canBeReplaced() && mc.level.getBlockState(ue4).canBeReplaced() && mc.level.getFluidState(ue1).isEmpty() && mc.level.getFluidState(ue2).isEmpty() && mc.level.getFluidState(ue3).isEmpty() && mc.level.getFluidState(ue4).isEmpty() && !mc.level.getBlockState(ue1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(ue2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(ue3).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(ue4).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(ue2)){
                             if (mc.level.getBlockState(pos).canBeReplaced()){
                                 mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                                mc.player.swing(InteractionHand.MAIN_HAND);
+                                mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                             }
                             mc.player.setPos(mc.player.getX()+1,mc.player.getY()+1+spcoffset.get(),mc.player.getZ());
                         } else {
@@ -930,7 +889,7 @@ public class AutoMountain extends Module {
                         if (mc.level.getBlockState(ue1).canBeReplaced() && mc.level.getBlockState(ue2).canBeReplaced() && mc.level.getBlockState(ue3).canBeReplaced() && mc.level.getBlockState(ue4).canBeReplaced() && mc.level.getFluidState(ue1).isEmpty() && mc.level.getFluidState(ue2).isEmpty() && mc.level.getFluidState(ue3).isEmpty() && mc.level.getFluidState(ue4).isEmpty() && !mc.level.getBlockState(ue1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(ue2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(ue3).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(ue4).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(ue2)){
                             if (mc.level.getBlockState(pos).canBeReplaced()){
                                 mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                                mc.player.swing(InteractionHand.MAIN_HAND);
+                                mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                             }
                             mc.player.setPos(mc.player.getX()+1,mc.player.getY()+1,mc.player.getZ());
                         } else {
@@ -951,7 +910,7 @@ public class AutoMountain extends Module {
                         if (mc.level.getBlockState(us1).canBeReplaced() && mc.level.getBlockState(us2).canBeReplaced() && mc.level.getBlockState(us3).canBeReplaced() && mc.level.getBlockState(us4).canBeReplaced() && mc.level.getFluidState(us1).isEmpty() && mc.level.getFluidState(us2).isEmpty() && mc.level.getFluidState(us3).isEmpty() && mc.level.getFluidState(us4).isEmpty() && !mc.level.getBlockState(us1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(us2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(us3).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(us4).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(us2)){
                             if (mc.level.getBlockState(pos).canBeReplaced()){
                                 mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                                mc.player.swing(InteractionHand.MAIN_HAND);
+                                mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                             }
                             mc.player.setPos(mc.player.getX(),mc.player.getY()+1+spcoffset.get(),mc.player.getZ()+1);
                         } else {
@@ -969,7 +928,7 @@ public class AutoMountain extends Module {
                         if (mc.level.getBlockState(us1).canBeReplaced() && mc.level.getBlockState(us2).canBeReplaced() && mc.level.getBlockState(us3).canBeReplaced() && mc.level.getBlockState(us4).canBeReplaced() && mc.level.getFluidState(us1).isEmpty() && mc.level.getFluidState(us2).isEmpty() && mc.level.getFluidState(us3).isEmpty() && mc.level.getFluidState(us4).isEmpty() && !mc.level.getBlockState(us1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(us2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(us3).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(us4).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(us2)){
                             if (mc.level.getBlockState(pos).canBeReplaced()){
                                 mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                                mc.player.swing(InteractionHand.MAIN_HAND);
+                                mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                             }
                             mc.player.setPos(mc.player.getX(),mc.player.getY()+1,mc.player.getZ()+1);
                         } else {
@@ -990,7 +949,7 @@ public class AutoMountain extends Module {
                         if (mc.level.getBlockState(uw1).canBeReplaced() && mc.level.getBlockState(uw2).canBeReplaced() && mc.level.getBlockState(uw3).canBeReplaced() && mc.level.getBlockState(uw4).canBeReplaced() && mc.level.getFluidState(uw1).isEmpty() && mc.level.getFluidState(uw2).isEmpty() && mc.level.getFluidState(uw3).isEmpty() && mc.level.getFluidState(uw4).isEmpty() && !mc.level.getBlockState(uw1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(uw2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(uw3).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(uw4).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(uw2)){
                             if (mc.level.getBlockState(pos).canBeReplaced()){
                                 mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                                mc.player.swing(InteractionHand.MAIN_HAND);
+                                mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                             }
                             mc.player.setPos(mc.player.getX()-1,mc.player.getY()+1+spcoffset.get(),mc.player.getZ());
                         } else {
@@ -1008,7 +967,7 @@ public class AutoMountain extends Module {
                         if (mc.level.getBlockState(uw1).canBeReplaced() && mc.level.getBlockState(uw2).canBeReplaced() && mc.level.getBlockState(uw3).canBeReplaced() && mc.level.getBlockState(uw4).canBeReplaced() && mc.level.getFluidState(uw1).isEmpty() && mc.level.getFluidState(uw2).isEmpty() && mc.level.getFluidState(uw3).isEmpty() && mc.level.getFluidState(uw4).isEmpty() && !mc.level.getBlockState(uw1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(uw2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(uw3).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(uw4).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(uw2)){
                             if (mc.level.getBlockState(pos).canBeReplaced()){
                                 mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                                mc.player.swing(InteractionHand.MAIN_HAND);
+                                mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                             }
                             mc.player.setPos(mc.player.getX()-1,mc.player.getY()+1,mc.player.getZ());
                         } else {
@@ -1042,7 +1001,7 @@ public class AutoMountain extends Module {
                         if (mc.level.getBlockState(dn1).canBeReplaced() && mc.level.getBlockState(dn2).canBeReplaced() && mc.level.getBlockState(dn3).canBeReplaced() && mc.level.getFluidState(dn1).isEmpty() && mc.level.getFluidState(dn2).isEmpty() && mc.level.getFluidState(dn3).isEmpty() && !mc.level.getBlockState(dn1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(dn2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(dn3).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(dn2)) {
                             if (mc.level.getBlockState(pos).canBeReplaced()){
                                 mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                                mc.player.swing(InteractionHand.MAIN_HAND);
+                                mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                             }
                             mc.player.setPos(mc.player.getX(),mc.player.getY()-1-spcoffset.get(),mc.player.getZ()-1);
                         } else {if (InvertDownDir.get()) mc.player.setXRot(35);}
@@ -1054,7 +1013,7 @@ public class AutoMountain extends Module {
                         if (mc.level.getBlockState(dn1).canBeReplaced() && mc.level.getBlockState(dn2).canBeReplaced() && mc.level.getBlockState(dn3).canBeReplaced() && mc.level.getFluidState(dn1).isEmpty() && mc.level.getFluidState(dn2).isEmpty() && mc.level.getFluidState(dn3).isEmpty() && !mc.level.getBlockState(dn1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(dn2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(dn3).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(dn2)) {
                             if (mc.level.getBlockState(pos).canBeReplaced()){
                                 mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                                mc.player.swing(InteractionHand.MAIN_HAND);
+                                mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                             }
                             mc.player.setPos(mc.player.getX(),mc.player.getY()-1,mc.player.getZ()-1);
                         } else {
@@ -1074,7 +1033,7 @@ public class AutoMountain extends Module {
                         if (mc.level.getBlockState(de1).canBeReplaced() && mc.level.getBlockState(de2).canBeReplaced() && mc.level.getBlockState(de3).canBeReplaced() && mc.level.getFluidState(de1).isEmpty() && mc.level.getFluidState(de2).isEmpty() && mc.level.getFluidState(de3).isEmpty() && !mc.level.getBlockState(de1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(de2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(de3).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(de2)) {
                             if (mc.level.getBlockState(pos).canBeReplaced()){
                                 mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                                mc.player.swing(InteractionHand.MAIN_HAND);
+                                mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                             }
                             mc.player.setPos(mc.player.getX()+1,mc.player.getY()-1-spcoffset.get(),mc.player.getZ());
                         } else {
@@ -1091,7 +1050,7 @@ public class AutoMountain extends Module {
                         if (mc.level.getBlockState(de1).canBeReplaced() && mc.level.getBlockState(de2).canBeReplaced() && mc.level.getBlockState(de3).canBeReplaced() && mc.level.getFluidState(de1).isEmpty() && mc.level.getFluidState(de2).isEmpty() && mc.level.getFluidState(de3).isEmpty() && !mc.level.getBlockState(de1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(de2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(de3).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(de2)) {
                             if (mc.level.getBlockState(pos).canBeReplaced()){
                                 mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                                mc.player.swing(InteractionHand.MAIN_HAND);
+                                mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                             }
                             mc.player.setPos(mc.player.getX()+1,mc.player.getY()-1,mc.player.getZ());
                         } else {
@@ -1111,7 +1070,7 @@ public class AutoMountain extends Module {
                         if (mc.level.getBlockState(ds1).canBeReplaced() && mc.level.getBlockState(ds2).canBeReplaced() && mc.level.getBlockState(ds3).canBeReplaced() && mc.level.getFluidState(ds1).isEmpty() && mc.level.getFluidState(ds2).isEmpty() && mc.level.getFluidState(ds3).isEmpty() && !mc.level.getBlockState(ds1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(ds2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(ds3).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(ds2)) {
                             if (mc.level.getBlockState(pos).canBeReplaced()){
                                 mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                                mc.player.swing(InteractionHand.MAIN_HAND);
+                                mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                             }
                             mc.player.setPos(mc.player.getX(),mc.player.getY()-1- spcoffset.get(),mc.player.getZ()+1);
                         } else {
@@ -1128,7 +1087,7 @@ public class AutoMountain extends Module {
                         if (mc.level.getBlockState(ds1).canBeReplaced() && mc.level.getBlockState(ds2).canBeReplaced() && mc.level.getBlockState(ds3).canBeReplaced() && mc.level.getFluidState(ds1).isEmpty() && mc.level.getFluidState(ds2).isEmpty() && mc.level.getFluidState(ds3).isEmpty() && !mc.level.getBlockState(ds1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(ds2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(ds3).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(ds2)) {
                             if (mc.level.getBlockState(pos).canBeReplaced()){
                                 mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                                mc.player.swing(InteractionHand.MAIN_HAND);
+                                mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                             }
                             mc.player.setPos(mc.player.getX(),mc.player.getY()-1,mc.player.getZ()+1);
                         } else {
@@ -1148,7 +1107,7 @@ public class AutoMountain extends Module {
                         if (mc.level.getBlockState(dw1).canBeReplaced() && mc.level.getBlockState(dw2).canBeReplaced() && mc.level.getBlockState(dw3).canBeReplaced() && mc.level.getFluidState(dw1).isEmpty() && mc.level.getFluidState(dw2).isEmpty() && mc.level.getFluidState(dw3).isEmpty() && !mc.level.getBlockState(dw1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(dw2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(dw3).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(dw2)) {
                             if (mc.level.getBlockState(pos).canBeReplaced()){
                                 mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                                mc.player.swing(InteractionHand.MAIN_HAND);
+                                mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                             }
                             mc.player.setPos(mc.player.getX()-1,mc.player.getY()-1-spcoffset.get(),mc.player.getZ());
                         } else {
@@ -1165,7 +1124,7 @@ public class AutoMountain extends Module {
                         if (mc.level.getBlockState(dw1).canBeReplaced() && mc.level.getBlockState(dw2).canBeReplaced() && mc.level.getBlockState(dw3).canBeReplaced() && mc.level.getFluidState(dw1).isEmpty() && mc.level.getFluidState(dw2).isEmpty() && mc.level.getFluidState(dw3).isEmpty() && !mc.level.getBlockState(dw1).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(dw2).is(Blocks.POWDER_SNOW) && !mc.level.getBlockState(dw3).is(Blocks.POWDER_SNOW) && mc.level.getWorldBorder().isWithinBounds(dw2)) {
                             if (mc.level.getBlockState(pos).canBeReplaced()){
                                 mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(pos), Direction.DOWN, pos, false));
-                                mc.player.swing(InteractionHand.MAIN_HAND);
+                                mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                             }
                             mc.player.setPos(mc.player.getX()-1,mc.player.getY()-1,mc.player.getZ());
                         } else {
@@ -1229,7 +1188,7 @@ public class AutoMountain extends Module {
 
     private boolean isInvalidBlock(ItemStack stack) {
         if (!(stack.getItem() instanceof BlockItem blockItem)) return true;
-        if (stack.getItem() instanceof BedItem) return true;
+        if (stack.is(ItemTags.BEDS)) return true;
         if (stack.getItem() instanceof SolidBucketItem) return true;
         if (stack.getItem() instanceof ScaffoldingBlockItem) return true;
         if (stack.getItem() instanceof DoubleHighBlockItem) return true;
@@ -1239,7 +1198,7 @@ public class AutoMountain extends Module {
         return block instanceof VegetationBlock
                 || block instanceof TorchBlock
                 || block instanceof DiodeBlock
-                || block instanceof RedStoneWireBlock
+                || block instanceof RedstoneWireBlock
                 || block instanceof FenceBlock
                 || block instanceof WallBlock
                 || block instanceof FenceGateBlock

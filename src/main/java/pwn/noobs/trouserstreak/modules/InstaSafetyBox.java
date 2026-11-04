@@ -13,8 +13,8 @@ import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.item.BedItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DoubleHighBlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -22,50 +22,8 @@ import net.minecraft.world.item.PlaceOnWaterBlockItem;
 import net.minecraft.world.item.ScaffoldingBlockItem;
 import net.minecraft.world.item.SolidBucketItem;
 import net.minecraft.world.item.StandingAndWallBlockItem;
-import net.minecraft.world.level.block.AmethystClusterBlock;
-import net.minecraft.world.level.block.BambooStalkBlock;
-import net.minecraft.world.level.block.BaseCoralFanBlock;
-import net.minecraft.world.level.block.BaseCoralWallFanBlock;
-import net.minecraft.world.level.block.BaseRailBlock;
-import net.minecraft.world.level.block.BellBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.BuddingAmethystBlock;
-import net.minecraft.world.level.block.CactusBlock;
-import net.minecraft.world.level.block.CakeBlock;
-import net.minecraft.world.level.block.CandleBlock;
-import net.minecraft.world.level.block.CarpetBlock;
-import net.minecraft.world.level.block.ChorusFlowerBlock;
-import net.minecraft.world.level.block.ChorusPlantBlock;
-import net.minecraft.world.level.block.ConduitBlock;
-import net.minecraft.world.level.block.CoralFanBlock;
-import net.minecraft.world.level.block.CoralWallFanBlock;
-import net.minecraft.world.level.block.DiodeBlock;
-import net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock;
-import net.minecraft.world.level.block.FallingBlock;
-import net.minecraft.world.level.block.FenceBlock;
-import net.minecraft.world.level.block.FenceGateBlock;
-import net.minecraft.world.level.block.FlowerPotBlock;
-import net.minecraft.world.level.block.GlowLichenBlock;
-import net.minecraft.world.level.block.HeavyCoreBlock;
-import net.minecraft.world.level.block.KelpBlock;
-import net.minecraft.world.level.block.LadderBlock;
-import net.minecraft.world.level.block.LanternBlock;
-import net.minecraft.world.level.block.PointedDripstoneBlock;
-import net.minecraft.world.level.block.PressurePlateBlock;
-import net.minecraft.world.level.block.RedStoneWireBlock;
-import net.minecraft.world.level.block.ShulkerBoxBlock;
-import net.minecraft.world.level.block.SignBlock;
-import net.minecraft.world.level.block.SlabBlock;
-import net.minecraft.world.level.block.SporeBlossomBlock;
-import net.minecraft.world.level.block.SugarCaneBlock;
-import net.minecraft.world.level.block.TntBlock;
-import net.minecraft.world.level.block.TorchBlock;
-import net.minecraft.world.level.block.TrapDoorBlock;
-import net.minecraft.world.level.block.TripWireBlock;
-import net.minecraft.world.level.block.TripWireHookBlock;
-import net.minecraft.world.level.block.VegetationBlock;
-import net.minecraft.world.level.block.WallBlock;
-import net.minecraft.world.level.block.WebBlock;
+import net.minecraft.world.item.component.SwingAnimation;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import pwn.noobs.trouserstreak.Trouser;
@@ -218,7 +176,7 @@ public class InstaSafetyBox extends Module {
 
                 if (!Objects.equals(blockPos, new BlockPos(mc.player.getBlockX(), mc.player.getBlockY(), mc.player.getBlockZ())) && blockPos != new BlockPos(mc.player.getBlockX(), mc.player.getBlockY()+1, mc.player.getBlockZ()) && mc.level.getBlockState(blockPos).getBlock().defaultBlockState().canBeReplaced() && !isInvalidBlock(mc.player.getMainHandItem().getItem().getDefaultInstance())) {
                     if (rotate.get())Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos));
-                    if (swing.get())mc.player.swing(InteractionHand.MAIN_HAND);
+                    if (swing.get())mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
                     mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atLowerCornerOf(blockPos), Direction.DOWN, blockPos, false));
                     count++;
                 }
@@ -269,7 +227,7 @@ public class InstaSafetyBox extends Module {
     }
     private boolean isInvalidBlock(ItemStack stack) {
         return !(stack.getItem() instanceof BlockItem)
-                || stack.getItem() instanceof BedItem
+                || stack.is(ItemTags.BEDS)
                 || stack.getItem() instanceof SolidBucketItem
                 || stack.getItem() instanceof ScaffoldingBlockItem
                 || stack.getItem() instanceof DoubleHighBlockItem
@@ -278,7 +236,7 @@ public class InstaSafetyBox extends Module {
                 || ((BlockItem) stack.getItem()).getBlock() instanceof VegetationBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof TorchBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof DiodeBlock
-                || ((BlockItem) stack.getItem()).getBlock() instanceof RedStoneWireBlock
+                || ((BlockItem) stack.getItem()).getBlock() instanceof RedstoneWireBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof FenceBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof WallBlock
                 || ((BlockItem) stack.getItem()).getBlock() instanceof FenceGateBlock

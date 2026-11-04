@@ -211,21 +211,19 @@ public class OnlinePlayerActivityDetector extends Module {
     private void onReadPacket(PacketEvent.Receive event) {
         if (event.packet instanceof ServerboundChunkBatchReceivedPacket)return; //for some reason this packet keeps getting cast to other packets
         if (!(event.packet instanceof ServerboundChunkBatchReceivedPacket) && !(event.packet instanceof ServerboundMovePlayerPacket) && event.packet instanceof ClientboundLevelChunkWithLightPacket packet && mc.level != null) {
-            ChunkPos playerActivityPos = new ChunkPos(packet.getX(), packet.getZ());
+            ChunkPos playerActivityPos = new ChunkPos(packet.x(), packet.z());
 
-            if (mc.level.getChunkSource().getChunkForLighting(packet.getX(), packet.getZ()) == null) {
+            if (mc.level.getChunkSource().getChunkForLighting(packet.x(), packet.z()) == null) {
                 LevelChunk chunk = new LevelChunk(mc.level, playerActivityPos);
                 try {
-                    Map<Heightmap.Types, long[]> heightmaps = new EnumMap<>(Heightmap.Types.class);
-
-                    Heightmap.Types type = Heightmap.Types.MOTION_BLOCKING;
-                    long[] emptyHeightmapData = new long[37];
-                    heightmaps.put(type, emptyHeightmapData);
-
                     CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-                        chunk.replaceWithPacketData(packet.getChunkData().getReadBuffer(), heightmaps,
-                                packet.getChunkData().getBlockEntitiesTagsConsumer(packet.getX(), packet.getZ()));
+                        chunk.replaceWithPacketData(
+                                packet.x(),
+                                packet.z(),
+                                packet.chunkData()
+                        );
                     }, taskExecutor);
+
                     future.join();
                 } catch (CompletionException e) {}
 

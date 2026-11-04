@@ -22,55 +22,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.AbstractFurnaceBlock;
-import net.minecraft.world.level.block.AnvilBlock;
-import net.minecraft.world.level.block.BarrelBlock;
-import net.minecraft.world.level.block.BeaconBlock;
-import net.minecraft.world.level.block.BedBlock;
-import net.minecraft.world.level.block.BellBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.BrewingStandBlock;
-import net.minecraft.world.level.block.ButtonBlock;
-import net.minecraft.world.level.block.CakeBlock;
-import net.minecraft.world.level.block.CampfireBlock;
-import net.minecraft.world.level.block.CandleBlock;
-import net.minecraft.world.level.block.CandleCakeBlock;
-import net.minecraft.world.level.block.CartographyTableBlock;
-import net.minecraft.world.level.block.CeilingHangingSignBlock;
-import net.minecraft.world.level.block.ChestBlock;
-import net.minecraft.world.level.block.CommandBlock;
-import net.minecraft.world.level.block.ComparatorBlock;
-import net.minecraft.world.level.block.CrafterBlock;
-import net.minecraft.world.level.block.CraftingTableBlock;
-import net.minecraft.world.level.block.DaylightDetectorBlock;
-import net.minecraft.world.level.block.DecoratedPotBlock;
-import net.minecraft.world.level.block.DispenserBlock;
-import net.minecraft.world.level.block.DoorBlock;
-import net.minecraft.world.level.block.DragonEggBlock;
-import net.minecraft.world.level.block.EnchantingTableBlock;
-import net.minecraft.world.level.block.EnderChestBlock;
-import net.minecraft.world.level.block.FenceBlock;
-import net.minecraft.world.level.block.FenceGateBlock;
-import net.minecraft.world.level.block.GrindstoneBlock;
-import net.minecraft.world.level.block.HopperBlock;
-import net.minecraft.world.level.block.LecternBlock;
-import net.minecraft.world.level.block.LeverBlock;
-import net.minecraft.world.level.block.LightBlock;
-import net.minecraft.world.level.block.LoomBlock;
-import net.minecraft.world.level.block.NoteBlock;
-import net.minecraft.world.level.block.RedStoneOreBlock;
-import net.minecraft.world.level.block.RedStoneWireBlock;
-import net.minecraft.world.level.block.RepeaterBlock;
-import net.minecraft.world.level.block.RespawnAnchorBlock;
-import net.minecraft.world.level.block.ShulkerBoxBlock;
-import net.minecraft.world.level.block.SignBlock;
-import net.minecraft.world.level.block.SmithingTableBlock;
-import net.minecraft.world.level.block.StonecutterBlock;
-import net.minecraft.world.level.block.SweetBerryBushBlock;
-import net.minecraft.world.level.block.TntBlock;
-import net.minecraft.world.level.block.TrapDoorBlock;
-import net.minecraft.world.level.block.WallHangingSignBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
@@ -365,7 +317,7 @@ public class LavaAura extends Module {
                                                     blockBelow instanceof LoomBlock ||
                                                     blockBelow instanceof NoteBlock ||
                                                     blockBelow instanceof RedStoneOreBlock ||
-                                                    blockBelow instanceof RedStoneWireBlock ||
+                                                    blockBelow instanceof RedstoneWireBlock ||
                                                     blockBelow instanceof RepeaterBlock ||
                                                     blockBelow instanceof RespawnAnchorBlock ||
                                                     blockBelow instanceof ShulkerBoxBlock ||
@@ -433,7 +385,7 @@ public class LavaAura extends Module {
                                             blockBelow instanceof LoomBlock ||
                                             blockBelow instanceof NoteBlock ||
                                             blockBelow instanceof RedStoneOreBlock ||
-                                            blockBelow instanceof RedStoneWireBlock ||
+                                            blockBelow instanceof RedstoneWireBlock ||
                                             blockBelow instanceof RepeaterBlock ||
                                             blockBelow instanceof RespawnAnchorBlock ||
                                             blockBelow instanceof ShulkerBoxBlock ||
@@ -527,7 +479,7 @@ public class LavaAura extends Module {
                                                         blockBelow instanceof LoomBlock ||
                                                         blockBelow instanceof NoteBlock ||
                                                         blockBelow instanceof RedStoneOreBlock ||
-                                                        blockBelow instanceof RedStoneWireBlock ||
+                                                        blockBelow instanceof RedstoneWireBlock ||
                                                         blockBelow instanceof RepeaterBlock ||
                                                         blockBelow instanceof RespawnAnchorBlock ||
                                                         blockBelow instanceof ShulkerBoxBlock ||

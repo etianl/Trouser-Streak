@@ -23,17 +23,19 @@ import net.minecraft.client.gui.screens.inventory.HangingSignEditScreen;
 import net.minecraft.client.gui.screens.inventory.SignEditScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.HangingSignItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.SignItem;
 import net.minecraft.world.level.block.CeilingHangingSignBlock;
 import net.minecraft.world.level.block.WallHangingSignBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.entity.SignTextSlot;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -67,7 +69,7 @@ public class BetterAutoSign extends Module {
     private final Setting<List<Item>> signTypes = sgPlace.add(new ItemListSetting.Builder()
             .name("do-not-place-these-signs")
             .description("Which signs to NOT use when auto-placing.")
-            .filter(item -> item instanceof SignItem)
+            .filter(item -> BuiltInRegistries.ITEM.wrapAsHolder(item).is(ItemTags.SIGNS))
             .visible(autoPlace::get)
             .build()
     );
@@ -260,7 +262,7 @@ public class BetterAutoSign extends Module {
         if (mc.player == null || mc.gameMode == null) return;
 
         FindItemResult signSlot = InvUtils.findInHotbar(itemStack ->
-                itemStack.getItem() instanceof SignItem && !(itemStack.getItem() instanceof HangingSignItem) && !signTypes.get().contains(itemStack.getItem()));
+                itemStack.is(ItemTags.SIGNS) && !(itemStack.getItem() instanceof HangingSignItem) && !signTypes.get().contains(itemStack.getItem()));
 
         if (!signSlot.found()) {
             signSlot = InvUtils.findInHotbar(itemStack ->
@@ -314,7 +316,7 @@ public class BetterAutoSign extends Module {
         if (mc.level == null || !autoPlace.get() || interactingsign) return;
 
         if (event.packet instanceof ServerboundUseItemOnPacket packet) {
-            BlockHitResult hit = packet.getHitResult();
+            BlockHitResult hit = packet.hitResult();
             if (hit.getType() == BlockHitResult.Type.BLOCK) {
                 lastPlacedBlock = hit.getBlockPos();
                 lastPlacedSide = hit.getDirection();
@@ -372,11 +374,17 @@ public class BetterAutoSign extends Module {
         boolean isFront = (editRearPos == null || !editRearPos.equals(pos));
 
         if (isFront) {
-            mc.player.connection.send(new ServerboundSignUpdatePacket(pos, true,
+            List<String> lines = List.of(
                     MeteorStarscript.run(MeteorStarscript.compile(isHanging ? HlineOne.get() : lineOne.get())),
                     MeteorStarscript.run(MeteorStarscript.compile(isHanging ? HlineTwo.get() : lineTwo.get())),
                     MeteorStarscript.run(MeteorStarscript.compile(isHanging ? HlineThree.get() : lineThree.get())),
                     MeteorStarscript.run(MeteorStarscript.compile(isHanging ? HlineFour.get() : lineFour.get()))
+            );
+
+            mc.player.connection.send(new ServerboundSignUpdatePacket(
+                    pos,
+                    lines,
+                    SignTextSlot.FRONT
             ));
 
             if (bothside.get()) {
@@ -402,11 +410,18 @@ public class BetterAutoSign extends Module {
             }
         } else {
             boolean diff = differentText.get();
-            mc.player.connection.send(new ServerboundSignUpdatePacket(pos, false,
+
+            List<String> backLines = List.of(
                     MeteorStarscript.run(MeteorStarscript.compile(isHanging ? (diff ? HlineOnedif.get() : HlineOne.get()) : (diff ? lineOnedif.get() : lineOne.get()))),
                     MeteorStarscript.run(MeteorStarscript.compile(isHanging ? (diff ? HlineTwodif.get() : HlineTwo.get()) : (diff ? lineTwodif.get() : lineTwo.get()))),
                     MeteorStarscript.run(MeteorStarscript.compile(isHanging ? (diff ? HlineThreedif.get() : HlineThree.get()) : (diff ? lineThreedif.get() : lineThree.get()))),
                     MeteorStarscript.run(MeteorStarscript.compile(isHanging ? (diff ? HlineFourdif.get() : HlineFour.get()) : (diff ? lineFourdif.get() : lineFour.get())))
+            );
+
+            mc.player.connection.send(new ServerboundSignUpdatePacket(
+                    pos,
+                    backLines,
+                    SignTextSlot.BACK
             ));
 
             editRearPos = null;

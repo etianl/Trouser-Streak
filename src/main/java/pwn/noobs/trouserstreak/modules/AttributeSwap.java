@@ -7,6 +7,8 @@ package pwn.noobs.trouserstreak.modules;
 import meteordevelopment.meteorclient.events.meteor.MouseClickEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import net.minecraft.network.protocol.game.ServerboundAttackPacket;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.phys.EntityHitResult;
 import pwn.noobs.trouserstreak.Trouser;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
@@ -20,7 +22,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -106,7 +107,7 @@ public class AttributeSwap extends Module {
             mc.player.connection.send(new ServerboundPlayerActionPacket(
                     ServerboundPlayerActionPacket.Action.STAB,
                     mc.player.blockPosition(),
-                    mc.player.getNearestViewDirection()
+                    mc.player.getDirection()
             ));
         }
 
@@ -131,7 +132,7 @@ public class AttributeSwap extends Module {
 
         if (event.packet instanceof ServerboundPlayerActionPacket action) {
             if (action.getAction() == ServerboundPlayerActionPacket.Action.STAB) {
-                Entity targetEntity = (mc.hitResult instanceof net.minecraft.world.phys.EntityHitResult hit) ? hit.getEntity() : null;
+                Entity targetEntity = (mc.hitResult instanceof EntityHitResult hit) ? hit.getEntity() : null;
 
                 if (targetEntity != null) {
                     performAttributeSwap(targetEntity,true);
@@ -155,7 +156,7 @@ public class AttributeSwap extends Module {
                     if (player.isBlocking()) {
                         for (int i = 0; i < 9; i++) {
                             ItemStack stack = mc.player.getInventory().getNonEquipmentItems().get(i);
-                            if (stack.getItem() instanceof AxeItem) {
+                            if (stack.is(ItemTags.AXES)) {
                                 InvUtils.swap(i, false);
                                 if (stabbed) {
                                     mc.getConnection().send(new ServerboundAttackPacket(targetEntity.getId()));
