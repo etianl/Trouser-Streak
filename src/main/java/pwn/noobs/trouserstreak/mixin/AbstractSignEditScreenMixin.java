@@ -10,42 +10,34 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import java.util.function.Function;
-import java.util.stream.Stream;
-
 @Mixin(AbstractSignEditScreen.class)
 public abstract class AbstractSignEditScreenMixin {
     @Redirect(
-            method = "<init>(Lnet/minecraft/world/level/block/entity/SignBlockEntity;ZZLnet/minecraft/network/chat/Component;)V",
+            method = "<init>(Lnet/minecraft/world/level/block/entity/SignBlockEntity;Lnet/minecraft/world/level/block/entity/SignTextSlot;ZLnet/minecraft/network/chat/Component;)V",
             at = @At(
                     value = "INVOKE",
-                    target = "Ljava/util/stream/Stream;map(Ljava/util/function/Function;)Ljava/util/stream/Stream;"
+                    target = "Lnet/minecraft/network/chat/Component;getString()Ljava/lang/String;"
             )
     )
-    private Stream<String> trouserstreak$filterSignText(
-            Stream<Component> stream,
-            Function<? super Component, ? extends String> originalMapper
-    ) {
+    private String trouserstreak$filterSignText(Component component) {
         NoModDetection module = Modules.get().get(NoModDetection.class);
 
         if (module == null || !module.isActive() || !module.filterSign.get()) {
-            return stream.map(originalMapper);
+            return component.getString();
         }
 
-        return stream.map(component -> {
-            if (component.getContents() instanceof TranslatableContents translatable) {
-                String fallback = translatable.getFallback();
+        if (component.getContents() instanceof TranslatableContents translatable) {
+            String fallback = translatable.getFallback();
 
-                return fallback != null
-                        ? fallback
-                        : translatable.getKey();
-            }
+            return fallback != null
+                    ? fallback
+                    : translatable.getKey();
+        }
 
-            if (component.getContents() instanceof KeybindContents) {
-                return "";
-            }
+        if (component.getContents() instanceof KeybindContents) {
+            return "";
+        }
 
-            return component.getString();
-        });
+        return component.getString();
     }
 }
