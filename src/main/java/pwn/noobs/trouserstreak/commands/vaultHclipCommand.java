@@ -11,6 +11,8 @@ import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 
+import java.util.Objects;
+
 public class vaultHclipCommand extends Command {
     public vaultHclipCommand() {
         super("vault-hclip", "Uses vault clip to \"hclip\" through blocks");
@@ -51,7 +53,7 @@ public class vaultHclipCommand extends Command {
             }
 
             for (int i = 0; i < 13; i++) {
-                if (mc.player.hasVehicle()) mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(mc.player.getVehicle()));
+                if (mc.player.hasVehicle()) mc.player.networkHandler.sendPacket(VehicleMoveC2SPacket.fromVehicle(Objects.requireNonNull(mc.player.getVehicle())));
                 else mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(false, mc.player.horizontalCollision));
             }
 
@@ -71,7 +73,8 @@ public class vaultHclipCommand extends Command {
         if (entity == mc.player) {
             mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(pos.x, pos.y, pos.z, false, false));
         } else {
-            mc.getNetworkHandler().sendPacket(new VehicleMoveC2SPacket(pos, mc.player.getVehicle().getYaw(), mc.player.getVehicle().getPitch(), false));
+            assert mc.player != null;
+            mc.getNetworkHandler().sendPacket(new VehicleMoveC2SPacket(pos, Objects.requireNonNull(mc.player.getVehicle()).getYaw(), mc.player.getVehicle().getPitch(), false));
         }
     }
 
@@ -81,6 +84,7 @@ public class vaultHclipCommand extends Command {
                 pos.y - entity.getY(),
                 pos.z - entity.getZ()
         );
+        assert mc.world != null;
         for (Entity e : mc.world.getOtherEntities(mc.player, box)) {
             if (e.isCollidable()) return true;
         }
