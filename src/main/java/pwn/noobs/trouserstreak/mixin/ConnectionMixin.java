@@ -32,7 +32,6 @@ public abstract class ConnectionMixin {
         HAProxyProtocolVersion version = Modules.get().get(HAProxySpoofer.class).haProxyProtocolVersion.get();
 
         SocketAddress rawAddress = this.getRemoteAddress();
-        System.out.println(rawAddress);
         if (rawAddress instanceof InetSocketAddress inetAddress && channel.localAddress() instanceof InetSocketAddress localAddr) {
             String serverIp = inetAddress.getAddress().getHostAddress();
             int serverPort = inetAddress.getPort();
@@ -52,7 +51,6 @@ public abstract class ConnectionMixin {
                 );
             }
             channel.writeAndFlush(proxyHeader);
-            System.out.println("sending");
         }
     }
 }
