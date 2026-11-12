@@ -54,6 +54,7 @@ public class Trouser extends MeteorAddon {
                 Modules.get().add(new BookAndQuillDupe());
                 Modules.get().add(new BoomPlus());
                 Modules.get().add(new BungeeSpoofer());
+                Modules.get().add(new HAProxySpoofer());
                 Modules.get().add(new CaveDisturbanceDetector());
                 Modules.get().add(new CollectibleESP());
                 Modules.get().add(new CrossbowMachineGun());

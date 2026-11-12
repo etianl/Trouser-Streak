@@ -20,7 +20,8 @@ dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
-
+    implementation "io.netty:netty-codec-haproxy:4.2.16.Final"
+    include "io.netty:netty-codec-haproxy:4.2.16.Final"
     // Meteor
     implementation "meteordevelopment:meteor-client:${project.minecraft_version}-SNAPSHOT"
 }
