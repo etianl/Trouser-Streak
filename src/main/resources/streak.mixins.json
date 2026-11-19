@@ -25,7 +25,6 @@
     "TelemetryManagerMixin",
     "TranslatableContentsMixin",
     "TrouserHandshakeC2SMixin",
-    "TrouserSplashTextMixin",
-    "accessor.ClientConnectionAccessor"
+    "TrouserSplashTextMixin"
   ]
 }
