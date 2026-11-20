@@ -6,6 +6,7 @@ version = project.mod_version
 group = project.maven_group
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven { url "https://maven.meteordev.org/releases" }
     maven { url "https://maven.meteordev.org/snapshots" }
